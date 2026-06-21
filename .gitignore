@@ -20,6 +20,7 @@ data/HIGHLIGHTLY_CIRCUIT.json
 data/LIVE_COLLECTOR.log
 data/LIVE_COLLECTOR_HEALTH.json
 data/RADAR_NOTICIAS.json
+data/backups/
 
 # Backups and old work copies
 *.bak*

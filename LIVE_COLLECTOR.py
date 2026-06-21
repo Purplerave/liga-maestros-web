@@ -1,11 +1,15 @@
 import argparse
 import json
+import shutil
+import sqlite3
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import config
 from app import (
     HIGHLIGHTLY_REFRESH_ENABLED,
+    Q15_EXPECTED_MATCHES,
     compute_refresh_window,
     get_db,
     get_highlightly_usage,
@@ -17,7 +21,9 @@ import utils
 LOG_PATH = Path(__file__).resolve().parent / "data" / "LIVE_COLLECTOR.log"
 DATA_DIR = Path(__file__).resolve().parent / "data"
 HEALTH_PATH = DATA_DIR / "LIVE_COLLECTOR_HEALTH.json"
+BACKUP_DIR = DATA_DIR / "backups"
 LAST_HIGHLIGHTLY_RUN = 0
+LAST_BACKUP_DATE = ""
 
 
 def log_line(message):
@@ -41,6 +47,55 @@ def write_health(status, window=None, error=None):
         "error": str(error) if error else "",
     }
     utils.safe_write_json(str(HEALTH_PATH), payload)
+
+
+def cleanup_old_backups(retention_days=14):
+    cutoff = datetime.now() - timedelta(days=max(1, int(retention_days or 14)))
+    for path in BACKUP_DIR.glob("*"):
+        if not path.is_file():
+            continue
+        try:
+            if datetime.fromtimestamp(path.stat().st_mtime) < cutoff:
+                path.unlink()
+        except Exception as exc:
+            log_line(f"backup_cleanup_error={path.name}:{exc}")
+
+
+def backup_runtime_state(force=False):
+    global LAST_BACKUP_DATE
+    today = datetime.now().strftime("%Y-%m-%d")
+    if not force and LAST_BACKUP_DATE == today:
+        return False
+
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    db_source = Path(config.DB_PATH)
+    if db_source.exists():
+        db_target = BACKUP_DIR / f"LIGA_MAESTROS_PRO_{stamp}.db"
+        source_conn = sqlite3.connect(str(db_source))
+        target_conn = sqlite3.connect(str(db_target))
+        try:
+            source_conn.backup(target_conn)
+        finally:
+            target_conn.close()
+            source_conn.close()
+        log_line(f"backup_db={db_target.name}")
+
+    copied = 0
+    for path in DATA_DIR.glob("*.json"):
+        if path.name.startswith("quiniela15_directo_") or path.name in {
+            "API_USAGE_HIGHLIGHTLY.json",
+            "HIGHLIGHTLY_CIRCUIT.json",
+            "LIVE_COLLECTOR_HEALTH.json",
+            "RADAR_NOTICIAS.json",
+        }:
+            shutil.copy2(path, BACKUP_DIR / f"{path.stem}_{stamp}{path.suffix}")
+            copied += 1
+    if copied:
+        log_line(f"backup_json={copied}")
+    cleanup_old_backups()
+    LAST_BACKUP_DATE = today
+    return True
 
 
 def choose_refresh_window(conn, jornada=None):
@@ -95,10 +150,13 @@ def write_q15_directo_cache(jornada):
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    match_count = len(payload.get("matches") or [])
+    if match_count != Q15_EXPECTED_MATCHES:
+        raise RuntimeError(f"quiniela15_matches_incompletos:{match_count}/{Q15_EXPECTED_MATCHES}")
     updates = apply_q15_results_to_db(int(jornada), payload)
     if updates:
         log_line(f"q15_result_updates={updates}")
-    return len(payload.get("matches") or [])
+    return match_count
 
 
 def apply_q15_results_to_db(jornada, payload):
@@ -175,6 +233,7 @@ def next_sleep_seconds(window, base_interval):
 
 def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     global LAST_HIGHLIGHTLY_RUN
+    backup_runtime_state()
     enabled, window = should_refresh(jornada)
     if not force and not enabled:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
@@ -219,7 +278,12 @@ def main():
     parser.add_argument("--highlightly-interval", type=int, default=120, help="Segundos minimos entre pasadas a Highlightly.")
     parser.add_argument("--jornada", type=int, help="Jornada concreta a vigilar.")
     parser.add_argument("--no-q15", action="store_true", help="No actualiza el cache de directo de Quiniela15.")
+    parser.add_argument("--backup-now", action="store_true", help="Crea backup local de DB y JSON y sale.")
     args = parser.parse_args()
+
+    if args.backup_now:
+        backup_runtime_state(force=True)
+        return
 
     if args.once:
         run_once(force=args.force, q15=not args.no_q15, jornada=args.jornada, highlightly_interval=args.highlightly_interval)
