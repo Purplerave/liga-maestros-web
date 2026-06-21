@@ -41,6 +41,7 @@ _highlightly_usage_lock = threading.Lock()
 _rate_limit_lock = threading.Lock()
 _rate_limit_hits = {}
 CONTEST_DYNAMIC_START_JORNADA = 58
+Q15_EXPECTED_MATCHES = 15
 HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
 HIGHLIGHTLY_DAILY_CALL_LIMIT = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_LIMIT", "7500"))
 HIGHLIGHTLY_DAILY_CALL_RESERVE = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_RESERVE", "250"))
@@ -308,42 +309,131 @@ def compute_refresh_window(conn, jornada=None):
     }
 
 
-def get_highlightly_usage():
+def ensure_api_usage_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS api_usage_daily (
+            service TEXT NOT NULL,
+            date TEXT NOT NULL,
+            calls INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (service, date)
+        )
+    """)
+
+
+def highlightly_usage_payload(date_text, calls):
+    calls = int(calls or 0)
+    remaining = max(0, HIGHLIGHTLY_DAILY_CALL_LIMIT - calls)
+    return {
+        "date": date_text,
+        "calls": calls,
+        "limit": HIGHLIGHTLY_DAILY_CALL_LIMIT,
+        "reserve": HIGHLIGHTLY_DAILY_CALL_RESERVE,
+        "remaining": remaining,
+        "usable_remaining": max(0, remaining - HIGHLIGHTLY_DAILY_CALL_RESERVE),
+    }
+
+
+def mirror_highlightly_usage_json(data):
     path = os.path.join(config.BASE_DIR, "data", "API_USAGE_HIGHLIGHTLY.json")
+    try:
+        utils.safe_write_json(path, data)
+    except Exception as exc:
+        app.logger.warning("No se pudo actualizar API_USAGE_HIGHLIGHTLY.json: %s", exc)
+
+
+def get_highlightly_usage():
     today = datetime.now().strftime("%Y-%m-%d")
-    data = utils.safe_read_json(path, {})
-    if data.get("date") != today:
-        data = {"date": today, "calls": 0, "limit": HIGHLIGHTLY_DAILY_CALL_LIMIT}
-    data["limit"] = HIGHLIGHTLY_DAILY_CALL_LIMIT
-    data["reserve"] = HIGHLIGHTLY_DAILY_CALL_RESERVE
-    data["remaining"] = max(0, HIGHLIGHTLY_DAILY_CALL_LIMIT - int(data.get("calls") or 0))
-    data["usable_remaining"] = max(0, data["remaining"] - HIGHLIGHTLY_DAILY_CALL_RESERVE)
-    return data
+    conn = get_db()
+    try:
+        ensure_api_usage_table(conn)
+        row = conn.execute(
+            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
+            ("highlightly", today)
+        ).fetchone()
+        if not row:
+            legacy = utils.safe_read_json(os.path.join(config.BASE_DIR, "data", "API_USAGE_HIGHLIGHTLY.json"), {})
+            legacy_calls = int(legacy.get("calls") or 0) if legacy.get("date") == today else 0
+            conn.execute("""
+                INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
+                VALUES (?, ?, ?, ?)
+            """, ("highlightly", today, legacy_calls, datetime.now().isoformat(timespec="seconds")))
+            conn.commit()
+            calls = legacy_calls
+        else:
+            calls = int(row["calls"] or 0)
+        data = highlightly_usage_payload(today, calls)
+        mirror_highlightly_usage_json(data)
+        return data
+    finally:
+        conn.close()
 
 
 def record_highlightly_call(count=1):
-    path = os.path.join(config.BASE_DIR, "data", "API_USAGE_HIGHLIGHTLY.json")
-    with _highlightly_usage_lock:
-        data = get_highlightly_usage()
-        data["calls"] = int(data.get("calls") or 0) + int(count or 0)
-        data["remaining"] = max(0, HIGHLIGHTLY_DAILY_CALL_LIMIT - data["calls"])
-        data["usable_remaining"] = max(0, data["remaining"] - HIGHLIGHTLY_DAILY_CALL_RESERVE)
-        utils.safe_write_json(path, data)
+    count = max(0, int(count or 0))
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = get_db()
+    try:
+        ensure_api_usage_table(conn)
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("""
+            INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
+            VALUES (?, ?, 0, ?)
+        """, ("highlightly", today, datetime.now().isoformat(timespec="seconds")))
+        conn.execute("""
+            UPDATE api_usage_daily
+            SET calls = calls + ?, updated_at = ?
+            WHERE service = ? AND date = ?
+        """, (count, datetime.now().isoformat(timespec="seconds"), "highlightly", today))
+        row = conn.execute(
+            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
+            ("highlightly", today)
+        ).fetchone()
+        conn.commit()
+        data = highlightly_usage_payload(today, row["calls"] if row else count)
+        mirror_highlightly_usage_json(data)
         return data
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def reserve_highlightly_calls(count=1):
     count = max(1, int(count or 1))
-    path = os.path.join(config.BASE_DIR, "data", "API_USAGE_HIGHLIGHTLY.json")
-    with _highlightly_usage_lock:
-        data = get_highlightly_usage()
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = get_db()
+    try:
+        ensure_api_usage_table(conn)
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("""
+            INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
+            VALUES (?, ?, 0, ?)
+        """, ("highlightly", today, datetime.now().isoformat(timespec="seconds")))
+        row = conn.execute(
+            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
+            ("highlightly", today)
+        ).fetchone()
+        calls = int(row["calls"] or 0) if row else 0
+        data = highlightly_usage_payload(today, calls)
         if count > int(data.get("usable_remaining") or 0):
+            conn.rollback()
             return None
-        data["calls"] = int(data.get("calls") or 0) + count
-        data["remaining"] = max(0, HIGHLIGHTLY_DAILY_CALL_LIMIT - data["calls"])
-        data["usable_remaining"] = max(0, data["remaining"] - HIGHLIGHTLY_DAILY_CALL_RESERVE)
-        utils.safe_write_json(path, data)
-        return data
+        conn.execute("""
+            UPDATE api_usage_daily
+            SET calls = calls + ?, updated_at = ?
+            WHERE service = ? AND date = ?
+        """, (count, datetime.now().isoformat(timespec="seconds"), "highlightly", today))
+        updated = highlightly_usage_payload(today, calls + count)
+        conn.commit()
+        mirror_highlightly_usage_json(updated)
+        return updated
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def can_spend_highlightly_calls(count):
@@ -777,6 +867,39 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
+
+def build_q15_cache_status(jornada):
+    status = {
+        "available": False,
+        "ok": False,
+        "last_sync": "--:--",
+        "matches": 0,
+        "matches_expected": Q15_EXPECTED_MATCHES,
+        "matches_received": 0,
+        "message": "sin_jornada",
+    }
+    if not jornada:
+        return status
+    q15_path = os.path.join(config.BASE_DIR, "data", f"quiniela15_directo_J{jornada}.json")
+    if not os.path.exists(q15_path):
+        status["message"] = "sin_cache"
+        return status
+    try:
+        payload = utils.safe_read_json(q15_path, {})
+        received = len(payload.get("matches") or [])
+        status.update({
+            "available": True,
+            "ok": received == Q15_EXPECTED_MATCHES,
+            "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
+            "matches": received,
+            "matches_received": received,
+            "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
+        })
+    except Exception as exc:
+        status["message"] = f"error_cache: {exc}"
+    return status
+
+
 @app.route('/api/sync/status')
 def sync_status():
     conn = get_db()
@@ -800,19 +923,7 @@ def sync_status():
     except Exception:
         pass
     api_usage = get_highlightly_usage()
-    q15_cache = {"available": False, "last_sync": "--:--", "matches": 0}
-    q15_path = os.path.join(config.BASE_DIR, "data", f"quiniela15_directo_J{target_jornada}.json") if target_jornada else ""
-    if q15_path and os.path.exists(q15_path):
-        try:
-            with open(q15_path, "r", encoding="utf-8") as fh:
-                q15_payload = json.load(fh)
-            q15_cache = {
-                "available": True,
-                "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
-                "matches": len(q15_payload.get("matches") or []),
-            }
-        except Exception:
-            pass
+    q15_cache = build_q15_cache_status(target_jornada)
     
     conn.close()
     return jsonify({
@@ -830,6 +941,11 @@ def sync_status():
 
 @app.route('/api/live/health')
 def live_health():
+    conn = get_db()
+    try:
+        target_jornada = resolve_jornada(conn, request.args.get("j"))
+    finally:
+        conn.close()
     health_path = os.path.join(config.BASE_DIR, "data", "LIVE_COLLECTOR_HEALTH.json")
     exists = os.path.exists(health_path)
     health = utils.safe_read_json(health_path, {}) if exists else {}
@@ -845,6 +961,8 @@ def live_health():
         "health_file": exists,
         "age_seconds": age_seconds,
         "stale": bool(age_seconds is None or age_seconds > 300),
+        "jornada": target_jornada,
+        "q15_cache": build_q15_cache_status(target_jornada),
         "api_usage": get_highlightly_usage(),
         "highlightly_circuit": {
             key: value
@@ -1338,19 +1456,35 @@ def live_probe():
     refresh_window = compute_refresh_window(conn, target_jornada)
     conn.close()
 
-    q15_status = {"ok": False, "matches": 0, "message": "sin_jornada"}
+    q15_status = {
+        "ok": False,
+        "matches": 0,
+        "matches_expected": Q15_EXPECTED_MATCHES,
+        "matches_received": 0,
+        "message": "sin_jornada"
+    }
     if target_jornada:
         try:
             payload = scrape_q15_directo(int(target_jornada))
             q15_path = os.path.join(config.BASE_DIR, "data", f"quiniela15_directo_J{target_jornada}.json")
             utils.safe_write_json(q15_path, payload)
+            received = len(payload.get("matches") or [])
             q15_status = {
-                "ok": True,
-                "matches": len(payload.get("matches") or []),
+                "ok": received == Q15_EXPECTED_MATCHES,
+                "matches": received,
+                "matches_expected": Q15_EXPECTED_MATCHES,
+                "matches_received": received,
                 "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
+                "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
             }
         except Exception as exc:
-            q15_status = {"ok": False, "matches": 0, "message": str(exc)}
+            q15_status = {
+                "ok": False,
+                "matches": 0,
+                "matches_expected": Q15_EXPECTED_MATCHES,
+                "matches_received": 0,
+                "message": str(exc)
+            }
 
     highlightly_started = False
     highlightly_skipped = "fuera_de_ventana"
@@ -1653,19 +1787,10 @@ def get_contest():
 
 @app.route('/api/concurso/perfil/<uid>')
 def get_contest_profile(uid):
-    user = session.get('user') or {}
     jornada = request.args.get("j") or None
-    payload = build_contest_payload(jornada, user.get("id"))
     target = canonical_contest_id(uid)
-    profile = None
-    for row in payload.get("general", []):
-        if row.get("id") == target:
-            profile_payload = build_contest_payload(jornada, target)
-            profile = profile_payload.get("profile")
-            break
-    if not profile:
-        profile_payload = build_contest_payload(jornada, target)
-        profile = profile_payload.get("profile")
+    profile_payload = build_contest_payload(jornada, target)
+    profile = profile_payload.get("profile")
     if not profile:
         return jsonify({"status": "error", "message": "Perfil no encontrado"}), 404
     return jsonify({"status": "ok", "profile": profile})

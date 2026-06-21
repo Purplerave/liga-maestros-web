@@ -2,6 +2,15 @@
 -- Generated from DATOS/LIGA_MAESTROS_PRO.db.
 -- Keep this file updated before database migrations.
 
+-- table: api_usage_daily
+CREATE TABLE api_usage_daily (
+            service TEXT NOT NULL,
+            date TEXT NOT NULL,
+            calls INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (service, date)
+        );
+
 -- table: clasificacion
 CREATE TABLE clasificacion 
                       (equipo TEXT UNIQUE, pj INTEGER, pts INTEGER, division INTEGER, pos INTEGER, pg INTEGER DEFAULT 0, pe INTEGER DEFAULT 0, pp INTEGER DEFAULT 0, gf INTEGER DEFAULT 0, gc INTEGER DEFAULT 0, racha TEXT);
