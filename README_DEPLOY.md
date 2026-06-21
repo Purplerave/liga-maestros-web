@@ -53,6 +53,12 @@ HIGHLIGHTLY_API_KEY=<clave Highlightly/RapidAPI>
 ADMIN_EMAILS=<tu correo si quieres permisos admin>
 ```
 
+Opcional si contratas/configuras disco persistente en Render:
+
+```env
+DB_PATH=/var/data/LIGA_MAESTROS_PRO.db
+```
+
 ## Google OAuth
 
 En Google Cloud Console, en el cliente OAuth de la app, anadir:
@@ -72,6 +78,8 @@ http://localhost:5000/authorize
 Para beta rapida se sube `DATOS/LIGA_MAESTROS_PRO.db`.
 
 Advertencia: en Render sin disco persistente, los cambios hechos en SQLite pueden perderse al redeploy/recrear instancia. Vale para probar online. Para produccion real, el siguiente paso sera migrar a PostgreSQL o configurar persistencia.
+
+Si defines `DB_PATH` apuntando a un disco persistente y la DB no existe ahi, la app copia automaticamente la DB inicial incluida en `DATOS/LIGA_MAESTROS_PRO.db`.
 
 ## Directo / Highlightly
 

@@ -1,4 +1,4 @@
-import sqlite3, os, sys, threading, time, logging, requests, json, re
+import sqlite3, os, sys, threading, time, logging, requests, json, re, shutil
 import urllib.request, urllib.error
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_from_directory
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
 import utils
@@ -15,6 +16,7 @@ from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
 load_dotenv()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY no configurada. Define SECRET_KEY en .env antes de arrancar Liga de Maestros.")
@@ -23,6 +25,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE=os.getenv("SESSION_COOKIE_SAMESITE", "Lax"),
     SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() in ("1", "true", "yes", "on"),
+    PREFERRED_URL_SCHEME=os.getenv("PREFERRED_URL_SCHEME", "https"),
 )
 
 
@@ -66,8 +69,19 @@ class ClosingConnection(sqlite3.Connection):
         self.close()
         return result
 
+def ensure_db_file():
+    db_dir = os.path.dirname(config.DB_PATH)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+    if os.path.exists(config.DB_PATH):
+        return
+    default_path = getattr(config, "DEFAULT_DB_PATH", "")
+    if default_path and os.path.exists(default_path) and os.path.abspath(default_path) != os.path.abspath(config.DB_PATH):
+        shutil.copy2(default_path, config.DB_PATH)
+
 def get_db():
     global _sqlite_wal_ready
+    ensure_db_file()
     conn = sqlite3.connect(config.DB_PATH, timeout=10, factory=ClosingConnection)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout = 10000")

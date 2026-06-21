@@ -8,7 +8,8 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Base de Datos
-DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+DEFAULT_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+DB_PATH = os.getenv("DB_PATH", DEFAULT_DB_PATH)
 
 # Configuración Highlightly API
 HIGHLIGHTLY_HOST = "soccer.highlightly.net"

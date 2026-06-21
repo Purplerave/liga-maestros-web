@@ -2,7 +2,6 @@ services:
   - type: web
     name: liga-maestros
     env: python
-    plan: starter
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
     autoDeploy: true
@@ -13,6 +12,8 @@ services:
         value: "1"
       - key: SESSION_COOKIE_SAMESITE
         value: Lax
+      - key: PREFERRED_URL_SCHEME
+        value: https
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
