@@ -2,6 +2,14 @@
 -- Generated from DATOS/LIGA_MAESTROS_PRO.db.
 -- Keep this file updated before database migrations.
 
+-- table: api_rate_limit
+CREATE TABLE api_rate_limit (
+                scope TEXT NOT NULL,
+                identity TEXT NOT NULL,
+                last_seen REAL NOT NULL,
+                PRIMARY KEY (scope, identity)
+            );
+
 -- table: api_usage_daily
 CREATE TABLE api_usage_daily (
             service TEXT NOT NULL,

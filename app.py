@@ -130,18 +130,46 @@ def is_admin_request():
 
 def is_rate_limited(scope, identity, seconds):
     now = time.time()
-    key = (scope, str(identity or request.remote_addr or "anon"))
-    with _rate_limit_lock:
-        last_seen = _rate_limit_hits.get(key, 0)
-        if now - last_seen < seconds:
+    identity = str(identity or request.remote_addr or "anon")
+    conn = get_db()
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS api_rate_limit (
+                scope TEXT NOT NULL,
+                identity TEXT NOT NULL,
+                last_seen REAL NOT NULL,
+                PRIMARY KEY (scope, identity)
+            )
+        """)
+        conn.commit()
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT last_seen FROM api_rate_limit WHERE scope = ? AND identity = ?",
+            (scope, identity)
+        ).fetchone()
+        if row and now - float(row["last_seen"] or 0) < seconds:
+            conn.rollback()
             return True
-        _rate_limit_hits[key] = now
-        if len(_rate_limit_hits) > 1000:
-            cutoff = now - 3600
-            for old_key, timestamp in list(_rate_limit_hits.items()):
-                if timestamp < cutoff:
-                    _rate_limit_hits.pop(old_key, None)
+        conn.execute("""
+            INSERT INTO api_rate_limit (scope, identity, last_seen)
+            VALUES (?, ?, ?)
+            ON CONFLICT(scope, identity) DO UPDATE SET last_seen = excluded.last_seen
+        """, (scope, identity, now))
+        conn.execute("DELETE FROM api_rate_limit WHERE last_seen < ?", (now - 3600,))
+        conn.commit()
         return False
+    except Exception as exc:
+        conn.rollback()
+        app.logger.warning("Rate limit fallback for %s/%s: %s", scope, identity, exc)
+        key = (scope, identity)
+        with _rate_limit_lock:
+            last_seen = _rate_limit_hits.get(key, 0)
+            if now - last_seen < seconds:
+                return True
+            _rate_limit_hits[key] = now
+            return False
+    finally:
+        conn.close()
 
 
 def fetch_feed_items(feed):
