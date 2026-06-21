@@ -40,6 +40,8 @@ _sqlite_wal_ready = False
 _highlightly_usage_lock = threading.Lock()
 _rate_limit_lock = threading.Lock()
 _rate_limit_hits = {}
+_contest_cache_lock = threading.Lock()
+_contest_payload_cache = {}
 CONTEST_DYNAMIC_START_JORNADA = 58
 Q15_EXPECTED_MATCHES = 15
 HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
@@ -1609,7 +1611,57 @@ def contest_month_key(date_text):
     return raw[:7] if raw else "sin-mes"
 
 
+def contest_cache_signature():
+    conn = get_db()
+    try:
+        pred = conn.execute("""
+            SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
+            FROM predicciones
+            WHERE jornada >= ?
+        """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchone()
+        results = conn.execute("""
+            SELECT
+                COUNT(*) AS n,
+                COALESCE(MAX(rowid), 0) AS max_rowid,
+                COALESCE(SUM(COALESCE(goles_local, -99) * 31 + COALESCE(goles_visitante, -99) * 17), 0) AS goals_sig,
+                COALESCE(SUM(LENGTH(COALESCE(status, '')) + LENGTH(COALESCE(signo_actual, ''))), 0) AS state_sig
+            FROM resultados
+        """).fetchone()
+        users = conn.execute("""
+            SELECT
+                COUNT(*) AS n,
+                COALESCE(MAX(rowid), 0) AS max_rowid,
+                COALESCE(SUM(COALESCE(puntos_acumulados, 0)), 0) AS points_sig
+            FROM usuarios
+        """).fetchone()
+        return (
+            int(pred["n"] or 0), int(pred["max_rowid"] or 0),
+            int(results["n"] or 0), int(results["max_rowid"] or 0),
+            int(results["goals_sig"] or 0), int(results["state_sig"] or 0),
+            int(users["n"] or 0), int(users["max_rowid"] or 0), int(users["points_sig"] or 0),
+        )
+    finally:
+        conn.close()
+
+
 def build_contest_payload(current_jornada=None, current_user_id=None):
+    signature = contest_cache_signature()
+    key = (str(current_jornada or ""), canonical_contest_id(current_user_id or ""), signature)
+    with _contest_cache_lock:
+        cached = _contest_payload_cache.get(key)
+        if cached:
+            return cached
+
+    payload = _build_contest_payload_uncached(current_jornada, current_user_id)
+    with _contest_cache_lock:
+        _contest_payload_cache[key] = payload
+        if len(_contest_payload_cache) > 64:
+            for old_key in list(_contest_payload_cache.keys())[:16]:
+                _contest_payload_cache.pop(old_key, None)
+    return payload
+
+
+def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     hidden_ids = {"hermes", "molbot", "jenova", "pena", "consenso", "momo", "manu", "manus"}
     conn = get_db()
     user_rows = conn.execute("SELECT id, nombre, puntos_acumulados FROM usuarios").fetchall()
