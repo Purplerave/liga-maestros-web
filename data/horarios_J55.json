@@ -1,0 +1,92 @@
+{
+    "1": {
+        "fecha": "2026-04-10",
+        "hora": "21:00",
+        "partido": "Real Madrid – Girona",
+        "finalizado": true
+    },
+    "2": {
+        "fecha": "2026-04-11",
+        "hora": "14:00",
+        "partido": "Real Sociedad – Alavés",
+        "finalizado": true
+    },
+    "3": {
+        "fecha": "2026-04-11",
+        "hora": "16:15",
+        "partido": "Elche – Valencia",
+        "finalizado": true
+    },
+    "4": {
+        "fecha": "2026-04-11",
+        "hora": "18:30",
+        "partido": "Barcelona – Espanyol",
+        "finalizado": true
+    },
+    "5": {
+        "fecha": "2026-04-11",
+        "hora": "21:00",
+        "partido": "Sevilla – Atlético de Madrid",
+        "finalizado": true
+    },
+    "6": {
+        "fecha": "2026-04-12",
+        "hora": "14:00",
+        "partido": "Osasuna – Real Betis",
+        "finalizado": false
+    },
+    "7": {
+        "fecha": "2026-04-12",
+        "hora": "16:15",
+        "partido": "Mallorca – Rayo Vallecano",
+        "finalizado": false
+    },
+    "8": {
+        "fecha": "2026-04-12",
+        "hora": "18:30",
+        "partido": "Celta – Real Oviedo",
+        "finalizado": false
+    },
+    "9": {
+        "fecha": "2026-04-12",
+        "hora": "21:00",
+        "partido": "Athletic Club – Villarreal",
+        "finalizado": true
+    },
+    "10": {
+        "fecha": "2026-04-11",
+        "hora": "18:30",
+        "partido": "Málaga – Las Palmas",
+        "finalizado": true
+    },
+    "11": {
+        "fecha": "2026-04-11",
+        "hora": "21:00",
+        "partido": "Córdoba – Zaragoza",
+        "finalizado": true
+    },
+    "12": {
+        "fecha": "2026-04-12",
+        "hora": "16:15",
+        "partido": "Huesca – Deportivo",
+        "finalizado": false
+    },
+    "13": {
+        "fecha": "2026-04-12",
+        "hora": "18:30",
+        "partido": "Mirandés – Castellón",
+        "finalizado": false
+    },
+    "14": {
+        "fecha": "2026-04-12",
+        "hora": "21:00",
+        "partido": "Racing de Santander – Almería",
+        "finalizado": false
+    },
+    "15": {
+        "fecha": "2026-04-13",
+        "hora": "21:00",
+        "partido": "Levante – Getafe",
+        "finalizado": false
+    }
+}

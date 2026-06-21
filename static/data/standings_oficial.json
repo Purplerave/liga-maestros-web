@@ -1,0 +1,300 @@
+{
+    "1ª DIVISIÓN": [
+        {
+            "pos": 1,
+            "n": "BARCELONA",
+            "pj": 38,
+            "pts": 88,
+            "r": "WLWWW"
+        },
+        {
+            "pos": 2,
+            "n": "REAL MADRID",
+            "pj": 38,
+            "pts": 84,
+            "r": "WWWLW"
+        },
+        {
+            "pos": 3,
+            "n": "ATLETICO MADRID",
+            "pj": 38,
+            "pts": 76,
+            "r": "WWLWD"
+        },
+        {
+            "pos": 4,
+            "n": "ATHLETIC CLUB",
+            "pj": 38,
+            "pts": 70,
+            "r": "LWWWD"
+        },
+        {
+            "pos": 5,
+            "n": "VILLARREAL",
+            "pj": 38,
+            "pts": 70,
+            "r": "WWWWW"
+        },
+        {
+            "pos": 6,
+            "n": "REAL BETIS",
+            "pj": 38,
+            "pts": 60,
+            "r": "DLDDW"
+        },
+        {
+            "pos": 7,
+            "n": "CELTA VIGO",
+            "pj": 38,
+            "pts": 55,
+            "r": "WLWWL"
+        },
+        {
+            "pos": 8,
+            "n": "RAYO VALLECANO",
+            "pj": 38,
+            "pts": 52,
+            "r": "DWDWW"
+        },
+        {
+            "pos": 9,
+            "n": "OSASUNA",
+            "pj": 38,
+            "pts": 52,
+            "r": "DWWDL"
+        },
+        {
+            "pos": 10,
+            "n": "MALLORCA",
+            "pj": 38,
+            "pts": 48,
+            "r": "DLLWL"
+        },
+        {
+            "pos": 11,
+            "n": "REAL SOCIEDAD",
+            "pj": 38,
+            "pts": 46,
+            "r": "LWLLD"
+        },
+        {
+            "pos": 12,
+            "n": "VALENCIA",
+            "pj": 38,
+            "pts": 46,
+            "r": "DLLWW"
+        },
+        {
+            "pos": 13,
+            "n": "GETAFE",
+            "pj": 38,
+            "pts": 42,
+            "r": "LWLLL"
+        },
+        {
+            "pos": 14,
+            "n": "ESPANYOL",
+            "pj": 38,
+            "pts": 42,
+            "r": "WLLLL"
+        },
+        {
+            "pos": 15,
+            "n": "ALAVES",
+            "pj": 38,
+            "pts": 42,
+            "r": "DWWLD"
+        },
+        {
+            "pos": 16,
+            "n": "GIRONA",
+            "pj": 38,
+            "pts": 41,
+            "r": "LLWLW"
+        },
+        {
+            "pos": 17,
+            "n": "SEVILLA",
+            "pj": 38,
+            "pts": 41,
+            "r": "LLWLD"
+        },
+        {
+            "pos": 18,
+            "n": "LEGANES",
+            "pj": 38,
+            "pts": 40,
+            "r": "WWLWD"
+        },
+        {
+            "pos": 19,
+            "n": "LAS PALMAS",
+            "pj": 38,
+            "pts": 32,
+            "r": "LLLLL"
+        },
+        {
+            "pos": 20,
+            "n": "VALLADOLID",
+            "pj": 38,
+            "pts": 16,
+            "r": "LLLLL"
+        }
+    ],
+    "2ª DIVISIÓN": [
+        {
+            "pos": 1,
+            "n": "LEVANTE",
+            "pj": 42,
+            "pts": 79,
+            "r": "WWWWD"
+        },
+        {
+            "pos": 2,
+            "n": "ELCHE",
+            "pj": 42,
+            "pts": 77,
+            "r": "WWLLW"
+        },
+        {
+            "pos": 3,
+            "n": "MIRANDES",
+            "pj": 42,
+            "pts": 75,
+            "r": "LWWDW"
+        },
+        {
+            "pos": 4,
+            "n": "OVIEDO",
+            "pj": 42,
+            "pts": 75,
+            "r": "WLDWW"
+        },
+        {
+            "pos": 5,
+            "n": "RACING SANTANDER",
+            "pj": 42,
+            "pts": 71,
+            "r": "LDWDL"
+        },
+        {
+            "pos": 6,
+            "n": "ALMERIA",
+            "pj": 42,
+            "pts": 69,
+            "r": "DLWDW"
+        },
+        {
+            "pos": 7,
+            "n": "GRANADA CF",
+            "pj": 42,
+            "pts": 65,
+            "r": "LWWLL"
+        },
+        {
+            "pos": 8,
+            "n": "HUESCA",
+            "pj": 42,
+            "pts": 64,
+            "r": "WLWLL"
+        },
+        {
+            "pos": 9,
+            "n": "EIBAR",
+            "pj": 42,
+            "pts": 58,
+            "r": "LWWWL"
+        },
+        {
+            "pos": 10,
+            "n": "ALBACETE",
+            "pj": 42,
+            "pts": 58,
+            "r": "DWLWL"
+        },
+        {
+            "pos": 11,
+            "n": "SPORTING GIJON",
+            "pj": 42,
+            "pts": 56,
+            "r": "WWLWL"
+        },
+        {
+            "pos": 12,
+            "n": "BURGOS",
+            "pj": 42,
+            "pts": 55,
+            "r": "DLLWL"
+        },
+        {
+            "pos": 13,
+            "n": "CADIZ",
+            "pj": 42,
+            "pts": 55,
+            "r": "LWLWL"
+        },
+        {
+            "pos": 14,
+            "n": "CORDOBA",
+            "pj": 42,
+            "pts": 55,
+            "r": "DLLLW"
+        },
+        {
+            "pos": 15,
+            "n": "CASTELLÓN",
+            "pj": 42,
+            "pts": 53,
+            "r": "WLDLW"
+        },
+        {
+            "pos": 16,
+            "n": "DEPORTIVO LA CORUNA",
+            "pj": 42,
+            "pts": 53,
+            "r": "LLLLW"
+        },
+        {
+            "pos": 17,
+            "n": "MALAGA",
+            "pj": 42,
+            "pts": 53,
+            "r": "DLWLW"
+        },
+        {
+            "pos": 18,
+            "n": "ZARAGOZA",
+            "pj": 42,
+            "pts": 51,
+            "r": "LWLWW"
+        },
+        {
+            "pos": 19,
+            "n": "ELDENSE",
+            "pj": 42,
+            "pts": 45,
+            "r": "LDDWL"
+        },
+        {
+            "pos": 20,
+            "n": "TENERIFE",
+            "pj": 42,
+            "pts": 36,
+            "r": "LLLDD"
+        },
+        {
+            "pos": 21,
+            "n": "RACING FERROL",
+            "pj": 42,
+            "pts": 30,
+            "r": "LLWDL"
+        },
+        {
+            "pos": 22,
+            "n": "FC CARTAGENA",
+            "pj": 42,
+            "pts": 23,
+            "r": "LLWLW"
+        }
+    ]
+}

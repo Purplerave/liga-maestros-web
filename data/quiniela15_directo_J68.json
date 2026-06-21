@@ -1,0 +1,991 @@
+{
+  "jornada": 68,
+  "source": "https://www.quiniela15.com/resultados-quiniela/68",
+  "fetched_at": "2026-06-21T11:06:43",
+  "matches": [
+    {
+      "id": 1,
+      "local": "EE.UU.",
+      "visitante": "Australia",
+      "score_home": 2,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "EE.UU.",
+          "events": [
+            {
+              "minute": "11'",
+              "player": "C. Burgess",
+              "type": "own goal"
+            },
+            {
+              "minute": "43'",
+              "player": "A. Freeman",
+              "type": "goal"
+            },
+            {
+              "minute": "56'",
+              "player": "A. Robinson",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "89'",
+              "player": "F. Balogun",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "C. Richards",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Australia",
+          "events": [
+            {
+              "minute": "16'",
+              "player": "J. Bos",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "32'",
+              "player": "A. Circati",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "88'",
+              "player": "H. Souttar",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "89'",
+              "player": "J. Italiano",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Felix Zwayer",
+      "coaches": "EE.UU.: Mauricio Pochettino | Australia: Tony Popovic",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "68%",
+            "22%",
+            "10%"
+          ],
+          [
+            "LAE",
+            "62%",
+            "26%",
+            "12%"
+          ],
+          [
+            "APU",
+            "58%",
+            "22%",
+            "19%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 2,
+      "local": "Escocia",
+      "visitante": "Marruecos",
+      "score_home": 0,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "2",
+      "events": [
+        {
+          "team": "Escocia",
+          "events": [
+            {
+              "minute": "65'",
+              "player": "A. Robertson",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Marruecos",
+          "events": [
+            {
+              "minute": "2'",
+              "player": "I. Saibari",
+              "type": "goal"
+            },
+            {
+              "minute": "23'",
+              "player": "I. Diop",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Ilgiz Tantashev",
+      "coaches": "Escocia: Steve Clarke | Marruecos: Mohamed Ouahbi",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "14%",
+            "17%",
+            "69%"
+          ],
+          [
+            "LAE",
+            "14%",
+            "24%",
+            "62%"
+          ],
+          [
+            "APU",
+            "17%",
+            "27%",
+            "56%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 3,
+      "local": "Brasil",
+      "visitante": "Haití",
+      "score_home": 3,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Brasil",
+          "events": [
+            {
+              "minute": "23'",
+              "player": "M. Cunha",
+              "type": "goal"
+            },
+            {
+              "minute": "36'",
+              "player": "M. Cunha",
+              "type": "goal"
+            },
+            {
+              "minute": "45'",
+              "player": "Vinicius Junior",
+              "type": "goal"
+            },
+            {
+              "minute": "65'",
+              "player": "Douglas Santos",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Haití",
+          "events": [
+            {
+              "minute": "4'",
+              "player": "C. Arcus",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "45'",
+              "player": "F. Pierrot",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "72'",
+              "player": "D. Jean Jacques",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Alejandro Hernandez",
+      "coaches": "Brasil: Carlo Ancelotti | Haití: Sebastien Migne",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "82%",
+            "8%",
+            "10%"
+          ],
+          [
+            "LAE",
+            "93%",
+            "4%",
+            "3%"
+          ],
+          [
+            "APU",
+            "84%",
+            "11%",
+            "5%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 4,
+      "local": "Turquía",
+      "visitante": "Paraguay",
+      "score_home": 0,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "2",
+      "events": [
+        {
+          "team": "Turquía",
+          "events": [
+            {
+              "minute": "63'",
+              "player": "V. Montella",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "71'",
+              "player": "E. Elmali",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Paraguay",
+          "events": [
+            {
+              "minute": "2'",
+              "player": "M. Galarza",
+              "type": "goal"
+            },
+            {
+              "minute": "4'",
+              "player": "M. Galarza",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "45'",
+              "player": "M. Almiron",
+              "type": "redcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Iván Barton",
+      "coaches": "Turquía: Vincenzo Montella | Paraguay: Gustavo Alfaro",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "58%",
+            "27%",
+            "15%"
+          ],
+          [
+            "LAE",
+            "53%",
+            "29%",
+            "18%"
+          ],
+          [
+            "APU",
+            "46%",
+            "28%",
+            "26%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 5,
+      "local": "Holanda",
+      "visitante": "Suecia",
+      "score_home": 5,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Holanda",
+          "events": [
+            {
+              "minute": "5'",
+              "player": "B. Brobbey",
+              "type": "goal"
+            },
+            {
+              "minute": "17'",
+              "player": "B. Brobbey",
+              "type": "goal"
+            },
+            {
+              "minute": "47'",
+              "player": "C. Gakpo",
+              "type": "goal"
+            },
+            {
+              "minute": "54'",
+              "player": "C. Gakpo",
+              "type": "goal"
+            },
+            {
+              "minute": "89'",
+              "player": "C. Summerville",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Suecia",
+          "events": [
+            {
+              "minute": "53'",
+              "player": "G. Gudmundsson",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "59'",
+              "player": "A. Elanga",
+              "type": "goal"
+            },
+            {
+              "minute": "75'",
+              "player": "Y. Ayari",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "80'",
+              "player": "L. Bergvall",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Michael Oliver",
+      "coaches": "Holanda: Ronald Koeman | Suecia: Graham Potter",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "60%",
+            "26%",
+            "14%"
+          ],
+          [
+            "LAE",
+            "50%",
+            "31%",
+            "19%"
+          ],
+          [
+            "APU",
+            "55%",
+            "24%",
+            "22%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 6,
+      "local": "Alemania",
+      "visitante": "Costa de Marfil",
+      "score_home": 2,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Alemania",
+          "events": [
+            {
+              "minute": "68'",
+              "player": "D. Undav",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "D. Undav",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Costa de Marfil",
+          "events": [
+            {
+              "minute": "30'",
+              "player": "F. Kessie",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Juan Gabriel Benitez",
+      "coaches": "Alemania: Julian Nagelsmann | Costa de Marfil: Emerse Fae",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "78%",
+            "12%",
+            "9%"
+          ],
+          [
+            "LAE",
+            "81%",
+            "13%",
+            "6%"
+          ],
+          [
+            "APU",
+            "60%",
+            "21%",
+            "18%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 7,
+      "local": "Ecuador",
+      "visitante": "Curaçao",
+      "score_home": 0,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Ecuador",
+          "events": [
+            {
+              "minute": "38'",
+              "player": "J. Alcivar",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Curaçao",
+          "events": [
+            {
+              "minute": "39'",
+              "player": "L. Bacuna",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "53'",
+              "player": "J. Bacuna",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "56'",
+              "player": "L. Comenencia",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "75'",
+              "player": "J. Gaari",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "G. Kastaneer",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Ma Ning",
+      "coaches": "Ecuador: Sebastian Beccacece | Curaçao: Dick Advocaat",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "75%",
+            "15%",
+            "9%"
+          ],
+          [
+            "LAE",
+            "81%",
+            "13%",
+            "6%"
+          ],
+          [
+            "APU",
+            "83%",
+            "11%",
+            "6%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 8,
+      "local": "Túnez",
+      "visitante": "Japón",
+      "score_home": 0,
+      "score_away": 4,
+      "status": "FT",
+      "minute": "",
+      "signo": "2",
+      "events": [
+        {
+          "team": "Túnez",
+          "events": []
+        },
+        {
+          "team": "Japón",
+          "events": [
+            {
+              "minute": "4'",
+              "player": "D. Kamada",
+              "type": "goal"
+            },
+            {
+              "minute": "31'",
+              "player": "A. Ueda",
+              "type": "goal"
+            },
+            {
+              "minute": "69'",
+              "player": "J. Ito",
+              "type": "goal"
+            },
+            {
+              "minute": "83'",
+              "player": "A. Ueda",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Istvan Kovacs",
+      "coaches": "Túnez: Herve Renard | Japón: Hajime Moriyasu",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "12%",
+            "15%",
+            "73%"
+          ],
+          [
+            "LAE",
+            "11%",
+            "22%",
+            "67%"
+          ],
+          [
+            "APU",
+            "14%",
+            "24%",
+            "62%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 9,
+      "local": "Bélgica",
+      "visitante": "Irán",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "Bélgica",
+          "events": []
+        },
+        {
+          "team": "Irán",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "68%",
+            "19%",
+            "13%"
+          ],
+          [
+            "LAE",
+            "78%",
+            "16%",
+            "6%"
+          ],
+          [
+            "APU",
+            "66%",
+            "21%",
+            "13%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 10,
+      "local": "Uruguay",
+      "visitante": "Cabo Verde",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "Uruguay",
+          "events": []
+        },
+        {
+          "team": "Cabo Verde",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "71%",
+            "17%",
+            "11%"
+          ],
+          [
+            "LAE",
+            "74%",
+            "18%",
+            "8%"
+          ],
+          [
+            "APU",
+            "64%",
+            "23%",
+            "13%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 11,
+      "local": "Nueva Zelanda",
+      "visitante": "Egipto",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "Nueva Zelanda",
+          "events": []
+        },
+        {
+          "team": "Egipto",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "15%",
+            "27%",
+            "58%"
+          ],
+          [
+            "LAE",
+            "17%",
+            "29%",
+            "54%"
+          ],
+          [
+            "APU",
+            "17%",
+            "25%",
+            "58%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 12,
+      "local": "Argentina",
+      "visitante": "Austria",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "Argentina",
+          "events": []
+        },
+        {
+          "team": "Austria",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "77%",
+            "13%",
+            "10%"
+          ],
+          [
+            "LAE",
+            "79%",
+            "15%",
+            "6%"
+          ],
+          [
+            "APU",
+            "60%",
+            "25%",
+            "16%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 13,
+      "local": "Francia",
+      "visitante": "Iraq",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "Francia",
+          "events": []
+        },
+        {
+          "team": "Iraq",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "83%",
+            "9%",
+            "7%"
+          ],
+          [
+            "LAE",
+            "92%",
+            "5%",
+            "3%"
+          ],
+          [
+            "APU",
+            "86%",
+            "10%",
+            "5%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    },
+    {
+      "id": 14,
+      "local": "Almería",
+      "visitante": "Málaga",
+      "score_home": 1,
+      "score_away": 2,
+      "status": "FT",
+      "minute": "",
+      "signo": "2",
+      "events": [],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": []
+    },
+    {
+      "id": 15,
+      "local": "España",
+      "visitante": "Arabia Saudí",
+      "score_home": null,
+      "score_away": null,
+      "status": "NS",
+      "minute": "",
+      "signo": "-",
+      "events": [
+        {
+          "team": "España",
+          "events": []
+        },
+        {
+          "team": "Arabia Saudí",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "0",
+            "1",
+            "2",
+            "M"
+          ],
+          [
+            "Q15 (L)",
+            "8%",
+            "12%",
+            "32%",
+            "47%"
+          ],
+          [
+            "Q15 (V)",
+            "48%",
+            "34%",
+            "8%",
+            "9%"
+          ],
+          [
+            "LAE (L)",
+            "2%",
+            "9%",
+            "29%",
+            "60%"
+          ],
+          [
+            "LAE (V)",
+            "56%",
+            "37%",
+            "5%",
+            "2%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/68"
+    }
+  ]
+}

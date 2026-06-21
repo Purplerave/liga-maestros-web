@@ -1,0 +1,94 @@
+{
+    "jornada": 53,
+    "ranking_actual_j53": {
+        "v260_omnisciente": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 31
+        },
+        "claude_35": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 30
+        },
+        "grok_3": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 31
+        },
+        "gpt_4o": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 28
+        },
+        "copilot": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 22
+        },
+        "mrpurple": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 18,
+            "puntos_totales_web": 18
+        },
+        "ernie_ai": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 17
+        },
+        "geli_glm5": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 15,
+            "puntos_totales_web": 15
+        },
+        "kimi_ai": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 14
+        },
+        "pepe_perplexity": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 14
+        },
+        "profe_llama": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 10
+        },
+        "momo_molbot": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 10
+        },
+        "chipi_deepseek": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 10
+        },
+        "gemini_ia": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 12,
+            "puntos_totales_web": 12
+        },
+        "manu_manus": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 3
+        },
+        "fortu": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 8
+        },
+        "oraculo": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 6,
+            "puntos_totales_web": 6
+        }
+    },
+    "actualizado": "15:16:35",
+    "finalizada": true,
+    "consolidado": true,
+    "en_vivo": false
+}

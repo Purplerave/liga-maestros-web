@@ -1,0 +1,870 @@
+{
+  "jornada": 66,
+  "source": "https://www.quiniela15.com/resultados-quiniela/66",
+  "fetched_at": "2026-06-07T23:01:17",
+  "matches": [
+    {
+      "id": 3,
+      "local": "Bélgica",
+      "visitante": "Túnez",
+      "events": [
+        {
+          "team": "Bélgica",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "L. Trossard",
+              "type": "goal"
+            },
+            {
+              "minute": "45'",
+              "player": "R. Garcia",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "53'",
+              "player": "C. De Ketelaere",
+              "type": "goal"
+            },
+            {
+              "minute": "65'",
+              "player": "K. De Bruyne",
+              "type": "goal"
+            },
+            {
+              "minute": "85'",
+              "player": "D. Lukebakio",
+              "type": "goal"
+            },
+            {
+              "minute": "87'",
+              "player": "N. Raskin",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "D. Moreira",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Túnez",
+          "events": [
+            {
+              "minute": "49'",
+              "player": "I. Gharbi",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "62'",
+              "player": "I. Gharbi",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "62'",
+              "player": "I. Gharbi",
+              "type": "redcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Anastasios Sidiropoulos",
+      "coaches": "Bélgica: Rudi Garcia | Túnez: Sabri Lamouchi",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "73%",
+            "15%",
+            "12%"
+          ],
+          [
+            "LAE",
+            "83%",
+            "10%",
+            "7%"
+          ],
+          [
+            "APU",
+            "71%",
+            "19%",
+            "10%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 4,
+      "local": "Lituania",
+      "visitante": "Letonia",
+      "events": [
+        {
+          "team": "Lituania",
+          "events": []
+        },
+        {
+          "team": "Letonia",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "21%",
+            "33%",
+            "46%"
+          ],
+          [
+            "LAE",
+            "43%",
+            "33%",
+            "24%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 5,
+      "local": "Estonia",
+      "visitante": "Islas Feroe",
+      "events": [
+        {
+          "team": "Estonia",
+          "events": []
+        },
+        {
+          "team": "Islas Feroe",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "63%",
+            "20%",
+            "17%"
+          ],
+          [
+            "LAE",
+            "63%",
+            "20%",
+            "17%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 6,
+      "local": "Portugal",
+      "visitante": "Chile",
+      "events": [
+        {
+          "team": "Portugal",
+          "events": [
+            {
+              "minute": "45'",
+              "player": "R. Leao",
+              "type": "redcard"
+            },
+            {
+              "minute": "58'",
+              "player": "G. Guedes",
+              "type": "goal"
+            },
+            {
+              "minute": "75'",
+              "player": "B. Fernandes",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Chile",
+          "events": [
+            {
+              "minute": "45'",
+              "player": "I. Roman",
+              "type": "redcard"
+            },
+            {
+              "minute": "90'",
+              "player": "L. Cepeda",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Luca Zufferli",
+      "coaches": "Portugal: Roberto Martinez | Chile: Nicolás Andrés Córdova San Cristóbal",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "72%",
+            "17%",
+            "11%"
+          ],
+          [
+            "LAE",
+            "84%",
+            "10%",
+            "6%"
+          ],
+          [
+            "APU",
+            "76%",
+            "15%",
+            "8%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 7,
+      "local": "Rumanía",
+      "visitante": "Gales",
+      "events": [
+        {
+          "team": "Rumanía",
+          "events": [
+            {
+              "minute": "52'",
+              "player": "F. Coman",
+              "type": "goal"
+            },
+            {
+              "minute": "80'",
+              "player": "A. Rus",
+              "type": "goal"
+            },
+            {
+              "minute": "87'",
+              "player": "A. Rus",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Gales",
+          "events": [
+            {
+              "minute": "63'",
+              "player": "D. Brooks",
+              "type": "goal"
+            },
+            {
+              "minute": "79'",
+              "player": "D. Brooks",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Rohit Saggi",
+      "coaches": "Rumanía: Mircea Lucescu | Gales: Craig Douglas Bellamy",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "32%",
+            "39%",
+            "29%"
+          ],
+          [
+            "LAE",
+            "41%",
+            "33%",
+            "26%"
+          ],
+          [
+            "APU",
+            "35%",
+            "30%",
+            "34%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 8,
+      "local": "Inglaterra",
+      "visitante": "Nueva Zelanda",
+      "events": [
+        {
+          "team": "Inglaterra",
+          "events": [
+            {
+              "minute": "45'",
+              "player": "H. Kane",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Nueva Zelanda",
+          "events": []
+        }
+      ],
+      "referee": "Natalie Simon",
+      "coaches": "Inglaterra: Thomas Tuchel | Nueva Zelanda: -",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "76%",
+            "12%",
+            "11%"
+          ],
+          [
+            "LAE",
+            "89%",
+            "6%",
+            "5%"
+          ],
+          [
+            "APU",
+            "84%",
+            "11%",
+            "4%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 9,
+      "local": "Suiza",
+      "visitante": "Australia",
+      "events": [
+        {
+          "team": "Suiza",
+          "events": []
+        },
+        {
+          "team": "Australia",
+          "events": []
+        }
+      ],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "67%",
+            "19%",
+            "13%"
+          ],
+          [
+            "LAE",
+            "67%",
+            "20%",
+            "13%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 10,
+      "local": "Bolivia",
+      "visitante": "Escocia",
+      "events": [
+        {
+          "team": "Bolivia",
+          "events": [
+            {
+              "minute": "36'",
+              "player": "R. Fernandez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "52'",
+              "player": "Miguelito",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "58'",
+              "player": "C. A. Melgar",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Escocia",
+          "events": [
+            {
+              "minute": "5'",
+              "player": "L. Shankland",
+              "type": "goal"
+            },
+            {
+              "minute": "23'",
+              "player": "S. McTominay",
+              "type": "goal"
+            },
+            {
+              "minute": "30'",
+              "player": "C. Adams",
+              "type": "goal"
+            },
+            {
+              "minute": "45'",
+              "player": "C. Adams",
+              "type": "goal"
+            },
+            {
+              "minute": "84'",
+              "player": "A. Ralston",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Rosendo Mendoza",
+      "coaches": "Bolivia: Óscar Adolfo Villegas Cámara | Escocia: Steve Clarke",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "15%",
+            "21%",
+            "63%"
+          ],
+          [
+            "LAE",
+            "18%",
+            "23%",
+            "59%"
+          ],
+          [
+            "APU",
+            "12%",
+            "22%",
+            "66%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 11,
+      "local": "Liechtenstein",
+      "visitante": "Chipre",
+      "events": [
+        {
+          "team": "Liechtenstein",
+          "events": []
+        },
+        {
+          "team": "Chipre",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "M. Tzionis",
+              "type": "goal"
+            },
+            {
+              "minute": "54'",
+              "player": "G. Satsias",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "65'",
+              "player": "A. Kakoullis",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "71'",
+              "player": "K. Sotiriou",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Anojen Kanagasingam",
+      "coaches": "Liechtenstein: Konrad Fünfstück | Chipre: Apostolos Mantzios",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "16%",
+            "21%",
+            "62%"
+          ],
+          [
+            "LAE",
+            "19%",
+            "24%",
+            "57%"
+          ],
+          [
+            "APU",
+            "10%",
+            "23%",
+            "67%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 12,
+      "local": "Dinamarca",
+      "visitante": "Ucrania",
+      "events": [
+        {
+          "team": "Dinamarca",
+          "events": [
+            {
+              "minute": "13'",
+              "player": "P. Dorgu",
+              "type": "goal"
+            },
+            {
+              "minute": "31'",
+              "player": "C. Eriksen",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "36'",
+              "player": "J. Maehle",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Ucrania",
+          "events": [
+            {
+              "minute": "44'",
+              "player": "V. Tsygankov",
+              "type": "goal"
+            },
+            {
+              "minute": "50'",
+              "player": "V. Mykolenko",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "56'",
+              "player": "I. Zabarnyi",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Sigurd Smehus Kringstad",
+      "coaches": "Dinamarca: Brian Riemer | Ucrania: Serhii Rebrov",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "65%",
+            "20%",
+            "15%"
+          ],
+          [
+            "LAE",
+            "64%",
+            "23%",
+            "13%"
+          ],
+          [
+            "APU",
+            "58%",
+            "26%",
+            "17%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 13,
+      "local": "Croacia",
+      "visitante": "Eslovenia",
+      "events": [
+        {
+          "team": "Croacia",
+          "events": [
+            {
+              "minute": "51'",
+              "player": "L. Modric",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "M. Pasalic",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Eslovenia",
+          "events": [
+            {
+              "minute": "83'",
+              "player": "A. Sporar",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Bence Csonka",
+      "coaches": "Croacia: Zlatko Dalic | Eslovenia: Matjaz Kek",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "73%",
+            "14%",
+            "13%"
+          ],
+          [
+            "LAE",
+            "80%",
+            "13%",
+            "7%"
+          ],
+          [
+            "APU",
+            "67%",
+            "21%",
+            "12%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 14,
+      "local": "Marruecos",
+      "visitante": "Noruega",
+      "events": [
+        {
+          "team": "Marruecos",
+          "events": [
+            {
+              "minute": "8'",
+              "player": "B. Diaz",
+              "type": "goal"
+            },
+            {
+              "minute": "82'",
+              "player": "B. El Khannouss",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Noruega",
+          "events": [
+            {
+              "minute": "39'",
+              "player": "J. Ryerson",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "75'",
+              "player": "M. Odegaard",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Pierre-Luc Lauziere",
+      "coaches": "Marruecos: Mohamed Ouahbi | Noruega: Stale Solbakken",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "54%",
+            "24%",
+            "22%"
+          ],
+          [
+            "LAE",
+            "46%",
+            "26%",
+            "28%"
+          ],
+          [
+            "APU",
+            "30%",
+            "27%",
+            "43%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    },
+    {
+      "id": 15,
+      "local": "Grecia",
+      "visitante": "Italia",
+      "events": [
+        {
+          "team": "Grecia",
+          "events": []
+        },
+        {
+          "team": "Italia",
+          "events": [
+            {
+              "minute": "18'",
+              "player": "F. Esposito",
+              "type": "goal"
+            },
+            {
+              "minute": "38'",
+              "player": "L. Lipani",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "44'",
+              "player": "H. Ahanor",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "68'",
+              "player": "L. Reggiani",
+              "type": "redcard"
+            },
+            {
+              "minute": "82'",
+              "player": "C. Favasuli",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Yigal Frid",
+      "coaches": "Grecia: Ivan Jovanovic | Italia: Ivan Gennaro Gattuso",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "0",
+            "1",
+            "2",
+            "M"
+          ],
+          [
+            "Q15 (L)",
+            "24%",
+            "47%",
+            "18%",
+            "11%"
+          ],
+          [
+            "Q15 (V)",
+            "12%",
+            "26%",
+            "41%",
+            "21%"
+          ],
+          [
+            "LAE (L)",
+            "17%",
+            "58%",
+            "20%",
+            "5%"
+          ],
+          [
+            "LAE (V)",
+            "8%",
+            "36%",
+            "41%",
+            "15%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/66"
+    }
+  ]
+}

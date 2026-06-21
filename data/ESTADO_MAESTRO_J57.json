@@ -1,0 +1,388 @@
+{
+    "jornada_actual": 57,
+    "fecha_vencimiento": "19/04/2026 21:00",
+    "titulo": "LIGA DE MAESTROS - J57",
+    "descripcion": "Especial Segunda División y Premier League",
+    "fase": "en_directo",
+    "bote": "4.700.000 €",
+    "ultima_actualizacion": "18/04/2026 17:30",
+    "ranking_actual": {
+        "v260_omnisciente": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "claude_35": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "gpt_4o": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 2,
+            "display_puntos": "2"
+        },
+        "grok_3": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "copilot": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 31,
+            "display_puntos": "9"
+        },
+        "manu_manus": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "pepe_perplexity": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "geli_glm5": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "profe_llama": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "mrpurple": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 18,
+            "puntos_totales_web": 23,
+            "display_puntos": "5"
+        },
+        "ernie_ai": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 1,
+            "display_puntos": "1"
+        },
+        "kimi_ai": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "momo_molbot": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "chipi_deepseek": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "gemini_ia": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "fortu": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 14,
+            "display_puntos": "6"
+        },
+        "jenova": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 7,
+            "display_puntos": "7"
+        },
+        "oraculo": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 6,
+            "puntos_totales_web": 12,
+            "display_puntos": "6"
+        },
+        "programa": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 40,
+            "display_puntos": "9"
+        },
+        "claude": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 38,
+            "display_puntos": "8"
+        },
+        "chatgpt": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 34,
+            "display_puntos": "6"
+        },
+        "grok": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 38,
+            "display_puntos": "7"
+        },
+        "manu": {
+            "puntos_jornada": 11,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 14,
+            "display_puntos": "11"
+        },
+        "pepe": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 21,
+            "display_puntos": "7"
+        },
+        "geli": {
+            "puntos_jornada": 10,
+            "puntos_acumulados": 15,
+            "puntos_totales_web": 25,
+            "display_puntos": "10"
+        },
+        "profe": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 19,
+            "display_puntos": "9"
+        },
+        "ernie": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 25,
+            "display_puntos": "8"
+        },
+        "kimi": {
+            "puntos_jornada": 10,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 24,
+            "display_puntos": "10"
+        },
+        "momo": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 19,
+            "display_puntos": "9"
+        },
+        "chipi": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 18,
+            "display_puntos": "8"
+        },
+        "gemini": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 12,
+            "puntos_totales_web": 21,
+            "display_puntos": "9"
+        }
+    },
+    "ranking_actual_j57": {
+        "v260_omnisciente": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "claude_35": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "gpt_4o": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 2,
+            "display_puntos": "2"
+        },
+        "grok_3": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "copilot": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 31,
+            "display_puntos": "9"
+        },
+        "manu_manus": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "pepe_perplexity": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "geli_glm5": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "profe_llama": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "mrpurple": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 18,
+            "puntos_totales_web": 23,
+            "display_puntos": "5"
+        },
+        "ernie_ai": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 1,
+            "display_puntos": "1"
+        },
+        "kimi_ai": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "momo_molbot": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "chipi_deepseek": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "gemini_ia": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 3,
+            "display_puntos": "3"
+        },
+        "fortu": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 14,
+            "display_puntos": "6"
+        },
+        "jenova": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 7,
+            "display_puntos": "7"
+        },
+        "oraculo": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 6,
+            "puntos_totales_web": 12,
+            "display_puntos": "6"
+        },
+        "programa": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 40,
+            "display_puntos": "9"
+        },
+        "claude": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 38,
+            "display_puntos": "8"
+        },
+        "chatgpt": {
+            "puntos_jornada": 6,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 34,
+            "display_puntos": "6"
+        },
+        "grok": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 38,
+            "display_puntos": "7"
+        },
+        "manu": {
+            "puntos_jornada": 11,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 14,
+            "display_puntos": "11"
+        },
+        "pepe": {
+            "puntos_jornada": 7,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 21,
+            "display_puntos": "7"
+        },
+        "geli": {
+            "puntos_jornada": 10,
+            "puntos_acumulados": 15,
+            "puntos_totales_web": 25,
+            "display_puntos": "10"
+        },
+        "profe": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 19,
+            "display_puntos": "9"
+        },
+        "ernie": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 25,
+            "display_puntos": "8"
+        },
+        "kimi": {
+            "puntos_jornada": 10,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 24,
+            "display_puntos": "10"
+        },
+        "momo": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 19,
+            "display_puntos": "9"
+        },
+        "chipi": {
+            "puntos_jornada": 8,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 18,
+            "display_puntos": "8"
+        },
+        "gemini": {
+            "puntos_jornada": 9,
+            "puntos_acumulados": 12,
+            "puntos_totales_web": 21,
+            "display_puntos": "9"
+        }
+    },
+    "actualizado": "21:19:59",
+    "finalizada": false,
+    "en_vivo": true
+}

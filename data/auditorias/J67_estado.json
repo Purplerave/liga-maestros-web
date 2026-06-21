@@ -1,0 +1,397 @@
+{
+  "generated_at": "2026-06-14T20:07:14",
+  "jornada": 67,
+  "summary": {
+    "partidos": 15,
+    "finalizados": 6,
+    "directo": 0,
+    "pendientes": 9,
+    "participantes_con_prediccion": 15,
+    "consenso_rows": 14,
+    "estado": "OK"
+  },
+  "critical": [],
+  "warnings": [],
+  "prediction_status": {
+    "116699982648036669051": {
+      "name": "Pablo Castro",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "usuario"
+    },
+    "chatgpt": {
+      "name": "ChatGPT",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "chipi": {
+      "name": "Chipi",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "claude": {
+      "name": "Claude",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "consejo_ias": {
+      "name": "Consejo IA",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "consejo"
+    },
+    "copilot": {
+      "name": "Copilot",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "ernie": {
+      "name": "Ernie",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "fortu": {
+      "name": "Fortu",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "geli": {
+      "name": "Geli",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "gemini": {
+      "name": "Gemini",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "grok": {
+      "name": "Grok",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "kimi": {
+      "name": "Kimi",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "pepe": {
+      "name": "Pepe",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "profe": {
+      "name": "Profe",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "programa": {
+      "name": "Programa",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "programa"
+    }
+  },
+  "scoreboard": {
+    "chipi": {
+      "name": "Chipi",
+      "hits": 5,
+      "played": 6,
+      "missing_played": []
+    },
+    "geli": {
+      "name": "Geli",
+      "hits": 5,
+      "played": 6,
+      "missing_played": []
+    },
+    "chatgpt": {
+      "name": "ChatGPT",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "claude": {
+      "name": "Claude",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "consejo_ias": {
+      "name": "Consejo IA",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "copilot": {
+      "name": "Copilot",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "ernie": {
+      "name": "Ernie",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "gemini": {
+      "name": "Gemini",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "grok": {
+      "name": "Grok",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "116699982648036669051": {
+      "name": "Pablo Castro",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "profe": {
+      "name": "Profe",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "programa": {
+      "name": "Programa",
+      "hits": 4,
+      "played": 6,
+      "missing_played": []
+    },
+    "fortu": {
+      "name": "Fortu",
+      "hits": 3,
+      "played": 6,
+      "missing_played": []
+    },
+    "kimi": {
+      "name": "Kimi",
+      "hits": 3,
+      "played": 6,
+      "missing_played": []
+    },
+    "pepe": {
+      "name": "Pepe",
+      "hits": 3,
+      "played": 6,
+      "missing_played": []
+    }
+  },
+  "missing_logos": [],
+  "matches": [
+    {
+      "partido_id": 1,
+      "local": "EE.UU.",
+      "visitante": "Paraguay",
+      "goles_local": 4,
+      "goles_visitante": 1,
+      "signo_actual": "1",
+      "status": "FT",
+      "fecha": "2026-06-13",
+      "hora": "03:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 2,
+      "local": "Qatar",
+      "visitante": "Suiza",
+      "goles_local": 1,
+      "goles_visitante": 1,
+      "signo_actual": "X",
+      "status": "FT",
+      "fecha": "2026-06-13",
+      "hora": "21:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 3,
+      "local": "Brasil",
+      "visitante": "Marruecos",
+      "goles_local": 1,
+      "goles_visitante": 1,
+      "signo_actual": "X",
+      "status": "FT",
+      "fecha": "2026-06-15",
+      "hora": "00:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 4,
+      "local": "Haití",
+      "visitante": "Escocia",
+      "goles_local": 0,
+      "goles_visitante": 1,
+      "signo_actual": "2",
+      "status": "FT",
+      "fecha": "2026-06-14",
+      "hora": "03:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 5,
+      "local": "Australia",
+      "visitante": "Turquía",
+      "goles_local": 2,
+      "goles_visitante": 0,
+      "signo_actual": "1",
+      "status": "FT",
+      "fecha": "2026-06-14",
+      "hora": "06:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 6,
+      "local": "Alemania",
+      "visitante": "Curaçao",
+      "goles_local": 3,
+      "goles_visitante": 1,
+      "signo_actual": "1",
+      "status": "FT",
+      "fecha": "2026-06-14",
+      "hora": "19:00",
+      "minuto": "Finalizado"
+    },
+    {
+      "partido_id": 7,
+      "local": "Holanda",
+      "visitante": "Japón",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-14",
+      "hora": "22:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 8,
+      "local": "Costa de Marfil",
+      "visitante": "Ecuador",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-15",
+      "hora": "01:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 9,
+      "local": "Suecia",
+      "visitante": "Túnez",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-15",
+      "hora": "04:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 10,
+      "local": "Bélgica",
+      "visitante": "Egipto",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-15",
+      "hora": "21:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 11,
+      "local": "Arabia Saudí",
+      "visitante": "Uruguay",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-17",
+      "hora": "00:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 12,
+      "local": "Irán",
+      "visitante": "Nueva Zelanda",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-16",
+      "hora": "03:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 13,
+      "local": "Francia",
+      "visitante": "Senegal",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-16",
+      "hora": "21:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 14,
+      "local": "Málaga",
+      "visitante": "Almería",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-14",
+      "hora": "21:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 15,
+      "local": "España",
+      "visitante": "Cabo Verde",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-06-15",
+      "hora": "18:00",
+      "minuto": ""
+    }
+  ]
+}

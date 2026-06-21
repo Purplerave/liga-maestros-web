@@ -1,0 +1,107 @@
+{
+    "1": {
+        "id": 1,
+        "fecha": "21/04/2026",
+        "hora": "19:00",
+        "partido": "ATH. CLUB - OSASUNA",
+        "finalizado": true
+    },
+    "2": {
+        "id": 2,
+        "fecha": "22/04/2026",
+        "hora": "19:00",
+        "partido": "BARCELONA - CELTA",
+        "finalizado": false
+    },
+    "3": {
+        "id": 3,
+        "fecha": "21/04/2026",
+        "hora": "21:00",
+        "partido": "LEVANTE - SEVILLA",
+        "finalizado": false
+    },
+    "4": {
+        "id": 4,
+        "fecha": "21/04/2026",
+        "hora": "21:00",
+        "partido": "MALLORCA - VALENCIA",
+        "finalizado": true
+    },
+    "5": {
+        "id": 5,
+        "fecha": "23/04/2026",
+        "hora": "21:30",
+        "partido": "R. OVIEDO - VILLARREAL",
+        "finalizado": false
+    },
+    "6": {
+        "id": 6,
+        "fecha": "22/04/2026",
+        "hora": "21:00",
+        "partido": "R. MADRID - ALAV\u00c9S",
+        "finalizado": true
+    },
+    "7": {
+        "id": 7,
+        "fecha": "23/04/2026",
+        "hora": "19:00",
+        "partido": "ELCHE - AT. MADRID",
+        "finalizado": true
+    },
+    "8": {
+        "id": 8,
+        "fecha": "23/04/2026",
+        "hora": "21:00",
+        "partido": "RAYO - ESPANYOL",
+        "finalizado": false
+    },
+    "9": {
+        "id": 9,
+        "fecha": "23/04/2026",
+        "hora": "21:00",
+        "partido": "R. SOCIEDAD - GETAFE",
+        "finalizado": true
+    },
+    "10": {
+        "id": 10,
+        "fecha": "21/04/2026",
+        "hora": "20:45",
+        "partido": "COVENTRY - PORTSMOUTH",
+        "finalizado": true
+    },
+    "11": {
+        "id": 11,
+        "fecha": "21/04/2026",
+        "hora": "20:45",
+        "partido": "QUEEN'S PARK R - SWANSEA",
+        "finalizado": false
+    },
+    "12": {
+        "id": 12,
+        "fecha": "21/04/2026",
+        "hora": "20:45",
+        "partido": "SOUTHAMPTON - BRISTOL CITY",
+        "finalizado": true
+    },
+    "13": {
+        "id": 13,
+        "fecha": "21/04/2026",
+        "hora": "20:45",
+        "partido": "CHARLTON - IPSWICH",
+        "finalizado": true
+    },
+    "14": {
+        "id": 14,
+        "fecha": "21/04/2026",
+        "hora": "20:45",
+        "partido": "LEICESTER - HULL",
+        "finalizado": true
+    },
+    "15": {
+        "id": 15,
+        "fecha": "22/04/2026",
+        "hora": "21:00",
+        "partido": "GIRONA - BETIS",
+        "finalizado": true
+    }
+}

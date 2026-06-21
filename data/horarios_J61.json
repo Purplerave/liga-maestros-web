@@ -1,0 +1,114 @@
+{
+    "1": {
+        "partido": "Elche - Alavés",
+        "local": "Elche",
+        "visitante": "Alavés",
+        "hora": "14:00",
+        "fecha": "2026-05-09",
+        "finalizado": true
+    },
+    "2": {
+        "partido": "Sevilla - Espanyol",
+        "local": "Sevilla",
+        "visitante": "Espanyol",
+        "hora": "16:15",
+        "fecha": "2026-05-09",
+        "finalizado": true
+    },
+    "3": {
+        "partido": "Atlético de Madrid - Celta",
+        "local": "Atlético de Madrid",
+        "visitante": "Celta",
+        "hora": "18:30",
+        "fecha": "2026-05-09",
+        "finalizado": true
+    },
+    "4": {
+        "partido": "Real Sociedad - Betis",
+        "local": "Real Sociedad",
+        "visitante": "Betis",
+        "hora": "21:00",
+        "fecha": "2026-05-09",
+        "finalizado": true
+    },
+    "5": {
+        "partido": "Mallorca - Villarreal",
+        "local": "Mallorca",
+        "visitante": "Villarreal",
+        "hora": "14:00",
+        "fecha": "2026-05-10",
+        "finalizado": true
+    },
+    "6": {
+        "partido": "Athletic de Bilbao - Valencia",
+        "local": "Athletic de Bilbao",
+        "visitante": "Valencia",
+        "hora": "16:15",
+        "fecha": "2026-05-10"
+    },
+    "7": {
+        "partido": "Oviedo - Getafe",
+        "local": "Oviedo",
+        "visitante": "Getafe",
+        "hora": "18:30",
+        "fecha": "2026-05-10",
+        "finalizado": true
+    },
+    "8": {
+        "partido": "Rayo Vallecano - Girona",
+        "local": "Rayo Vallecano",
+        "visitante": "Girona",
+        "hora": "21:00",
+        "fecha": "2026-05-11"
+    },
+    "9": {
+        "partido": "Ceuta - Castellón",
+        "local": "Ceuta",
+        "visitante": "Castellón",
+        "hora": "14:00",
+        "fecha": "2026-05-09"
+    },
+    "10": {
+        "partido": "Burgos - Almería",
+        "local": "Burgos",
+        "visitante": "Almería",
+        "hora": "16:15",
+        "fecha": "2026-05-09"
+    },
+    "11": {
+        "partido": "Málaga - Sporting de Gijón",
+        "local": "Málaga",
+        "visitante": "Sporting de Gijón",
+        "hora": "21:00",
+        "fecha": "2026-05-09"
+    },
+    "12": {
+        "partido": "Andorra - Las Palmas",
+        "local": "Andorra",
+        "visitante": "Las Palmas",
+        "hora": "14:00",
+        "fecha": "2026-05-10"
+    },
+    "13": {
+        "partido": "Leganés - Racing de Santander",
+        "local": "Leganés",
+        "visitante": "Racing de Santander",
+        "hora": "16:15",
+        "fecha": "2026-05-10"
+    },
+    "14": {
+        "partido": "Córdoba - Granada",
+        "local": "Córdoba",
+        "visitante": "Granada",
+        "hora": "18:30",
+        "fecha": "2026-05-10"
+    },
+    "15": {
+        "partido": "Barcelona - Real Madrid",
+        "local": "Barcelona",
+        "visitante": "Real Madrid",
+        "hora": "21:00",
+        "fecha": "2026-05-10",
+        "finalizado": true
+    }
+}

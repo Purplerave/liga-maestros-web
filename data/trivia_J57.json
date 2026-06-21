@@ -1,0 +1,10 @@
+{
+    "preguntas": [
+        {
+            "id": 1,
+            "pregunta": "¿Qué equipo venció 3-0 al Chelsea esta semana?",
+            "opciones": {"A": "Man City", "B": "Arsenal", "C": "Liverpool"},
+            "correcta": "A"
+        }
+    ]
+}

@@ -1,0 +1,82 @@
+{
+    "v260_omnisciente": {
+        "signos": ["1", "1", "X", "1", "X", "1X", "X", "1", "12", "1", "X", "2", "X2", "1", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["V2600 QUANTUM", "Madrid Fijo", "Sociedad Fija", "BOMBA 1: Elche", "Barça Fijo", "BOMBA 2: Nervión", "Doble 1: Sadar", "Efecto Espejo X", "Celta Fijo", "Doble 2: Athletic 12", "Málaga Fijo", "Zaragoza X", "DEPOR GOLPE ELO", "Doble 3: Castellón X2", "Racing Fijo", "Getafe 1-1"]
+    },
+    "claude_35": {
+        "signos": ["1", "1", "X", "1", "X2", "1", "1X", "1", "X", "X", "1", "2", "1", "12", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["Anthropic", "Superioridad blanca", "Derbi vasco", "Igualdad", "Derbi catalán", "Doble cobertura", "El Sadar", "Doble cobertura", "Balaídos", "Duelo táctico", "Tablas", "Ascenso", "Riazor", "Anduva", "Doble cobertura", "1-1"]
+    },
+    "grok_3": {
+        "signos": ["1", "1", "1X", "1", "2", "X", "1", "1", "12", "1", "1", "X2", "2", "12", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["xAI", "Madrid", "Sociedad", "Doble 1X", "Barça", "Atleti", "Igualdad", "Mallorca", "Celta", "Doble 12", "Málaga", "Zaragoza", "Doble X2", "Mirandés", "Doble 12", "1-1"]
+    },
+    "gpt_4o": {
+        "signos": ["1", "1", "2", "1", "2", "X2", "1X", "1", "2", "12", "1", "2", "2", "1", "0-2"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "2"},
+        "razones": ["OpenAI", "Favorito local", "Favorito local", "Victoria visitante", "Favorito local", "Victoria visitante", "Doble X2", "Doble 1X", "Favorito local", "Victoria visitante", "Doble 12", "Favorito local", "Victoria visitante", "Victoria visitante", "Favorito local", "0-2"]
+    },
+    "copilot": {
+        "signos": ["1", "1", "1X", "1", "1X", "1X", "X", "1", "1", "1", "2", "2", "X", "X", "0-1"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "1"},
+        "razones": ["Microsoft", "Madrid local", "Real Sociedad", "Doble 1X", "Barcelona", "Doble 1X", "Doble 1X", "Empate", "Celta", "Athletic", "Málaga", "Zaragoza", "Deportivo", "Empate", "Empate", "0-1"]
+    },
+    "pepe_perplexity": {
+        "signos": ["1", "1", "1", "1", "2", "1", "1", "1", "1", "1", "1", "2", "2", "X", "0-1"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "1"},
+        "razones": ["Perplexity", "Estadística pura", "Localía", "Elche fuerte", "Poder blaugrana", "Atleti racha", "Osasuna local", "Mallorca", "Celta", "San Mamés", "Málaga", "Córdoba", "Depor", "Castellón", "Equilibrio", "0-1"]
+    },
+    "geli_glm5": {
+        "signos": ["1", "1", "X", "1", "X", "X", "X", "1", "2", "X", "X", "1X", "X", "X2", "1-0"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "0"},
+        "razones": ["Zhipu AI", "Madrid", "Sociedad", "Empate", "Barça", "Empate", "Empate", "Empate", "Celta", "Villarreal", "Empate", "Empate", "Doble 1X", "Empate", "Doble X2", "1-0"]
+    },
+    "chipi_deepseek": {
+        "signos": ["1", "X", "X", "1", "X", "1", "X", "1", "X", "1", "X", "2", "X", "X", "X"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["DeepSeek", "Favorito", "Incertidumbre", "Duelo bajo", "Superior", "Igualdad", "Fuerza local", "Tablas", "Balaídos", "Equilibrio", "Rosaleda", "Incertidumbre", "Calidad", "Castellón", "Liderato", "Empate"]
+    },
+    "manu_manus": {
+        "signos": ["1", "X", "2", "1", "X", "X", "1", "1", "1", "X", "1", "X", "2", "X", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["Manus.ai", "Bernabéu", "Bajas defensa", "Necesidad", "Camp Nou", "Simeone sancionado", "Igualdad", "Mallorca", "Oviedo mal", "Athletic", "Incertidumbre", "Córdoba", "Huesca firme", "Castellón", "Racing", "1-1"]
+    },
+    "kimi_ai": {
+        "signos": ["1", "1", "1", "1", "1", "1", "X", "1", "X", "1", "1", "2", "X", "1", "0-1"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "1"},
+        "razones": ["Moonshot", "Madrid", "Bajas Real", "Elche", "Barça", "Sevilla", "Osasuna", "Rayo", "Celta", "Empate", "Málaga", "Córdoba", "Depor", "Empate", "Racing", "0-1"]
+    },
+    "fortu": {
+        "signos": ["1", "1X", "1X", "1", "X2", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["Qwen", "Local", "Doble", "Doble", "Local", "Doble", "Local", "Local", "Local", "Local", "Local", "Local", "Local", "Local", "Local", "1-1"]
+    },
+    "momo_molbot": {
+        "signos": ["1", "1", "X", "1", "2", "1", "1X", "1", "12", "X", "1", "2", "1", "1X", "0-1"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "1"},
+        "razones": ["Molbot", "WSL2 Core", "Madrid", "Sociedad", "Valencia X", "Barcelona", "Atlético", "Osasuna", "Doble Mallorca", "Celta", "Doble Athletic", "Las Palmas", "Córdoba", "Depor", "Mirandés", "Doble Racing", "0-1"]
+    },
+    "ernie_ai": {
+        "signos": ["1", "1", "2", "1", "X", "2", "X", "1", "X", "2", "2", "X", "1", "2", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["Baidu", "Baidu Logic", "Madrid", "Sociedad", "Valencia", "Barcelona", "Empate", "Betis", "Empate", "Celta", "Empate", "Las Palmas", "Zaragoza", "Empate", "Mirandés", "Almería", "1-1"]
+    },
+    "jenova": {
+        "signos": ["1", "1", "X", "1", "1X", "1X", "X", "1", "1", "1", "2", "2", "X", "12", "0-1"],
+        "porra": {"partido": "15", "goles_h": "0", "goles_a": "1"},
+        "razones": ["Jenova Sintético", "Madrid Fijo", "Sociedad Fijo", "Empate Elche", "Barça Fijo", "Doble Sevilla 1X", "Doble Osasuna 1X", "Mallorca X", "Celta 1", "Athletic 1", "Málaga 1", "Zaragoza 2", "DEPOR GOLPE 2", "Mirandés X", "Doble Racing 12", "0-1"]
+    },
+    "gemini_ia": {
+        "signos": ["1X", "1", "X", "1", "X2", "2", "1", "1", "2", "1", "1", "2", "2", "12", "1-1"],
+        "porra": {"partido": "15", "goles_h": "1", "goles_a": "1"},
+        "razones": ["Google DeepSearch", "Doble Madrid 1X", "Real Fijo", "Empate Elche", "Barça Fijo", "Doble Sevilla X2", "Betis Victoria 2", "Mallorca 1", "Celta 1", "Athletic 2", "Málaga 1", "Córdoba 1", "DEPOR GOLPE 2", "Castellón 2", "Doble Racing 12", "1-1"]
+    },
+    "mrpurple": {
+        "signos": ["1", "1", "X", "1", "2", "X", "2", "X", "2", "1", "1", "2", "X", "X", "1-1"],
+        "porra": {"partido": "12", "goles_h": "1", "goles_a": "2"},
+        "trivia_score": 0
+    }
+}

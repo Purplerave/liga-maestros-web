@@ -1,0 +1,372 @@
+[
+    {
+        "fixture_id": 1789965,
+        "competition": {
+            "has_groups": true,
+            "national_teams_only": false,
+            "tier": 1,
+            "name": "LaLiga Santander",
+            "is_league": true,
+            "id": 3,
+            "active": true,
+            "is_cup": false
+        },
+        "time": "FT",
+        "home": {
+            "stadium": "San Mamés Barria",
+            "name": "Athletic Bilbao",
+            "logo": "https://cdn.live-score-api.com/teams/394326ab4e139dc817446921bdc7bef4.png",
+            "id": 24,
+            "country_id": 43
+        },
+        "federation": null,
+        "status": "FINISHED",
+        "location": "San Mamés Barria",
+        "odds": {
+            "live": {
+                "1": null,
+                "2": null,
+                "X": null
+            },
+            "pre": {
+                "1": 1.72,
+                "2": 5.5,
+                "X": 3.75
+            }
+        },
+        "added": "2026-05-10 14:00:24",
+        "country": {
+            "flag": "ESP.png",
+            "name": "Spain",
+            "uefa_code": "ESP",
+            "is_real": true,
+            "id": 43,
+            "fifa_code": "ESP"
+        },
+        "scheduled": "14:15",
+        "away": {
+            "stadium": "Estadio de Mestalla",
+            "name": "Valencia",
+            "logo": "https://cdn.live-score-api.com/teams/5597e99c7e95d5e9fc5f218f4e816a8a.png",
+            "id": 29,
+            "country_id": 43
+        },
+        "last_changed": "2026-05-10 17:24:04",
+        "id": 710491,
+        "outcomes": {
+            "half_time": "X",
+            "full_time": "2",
+            "extra_time": null,
+            "penalty_shootout": null
+        },
+        "scores": {
+            "score": "0 - 1",
+            "ht_score": "0 - 0",
+            "ft_score": "0 - 1",
+            "et_score": "",
+            "ps_score": ""
+        },
+        "urls": {
+            "events": "https://livescore-api.com/api-client/scores/events.json?id=710491",
+            "statistics": "https://livescore-api.com/api-client/matches/stats.json?match_id=710491",
+            "lineups": "https://livescore-api.com/api-client/matches/lineups.json?match_id=710491",
+            "head2head": "https://livescore-api.com/api-client/teams/head2head.json?team1_id=24&team2_id=29"
+        }
+    },
+    {
+        "fixture_id": 1801478,
+        "competition": {
+            "has_groups": true,
+            "national_teams_only": false,
+            "tier": 2,
+            "name": "Segunda Division",
+            "is_league": true,
+            "id": 79,
+            "active": true,
+            "is_cup": false
+        },
+        "time": "FT",
+        "home": {
+            "stadium": "Estadio Municipal de Butarque",
+            "name": "Leganes",
+            "logo": "https://cdn.live-score-api.com/teams/60df33277358d8699739fd775ee2d561.png",
+            "id": 25,
+            "country_id": 43
+        },
+        "federation": null,
+        "status": "FINISHED",
+        "location": "Estadio Municipal de Butarque",
+        "odds": {
+            "live": {
+                "1": null,
+                "2": null,
+                "X": null
+            },
+            "pre": {
+                "1": 2.75,
+                "2": 2.35,
+                "X": 3.6
+            }
+        },
+        "added": "2026-05-10 14:00:37",
+        "country": {
+            "flag": "ESP.png",
+            "name": "Spain",
+            "uefa_code": "ESP",
+            "is_real": true,
+            "id": 43,
+            "fifa_code": "ESP"
+        },
+        "scheduled": "14:16",
+        "away": {
+            "stadium": "Campos de Sport de El Sardinero",
+            "name": "Racing Santander",
+            "logo": "https://cdn.live-score-api.com/teams/6922311e09bd40286dc0e979e003cd91.png",
+            "id": 2780,
+            "country_id": 43
+        },
+        "last_changed": "2026-05-10 16:17:34",
+        "id": 710492,
+        "outcomes": {
+            "half_time": "2",
+            "full_time": "2",
+            "extra_time": null,
+            "penalty_shootout": null
+        },
+        "scores": {
+            "score": "1 - 2",
+            "ht_score": "0 - 1",
+            "ft_score": "1 - 2",
+            "et_score": "",
+            "ps_score": ""
+        },
+        "urls": {
+            "events": "https://livescore-api.com/api-client/scores/events.json?id=710492",
+            "statistics": "https://livescore-api.com/api-client/matches/stats.json?match_id=710492",
+            "lineups": "https://livescore-api.com/api-client/matches/lineups.json?match_id=710492",
+            "head2head": "https://livescore-api.com/api-client/teams/head2head.json?team1_id=25&team2_id=2780"
+        }
+    },
+    {
+        "fixture_id": 1789969,
+        "competition": {
+            "has_groups": true,
+            "national_teams_only": false,
+            "tier": 1,
+            "name": "LaLiga Santander",
+            "is_league": true,
+            "id": 3,
+            "active": true,
+            "is_cup": false
+        },
+        "time": "HT",
+        "home": {
+            "stadium": "Estadio Nuevo Carlos Tartiere",
+            "name": "Real Oviedo",
+            "logo": "https://cdn.live-score-api.com/teams/9dd1eb968e5a7ed11bd5afb45e7c9009.png",
+            "id": 577,
+            "country_id": 43
+        },
+        "federation": null,
+        "status": "HALF TIME BREAK",
+        "location": "Estadio Nuevo Carlos Tartiere",
+        "odds": {
+            "live": {
+                "1": null,
+                "2": null,
+                "X": null
+            },
+            "pre": {
+                "1": 2.95,
+                "2": 3,
+                "X": 2.75
+            }
+        },
+        "added": "2026-05-10 16:15:29",
+        "country": {
+            "flag": "ESP.png",
+            "name": "Spain",
+            "uefa_code": "ESP",
+            "is_real": true,
+            "id": 43,
+            "fifa_code": "ESP"
+        },
+        "scheduled": "16:31",
+        "away": {
+            "stadium": "Coliseum Alfonso Pérez",
+            "name": "Getafe",
+            "logo": "https://cdn.live-score-api.com/teams/d3df99389c77a9526ce3db15c8c04620.png",
+            "id": 30,
+            "country_id": 43
+        },
+        "last_changed": "2026-05-10 17:23:56",
+        "id": 710623,
+        "outcomes": {
+            "half_time": "X",
+            "full_time": null,
+            "extra_time": null,
+            "penalty_shootout": null
+        },
+        "scores": {
+            "score": "0 - 0",
+            "ht_score": "0 - 0",
+            "ft_score": "",
+            "et_score": "",
+            "ps_score": ""
+        },
+        "urls": {
+            "events": "https://livescore-api.com/api-client/scores/events.json?id=710623",
+            "statistics": "https://livescore-api.com/api-client/matches/stats.json?match_id=710623",
+            "lineups": "https://livescore-api.com/api-client/matches/lineups.json?match_id=710623",
+            "head2head": "https://livescore-api.com/api-client/teams/head2head.json?team1_id=577&team2_id=30"
+        }
+    },
+    {
+        "fixture_id": 1801484,
+        "competition": {
+            "has_groups": true,
+            "national_teams_only": false,
+            "tier": 2,
+            "name": "Segunda Division",
+            "is_league": true,
+            "id": 79,
+            "active": true,
+            "is_cup": false
+        },
+        "time": "HT",
+        "home": {
+            "stadium": "Estadio Municipal de Anduva",
+            "name": "Mirandés",
+            "logo": "https://cdn.live-score-api.com/teams/3767017d04c7e27b7a6883eaca05e7cc.png",
+            "id": 3317,
+            "country_id": 43
+        },
+        "federation": null,
+        "status": "HALF TIME BREAK",
+        "location": "Estadio Municipal de Anduva",
+        "odds": {
+            "live": {
+                "1": null,
+                "2": null,
+                "X": null
+            },
+            "pre": {
+                "1": 2.7,
+                "2": 2.65,
+                "X": 3.15
+            }
+        },
+        "added": "2026-05-10 16:15:54",
+        "country": {
+            "flag": "ESP.png",
+            "name": "Spain",
+            "uefa_code": "ESP",
+            "is_real": true,
+            "id": 43,
+            "fifa_code": "ESP"
+        },
+        "scheduled": "16:30",
+        "away": {
+            "stadium": "Estadio Municipal de Ipurúa",
+            "name": "Eibar",
+            "logo": "https://cdn.live-score-api.com/teams/1e02fb5fdc02f1bbb669f2883251fbed.png",
+            "id": 36,
+            "country_id": 43
+        },
+        "last_changed": "2026-05-10 17:23:05",
+        "id": 710627,
+        "outcomes": {
+            "half_time": "2",
+            "full_time": null,
+            "extra_time": null,
+            "penalty_shootout": null
+        },
+        "scores": {
+            "score": "0 - 1",
+            "ht_score": "0 - 1",
+            "ft_score": "",
+            "et_score": "",
+            "ps_score": ""
+        },
+        "urls": {
+            "events": "https://livescore-api.com/api-client/scores/events.json?id=710627",
+            "statistics": "https://livescore-api.com/api-client/matches/stats.json?match_id=710627",
+            "lineups": "https://livescore-api.com/api-client/matches/lineups.json?match_id=710627",
+            "head2head": "https://livescore-api.com/api-client/teams/head2head.json?team1_id=3317&team2_id=36"
+        }
+    },
+    {
+        "fixture_id": 1801479,
+        "competition": {
+            "has_groups": true,
+            "national_teams_only": false,
+            "tier": 2,
+            "name": "Segunda Division",
+            "is_league": true,
+            "id": 79,
+            "active": true,
+            "is_cup": false
+        },
+        "time": "HT",
+        "home": {
+            "stadium": "Estadio Nuevo Arcángel",
+            "name": "Cordoba",
+            "logo": "https://cdn.live-score-api.com/teams/285175efad9742bdce469b6734acb844.png",
+            "id": 797,
+            "country_id": 43
+        },
+        "federation": null,
+        "status": "HALF TIME BREAK",
+        "location": "Estadio Nuevo Arcángel",
+        "odds": {
+            "live": {
+                "1": null,
+                "2": null,
+                "X": null
+            },
+            "pre": {
+                "1": 1.63,
+                "2": 5,
+                "X": 4
+            }
+        },
+        "added": "2026-05-10 16:15:54",
+        "country": {
+            "flag": "ESP.png",
+            "name": "Spain",
+            "uefa_code": "ESP",
+            "is_real": true,
+            "id": 43,
+            "fifa_code": "ESP"
+        },
+        "scheduled": "16:33",
+        "away": {
+            "stadium": "Estadio Nuevo Los Cármenes",
+            "name": "Granada",
+            "logo": "https://cdn.live-score-api.com/teams/80e8f8bca4030c7fe1be348a78d80cad.png",
+            "id": 800,
+            "country_id": 43
+        },
+        "last_changed": "2026-05-10 17:23:59",
+        "id": 710628,
+        "outcomes": {
+            "half_time": "X",
+            "full_time": null,
+            "extra_time": null,
+            "penalty_shootout": null
+        },
+        "scores": {
+            "score": "0 - 0",
+            "ht_score": "0 - 0",
+            "ft_score": "",
+            "et_score": "",
+            "ps_score": ""
+        },
+        "urls": {
+            "events": "https://livescore-api.com/api-client/scores/events.json?id=710628",
+            "statistics": "https://livescore-api.com/api-client/matches/stats.json?match_id=710628",
+            "lineups": "https://livescore-api.com/api-client/matches/lineups.json?match_id=710628",
+            "head2head": "https://livescore-api.com/api-client/teams/head2head.json?team1_id=797&team2_id=800"
+        }
+    }
+]

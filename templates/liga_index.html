@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Liga de Maestros · Humanos vs IAs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static_files', filename='css/quantum_pro.css', v=assets_v) }}">
+    <script async src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <section class="panel header-brand-panel">
+            <img class="sidebar-brand-image" src="{{ url_for('static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros · 1X2 · La Peña vs IA">
+        </section>
+
+        <header class="topbar-shell">
+            <div class="topbar-filters">
+                <div class="field-group">
+                    <label for="jornada-nav">Jornada</label>
+                    <select id="jornada-nav" onchange="changeJornada(this.value)"></select>
+                </div>
+
+                <div class="field-group">
+                    <label for="league-nav">Vista</label>
+                    <select id="league-nav" onchange="changeMainView(this.value)"></select>
+                </div>
+
+                <div class="field-group nav-secondary">
+                    <label for="contest-nav">Detalle</label>
+                    <select id="contest-nav" onchange="changeSecondaryView(this.value)"></select>
+                </div>
+
+            </div>
+
+            <div class="topbar-actions">
+                <button id="home-btn" class="home-btn" type="button" onclick="goHome()" title="Volver a la quiniela">Quiniela</button>
+                <button id="warroom-btn" class="icon-btn warroom-btn" type="button" title="Modo Directo">◫</button>
+                <div id="user-profile-nav" class="user-panel"></div>
+                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar">↻</button>
+                <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
+                <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
+            </div>
+
+            <div id="topbar-live-slot" class="topbar-live-slot" aria-live="polite"></div>
+        </header>
+
+        <aside class="sidebar-left">
+            <div class="status-stack">
+                <div class="status-tile"><span>En directo</span><strong id="stat-live">0</strong></div>
+                <div class="status-tile"><span>Pendientes</span><strong id="stat-pending">0</strong></div>
+                <div class="status-tile"><span>Actualizado</span><strong id="stat-sync">--:--</strong></div>
+            </div>
+
+            <section class="panel comments-panel comments-panel-side">
+                <div class="panel-head">
+                    <div>
+                        <h3>Peña</h3>
+                        <div id="comments-summary" class="comments-summary">0 comentarios</div>
+                    </div>
+                    <div class="comments-head-actions">
+                        <strong id="comment-count" class="comment-count" title="Comentarios totales">0</strong>
+                        <strong id="comment-new-count" class="comment-count comment-count-new" title="Comentarios nuevos">0</strong>
+                    </div>
+                </div>
+                <div id="comments-panel-content" class="comments-panel-content">
+                    <div id="comments-body" class="comments-body"></div>
+                    <form id="comment-form" class="comment-form">
+                        <div id="comment-helper" class="comment-helper">Comentario de la jornada</div>
+                        <textarea id="comment-text" maxlength="240" rows="3" placeholder="Comenta la jornada..."></textarea>
+                        <button type="submit">Enviar</button>
+                    </form>
+                </div>
+            </section>
+
+        </aside>
+
+        <main class="main-arena">
+            <section id="matches-body" class="arena-content" aria-live="polite"></section>
+        </main>
+
+        <aside class="sidebar-right">
+            <section id="surprise-radar-slot" class="panel surprise-radar-panel" aria-live="polite"></section>
+            <section class="panel standings-panel">
+                <div class="tabs">
+                    <button class="tab-btn active" type="button" data-standings="ranking-body">Maestros</button>
+                    <button class="tab-btn" type="button" data-standings="standings-1-body">Primera</button>
+                    <button class="tab-btn" type="button" data-standings="standings-2-body">Segunda</button>
+                </div>
+                <div id="ranking-body" class="standings-pane active"></div>
+                <div id="standings-1-body" class="standings-pane"></div>
+                <div id="standings-2-body" class="standings-pane"></div>
+            </section>
+        </aside>
+    </div>
+    <div id="toast-container"></div>
+    <script defer src="{{ url_for('static_files', filename='js/quantum_final.js', v=assets_v) }}"></script>
+</body>
+</html>
+

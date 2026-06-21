@@ -1,0 +1,147 @@
+[
+  {
+    "id": "programa",
+    "nombre": "Programa",
+    "tipo": "programa",
+    "grupo": "maestros",
+    "puntos_totales": 31,
+    "activo": true,
+    "descripcion": "Motor estadistico principal de Liga de Maestros."
+  },
+  {
+    "id": "consejo_ias",
+    "nombre": "Consejo IA",
+    "tipo": "consejo",
+    "grupo": "maestros",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Columna de consenso debatida entre las IAs."
+  },
+  {
+    "id": "claude",
+    "nombre": "Claude",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 30,
+    "activo": true,
+    "descripcion": "Analisis IA de Anthropic."
+  },
+  {
+    "id": "grok",
+    "nombre": "Grok",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 31,
+    "activo": true,
+    "descripcion": "Analisis IA de xAI."
+  },
+  {
+    "id": "chatgpt",
+    "nombre": "ChatGPT",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 28,
+    "activo": true,
+    "descripcion": "Analisis IA de OpenAI."
+  },
+  {
+    "id": "copilot",
+    "nombre": "Copilot",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 22,
+    "activo": true,
+    "descripcion": "Analisis IA de Microsoft."
+  },
+  {
+    "id": "gemini",
+    "nombre": "Gemini",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 12,
+    "activo": true,
+    "descripcion": "Analisis IA de Google."
+  },
+  {
+    "id": "mrpurple",
+    "nombre": "MrPurple",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 18,
+    "activo": true,
+    "descripcion": "Participante de La Pena.",
+    "trivia_total": 8
+  },
+  {
+    "id": "ernie",
+    "nombre": "Ernie",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 17,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "geli",
+    "nombre": "Geli",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 15,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "kimi",
+    "nombre": "Kimi",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 14,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "pepe",
+    "nombre": "Pepe",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 14,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "profe",
+    "nombre": "Profe",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 10,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "chipi",
+    "nombre": "Chipi",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 10,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "fortu",
+    "nombre": "Fortu",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 8,
+    "activo": true,
+    "descripcion": "Alias de La Pena."
+  },
+  {
+    "id": "oraculo",
+    "nombre": "Oraculo",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 6,
+    "activo": true,
+    "descripcion": "Participante de La Pena."
+  }
+]

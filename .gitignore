@@ -1,0 +1,54 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Python/runtime noise
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Local logs and generated runtime state
+*.log
+server_stdout.log
+server_stderr.log
+data/API_USAGE_HIGHLIGHTLY.json
+data/HIGHLIGHTLY_CIRCUIT.json
+data/LIVE_COLLECTOR.log
+data/LIVE_COLLECTOR_HEALTH.json
+data/RADAR_NOTICIAS.json
+
+# Backups and old work copies
+*.bak*
+*.backup*
+BACKUP*/
+BACKUP_*/
+BACKUP_PRE_REDISENO_TENSION_*/
+OLD/
+aistudio/
+
+# Database backups. Keep the main DB for beta deploy bootstrap.
+DATOS/*.bak*
+DATOS/*.backup*
+DATOS/*backup*
+DATOS/*.db-wal
+DATOS/*.db-shm
+DATOS/DATASET*.csv
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Temporary screenshots and visual QA artifacts
+/*.png
+tmp_*.png
+*_preview*.png
+header_cleanup_preview.png
+tension_preview*.png
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.code-workspace

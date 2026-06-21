@@ -1,0 +1,28 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shield" x1="32" y1="20" x2="128" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F1B30"/>
+      <stop offset="1" stop-color="#08111D"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="40" y1="24" x2="120" y2="136" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="80" y1="18" x2="80" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M80 20L122 35V82C122 106 106 127 80 140C54 127 38 106 38 82V35L80 20Z"
+        fill="url(#shield)" stroke="url(#edge)" stroke-width="4"/>
+
+  <path d="M57 36L66 25L80 33L94 25L103 36" stroke="url(#crown)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="80" cy="26" r="4" fill="#FBBF24"/>
+
+  <path d="M52 98V56H63V88H78V98H52Z" fill="#F8FAFC"/>
+  <path d="M82 98V56H95L106 76L117 56H128V98H117V74L108 91H103L93 74V98H82Z" fill="#F8FAFC"/>
+
+  <path d="M52 110H108" stroke="rgba(103,232,249,0.30)" stroke-width="2" stroke-linecap="round"/>
+  <text x="80" y="125" text-anchor="middle" fill="#67E8F9" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="4">1X2</text>
+</svg>

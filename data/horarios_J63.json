@@ -1,0 +1,109 @@
+{
+    "1": {
+        "partido": "Celta - Levante",
+        "local": "Celta",
+        "visitante": "Levante",
+        "hora": "19:00",
+        "fecha": "2026-05-12"
+    },
+    "2": {
+        "partido": "Betis - Elche",
+        "local": "Betis",
+        "visitante": "Elche",
+        "hora": "20:00",
+        "fecha": "2026-05-12"
+    },
+    "3": {
+        "partido": "Osasuna - At. Madrid",
+        "local": "Osasuna",
+        "visitante": "At. Madrid",
+        "hora": "21:30",
+        "fecha": "2026-05-12",
+        "finalizado": true
+    },
+    "4": {
+        "partido": "Espanyol - Athletic",
+        "local": "Espanyol",
+        "visitante": "Athletic",
+        "hora": "19:00",
+        "fecha": "2026-05-13"
+    },
+    "5": {
+        "partido": "Villarreal - Sevilla",
+        "local": "Villarreal",
+        "visitante": "Sevilla",
+        "hora": "19:00",
+        "fecha": "2026-05-13"
+    },
+    "6": {
+        "partido": "Alav\u00c3\u00a9s - Barcelona",
+        "local": "Alav\u00c3\u00a9s",
+        "visitante": "Barcelona",
+        "hora": "21:30",
+        "fecha": "2026-05-13",
+        "finalizado": true
+    },
+    "7": {
+        "partido": "Getafe - Mallorca",
+        "local": "Getafe",
+        "visitante": "Mallorca",
+        "hora": "21:30",
+        "fecha": "2026-05-13"
+    },
+    "8": {
+        "partido": "Valencia - Rayo",
+        "local": "Valencia",
+        "visitante": "Rayo",
+        "hora": "19:00",
+        "fecha": "2026-05-14"
+    },
+    "9": {
+        "partido": "Girona - R. Sociedad",
+        "local": "Girona",
+        "visitante": "R. Sociedad",
+        "hora": "20:00",
+        "fecha": "2026-05-14"
+    },
+    "10": {
+        "partido": "Kilmarnock - Dundee",
+        "local": "Kilmarnock",
+        "visitante": "Dundee",
+        "hora": "20:45",
+        "fecha": "2026-05-12"
+    },
+    "11": {
+        "partido": "Aberdeen - St. Mirren",
+        "local": "Aberdeen",
+        "visitante": "St. Mirren",
+        "hora": "20:45",
+        "fecha": "2026-05-12"
+    },
+    "12": {
+        "partido": "Hearts - Falkirk",
+        "local": "Hearts",
+        "visitante": "Falkirk",
+        "hora": "21:00",
+        "fecha": "2026-05-13"
+    },
+    "13": {
+        "partido": "Motherwell - Celtic",
+        "local": "Motherwell",
+        "visitante": "Celtic",
+        "hora": "21:00",
+        "fecha": "2026-05-13"
+    },
+    "14": {
+        "partido": "Rangers - Hibernian",
+        "local": "Rangers",
+        "visitante": "Hibernian",
+        "hora": "21:00",
+        "fecha": "2026-05-13"
+    },
+    "15": {
+        "partido": "Real Madrid - R. Oviedo",
+        "local": "Real Madrid",
+        "visitante": "R. Oviedo",
+        "hora": "21:30",
+        "fecha": "2026-05-14"
+    }
+}

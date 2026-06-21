@@ -1,0 +1,86 @@
+{
+    "jornada": 52,
+    "ranking_actual_j52": {
+        "v260_omnisciente": {
+            "aciertos_signo": 5,
+            "aciertos_porra": 0,
+            "puntos_jornada": 5
+        },
+        "gpt_4o": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "claude_35": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "grok_3": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "copilot": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "ernie_ai": {
+            "aciertos_signo": 7,
+            "aciertos_porra": 0,
+            "puntos_jornada": 7
+        },
+        "pepe_perplexity": {
+            "aciertos_signo": 9,
+            "aciertos_porra": 0,
+            "puntos_jornada": 9
+        },
+        "geli_glm5": {
+            "aciertos_signo": 7,
+            "aciertos_porra": 0,
+            "puntos_jornada": 7
+        },
+        "chipi_deepseek": {
+            "aciertos_signo": 4,
+            "aciertos_porra": 0,
+            "puntos_jornada": 4
+        },
+        "chema_cohere": {
+            "aciertos_signo": 2,
+            "aciertos_porra": 1,
+            "puntos_jornada": 5
+        },
+        "profe_llama": {
+            "aciertos_signo": 8,
+            "aciertos_porra": 0,
+            "puntos_jornada": 8
+        },
+        "momo_molbot": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "manu_manus": {
+            "aciertos_signo": 3,
+            "aciertos_porra": 0,
+            "puntos_jornada": 3
+        },
+        "fortu": {
+            "aciertos_signo": 3,
+            "aciertos_porra": 0,
+            "puntos_jornada": 3
+        },
+        "kimi_ai": {
+            "aciertos_signo": 6,
+            "aciertos_porra": 0,
+            "puntos_jornada": 6
+        },
+        "mrpurple": {
+            "aciertos_signo": 3,
+            "aciertos_porra": 1,
+            "puntos_jornada": 6
+        }
+    },
+    "actualizado": "23:41:25"
+}

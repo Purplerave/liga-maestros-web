@@ -1,0 +1,58 @@
+{
+  "programa": {
+    "signos": ["1", "1", "2", "1", "2", "1", "2", "X", "1", "1", "1", "1", "2", "2", "2-1"],
+    "comentario": "Tecnotron V7000: ADN Táctico + Elo. Ajustado con análisis Meta."
+  },
+  "meta": {
+    "signos": ["1", "1", "2", "1", "2", "1", "2", "X", "1", "1", "1", "1", "2", "2", "1-2"],
+    "comentario": "IA META: Análisis profundo de bajas y urgencia clasificatoria."
+  },
+  "claude": {
+    "signos": ["1", "1", "1X", "1X", "2", "1", "1X", "1", "1", "1X", "X2", "1", "X2", "1X", "1-1"],
+    "comentario": "Claude: Enfoque en San Mamés y el Camp Nou."
+  },
+  "gemini": {
+    "signos": ["1", "1", "X2", "1X", "2", "1", "2", "1", "1X", "1", "X", "1", "2", "1", "2-1"],
+    "comentario": "Gemini: Potencia en casa y solidez del Villarreal."
+  },
+  "grok": {
+    "signos": ["1", "1", "1X", "1", "2", "1", "X2", "X", "1", "1", "1X", "1", "2", "X2", "M-1"],
+    "comentario": "Grok: Análisis de bajas (Budimir, David García)."
+  },
+  "pepe": {
+    "signos": ["1", "1", "X", "1", "2", "1", "2", "2", "1", "1", "1", "1", "2", "X", "1-1"],
+    "comentario": "Pepe (Perplexity): Buscando el valor en la victoria del Espanyol."
+  },
+  "kimi": {
+    "signos": ["X", "1", "1", "1", "X", "1", "X", "2", "1", "1", "1", "1", "2", "1", "0-0"],
+    "comentario": "Kimi: Enfoque en el equilibrio y sorpresas defensivas."
+  },
+  "chipi": {
+    "signos": ["1", "1", "X", "1", "2", "1", "2", "1", "1", "1", "X", "1", "2", "1", "2-0"],
+    "comentario": "Chipi (DeepSeek): Eficiencia matemática y solidez local."
+  },
+  "ernie": {
+    "signos": ["1", "1", "X", "X", "2", "1", "2", "X", "1", "1", "X", "1", "2", "2", "0-1"],
+    "comentario": "Ernie AI: Predicción de baja intensidad goleadora."
+  },
+  "manu": {
+    "signos": ["X", "1", "1", "1", "2", "1", "X", "2", "1", "1", "1", "1", "2", "2", "1-1"],
+    "comentario": "Manu: Intuición pura de peña."
+  },
+  "gwen": {
+    "signos": ["1", "1", "X", "1", "2", "1", "2", "X", "1", "1", "X", "1", "2", "1", "1-2"],
+    "comentario": "Gwen: Especialista en Championship y finales ajustados."
+  },
+  "copilot": {
+    "signos": ["1", "1", "2", "X", "2", "1", "2", "1", "1", "1", "1", "1", "2", "1", "1-1"],
+    "comentario": "Copilot: Soporte táctico para favoritos."
+  },
+  "chatgpt": {
+    "signos": ["1", "1", "2", "1", "2", "1", "2", "1", "1", "1", "1", "1", "2", "1", "2-0"],
+    "comentario": "GPT-4o: Confianza absoluta en los grandes."
+  },
+  "fortu": {
+    "signos": ["X", "1", "2", "X", "1", "1", "2", "2", "X", "1", "2", "1", "2", "X", "0-0"],
+    "comentario": "Fortu: Factor azar."
+  }
+}

@@ -1,0 +1,642 @@
+{
+    "v260_omnisciente": {
+        "signos": [
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "1",
+            "goles_h": "2",
+            "goles_a": "1"
+        },
+        "razones": [
+            "V1000: xG Local Superior 1.8",
+            "V1000: Empate Táctico 35%",
+            "V1000: Zorrilla Fortín",
+            "V1000: Málaga Momentum",
+            "V1000: Muro El Plantío",
+            "V1000: Huesca xG recuperado",
+            "V1000: Racing Líder",
+            "V1000: xG Bloqueado",
+            "V1000: Eibar letal fuera",
+            "V1000: Castellón Factor Campo",
+            "DSEARCH: Puskas Factor",
+            "DSEARCH: Jerarquía local",
+            "DSEARCH: Wembley fortín",
+            "DSEARCH: Igualdad táctica",
+            "Defensa Leganés 0.18"
+        ]
+    },
+    "gpt_4o": {
+        "signos": [
+            "2",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1",
+            "X",
+            "2",
+            "2",
+            "X",
+            "X",
+            "1",
+            "X",
+            "2-1"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Forma reciente Albacete",
+            "Efectividad local Depor",
+            "Duelo parejo zona baja",
+            "Calidad y tendencia Málaga",
+            "Solidez local Burgos",
+            "Consistencia Huesca",
+            "Líder vs Sporting",
+            "Efectivos equilibrados",
+            "Experiencia Eibar",
+            "Superioridad Almería",
+            "Paridad según Polymarket",
+            "Ataques discretos",
+            "Superioridad de talento",
+            "Defensa sólida Ecuador",
+            "Dominio Butarque"
+        ]
+    },
+    "claude_35": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "X",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2-0"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Desesperación local vs Inercia",
+            "Motivación Riazor",
+            "Plantilla superior local",
+            "Andorra campo trampa",
+            "Ambición de ascenso",
+            "Urgencia nuevo técnico",
+            "Rebote líder Sardinero",
+            "Equilibrio real jornada",
+            "Identidad consolidada Eibar",
+            "Bloque bajo frena ímpetu",
+            "Clima local Budapest",
+            "Sparring Honduras",
+            "Neutraliza factor sorpresa",
+            "Rodaje equipo élite",
+            "Control total Riazor"
+        ]
+    },
+    "grok_3": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2-1"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Escéptico: Debilidad local",
+            "Amarillo: Solidez local",
+            "Azul: Necesidad urgente",
+            "Juez: Equilibrio rachas",
+            "Verde: Rendimiento imbatible",
+            "Rojo: Derbi emocional",
+            "Azul: Superviviente lógico",
+            "Buscador: Valor en casa",
+            "Negro: Inexperiencia filial",
+            "Escéptico: Equilibrio táctico",
+            "Azul: Clima positivo",
+            "Juez: Motivación Perú",
+            "Azul: Superioridad clara",
+            "Juez: ELO y racha",
+            "Solidez defensiva local"
+        ]
+    },
+    "copilot": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2-1"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Presión local iguala",
+            "Dinámica positiva Depor",
+            "Mejor xG local",
+            "Calidad visitante",
+            "Impulso local",
+            "Huesca mejoría",
+            "Factor local líder",
+            "Solidez canaria",
+            "Pegada Eibar",
+            "Máximo goleador",
+            "Mejor ranking FIFA",
+            "Ritmo competitivo",
+            "Contexto Wembley",
+            "Contexto Eindhoven",
+            "Diferencia pegada"
+        ]
+    },
+    "ernie_ai": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1"
+        ],
+        "porra": {
+            "partido": "3",
+            "goles_h": "1",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Negro: Tendencia empate",
+            "Datos: Abismo xG",
+            "Datos: Zorrilla apisonadora",
+            "Valor: Césped artificial",
+            "Azul: Empate con goles",
+            "Datos: xG local top",
+            "Rojo: Vibraciones sorpresa",
+            "Datos: Las Palmas Champions",
+            "Azul: Eibar empata mucho",
+            "Amarillo: Verdugo de grandes",
+            "Datos: Fortín Puskas",
+            "Datos: Necesidad local",
+            "Datos: Apisonadora Wembley",
+            "Negro: Fragilidad local",
+            "Datos: Butarque difícil"
+        ]
+    },
+    "pepe_perplexity": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "2",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "1",
+            "goles_h": "2",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Empate resiste trampa",
+            "Depor dominante",
+            "Viento en Zorrilla",
+            "Empate sobrevive",
+            "Defensa élite Burgos",
+            "Partido del miedo",
+            "Reacción del líder",
+            "Factor Gran Canaria",
+            "Eibar lanzado",
+            "Métricas ofensivas Almería",
+            "Reset amistoso",
+            "Marcador ajustado",
+            "Diferencial de plantilla",
+            "Contexto Eindhoven",
+            "Solidez Butarque"
+        ]
+    },
+    "geli_glm5": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1",
+            "X",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "2-0"
+        ],
+        "porra": {
+            "partido": "7",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Incapacidad local gol",
+            "Calidad medular",
+            "Superioridad técnica",
+            "Altitud y césped",
+            "Pressing asfixiante",
+            "Linearidad oscense",
+            "Clima Sardinero",
+            "Instinto nazarí",
+            "Necesidad rotación",
+            "Factor playoff",
+            "Escenario testeo",
+            "Jerarquía Perú",
+            "Profundidad banquillo",
+            "Talento segundas líneas",
+            "Desconexión defensiva maña"
+        ]
+    },
+    "chipi_deepseek": {
+        "signos": [
+            "1",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "X",
+            "1",
+            "2",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "2-1"
+        ],
+        "porra": {
+            "partido": "8",
+            "goles_h": "0",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Dudas Albacete fuera",
+            "Factor Riazor",
+            "Negro: Baja central Cádiz",
+            "Urgencia Málaga",
+            "Duelos directos Burgos",
+            "Momento goleador local",
+            "Negro: Derbi alarmas",
+            "Sinergia positiva local",
+            "Diferencia de plantilla",
+            "Análisis xG transiciones",
+            "Ritmo bajo amistoso",
+            "Diferencia ranking FIFA",
+            "Calidad individual",
+            "Efectividad local",
+            "Urgencia puntos local"
+        ]
+    },
+    "chema_cohere": {
+        "signos": [
+            "1",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "X",
+            "2",
+            "2",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1-1"
+        ],
+        "porra": {
+            "partido": "10",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Bajas defensivas Albacete",
+            "xG local +1.2",
+            "Fatiga local post-Copa",
+            "Andorra invicto casa",
+            "Eficacia contragolpe",
+            "Recupera efectivos",
+            "Miedo a perder domina",
+            "Contra letal visitante",
+            "Superioridad física",
+            "Almería reactivada",
+            "Presión bandas local",
+            "Superioridad balón parado",
+            "Transiciones rápidas",
+            "Posesión + Verticalidad",
+            "Miedo a perder puntos"
+        ]
+    },
+    "profe_llama": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "X",
+            "1",
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "1",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Empate táctico",
+            "Solidez defensiva local",
+            "Factor campo decisivo",
+            "Escenario dominio estéril",
+            "Análisis datos ELO",
+            "Irregularidad visitante",
+            "Partido cerrado",
+            "Fútbol de control",
+            "Pegada armera",
+            "Momento anímico",
+            "Choque físico",
+            "Jerarquía técnica",
+            "Áreas Lionesses",
+            "Control mediocampo",
+            "Mínima diferencia"
+        ]
+    },
+    "momo_molbot": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2-0"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Probabilidad empate alta",
+            "Lógica local",
+            "Necesidad Zorrilla",
+            "Inercia Málaga",
+            "Fortín burgalés",
+            "Debilidad Cultural",
+            "Líder impone ley",
+            "Factor isla",
+            "Oficio Eibar",
+            "Pegada Almería",
+            "Puskas factor",
+            "Localía inca",
+            "Wembley manda",
+            "Calidad Oranje",
+            "Butarque decide"
+        ]
+    },
+    "manu_manus": {
+        "signos": [
+            "2",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "12",
+            "goles_h": "2",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Necesidad crítica Alba",
+            "Riazor determinante",
+            "Cádiz puntúa Pucela",
+            "Calidad individual",
+            "xG local duplica",
+            "Fortaleza aérea",
+            "Especialidad cántabra",
+            "Precisión en el pase",
+            "Fatiga acumulada",
+            "Intercambio de golpes",
+            "Bloque magiar",
+            "Bajas Honduras",
+            "Arsenal ofensivo",
+            "Ecuador minimiza daños",
+            "Duelo de pizarras"
+        ]
+    },
+    "fortu": {
+        "signos": [
+            "1",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "X",
+            "X",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "2",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Sequía goleadora visitante",
+            "Clamor de Riazor",
+            "Debate 1-1",
+            "Factor Málaga 0-2",
+            "Defensa de hierro",
+            "Mínima local",
+            "Derbi bloqueado 0-0",
+            "Relajación canaria",
+            "Oficio armero",
+            "Duelo aspirantes",
+            "Puskas Arena",
+            "Motivación local",
+            "Pegada Inglaterra",
+            "Duelo táctico",
+            "Sentencia tardía"
+        ]
+    },
+    "kimi_ai": {
+        "signos": [
+            "X",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1-1"
+        ],
+        "porra": {
+            "partido": "1",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "razones": [
+            "Empate técnico",
+            "Superioridad local",
+            "Zorrilla empuja",
+            "Momento visitante",
+            "Solidez casa",
+            "Crisis Cultural",
+            "Líder en Sardinero",
+            "Favorito local",
+            "Diferencia plantilla",
+            "Equilibrio táctico",
+            "Fifa ranking",
+            "Factor Lima",
+            "Calidad Wembley",
+            "Efectividad Oranje",
+            "Respeto mutuo"
+        ]
+    },
+    "mrpurple": {
+        "signos": [
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "X",
+            "2",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1-0"
+        ],
+        "porra": {
+            "partido": "2",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "trivia_score": 0
+    }
+}

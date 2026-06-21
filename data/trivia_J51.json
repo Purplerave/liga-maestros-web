@@ -1,0 +1,65 @@
+{
+    "jornada": 51,
+    "preguntas": [
+        {
+            "id": 1,
+            "pregunta": "¿Qué equipo llega a esta jornada como el MEJOR VISITANTE de la categoría con 8 triunfos fuera?",
+            "opciones": {"A": "Racing Santander", "B": "Deportivo La Coruña", "C": "UD Las Palmas"},
+            "correcta": "A"
+        },
+        {
+            "id": 2,
+            "pregunta": "¿Cuántos minutos estuvo José Antonio Caro (Burgos) sin encajar un gol, batiendo el récord nacional?",
+            "opciones": {"A": "1.293 min", "B": "800 min", "C": "1.050 min"},
+            "correcta": "A"
+        },
+        {
+            "id": 3,
+            "pregunta": "¿Quién lidera la tabla de máximos goleadores de nuestra Segunda División 2025-26 ahora mismo?",
+            "opciones": {"A": "Jorge Pascual", "B": "Adrián Niño", "C": "José Arnáiz"},
+            "correcta": "A"
+        },
+        {
+            "id": 4,
+            "pregunta": "¿A quién ganó el Deportivo el famoso 'Centenariazo' de la Copa del Rey en 2002?",
+            "opciones": {"A": "Real Madrid", "B": "FC Barcelona", "C": "Valencia CF"},
+            "correcta": "A"
+        },
+        {
+            "id": 5,
+            "pregunta": "El Granada CF está en una situación delicada en nuestra liga. ¿Qué posición ocupa actualmente?",
+            "opciones": {"A": "14ª posición", "B": "17ª posición", "C": "20ª posición"},
+            "correcta": "B"
+        },
+        {
+            "id": 6,
+            "pregunta": "El mítico gol de Nayim que dio la Recopa al Zaragoza en 1995 fue desde...",
+            "opciones": {"A": "El centro del campo", "B": "Un saque de esquina", "C": "El punto de penalti"},
+            "correcta": "A"
+        },
+        {
+            "id": 7,
+            "pregunta": "¿Qué equipo es el MÁXIMO GOLEADOR colectivo de la temporada con 56 tantos?",
+            "opciones": {"A": "Racing Santander", "B": "UD Almería", "C": "Málaga CF"},
+            "correcta": "A"
+        },
+        {
+            "id": 8,
+            "pregunta": "¿Cómo se llamaba el legendario delantero del Sporting, 7 veces Pichichi y apodado 'El Brujo'?",
+            "opciones": {"A": "Quini", "B": "David Villa", "C": "Abelardo"},
+            "correcta": "A"
+        },
+        {
+            "id": 9,
+            "pregunta": "¿Por qué objetivo lucha actualmente el filial Real Sociedad B en nuestra simulación?",
+            "opciones": {"A": "Ascenso", "B": "Permanencia", "C": "Mitad de tabla"},
+            "correcta": "B"
+        },
+        {
+            "id": 10,
+            "pregunta": "¿Cómo se llama el estadio del Hércules CF que fue sede del Mundial 82?",
+            "opciones": {"A": "José Rico Pérez", "B": "Nuevo Castalia", "C": "El Plantío"},
+            "correcta": "A"
+        }
+    ]
+}

@@ -1,0 +1,72 @@
+{
+    "jornada_actual": 63,
+    "titulo": "Jornada 62 - Liga de Maestros",
+    "fase": "en_directo",
+    "ultima_actualizacion": "13/05/2026 21:17",
+    "jornada": 63,
+    "ranking_actual": {
+        "116699982648036669051": {
+            "puntos_jornada": 1,
+            "puntos_vivos": 0,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 1,
+            "display_puntos": "1"
+        },
+        "hermes": {
+            "puntos_jornada": 2,
+            "puntos_vivos": 0,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 2,
+            "display_puntos": "2"
+        },
+        "tecnotron": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "v260_omnisciente": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 0,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "programa": {
+            "puntos_jornada": 1,
+            "puntos_vivos": 0,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 1,
+            "display_puntos": "1"
+        },
+        "grok": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "claude": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "copilot": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        },
+        "chatgpt": {
+            "puntos_jornada": 4,
+            "puntos_vivos": 1,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 5,
+            "display_puntos": "5"
+        }
+    }
+}

@@ -1,0 +1,132 @@
+{
+    "1": {
+        "partido": "ELCHE - ALAVÉS",
+        "prob": [
+            47,
+            30,
+            23
+        ],
+        "signo": "1"
+    },
+    "2": {
+        "partido": "SEVILLA - ESPANYOL",
+        "prob": [
+            57,
+            27,
+            16
+        ],
+        "signo": "X"
+    },
+    "3": {
+        "partido": "AT.MADRID - CELTA",
+        "prob": [
+            66,
+            21,
+            13
+        ],
+        "signo": "X"
+    },
+    "4": {
+        "partido": "R.SOCIEDAD - BETIS",
+        "prob": [
+            36,
+            31,
+            33
+        ],
+        "signo": "1"
+    },
+    "5": {
+        "partido": "MALLORCA - VILLARREAL",
+        "prob": [
+            35,
+            25,
+            40
+        ],
+        "signo": "2"
+    },
+    "6": {
+        "partido": "ATH.CLUB - VALENCIA",
+        "prob": [
+            80,
+            15,
+            5
+        ],
+        "signo": "1"
+    },
+    "7": {
+        "partido": "R.OVIEDO - GETAFE",
+        "prob": [
+            26,
+            28,
+            46
+        ],
+        "signo": "1"
+    },
+    "8": {
+        "partido": "RAYO - GIRONA",
+        "prob": [
+            40,
+            29,
+            31
+        ],
+        "signo": "1"
+    },
+    "9": {
+        "partido": "CEUTA - CASTELLÓN",
+        "prob": [
+            18,
+            25,
+            57
+        ],
+        "signo": "X"
+    },
+    "10": {
+        "partido": "BURGOS - ALMERÍA",
+        "prob": [
+            32,
+            31,
+            37
+        ],
+        "signo": "1"
+    },
+    "11": {
+        "partido": "MÁLAGA - SPORTING",
+        "prob": [
+            84,
+            11,
+            5
+        ],
+        "signo": "1"
+    },
+    "12": {
+        "partido": "ANDORRA - LAS PALMAS",
+        "prob": [
+            28,
+            30,
+            42
+        ],
+        "signo": "X"
+    },
+    "13": {
+        "partido": "LEGANÉS - RACING",
+        "prob": [
+            20,
+            23,
+            57
+        ],
+        "signo": "1"
+    },
+    "14": {
+        "partido": "CÓRDOBA - GRANADA",
+        "prob": [
+            70,
+            21,
+            9
+        ],
+        "signo": "1"
+    },
+    "15": {
+        "partido": "BARCELONA - R.MADRID",
+        "pleno": "1"
+    }
+}

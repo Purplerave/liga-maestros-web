@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGA DE LOS MAESTROS | ARENA PRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quantum.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Parche de emergencia para asegurar que los elementos críticos sean visibles */
+        .top-navbar {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            height: 50px !important;
+            padding: 0 20px !important;
+            background: #020617 !important;
+            border-bottom: 2px solid #22d3ee !important;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-brand { font-weight: 900; color: #fff; font-size: 1.1rem; }
+        .nav-jornada-ctrl {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            background: rgba(34, 211, 238, 0.1) !important;
+            padding: 4px 15px !important;
+            border-radius: 20px !important;
+            border: 1px solid #22d3ee !important;
+        }
+        #jornada-select {
+            background: transparent !important;
+            color: #fff !important;
+            border: none !important;
+            font-weight: 900 !important;
+            font-size: 0.85rem !important;
+            cursor: pointer !important;
+            outline: none !important;
+        }
+        #jornada-select option { background: #020617; }
+        .btn-login-google {
+            background: #fff;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-navbar">
+        <div class="nav-brand">LIGA DE LOS MAESTROS</div>
+        
+        <div class="nav-jornada-ctrl">
+            <span style="font-size:0.65rem; color:#22d3ee; font-weight:900;">JORNADA:</span>
+            <select id="jornada-select" onchange="window.location.href='/?j='+this.value">
+                <option value="61">J61 (HOY)</option>
+                <option value="62">J62 (PROX)</option>
+                <option value="60">J60</option>
+                <option value="59">J59</option>
+                <option value="58">J58</option>
+            </select>
+        </div>
+
+        <div id="user-profile-nav">
+            <a href="/login" class="btn-login-google">LOGIN GOOGLE</a>
+        </div>
+    </header>
+
+    <nav class="league-nav" id="league-nav">
+        <!-- Dinámico JS -->
+    </nav>
+
+    <div class="main-wrapper">
+        <main class="primary-content">
+            <div id="save-container" style="display:none; padding:10px;">
+                <button id="save-quiniela-btn" style="width:100%; padding:10px; background:var(--win); color:white; border:none; border-radius:4px; font-weight:900; cursor:pointer;">GUARDAR MI QUINIELA</button>
+            </div>
+            
+            <table class="arena-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th style="text-align:right;">LOCAL</th>
+                        <th style="text-align:center;">SCORE</th>
+                        <th style="text-align:left;">VISITANTE</th>
+                        <th>REAL</th>
+                        <th>TECNO</th>
+                        <th>GROK</th>
+                        <th>CLAUDE</th>
+                        <th>COP</th>
+                        <th>GPT</th>
+                        <th>TÚ</th>
+                        <th>PEÑA</th>
+                    </tr>
+                </thead>
+                <tbody id="matches-body">
+                    <!-- Dinámico JS -->
+                </tbody>
+            </table>
+        </main>
+
+        <aside class="sidebar-master">
+            <div class="tab-controls">
+                <button class="tab-btn active" onclick="switchTab(event, 'rank')">RANKING</button>
+                <button class="tab-btn" onclick="switchTab(event, 'liga')">LALIGA</button>
+                <button class="tab-btn" onclick="switchTab(event, 'hyper')">HYPER</button>
+                <button class="tab-btn" onclick="switchTab(event, 'otros')">OTROS</button>
+                <button class="tab-btn" onclick="switchTab(event, 'stats')">STATS</button>
+            </div>
+
+            <div id="tab-rank" class="tab-content active">
+                <div id="ranking-body"></div>
+            </div>
+
+            <div id="tab-liga" class="tab-content">
+                <div class="sidebar-title">CLASIFICACIÓN PRIMERA</div>
+                <div id="standings-1-body"></div>
+            </div>
+
+            <div id="tab-hyper" class="tab-content">
+                <div class="sidebar-title">CLASIFICACIÓN SEGUNDA</div>
+                <div id="standings-2-body"></div>
+            </div>
+
+            <div id="tab-otros" class="tab-content">
+                <div class="sidebar-title">OTROS PARTIDOS LIVE</div>
+                <div id="otros-body" style="font-size: 0.55rem; color: var(--text-dim);"></div>
+            </div>
+
+            <div id="tab-stats" class="tab-content">
+                <div style="height:220px; padding:10px;">
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999;"></div>
+
+    <script src="{{ url_for('static', filename='js/quantum_final.js') }}"></script>
+</body>
+</html>

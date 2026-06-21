@@ -1,0 +1,21 @@
+{
+  "jornada": 57,
+  "fase": "en_directo",
+  "partidos": [
+    {"id": 1, "local": "Zaragoza", "visitante": "Ceuta", "marcador": "0-1", "minuto": "Descanso", "status": "HT", "signo_actual": "2"},
+    {"id": 2, "local": "Castellón", "visitante": "Burgos", "marcador": "0-0", "minuto": "18:30", "status": "NS", "signo_actual": ""},
+    {"id": 3, "local": "C. Leonesa", "visitante": "Córdoba", "marcador": "0-0", "minuto": "18:30", "status": "NS", "signo_actual": ""},
+    {"id": 4, "local": "Andorra", "visitante": "Valladolid", "marcador": "0-0", "minuto": "Dom 14:00", "status": "NS", "signo_actual": ""},
+    {"id": 5, "local": "Sporting Gijón", "visitante": "Cádiz", "marcador": "0-0", "minuto": "Dom 16:15", "status": "NS", "signo_actual": ""},
+    {"id": 6, "local": "Albacete", "visitante": "Granada", "marcador": "0-0", "minuto": "Dom 18:30", "status": "NS", "signo_actual": ""},
+    {"id": 7, "local": "Eibar", "visitante": "Huesca", "marcador": "0-0", "minuto": "Dom 18:30", "status": "NS", "signo_actual": ""},
+    {"id": 8, "local": "Almería", "visitante": "Málaga", "marcador": "0-0", "minuto": "Dom 21:00", "status": "NS", "signo_actual": ""},
+    {"id": 9, "local": "Brentford", "visitante": "Fulham", "marcador": "0-0", "minuto": "Finalizado", "status": "FT", "signo_actual": "X"},
+    {"id": 10, "local": "Tottenham", "visitante": "Brighton", "marcador": "0-0", "minuto": "18:30", "status": "NS", "signo_actual": ""},
+    {"id": 11, "local": "Chelsea", "visitante": "Man. United", "marcador": "0-0", "minuto": "21:00", "status": "NS", "signo_actual": ""},
+    {"id": 12, "local": "Nottingham Forest", "visitante": "Burnley", "marcador": "0-0", "minuto": "Dom 15:00", "status": "NS", "signo_actual": ""},
+    {"id": 13, "local": "Everton", "visitante": "Liverpool", "marcador": "0-0", "minuto": "Dom 15:00", "status": "NS", "signo_actual": ""},
+    {"id": 14, "local": "Man. City", "visitante": "Arsenal", "marcador": "0-0", "minuto": "Dom 17:30", "status": "NS", "signo_actual": ""},
+    {"id": 15, "local": "At. Madrid", "visitante": "Real Sociedad", "marcador": "0-0", "minuto": "21:00", "status": "NS", "signo_actual": ""}
+  ]
+}

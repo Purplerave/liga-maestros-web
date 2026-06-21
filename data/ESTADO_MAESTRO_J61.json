@@ -1,0 +1,170 @@
+{
+    "jornada_actual": 61,
+    "titulo": "Jornada 61 - Liga de Maestros",
+    "timestamp_vuelo": "2026-05-03 21:15:00",
+    "fase": "en_directo",
+    "ranking_actual": {
+        "programa": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 31,
+            "display_puntos": "0"
+        },
+        "claude": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 33,
+            "display_puntos": "3"
+        },
+        "grok": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 34,
+            "display_puntos": "3"
+        },
+        "copilot": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 24,
+            "display_puntos": "2"
+        },
+        "chatgpt": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 30,
+            "display_puntos": "2"
+        },
+        "manu": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 5,
+            "display_puntos": "2"
+        },
+        "chipi": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 15,
+            "display_puntos": "5"
+        },
+        "pepe": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 17,
+            "display_puntos": "3"
+        },
+        "profe": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 12,
+            "display_puntos": "2"
+        },
+        "fortu": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 11,
+            "display_puntos": "3"
+        },
+        "ernie": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 18,
+            "display_puntos": "1"
+        },
+        "geli": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 15,
+            "puntos_totales_web": 16,
+            "display_puntos": "1"
+        },
+        "kimi": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 15,
+            "display_puntos": "1"
+        }
+    },
+    "ultima_actualizacion": "09/05/2026 11:58",
+    "ranking_actual_j61": {
+        "programa": {
+            "puntos_jornada": 0,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 31,
+            "display_puntos": "0"
+        },
+        "claude": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 33,
+            "display_puntos": "3"
+        },
+        "grok": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 34,
+            "display_puntos": "3"
+        },
+        "copilot": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 24,
+            "display_puntos": "2"
+        },
+        "chatgpt": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 30,
+            "display_puntos": "2"
+        },
+        "manu": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 5,
+            "display_puntos": "2"
+        },
+        "chipi": {
+            "puntos_jornada": 5,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 15,
+            "display_puntos": "5"
+        },
+        "pepe": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 17,
+            "display_puntos": "3"
+        },
+        "profe": {
+            "puntos_jornada": 2,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 12,
+            "display_puntos": "2"
+        },
+        "fortu": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 11,
+            "display_puntos": "3"
+        },
+        "ernie": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 18,
+            "display_puntos": "1"
+        },
+        "geli": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 15,
+            "puntos_totales_web": 16,
+            "display_puntos": "1"
+        },
+        "kimi": {
+            "puntos_jornada": 1,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 15,
+            "display_puntos": "1"
+        }
+    },
+    "actualizado": "22:14:37",
+    "finalizada": false,
+    "en_vivo": true
+}

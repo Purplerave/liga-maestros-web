@@ -1,0 +1,113 @@
+{
+    "1": {
+        "partido": "Villarreal - Levante",
+        "local": "Villarreal",
+        "visitante": "Levante",
+        "hora": "14:00",
+        "fecha": "2026-05-02",
+        "finalizado": true
+    },
+    "2": {
+        "partido": "Valencia - At. Madrid",
+        "local": "Valencia",
+        "visitante": "At. Madrid",
+        "hora": "16:15",
+        "fecha": "2026-05-02"
+    },
+    "3": {
+        "partido": "Alavés - Ath. Club",
+        "local": "Alavés",
+        "visitante": "Ath. Club",
+        "hora": "18:30",
+        "fecha": "2026-05-02",
+        "finalizado": true
+    },
+    "4": {
+        "partido": "Osasuna - Barcelona",
+        "local": "Osasuna",
+        "visitante": "Barcelona",
+        "hora": "21:00",
+        "fecha": "2026-05-02",
+        "finalizado": true
+    },
+    "5": {
+        "partido": "Celta - Elche",
+        "local": "Celta",
+        "visitante": "Elche",
+        "hora": "14:00",
+        "fecha": "2026-05-03",
+        "finalizado": true
+    },
+    "6": {
+        "partido": "Getafe - Rayo",
+        "local": "Getafe",
+        "visitante": "Rayo",
+        "hora": "16:15",
+        "fecha": "2026-05-03",
+        "finalizado": true
+    },
+    "7": {
+        "partido": "Betis - R. Oviedo",
+        "local": "Betis",
+        "visitante": "R. Oviedo",
+        "hora": "18:30",
+        "fecha": "2026-05-03"
+    },
+    "8": {
+        "partido": "Espanyol - R. Madrid",
+        "local": "Espanyol",
+        "visitante": "R. Madrid",
+        "hora": "21:00",
+        "fecha": "2026-05-03"
+    },
+    "9": {
+        "partido": "C. Leonesa - Cádiz",
+        "local": "C. Leonesa",
+        "visitante": "Cádiz",
+        "hora": "16:15",
+        "fecha": "2026-05-02"
+    },
+    "10": {
+        "partido": "Castellón - Córdoba",
+        "local": "Castellón",
+        "visitante": "Córdoba",
+        "hora": "18:30",
+        "fecha": "2026-05-02"
+    },
+    "11": {
+        "partido": "Eibar - Málaga",
+        "local": "Eibar",
+        "visitante": "Málaga",
+        "hora": "21:00",
+        "fecha": "2026-05-02",
+        "finalizado": true
+    },
+    "12": {
+        "partido": "Racing S. - Huesca",
+        "local": "Racing S.",
+        "visitante": "Huesca",
+        "hora": "14:00",
+        "fecha": "2026-05-03"
+    },
+    "13": {
+        "partido": "Sporting - Ceuta",
+        "local": "Sporting",
+        "visitante": "Ceuta",
+        "hora": "16:15",
+        "fecha": "2026-05-03"
+    },
+    "14": {
+        "partido": "Las Palmas - Valladolid",
+        "local": "Las Palmas",
+        "visitante": "Valladolid",
+        "hora": "21:00",
+        "fecha": "2026-05-03"
+    },
+    "15": {
+        "partido": "Sevilla - R. Sociedad",
+        "local": "Sevilla",
+        "visitante": "R. Sociedad",
+        "hora": "21:00",
+        "fecha": "2026-05-04"
+    }
+}

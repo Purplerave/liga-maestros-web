@@ -1,0 +1,75 @@
+{
+  "programa": {
+    "signos": ["1", "X", "1", "X2", "1", "X", "1", "1", "1X", "2", "1", "1", "X2", "1", "2-0"],
+    "comentario": "Motor estadístico principal. Apostando por el colapso de los Spurs."
+  },
+  "claude": {
+    "signos": ["1", "1X", "1", "2", "1", "1X", "1", "1", "X", "2", "1X", "1", "X", "1", "1-0"],
+    "comentario": "Necesidad Zaragoza. Empate en Everton por ambiente eléctrico."
+  },
+  "chatgpt": {
+    "signos": ["1", "1", "1X", "X", "1", "1", "1", "X2", "1", "2", "1", "1", "2", "X2", "2-0"],
+    "comentario": "Duda en el City-Arsenal (X2). Confianza en la localía de Segunda."
+  },
+  "grok": {
+    "signos": ["1", "1X", "1", "X", "1", "X", "1", "1X", "X", "1", "X", "1", "X", "1X", "1-0"],
+    "comentario": "Plus moral del Atleti tras eliminar al Barça."
+  },
+  "copilot": {
+    "signos": ["1", "1X", "2", "1", "1", "1X", "1", "X2", "1", "X", "X", "1", "2", "1", "1-0"],
+    "comentario": "Confianza en el factor local en el bloque de Segunda."
+  },
+  "manu": {
+    "signos": ["1", "1X", "2", "2", "1", "X2", "1", "1", "X", "1", "1X", "1", "2", "1", "2-1"],
+    "comentario": "Doble X2 en Albacete por calidad del Granada."
+  },
+  "pepe": {
+    "signos": ["1", "1X", "1", "X", "1", "X", "1", "1X", "X", "1", "X", "1", "X", "X1", "1-0"],
+    "comentario": "Busca el equilibrio y empates en Premier."
+  },
+  "geli": {
+    "signos": ["1", "1", "X", "2", "1", "X", "1", "X", "X", "X", "2", "1", "2", "X", "2-1"],
+    "comentario": "Bajas clave en Tottenham y Arsenal."
+  },
+  "profe": {
+    "signos": ["1", "1", "X2", "1", "1", "1X", "1", "1", "1", "X2", "X", "1", "2", "1", "2-1"],
+    "comentario": "Única confianza en el Andorra (1)."
+  },
+  "mrpurple": {
+    "signos": ["1", "X", "X", "1", "1", "X", "1", "1", "1", "2", "1", "1", "X", "2", "2-0"],
+    "porra": {"partido": "1", "goles_h": "0", "goles_a": "0"},
+    "trivia_score": 0
+  },
+  "ernie": {
+    "signos": ["1", "X", "2", "1", "1", "X", "2", "1", "2", "2", "X", "1", "2", "1", "2-1"],
+    "comentario": "Bajas clave en Valladolid y Arsenal."
+  },
+  "kimi": {
+    "signos": ["1X", "1", "2", "X2", "1", "X", "1", "1", "1", "1X", "1", "1", "2", "1X", "1-1"],
+    "comentario": "Doble 1X en Spurs por vulnerabilidad ante bajas."
+  },
+  "momo": {
+    "signos": ["1", "X", "1", "X2", "1", "X", "1", "1", "1X", "2", "1", "1", "X2", "1", "2-0"],
+    "comentario": "Sincronía total con el núcleo maestro."
+  },
+  "chipi": {
+    "signos": ["1", "X", "X2", "1", "1", "X", "1X", "1X", "X", "2", "1", "1", "X", "1", "2-0"],
+    "comentario": "Factor anímico tras Champions."
+  },
+  "gemini": {
+    "signos": ["1", "1X", "2", "1", "1", "X", "1", "1", "1", "X2", "1X", "1", "2", "1", "2-1"],
+    "comentario": "Andorra fortín tras el 6-2 al líder."
+  },
+  "fortu": {
+    "signos": ["X2", "1X", "1X", "2", "2", "2", "1", "1", "1X", "1", "1", "X", "2", "2", "2-0"],
+    "comentario": "Diferencia de categoría abrumadora en Segunda."
+  },
+  "jenova": {
+    "signos": ["1", "1", "1X", "1", "1", "X", "1", "1X", "1", "2", "X", "1", "2", "12", "2-1"],
+    "comentario": "Sin empates en el City-Arsenal (12)."
+  },
+  "oraculo": {
+    "signos": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0-0"],
+    "comentario": "Participante de la Peña."
+  }
+}

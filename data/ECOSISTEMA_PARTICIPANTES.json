@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "updated": "2026-06-10",
+  "principios": [
+    "Programa, Consejo IA, Maestros, La Pena y usuario son capas distintas.",
+    "La Pena no es un usuario unico: es un grupo de participantes y aliases.",
+    "El Consejo IA es una columna de consenso; no sustituye a los Maestros individuales.",
+    "El usuario humano mantiene su quiniela separada de Programa y Consejo IA."
+  ],
+  "roles": {
+    "programa": {
+      "label": "Programa",
+      "descripcion": "Motor estadistico propio."
+    },
+    "consejo": {
+      "label": "Consejo IA",
+      "descripcion": "Columna final nacida del debate entre modelos."
+    },
+    "maestro": {
+      "label": "Maestros",
+      "descripcion": "IAs principales compitiendo con columna individual."
+    },
+    "pena": {
+      "label": "La Pena",
+      "descripcion": "Grupo social, aliases invitados y futuros usuarios."
+    },
+    "usuario": {
+      "label": "Usuario",
+      "descripcion": "Quiniela personal del usuario autenticado."
+    }
+  },
+  "maestros_oficiales": [
+    "programa",
+    "consejo_ias",
+    "claude",
+    "grok",
+    "chatgpt",
+    "copilot",
+    "gemini"
+  ],
+  "pena_aliases": [
+    "mrpurple",
+    "ernie",
+    "geli",
+    "kimi",
+    "pepe",
+    "profe",
+    "chipi",
+    "fortu",
+    "oraculo"
+  ],
+  "ids_obsoletos": [
+    "hermes",
+    "molbot",
+    "jenova",
+    "momo",
+    "manu",
+    "manus",
+    "pena"
+  ],
+  "nombres_publicos": {
+    "programa": "Programa",
+    "v260_omnisciente": "Programa",
+    "consejo_ias": "Consejo IA",
+    "consenso": "Consejo IA",
+    "claude": "Claude",
+    "grok": "Grok",
+    "chatgpt": "ChatGPT",
+    "copilot": "Copilot",
+    "gemini": "Gemini",
+    "mrpurple": "MrPurple",
+    "ernie": "Ernie",
+    "geli": "Geli",
+    "kimi": "Kimi",
+    "pepe": "Pepe",
+    "profe": "Profe",
+    "chipi": "Chipi",
+    "fortu": "Fortu",
+    "oraculo": "Oraculo"
+  }
+}

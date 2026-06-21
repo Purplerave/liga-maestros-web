@@ -1,0 +1,22 @@
+/* SORPRESAS: ESTILO TÉCNICO PLANO (UNA SOLA LÍNEA) */
+.label-sorpresa, .label-sorpresa-alta { 
+    font-size: 0.48rem; 
+    font-weight: 800; 
+    padding: 1px 4px; 
+    border-radius: 2px; 
+    margin-left: 4px; 
+    vertical-align: middle; 
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap; /* Evita que el + se vaya abajo */
+    display: inline-block;
+}
+.label-sorpresa { background: #fff4e6; color: #d9480f; border: 1px solid #ffd8a8; }
+.label-sorpresa-alta { background: #fff0f6; color: #c2255c; border: 1px solid #ffdeeb; }
+
+/* MARCADOR LIVE: UN PELÍN MÁS GRANDE */
+.score-cell.live {
+    color: #e03131;
+    font-weight: 900;
+    font-size: 0.95rem !important; /* Aumento solicitado */
+    animation: pulse-live 2s infinite;
+}

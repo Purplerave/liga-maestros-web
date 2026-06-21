@@ -1,0 +1,170 @@
+{
+    "jornada": 63,
+    "partidos": [
+        {
+            "id": 1,
+            "local": "Athletic",
+            "visitante": "Celta",
+            "marcador": "1-1",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 1,
+            "signo_actual": "X"
+        },
+        {
+            "id": 2,
+            "local": "At. Madrid",
+            "visitante": "Girona",
+            "marcador": "1-0",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 0,
+            "signo_actual": "1"
+        },
+        {
+            "id": 3,
+            "local": "Barcelona",
+            "visitante": "Betis",
+            "marcador": "1-0",
+            "status": "LIVE",
+            "minuto": "min. 46",
+            "goles_h": 1,
+            "goles_a": 0,
+            "signo_actual": "1"
+        },
+        {
+            "id": 4,
+            "local": "Elche",
+            "visitante": "Getafe",
+            "marcador": "1-0",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 0,
+            "signo_actual": "1"
+        },
+        {
+            "id": 5,
+            "local": "Levante",
+            "visitante": "Mallorca",
+            "marcador": "2-0",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 2,
+            "goles_a": 0,
+            "signo_actual": "1"
+        },
+        {
+            "id": 6,
+            "local": "Rayo",
+            "visitante": "Villarreal",
+            "marcador": "2-0",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 2,
+            "goles_a": 0,
+            "signo_actual": "1"
+        },
+        {
+            "id": 7,
+            "local": "R. Sociedad",
+            "visitante": "Valencia",
+            "marcador": "3-4",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 3,
+            "goles_a": 4,
+            "signo_actual": "2"
+        },
+        {
+            "id": 8,
+            "local": "Real Oviedo",
+            "visitante": "Alavés",
+            "marcador": "0-1",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 0,
+            "goles_a": 1,
+            "signo_actual": "2"
+        },
+        {
+            "id": 9,
+            "local": "Osasuna",
+            "visitante": "Espanyol",
+            "marcador": "1-2",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 2,
+            "signo_actual": "2"
+        },
+        {
+            "id": 10,
+            "local": "Ceuta",
+            "visitante": "Málaga",
+            "marcador": "1-4",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 4,
+            "signo_actual": "2"
+        },
+        {
+            "id": 11,
+            "local": "R. Santander",
+            "visitante": "Valladolid",
+            "marcador": "4-1",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 4,
+            "goles_a": 1,
+            "signo_actual": "1"
+        },
+        {
+            "id": 12,
+            "local": "Almería",
+            "visitante": "Las Palmas",
+            "marcador": "1-2",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 2,
+            "signo_actual": "2"
+        },
+        {
+            "id": 13,
+            "local": "Castellón",
+            "visitante": "Cádiz",
+            "marcador": "1-1",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 1,
+            "goles_a": 1,
+            "signo_actual": "X"
+        },
+        {
+            "id": 14,
+            "local": "Leganés",
+            "visitante": "Huesca",
+            "marcador": "None-None",
+            "status": "NS",
+            "minuto": "NS",
+            "goles_h": null,
+            "goles_a": null,
+            "signo_actual": "-"
+        },
+        {
+            "id": 15,
+            "local": "Sevilla",
+            "visitante": "Real Madrid",
+            "marcador": "0-1",
+            "status": "FT",
+            "minuto": "Finalizado",
+            "goles_h": 0,
+            "goles_a": 1,
+            "signo_actual": "0-1"
+        }
+    ]
+}

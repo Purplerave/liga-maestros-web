@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1320133256,
+    "fixture_id": 1320133256,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 2",
+    "home": {
+      "name": "Almería",
+      "logo": "https://highlightly.net/soccer/images/teams/616057.png"
+    },
+    "away": {
+      "name": "Malaga",
+      "logo": "https://highlightly.net/soccer/images/teams/456069.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/616057.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/456069.png",
+    "competition": {
+      "name": "SEGUNDA DIVISION"
+    },
+    "competition_name": "SEGUNDA DIVISION",
+    "added": "2026-06-20 21:00:00",
+    "scheduled": "21:00"
+  }
+]

@@ -1,0 +1,100 @@
+{
+    "1": {
+        "pair": "Mirandés-Albacete",
+        "fecha": "2026-03-31",
+        "hora": "19:00",
+        "finalizado": true
+    },
+    "2": {
+        "pair": "Deportivo-Córdoba",
+        "fecha": "2026-03-31",
+        "hora": "20:00",
+        "finalizado": true
+    },
+    "3": {
+        "pair": "R. Valladolid-Cádiz",
+        "fecha": "2026-03-31",
+        "hora": "21:30",
+        "finalizado": true
+    },
+    "4": {
+        "pair": "Andorra-Málaga",
+        "fecha": "2026-04-01",
+        "hora": "19:00",
+        "finalizado": true,
+        "api_id": 1396981
+    },
+    "5": {
+        "pair": "Burgos-Ceuta",
+        "fecha": "2026-04-01",
+        "hora": "20:00",
+        "finalizado": true,
+        "api_id": 1392125
+    },
+    "6": {
+        "pair": "Huesca-Cultural Leonesa",
+        "fecha": "2026-04-01",
+        "hora": "20:00",
+        "finalizado": true,
+        "api_id": 1392127
+    },
+    "7": {
+        "pair": "Racing Santander-Sporting",
+        "fecha": "2026-04-01",
+        "hora": "21:30",
+        "finalizado": true,
+        "api_id": 1392120
+    },
+    "8": {
+        "pair": "Las Palmas-Granada",
+        "fecha": "2026-04-02",
+        "hora": "19:00",
+        "finalizado": true,
+        "api_id": 1392123
+    },
+    "9": {
+        "pair": "Real Sociedad B-Eibar",
+        "fecha": "2026-04-02",
+        "hora": "20:00",
+        "finalizado": true,
+        "api_id": 1392118
+    },
+    "10": {
+        "pair": "Castellón-Almería",
+        "fecha": "2026-04-02",
+        "hora": "20:00",
+        "finalizado": true,
+        "api_id": 1392117
+    },
+    "11": {
+        "pair": "Hungría-Grecia",
+        "fecha": "2026-03-31",
+        "hora": "19:00",
+        "finalizado": true
+    },
+    "12": {
+        "pair": "Perú-Honduras",
+        "fecha": "2026-03-31",
+        "hora": "20:00",
+        "finalizado": true
+    },
+    "13": {
+        "pair": "Inglaterra-Japón",
+        "fecha": "2026-03-31",
+        "hora": "20:45",
+        "finalizado": true
+    },
+    "14": {
+        "pair": "Países Bajos-Ecuador",
+        "fecha": "2026-03-31",
+        "hora": "20:45",
+        "finalizado": true
+    },
+    "15": {
+        "pair": "Leganés-R. Zaragoza",
+        "fecha": "2026-04-02",
+        "hora": "21:30",
+        "finalizado": true,
+        "api_id": 1392119
+    }
+}

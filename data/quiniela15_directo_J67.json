@@ -1,0 +1,1149 @@
+{
+  "jornada": 67,
+  "source": "https://www.quiniela15.com/resultados-quiniela/67",
+  "fetched_at": "2026-06-16T23:06:22",
+  "matches": [
+    {
+      "id": 1,
+      "local": "EE.UU.",
+      "visitante": "Paraguay",
+      "score_home": 4,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "EE.UU.",
+          "events": [
+            {
+              "minute": "7'",
+              "player": "Damian Bobadilla",
+              "type": "own goal"
+            },
+            {
+              "minute": "31'",
+              "player": "Folarin Balogun",
+              "type": "goal"
+            },
+            {
+              "minute": "50'",
+              "player": "Folarin Balogun",
+              "type": "goal"
+            },
+            {
+              "minute": "59'",
+              "player": "Tyler Adams",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "98'",
+              "player": "Giovanni Reyna",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Paraguay",
+          "events": [
+            {
+              "minute": "10'",
+              "player": "Juan Caceres",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "53'",
+              "player": "Miguel Almirón",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "73'",
+              "player": "Maurício Magalhães Prado",
+              "type": "goal"
+            },
+            {
+              "minute": "79'",
+              "player": "Diego Gomez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "88'",
+              "player": "Alex Arce",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "93'",
+              "player": "Junior Alonso",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Danny Makkelie",
+      "coaches": "EE.UU.: Mauricio Pochettino | Paraguay: Gustavo Alfaro",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "64%",
+            "22%",
+            "14%"
+          ],
+          [
+            "LAE",
+            "57%",
+            "27%",
+            "16%"
+          ],
+          [
+            "APU",
+            "45%",
+            "30%",
+            "25%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 2,
+      "local": "Qatar",
+      "visitante": "Suiza",
+      "score_home": 1,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Qatar",
+          "events": [
+            {
+              "minute": "16'",
+              "player": "M. Abunada",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "23'",
+              "player": "J. Gaber",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "B. Khoukhi",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Suiza",
+          "events": [
+            {
+              "minute": "17'",
+              "player": "B. Embolo",
+              "type": "goal pen"
+            },
+            {
+              "minute": "42'",
+              "player": "D. Zakaria",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Said Martinez",
+      "coaches": "Qatar: Julen Lopetegui | Suiza: Murat Yakin",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "13%",
+            "14%",
+            "73%"
+          ],
+          [
+            "LAE",
+            "9%",
+            "13%",
+            "78%"
+          ],
+          [
+            "APU",
+            "7%",
+            "17%",
+            "77%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 3,
+      "local": "Brasil",
+      "visitante": "Marruecos",
+      "score_home": 1,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Brasil",
+          "events": [
+            {
+              "minute": "32'",
+              "player": "Vinicius Junior",
+              "type": "goal"
+            },
+            {
+              "minute": "37'",
+              "player": "Casemiro",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "43'",
+              "player": "Ibanez",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Marruecos",
+          "events": [
+            {
+              "minute": "21'",
+              "player": "I. Saibari",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Slavko Vincic",
+      "coaches": "Brasil: Carlo Ancelotti | Marruecos: Mohamed Ouahbi",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "58%",
+            "25%",
+            "17%"
+          ],
+          [
+            "LAE",
+            "64%",
+            "24%",
+            "12%"
+          ],
+          [
+            "APU",
+            "56%",
+            "26%",
+            "18%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 4,
+      "local": "Haití",
+      "visitante": "Escocia",
+      "score_home": 0,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "2",
+      "events": [
+        {
+          "team": "Haití",
+          "events": [
+            {
+              "minute": "39'",
+              "player": "J. Bellegarde",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Escocia",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "J. McGinn",
+              "type": "goal"
+            },
+            {
+              "minute": "46'",
+              "player": "A. Hickey",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "F. Curtis",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "K. McLean",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Mustapha Ghorbal",
+      "coaches": "Haití: Sebastien Migne | Escocia: Steve Clarke",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "12%",
+            "14%",
+            "74%"
+          ],
+          [
+            "LAE",
+            "7%",
+            "11%",
+            "82%"
+          ],
+          [
+            "APU",
+            "17%",
+            "23%",
+            "60%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 5,
+      "local": "Australia",
+      "visitante": "Turquía",
+      "score_home": 2,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Australia",
+          "events": [
+            {
+              "minute": "27'",
+              "player": "N. Irankunda",
+              "type": "goal"
+            },
+            {
+              "minute": "75'",
+              "player": "C. Metcalfe",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Turquía",
+          "events": [
+            {
+              "minute": "86'",
+              "player": "Y. Akgun",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Jesús Valenzuela",
+      "coaches": "Australia: Tony Popovic | Turquía: Vincenzo Montella",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "18%",
+            "29%",
+            "53%"
+          ],
+          [
+            "LAE",
+            "18%",
+            "26%",
+            "56%"
+          ],
+          [
+            "APU",
+            "20%",
+            "26%",
+            "55%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 6,
+      "local": "Alemania",
+      "visitante": "Curaçao",
+      "score_home": 7,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Alemania",
+          "events": [
+            {
+              "minute": "6'",
+              "player": "F. Nmecha",
+              "type": "goal"
+            },
+            {
+              "minute": "38'",
+              "player": "N. Schlotterbeck",
+              "type": "goal"
+            },
+            {
+              "minute": "45'",
+              "player": "K. Havertz",
+              "type": "goal pen"
+            },
+            {
+              "minute": "47'",
+              "player": "J. Musiala",
+              "type": "goal"
+            },
+            {
+              "minute": "68'",
+              "player": "N. Brown",
+              "type": "goal"
+            },
+            {
+              "minute": "78'",
+              "player": "D. Undav",
+              "type": "goal"
+            },
+            {
+              "minute": "88'",
+              "player": "K. Havertz",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Curaçao",
+          "events": [
+            {
+              "minute": "21'",
+              "player": "L. Comenencia",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Jalal Jayed",
+      "coaches": "Alemania: Julian Nagelsmann | Curaçao: Dick Advocaat",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "79%",
+            "11%",
+            "10%"
+          ],
+          [
+            "LAE",
+            "93%",
+            "4%",
+            "3%"
+          ],
+          [
+            "APU",
+            "91%",
+            "6%",
+            "3%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 7,
+      "local": "Holanda",
+      "visitante": "Japón",
+      "score_home": 2,
+      "score_away": 2,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Holanda",
+          "events": [
+            {
+              "minute": "51'",
+              "player": "V. van Dijk",
+              "type": "goal"
+            },
+            {
+              "minute": "61'",
+              "player": "C. Summerville",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "64'",
+              "player": "C. Summerville",
+              "type": "goal"
+            },
+            {
+              "minute": "83'",
+              "player": "M. Depay",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "M. van de Ven",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Japón",
+          "events": [
+            {
+              "minute": "57'",
+              "player": "K. Nakamura",
+              "type": "goal"
+            },
+            {
+              "minute": "88'",
+              "player": "D. Kamada",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Ismail Elfath",
+      "coaches": "Holanda: Ronald Koeman | Japón: Hajime Moriyasu",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "51%",
+            "27%",
+            "22%"
+          ],
+          [
+            "LAE",
+            "55%",
+            "27%",
+            "18%"
+          ],
+          [
+            "APU",
+            "48%",
+            "27%",
+            "26%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 8,
+      "local": "Costa de Marfil",
+      "visitante": "Ecuador",
+      "score_home": 1,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Costa de Marfil",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "S. Fofana",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "38'",
+              "player": "F. Kessie",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "40'",
+              "player": "G. Doue",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "A. Diallo",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Ecuador",
+          "events": [
+            {
+              "minute": "73'",
+              "player": "J. Porozo",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "François Letexier",
+      "coaches": "Costa de Marfil: Emerse Fae | Ecuador: Sebastian Beccacece",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "29%",
+            "39%",
+            "32%"
+          ],
+          [
+            "LAE",
+            "30%",
+            "32%",
+            "38%"
+          ],
+          [
+            "APU",
+            "27%",
+            "34%",
+            "40%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 9,
+      "local": "Suecia",
+      "visitante": "Túnez",
+      "score_home": 5,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Suecia",
+          "events": [
+            {
+              "minute": "7'",
+              "player": "Y. Ayari",
+              "type": "goal"
+            },
+            {
+              "minute": "30'",
+              "player": "A. Isak",
+              "type": "goal"
+            },
+            {
+              "minute": "59'",
+              "player": "V. Gyokeres",
+              "type": "goal"
+            },
+            {
+              "minute": "84'",
+              "player": "M. Svanberg",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "Y. Ayari",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Túnez",
+          "events": [
+            {
+              "minute": "43'",
+              "player": "O. Rekik",
+              "type": "goal"
+            },
+            {
+              "minute": "54'",
+              "player": "R. Khedira",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Yael Falcon Perez",
+      "coaches": "Suecia: Graham Potter | Túnez: Sabri Lamouchi",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "70%",
+            "18%",
+            "12%"
+          ],
+          [
+            "LAE",
+            "72%",
+            "19%",
+            "9%"
+          ],
+          [
+            "APU",
+            "51%",
+            "27%",
+            "22%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 10,
+      "local": "Bélgica",
+      "visitante": "Egipto",
+      "score_home": 1,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Bélgica",
+          "events": [
+            {
+              "minute": "14'",
+              "player": "T. Castagne",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "66'",
+              "player": "M. Hany",
+              "type": "own goal"
+            },
+            {
+              "minute": "75'",
+              "player": "M. De Cuyper",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Egipto",
+          "events": [
+            {
+              "minute": "13'",
+              "player": "M. Attia",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "19'",
+              "player": "E. Ashour",
+              "type": "goal"
+            },
+            {
+              "minute": "34'",
+              "player": "A. Fatouh",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Ramon Abatti Abel",
+      "coaches": "Bélgica: Rudi Garcia | Egipto: Hossam Hassan",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "70%",
+            "19%",
+            "11%"
+          ],
+          [
+            "LAE",
+            "76%",
+            "16%",
+            "8%"
+          ],
+          [
+            "APU",
+            "58%",
+            "25%",
+            "17%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 11,
+      "local": "Arabia Saudí",
+      "visitante": "Uruguay",
+      "score_home": 1,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Arabia Saudí",
+          "events": [
+            {
+              "minute": "41'",
+              "player": "A. Al Amri",
+              "type": "goal"
+            },
+            {
+              "minute": "44'",
+              "player": "A. Al Amri",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Uruguay",
+          "events": [
+            {
+              "minute": "80'",
+              "player": "M. Araujo",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Maurizio Mariani",
+      "coaches": "Arabia Saudí: Georgios Donis | Uruguay: Marcelo Bielsa",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "13%",
+            "17%",
+            "70%"
+          ],
+          [
+            "LAE",
+            "10%",
+            "16%",
+            "74%"
+          ],
+          [
+            "APU",
+            "11%",
+            "23%",
+            "67%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 12,
+      "local": "Irán",
+      "visitante": "Nueva Zelanda",
+      "score_home": 2,
+      "score_away": 2,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [
+        {
+          "team": "Irán",
+          "events": [
+            {
+              "minute": "32'",
+              "player": "Ramin Rezaeian",
+              "type": "goal"
+            },
+            {
+              "minute": "64'",
+              "player": "Mohammad Mohebbi",
+              "type": "goal"
+            },
+            {
+              "minute": "89'",
+              "player": "Ehsan Hajisafi",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Nueva Zelanda",
+          "events": [
+            {
+              "minute": "7'",
+              "player": "Elijah Just",
+              "type": "goal"
+            },
+            {
+              "minute": "54'",
+              "player": "Elijah Just",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "César Ramos Palazuelos",
+      "coaches": "Irán: Amir Ghalenoei | Nueva Zelanda: -",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "65%",
+            "21%",
+            "14%"
+          ],
+          [
+            "LAE",
+            "54%",
+            "28%",
+            "18%"
+          ],
+          [
+            "APU",
+            "50%",
+            "28%",
+            "22%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 13,
+      "local": "Francia",
+      "visitante": "Senegal",
+      "score_home": 3,
+      "score_away": 1,
+      "status": "FT",
+      "minute": "",
+      "signo": "1",
+      "events": [
+        {
+          "team": "Francia",
+          "events": [
+            {
+              "minute": "66'",
+              "player": "K. Mbappe",
+              "type": "goal"
+            },
+            {
+              "minute": "82'",
+              "player": "B. Barcola",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "K. Mbappe",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Senegal",
+          "events": [
+            {
+              "minute": "90'",
+              "player": "I. Mbaye",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "Alireza Faghani",
+      "coaches": "Francia: Didier Deschamps | Senegal: Bouna Thiaw Pape",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "73%",
+            "15%",
+            "12%"
+          ],
+          [
+            "LAE",
+            "82%",
+            "12%",
+            "6%"
+          ],
+          [
+            "APU",
+            "63%",
+            "23%",
+            "14%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    },
+    {
+      "id": 14,
+      "local": "Málaga",
+      "visitante": "Almería",
+      "score_home": 0,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "X",
+      "events": [],
+      "referee": "",
+      "coaches": "",
+      "probability_tables": []
+    },
+    {
+      "id": 15,
+      "local": "España",
+      "visitante": "Cabo Verde",
+      "score_home": 0,
+      "score_away": 0,
+      "status": "FT",
+      "minute": "",
+      "signo": "0-0",
+      "events": [
+        {
+          "team": "España",
+          "events": [
+            {
+              "minute": "90'",
+              "player": "Pedri",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Cabo Verde",
+          "events": [
+            {
+              "minute": "16'",
+              "player": "S. Lopes Cabral",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Adham Mohammad",
+      "coaches": "España: Luis de la Fuente | Cabo Verde: Pedro Leitao Brito",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "0",
+            "1",
+            "2",
+            "M"
+          ],
+          [
+            "Q15 (L)",
+            "12%",
+            "10%",
+            "17%",
+            "61%"
+          ],
+          [
+            "Q15 (V)",
+            "59%",
+            "22%",
+            "9%",
+            "10%"
+          ],
+          [
+            "LAE (L)",
+            "2%",
+            "5%",
+            "14%",
+            "79%"
+          ],
+          [
+            "LAE (V)",
+            "71%",
+            "23%",
+            "4%",
+            "2%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/67"
+    }
+  ]
+}

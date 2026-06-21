@@ -1,0 +1,107 @@
+{
+  "1": {
+    "partido": "Alaves - Rayo",
+    "local": "Alaves",
+    "visitante": "Rayo",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "2": {
+    "partido": "Betis - Levante",
+    "local": "Betis",
+    "visitante": "Levante",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "3": {
+    "partido": "Celta - Sevilla",
+    "local": "Celta",
+    "visitante": "Sevilla",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "4": {
+    "partido": "Espanyol - R. Sociedad",
+    "local": "Espanyol",
+    "visitante": "R. Sociedad",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "5": {
+    "partido": "Getafe - Osasuna",
+    "local": "Getafe",
+    "visitante": "Osasuna",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "6": {
+    "partido": "Mallorca - Real Oviedo",
+    "local": "Mallorca",
+    "visitante": "Real Oviedo",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "7": {
+    "partido": "Villarreal - At. Madrid",
+    "local": "Villarreal",
+    "visitante": "At. Madrid",
+    "hora": "21:00",
+    "fecha": "2026-05-24"
+  },
+  "8": {
+    "partido": "Valencia - Barcelona",
+    "local": "Valencia",
+    "visitante": "Barcelona",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "9": {
+    "partido": "Girona - Elche",
+    "local": "Girona",
+    "visitante": "Elche",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  },
+  "10": {
+    "partido": "Malaga - R. Santander",
+    "local": "Malaga",
+    "visitante": "R. Santander",
+    "hora": "18:30",
+    "fecha": "2026-05-24"
+  },
+  "11": {
+    "partido": "Andorra - Ceuta",
+    "local": "Andorra",
+    "visitante": "Ceuta",
+    "hora": "16:15",
+    "fecha": "2026-05-24"
+  },
+  "12": {
+    "partido": "Huesca - Castellon",
+    "local": "Huesca",
+    "visitante": "Castellon",
+    "hora": "18:30",
+    "fecha": "2026-05-24"
+  },
+  "13": {
+    "partido": "Eibar - Cordoba",
+    "local": "Eibar",
+    "visitante": "Cordoba",
+    "hora": "18:30",
+    "fecha": "2026-05-24"
+  },
+  "14": {
+    "partido": "Sporting Gijon - Almeria",
+    "local": "Sporting Gijon",
+    "visitante": "Almeria",
+    "hora": "18:30",
+    "fecha": "2026-05-24"
+  },
+  "15": {
+    "partido": "Real Madrid - Athletic",
+    "local": "Real Madrid",
+    "visitante": "Athletic",
+    "hora": "21:00",
+    "fecha": "2026-05-23"
+  }
+}

@@ -1,0 +1,650 @@
+{
+    "v260_omnisciente": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "2",
+            "1",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1-M"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "M"
+        },
+        "razones": [
+            "EWMA: 1.54",
+            "Madrid superior",
+            "Igualdad",
+            "Efectividad vis",
+            "Mestalla manda",
+            "Tendencia X",
+            "Betis fortín",
+            "Duelo pegadas",
+            "Cádiz urgencia",
+            "Alba xG",
+            "Depor inercia",
+            "Racing líder",
+            "Almería rodillo",
+            "Huesca sequía",
+            "Veredicto 1-M"
+        ]
+    },
+    "claude_35": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "X",
+            "2",
+            "2",
+            "1",
+            "2",
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "LEV descenso",
+            "Modo título",
+            "Duelo mitad",
+            "Fortín Coliseum",
+            "Forma europea",
+            "Oviedo hundido",
+            "Pugna Europa",
+            "Racha goles",
+            "Necesidad pts",
+            "Playoff",
+            "Ascenso dir",
+            "Líder dom",
+            "Arribas loc",
+            "Huesca colista",
+            "Barça racha 5"
+        ]
+    },
+    "grok_3": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "1",
+            "X",
+            "X",
+            "1",
+            "2",
+            "X",
+            "2",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Sólida casa",
+            "Superioridad",
+            "Equilibrado",
+            "Getafe Coliseum",
+            "Abierto",
+            "Cerrado 2a",
+            "Betis racha",
+            "Villarreal goles",
+            "Equilibrado",
+            "Burgos zona alta",
+            "Igualados",
+            "Líder manda",
+            "Almería fuerte",
+            "Las Palmas fortín",
+            "Barça efectivo"
+        ]
+    },
+    "gpt_4o": {
+        "signos": [
+            "1",
+            "2",
+            "2",
+            "X",
+            "X",
+            "2",
+            "1",
+            "2",
+            "X",
+            "2",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Domina",
+            "Aventaja",
+            "Osasuna forma",
+            "Equipos iguales",
+            "Paridad",
+            "Sevilla domina",
+            "Betis racha",
+            "Superior",
+            "Duelo parejo",
+            "Mejor campaña",
+            "Igualados",
+            "Racing amplia",
+            "Almería domina",
+            "Superior",
+            "Ofensiva azulgrana"
+        ]
+    },
+    "copilot": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "1",
+            "2",
+            "2",
+            "1",
+            "2",
+            "X",
+            "2",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Dominio casa",
+            "Madrid racha",
+            "Empate valor",
+            "Ventaja local",
+            "Celta consistencia",
+            "Favorito claro",
+            "Betis superior",
+            "Diferencial goles",
+            "Empate Segunda",
+            "Burgos forma",
+            "Depor fuerte",
+            "Líder lógico",
+            "Almería superior",
+            "Duelo calidad",
+            "Veredicto: 1-2"
+        ]
+    },
+    "gemini_ia": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "X",
+            "1",
+            "X",
+            "1",
+            "2",
+            "2",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "2-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "2",
+            "goles_a": "2"
+        },
+        "razones": [
+            "MD: RSO 1",
+            "MD: MAD 2",
+            "MD: OSA X",
+            "MD: GET X",
+            "MD: VAL 1",
+            "MD: OVI X",
+            "MD: BET 1",
+            "MD: VIL 2",
+            "MD: CAD 2",
+            "MD: ALB 1",
+            "MD: DEP X",
+            "MD: RAC 2",
+            "MD: ALM 1",
+            "MD: LP 1",
+            "Pleno 2-2"
+        ]
+    },
+    "pepe_perplexity": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "1",
+            "1",
+            "X",
+            "X",
+            "X",
+            "X",
+            "2",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1-1"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Factor campo",
+            "Madrid mejor",
+            "Equilibrado",
+            "Getafe fuerte",
+            "Mestalla 1",
+            "Cerrado casa",
+            "Betis irr",
+            "Girona compite",
+            "Duelo parejo",
+            "Burgos racha",
+            "Fuerzas igualadas",
+            "Racing forma",
+            "Almería racha",
+            "Palmas playoff",
+            "Choque fortalezas"
+        ]
+    },
+    "ernie_ai": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Real marca",
+            "Madrid rompe",
+            "Balón parado",
+            "Gol local",
+            "Errores Celta",
+            "Sevilla remonta",
+            "Bandas Betis",
+            "Intercambio",
+            "Gol de fe",
+            "Físico 0-0",
+            "Dépor sentencia",
+            "Oficio Racing",
+            "Almería gana",
+            "Control total",
+            " Lewy/Griezmann"
+        ]
+    },
+    "profe_llama": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "X",
+            "1",
+            "2",
+            "1",
+            "2",
+            "1",
+            "X",
+            "1",
+            "2",
+            "1",
+            "1",
+            "2-1"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "2",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Racha LEV",
+            "Madrid sup",
+            "Parejo",
+            "Idéntica pts",
+            "Mestalla factor",
+            "Diferencia cat",
+            "Superior tabla",
+            "Gran momento",
+            "Categoría sup",
+            "Burgos racha",
+            "Fortín Riazor",
+            "Líder sólido",
+            "Ascenso dir",
+            "Huesca irr",
+            "Fortaleza casa"
+        ]
+    },
+    "geli_glm5": {
+        "signos": [
+            "1",
+            "X",
+            "X",
+            "X",
+            "2",
+            "2",
+            "1",
+            "2",
+            "1",
+            "1",
+            "X",
+            "2",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "GLM5: 1",
+            "GLM5: X",
+            "GLM5: X",
+            "GLM5: X",
+            "GLM5: 2",
+            "GLM5: 2",
+            "GLM5: 1",
+            "GLM5: 2",
+            "GLM5: 1",
+            "GLM5: 1",
+            "GLM5: X",
+            "GLM5: 2",
+            "GLM5: 1",
+            "GLM5: 1",
+            "Pleno 1-2"
+        ]
+    },
+    "chipi_deepseek": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "X",
+            "X",
+            "2",
+            "1",
+            "2",
+            "X",
+            "2",
+            "1",
+            "2",
+            "1",
+            "1",
+            "1-1"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "RSO abierta",
+            "Calidad blanca",
+            "Conocidos",
+            "Orden táctico",
+            "Respeto",
+            "Eficiencia",
+            "Puntual",
+            "Pegada",
+            "Tensión",
+            "Sólido",
+            "Riazor",
+            "Ofensivo",
+            "Rodillo",
+            "Posesión",
+            "Escenario"
+        ]
+    },
+    "momo_molbot": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "X",
+            "1",
+            "2",
+            "1",
+            "2",
+            "X",
+            "X",
+            "1",
+            "2",
+            "1",
+            "1",
+            "2-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "2",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Lógica",
+            "Superioridad",
+            "Igualdad",
+            "Bloqueo",
+            "Recupera",
+            "Oficio",
+            "Villamarín",
+            "Potencia",
+            "Tablas",
+            "Belmonte",
+            "Manda",
+            "Líder",
+            "Imparable",
+            "Isla",
+            "Pleno 2-2"
+        ]
+    },
+    "fortu": {
+        "signos": [
+            "1",
+            "X",
+            "X",
+            "1",
+            "1",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1-1"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "1"
+        },
+        "razones": [
+            "Local",
+            "X Mallorca",
+            "Tablas",
+            "Manda",
+            "Superior",
+            "Empate T",
+            "Sólido",
+            "Resiste",
+            "Necesidad",
+            "Belmonte",
+            "Aprieta",
+            "Aguanta",
+            "Fav",
+            "Fortín",
+            "Eq"
+        ]
+    },
+    "kimi_ai": {
+        "signos": [
+            "1",
+            "2",
+            "1",
+            "X",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1-2"
+        ],
+        "porra": {
+            "partido": "15",
+            "goles_h": "1",
+            "goles_a": "2"
+        },
+        "razones": [
+            "Anoeta",
+            "Mejor vis",
+            "Moral",
+            "Equilibrados",
+            "Mestalla",
+            "Peor loc",
+            "Crisis",
+            "Montilivi",
+            "5 der",
+            "Invicto",
+            "Riazor",
+            "Mejora",
+            "5 vic",
+            "Defensa",
+            "Calidad"
+        ]
+    },
+    "mrpurple": {
+        "signos": [
+            "1",
+            "2",
+            "X",
+            "2",
+            "1",
+            "X",
+            "1",
+            "2",
+            "X",
+            "2",
+            "1",
+            "X",
+            "1",
+            "1",
+            "1-3"
+        ],
+        "porra": {
+            "partido": "11",
+            "goles_h": "3",
+            "goles_a": "1"
+        },
+        "trivia_score": 0
+    },
+    "manu_manus": {
+        "signos": [
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?"
+        ],
+        "porra": {
+            "partido": "1",
+            "goles_h": "0",
+            "goles_a": "0"
+        }
+    },
+    "oraculo": {
+        "signos": [
+            "1",
+            "X",
+            "X",
+            "2",
+            "2",
+            "2",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "2",
+            "1",
+            "1",
+            "2-2"
+        ],
+        "porra": {
+            "partido": "9",
+            "goles_h": "2",
+            "goles_a": "0"
+        },
+        "trivia_score": 0
+    }
+}

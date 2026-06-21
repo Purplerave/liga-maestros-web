@@ -1,0 +1,1011 @@
+{
+  "jornada": 65,
+  "source": "https://www.quiniela15.com/resultados-quiniela/65",
+  "fetched_at": "2026-06-03T22:34:44",
+  "matches": [
+    {
+      "id": 1,
+      "local": "Castellón",
+      "visitante": "Eibar",
+      "events": [
+        {
+          "team": "Castellón",
+          "events": [
+            {
+              "minute": "43'",
+              "player": "A. Calatrava",
+              "type": "goal"
+            },
+            {
+              "minute": "71'",
+              "player": "I. Suero",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Eibar",
+          "events": [
+            {
+              "minute": "49'",
+              "player": "J. Bernat",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "57'",
+              "player": "J. Corpas",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "C. Muniz",
+      "coaches": "Castellón: Pablo Hernandez | Eibar: Benat San Jose",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "57%",
+            "24%",
+            "19%"
+          ],
+          [
+            "LAE",
+            "56%",
+            "23%",
+            "21%"
+          ],
+          [
+            "APU",
+            "61%",
+            "22%",
+            "17%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 2,
+      "local": "Córdoba",
+      "visitante": "Huesca",
+      "events": [
+        {
+          "team": "Córdoba",
+          "events": [
+            {
+              "minute": "34'",
+              "player": "D. Requena",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "45'",
+              "player": "C. Albarran",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "52'",
+              "player": "S. Guardiola",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Huesca",
+          "events": [
+            {
+              "minute": "15'",
+              "player": "J. Martin",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "64'",
+              "player": "Pina",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "76'",
+              "player": "J. Alvarez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "86'",
+              "player": "J. Escobar",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "M. H. De Aza",
+      "coaches": "Córdoba: Ivan Ania | Huesca: Luis Oltra Castaner Jose",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "64%",
+            "18%",
+            "18%"
+          ],
+          [
+            "LAE",
+            "69%",
+            "19%",
+            "12%"
+          ],
+          [
+            "APU",
+            "55%",
+            "26%",
+            "20%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 3,
+      "local": "Deportivo",
+      "visitante": "Las Palmas",
+      "events": [
+        {
+          "team": "Deportivo",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "Z. Eddahchouri",
+              "type": "goal"
+            },
+            {
+              "minute": "39'",
+              "player": "Z. Eddahchouri",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Las Palmas",
+          "events": [
+            {
+              "minute": "7'",
+              "player": "K. Rodriguez",
+              "type": "goal"
+            },
+            {
+              "minute": "18'",
+              "player": "Marvin",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "E. Mallo",
+      "coaches": "Deportivo: Antonio Hidalgo | Las Palmas: Luis Garcia",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "42%",
+            "28%",
+            "30%"
+          ],
+          [
+            "LAE",
+            "34%",
+            "27%",
+            "39%"
+          ],
+          [
+            "APU",
+            "27%",
+            "27%",
+            "46%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 4,
+      "local": "Granada",
+      "visitante": "Sporting Gijón",
+      "events": [
+        {
+          "team": "Granada",
+          "events": [
+            {
+              "minute": "2'",
+              "player": "J. M. Arnaiz",
+              "type": "goal"
+            },
+            {
+              "minute": "34'",
+              "player": "R. Alcaraz",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Sporting Gijón",
+          "events": [
+            {
+              "minute": "27'",
+              "player": "K. Vazquez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "45'",
+              "player": "D. Hormigo",
+              "type": "own goal"
+            },
+            {
+              "minute": "68'",
+              "player": "J. Smith",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "B. Olivan",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "A. Moreno",
+      "coaches": "Granada: Pacheta | Sporting Gijón: Borja Jimenez",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "44%",
+            "31%",
+            "25%"
+          ],
+          [
+            "LAE",
+            "40%",
+            "31%",
+            "29%"
+          ],
+          [
+            "APU",
+            "38%",
+            "28%",
+            "34%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 5,
+      "local": "Leganés",
+      "visitante": "Mirandés",
+      "events": [
+        {
+          "team": "Leganés",
+          "events": [
+            {
+              "minute": "25'",
+              "player": "D. Garcia",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "69'",
+              "player": "A. Millan",
+              "type": "goal"
+            },
+            {
+              "minute": "74'",
+              "player": "J. Cruz",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "Marvel",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Mirandés",
+          "events": [
+            {
+              "minute": "17'",
+              "player": "J. Gutierrez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "34'",
+              "player": "J. Hernandez",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "84'",
+              "player": "U. del Cura",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "Juanpa",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "M. Orellana",
+      "coaches": "Leganés: Igor Oca | Mirandés: Antxon Muneta",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "52%",
+            "27%",
+            "22%"
+          ],
+          [
+            "LAE",
+            "47%",
+            "28%",
+            "25%"
+          ],
+          [
+            "APU",
+            "47%",
+            "26%",
+            "27%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 6,
+      "local": "Almería",
+      "visitante": "Valladolid",
+      "events": [
+        {
+          "team": "Almería",
+          "events": [
+            {
+              "minute": "42'",
+              "player": "A. Munoz",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "57'",
+              "player": "S. Arribas",
+              "type": "goal pen"
+            },
+            {
+              "minute": "90'",
+              "player": "A. Puigmal",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Valladolid",
+          "events": [
+            {
+              "minute": "25'",
+              "player": "C. Clerc",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "42'",
+              "player": "C. Michelin",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "55'",
+              "player": "P. Tomeo",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "B. Chinedu",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "M. Perez",
+      "coaches": "Almería: Joan Rubi | Valladolid: Fran Escriba",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "71%",
+            "17%",
+            "12%"
+          ],
+          [
+            "LAE",
+            "82%",
+            "11%",
+            "7%"
+          ],
+          [
+            "APU",
+            "68%",
+            "20%",
+            "12%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 7,
+      "local": "Ceuta",
+      "visitante": "Albacete",
+      "events": [
+        {
+          "team": "Ceuta",
+          "events": [
+            {
+              "minute": "17'",
+              "player": "M. Fernandez Sanchez",
+              "type": "goal"
+            },
+            {
+              "minute": "46'",
+              "player": "Youness",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "55'",
+              "player": "Anuar",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Albacete",
+          "events": []
+        }
+      ],
+      "referee": "G. Cid",
+      "coaches": "Ceuta: Jose Romero | Albacete: Alberto Gonzalez",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "30%",
+            "41%",
+            "29%"
+          ],
+          [
+            "LAE",
+            "38%",
+            "33%",
+            "29%"
+          ],
+          [
+            "APU",
+            "36%",
+            "29%",
+            "34%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 8,
+      "local": "R. Santander",
+      "visitante": "Cádiz",
+      "events": [
+        {
+          "team": "R. Santander",
+          "events": [
+            {
+              "minute": "14'",
+              "player": "P. Canales",
+              "type": "goal"
+            },
+            {
+              "minute": "29'",
+              "player": "J. Arana",
+              "type": "goal"
+            },
+            {
+              "minute": "34'",
+              "player": "J. Arana",
+              "type": "goal"
+            },
+            {
+              "minute": "73'",
+              "player": "I. Vicente",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Cádiz",
+          "events": [
+            {
+              "minute": "57'",
+              "player": "A. Fernandez",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "A. Morilla",
+      "coaches": "R. Santander: Jose Lopez | Cádiz: Imanol Idiakez",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "61%",
+            "21%",
+            "18%"
+          ],
+          [
+            "LAE",
+            "71%",
+            "17%",
+            "12%"
+          ],
+          [
+            "APU",
+            "68%",
+            "20%",
+            "11%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 9,
+      "local": "R. Sociedad B",
+      "visitante": "C. Leonesa",
+      "events": [
+        {
+          "team": "R. Sociedad B",
+          "events": [
+            {
+              "minute": "55'",
+              "player": "G. Gorosabel",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "61'",
+              "player": "A. Mariezkurrena",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "C. Leonesa",
+          "events": [
+            {
+              "minute": "56'",
+              "player": "L. Ribeiro",
+              "type": "goal"
+            }
+          ]
+        }
+      ],
+      "referee": "G. Etayo",
+      "coaches": "R. Sociedad B: Ion Ansotegi | C. Leonesa: Ruben de la Barrera",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "58%",
+            "26%",
+            "17%"
+          ],
+          [
+            "LAE",
+            "58%",
+            "24%",
+            "18%"
+          ],
+          [
+            "APU",
+            "43%",
+            "29%",
+            "28%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 10,
+      "local": "R. Zaragoza",
+      "visitante": "Málaga",
+      "events": [
+        {
+          "team": "R. Zaragoza",
+          "events": [
+            {
+              "minute": "54'",
+              "player": "M. A. Cuenca",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Málaga",
+          "events": [
+            {
+              "minute": "34'",
+              "player": "Chupe",
+              "type": "goal"
+            },
+            {
+              "minute": "66'",
+              "player": "Rafita",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "76'",
+              "player": "Chupe",
+              "type": "goal pen"
+            }
+          ]
+        }
+      ],
+      "referee": "D. Palencia",
+      "coaches": "R. Zaragoza: David Navarro | Málaga: Juan Funes",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "18%",
+            "19%",
+            "63%"
+          ],
+          [
+            "LAE",
+            "13%",
+            "19%",
+            "68%"
+          ],
+          [
+            "APU",
+            "21%",
+            "28%",
+            "51%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 11,
+      "local": "Burgos",
+      "visitante": "Andorra",
+      "events": [
+        {
+          "team": "Burgos",
+          "events": [
+            {
+              "minute": "34'",
+              "player": "Curro",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "40'",
+              "player": "I. Morante",
+              "type": "goal"
+            },
+            {
+              "minute": "90'",
+              "player": "A. Lizancos",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Andorra",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "J. Cerda",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "49'",
+              "player": "D. Alende",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "90'",
+              "player": "",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "S. Ais",
+      "coaches": "Burgos: Luis Ramis | Andorra: Carles Manso",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "62%",
+            "23%",
+            "15%"
+          ],
+          [
+            "LAE",
+            "71%",
+            "18%",
+            "11%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 12,
+      "local": "México",
+      "visitante": "Australia",
+      "events": [
+        {
+          "team": "México",
+          "events": [
+            {
+              "minute": "28'",
+              "player": "J. Vasquez",
+              "type": "goal"
+            },
+            {
+              "minute": "52'",
+              "player": "C. S. Huerta Valera",
+              "type": "yellowcard"
+            }
+          ]
+        },
+        {
+          "team": "Australia",
+          "events": [
+            {
+              "minute": "32'",
+              "player": "J. Italiano",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Rubiel Vazquez",
+      "coaches": "México: Javier Aguirre | Australia: Anthony Popovic",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "62%",
+            "24%",
+            "15%"
+          ],
+          [
+            "LAE",
+            "65%",
+            "22%",
+            "13%"
+          ],
+          [
+            "APU",
+            "61%",
+            "25%",
+            "15%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 13,
+      "local": "Japón",
+      "visitante": "Islandia",
+      "events": [
+        {
+          "team": "Japón",
+          "events": [
+            {
+              "minute": "87'",
+              "player": "K. Ogawa",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Islandia",
+          "events": [
+            {
+              "minute": "33'",
+              "player": "K. Hlynsson",
+              "type": "yellowcard"
+            },
+            {
+              "minute": "76'",
+              "player": "S. T. Thordarson",
+              "type": "yellowcard"
+            }
+          ]
+        }
+      ],
+      "referee": "Damian Kos",
+      "coaches": "Japón: Hajime Moriyasu | Islandia: -",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "69%",
+            "17%",
+            "14%"
+          ],
+          [
+            "LAE",
+            "79%",
+            "13%",
+            "8%"
+          ],
+          [
+            "APU",
+            "76%",
+            "16%",
+            "7%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    },
+    {
+      "id": 14,
+      "local": "Alemania",
+      "visitante": "Finlandia",
+      "events": [
+        {
+          "team": "Alemania",
+          "events": [
+            {
+              "minute": "34'",
+              "player": "D. Undav",
+              "type": "goal"
+            },
+            {
+              "minute": "48'",
+              "player": "F. Wirtz",
+              "type": "goal"
+            },
+            {
+              "minute": "57'",
+              "player": "D. Undav",
+              "type": "goal"
+            },
+            {
+              "minute": "63'",
+              "player": "J. Musiala",
+              "type": "goal"
+            }
+          ]
+        },
+        {
+          "team": "Finlandia",
+          "events": []
+        }
+      ],
+      "referee": "Matheus Delgado Candançan",
+      "coaches": "Alemania: Julian Nagelsmann | Finlandia: Jacob Friis",
+      "probability_tables": [
+        [
+          [
+            "Web",
+            "1",
+            "X",
+            "2"
+          ],
+          [
+            "Q15",
+            "73%",
+            "13%",
+            "14%"
+          ],
+          [
+            "LAE",
+            "90%",
+            "6%",
+            "4%"
+          ],
+          [
+            "APU",
+            "81%",
+            "12%",
+            "6%"
+          ]
+        ]
+      ],
+      "source": "https://www.quiniela15.com/resultados-quiniela/65"
+    }
+  ]
+}

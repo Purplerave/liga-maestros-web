@@ -1,0 +1,107 @@
+{
+    "1": {
+        "pair": "Real Sociedad-Levante",
+        "fecha": "2026-04-04",
+        "hora": "14:00",
+        "finalizado": true,
+        "api_id": 1391116
+    },
+    "2": {
+        "pair": "Mallorca-Real Madrid",
+        "fecha": "2026-04-04",
+        "hora": "16:15",
+        "finalizado": true,
+        "api_id": 1391114
+    },
+    "3": {
+        "pair": "Alaves-Osasuna",
+        "fecha": "2026-04-05",
+        "hora": "21:00",
+        "finalizado": true,
+        "api_id": 1391109
+    },
+    "4": {
+        "pair": "Getafe-Athletic Club",
+        "fecha": "2026-04-05",
+        "hora": "14:00",
+        "finalizado": true,
+        "api_id": 1391112
+    },
+    "5": {
+        "pair": "Valencia-Celta Vigo",
+        "fecha": "2026-04-05",
+        "hora": "16:15",
+        "finalizado": true,
+        "api_id": 1391118
+    },
+    "6": {
+        "pair": "Oviedo-Sevilla",
+        "fecha": "2026-04-05",
+        "hora": "18:30",
+        "finalizado": true,
+        "api_id": 1391117
+    },
+    "7": {
+        "pair": "Real Betis-Espanyol",
+        "fecha": "2026-04-04",
+        "hora": "18:30",
+        "finalizado": true,
+        "api_id": 1391111
+    },
+    "8": {
+        "pair": "Girona-Villarreal",
+        "fecha": "2026-04-06",
+        "hora": "21:00",
+        "finalizado": true,
+        "api_id": 1391119
+    },
+    "9": {
+        "pair": "Cádiz-Córdoba",
+        "fecha": "2026-04-04",
+        "hora": "14:00",
+        "finalizado": true,
+        "api_id": 1392130
+    },
+    "10": {
+        "pair": "Albacete-Burgos",
+        "fecha": "2026-04-04",
+        "hora": "16:15",
+        "finalizado": true,
+        "api_id": 1392137
+    },
+    "11": {
+        "pair": "Deportivo La Coruna-Málaga",
+        "fecha": "2026-04-04",
+        "hora": "18:30",
+        "finalizado": true,
+        "api_id": 1392132
+    },
+    "12": {
+        "pair": "Andorra-Racing Santander",
+        "fecha": "2026-04-05",
+        "hora": "16:15",
+        "finalizado": true,
+        "api_id": 1396982
+    },
+    "13": {
+        "pair": "Almería-Leganés",
+        "fecha": "2026-04-05",
+        "hora": "18:30",
+        "finalizado": true,
+        "api_id": 1392136
+    },
+    "14": {
+        "pair": "Las Palmas-Huesca",
+        "fecha": "2026-04-05",
+        "hora": "18:30",
+        "finalizado": true,
+        "api_id": 1392134
+    },
+    "15": {
+        "pair": "Atletico Madrid-Barcelona",
+        "fecha": "2026-04-04",
+        "hora": "21:00",
+        "finalizado": true,
+        "api_id": 1391110
+    }
+}

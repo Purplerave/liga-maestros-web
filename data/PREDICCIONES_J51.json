@@ -1,0 +1,71 @@
+{
+    "v260_omnisciente": {
+        "signos": ["1", "1", "X", "1", "1", "1", "1", "X", "2", "X", "X", "2", "2", "1", "M-1"],
+        "razones": ["Poisson: Fortaleza local", "Poisson: xG superior", "Poisson: Prob. empate alta", "Poisson: Málaga sólido", "Poisson: Choque igualado", "Poisson: Derbi equilibrado", "Poisson: Local fuerte", "Poisson: Andorra baja fuera", "Poisson: Racing líder", "Poisson: RFEF defensiva", "Poisson: Empate técnico", "Poisson: Ponfe superior", "Poisson: Ibiza favorito", "Poisson: Hércules casa", "Rodillo Almeriense: M-1"]
+    },
+    "gpt_4o": {
+        "signos": ["X", "1", "X", "1", "1", "X", "1", "X", "2", "X", "X", "2", "X", "1", "2-1"],
+        "razones": ["Partido trabado", "Huesca flojo fuera", "Derbi de tensión", "Málaga con gol", "Albacete pesca casa", "Molinón iguala", "Eibar dinámica sólida", "Guion atascado", "Racing líder", "Pontevedra muy X", "Ferrol no cierra fuera", "Ponfe racha potente", "Media tabla parejo", "Marbella muy tocado", "Almería más pegada"]
+    },
+    "claude_35": {
+        "signos": ["1", "1", "X", "1", "1", "2", "X", "X", "2", "X", "1", "X", "1", "1", "2-1"],
+        "razones": ["Ceuta modo play-off", "Huesca peor visitante", "Burgos defensa férrea", "La Rosaleda fortín", "Albacete invicto casa", "Depor mejor visitante", "Duelo táctico Ipurua", "Cultural no marca casa", "Racing lava imagen", "Pontevedra rey empate", "Mérida factor campo", "Ponfe blindaje 0-0", "Ibiza reacción local", "Marbella debilidad fuera", "Almería superioridad"]
+    },
+    "grok_3": {
+        "signos": ["1", "1", "X", "1", "1", "X", "X", "2", "1", "X", "1", "X", "1", "1", "3-1"],
+        "razones": ["Ceuta 5º mejor local", "Huesca peor visitante", "Derbi físico castellano", "Málaga manda pese a bajas", "Giro por racha local", "Barro por lluvia", "Empate top-10 vs top-5", "Andorra mejor visitante", "Racing con 5 bajas int.", "Pacto no agresión RFEF", "Mérida fuerte en casa", "Equilibrado RFEF", "Ibiza buena local", "Colista Marbella", "Almería fuerte vs filial"]
+    },
+    "copilot": {
+        "signos": ["X", "1", "X", "1", "X", "2", "1", "2", "2", "X", "2", "X", "1", "1", "2-1"],
+        "razones": ["Precedente 0-0", "Huesca hundido fuera", "Burgos defensa hierro", "Málaga mejor local", "Igualdad por crisis", "Sporting con 5 bajas", "Factor campo Ipurua", "Cultural peor local", "Racing líder lanzado", "H2H empatón", "Ferrol pelea ascenso", "Ourense mejora defensa", "Ibiza Can Misses", "Marbella débil fuera", "Pegada almeriense"]
+    },
+    "ernie_ai": {
+        "signos": ["2", "1", "1", "X", "1", "X", "1", "2", "1", "X", "1", "2", "X", "1", "2-1"],
+        "razones": ["Cádiz experiencia", "Granada solidez", "IA: Superioridad local", "Igualdad máxima", "Motivación Alba", "Inconsistencia mutua", "Eibar racha casa", "Andorra dinámica", "Zaragoza evita descenso", "Igualdad tabla", "Mérida racha casa", "Ponfe experiencia", "Inconsistencia mutua", "Hércules racha casa", "Preferencia local"]
+    },
+    "fortu": {
+        "signos": ["2", "1", "1", "1", "1", "X", "X", "X", "2", "1", "1", "1", "1", "1", "3-0"],
+        "razones": ["Cádiz jerarquía", "Granada superior", "Valladolid local", "Málaga racha", "Albacete casa", "Empate táctico", "Duelo equilibrado", "Empate RFEF", "Racing líder", "Zamora local", "Mérida racha", "Ourense factor campo", "Ibiza favorito", "Hércules superior", "Goleada líder"]
+    },
+    "momo_molbot": {
+        "signos": ["1", "1", "X", "1", "1", "2", "X", "1", "1", "X", "1", "2", "X", "1", "2-1"],
+        "razones": ["Ceuta factor campo", "Huesca débil", "Derbi tablas", "Málaga racha", "Alba local", "Depor mejor bloque", "Igualdad Ipurua", "Cultu Reino de León", "Sorpresa: Zaragoza 1", "Pacto RFEF", "Mérida fuerte", "Ponfe de oficio", "Alcorcón empata", "Hércules superior", "Pegada local"]
+    },
+    "manu_manus": {
+        "signos": ["2", "1", "1", "1", "2", "X", "2", "1", "2", "X", "2", "2", "1", "1", "2-0"],
+        "razones": ["Cádiz más oficio", "Huesca poco gol", "Derbi pasional", "Málaga imparable", "Castellón ritmo", "Máxima igualdad", "Calidad Las Palmas", "Solidez local", "Líder no perdona", "Partido trabado", "Calidad gallegos", "Oficio Ponfe", "Ibiza superior", "Factor campo e historia", "Victoria cómoda"]
+    },
+    "pepe_perplexity": {
+        "signos": ["1", "1", "2", "1", "X", "1", "X", "1", "2", "X", "1", "2", "1", "1", "2-1"],
+        "razones": ["Ceuta ganó a grandes", "Huesca hundido", "Burgos muro defensivo", "Málaga pegada local", "Necesidad vs Presión", "Dudas gallegas Molinón", "Alta igualdad", "Necesidad extrema local", "Racing líder en forma", "Duelo táctico play-off", "Mérida fuerte casa", "Ponfe recursos gol", "Inercia positiva Ibiza", "Hércules manda casa", "Pegada vs Fragilidad"]
+    },
+    "geli_glm5": {
+        "signos": ["2", "1", "1", "1", "X", "X", "1", "2", "2", "2", "X", "1", "X", "1", "2-1"],
+        "razones": ["Plantilla Cadista", "Favorito claro", "Factor derbi", "Málaga aprieta", "Igualdad táctica", "Reparto puntos", "Fortaleza armera", "Calidad visitante", "Líder imparable", "Oficio Pontevedra", "Tablas equilibrio", "Sorpresa localista", "Duelo cerrado", "Superioridad local", "Pegada Almería"]
+    },
+    "chipi_deepseek": {
+        "signos": ["1", "X", "X", "1", "X", "1", "1", "X", "2", "X", "2", "1", "1", "1", "2-0"],
+        "razones": ["Ceuta sólido casa", "Bloqueo nazarí", "Derbi regional", "Fortín Rosaleda", "Partido trampa", "Reacción Molinón", "Ipurúa tradicional", "Andorra gestiona", "Zaragoza en crisis", "Derbi gallego", "Dinámica Ferrol", "Factor campo Ourense", "Ibiza reacciona", "Marbella sufre atrás", "Almería potencial"]
+    },
+    "chema_cohere": {
+        "signos": ["2", "1", "1", "X", "1", "1", "2", "1", "1", "X", "2", "2", "1", "2", "2-1"],
+        "razones": ["Cambio de entrenador", "Fortaleza Granada", "Valladolid favorito", "Necesidad del punto", "Racha reciente local", "Factor campo Molinón", "Las Palmas reacción", "Superioridad total", "Zaragoza favorito", "Consenso tablas", "Valor visitante", "Momento Ponfe", "Reacción local", "Derbi para Marbella", "Victoria ajustada"]
+    },
+    "carlos": {
+        "signos": ["2", "1", "X", "X", "1", "1", "2", "X", "1", "2", "X", "2", "1", "1", "2-1"],
+        "razones": ["Cádiz jerarquía", "Granada fortín", "Derbi emocional", "Empate táctico", "Mejor xG local", "Sporting es un muro", "Las Palmas mejor visitante", "Factor permanencia", "Zaragoza coloso", "Gallegos necesitan puntos", "Factor trampa", "Superioridad Ponfe", "Alcorcón en crisis", "Ventaja psicológica", "IA: Almería superior"]
+    },
+    "mrpurple": {
+        "signos": ["2", "X", "2", "1", "1", "2", "2", "1", "X", "1", "2", "1", "1", "1", "M-1"],
+        "porra": {"6": "1-3"},
+        "trivia_score": 8
+    },
+    "profe_llama": {
+        "signos": ["2", "1", "1", "X", "2", "1", "1", "X", "X", "1", "2", "X", "1", "1", "2-1"],
+        "razones": ["Cádiz necesidad", "Granada presión", "Derbi regional", "Duelo directo", "Castellón racha", "Sporting fortín", "Eibar fiable", "Empate táctico", "Racing rocoso", "Zamora momento", "Calidad visitante", "Empate probable", "Ibiza fuerte casa", "Hércules liderato"]
+    },
+    "sombrerero_cohere": {
+        "signos": ["2", "1", "1", "X", "1", "2", "X", "2", "1", "1", "X", "2", "1", "2", "2-1"],
+        "razones": ["Plantilla superior", "Racha local", "Presión ascenso", "Equilibrio táctico", "Cambio entrenador", "Mejor plantilla", "Sólido atrás", "Superioridad táctica", "7 bajas Racing", "Invicto casa 2026", "Racha empates", "Necesidad playoff", "Mejor xG casa", "Racha visitante"]
+    }
+}

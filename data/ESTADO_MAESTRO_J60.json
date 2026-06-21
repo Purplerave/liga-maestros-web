@@ -1,0 +1,178 @@
+{
+    "jornada": 60,
+    "ranking_actual_j60": {
+        "programa": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 35,
+            "display_puntos": "4"
+        },
+        "grok": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 35,
+            "display_puntos": "4"
+        },
+        "claude": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 34,
+            "display_puntos": "4"
+        },
+        "chatgpt": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 32,
+            "display_puntos": "4"
+        },
+        "copilot": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 26,
+            "display_puntos": "4"
+        },
+        "pepe": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 18,
+            "display_puntos": "4"
+        },
+        "chipi": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 13,
+            "display_puntos": "3"
+        },
+        "profe": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 14,
+            "display_puntos": "4"
+        },
+        "kimi": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 18,
+            "display_puntos": "4"
+        },
+        "ernie": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 21,
+            "display_puntos": "4"
+        },
+        "manu": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 7,
+            "display_puntos": "4"
+        },
+        "fortu": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 12,
+            "display_puntos": "4"
+        },
+        "consenso": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "hermes": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        }
+    },
+    "ranking_actual": {
+        "programa": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 35,
+            "display_puntos": "4"
+        },
+        "grok": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 31,
+            "puntos_totales_web": 35,
+            "display_puntos": "4"
+        },
+        "claude": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 30,
+            "puntos_totales_web": 34,
+            "display_puntos": "4"
+        },
+        "chatgpt": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 28,
+            "puntos_totales_web": 32,
+            "display_puntos": "4"
+        },
+        "copilot": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 22,
+            "puntos_totales_web": 26,
+            "display_puntos": "4"
+        },
+        "pepe": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 18,
+            "display_puntos": "4"
+        },
+        "chipi": {
+            "puntos_jornada": 3,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 13,
+            "display_puntos": "3"
+        },
+        "profe": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 10,
+            "puntos_totales_web": 14,
+            "display_puntos": "4"
+        },
+        "kimi": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 14,
+            "puntos_totales_web": 18,
+            "display_puntos": "4"
+        },
+        "ernie": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 17,
+            "puntos_totales_web": 21,
+            "display_puntos": "4"
+        },
+        "manu": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 3,
+            "puntos_totales_web": 7,
+            "display_puntos": "4"
+        },
+        "fortu": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 8,
+            "puntos_totales_web": 12,
+            "display_puntos": "4"
+        },
+        "consenso": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        },
+        "hermes": {
+            "puntos_jornada": 4,
+            "puntos_acumulados": 0,
+            "puntos_totales_web": 4,
+            "display_puntos": "4"
+        }
+    },
+    "actualizado": "23:22:27",
+    "finalizada": false,
+    "en_vivo": true
+}

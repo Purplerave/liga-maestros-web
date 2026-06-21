@@ -1,0 +1,17 @@
+{
+    "1": {"id": 1, "partido": "BETIS - R.MADRID", "fecha": "25/04/2026", "hora": "21:00", "finalizado": false},
+    "2": {"id": 2, "partido": "ALAVÉS - MALLORCA", "fecha": "26/04/2026", "hora": "14:00", "finalizado": false},
+    "3": {"id": 3, "partido": "GETAFE - BARCELONA", "fecha": "26/04/2026", "hora": "16:15", "finalizado": false},
+    "4": {"id": 4, "partido": "VALENCIA - GIRONA", "fecha": "26/04/2026", "hora": "18:30", "finalizado": false},
+    "5": {"id": 5, "partido": "AT.MADRID - ATH.CLUB", "fecha": "26/04/2026", "hora": "21:00", "finalizado": false},
+    "6": {"id": 6, "partido": "RAYO - R.SOCIEDAD", "fecha": "26/04/2026", "hora": "16:15", "finalizado": false},
+    "7": {"id": 7, "partido": "R.OVIEDO - ELCHE", "fecha": "27/04/2026", "hora": "16:15", "finalizado": false},
+    "8": {"id": 8, "partido": "OSASUNA - SEVILLA", "fecha": "27/04/2026", "hora": "18:30", "finalizado": false},
+    "9": {"id": 9, "partido": "VILLARREAL - CELTA", "fecha": "27/04/2026", "hora": "21:00", "finalizado": false},
+    "10": {"id": 10, "partido": "BURGOS - DEPORTIVO", "fecha": "26/04/2026", "hora": "18:30", "finalizado": false},
+    "11": {"id": 11, "partido": "MÁLAGA - CASTELLÓN", "fecha": "26/04/2026", "hora": "21:00", "finalizado": false},
+    "12": {"id": 12, "partido": "GRANADA - ALMERÍA", "fecha": "27/04/2026", "hora": "16:15", "finalizado": false},
+    "13": {"id": 13, "partido": "HUESCA - R.ZARAGOZA", "fecha": "27/04/2026", "hora": "18:30", "finalizado": false},
+    "14": {"id": 14, "partido": "CEUTA - RACING S.", "fecha": "27/04/2026", "hora": "21:00", "finalizado": false},
+    "15": {"id": 15, "partido": "ESPANYOL - LEVANTE", "fecha": "27/04/2026", "hora": "21:00", "finalizado": false}
+}

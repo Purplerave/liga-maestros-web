@@ -1,0 +1,8 @@
+[
+    {"pos": 1, "equipo": "Barcelona", "pts": 78, "racha": "V-V-V-E-V"},
+    {"pos": 2, "equipo": "Real Madrid", "pts": 75, "racha": "V-V-E-V-V"},
+    {"pos": 3, "equipo": "Athletic", "pts": 68, "racha": "E-V-D-V-V"},
+    {"pos": 4, "equipo": "At. Madrid", "pts": 65, "racha": "V-E-V-D-V"},
+    {"pos": 5, "equipo": "Villarreal", "pts": 62, "racha": "V-D-V-V-E"},
+    {"pos": 6, "equipo": "Real Sociedad", "pts": 58, "racha": "D-V-E-E-V"}
+]
