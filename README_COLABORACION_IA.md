@@ -16,6 +16,11 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 
 - Rama principal: `main`.
 - Ultimos arreglos aplicados:
+  - `2c031d4 Improve live reliability and contest profile performance`
+    - `get_contest_profile` pasa de varias reconstrucciones del ranking a una sola.
+    - el contador diario de Highlightly se mueve a SQLite con transacciones `BEGIN IMMEDIATE`.
+    - `/api/live/probe`, `/api/live/health` y `/api/sync/status` exponen partidos Q15 esperados/recibidos.
+    - `schema.sql` incluye la tabla `api_usage_daily`.
   - `2ad5a1b Add safety checks and scoring tests`
     - CI minimo en GitHub Actions.
     - tests de scoring para pleno al 15 y signos dobles.
@@ -81,28 +86,28 @@ Pendiente de confirmar: el commit `369849c` quito la linea `plan: starter` de `r
 
 ## Revision Claude sobre 0344366
 
-Estos puntos son sobre codigo real. Clonar y verificar antes de tocar.
+Estos puntos son sobre codigo real. Estado tras `2c031d4`:
 
-1. `get_contest_profile` recalcula el ranking general hasta 3 veces para un solo perfil (`app.py`, funciones `get_contest_profile` y `build_contest_payload`). La segunda y la tercera llamada usan los mismos argumentos (`jornada`, `target`); si la segunda no encuentra perfil, la tercera repite lo mismo y no puede dar un resultado distinto. Ademas `profile_for` esta definida dentro de `build_contest_payload`, asi que no se puede pedir un perfil suelto sin reconstruir el ranking general completo.
-2. El contador diario de Highlightly tiene condicion de carrera entre workers (`get_highlightly_usage`, `record_highlightly_call`, `reserve_highlightly_calls`). El contador vive en JSON protegido solo por un `threading.Lock` de proceso. Con `gunicorn --workers 2`, cada worker tiene su propio lock y pueden perderse actualizaciones. Esto puede gastar mas cupo diario de Highlightly del limite configurado.
-3. El scraper de Quiniela15 puede romperse en silencio (`SCRAPE_QUINIELA15_DIRECTO.py`, funcion `scrape`). Si cambia el HTML, puede devolver `matches: []` o lista parcial sin excepcion. `live_probe` puede mostrar `ok: true` si hubo respuesta HTTP valida aunque no haya 15 partidos.
-4. No habia snapshot SQL del esquema para `usuarios`, `resultados`, `predicciones`, `clasificacion` ni `consenso`. Mitigacion aplicada: `schema.sql` generado desde `DATOS/LIGA_MAESTROS_PRO.db`.
+1. Resuelto: `get_contest_profile` ya no recalcula el ranking general hasta 3 veces.
+2. Resuelto en la ruta Highlightly: el contador diario ahora usa SQLite y transaccion `BEGIN IMMEDIATE`, no JSON con lock de proceso.
+3. Parcialmente resuelto: `live_probe`, `/api/live/health` y `/api/sync/status` ya muestran `matches_expected` y `matches_received`, y `ok=false` si Quiniela15 no devuelve 15 partidos.
+4. Resuelto: `schema.sql` generado desde `DATOS/LIGA_MAESTROS_PRO.db`.
 
 ### Mejoras que resuelven los bugs de raiz
 
-- Cachear `build_contest_payload` por `jornada`, invalidando por cambios en `predicciones`/`resultados`.
-- Sacar `profile_for` de dentro de `build_contest_payload` para pedir perfiles sin recalcular el ranking general entero.
-- Mover el contador de Highlightly y, si hace falta, el rate limit de comentarios/guardado a SQLite con `UPSERT`, para que funcione correctamente con varios workers de Gunicorn.
-- En `live_probe` y `/api/live/health`, exponer `matches_esperados` frente a `matches_recibidos` para detectar scraper roto de un vistazo.
+- Pendiente: cachear `build_contest_payload` por `jornada`, invalidando por cambios en `predicciones`/`resultados`.
+- Pendiente opcional: sacar `profile_for` de dentro de `build_contest_payload` si se necesita reutilizarlo sin payload completo.
+- Pendiente opcional: mover tambien el rate limit de comentarios/guardado a SQLite si se quiere control estricto entre workers.
+- Pendiente: hacer que el scraper Quiniela15 lance error o alerta fuerte cuando reciba menos de 15 partidos, no solo exponerlo en health/probe.
 
 ## Tareas de revision recomendadas
 
 1. Persistencia real de datos en produccion: disco Render o PostgreSQL.
 2. Backup diario de la DB y JSON criticos.
 3. Mantener `schema.sql` actualizado antes de migraciones.
-4. Arreglar condicion de carrera del contador Highlightly entre workers de Gunicorn.
-5. Quitar llamadas redundantes a `build_contest_payload` en `get_contest_profile`.
-6. Anadir chequeo de `matches` esperados frente a recibidos en el scraper de Quiniela15.
+4. Cachear `build_contest_payload` e invalidar por cambios en predicciones/resultados.
+5. Convertir incompletos de Quiniela15 en alerta fuerte o error controlado del scraper.
+6. Mover rate limit de comentarios/guardado a SQLite si el uso publico crece.
 7. Reforzar tests de ranking, concurso y cierre de quinielas.
 8. Revisar OAuth Google y registro de usuarios en produccion.
 9. UX mobile/desktop.
