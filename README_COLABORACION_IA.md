@@ -16,6 +16,8 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 
 - Rama principal: `main`.
 - Ultimos arreglos aplicados:
+  - En esta revision frontend:
+    - auto-refresh de `quantum_final.js` conserva la Arena si falla una actualizacion en segundo plano.
   - En esta revision:
     - `scoring.py` como fuente unica de scoring para app, auditoria y tests.
     - `AUDITAR_JORNADA_LIGA_MAESTROS.py` e `IMPORTAR_PROGRAMA_JORNADA.py` usan `config.DB_PATH`.
@@ -124,6 +126,15 @@ Estado tras esta revision:
 3. Resuelto: `/static/<path>` queda controlado por la ruta custom, con cache largo para `static/img/*`, cache razonable para CSS/JS y version de assets basada en mtime, no `time.time()` por request.
 4. Resuelto sin borrar historia: `templates/index.html`, `static/css/quantum.css`, `static/css/quantum_fix.css` y `static/js/quantum.js` se mueven a `legacy/frontend_old/`.
 
+## Revision Claude sobre quantum_final.js
+
+Estado tras esta revision:
+
+1. Resuelto: si falla un auto-refresh con datos ya cargados, `refreshData({auto:true})` mantiene la Arena actual y solo muestra un aviso espaciado. Ya no reemplaza la tabla por un error por un fallo transitorio de red o de un endpoint secundario.
+2. Validado: los comentarios y nombres revisados pasan por `escapeHtml` antes de insertarse con `innerHTML`.
+3. Pendiente UX: el Pleno al 15 todavia usa `window.prompt()`. Funciona, pero conviene sustituirlo por un modal propio con opciones `0`, `1`, `2`, `M` para local/visitante.
+4. Pendiente arquitectura: `refreshData` hace varias peticiones paralelas. El backend ya tiene cache, pero a futuro podria consolidarse en un endpoint combinado para reducir round-trips en movil.
+
 ## Tareas de revision recomendadas
 
 1. Persistencia real de datos en produccion: disco Render o PostgreSQL.
@@ -131,12 +142,13 @@ Estado tras esta revision:
 3. Mantener `schema.sql` actualizado antes de migraciones.
 4. Revisar si el cache de `build_contest_payload` debe ser compartido entre workers con Redis/Postgres si el trafico crece.
 5. Convertir incompletos de Quiniela15 en alerta visible de UI/admin, ademas de health/probe/colector.
-6. Anadir tests de endpoints para comentarios, guardado y API de concurso.
-7. Reforzar tests de ranking, concurso y cierre de quinielas.
-8. Revisar OAuth Google y registro de usuarios en produccion.
-9. UX mobile/desktop.
-10. Limpieza de mojibake/UTF-8.
-11. Modularizar `app.py`, `quantum_final.js` y `quantum_pro.css` cuando haya margen.
+6. Sustituir `window.prompt()` del Pleno al 15 por modal propio.
+7. Anadir tests de endpoints para comentarios, guardado y API de concurso.
+8. Reforzar tests de ranking, concurso y cierre de quinielas.
+9. Revisar OAuth Google y registro de usuarios en produccion.
+10. UX mobile/desktop.
+11. Limpieza de mojibake/UTF-8.
+12. Modularizar `app.py`, `quantum_final.js` y `quantum_pro.css` cuando haya margen.
 
 ## Reglas de colaboracion IA
 

@@ -16,7 +16,8 @@ const state = {
     selectedAwardJornada: "",
     selectedAwardMonth: "",
     commentsOpen: false,
-    commentsLastSeenId: 0
+    commentsLastSeenId: 0,
+    refreshErrorNotifiedAt: 0
 };
 
 const initialView = new URLSearchParams(window.location.search).get("view");
@@ -818,6 +819,14 @@ async function refreshData(options = {}) {
         hydrateStandingsNav();
     } catch (error) {
         console.error(error);
+        if (options.auto && state.data) {
+            const now = Date.now();
+            if (now - state.refreshErrorNotifiedAt > 60000) {
+                showToast("No se pudo actualizar en segundo plano. Mantengo la ultima version cargada.", "error");
+                state.refreshErrorNotifiedAt = now;
+            }
+            return;
+        }
         const body = qs("matches-body");
         if (body) body.innerHTML = `<div class="empty-state">No se pudo cargar la Arena. Revisa que Flask y la base de datos esten activos.</div>`;
     }
