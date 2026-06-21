@@ -1,15 +1,16 @@
 import argparse
 import json
-import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+import config
+from scoring import pleno_score_key, score_prediction
 import utils
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "DATOS" / "LIGA_MAESTROS_PRO.db"
+DB_PATH = Path(config.DB_PATH)
 ROLES_PATH = BASE_DIR / "data" / "ECOSISTEMA_PARTICIPANTES.json"
 LOGOS_PATH = BASE_DIR / "data" / "TEAM_LOGOS.json"
 OUT_DIR = BASE_DIR / "data" / "auditorias"
@@ -35,26 +36,6 @@ def canonical_id(uid):
     return aliases.get(low, low)
 
 
-def pleno_score_key(value):
-    raw = str(value or "").strip().upper().replace(" ", "")
-    match = re.search(r"([0-9M]+)-([0-9M]+)", raw)
-    if not match:
-        return ""
-
-    def bucket(part):
-        if part == "M":
-            return "M"
-        try:
-            goals = int(part)
-        except Exception:
-            return ""
-        return "M" if goals >= 3 else str(goals)
-
-    home = bucket(match.group(1))
-    away = bucket(match.group(2))
-    return f"{home}-{away}" if home and away else ""
-
-
 def result_sign(row):
     gl = row["goles_local"]
     gv = row["goles_visitante"]
@@ -67,16 +48,6 @@ def result_sign(row):
     if gl < gv:
         return "2"
     return "X"
-
-
-def score_prediction(partido_id, prediction, real):
-    pred = str(prediction or "").strip().upper()
-    real = str(real or "").strip().upper()
-    if not pred or pred == "-" or not real or real == "-":
-        return 0
-    if int(partido_id) == 15:
-        return int(pleno_score_key(pred) == pleno_score_key(real))
-    return int(real in pred)
 
 
 def is_finished(row):

@@ -10,12 +10,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
 import utils
+from scoring import normalize_prediction_sign, pleno_score_key, score_prediction
 from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
 
 # Cargar configuración
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 if not SECRET_KEY:
@@ -57,6 +58,7 @@ ADMIN_EMAILS = {
 HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT = int(os.getenv("HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT", "3"))
 HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS", "600"))
 GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
+ASSETS_VERSION = None
 
 # Configuración OAuth
 oauth = OAuth(app)
@@ -742,6 +744,26 @@ def trigger_highlightly_refresh_async(force=False, jornada=None):
     _highlightly_refresh_thread.start()
     return True
 
+
+def get_assets_version():
+    global ASSETS_VERSION
+    if ASSETS_VERSION:
+        return ASSETS_VERSION
+    paths = [
+        os.path.join(config.BASE_DIR, "static", "css", "quantum_pro.css"),
+        os.path.join(config.BASE_DIR, "static", "js", "quantum_final.js"),
+        os.path.join(config.BASE_DIR, "static", "img", "ligademaestroslogo_trans.png"),
+    ]
+    mtimes = []
+    for path in paths:
+        try:
+            mtimes.append(int(os.path.getmtime(path)))
+        except OSError:
+            continue
+    ASSETS_VERSION = str(max(mtimes or [int(time.time())]))
+    return ASSETS_VERSION
+
+
 @app.route('/')
 def index():
     """
@@ -757,7 +779,7 @@ def index():
     conn.close()
     j = request.args.get('j', str(max_j))
     try:
-        return render_template('liga_index.html', jornada=j, user=user, assets_v=int(time.time()))
+        return render_template('liga_index.html', jornada=j, user=user, assets_v=get_assets_version())
     except Exception:
         return f"La plantilla no se encontró. Jornada actual: {j}", 200
 
@@ -1540,54 +1562,6 @@ def is_scored_status(status):
     return str(status or "").upper() in ("FT", "FINISHED", "TERMINADO")
 
 
-def pleno_score_key(value):
-    raw = str(value or "").strip().upper().replace(" ", "")
-    match = re.search(r"([0-9M]+)-([0-9M]+)", raw)
-    if not match:
-        return ""
-
-    def bucket(part):
-        if part == "M":
-            return "M"
-        try:
-            goals = int(part)
-        except Exception:
-            return ""
-        return "M" if goals >= 3 else str(goals)
-
-    home = bucket(match.group(1))
-    away = bucket(match.group(2))
-    return f"{home}-{away}" if home and away else ""
-
-
-def normalize_prediction_sign(partido_id, value):
-    raw = str(value or "").strip().upper().replace(" ", "")
-    if not raw or raw == "-":
-        return "-"
-    try:
-        match_id = int(partido_id)
-    except Exception:
-        return ""
-    if match_id == 15:
-        return pleno_score_key(raw)
-    if match_id < 1 or match_id > 14:
-        return ""
-    if any(ch not in "1X2" for ch in raw):
-        return ""
-    chars = "".join(ch for ch in "1X2" if ch in set(raw))
-    return chars if chars else ""
-
-
-def score_prediction(partido_id, prediction, real_sign):
-    pred = str(prediction or "").strip().upper()
-    real = str(real_sign or "").strip().upper()
-    if not pred or not real or real == "-":
-        return 0
-    if int(partido_id or 0) == 15:
-        return 1 if pleno_score_key(pred) == pleno_score_key(real) else 0
-    return 1 if real in pred else 0
-
-
 def public_contest_name(uid, users):
     names = {
         "v260_omnisciente": "PROGRAMA",
@@ -2087,15 +2061,20 @@ def get_news_radar():
 @app.route('/static/<path:filename>')
 def static_files(filename):
     """
-    Permite servir ficheros CSS y JavaScript situados en la raíz del proyecto
-    sin necesidad de moverlos a una carpeta `static`. Flask por defecto
-    sirve desde `static/`, pero aquí ampliamos para que archivos como
-    `quantum.css` y `quantum_final.js` puedan ser entregados correctamente.
+    Sirve los assets activos con cache diferenciado por tipo.
     """
-    response = send_from_directory(os.path.join(config.BASE_DIR, "static"), filename, max_age=0)
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
+    normalized = filename.replace("\\", "/")
+    if normalized.startswith("img/"):
+        max_age = 31536000
+        cache_control = "public, max-age=31536000, immutable"
+    elif normalized.startswith(("css/", "js/")):
+        max_age = 86400
+        cache_control = "public, max-age=86400"
+    else:
+        max_age = 0
+        cache_control = "no-cache, max-age=0"
+    response = send_from_directory(os.path.join(config.BASE_DIR, "static"), filename, max_age=max_age)
+    response.headers["Cache-Control"] = cache_control
     return response
 
 @app.route('/api/user/evolution')

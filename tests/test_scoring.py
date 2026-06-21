@@ -5,7 +5,7 @@ from pathlib import Path
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app import normalize_prediction_sign, pleno_score_key, score_prediction
+from scoring import normalize_prediction_sign, pleno_score_key, score_prediction
 
 
 def test_pleno_score_key_buckets_three_or_more_as_m():

@@ -5,10 +5,11 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+import config
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = ROOT.parent
-DB_PATH = ROOT / "DATOS" / "LIGA_MAESTROS_PRO.db"
+DB_PATH = Path(config.DB_PATH)
 PROGRAMA_DIR = PROJECT_ROOT / "PROGRAMA_QUINIELA"
 
 

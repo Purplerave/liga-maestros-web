@@ -16,6 +16,11 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 
 - Rama principal: `main`.
 - Ultimos arreglos aplicados:
+  - En esta revision:
+    - `scoring.py` como fuente unica de scoring para app, auditoria y tests.
+    - `AUDITAR_JORNADA_LIGA_MAESTROS.py` e `IMPORTAR_PROGRAMA_JORNADA.py` usan `config.DB_PATH`.
+    - cache de assets corregida: imagenes con cache largo, CSS/JS con cache por version de assets.
+    - frontend antiguo movido a `legacy/frontend_old/`.
   - `65fac90 Persist API rate limits in SQLite`
     - rate limit de guardado de quiniela y comentarios pasa a SQLite con transaccion.
     - `schema.sql` incluye `api_rate_limit`.
@@ -109,6 +114,15 @@ Estos puntos son sobre codigo real. Estado tras `2c031d4`:
 - Pendiente opcional: sacar `profile_for` de dentro de `build_contest_payload` si se necesita reutilizarlo sin payload completo.
 - Pendiente opcional: mover tambien el rate limit de comentarios/guardado a SQLite si se quiere control estricto entre workers.
 - Pendiente: hacer que el scraper Quiniela15 lance error o alerta fuerte cuando reciba menos de 15 partidos, no solo exponerlo en health/probe.
+
+## Revision Claude sobre 4d41f30
+
+Estado tras esta revision:
+
+1. Resuelto: `AUDITAR_JORNADA_LIGA_MAESTROS.py` e `IMPORTAR_PROGRAMA_JORNADA.py` importan `config.DB_PATH`.
+2. Resuelto: la logica de Pleno al 15, dobles y scoring vive en `scoring.py`; `app.py`, auditoria y tests importan de ahi.
+3. Resuelto: `/static/<path>` queda controlado por la ruta custom, con cache largo para `static/img/*`, cache razonable para CSS/JS y version de assets basada en mtime, no `time.time()` por request.
+4. Resuelto sin borrar historia: `templates/index.html`, `static/css/quantum.css`, `static/css/quantum_fix.css` y `static/js/quantum.js` se mueven a `legacy/frontend_old/`.
 
 ## Tareas de revision recomendadas
 
