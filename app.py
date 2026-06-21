@@ -38,6 +38,8 @@ _highlightly_refresh_started_at = 0
 _sqlite_pragma_lock = threading.Lock()
 _sqlite_wal_ready = False
 _highlightly_usage_lock = threading.Lock()
+_rate_limit_lock = threading.Lock()
+_rate_limit_hits = {}
 CONTEST_DYNAMIC_START_JORNADA = 58
 HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
 HIGHLIGHTLY_DAILY_CALL_LIMIT = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_LIMIT", "7500"))
@@ -121,6 +123,22 @@ def is_admin_request():
 
 
 
+
+
+def is_rate_limited(scope, identity, seconds):
+    now = time.time()
+    key = (scope, str(identity or request.remote_addr or "anon"))
+    with _rate_limit_lock:
+        last_seen = _rate_limit_hits.get(key, 0)
+        if now - last_seen < seconds:
+            return True
+        _rate_limit_hits[key] = now
+        if len(_rate_limit_hits) > 1000:
+            cutoff = now - 3600
+            for old_key, timestamp in list(_rate_limit_hits.items()):
+                if timestamp < cutoff:
+                    _rate_limit_hits.pop(old_key, None)
+        return False
 
 
 def fetch_feed_items(feed):
@@ -1666,6 +1684,8 @@ def save_predictions():
     user = session.get('user')
     if not user:
         return jsonify({"status": "error", "message": "Debes iniciar sesión"}), 401
+    if is_rate_limited("predicciones_save", user.get("id"), 5):
+        return jsonify({"status": "error", "message": "Espera unos segundos antes de volver a guardar."}), 429
     
     data = request.get_json(silent=True) or {}
     uid = data.get('user_id')
@@ -1724,10 +1744,11 @@ def save_predictions():
                             (uid, j, i, signo))
         conn.commit()
         return jsonify({"status": "ok", "message": "Quiniela guardada correctamente"})
-    except Exception as e:
+    except Exception as exc:
         if transaction_started:
             conn.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+        app.logger.exception("Error guardando predicciones: %s", exc)
+        return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500
     finally:
         conn.close()
 
@@ -1772,6 +1793,8 @@ def post_comment():
     user = session.get('user')
     if not user:
         return jsonify({"status": "error", "message": "Entra con Google para comentar"}), 401
+    if is_rate_limited("comentarios_post", user.get("id"), 10):
+        return jsonify({"status": "error", "message": "Espera unos segundos antes de comentar otra vez."}), 429
 
     data = request.get_json(silent=True) or {}
     jornada = data.get('jornada')
@@ -1803,7 +1826,8 @@ def post_comment():
         conn.commit()
         return jsonify({"status": "ok"})
     except Exception as exc:
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        app.logger.exception("Error guardando comentario: %s", exc)
+        return jsonify({"status": "error", "message": "Error guardando el comentario. Intentalo de nuevo."}), 500
     finally:
         conn.close()
 
