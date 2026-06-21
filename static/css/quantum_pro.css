@@ -251,6 +251,11 @@ html, body {
     font-size: 0.62rem;
 }
 
+.topbar-login-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 .profile-link {
     appearance: none;
     border: 0;

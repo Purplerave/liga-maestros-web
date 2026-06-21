@@ -1175,7 +1175,9 @@ function updateAuthUI() {
     const navAuth = qs("user-profile-nav");
     if (!navAuth) return;
     if (!state.user) {
-        navAuth.innerHTML = `<a class="login-btn topbar-login-btn" href="/login/google">Entrar</a>`;
+        navAuth.innerHTML = state.data?.auth_enabled === false
+            ? `<span class="login-btn topbar-login-btn is-disabled" title="Google OAuth pendiente de configurar">Login off</span>`
+            : `<a class="login-btn topbar-login-btn" href="/login/google">Entrar</a>`;
         return;
     }
     const stats = state.data?.ranking_maestros?.[state.user.id] || { total: 0, jornada: 0 };
@@ -2488,7 +2490,9 @@ async function loadComments() {
     if (helper) {
         helper.innerHTML = state.user
             ? "Comentario de la jornada"
-            : `<a class="comment-login-link" href="/login/google">Entra con Google para comentar</a>`;
+            : state.data?.auth_enabled === false
+                ? "Login pendiente de configurar"
+                : `<a class="comment-login-link" href="/login/google">Entra con Google para comentar</a>`;
     }
 
     try {
