@@ -2740,7 +2740,7 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshData();
     setInterval(() => {
         refreshData({ auto: true });
-    }, 60000);
+    }, 120000);
 });
 
 function renderLiveTicker() {

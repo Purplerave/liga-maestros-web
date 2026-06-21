@@ -123,20 +123,6 @@ def is_admin_request():
 
 
 
-    for fmt in ("%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%SZ"):
-        try:
-            dt = datetime.strptime(raw, fmt)
-            if dt.tzinfo:
-                dt = dt.astimezone(ZoneInfo("Europe/Madrid"))
-            return dt.strftime("%Y-%m-%d %H:%M")
-        except Exception:
-            continue
-
-
-
-
-
-
 def fetch_feed_items(feed):
     req = urllib.request.Request(
         feed["url"],
@@ -938,6 +924,32 @@ def get_liga_data():
             "goles_local": gh,
             "goles_visitante": ga
         })
+
+    partidos_by_id = {}
+    for partido in partidos:
+        try:
+            partidos_by_id[int(partido.get("id"))] = partido
+        except (TypeError, ValueError):
+            continue
+    partidos = [
+        partidos_by_id.get(i, {
+            "id": i,
+            "local": "-",
+            "visitante": "-",
+            "logo_local": "",
+            "logo_visitante": "",
+            "marcador": "Pendiente",
+            "status": "NS",
+            "marcador_base": "",
+            "minuto_live": "",
+            "fecha_raw": "",
+            "hora": "-",
+            "signo_actual": "-",
+            "goles_local": None,
+            "goles_visitante": None
+        })
+        for i in range(1, 16)
+    ]
     
     standings_raw = conn.execute("SELECT * FROM clasificacion ORDER BY pos ASC").fetchall()
     standings = {"primera": [], "segunda": []}
