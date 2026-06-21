@@ -16,6 +16,15 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 
 - Rama principal: `main`.
 - Ultimos arreglos aplicados:
+  - `65fac90 Persist API rate limits in SQLite`
+    - rate limit de guardado de quiniela y comentarios pasa a SQLite con transaccion.
+    - `schema.sql` incluye `api_rate_limit`.
+  - `bcd0508 Cache contest payloads with database signature`
+    - `build_contest_payload` queda cacheado con firma de datos para reducir recalculos.
+  - `e1a8223 Add collector backups and stricter Q15 checks`
+    - `LIVE_COLLECTOR.py --backup-now` crea backup local de DB y JSON criticos.
+    - el colector hace backup diario local y retiene backups recientes.
+    - Quiniela15 incompleta deja de aplicarse a resultados.
   - `2c031d4 Improve live reliability and contest profile performance`
     - `get_contest_profile` pasa de varias reconstrucciones del ranking a una sola.
     - el contador diario de Highlightly se mueve a SQLite con transacciones `BEGIN IMMEDIATE`.
@@ -57,6 +66,7 @@ $env:SECRET_KEY='codex-local-check'
 python -m py_compile app.py LIVE_COLLECTOR.py AUDITAR_JORNADA_LIGA_MAESTROS.py
 node --check static/js/quantum_final.js
 pytest -q
+python LIVE_COLLECTOR.py --backup-now
 ```
 
 Para arrancar localmente, `SECRET_KEY` debe estar definida en `.env` o en el entorno.
@@ -103,11 +113,11 @@ Estos puntos son sobre codigo real. Estado tras `2c031d4`:
 ## Tareas de revision recomendadas
 
 1. Persistencia real de datos en produccion: disco Render o PostgreSQL.
-2. Backup diario de la DB y JSON criticos.
+2. Backup externo de la DB y JSON criticos fuera del filesystem de Render.
 3. Mantener `schema.sql` actualizado antes de migraciones.
-4. Cachear `build_contest_payload` e invalidar por cambios en predicciones/resultados.
-5. Convertir incompletos de Quiniela15 en alerta fuerte o error controlado del scraper.
-6. Mover rate limit de comentarios/guardado a SQLite si el uso publico crece.
+4. Revisar si el cache de `build_contest_payload` debe ser compartido entre workers con Redis/Postgres si el trafico crece.
+5. Convertir incompletos de Quiniela15 en alerta visible de UI/admin, ademas de health/probe/colector.
+6. Anadir tests de endpoints para comentarios, guardado y API de concurso.
 7. Reforzar tests de ranking, concurso y cierre de quinielas.
 8. Revisar OAuth Google y registro de usuarios en produccion.
 9. UX mobile/desktop.
