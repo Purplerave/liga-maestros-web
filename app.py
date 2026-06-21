@@ -51,6 +51,7 @@ ADMIN_EMAILS = {
 }
 HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT = int(os.getenv("HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT", "3"))
 HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS", "600"))
+GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
 
 # Configuración OAuth
 oauth = OAuth(app)
@@ -743,11 +744,15 @@ def load_match_info_for_jornada(jornada):
 
 @app.route('/login/google')
 def login():
+    if not GOOGLE_AUTH_ENABLED:
+        return "Google OAuth no configurado en variables de entorno.", 503
     redirect_uri = url_for('authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/authorize')
 def authorize():
+    if not GOOGLE_AUTH_ENABLED:
+        return redirect('/')
     token = google.authorize_access_token()
     user_info = token.get('userinfo')
     if user_info:
@@ -1260,7 +1265,8 @@ def get_liga_data():
         "match_info": match_info,
         "predicciones_actuales": preds,
         "consenso_pena": consenso,
-        "ranking_maestros": ranking
+        "ranking_maestros": ranking,
+        "auth_enabled": GOOGLE_AUTH_ENABLED
     })
 
 @app.route('/api/live/refresh', methods=['POST'])
