@@ -3950,7 +3950,7 @@ function coverDiscrepancyHtml() {
         <div class="cover-dispute-grid">
             <div><span>Programa</span><b>${escapeHtml(programSign || "-")}</b></div>
             <div><span>Maestros</span><b>${escapeHtml(masterSign || "-")}</b></div>
-            <div><span>La Pena</span><b>${escapeHtml(penaSign || "-")}</b><small>${Number(pena.total || 0)} votos</small></div>
+            <div><span>La Peña</span><b>${escapeHtml(penaSign || "-")}</b><small>${Number(pena.total || 0)} votos</small></div>
         </div>
         <div class="cover-dispute-bars">
             <span style="--w:${Number(pena.p1 || 0)}%"><b>1</b>${Number(pena.p1 || 0)}%</span>
@@ -3990,18 +3990,25 @@ function renderNewspaperCoverPageV3() {
     const jornada = state.data.jornada || state.jornada || "";
     const headline = liveCount
         ? `${liveCount} partido${liveCount === 1 ? "" : "s"} en directo`
-        : `Control J${escapeHtml(String(jornada || "-"))}`;
+        : `Jornada ${escapeHtml(String(jornada || "-"))} bajo control`;
+    const ticketState = saved ? "Boleto guardado" : "Boleto pendiente";
+    const liveLabel = liveCount ? `${liveCount} en vivo` : "sin directo";
     return `
         <section class="frontpage frontpage-v2 cover-control-room">
             <article class="frontpage-lead cover-hero-grid">
                 <div class="frontpage-photo frontpage-cover-visual cover-brand-card">
                     <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
                     <strong>1X2</strong>
-                    <span>La Pena contra los Maestros IA</span>
+                    <span>La Peña contra los Maestros IA</span>
                 </div>
                 <div class="frontpage-headline cover-command-card">
-                    <span>Jornada ${escapeHtml(String(jornada || "-"))}</span>
+                    <span>Portada · Jornada ${escapeHtml(String(jornada || "-"))}</span>
                     <h2>${escapeHtml(headline)}</h2>
+                    <div class="cover-status-rail" aria-label="Estado de la jornada">
+                        <b>${escapeHtml(ticketState)}</b>
+                        <b>${escapeHtml(liveLabel)}</b>
+                        <b>${escapeHtml(coverCloseLabel())}</b>
+                    </div>
                     ${coverProgramTicketHtml()}
                     <div class="frontpage-facts cover-score-strip">
                         <strong>${matches.length}<small>partidos</small></strong>
@@ -4023,7 +4030,7 @@ function renderNewspaperCoverPageV3() {
                 <article class="cover-panel cover-actions">
                     <button type="button" data-page-action="TICKET"><b>Jugar quiniela</b><span>Pag. 2</span></button>
                     <button type="button" data-page-action="LIVE"><b>Ver directo</b><span>Pag. 3</span></button>
-                    <button type="button" data-page-action="CONTEST"><b>La Pena</b><span>Pag. 6</span></button>
+                    <button type="button" data-page-action="CONTEST"><b>La Peña</b><span>Pag. 6</span></button>
                 </article>
             </div>
         </section>`;
