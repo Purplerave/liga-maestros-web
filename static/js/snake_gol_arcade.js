@@ -50,6 +50,7 @@
   let lastTime = 0;
   let accumulator = 0;
   let callbacks = [];
+  let runStartedAt = 0;
 
   let view = {
     w: 960,
@@ -187,6 +188,7 @@
     status = "ready";
     accumulator = 0;
     lastTime = performance.now();
+    runStartedAt = 0;
 
     rebuildSnake(direction);
     spawnFood();
@@ -206,6 +208,7 @@
 
     status = "running";
     lastTime = performance.now();
+    if (!runStartedAt) runStartedAt = lastTime;
     accumulator = 0;
     hideOverlay();
     updateHud();
@@ -233,6 +236,17 @@
 
   function getScore() {
     return score;
+  }
+
+  function getRunStats(reason = "") {
+    const now = performance.now();
+    return {
+      score,
+      level,
+      eaten,
+      reason,
+      duration_ms: runStartedAt ? Math.max(0, Math.round(now - runStartedAt)) : 0
+    };
   }
 
   function onGameOver(callback) {
@@ -489,7 +503,7 @@
 
     callbacks.forEach((cb) => {
       try {
-        cb({ score, level, reason });
+        cb(getRunStats(reason));
       } catch (error) {
         console.warn("SnakeGol onGameOver callback error:", error);
       }
@@ -1059,6 +1073,7 @@
     reset,
     pause,
     getScore,
+    getRunStats,
     onGameOver,
 
     // Preparadas para cambiar localStorage por API cuando lo conectes a Flask.

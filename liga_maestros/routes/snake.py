@@ -9,6 +9,38 @@ from ..db.migrations import ensure_snake_table
 bp = Blueprint("snake", __name__)
 
 
+def _expected_arcade_score(eaten):
+    score = 0
+    for _ in range(max(0, int(eaten or 0))):
+        level = (score // 72) + 1
+        score += 10 + level * 2
+    return score
+
+
+def _validate_arcade_score(score, data):
+    eaten_raw = data.get("eaten")
+    duration_raw = data.get("duration_ms")
+
+    if eaten_raw is None or duration_raw is None:
+        return score <= 200
+
+    try:
+        eaten = int(eaten_raw)
+        duration_ms = int(duration_raw)
+    except (TypeError, ValueError):
+        return False
+
+    if eaten < 0 or eaten > 500:
+        return False
+    if _expected_arcade_score(eaten) != score:
+        return False
+    if duration_ms < max(1500, eaten * 650):
+        return False
+    if duration_ms > 60 * 60 * 1000:
+        return False
+    return True
+
+
 @bp.route('/api/snake')
 def get_snake_scores():
     user = session.get("user") or {}
@@ -42,6 +74,8 @@ def post_snake_score():
         return jsonify({"status": "error", "message": "Puntuacion invalida."}), 400
     if score < 0 or score > 99999:
         return jsonify({"status": "error", "message": "Puntuacion fuera de rango."}), 400
+    if not _validate_arcade_score(score, data):
+        return jsonify({"status": "error", "message": "Puntuacion no valida para una partida real."}), 400
 
     conn = get_db()
     try:

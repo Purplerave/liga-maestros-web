@@ -27,7 +27,7 @@ def get_quiz_preguntas(jornada):
         conn.close()
 
 
-def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms=0):
+def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms=0, expected_question_ids=None):
     """
     Guarda las respuestas del usuario y devuelve el resultado.
     
@@ -49,6 +49,29 @@ def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms
             (jornada,)
         ).fetchall()
         preguntas_map = {int(p["id"]): p for p in preguntas}
+        expected_ids = [int(p["id"]) for p in preguntas]
+        if expected_question_ids and [int(pid) for pid in expected_question_ids] != expected_ids:
+            return {"error": "El intento del quiz no coincide con las preguntas actuales."}
+        if len(respuestas) != len(expected_ids):
+            return {"error": "Debes responder exactamente todas las preguntas del reto."}
+
+        seen_ids = []
+        normalized_answers = []
+        for resp in respuestas:
+            try:
+                pid = int(resp.get("pregunta_id", 0))
+            except (TypeError, ValueError):
+                return {"error": "Respuesta invalida."}
+            respuesta_user = str(resp.get("respuesta", "")).strip().upper()
+            if respuesta_user not in ("A", "B", "C"):
+                return {"error": "Respuesta invalida."}
+            seen_ids.append(pid)
+            normalized_answers.append({"pregunta_id": pid, "respuesta": respuesta_user})
+
+        if len(set(seen_ids)) != len(seen_ids):
+            return {"error": "No se admiten preguntas duplicadas."}
+        if sorted(seen_ids) != sorted(expected_ids):
+            return {"error": "Las respuestas no corresponden a este reto."}
         
         aciertos = 0
         puntos_total = 0
@@ -56,9 +79,11 @@ def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms
         racha_max = 0
         detalle = []
         
-        for resp in respuestas:
-            pid = int(resp.get("pregunta_id", 0))
-            respuesta_user = str(resp.get("respuesta", "")).strip().upper()
+        tiempo_total_ms = max(0, min(int(tiempo_total_ms or 0), 60 * 60 * 1000))
+
+        for resp in normalized_answers:
+            pid = resp["pregunta_id"]
+            respuesta_user = resp["respuesta"]
             pregunta = preguntas_map.get(pid)
             
             if not pregunta:

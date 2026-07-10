@@ -3548,6 +3548,37 @@ async function saveSnakeScore(options = {}) {
     }
 }
 
+async function saveSnakeArcadeScore(result = {}) {
+    const score = Number(result.score || 0);
+    if (!state.user || !score) return;
+    try {
+        const res = await fetch("/api/snake", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                score,
+                eaten: Number(result.eaten || 0),
+                level: Number(result.level || 1),
+                duration_ms: Number(result.duration_ms || 0),
+                reason: String(result.reason || "")
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== "ok") throw new Error(data.message || "No se pudo guardar.");
+        state.snake.savedScore = Math.max(Number(state.snake.savedScore || 0), score);
+        state.snake.best = Math.max(Number(state.snake.best || 0), score);
+        await loadSnakeRanking();
+    } catch (error) {
+        console.warn("Snake arcade score rejected:", error.message || error);
+    }
+}
+
+function bindSnakeArcadeServerSave() {
+    if (!window.SnakeGol || window.__snakeArcadeServerSaveBound) return;
+    window.__snakeArcadeServerSaveBound = true;
+    window.SnakeGol.onGameOver(saveSnakeArcadeScore);
+}
+
 function changeSnakeDirection(key) {
     const map = {
         ArrowUp: { x: 0, y: -1 }, w: { x: 0, y: -1 }, W: { x: 0, y: -1 },
@@ -4002,6 +4033,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hydrateCommentsPanel();
     bindEvents();
     drawSnakeGame();
+    bindSnakeArcadeServerSave();
     refreshData();
     setInterval(() => {
         refreshData({ auto: true });
