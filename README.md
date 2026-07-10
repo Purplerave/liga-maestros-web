@@ -5,7 +5,8 @@ Web Flask para gestionar una jornada de quiniela competitiva: Programa, Maestros
 ## Arranque local
 
 ```powershell
-cd C:\Users\Mortadelo\Desktop\QUINIELAs\LIGA_MAESTROS
+git clone https://github.com/Purplerave/liga-maestros-web.git
+cd liga-maestros-web
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt

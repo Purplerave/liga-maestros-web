@@ -26,13 +26,15 @@ jobs:
           pip install -r requirements.txt pytest ruff
 
       - name: Lint with ruff
-        run: ruff check app.py utils.py scoring.py config.py LIVE_COLLECTOR.py --select E,F,W --ignore E501,E741,F841
+        run: ruff check app.py scoring.py tests --select E,F,W --ignore E501,E741,F841
 
       - name: Python syntax check
-        run: python -m py_compile app.py utils.py scoring.py config.py LIVE_COLLECTOR.py AUDITAR_JORNADA_LIGA_MAESTROS.py SCRAPE_QUINIELA15_DIRECTO.py IMPORTAR_PROGRAMA_JORNADA.py
+        run: python -m py_compile app.py utils.py scoring.py config.py LIVE_COLLECTOR.py AUDITAR_JORNADA_LIGA_MAESTROS.py SCRAPE_QUINIELA15_DIRECTO.py IMPORTAR_PROGRAMA_JORNADA.py liga_maestros/routes/snake.py liga_maestros/routes/quiz.py liga_maestros/services/quiz.py
 
       - name: JavaScript syntax check
-        run: node --check static/js/quantum_final.js
+        run: |
+          node --check static/js/quantum_final.js
+          node --check static/js/snake_gol_arcade.js
 
       - name: Tests
         run: pytest -q
