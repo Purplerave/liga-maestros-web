@@ -4026,17 +4026,45 @@ function coverProgramTicketHtml() {
         </div>`;
 }
 
+function coverQuinielaStatusHtml(matches, finished, saved, liveCount) {
+    const nextIdx = matches.findIndex(match => !isFinishedStatus(match.status));
+    const nextMatch = nextIdx >= 0 ? matches[nextIdx] : null;
+    const nextFixture = nextMatch
+        ? `#${nextIdx + 1} ${getShortName(nextMatch.local)} vs ${getShortName(nextMatch.visitante)}`
+        : "Jornada completada";
+    const nextTime = nextMatch
+        ? formatKickoffShort(nextMatch.fecha_raw || nextMatch.fecha, nextMatch.scheduled || nextMatch.hora || nextMatch.time)
+        : "";
+    const rows = [
+        ["Quiniela", `${finished}/15 terminados`],
+        ["En juego", liveCount ? `${liveCount} de la quiniela` : "sin partidos de quiniela"],
+        ["Tu boleto", saved ? "guardado" : "pendiente"],
+        ["Próximo", nextTime ? `${nextFixture} · ${nextTime}` : nextFixture],
+    ];
+    return `
+        <div class="cover-status-board">
+            ${rows.map(([label, value]) => `
+                <div class="cover-status-row">
+                    <span>${escapeHtml(label)}</span>
+                    <b>${escapeHtml(value)}</b>
+                </div>
+            `).join("")}
+        </div>`;
+}
+
 function renderNewspaperCoverPageV3() {
     const matches = state.data.partidos || [];
-    const liveCount = getLiveLeagueMatches().length;
+    const liveCount = matches.filter(match => isLiveStatus(match.status) || isLiveMatch(match)).length;
     const finished = matches.filter(match => isFinishedStatus(match.status)).length;
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
     const headline = liveCount
-        ? `${liveCount} partido${liveCount === 1 ? "" : "s"} en directo`
+        ? `${liveCount} partido${liveCount === 1 ? "" : "s"} de quiniela en directo`
+        : finished
+            ? `${finished} de 15 partidos resueltos`
         : `Jornada ${escapeHtml(String(jornada || "-"))} bajo control`;
     const ticketState = saved ? "Boleto guardado" : "Boleto pendiente";
-    const liveLabel = liveCount ? `${liveCount} en vivo` : "sin directo";
+    const liveLabel = liveCount ? `${liveCount} de quiniela` : `${finished}/15 resueltos`;
     return `
         <section class="frontpage frontpage-v2 cover-control-room">
             <article class="frontpage-lead cover-hero-grid">
@@ -4065,9 +4093,9 @@ function renderNewspaperCoverPageV3() {
                     <div class="cover-panel-title"><span>Podio</span><b>${state.contest?.jornada?.rows?.length ? "jornada" : "general"}</b></div>
                     ${coverPodiumHtml()}
                 </article>
-                <article class="cover-panel cover-dispute">
-                    <div class="cover-panel-title"><span>Partido caliente</span><b>mayor discrepancia</b></div>
-                    ${coverDiscrepancyHtml()}
+                <article class="cover-panel cover-quiniela-status">
+                    <div class="cover-panel-title"><span>Estado quiniela</span><b>jornada oficial</b></div>
+                    ${coverQuinielaStatusHtml(matches, finished, saved, liveCount)}
                 </article>
                 <article class="cover-panel cover-actions">
                     <button type="button" data-page-action="TICKET"><b>Jugar quiniela</b><span>Pag. 2</span></button>

@@ -2942,6 +2942,44 @@ body.newspaper-ui.quiniela-focus .cover-ticket-more b {
     color: rgba(246, 239, 225, 0.74) !important;
 }
 
+body.newspaper-ui.quiniela-focus .cover-status-board {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-row {
+    display: grid !important;
+    min-width: 0 !important;
+    min-height: 54px !important;
+    align-content: center !important;
+    gap: 4px !important;
+    padding: 8px 10px !important;
+    border: 1px solid rgba(45, 167, 216, 0.32) !important;
+    background:
+        linear-gradient(90deg, rgba(45, 167, 216, 0.12), rgba(2, 6, 23, 0.72)) !important;
+    font-family: "Rajdhani", "Inter", sans-serif !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-row span {
+    color: var(--news-gold) !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-row b {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: var(--news-paper) !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+}
+
 body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
     display: grid !important;
     align-content: center !important;
@@ -2959,6 +2997,164 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
     font-family: "Rajdhani", "Inter", sans-serif !important;
     font-size: 0.58rem !important;
     letter-spacing: 0.1em !important;
+}
+
+/* Delight pass: gentle motion and tactile feedback, without turning the cover into noise. */
+@keyframes coverSoftIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes coverSheen {
+    from {
+        transform: translateX(-120%);
+    }
+    to {
+        transform: translateX(120%);
+    }
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cover-control-room {
+    animation: coverSoftIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card::after,
+body.newspaper-ui.quiniela-focus .cover-command-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 0%, rgba(246, 239, 225, 0.08) 46%, transparent 58%);
+    opacity: 0.72;
+    animation: coverSheen 6s ease-in-out infinite;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-card,
+body.newspaper-ui.quiniela-focus .cover-panel,
+body.newspaper-ui.quiniela-focus .cover-ticket-card {
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-card:hover,
+body.newspaper-ui.quiniela-focus .cover-panel:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(217, 169, 40, 0.52) !important;
+    box-shadow: inset 0 0 0 1px rgba(45, 167, 216, 0.18), 0 18px 38px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-score {
+    box-shadow: inset 0 0 18px rgba(217, 169, 40, 0.12), 0 0 22px rgba(217, 169, 40, 0.08) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-score b {
+    text-shadow: 0 0 18px rgba(246, 239, 225, 0.22) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-card button,
+body.newspaper-ui.quiniela-focus .cover-spotlight-actions button,
+body.newspaper-ui.quiniela-focus .cover-actions button {
+    transition: transform 150ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-card button:hover,
+body.newspaper-ui.quiniela-focus .cover-spotlight-actions button:hover,
+body.newspaper-ui.quiniela-focus .cover-actions button:hover {
+    transform: translateY(-1px) !important;
+    border-color: rgba(217, 169, 40, 0.7) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-row:hover {
+    border-color: rgba(45, 167, 216, 0.62) !important;
+    background: linear-gradient(90deg, rgba(45, 167, 216, 0.18), rgba(2, 6, 23, 0.74)) !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    position: relative !important;
+    transition: background 160ms ease, color 160ms ease !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+    left: 10px;
+    height: 2px;
+    background: var(--news-gold);
+}
+
+/* Handcrafted sports-paper accent: warmer typography and soft 3D depth. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title {
+    font-family: "Patrick Hand", "Rajdhani", "Inter", sans-serif !important;
+    font-size: clamp(1.8rem, 2.5vw, 2.7rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85) !important;
+    transform: rotate(-0.35deg) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card > span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker,
+body.newspaper-ui.quiniela-focus .cover-panel-title b {
+    font-family: "Patrick Hand", "Rajdhani", "Inter", sans-serif !important;
+    letter-spacing: 0.09em !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card > span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker {
+    display: inline-flex !important;
+    width: fit-content !important;
+    padding: 1px 7px !important;
+    background: linear-gradient(90deg, rgba(217, 169, 40, 0.22), rgba(217, 169, 40, 0.04)) !important;
+    box-shadow: inset 0 -2px 0 rgba(217, 169, 40, 0.42) !important;
+    transform: rotate(-0.45deg) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-command-card,
+body.newspaper-ui.quiniela-focus .cover-panel {
+    transform-style: preserve-3d !important;
+    will-change: transform !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-card:hover {
+    transform: perspective(900px) rotateX(1.2deg) rotateY(-1.4deg) translateY(-3px) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card:hover,
+body.newspaper-ui.quiniela-focus .cover-panel:hover {
+    transform: perspective(1000px) rotateX(0.7deg) translateY(-2px) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-team .team-badge,
+body.newspaper-ui.quiniela-focus .cover-ticket-strip span,
+body.newspaper-ui.quiniela-focus .cover-status-row {
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-team:hover .team-badge,
+body.newspaper-ui.quiniela-focus .cover-ticket-strip span:hover,
+body.newspaper-ui.quiniela-focus .cover-status-row:hover {
+    transform: translateY(-2px) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-team:hover .team-badge {
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.44), 0 0 18px rgba(45, 167, 216, 0.22) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cover-control-room,
+    body.newspaper-ui.quiniela-focus .cover-brand-card::after,
+    body.newspaper-ui.quiniela-focus .cover-command-card::after {
+        animation: none !important;
+    }
 }
 
 @media (max-width: 1280px) {
