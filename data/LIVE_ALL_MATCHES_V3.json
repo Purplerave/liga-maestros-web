@@ -21,5 +21,2735 @@
     "competition_name": "SEGUNDA DIVISION",
     "added": "2026-06-20 21:00:00",
     "scheduled": "21:00"
+  },
+  {
+    "id": 1272863610,
+    "fixture_id": 1272863610,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "4 - 0",
+    "home": {
+      "name": "Vaasan Palloseura",
+      "logo": "https://highlightly.net/soccer/images/teams/553934.png"
+    },
+    "away": {
+      "name": "IFK Mariehamn",
+      "logo": "https://highlightly.net/soccer/images/teams/500321.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/553934.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/500321.png",
+    "competition": {
+      "name": "VEIKKAUSLIIGA"
+    },
+    "competition_name": "VEIKKAUSLIIGA",
+    "added": "2026-07-04 17:00:00",
+    "scheduled": "17:00"
+  },
+  {
+    "id": 1272861908,
+    "fixture_id": 1272861908,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 1",
+    "home": {
+      "name": "FF Jaro",
+      "logo": "https://highlightly.net/soccer/images/teams/1766609.png"
+    },
+    "away": {
+      "name": "Ilves",
+      "logo": "https://highlightly.net/soccer/images/teams/990497.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1766609.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/990497.png",
+    "competition": {
+      "name": "VEIKKAUSLIIGA"
+    },
+    "competition_name": "VEIKKAUSLIIGA",
+    "added": "2026-07-04 16:00:00",
+    "scheduled": "16:00"
+  },
+  {
+    "id": 1272862759,
+    "fixture_id": 1272862759,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "3 - 1",
+    "home": {
+      "name": "SJK Seinajoki",
+      "logo": "https://highlightly.net/soccer/images/teams/587123.png"
+    },
+    "away": {
+      "name": "Turku PS",
+      "logo": "https://highlightly.net/soccer/images/teams/994752.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/587123.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/994752.png",
+    "competition": {
+      "name": "VEIKKAUSLIIGA"
+    },
+    "competition_name": "VEIKKAUSLIIGA",
+    "added": "2026-07-04 16:00:00",
+    "scheduled": "16:00"
+  },
+  {
+    "id": 1272861057,
+    "fixture_id": 1272861057,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 0",
+    "home": {
+      "name": "FC Lahti",
+      "logo": "https://highlightly.net/soccer/images/teams/993050.png"
+    },
+    "away": {
+      "name": "IF Gnistan",
+      "logo": "https://highlightly.net/soccer/images/teams/1772566.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/993050.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1772566.png",
+    "competition": {
+      "name": "VEIKKAUSLIIGA"
+    },
+    "competition_name": "VEIKKAUSLIIGA",
+    "added": "2026-07-04 14:00:00",
+    "scheduled": "14:00"
+  },
+  {
+    "id": 1280120938,
+    "fixture_id": 1280120938,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 3",
+    "home": {
+      "name": "EIF",
+      "logo": "https://highlightly.net/soccer/images/teams/1769162.png"
+    },
+    "away": {
+      "name": "PK-35",
+      "logo": "https://highlightly.net/soccer/images/teams/9080103.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1769162.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/9080103.png",
+    "competition": {
+      "name": "YKKOSLIIGA"
+    },
+    "competition_name": "YKKOSLIIGA",
+    "added": "2026-07-04 15:00:00",
+    "scheduled": "15:00"
+  },
+  {
+    "id": 1271559878,
+    "fixture_id": 1271559878,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 1",
+    "home": {
+      "name": "Degerfors IF",
+      "logo": "https://highlightly.net/soccer/images/teams/1849156.png"
+    },
+    "away": {
+      "name": "Malmö FF",
+      "logo": "https://highlightly.net/soccer/images/teams/319909.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1849156.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/319909.png",
+    "competition": {
+      "name": "ALLSVENSKAN"
+    },
+    "competition_name": "ALLSVENSKAN",
+    "added": "2026-07-04 15:00:00",
+    "scheduled": "15:00"
+  },
+  {
+    "id": 1271563282,
+    "fixture_id": 1271563282,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 3",
+    "home": {
+      "name": "Halmstad",
+      "logo": "https://highlightly.net/soccer/images/teams/652650.png"
+    },
+    "away": {
+      "name": "Vasteras SK FK",
+      "logo": "https://highlightly.net/soccer/images/teams/1907875.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/652650.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1907875.png",
+    "competition": {
+      "name": "ALLSVENSKAN"
+    },
+    "competition_name": "ALLSVENSKAN",
+    "added": "2026-07-04 15:00:00",
+    "scheduled": "15:00"
+  },
+  {
+    "id": 1280121789,
+    "fixture_id": 1280121789,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 1",
+    "home": {
+      "name": "MP",
+      "logo": "https://highlightly.net/soccer/images/teams/7808709.png"
+    },
+    "away": {
+      "name": "haka",
+      "logo": "https://highlightly.net/soccer/images/teams/1770864.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/7808709.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1770864.png",
+    "competition": {
+      "name": "Ykkösliiga"
+    },
+    "competition_name": "Ykkösliiga",
+    "country": "Finland",
+    "country_code": "FI",
+    "added": "2026-07-05 17:30:00",
+    "scheduled": "17:30"
+  },
+  {
+    "id": 1271560729,
+    "fixture_id": 1271560729,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 2",
+    "home": {
+      "name": "IF Elfsborg",
+      "logo": "https://highlightly.net/soccer/images/teams/317356.png"
+    },
+    "away": {
+      "name": "Hammarby FF",
+      "logo": "https://highlightly.net/soccer/images/teams/309697.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/317356.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/309697.png",
+    "competition": {
+      "name": "ALLSVENSKAN"
+    },
+    "competition_name": "ALLSVENSKAN",
+    "added": "2026-07-05 16:30:00",
+    "scheduled": "16:30"
+  },
+  {
+    "id": 1271561580,
+    "fixture_id": 1271561580,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 2",
+    "home": {
+      "name": "IFK Göteborg",
+      "logo": "https://highlightly.net/soccer/images/teams/312250.png"
+    },
+    "away": {
+      "name": "AIK Stockholm",
+      "logo": "https://highlightly.net/soccer/images/teams/321611.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/312250.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/321611.png",
+    "competition": {
+      "name": "ALLSVENSKAN"
+    },
+    "competition_name": "ALLSVENSKAN",
+    "added": "2026-07-05 14:00:00",
+    "scheduled": "14:00"
+  },
+  {
+    "id": 1271564133,
+    "fixture_id": 1271564133,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "3 - 0",
+    "home": {
+      "name": "Kalmar FF",
+      "logo": "https://highlightly.net/soccer/images/teams/319058.png"
+    },
+    "away": {
+      "name": "Örgryte IS",
+      "logo": "https://highlightly.net/soccer/images/teams/1844050.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/319058.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1844050.png",
+    "competition": {
+      "name": "ALLSVENSKAN"
+    },
+    "competition_name": "ALLSVENSKAN",
+    "added": "2026-07-05 14:00:00",
+    "scheduled": "14:00"
+  },
+  {
+    "id": 1297991938,
+    "fixture_id": 1297991938,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "City SC",
+      "logo": null
+    },
+    "away": {
+      "name": "Redlands",
+      "logo": "https://highlightly.net/soccer/images/teams/18116021.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/18116021.png",
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 23:30:00",
+    "scheduled": "23:30"
+  },
+  {
+    "id": 1314354966,
+    "fixture_id": 1314354966,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Unión Española",
+      "logo": "https://highlightly.net/soccer/images/teams/1975955.png"
+    },
+    "away": {
+      "name": "O'Higgins",
+      "logo": "https://highlightly.net/soccer/images/teams/1975104.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1975955.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1975104.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 23:30:00",
+    "scheduled": "23:30"
+  },
+  {
+    "id": 1305486695,
+    "fixture_id": 1305486695,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Halifax Tides",
+      "logo": null
+    },
+    "away": {
+      "name": "AFC Toronto",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "NSL"
+    },
+    "competition_name": "NSL",
+    "country": "Canada",
+    "country_code": "CA",
+    "added": "2026-07-05 23:00:00",
+    "scheduled": "23:00"
+  },
+  {
+    "id": 1283695989,
+    "fixture_id": 1283695989,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Chicago Red Stars Women",
+      "logo": "https://highlightly.net/soccer/images/teams/2551231.png"
+    },
+    "away": {
+      "name": "Utah Royals Women",
+      "logo": "https://highlightly.net/soccer/images/teams/2557188.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2551231.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2557188.png",
+    "competition": {
+      "name": "NWSL Women"
+    },
+    "competition_name": "NWSL Women",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 23:00:00",
+    "scheduled": "23:00"
+  },
+  {
+    "id": 1297985130,
+    "fixture_id": 1297985130,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Virginia Marauders",
+      "logo": "https://highlightly.net/soccer/images/teams/18121127.png"
+    },
+    "away": {
+      "name": "Bethesda Sc",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/18121127.png",
+    "away_logo": null,
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 23:00:00",
+    "scheduled": "23:00"
+  },
+  {
+    "id": 1297986832,
+    "fixture_id": 1297986832,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Ballard",
+      "logo": "https://highlightly.net/soccer/images/teams/16069366.png"
+    },
+    "away": {
+      "name": "Tacoma Stars",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/16069366.png",
+    "away_logo": null,
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 23:00:00",
+    "scheduled": "23:00"
+  },
+  {
+    "id": 1297988534,
+    "fixture_id": 1297988534,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "West Seattle Junction",
+      "logo": null
+    },
+    "away": {
+      "name": "Oly Town",
+      "logo": "https://highlightly.net/soccer/images/teams/16088088.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/16088088.png",
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 23:00:00",
+    "scheduled": "23:00"
+  },
+  {
+    "id": 1287734835,
+    "fixture_id": 1287734835,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Houston Dynamo II",
+      "logo": "https://highlightly.net/soccer/images/teams/16010647.png"
+    },
+    "away": {
+      "name": "Minnesota United II",
+      "logo": "https://highlightly.net/soccer/images/teams/16011498.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/16010647.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/16011498.png",
+    "competition": {
+      "name": "MLS Next Pro"
+    },
+    "competition_name": "MLS Next Pro",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 22:30:00",
+    "scheduled": "22:30"
+  },
+  {
+    "id": 1298133204,
+    "fixture_id": 1298133204,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Eagle FC",
+      "logo": null
+    },
+    "away": {
+      "name": "West Chester United",
+      "logo": "https://highlightly.net/soccer/images/teams/7691271.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/7691271.png",
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1319706905,
+    "fixture_id": 1319706905,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Búzios",
+      "logo": null
+    },
+    "away": {
+      "name": "Itaborai Profute",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Carioca Série C"
+    },
+    "competition_name": "Carioca Série C",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1319708607,
+    "fixture_id": 1319708607,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Ceres",
+      "logo": null
+    },
+    "away": {
+      "name": "Brescia Clube",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Carioca Série C"
+    },
+    "competition_name": "Carioca Série C",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328265412,
+    "fixture_id": 1328265412,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Fundación Lara Deportiva",
+      "logo": null
+    },
+    "away": {
+      "name": "Caracas FC",
+      "logo": "https://highlightly.net/soccer/images/teams/2390392.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/2390392.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1319709458,
+    "fixture_id": 1319709458,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Independente Rj",
+      "logo": null
+    },
+    "away": {
+      "name": "Mageense",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Carioca Série C"
+    },
+    "competition_name": "Carioca Série C",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328263710,
+    "fixture_id": 1328263710,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Club Atletico Barinas",
+      "logo": null
+    },
+    "away": {
+      "name": "Atlético El Vigía",
+      "logo": "https://highlightly.net/soccer/images/teams/2410816.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/2410816.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328264561,
+    "fixture_id": 1328264561,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Atletico Avila Fc",
+      "logo": null
+    },
+    "away": {
+      "name": "Marítimo",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328262859,
+    "fixture_id": 1328262859,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Academia Anzoátegui",
+      "logo": null
+    },
+    "away": {
+      "name": "Petare",
+      "logo": "https://highlightly.net/soccer/images/teams/2428687.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/2428687.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328266263,
+    "fixture_id": 1328266263,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Dinamo de Puerto La Cruz",
+      "logo": "https://highlightly.net/soccer/images/teams/2432942.png"
+    },
+    "away": {
+      "name": "Mineros de Guayana",
+      "logo": "https://highlightly.net/soccer/images/teams/2404008.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2432942.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2404008.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328686657,
+    "fixture_id": 1328686657,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Tacuarembó",
+      "logo": "https://highlightly.net/soccer/images/teams/2021058.png"
+    },
+    "away": {
+      "name": "Cerrito",
+      "logo": "https://highlightly.net/soccer/images/teams/2015101.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2021058.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2015101.png",
+    "competition": {
+      "name": "Segunda División"
+    },
+    "competition_name": "Segunda División",
+    "country": "Uruguay",
+    "country_code": "UY",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328267965,
+    "fixture_id": 1328267965,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Deportivo Lara",
+      "logo": "https://highlightly.net/soccer/images/teams/2393796.png"
+    },
+    "away": {
+      "name": "Trujillanos FC",
+      "logo": "https://highlightly.net/soccer/images/teams/2396349.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2393796.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2396349.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328268816,
+    "fixture_id": 1328268816,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Monagas SC",
+      "logo": "https://highlightly.net/soccer/images/teams/2392945.png"
+    },
+    "away": {
+      "name": "Bolívar",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2392945.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328269667,
+    "fixture_id": 1328269667,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Urena SC",
+      "logo": "https://highlightly.net/soccer/images/teams/2397200.png"
+    },
+    "away": {
+      "name": "Rayo Zuliano",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2397200.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1314354115,
+    "fixture_id": 1314354115,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Deportes Santa Cruz",
+      "logo": "https://highlightly.net/soccer/images/teams/1997230.png"
+    },
+    "away": {
+      "name": "A. Italiano",
+      "logo": "https://highlightly.net/soccer/images/teams/1982763.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1997230.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1982763.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328267114,
+    "fixture_id": 1328267114,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Real Frontera",
+      "logo": "https://highlightly.net/soccer/images/teams/2423581.png"
+    },
+    "away": {
+      "name": "Zamora",
+      "logo": "https://highlightly.net/soccer/images/teams/2388690.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2423581.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2388690.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1328270518,
+    "fixture_id": 1328270518,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Yaracuyanos FC",
+      "logo": "https://highlightly.net/soccer/images/teams/2408263.png"
+    },
+    "away": {
+      "name": "Aragua FC",
+      "logo": "https://highlightly.net/soccer/images/teams/2398051.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2408263.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2398051.png",
+    "competition": {
+      "name": "Copa Venezuela"
+    },
+    "competition_name": "Copa Venezuela",
+    "country": "Venezuela",
+    "country_code": "VE",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1297985981,
+    "fixture_id": 1297985981,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Project 51O",
+      "logo": "https://highlightly.net/soccer/images/teams/16091492.png"
+    },
+    "away": {
+      "name": "Davis Legacy",
+      "logo": "https://highlightly.net/soccer/images/teams/16078727.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/16091492.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/16078727.png",
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1303641727,
+    "fixture_id": 1303641727,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Colchagua",
+      "logo": "https://highlightly.net/soccer/images/teams/4794467.png"
+    },
+    "away": {
+      "name": "Lota Schwager",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/4794467.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Segunda División"
+    },
+    "competition_name": "Segunda División",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1334453884,
+    "fixture_id": 1334453884,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Brazil",
+      "logo": "https://highlightly.net/soccer/images/teams/5890.png"
+    },
+    "away": {
+      "name": "Norway",
+      "logo": "https://highlightly.net/soccer/images/teams/928374.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/5890.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/928374.png",
+    "competition": {
+      "name": "World Cup"
+    },
+    "competition_name": "World Cup",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 22:00:00",
+    "scheduled": "22:00"
+  },
+  {
+    "id": 1275323851,
+    "fixture_id": 1275323851,
+    "status": "IN PLAY",
+    "time": "24",
+    "score": "1 - 0",
+    "home": {
+      "name": "Central Norte",
+      "logo": "https://highlightly.net/soccer/images/teams/1661085.png"
+    },
+    "away": {
+      "name": "San Miguel FC",
+      "logo": "https://highlightly.net/soccer/images/teams/7131313.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1661085.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/7131313.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:30:00",
+    "scheduled": "21:30"
+  },
+  {
+    "id": 1275328957,
+    "fixture_id": 1275328957,
+    "status": "IN PLAY",
+    "time": "25",
+    "score": "0 - 0",
+    "home": {
+      "name": "Deportivo Maipú",
+      "logo": "https://highlightly.net/soccer/images/teams/1663638.png"
+    },
+    "away": {
+      "name": "Agropecuario",
+      "logo": "https://highlightly.net/soccer/images/teams/393946.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1663638.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/393946.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:30:00",
+    "scheduled": "21:30"
+  },
+  {
+    "id": 1275330659,
+    "fixture_id": 1275330659,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 1",
+    "home": {
+      "name": "Midland",
+      "logo": "https://highlightly.net/soccer/images/teams/1671297.png"
+    },
+    "away": {
+      "name": "Gimnasia Jujuy",
+      "logo": "https://highlightly.net/soccer/images/teams/408413.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1671297.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/408413.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302413734,
+    "fixture_id": 1302413734,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "1 - 0",
+    "home": {
+      "name": "Sportivo Belgrano",
+      "logo": "https://highlightly.net/soccer/images/teams/1673850.png"
+    },
+    "away": {
+      "name": "Independiente de Chivilcoy",
+      "logo": "https://highlightly.net/soccer/images/teams/1668744.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1673850.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1668744.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1314352413,
+    "fixture_id": 1314352413,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 0",
+    "home": {
+      "name": "Ñublense",
+      "logo": "https://highlightly.net/soccer/images/teams/1989571.png"
+    },
+    "away": {
+      "name": "Curicó Unido",
+      "logo": "https://highlightly.net/soccer/images/teams/1971700.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1989571.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1971700.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1275334063,
+    "fixture_id": 1275334063,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 1",
+    "home": {
+      "name": "San Martín San Juan",
+      "logo": "https://highlightly.net/soccer/images/teams/393095.png"
+    },
+    "away": {
+      "name": "Chacarita Juniors",
+      "logo": "https://highlightly.net/soccer/images/teams/381181.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/393095.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/381181.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302411181,
+    "fixture_id": 1302411181,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 0",
+    "home": {
+      "name": "San Martín Formosa",
+      "logo": "https://highlightly.net/soccer/images/teams/1647469.png"
+    },
+    "away": {
+      "name": "Juventud Antoniana",
+      "logo": "https://highlightly.net/soccer/images/teams/1669595.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1647469.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1669595.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1314349860,
+    "fixture_id": 1314349860,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "2 - 1",
+    "home": {
+      "name": "Cobresal",
+      "logo": "https://highlightly.net/soccer/images/teams/1984465.png"
+    },
+    "away": {
+      "name": "Cobreloa",
+      "logo": "https://highlightly.net/soccer/images/teams/1985316.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1984465.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1985316.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302403522,
+    "fixture_id": 1302403522,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 0",
+    "home": {
+      "name": "Gimnasia Chivilcoy",
+      "logo": null
+    },
+    "away": {
+      "name": "El Linqueño",
+      "logo": "https://highlightly.net/soccer/images/teams/17906675.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/17906675.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1275323000,
+    "fixture_id": 1275323000,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 1",
+    "home": {
+      "name": "Atletico Mitre",
+      "logo": "https://highlightly.net/soccer/images/teams/397350.png"
+    },
+    "away": {
+      "name": "All Boys",
+      "logo": "https://highlightly.net/soccer/images/teams/395648.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/397350.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/395648.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302412032,
+    "fixture_id": 1302412032,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "1 - 0",
+    "home": {
+      "name": "San Martín de Mendoza",
+      "logo": "https://highlightly.net/soccer/images/teams/17907526.png"
+    },
+    "away": {
+      "name": "Deportivo Rincón",
+      "logo": "https://highlightly.net/soccer/images/teams/1667893.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/17907526.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1667893.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1297987683,
+    "fixture_id": 1297987683,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "1 - 1",
+    "home": {
+      "name": "St. Croix",
+      "logo": "https://highlightly.net/soccer/images/teams/16093194.png"
+    },
+    "away": {
+      "name": "Edgewater Castle",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/16093194.png",
+    "away_logo": null,
+    "competition": {
+      "name": "USL League Two"
+    },
+    "competition_name": "USL League Two",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302414585,
+    "fixture_id": 1302414585,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 1",
+    "home": {
+      "name": "Tucuman Central",
+      "logo": null
+    },
+    "away": {
+      "name": "Sol de América",
+      "logo": "https://highlightly.net/soccer/images/teams/3389466.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/3389466.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1301287861,
+    "fixture_id": 1301287861,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 0",
+    "home": {
+      "name": "Real San Joaquín",
+      "logo": "https://highlightly.net/soccer/images/teams/15981713.png"
+    },
+    "away": {
+      "name": "Trasandino",
+      "logo": "https://highlightly.net/soccer/images/teams/4805530.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/15981713.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/4805530.png",
+    "competition": {
+      "name": "Segunda División"
+    },
+    "competition_name": "Segunda División",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1314350711,
+    "fixture_id": 1314350711,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "0 - 0",
+    "home": {
+      "name": "Deportes Puerto Montt",
+      "logo": "https://highlightly.net/soccer/images/teams/1993826.png"
+    },
+    "away": {
+      "name": "Huachipato",
+      "logo": "https://highlightly.net/soccer/images/teams/1981912.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1993826.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1981912.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1314353264,
+    "fixture_id": 1314353264,
+    "status": "IN PLAY",
+    "time": "HT",
+    "score": "1 - 0",
+    "home": {
+      "name": "Universidad de Concepción",
+      "logo": "https://highlightly.net/soccer/images/teams/1978508.png"
+    },
+    "away": {
+      "name": "Rangers de Talca",
+      "logo": "https://highlightly.net/soccer/images/teams/1995528.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1978508.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1995528.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 21:00:00",
+    "scheduled": "21:00"
+  },
+  {
+    "id": 1302402671,
+    "fixture_id": 1302402671,
+    "status": "IN PLAY",
+    "time": "68",
+    "score": "1 - 0",
+    "home": {
+      "name": "Boca Unidos",
+      "logo": "https://highlightly.net/soccer/images/teams/398201.png"
+    },
+    "away": {
+      "name": "Sarmiento Resistencia",
+      "logo": "https://highlightly.net/soccer/images/teams/1662787.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/398201.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1662787.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1302405224,
+    "fixture_id": 1302405224,
+    "status": "IN PLAY",
+    "time": "71",
+    "score": "1 - 1",
+    "home": {
+      "name": "Defensores de Belgrano VR",
+      "logo": "https://highlightly.net/soccer/images/teams/2065310.png"
+    },
+    "away": {
+      "name": "Atletico Escobar",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2065310.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1275324702,
+    "fixture_id": 1275324702,
+    "status": "IN PLAY",
+    "time": "68",
+    "score": "1 - 1",
+    "home": {
+      "name": "Chaco For Ever",
+      "logo": "https://highlightly.net/soccer/images/teams/1656830.png"
+    },
+    "away": {
+      "name": "Acassuso",
+      "logo": "https://highlightly.net/soccer/images/teams/2064459.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1656830.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2064459.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1275329808,
+    "fixture_id": 1275329808,
+    "status": "IN PLAY",
+    "time": "61",
+    "score": "2 - 1",
+    "home": {
+      "name": "Ferro Carril Oeste",
+      "logo": "https://highlightly.net/soccer/images/teams/400754.png"
+    },
+    "away": {
+      "name": "San Telmo",
+      "logo": "https://highlightly.net/soccer/images/teams/1644916.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/400754.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1644916.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1275332361,
+    "fixture_id": 1275332361,
+    "status": "IN PLAY",
+    "time": "65",
+    "score": "0 - 1",
+    "home": {
+      "name": "Patronato",
+      "logo": "https://highlightly.net/soccer/images/teams/378628.png"
+    },
+    "away": {
+      "name": "San Martín de Tucumán",
+      "logo": "https://highlightly.net/soccer/images/teams/413519.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/378628.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/413519.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1302404373,
+    "fixture_id": 1302404373,
+    "status": "IN PLAY",
+    "time": "63",
+    "score": "2 - 1",
+    "home": {
+      "name": "Cipolletti",
+      "logo": "https://highlightly.net/soccer/images/teams/1659383.png"
+    },
+    "away": {
+      "name": "Argentino Monte Maíz",
+      "logo": "https://highlightly.net/soccer/images/teams/15968948.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1659383.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/15968948.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:30:00",
+    "scheduled": "20:30"
+  },
+  {
+    "id": 1313649487,
+    "fixture_id": 1313649487,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Jacobina",
+      "logo": "https://highlightly.net/soccer/images/teams/6687942.png"
+    },
+    "away": {
+      "name": "Feira Fc",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/6687942.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Baiano - 2"
+    },
+    "competition_name": "Baiano - 2",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1305485844,
+    "fixture_id": 1305485844,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Ottawa Rapid",
+      "logo": null
+    },
+    "away": {
+      "name": "Calgary Wild",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "NSL"
+    },
+    "competition_name": "NSL",
+    "country": "Canada",
+    "country_code": "CA",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1323091332,
+    "fixture_id": 1323091332,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Macva",
+      "logo": "https://highlightly.net/soccer/images/teams/2244871.png"
+    },
+    "away": {
+      "name": "Mladost Lučani",
+      "logo": "https://highlightly.net/soccer/images/teams/595633.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2244871.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/595633.png",
+    "competition": {
+      "name": "Friendlies Clubs"
+    },
+    "competition_name": "Friendlies Clubs",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1327902035,
+    "fixture_id": 1327902035,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Atl. Andahuaylas Women",
+      "logo": null
+    },
+    "away": {
+      "name": "Sporting Cristal Women",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Liga Women"
+    },
+    "competition_name": "Liga Women",
+    "country": "Peru",
+    "country_code": "PE",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302407777,
+    "fixture_id": 1302407777,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "3 - 0",
+    "home": {
+      "name": "Gimnasia Concepción",
+      "logo": "https://highlightly.net/soccer/images/teams/3357979.png"
+    },
+    "away": {
+      "name": "9 de Julio Rafaela",
+      "logo": "https://highlightly.net/soccer/images/teams/17905824.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/3357979.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/17905824.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1276475254,
+    "fixture_id": 1276475254,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 0",
+    "home": {
+      "name": "Canuelas",
+      "logo": "https://highlightly.net/soccer/images/teams/1657681.png"
+    },
+    "away": {
+      "name": "Central Córdoba",
+      "logo": "https://highlightly.net/soccer/images/teams/673074.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1657681.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/673074.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1276476105,
+    "fixture_id": 1276476105,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 1",
+    "home": {
+      "name": "Lujan",
+      "logo": "https://highlightly.net/soccer/images/teams/1667042.png"
+    },
+    "away": {
+      "name": "Fénix",
+      "logo": "https://highlightly.net/soccer/images/teams/7127058.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1667042.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/7127058.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302401820,
+    "fixture_id": 1302401820,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 3",
+    "home": {
+      "name": "Atenas",
+      "logo": "https://highlightly.net/soccer/images/teams/17908377.png"
+    },
+    "away": {
+      "name": "Fundacion Amigos",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/17908377.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302412883,
+    "fixture_id": 1302412883,
+    "status": "IN PLAY",
+    "time": "90",
+    "score": "1 - 2",
+    "home": {
+      "name": "Sol de Mayo",
+      "logo": "https://highlightly.net/soccer/images/teams/1652575.png"
+    },
+    "away": {
+      "name": "Kimberley Mar del Plata",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1652575.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1276473552,
+    "fixture_id": 1276473552,
+    "status": "IN PLAY",
+    "time": "90",
+    "score": "2 - 1",
+    "home": {
+      "name": "Atlético Atlas",
+      "logo": "https://highlightly.net/soccer/images/teams/1649171.png"
+    },
+    "away": {
+      "name": "Claypole",
+      "logo": "https://highlightly.net/soccer/images/teams/7141525.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1649171.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/7141525.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1293000823,
+    "fixture_id": 1293000823,
+    "status": "IN PLAY",
+    "time": "90",
+    "score": "1 - 0",
+    "home": {
+      "name": "Macará",
+      "logo": "https://highlightly.net/soccer/images/teams/983689.png"
+    },
+    "away": {
+      "name": "LDU Quito",
+      "logo": "https://highlightly.net/soccer/images/teams/986242.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/983689.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/986242.png",
+    "competition": {
+      "name": "Liga Pro"
+    },
+    "competition_name": "Liga Pro",
+    "country": "Ecuador",
+    "country_code": "EC",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1313625659,
+    "fixture_id": 1313625659,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 6",
+    "home": {
+      "name": "Grapiuna Itabuna",
+      "logo": null
+    },
+    "away": {
+      "name": "Leonico",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Baiano - 2"
+    },
+    "competition_name": "Baiano - 2",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1275322149,
+    "fixture_id": 1275322149,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "CA Estudiantes",
+      "logo": "https://highlightly.net/soccer/images/teams/1648320.png"
+    },
+    "away": {
+      "name": "Racing de Córdoba",
+      "logo": "https://highlightly.net/soccer/images/teams/1666191.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1648320.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1666191.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302406926,
+    "fixture_id": 1302406926,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 0",
+    "home": {
+      "name": "Douglas Haig",
+      "logo": "https://highlightly.net/soccer/images/teams/672223.png"
+    },
+    "away": {
+      "name": "Sportivo Las Parejas",
+      "logo": "https://highlightly.net/soccer/images/teams/1660234.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/672223.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1660234.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1276479509,
+    "fixture_id": 1276479509,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "General Lamadrid",
+      "logo": "https://highlightly.net/soccer/images/teams/1664489.png"
+    },
+    "away": {
+      "name": "El Porvenir",
+      "logo": "https://highlightly.net/soccer/images/teams/7135568.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1664489.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/7135568.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1313651189,
+    "fixture_id": 1313651189,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "4 - 0",
+    "home": {
+      "name": "Redenção Fc",
+      "logo": null
+    },
+    "away": {
+      "name": "Camaçari",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Baiano - 2"
+    },
+    "competition_name": "Baiano - 2",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1275328106,
+    "fixture_id": 1275328106,
+    "status": "IN PLAY",
+    "time": "90",
+    "score": "1 - 2",
+    "home": {
+      "name": "Deportivo Madryn",
+      "logo": "https://highlightly.net/soccer/images/teams/1642363.png"
+    },
+    "away": {
+      "name": "Colon Santa Fe",
+      "logo": "https://highlightly.net/soccer/images/teams/382032.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1642363.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/382032.png",
+    "competition": {
+      "name": "Primera Nacional"
+    },
+    "competition_name": "Primera Nacional",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1313650338,
+    "fixture_id": 1313650338,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 0",
+    "home": {
+      "name": "SSA",
+      "logo": null
+    },
+    "away": {
+      "name": "Barreiras Fc",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Baiano - 2"
+    },
+    "competition_name": "Baiano - 2",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1334222412,
+    "fixture_id": 1334222412,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "Sportivo Carapeguá",
+      "logo": "https://highlightly.net/soccer/images/teams/17689670.png"
+    },
+    "away": {
+      "name": "Sol de América",
+      "logo": "https://highlightly.net/soccer/images/teams/1002411.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/17689670.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1002411.png",
+    "competition": {
+      "name": "Division Intermedia"
+    },
+    "competition_name": "Division Intermedia",
+    "country": "Paraguay",
+    "country_code": "PY",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1334224114,
+    "fixture_id": 1334224114,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "3 - 2",
+    "home": {
+      "name": "12 de Junio VH",
+      "logo": null
+    },
+    "away": {
+      "name": "Resistencia SC",
+      "logo": "https://highlightly.net/soccer/images/teams/1817669.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/1817669.png",
+    "competition": {
+      "name": "Division Intermedia"
+    },
+    "competition_name": "Division Intermedia",
+    "country": "Paraguay",
+    "country_code": "PY",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302408628,
+    "fixture_id": 1302408628,
+    "status": "IN PLAY",
+    "time": "90",
+    "score": "1 - 0",
+    "home": {
+      "name": "Guillermo Brown",
+      "logo": "https://highlightly.net/soccer/images/teams/402456.png"
+    },
+    "away": {
+      "name": "Circulo Deportivo",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/402456.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1302410330,
+    "fixture_id": 1302410330,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 0",
+    "home": {
+      "name": "Olimpo de Bahía Blanca",
+      "logo": "https://highlightly.net/soccer/images/teams/377777.png"
+    },
+    "away": {
+      "name": "Villa Mitre",
+      "logo": "https://highlightly.net/soccer/images/teams/1650022.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/377777.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1650022.png",
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1313624808,
+    "fixture_id": 1313624808,
+    "status": "SCHEDULED",
+    "time": "NS",
+    "score": "",
+    "home": {
+      "name": "Vitória da Conquista",
+      "logo": "https://highlightly.net/soccer/images/teams/1043259.png"
+    },
+    "away": {
+      "name": "Fluminense De Feira",
+      "logo": "https://highlightly.net/soccer/images/teams/1021984.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1043259.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1021984.png",
+    "competition": {
+      "name": "Baiano - 2"
+    },
+    "competition_name": "Baiano - 2",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 20:00:00",
+    "scheduled": "20:00"
+  },
+  {
+    "id": 1298557002,
+    "fixture_id": 1298557002,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 2",
+    "home": {
+      "name": "Torpedo Zhodino",
+      "logo": "https://highlightly.net/soccer/images/teams/328419.png"
+    },
+    "away": {
+      "name": "FC Isloch Minsk R.",
+      "logo": "https://highlightly.net/soccer/images/teams/333525.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/328419.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/333525.png",
+    "competition": {
+      "name": "Premier League"
+    },
+    "competition_name": "Premier League",
+    "country": "Belarus",
+    "country_code": "BY",
+    "added": "2026-07-05 19:55:00",
+    "scheduled": "19:55"
+  },
+  {
+    "id": 1337328562,
+    "fixture_id": 1337328562,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 1",
+    "home": {
+      "name": "FUS Rabat",
+      "logo": "https://highlightly.net/soccer/images/teams/832211.png"
+    },
+    "away": {
+      "name": "Yacoub El Mansour",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/832211.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337329413,
+    "fixture_id": 1337329413,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "Hassania Agadir",
+      "logo": "https://highlightly.net/soccer/images/teams/828807.png"
+    },
+    "away": {
+      "name": "Kawkab Marrakech",
+      "logo": "https://highlightly.net/soccer/images/teams/827105.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/828807.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/827105.png",
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337330264,
+    "fixture_id": 1337330264,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 1",
+    "home": {
+      "name": "Ittihad Tanger",
+      "logo": "https://highlightly.net/soccer/images/teams/829658.png"
+    },
+    "away": {
+      "name": "CODM Meknès",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/829658.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337331115,
+    "fixture_id": 1337331115,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 0",
+    "home": {
+      "name": "Maghreb de Fès",
+      "logo": "https://highlightly.net/soccer/images/teams/2939287.png"
+    },
+    "away": {
+      "name": "Olympique Dcheïra",
+      "logo": "https://highlightly.net/soccer/images/teams/2940138.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2939287.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2940138.png",
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337327711,
+    "fixture_id": 1337327711,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 0",
+    "home": {
+      "name": "FAR Rabat",
+      "logo": "https://highlightly.net/soccer/images/teams/825403.png"
+    },
+    "away": {
+      "name": "CR Khemis Zemamra",
+      "logo": "https://highlightly.net/soccer/images/teams/2935883.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/825403.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2935883.png",
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337331966,
+    "fixture_id": 1337331966,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 2",
+    "home": {
+      "name": "Olympique Safi",
+      "logo": "https://highlightly.net/soccer/images/teams/830509.png"
+    },
+    "away": {
+      "name": "Raja Casablanca",
+      "logo": "https://highlightly.net/soccer/images/teams/831360.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/830509.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/831360.png",
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337332817,
+    "fixture_id": 1337332817,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 2",
+    "home": {
+      "name": "Wydad AC",
+      "logo": "https://highlightly.net/soccer/images/teams/824552.png"
+    },
+    "away": {
+      "name": "UTS Rabat",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/824552.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1328685806,
+    "fixture_id": 1328685806,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 0",
+    "home": {
+      "name": "Fenix",
+      "logo": "https://highlightly.net/soccer/images/teams/2006591.png"
+    },
+    "away": {
+      "name": "Sportivo Huracán",
+      "logo": "https://highlightly.net/soccer/images/teams/2023611.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2006591.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2023611.png",
+    "competition": {
+      "name": "Segunda División"
+    },
+    "competition_name": "Segunda División",
+    "country": "Uruguay",
+    "country_code": "UY",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1302400969,
+    "fixture_id": 1302400969,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "5 - 0",
+    "home": {
+      "name": "Alvarado",
+      "logo": null
+    },
+    "away": {
+      "name": "Germinal de Rawson",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Torneo Federal A"
+    },
+    "competition_name": "Torneo Federal A",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1326270668,
+    "fixture_id": 1326270668,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "3 - 0",
+    "home": {
+      "name": "Zimbru",
+      "logo": "https://highlightly.net/soccer/images/teams/3943467.png"
+    },
+    "away": {
+      "name": "CSF Bălți",
+      "logo": "https://highlightly.net/soccer/images/teams/11921592.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/3943467.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/11921592.png",
+    "competition": {
+      "name": "Super Liga"
+    },
+    "competition_name": "Super Liga",
+    "country": "Moldova",
+    "country_code": "MD",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1291229041,
+    "fixture_id": 1291229041,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 2",
+    "home": {
+      "name": "Supra Du Quebec",
+      "logo": null
+    },
+    "away": {
+      "name": "Forge",
+      "logo": "https://highlightly.net/soccer/images/teams/3260114.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/3260114.png",
+    "competition": {
+      "name": "Canadian Premier League"
+    },
+    "competition_name": "Canadian Premier League",
+    "country": "Canada",
+    "country_code": "CA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1334219859,
+    "fixture_id": 1334219859,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "Danubio",
+      "logo": "https://highlightly.net/soccer/images/teams/2002336.png"
+    },
+    "away": {
+      "name": "Juventud",
+      "logo": "https://highlightly.net/soccer/images/teams/2003187.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/2002336.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/2003187.png",
+    "competition": {
+      "name": "Primera División - Apertura"
+    },
+    "competition_name": "Primera División - Apertura",
+    "country": "Uruguay",
+    "country_code": "UY",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1325243511,
+    "fixture_id": 1325243511,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 1",
+    "home": {
+      "name": "Gramadense",
+      "logo": null
+    },
+    "away": {
+      "name": "Bagé",
+      "logo": "https://highlightly.net/soccer/images/teams/8548228.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/8548228.png",
+    "competition": {
+      "name": "Copa Gaúcha"
+    },
+    "competition_name": "Copa Gaúcha",
+    "country": "Brazil",
+    "country_code": "BR",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1337326860,
+    "fixture_id": 1337326860,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 3",
+    "home": {
+      "name": "Difaa El Jadida",
+      "logo": "https://highlightly.net/soccer/images/teams/821148.png"
+    },
+    "away": {
+      "name": "Renaissance Berkane",
+      "logo": "https://highlightly.net/soccer/images/teams/819446.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/821148.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/819446.png",
+    "competition": {
+      "name": "Botola Pro"
+    },
+    "competition_name": "Botola Pro",
+    "country": "Morocco",
+    "country_code": "MA",
+    "added": "2026-07-05 19:00:00",
+    "scheduled": "19:00"
+  },
+  {
+    "id": 1314349009,
+    "fixture_id": 1314349009,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 3",
+    "home": {
+      "name": "Santiago Wanderers",
+      "logo": "https://highlightly.net/soccer/images/teams/1986167.png"
+    },
+    "away": {
+      "name": "Universidad de Chile",
+      "logo": "https://highlightly.net/soccer/images/teams/1977657.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1986167.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1977657.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 18:30:00",
+    "scheduled": "18:30"
+  },
+  {
+    "id": 1314351562,
+    "fixture_id": 1314351562,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 4",
+    "home": {
+      "name": "Deportes La Serena",
+      "logo": "https://highlightly.net/soccer/images/teams/1992975.png"
+    },
+    "away": {
+      "name": "Antofagasta",
+      "logo": "https://highlightly.net/soccer/images/teams/1981061.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1992975.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/1981061.png",
+    "competition": {
+      "name": "Copa Chile"
+    },
+    "competition_name": "Copa Chile",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 18:30:00",
+    "scheduled": "18:30"
+  },
+  {
+    "id": 1328016920,
+    "fixture_id": 1328016920,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 4",
+    "home": {
+      "name": "Sint-Denijs Sport",
+      "logo": null
+    },
+    "away": {
+      "name": "Lokeren-Temse",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "Friendlies Clubs"
+    },
+    "competition_name": "Friendlies Clubs",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1288059917,
+    "fixture_id": 1288059917,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 1",
+    "home": {
+      "name": "Tammeka",
+      "logo": "https://highlightly.net/soccer/images/teams/3004814.png"
+    },
+    "away": {
+      "name": "Laagri",
+      "logo": "https://highlightly.net/soccer/images/teams/15877891.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/3004814.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/15877891.png",
+    "competition": {
+      "name": "Meistriliiga"
+    },
+    "competition_name": "Meistriliiga",
+    "country": "Estonia",
+    "country_code": "EE",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1276481211,
+    "fixture_id": 1276481211,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 0",
+    "home": {
+      "name": "Sacachispas",
+      "logo": "https://highlightly.net/soccer/images/teams/1653426.png"
+    },
+    "away": {
+      "name": "Juventud Unida",
+      "logo": "https://highlightly.net/soccer/images/teams/414370.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1653426.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/414370.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1328017771,
+    "fixture_id": 1328017771,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 1",
+    "home": {
+      "name": "Zenit Saint Petersburg",
+      "logo": "https://highlightly.net/soccer/images/teams/507980.png"
+    },
+    "away": {
+      "name": "Gimnasia La Plata",
+      "logo": "https://highlightly.net/soccer/images/teams/370118.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/507980.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/370118.png",
+    "competition": {
+      "name": "Friendlies Clubs"
+    },
+    "competition_name": "Friendlies Clubs",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1328016069,
+    "fixture_id": 1328016069,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "4 - 1",
+    "home": {
+      "name": "Beltinci",
+      "logo": "https://highlightly.net/soccer/images/teams/3716250.png"
+    },
+    "away": {
+      "name": "Mura",
+      "logo": "https://highlightly.net/soccer/images/teams/3572431.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/3716250.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/3572431.png",
+    "competition": {
+      "name": "Friendlies Clubs"
+    },
+    "competition_name": "Friendlies Clubs",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1283695138,
+    "fixture_id": 1283695138,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 2",
+    "home": {
+      "name": "Boston Legacy Women",
+      "logo": null
+    },
+    "away": {
+      "name": "Bay FC",
+      "logo": null
+    },
+    "home_logo": null,
+    "away_logo": null,
+    "competition": {
+      "name": "NWSL Women"
+    },
+    "competition_name": "NWSL Women",
+    "country": "USA",
+    "country_code": "US",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1276482913,
+    "fixture_id": 1276482913,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 0",
+    "home": {
+      "name": "Victoriano Arenas",
+      "logo": "https://highlightly.net/soccer/images/teams/1672148.png"
+    },
+    "away": {
+      "name": "Deportivo Paraguayo",
+      "logo": "https://highlightly.net/soccer/images/teams/7144078.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/1672148.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/7144078.png",
+    "competition": {
+      "name": "Primera C"
+    },
+    "competition_name": "Primera C",
+    "country": "Argentina",
+    "country_code": "AR",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1301284457,
+    "fixture_id": 1301284457,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "1 - 0",
+    "home": {
+      "name": "Municipal Salamanca",
+      "logo": "https://highlightly.net/soccer/images/teams/15978309.png"
+    },
+    "away": {
+      "name": "Concón National",
+      "logo": null
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/15978309.png",
+    "away_logo": null,
+    "competition": {
+      "name": "Segunda División"
+    },
+    "competition_name": "Segunda División",
+    "country": "Chile",
+    "country_code": "CL",
+    "added": "2026-07-05 18:00:00",
+    "scheduled": "18:00"
+  },
+  {
+    "id": 1316993066,
+    "fixture_id": 1316993066,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "0 - 3",
+    "home": {
+      "name": "Šiauliai",
+      "logo": "https://highlightly.net/soccer/images/teams/3294154.png"
+    },
+    "away": {
+      "name": "FK Zalgiris Vilnius",
+      "logo": "https://highlightly.net/soccer/images/teams/499470.png"
+    },
+    "home_logo": "https://highlightly.net/soccer/images/teams/3294154.png",
+    "away_logo": "https://highlightly.net/soccer/images/teams/499470.png",
+    "competition": {
+      "name": "A Lyga"
+    },
+    "competition_name": "A Lyga",
+    "country": "Lithuania",
+    "country_code": "LT",
+    "added": "2026-07-05 17:45:00",
+    "scheduled": "17:45"
+  },
+  {
+    "id": 1330011664,
+    "fixture_id": 1330011664,
+    "status": "FINISHED",
+    "time": "Finalizado",
+    "score": "2 - 2",
+    "home": {
+      "name": "Omonia Nicosia",
+      "logo": null
+    },
+    "away": {
+      "name": "Hapoel Beer Sheva",
+      "logo": "https://highlightly.net/soccer/images/teams/479897.png"
+    },
+    "home_logo": null,
+    "away_logo": "https://highlightly.net/soccer/images/teams/479897.png",
+    "competition": {
+      "name": "Friendlies Clubs"
+    },
+    "competition_name": "Friendlies Clubs",
+    "country": "World",
+    "country_code": "World",
+    "added": "2026-07-05 17:30:00",
+    "scheduled": "17:30"
   }
 ]

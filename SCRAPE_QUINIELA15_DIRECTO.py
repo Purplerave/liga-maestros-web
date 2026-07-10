@@ -7,6 +7,7 @@ from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
@@ -25,7 +26,9 @@ def fetch_page(url, attempts=3):
             last_error = exc
             if attempt < attempts:
                 time.sleep(1.5 * attempt)
-    raise last_error
+    if last_error:
+        raise last_error
+    raise RuntimeError(f"No se pudo descargar {url}: attempts={attempts}")
 
 
 def clean(text):
@@ -43,20 +46,28 @@ def parse_live_minute(text):
     value = clean(text)
     if re.search(r"\b(descanso|medio\s+tiempo|half\s*time|ht)\b", value, flags=re.I):
         return "Descanso"
-    match = re.search(r"\bmin\.\s*([0-9]+(?:\+[0-9]+)?')", value, flags=re.I)
-    return match.group(1) if match else ""
+    match = re.search(r"\bmin\.\s*([0-9]+(?:\+[0-9]+)?'?)", value, flags=re.I)
+    if not match:
+        return ""
+    minute = match.group(1)
+    return minute if minute.endswith("'") else f"{minute}'"
+
+
+def has_final_signal(text):
+    value = clean(text)
+    return bool(re.search(r"\b(finalizado|terminado|final|ft|fin)\b", value, flags=re.I))
+
+
+def status_for_q15(score_home, score_away, minute, text):
+    if minute:
+        return "HT" if str(minute).lower().startswith("descanso") else "LIVE"
+    if score_home is None or score_away is None:
+        return "NS"
+    return "FT" if has_final_signal(text) else "STALE"
 
 
 def signo_for_score(match_id, home_goals, away_goals):
-    if home_goals is None or away_goals is None:
-        return "-"
-    if int(match_id) == 15:
-        return f"{home_goals}-{away_goals}"
-    if home_goals > away_goals:
-        return "1"
-    if home_goals < away_goals:
-        return "2"
-    return "X"
+    return utils.signo_for_match(match_id, home_goals, away_goals)
 
 
 def parse_match_title(text):
@@ -79,7 +90,8 @@ def parse_events(detail_row):
         events = []
         for event_node in column.select(".events"):
             parent = event_node.parent
-            minute = clean(parent.find("span", class_=re.compile("font-bold")).get_text(" ", strip=True) if parent else "")
+            minute_node = parent.find("span", class_=re.compile("font-bold")) if parent else None
+            minute = clean(minute_node.get_text(" ", strip=True) if minute_node else "")
             spans = parent.find_all("span") if parent else []
             player = clean(spans[-1].get_text(" ", strip=True) if spans else "")
             kind = clean(event_node.get("title") or "")
@@ -127,7 +139,8 @@ def parse_main_row(row):
         minute = parse_live_minute(cells[3].get_text(" ", strip=True))
     if not minute:
         minute = parse_live_minute(row.get_text(" ", strip=True))
-    status = "LIVE" if minute else ("FT" if score_home is not None and score_away is not None else "NS")
+    row_text = row.get_text(" ", strip=True)
+    status = status_for_q15(score_home, score_away, minute, row_text)
     return {
         "id": index,
         "local": home,
@@ -156,7 +169,7 @@ def scrape(jornada):
             by_id[parsed["id"]] = parsed
 
     for detail in soup.select("tr.matchinfo"):
-        prev = detail.find_previous_sibling("tr")
+        prev = detail.find_previous_sibling(lambda tag: tag.name == "tr" and tag.select_one("td.tnum"))
         index, home, away = parse_match_title(prev.get_text(" ", strip=True) if prev else "")
         if not index:
             continue
@@ -169,7 +182,7 @@ def scrape(jornada):
             minute = parse_live_minute(main_cells[3].get_text(" ", strip=True))
         if not minute:
             minute = parse_live_minute(prev.get_text(" ", strip=True) if prev else "")
-        status = "LIVE" if minute else ("FT" if score_home is not None and score_away is not None else "NS")
+        status = status_for_q15(score_home, score_away, minute, prev.get_text(" ", strip=True) if prev else "")
         text = clean(detail.get_text(" ", strip=True))
         referee = ""
         coaches = ""
@@ -195,6 +208,8 @@ def scrape(jornada):
             "probability_tables": parse_probs(detail),
             "source": url,
         }
+    for item in by_id.values():
+        item.setdefault("source", url)
     matches = [by_id[key] for key in sorted(by_id)]
     return {
         "jornada": int(jornada),

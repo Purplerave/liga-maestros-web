@@ -6,9 +6,15 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import xml.etree.ElementTree as ET
 try:
-    from .config import BASE_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
+    from .config import BASE_DIR, DATA_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
 except ImportError:
-    from config import BASE_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
+    from config import BASE_DIR, DATA_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
+
+def runtime_data_path(*parts):
+    path = os.path.join(DATA_DIR, *parts)
+    if os.path.exists(path):
+        return path
+    return os.path.join(BASE_DIR, "data", *parts)
 
 def clean_team_key(value):
     text = unicodedata.normalize("NFD", str(value or "").upper())
@@ -22,8 +28,39 @@ def normalize_team_key(value):
     text = clean_team_key(value)
     return TEAM_LOGO_ALIASES.get(text, text)
 
+def short_team_name(value):
+    key = normalize_team_key(value)
+    names = {
+        "ATLETICO MADRID": "AT. MADRID",
+        "REAL MADRID": "R. MADRID",
+        "BARCELONA": "BARCA",
+        "REAL SOCIEDAD": "R. SOC.",
+        "REAL BETIS": "BETIS",
+        "DEPORTIVO LA CORUNA": "DEPOR",
+        "RACING DE SANTANDER": "RACING",
+        "RACING SANTANDER": "RACING",
+        "CULTURAL LEONESA": "C. LEONESA",
+        "SPORTING GIJON": "SPORTING",
+        "COSTA DE MARFIL": "C. MARFIL",
+        "COREA DEL SUR": "C. SUR",
+        "REPUBLICA CHECA": "R. CHECA",
+    }
+    if key in names:
+        return names[key]
+    cleaned = re.sub(
+        r"\b(REAL|CLUB|FC|CF|RC|RCD|CD|UD|SD|SAD|BALOMPIE|DEPORTIVO)\b",
+        "",
+        key,
+    ).strip()
+    return re.sub(r"\s+", " ", cleaned or key)[:18]
+
+def team_token(value):
+    short = short_team_name(value)
+    token = re.sub(r"[^A-Z0-9]", "", clean_team_key(short))
+    return (token[:2] or "--")
+
 def load_team_logos():
-    logos_path = os.path.join(BASE_DIR, "data", "TEAM_LOGOS.json")
+    logos_path = runtime_data_path("TEAM_LOGOS.json")
     manifest_path = os.path.join(BASE_DIR, "static", "img", "team_logos", "manifest.json")
     logos = {}
     try:
@@ -45,20 +82,34 @@ def load_team_logos():
 
 def build_team_contract():
     logos = load_team_logos()
+    aliases = {clean_team_key(k): normalize_team_key(v) for k, v in TEAM_LOGO_ALIASES.items()}
+    keys = set(logos.keys()) | set(aliases.values())
+    short_names = {key: short_team_name(key) for key in keys}
+    tokens = {key: team_token(key) for key in keys}
     return {
         "version": datetime.now().strftime("%Y-%m-%d"),
+        "aliases_resolved": True,
         "logos": logos,
-        "aliases": {clean_team_key(k): normalize_team_key(v) for k, v in TEAM_LOGO_ALIASES.items()},
+        "aliases": aliases,
+        "short_names": short_names,
+        "tokens": tokens,
         "teams": [
-            {"key": key, "logo": logo}
+            {
+                "canonical_key": key,
+                "key": key,
+                "logo": logo,
+                "logo_url": logo,
+                "short_name": short_names.get(key, key),
+                "token": tokens.get(key, "--"),
+            }
             for key, logo in sorted(logos.items())
         ],
     }
 
 def load_standings_override():
-    path = os.path.join(BASE_DIR, "data", "standings_oficial.json")
-    laliga_path = os.path.join(BASE_DIR, "data", "STANDINGS_LALIGA_BASE.json")
-    segunda_path = os.path.join(BASE_DIR, "data", "STANDINGS_SEGUNDA_BASE.json")
+    path = runtime_data_path("standings_oficial.json")
+    laliga_path = runtime_data_path("STANDINGS_LALIGA_BASE.json")
+    segunda_path = runtime_data_path("STANDINGS_SEGUNDA_BASE.json")
     if not os.path.exists(path):
         data = {"primera": [], "segunda": []}
     else:
@@ -87,11 +138,36 @@ def safe_read_json(path, default):
     except Exception:
         return default
 
+def _lock_file(lock_fh):
+    if os.name == "nt":
+        import msvcrt
+        msvcrt.locking(lock_fh.fileno(), msvcrt.LK_LOCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
+
+def _unlock_file(lock_fh):
+    if os.name == "nt":
+        import msvcrt
+        lock_fh.seek(0)
+        msvcrt.locking(lock_fh.fileno(), msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
+
 def safe_write_json(path, payload):
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False, indent=2)
+        lock_path = f"{path}.lock"
+        with open(lock_path, "a+b") as lock_fh:
+            _lock_file(lock_fh)
+            try:
+                tmp_path = f"{path}.tmp"
+                with open(tmp_path, "w", encoding="utf-8") as fh:
+                    json.dump(payload, fh, ensure_ascii=False, indent=2)
+                os.replace(tmp_path, path)
+            finally:
+                _unlock_file(lock_fh)
         return True
     except Exception:
         return False
@@ -128,7 +204,7 @@ def parse_rfc822_to_iso(value):
             return dt.strftime("%Y-%m-%d %H:%M")
         except Exception:
             continue
-    return raw[:16]
+    return ""
 
 def sanitize_xml_payload(payload):
     text = payload.decode("utf-8", errors="replace")
@@ -145,7 +221,11 @@ def parse_score_text(score_text):
 def signo_for_match(partido_id, home_goals, away_goals):
     if home_goals is None or away_goals is None:
         return "-"
-    if int(partido_id) == 15:
+    try:
+        match_id = int(partido_id)
+    except (TypeError, ValueError):
+        return "-"
+    if match_id == 15:
         return f"{home_goals}-{away_goals}"
     if home_goals > away_goals:
         return "1"
@@ -166,6 +246,9 @@ def highlightly_status(state):
 
 def highlightly_match_to_panel(match):
     state = match.get("state") or {}
+    league = match.get("league") or {}
+    country = match.get("country") or {}
+    competition_name = match.get("_competition_name") or league.get("name") or "Liga"
     status, minute = highlightly_status(state)
     score_text = ((state.get("score") or {}).get("current") or "")
     date_str = match.get("date", "")
@@ -193,8 +276,10 @@ def highlightly_match_to_panel(match):
         },
         "home_logo": (match.get("homeTeam") or {}).get("logo"),
         "away_logo": (match.get("awayTeam") or {}).get("logo"),
-        "competition": {"name": match.get("_competition_name") or "Liga"},
-        "competition_name": match.get("_competition_name") or "Liga",
+        "competition": {"name": competition_name},
+        "competition_name": competition_name,
+        "country": country.get("name") or "",
+        "country_code": country.get("code") or "",
         "added": added_date,
         "scheduled": scheduled_time,
     }

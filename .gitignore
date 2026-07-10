@@ -20,6 +20,11 @@ data/HIGHLIGHTLY_CIRCUIT.json
 data/LIVE_COLLECTOR.log
 data/LIVE_COLLECTOR_HEALTH.json
 data/RADAR_NOTICIAS.json
+data/*.jsonl
+data/*.lock
+data/*.tmp
+data/VUELCO_DE_DATOS_REALES.txt
+data/PARTICIPANTES_MAESTROS.json
 data/backups/
 
 # Backups and old work copies
@@ -27,7 +32,7 @@ data/backups/
 *.backup*
 BACKUP*/
 BACKUP_*/
-BACKUP_PRE_REDISENO_TENSION_*/
+BACKUP_PRE_*/
 OLD/
 aistudio/
 
@@ -37,6 +42,8 @@ DATOS/*.backup*
 DATOS/*backup*
 DATOS/*.db-wal
 DATOS/*.db-shm
+DATOS/*.lock
+DATOS/*.schema.lock
 DATOS/DATASET*.csv
 data/*.db
 data/*.db-wal

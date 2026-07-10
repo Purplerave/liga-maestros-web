@@ -33,7 +33,17 @@ def canonical_id(uid):
         "consenso": "consejo_ias",
         "deepseek": "chipi",
     }
-    return aliases.get(low, low)
+    if low in aliases:
+        return aliases[low]
+    if low in (
+        "programa", "chipi", "gemini", "grok", "claude", "copilot", "chatgpt",
+        "kimi", "profe", "ernie", "fortu", "geli", "mrpurple", "oraculo",
+        "pepe", "hermes", "jenova", "momo", "manu", "manus", "qwen", "gwen",
+        "meta", "perplexity", "glm5", "geli_glm5", "chema_cohere",
+        "momo_molbot", "tecnotron", "consejo_ias",
+    ):
+        return low
+    return value
 
 
 def result_sign(row):
@@ -141,7 +151,7 @@ def build_audit(jornada):
     finished_results = [row for row in results if is_finished(row)]
     live_results = [
         row for row in results
-        if str(row["status"] or "").upper() in {"LIVE", "IN PLAY", "HT", "EN JUEGO"}
+        if str(row["status"] or "").upper() in {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"}
     ]
     scheduled_results = [
         row for row in results

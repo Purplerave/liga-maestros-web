@@ -1,0 +1,127 @@
+{
+  "jornada": 72,
+  "generated_at": "2026-07-09T23:21:52",
+  "source": "data/quiz/approved",
+  "preguntas": [
+    {
+      "tipo": "multiple",
+      "enunciado": "Que seleccion gano el Mundial masculino de 2022?",
+      "opcion_a": "Argentina",
+      "opcion_b": "Francia",
+      "opcion_c": "Croacia",
+      "respuesta_correcta": "A",
+      "explicacion": "Argentina gano el Mundial de 2022 tras empatar 3-3 con Francia y vencer en la tanda de penaltis.",
+      "dificultad": 2,
+      "tema": "mundial",
+      "source_id": "lmq_world_0001"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Cual es el estadio asociado historicamente al Valencia CF?",
+      "opcion_a": "La Romareda",
+      "opcion_b": "Mestalla",
+      "opcion_c": "El Sadar",
+      "respuesta_correcta": "B",
+      "explicacion": "Mestalla es el estadio historico del Valencia CF.",
+      "dificultad": 2,
+      "tema": "clubes",
+      "source_id": "lmq_club_0002"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Cuantos jugadores como minimo necesita un equipo para que un partido pueda continuar?",
+      "opcion_a": "7",
+      "opcion_b": "8",
+      "opcion_c": "9",
+      "respuesta_correcta": "A",
+      "explicacion": "Un partido no debe continuar si un equipo tiene menos de siete jugadores.",
+      "dificultad": 1,
+      "tema": "reglas",
+      "source_id": "lmq_rules_0002"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que representa el Programa en Liga de Maestros?",
+      "opcion_a": "Una columna oficial de referencia",
+      "opcion_b": "Un equipo de futbol",
+      "opcion_c": "Un arbitro de la jornada",
+      "respuesta_correcta": "A",
+      "explicacion": "El Programa es la columna oficial propia que combina criterio, datos y lectura de la jornada.",
+      "dificultad": 2,
+      "tema": "quiniela",
+      "source_id": "lmq_quiz_0002"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Cual es el estadio asociado historicamente al Real Madrid CF?",
+      "opcion_a": "Santiago Bernabeu",
+      "opcion_b": "Mestalla",
+      "opcion_c": "Ramon Sanchez-Pizjuan",
+      "respuesta_correcta": "A",
+      "explicacion": "El Santiago Bernabeu es el estadio historico del Real Madrid CF.",
+      "dificultad": 2,
+      "tema": "clubes",
+      "source_id": "lmq_club_0001"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Si un saque de banda entra directamente en la porteria rival sin tocar a nadie, que se concede?",
+      "opcion_a": "Gol valido",
+      "opcion_b": "Saque de meta",
+      "opcion_c": "Se repite el saque",
+      "respuesta_correcta": "B",
+      "explicacion": "No se puede marcar gol directamente de saque de banda. Si entra en la meta rival, se concede saque de meta.",
+      "dificultad": 1,
+      "tema": "reglas",
+      "source_id": "lmq_rules_0001"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "En una quiniela 1X2, que significa la X?",
+      "opcion_a": "Victoria local",
+      "opcion_b": "Empate",
+      "opcion_c": "Victoria visitante",
+      "respuesta_correcta": "B",
+      "explicacion": "En formato 1X2, 1 es local, X es empate y 2 es visitante.",
+      "dificultad": 2,
+      "tema": "reglas",
+      "source_id": "lmq_rules_0003"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que seleccion gano el Mundial masculino de 2010?",
+      "opcion_a": "Paises Bajos",
+      "opcion_b": "Alemania",
+      "opcion_c": "Espana",
+      "respuesta_correcta": "C",
+      "explicacion": "Espana gano el Mundial 2010 al vencer 1-0 a Paises Bajos en la final.",
+      "dificultad": 2,
+      "tema": "mundial",
+      "source_id": "lmq_world_0002"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Gano el Mundial 2022 con Argentina y es conocido por vestir el dorsal 10. Quien es?",
+      "opcion_a": "Lionel Messi",
+      "opcion_b": "Angel Di Maria",
+      "opcion_c": "Emiliano Martinez",
+      "respuesta_correcta": "A",
+      "explicacion": "Lionel Messi fue campeon del Mundial 2022 con Argentina y es el jugador historicamente asociado al dorsal 10.",
+      "dificultad": 2,
+      "tema": "jugadores",
+      "source_id": "lmq_player_0001"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "En Liga de Maestros, que capa representa el voto colectivo frente a los Maestros IA?",
+      "opcion_a": "La Pena",
+      "opcion_b": "El calendario",
+      "opcion_c": "El directo",
+      "respuesta_correcta": "A",
+      "explicacion": "La Pena agrupa usuarios y participantes invitados que compiten contra los Maestros IA.",
+      "dificultad": 1,
+      "tema": "quiniela",
+      "source_id": "lmq_quiz_0001"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "description": "Formato canonico para preguntas del banco grande de Liga de Maestros.",
+  "required_fields": [
+    "id",
+    "mode",
+    "category",
+    "difficulty",
+    "prompt",
+    "options",
+    "correct_option_id",
+    "explanation",
+    "source_facts",
+    "status"
+  ],
+  "question": {
+    "id": "lmq_000001",
+    "mode": "desafio_jornada",
+    "category": "reglas",
+    "difficulty": 2,
+    "prompt": "Texto de la pregunta.",
+    "options": [
+      { "id": "A", "label": "Opcion A" },
+      { "id": "B", "label": "Opcion B" },
+      { "id": "C", "label": "Opcion C" }
+    ],
+    "correct_option_id": "A",
+    "explanation": "Explicacion breve tras responder.",
+    "source_facts": [
+      {
+        "provider": "wikidata",
+        "ref": "Q615",
+        "license": "CC0",
+        "snapshot_at": "2026-07-09"
+      }
+    ],
+    "tags": ["mundial", "jugadores"],
+    "season": "2026-27",
+    "publish_window": {
+      "start_at": "",
+      "end_at": ""
+    },
+    "quality": {
+      "editor_status": "approved",
+      "ambiguity_note": "",
+      "repetition_key": "jugador_lionel_messi"
+    },
+    "status": "approved"
+  }
+}

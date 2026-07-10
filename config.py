@@ -1,4 +1,5 @@
 import os
+import shutil
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -6,10 +7,30 @@ load_dotenv()
 
 # Directorio base del proyecto
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RENDER_DATA_DIR = "/var/data"
+DEFAULT_DATA_DIR = RENDER_DATA_DIR if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR) else os.path.join(BASE_DIR, "data")
+DATA_DIR = os.getenv("DATA_DIR", DEFAULT_DATA_DIR)
+SEED_DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # Base de Datos
-DEFAULT_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+BOOTSTRAP_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+DEFAULT_DB_PATH = os.path.join(DATA_DIR, "LIGA_MAESTROS_PRO.db") if os.getenv("RENDER") else os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
 DB_PATH = os.getenv("DB_PATH", DEFAULT_DB_PATH)
+
+def data_path(*parts):
+    return os.path.join(DATA_DIR, *parts)
+
+def ensure_runtime_data_dir():
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if os.path.abspath(DATA_DIR) == os.path.abspath(SEED_DATA_DIR):
+        return
+    if not os.path.isdir(SEED_DATA_DIR):
+        return
+    for name in os.listdir(SEED_DATA_DIR):
+        src = os.path.join(SEED_DATA_DIR, name)
+        dst = os.path.join(DATA_DIR, name)
+        if os.path.isfile(src) and name.lower().endswith(".json") and not os.path.exists(dst):
+            shutil.copy2(src, dst)
 
 # Configuración Highlightly API
 HIGHLIGHTLY_HOST = "soccer.highlightly.net"
@@ -22,6 +43,10 @@ HIGHLIGHTLY_LEAGUES = {
     "LIGUE 1": 52695,
     "UEFA CHAMPIONS LEAGUE": 2486,
     "FRIENDLIES": 9294,
+    "VEIKKAUSLIIGA": 208428,
+    "YKKOSLIIGA": 925821,
+    "ALLSVENSKAN": 96947,
+    "SUPERETTAN": 97798,
 }
 
 # API-FOOTBALL / API-SPORTS: respaldo puntual, no motor de directo.
@@ -31,7 +56,7 @@ API_FOOTBALL_DAILY_LIMIT = int(os.getenv("API_FOOTBALL_DAILY_LIMIT", "100"))
 API_FOOTBALL_DAILY_RESERVE = int(os.getenv("API_FOOTBALL_DAILY_RESERVE", "10"))
 
 # Configuración Radar de Noticias
-NEWS_CACHE_PATH = os.path.join(BASE_DIR, "data", "RADAR_NOTICIAS.json")
+NEWS_CACHE_PATH = os.path.join(DATA_DIR, "RADAR_NOTICIAS.json")
 NEWS_REFRESH_SECONDS = int(os.getenv("NEWS_REFRESH_SECONDS", "900"))
 NEWS_FEEDS = [
     {"id": "laliga", "name": "LALIGA", "url": "https://www.laliga.com/noticias?format=feed&type=rss"},
@@ -138,6 +163,21 @@ TEAM_LOGO_ALIASES = {
     "LATVIA": "LETONIA",
     "ESTONIA": "ESTONIA",
     "ISLAS FEROE": "ISLAS FEROE",
+    "TURKU PS": "TPS",
+    "VAASA PS": "VPS",
+    "VAASAN PALLOSEURA": "VPS",
+    "ILVES TAMPERE": "ILVES",
+    "HALMSTAD": "HALMSTADS",
+    "IFK GOTEBORG": "GOTEBORG",
+    "GOTEBORG": "GOTEBORG",
+    "KALMAR FF": "KALMAR",
+    "ORGRYTE IS": "ORGRYTE",
+    "ORGRYTE": "ORGRYTE",
+    "VASTERAS SK FK": "VASTERAS",
+    "VASTERAS SK": "VASTERAS",
+    "MALMOE": "MALMO",
+    "MALMO FF": "MALMO",
+    "DEGERFORS IF": "DEGERFORS",
     "FAROE ISLANDS": "ISLAS FEROE",
     "FAROE": "ISLAS FEROE",
     "PORTUGAL": "PORTUGAL",
