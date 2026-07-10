@@ -1,4 +1,6 @@
 """Quiz routes: Reto 10 LaLiga."""
+from datetime import datetime
+
 from flask import Blueprint, request, jsonify, session
 
 from ..services.quiz import (
@@ -8,6 +10,10 @@ from ..services.quiz import (
 )
 
 bp = Blueprint("quiz", __name__)
+
+
+def _quiz_session_key(jornada):
+    return f"quiz_attempt_{int(jornada)}"
 
 
 @bp.route('/api/quiz/preguntas')
@@ -20,6 +26,10 @@ def quiz_preguntas():
         return jsonify({"status": "ok", "disponible": False, "message": "Sin preguntas para esta jornada"})
     
     user = session.get("user") or {}
+    session[_quiz_session_key(int(jornada))] = {
+        "started_at": datetime.utcnow().isoformat(timespec="milliseconds"),
+        "question_ids": [int(p["id"]) for p in preguntas],
+    }
     return jsonify({
         "status": "ok",
         "disponible": True,
@@ -48,17 +58,29 @@ def quiz_submit():
     data = request.get_json(silent=True) or {}
     jornada = data.get("jornada")
     respuestas = data.get("respuestas")
-    tiempo_ms = int(data.get("tiempo_total_ms", 0))
+    try:
+        jornada = int(jornada)
+        client_tiempo_ms = int(data.get("tiempo_total_ms", 0))
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Datos incompletos."}), 400
     
     if not jornada or not isinstance(respuestas, list):
         return jsonify({"status": "error", "message": "Datos incompletos."}), 400
     
+    attempt = session.get(_quiz_session_key(jornada)) or {}
+    try:
+        started_at = datetime.fromisoformat(str(attempt.get("started_at")))
+        tiempo_ms = max(0, int((datetime.utcnow() - started_at).total_seconds() * 1000))
+    except (TypeError, ValueError):
+        tiempo_ms = max(client_tiempo_ms, 180000)
+
     result = submit_quiz_respuestas(
-        jornada=int(jornada),
+        jornada=jornada,
         user_id=user["id"],
         nombre=(user.get("name") or "Maestro").split(" ")[0],
         respuestas=respuestas,
         tiempo_total_ms=tiempo_ms,
+        expected_question_ids=attempt.get("question_ids"),
     )
     
     if "error" in result:
