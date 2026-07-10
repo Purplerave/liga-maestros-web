@@ -11,13 +11,13 @@ from ...services.teams import (
 )
 
 
-def build_predictions_payload(conn, jornada):
+def build_predictions_payload(conn, jornada, current_user_id=None, reveal_all=False):
     preds = _load_predictions(conn, jornada)
     participant_contract = build_participant_contract()
     consenso = _build_pena_consensus(preds, participant_contract)
     ranking = _build_ranking(conn, jornada)
     return {
-        "predicciones_actuales": preds,
+        "predicciones_actuales": _filter_public_predictions(preds, participant_contract, current_user_id, reveal_all),
         "participant_contract": participant_contract,
         "consenso_pena": consenso,
         "ranking_maestros": ranking,
@@ -103,6 +103,32 @@ def _build_pena_consensus(preds, participant_contract):
     return consenso
 
 
+def _official_prediction_ids(participant_contract):
+    official = {
+        canonical_contest_id(column.get("id"))
+        for column in participant_contract.get("visible_ai_columns", [])
+    }
+    official.update({
+        canonical_contest_id(uid)
+        for uid in participant_contract.get("hidden_ids", [])
+    })
+    official.update({"programa", "v260_omnisciente", "consejo_ias", "consenso"})
+    return {str(uid).lower() for uid in official if uid}
+
+
+def _filter_public_predictions(preds, participant_contract, current_user_id=None, reveal_all=False):
+    if reveal_all:
+        return preds
+    official_ids = _official_prediction_ids(participant_contract)
+    current_user_text = str(current_user_id or "").strip()
+    public_preds = {}
+    for raw_uid, data in preds.items():
+        canonical = canonical_contest_id(raw_uid)
+        if str(canonical).lower() in official_ids or str(raw_uid) == current_user_text:
+            public_preds[raw_uid] = data
+    return public_preds
+
+
 def _build_ranking(conn, jornada):
     final_res_map, current_res_map = _build_result_maps(conn, jornada)
     ranking = {}
@@ -185,4 +211,3 @@ def _apply_user_bonus_points(conn, ranking):
         else:
             ranking[uid]["bonus"] = points
             ranking[uid]["total"] += points
-
