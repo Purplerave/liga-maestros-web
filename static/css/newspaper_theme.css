@@ -3149,6 +3149,131 @@ body.newspaper-ui.quiniela-focus .cover-spotlight-team:hover .team-badge {
     box-shadow: 0 12px 26px rgba(0, 0, 0, 0.44), 0 0 18px rgba(45, 167, 216, 0.22) !important;
 }
 
+/* Hand-drawn refinement: rounded, warmer, still readable. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title,
+body.newspaper-ui.quiniela-focus .cover-command-card > span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker,
+body.newspaper-ui.quiniela-focus .cover-panel-title span,
+body.newspaper-ui.quiniela-focus .cover-panel-title b {
+    font-family: "Kalam", "Patrick Hand", "Rajdhani", "Inter", sans-serif !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title {
+    font-weight: 700 !important;
+    letter-spacing: 0.055em !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-command-card,
+body.newspaper-ui.quiniela-focus .cover-panel,
+body.newspaper-ui.quiniela-focus .cover-ticket-card,
+body.newspaper-ui.quiniela-focus .cover-spotlight-card,
+body.newspaper-ui.quiniela-focus .cover-status-row,
+body.newspaper-ui.quiniela-focus .cover-dispute-grid div,
+body.newspaper-ui.quiniela-focus .cover-actions button,
+body.newspaper-ui.quiniela-focus .cover-spotlight-card button,
+body.newspaper-ui.quiniela-focus .cover-spotlight-actions button {
+    border-radius: 8px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-ticket-strip span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-score,
+body.newspaper-ui.quiniela-focus .cover-spotlight-team .team-badge,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    border-radius: 6px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-command-card,
+body.newspaper-ui.quiniela-focus .cover-panel {
+    outline: 1px solid rgba(246, 239, 225, 0.08) !important;
+    outline-offset: -5px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title {
+    border-bottom-style: solid !important;
+    border-bottom-width: 2px !important;
+    border-image: linear-gradient(90deg, rgba(217, 169, 40, 0.85), rgba(45, 167, 216, 0.1)) 1 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker,
+body.newspaper-ui.quiniela-focus .cover-command-card > span {
+    text-transform: none !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker,
+body.newspaper-ui.quiniela-focus .cover-command-card > span {
+    font-size: 1rem !important;
+}
+
+/* Paper-sheet pass: the cover should feel like a designed sheet laid over the dark app. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
+    background:
+        linear-gradient(180deg, rgba(2, 6, 12, 0.12), rgba(2, 6, 12, 0.42)),
+        repeating-linear-gradient(90deg, rgba(246, 239, 225, 0.025), rgba(246, 239, 225, 0.025) 1px, transparent 1px, transparent 22px) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-command-card,
+body.newspaper-ui.quiniela-focus .cover-panel {
+    background:
+        repeating-linear-gradient(0deg, rgba(6, 10, 18, 0.025), rgba(6, 10, 18, 0.025) 1px, transparent 1px, transparent 7px),
+        linear-gradient(145deg, #f4ead4, #e6d8ba) !important;
+    border-color: rgba(60, 45, 24, 0.42) !important;
+    color: #0b1320 !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.34),
+        0 18px 42px rgba(0, 0, 0, 0.34) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card h2,
+body.newspaper-ui.quiniela-focus .cover-panel-title,
+body.newspaper-ui.quiniela-focus .cover-panel-title b,
+body.newspaper-ui.quiniela-focus .cover-status-row b {
+    color: #0b1320 !important;
+    text-shadow: none !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card > span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker,
+body.newspaper-ui.quiniela-focus .cover-panel-title span,
+body.newspaper-ui.quiniela-focus .cover-status-row span {
+    color: #9b6b05 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title {
+    border-bottom-color: rgba(56, 38, 14, 0.28) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-ticket-card,
+body.newspaper-ui.quiniela-focus .cover-status-row,
+body.newspaper-ui.quiniela-focus .cover-spotlight-picks span,
+body.newspaper-ui.quiniela-focus .cover-dispute-grid div,
+body.newspaper-ui.quiniela-focus .cover-actions button {
+    background:
+        linear-gradient(180deg, rgba(10, 18, 32, 0.97), rgba(4, 8, 16, 0.98)) !important;
+    border-color: rgba(7, 18, 33, 0.72) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-row b,
+body.newspaper-ui.quiniela-focus .cover-actions button b {
+    color: #f6efe1 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-score {
+    background: linear-gradient(180deg, #f8f0da, #d9c794) !important;
+    border-color: rgba(113, 79, 11, 0.6) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-score b {
+    color: #0b1320 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-spotlight-score span {
+    color: rgba(11, 19, 32, 0.68) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cover-control-room,
     body.newspaper-ui.quiniela-focus .cover-brand-card::after,
