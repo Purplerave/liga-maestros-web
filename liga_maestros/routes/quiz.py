@@ -67,12 +67,14 @@ def quiz_submit():
     if not jornada or not isinstance(respuestas, list):
         return jsonify({"status": "error", "message": "Datos incompletos."}), 400
     
-    attempt = session.get(_quiz_session_key(jornada)) or {}
+    attempt = session.get(_quiz_session_key(jornada))
+    if not attempt:
+        return jsonify({"status": "error", "code": "QUIZ_ATTEMPT_MISSING", "message": "Debes iniciar el reto antes de enviarlo."}), 400
     try:
         started_at = datetime.fromisoformat(str(attempt.get("started_at")))
         tiempo_ms = max(0, int((datetime.utcnow() - started_at).total_seconds() * 1000))
     except (TypeError, ValueError):
-        tiempo_ms = max(client_tiempo_ms, 180000)
+        return jsonify({"status": "error", "code": "QUIZ_ATTEMPT_INVALID", "message": "Debes iniciar el reto antes de enviarlo."}), 400
 
     result = submit_quiz_respuestas(
         jornada=jornada,
@@ -85,7 +87,8 @@ def quiz_submit():
     
     if "error" in result:
         return jsonify({"status": "error", "message": result["error"]}), 400
-    
+
+    session.pop(_quiz_session_key(jornada), None)
     return jsonify({"status": "ok", **result})
 
 

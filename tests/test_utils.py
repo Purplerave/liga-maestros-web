@@ -1,7 +1,6 @@
 import os
 import sys
 import tempfile
-import json
 from pathlib import Path
 
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
