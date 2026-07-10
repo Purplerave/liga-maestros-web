@@ -1,5 +1,5 @@
 """Quiz routes: Reto 10 LaLiga."""
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify, session
 
@@ -27,7 +27,7 @@ def quiz_preguntas():
     
     user = session.get("user") or {}
     session[_quiz_session_key(int(jornada))] = {
-        "started_at": datetime.utcnow().isoformat(timespec="milliseconds"),
+        "started_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
         "question_ids": [int(p["id"]) for p in preguntas],
     }
     return jsonify({
@@ -72,7 +72,9 @@ def quiz_submit():
         return jsonify({"status": "error", "code": "QUIZ_ATTEMPT_MISSING", "message": "Debes iniciar el reto antes de enviarlo."}), 400
     try:
         started_at = datetime.fromisoformat(str(attempt.get("started_at")))
-        tiempo_ms = max(0, int((datetime.utcnow() - started_at).total_seconds() * 1000))
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=timezone.utc)
+        tiempo_ms = max(0, int((datetime.now(timezone.utc) - started_at).total_seconds() * 1000))
     except (TypeError, ValueError):
         return jsonify({"status": "error", "code": "QUIZ_ATTEMPT_INVALID", "message": "Debes iniciar el reto antes de enviarlo."}), 400
 
