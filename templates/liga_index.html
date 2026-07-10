@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Patrick+Hand&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/quantum_pro.css', v=assets_v ~ '-v3-design-2') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/newspaper_theme.css', v=assets_v ~ '-newspaper-27') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/newspaper_theme.css', v=assets_v ~ '-newspaper-28') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/snake_gol_arcade.css', v=assets_v ~ '-snake-arcade-5') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}">
@@ -54,13 +54,13 @@
         </header>
 
         <nav class="newspaper-page-nav" aria-label="Indice del diario">
-            <button class="active" type="button" data-page-action="ALL"><b>Pag. 1</b><span>Portada</span></button>
-            <button type="button" data-page-action="TICKET"><b>Pag. 2</b><span>Quiniela</span></button>
-            <button type="button" data-page-action="LIVE"><b>Pag. 3</b><span>Directo</span></button>
-            <button type="button" data-page-action="STANDINGS"><b>Pag. 4</b><span>Ligas</span></button>
-            <button type="button" data-page-action="SNAKE"><b>Pag. 5</b><span>Snake gol</span></button>
-            <button type="button" data-page-action="CONTEST"><b>Pag. 6</b><span>La Peña</span></button>
-            <button type="button" data-page-action="QUIZ"><b>Pag. 7</b><span>Quiz</span></button>
+            <button class="active" type="button" data-page-action="ALL"><span>Portada</span><b>Pag. 1</b></button>
+            <button type="button" data-page-action="TICKET"><span>Quiniela</span><b>Pag. 2</b></button>
+            <button type="button" data-page-action="LIVE"><span>Directo</span><b>Pag. 3</b></button>
+            <button type="button" data-page-action="STANDINGS"><span>Ligas</span><b>Pag. 4</b></button>
+            <button type="button" data-page-action="SNAKE"><span>Snake gol</span><b>Pag. 5</b></button>
+            <button type="button" data-page-action="CONTEST"><span>La Peña</span><b>Pag. 6</b></button>
+            <button type="button" data-page-action="QUIZ"><span>Quiz</span><b>Pag. 7</b></button>
         </nav>
 
         <aside class="sidebar-left"></aside>
@@ -167,7 +167,7 @@
         </aside>
     </div>
     <div id="toast-container"></div>
-    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-16') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-17') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/snake_gol_arcade.js', v=assets_v ~ '-snake-arcade-2') }}"></script>
 </body>
 </html>

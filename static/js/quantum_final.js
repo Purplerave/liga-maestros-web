@@ -3834,9 +3834,7 @@ function renderNewspaperCoverPageV2() {
         <section class="frontpage frontpage-v2">
             <article class="frontpage-lead">
                 <div class="frontpage-photo frontpage-cover-visual">
-                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
-                    <strong>1X2</strong>
-                    <span>La Peña contra los Maestros IA</span>
+                    ${coverSpotlightHtml()}
                 </div>
                 <div class="frontpage-headline">
                     <span>Jornada ${escapeHtml(String(jornada || "-"))}</span>
@@ -3918,6 +3916,51 @@ function coverDiscrepancyMatch() {
     return best;
 }
 
+function coverSpotlightHtml() {
+    const item = coverDiscrepancyMatch();
+    if (!item?.match) {
+        return `
+            <div class="cover-spotlight-card">
+                <div class="cover-spotlight-kicker">La jornada en juego</div>
+                <h3>Liga de Maestros</h3>
+                <p>La Peña y los Maestros IA juegan el mismo boleto, con directo, rankings y juegos por secciones.</p>
+                <button type="button" data-page-action="TICKET">Jugar quiniela</button>
+            </div>`;
+    }
+    const { match, idx, penaSign, programSign, masterSign } = item;
+    const home = match.local || match.home_name || match.home?.name || "Local";
+    const away = match.visitante || match.away_name || match.away?.name || "Visitante";
+    const score = scoreOnly(match.marcador || match.score || match.scores?.score) || match.marcador || "";
+    const status = isLiveStatus(match.status) || isLiveMatch(match) ? "En directo" : (score ? "Marcador" : "Partido caliente");
+    return `
+        <div class="cover-spotlight-card">
+            <div class="cover-spotlight-kicker">#${idx + 1} · ${escapeHtml(status)}</div>
+            <div class="cover-spotlight-fixture">
+                <div class="cover-spotlight-team">
+                    ${logoBadge(home, teamLogo(match, "home"))}
+                    <strong>${escapeHtml(getShortName(home))}</strong>
+                </div>
+                <div class="cover-spotlight-score">
+                    <b>${escapeHtml(score || "vs")}</b>
+                    <span>mayor discrepancia</span>
+                </div>
+                <div class="cover-spotlight-team">
+                    ${logoBadge(away, teamLogo(match, "away"))}
+                    <strong>${escapeHtml(getShortName(away))}</strong>
+                </div>
+            </div>
+            <div class="cover-spotlight-picks">
+                <span>Programa <b>${escapeHtml(programSign || "-")}</b></span>
+                <span>Maestros <b>${escapeHtml(masterSign || "-")}</b></span>
+                <span>La Peña <b>${escapeHtml(penaSign || "-")}</b></span>
+            </div>
+            <div class="cover-spotlight-actions">
+                <button type="button" data-page-action="LIVE">Ver directo</button>
+                <button type="button" data-page-action="TICKET">Jugar quiniela</button>
+            </div>
+        </div>`;
+}
+
 function coverPodiumHtml() {
     const rows = coverPodiumRows();
     const slots = [rows[1], rows[0], rows[2]];
@@ -3968,15 +4011,16 @@ function coverProgramTicketHtml() {
     return `
         <div class="cover-ticket-card">
             <div class="cover-ticket-head">
-                <span>Boleto Programa</span>
+                <span>Pronóstico del programa</span>
                 <b>${doubles.length ? `${doubles.length} dobles: ${doubles.join(", ")}` : "sin dobles"}</b>
             </div>
-            <div class="cover-ticket-strip">
-                ${signs.slice(0, 14).map((sign, idx) => `
+            <div class="cover-ticket-strip is-summary">
+                ${signs.slice(0, 8).map((sign, idx) => `
                     <span class="${String(sign).length > 1 ? "is-double" : ""}">
                         <small>${idx + 1}</small><b>${escapeHtml(sign)}</b>
                     </span>
                 `).join("")}
+                <span class="cover-ticket-more"><small>...</small><b>+6</b></span>
                 <span class="is-pleno"><small>15</small><b>${escapeHtml(signs[14] || "-")}</b></span>
             </div>
         </div>`;
@@ -3997,9 +4041,7 @@ function renderNewspaperCoverPageV3() {
         <section class="frontpage frontpage-v2 cover-control-room">
             <article class="frontpage-lead cover-hero-grid">
                 <div class="frontpage-photo frontpage-cover-visual cover-brand-card">
-                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
-                    <strong>1X2</strong>
-                    <span>La Peña contra los Maestros IA</span>
+                    ${coverSpotlightHtml()}
                 </div>
                 <div class="frontpage-headline cover-command-card">
                     <span>Portada · Jornada ${escapeHtml(String(jornada || "-"))}</span>
