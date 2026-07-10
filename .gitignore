@@ -36,7 +36,8 @@ BACKUP_PRE_*/
 OLD/
 aistudio/
 
-# Database backups. Keep the main DB for beta deploy bootstrap.
+# Local databases and backups. Never publish live DB files.
+DATOS/*.db
 DATOS/*.bak*
 DATOS/*.backup*
 DATOS/*backup*

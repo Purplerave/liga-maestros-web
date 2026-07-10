@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify, session
 
 from ..db.connection import get_db
 from ..middleware.rate_limit import is_rate_limited
-from ..utils import parse_db_match_datetime
+from ..services.ticket import madrid_now, parse_madrid_datetime
 from ..db.migrations import ensure_porra_table
 
 bp = Blueprint("porra", __name__)
@@ -21,8 +21,8 @@ def _porra_target_match(conn, jornada):
     matches = [dict(row) for row in rows]
     for match in matches:
         status = str(match.get("status") or "").upper()
-        kickoff = parse_db_match_datetime(match.get("fecha"), match.get("hora"))
-        if status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or datetime.now() < kickoff):
+        kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
+        if status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or madrid_now() < kickoff):
             return match
     return matches[0]
 
@@ -33,8 +33,8 @@ def _porra_is_locked(match):
     status = str(match.get("status") or "").upper()
     if status not in ("", "NS", "SCHEDULED", "NOT STARTED"):
         return True
-    kickoff = parse_db_match_datetime(match.get("fecha"), match.get("hora"))
-    return bool(kickoff and datetime.now() >= kickoff)
+    kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
+    return bool(kickoff and madrid_now() >= kickoff)
 
 
 @bp.route('/api/porra')

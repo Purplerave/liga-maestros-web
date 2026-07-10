@@ -1,5 +1,5 @@
 """Liga data route: the main data endpoint."""
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 
 import config
 from ..db.connection import get_db
@@ -27,12 +27,18 @@ def get_liga_data():
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
-        predictions_payload = build_predictions_payload(conn, jornada)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         jornada_liga = _detect_jornada_liga(conn)
         match_info = _load_and_repair_match_info(jornada, partidos)
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
         is_locked = _is_ticket_locked(partidos, close_info)
+        user = session.get("user") or {}
+        predictions_payload = build_predictions_payload(
+            conn,
+            jornada,
+            current_user_id=user.get("id"),
+            reveal_all=is_locked,
+        )
 
         participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
         return jsonify({
