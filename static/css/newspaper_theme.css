@@ -675,8 +675,8 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover span {
 }
 
 body.newspaper-ui.quiniela-focus .topbar-context::before {
-    content: "LIGA DE MAESTROS";
-    display: block;
+    content: none;
+    display: none;
     color: var(--news-paper);
     font-family: Georgia, "Times New Roman", serif;
     font-size: clamp(1.25rem, 2vw, 2.2rem);
@@ -700,8 +700,8 @@ body.newspaper-ui.quiniela-focus .topbar-kicker {
     width: fit-content;
     margin-bottom: 3px;
     padding: 1px 6px;
-    background: var(--news-red);
-    color: #fff !important;
+    background: rgba(217, 169, 40, 0.16);
+    color: var(--news-gold) !important;
     font-family: "Rajdhani", "Inter", sans-serif !important;
     font-size: 0.62rem;
     font-weight: 900;

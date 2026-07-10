@@ -1024,7 +1024,7 @@ function hydrateHero() {
     if (arenaTitle) arenaTitle.textContent = title;
     if (arenaKicker) arenaKicker.textContent = `Jornada ${state.data.jornada}`;
     if (document.body.classList.contains("newspaper-ui")) {
-        if (topbarKicker) topbarKicker.textContent = "Liga de Maestros";
+        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} · La Peña vs Maestros IA`;
         if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL"
             ? "El diario de la jornada"
             : title;
@@ -3930,7 +3930,7 @@ function coverSpotlightHtml() {
     const { match, idx, penaSign, programSign, masterSign } = item;
     const home = match.local || match.home_name || match.home?.name || "Local";
     const away = match.visitante || match.away_name || match.away?.name || "Visitante";
-    const score = scoreOnly(match.marcador || match.score || match.scores?.score) || match.marcador || "";
+    const score = scoreOnly(match.marcador || match.score || match.scores?.score || "");
     const status = isLiveStatus(match.status) || isLiveMatch(match) ? "En directo" : (score ? "Marcador" : "Partido caliente");
     return `
         <div class="cover-spotlight-card">
@@ -3941,7 +3941,7 @@ function coverSpotlightHtml() {
                     <strong>${escapeHtml(getShortName(home))}</strong>
                 </div>
                 <div class="cover-spotlight-score">
-                    <b>${escapeHtml(score || "vs")}</b>
+                    <b>${escapeHtml(score || "VS")}</b>
                     <span>mayor discrepancia</span>
                 </div>
                 <div class="cover-spotlight-team">
