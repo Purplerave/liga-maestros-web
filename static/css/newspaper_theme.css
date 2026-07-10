@@ -2588,3 +2588,215 @@ body.newspaper-ui.quiniela-focus .cover-actions button b {
 body.newspaper-ui.quiniela-focus .cover-actions button span {
     font-size: 0.6rem !important;
 }
+
+/* Visual polish pass: compact, useful front page with stronger hierarchy. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
+    background:
+        linear-gradient(90deg, rgba(5, 10, 18, 0.98), rgba(10, 21, 34, 0.96) 62%, rgba(5, 10, 18, 0.98)),
+        repeating-linear-gradient(0deg, rgba(246, 239, 225, 0.07), rgba(246, 239, 225, 0.07) 1px, transparent 1px, transparent 8px) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title {
+    color: var(--news-paper) !important;
+    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-size: clamp(1.25rem, 1.65vw, 1.85rem) !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-control-room {
+    position: relative !important;
+    grid-template-rows: minmax(172px, 0.84fr) minmax(138px, 0.64fr) !important;
+    gap: 10px !important;
+    padding: 2px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-control-room::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 18% 16%, rgba(45, 167, 216, 0.16), transparent 32%),
+        radial-gradient(circle at 78% 20%, rgba(217, 169, 40, 0.12), transparent 30%);
+    opacity: 0.8;
+}
+
+body.newspaper-ui.quiniela-focus .cover-control-room .cover-hero-grid {
+    grid-template-columns: minmax(300px, 0.36fr) minmax(0, 0.64fr) !important;
+    gap: 10px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-command-card,
+body.newspaper-ui.quiniela-focus .cover-panel {
+    position: relative !important;
+    overflow: hidden !important;
+    border-color: rgba(246, 239, 225, 0.38) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(45, 167, 216, 0.13),
+        0 14px 35px rgba(0, 0, 0, 0.22) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card {
+    min-height: 172px !important;
+    background:
+        linear-gradient(145deg, rgba(7, 17, 28, 0.94), rgba(9, 13, 22, 0.98)),
+        radial-gradient(circle at 70% 35%, rgba(217, 169, 40, 0.16), transparent 34%) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card img {
+    width: min(390px, 78%) !important;
+    max-height: 100px !important;
+    filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.42)) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-brand-card strong {
+    margin-top: 0 !important;
+    color: var(--news-gold) !important;
+    font-size: clamp(1.7rem, 2.4vw, 2.7rem) !important;
+    text-shadow: 0 0 18px rgba(217, 169, 40, 0.32) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card {
+    min-height: 172px !important;
+    align-content: stretch !important;
+    padding: 12px 16px !important;
+    background:
+        linear-gradient(135deg, rgba(9, 15, 27, 0.98), rgba(13, 28, 45, 0.92)),
+        repeating-linear-gradient(0deg, rgba(246, 239, 225, 0.04), rgba(246, 239, 225, 0.04) 1px, transparent 1px, transparent 7px) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card h2 {
+    max-width: none !important;
+    margin: 2px 0 8px !important;
+    color: var(--news-paper) !important;
+    font-size: clamp(1.95rem, 3vw, 3.35rem) !important;
+    line-height: 0.92 !important;
+    text-wrap: balance !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-rail {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-rail b {
+    display: grid !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    place-items: center !important;
+    border: 1px solid rgba(45, 167, 216, 0.36) !important;
+    background: rgba(45, 167, 216, 0.11) !important;
+    color: var(--news-paper) !important;
+    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-ticket-card {
+    border-color: rgba(217, 169, 40, 0.42) !important;
+    background: rgba(2, 6, 23, 0.72) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-ticket-head span {
+    font-size: 0.8rem !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-ticket-strip span {
+    min-height: 28px !important;
+    border-radius: 2px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-score-strip {
+    display: none !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-dashboard {
+    grid-template-columns: minmax(300px, 0.72fr) minmax(420px, 1fr) minmax(220px, 0.48fr) !important;
+    gap: 10px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel {
+    padding: 10px 12px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title {
+    margin-bottom: 8px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-stage {
+    height: 116px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step {
+    border-radius: 2px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-1 {
+    height: 116px !important;
+    box-shadow: inset 0 0 22px rgba(217, 169, 40, 0.12) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-2 {
+    height: 92px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-3 {
+    height: 78px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-dispute-grid div {
+    min-height: 54px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-dispute-bars {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin-top: 8px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-dispute-bars span {
+    min-height: 24px !important;
+    padding: 4px 7px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-actions {
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-actions button {
+    position: relative !important;
+    min-height: 42px !important;
+    padding-block: 5px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-actions button::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--news-gold);
+    opacity: 0.85;
+}
+
+@media (max-width: 1280px) {
+    body.newspaper-ui.quiniela-focus .cover-control-room .cover-hero-grid,
+    body.newspaper-ui.quiniela-focus .cover-dashboard {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
+        overflow: auto !important;
+    }
+}
