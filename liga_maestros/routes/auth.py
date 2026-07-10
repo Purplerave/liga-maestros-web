@@ -1,11 +1,9 @@
 """Auth routes: Google OAuth login/authorize/logout."""
-from flask import Blueprint, redirect, url_for, session, jsonify
+from flask import Blueprint, redirect, url_for, session
 import os
 
-from ..services.teams import canonical_contest_id
+import config
 from ..db.connection import get_db
-
-GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
 
 bp = Blueprint("auth", __name__)
 
@@ -25,7 +23,7 @@ def _get_google():
 
 @bp.route('/login/google')
 def login():
-    if not GOOGLE_AUTH_ENABLED:
+    if not config.GOOGLE_AUTH_ENABLED:
         return "Google OAuth no configurado en variables de entorno.", 503
     google = _get_google()
     redirect_uri = url_for('auth.authorize', _external=True)
@@ -34,7 +32,7 @@ def login():
 
 @bp.route('/authorize')
 def authorize():
-    if not GOOGLE_AUTH_ENABLED:
+    if not config.GOOGLE_AUTH_ENABLED:
         return redirect('/')
     google = _get_google()
     token = google.authorize_access_token()

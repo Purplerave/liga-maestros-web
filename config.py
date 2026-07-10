@@ -55,6 +55,11 @@ API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "")
 API_FOOTBALL_DAILY_LIMIT = int(os.getenv("API_FOOTBALL_DAILY_LIMIT", "100"))
 API_FOOTBALL_DAILY_RESERVE = int(os.getenv("API_FOOTBALL_DAILY_RESERVE", "10"))
 
+# Politica de la aplicacion
+MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
+MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
+GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
+
 # Configuración Radar de Noticias
 NEWS_CACHE_PATH = os.path.join(DATA_DIR, "RADAR_NOTICIAS.json")
 NEWS_REFRESH_SECONDS = int(os.getenv("NEWS_REFRESH_SECONDS", "900"))
