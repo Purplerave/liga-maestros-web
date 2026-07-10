@@ -1,9 +1,10 @@
 """Liga data route: the main data endpoint."""
 import os
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request
 
 from ..db.connection import get_db
+from ..middleware.authz import is_admin_request
 from ..services.payloads.league_matches import build_all_league_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
@@ -17,17 +18,6 @@ bp = Blueprint("liga_data", __name__)
 MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
 MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
 GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
-
-
-def _is_admin_request():
-    from flask import request as req
-
-    user = session.get("user") or {}
-    email = str(user.get("email") or "").strip().lower()
-    allow_local = os.getenv("ALLOW_LOCAL_ADMIN", "0").strip().lower() in ("1", "true", "yes", "on")
-    is_local = req.remote_addr in ("127.0.0.1", "::1", "localhost")
-    admin_emails = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()}
-    return (allow_local and is_local) or (email and email in admin_emails)
 
 
 @bp.route("/api/liga/data")
@@ -70,7 +60,7 @@ def get_liga_data():
             "consenso_pena": predictions_payload["consenso_pena"],
             "ranking_maestros": predictions_payload["ranking_maestros"],
             "auth_enabled": GOOGLE_AUTH_ENABLED,
-            "is_admin": _is_admin_request(),
+            "is_admin": is_admin_request(),
             "ticket_policy": {
                 "max_dobles": MAX_DOBLES_PER_TICKET,
                 "max_triples": MAX_TRIPLES_PER_TICKET,
