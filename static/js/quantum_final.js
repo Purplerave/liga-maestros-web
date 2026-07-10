@@ -1360,7 +1360,7 @@ function getUserRankingPosition() {
         .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.id.localeCompare(b.id));
     const idx = rows.findIndex(row => String(row.id) === uid);
     if (idx >= 0) return idx + 1;
-    const contestRow = (state.contest.general || []).find(row => String(row.id) === uid || row.is_user);
+    const contestRow = (state.contest?.general || []).find(row => String(row.id) === uid || row.is_user);
     return contestRow.pos || null;
 }
 
@@ -4053,6 +4053,37 @@ function coverQuinielaStatusHtml(matches, finished, saved, liveCount) {
         </div>`;
 }
 
+function coverUserSummaryHtml(finished, saved) {
+    if (!state.user) {
+        return `
+            <div class="cover-user-card is-guest">
+                <span>Tu jornada</span>
+                <strong>Entra para guardar boleto</strong>
+                <small>Perfil, ranking y galardones se activan con Google.</small>
+                <a href="/login/google">Entrar</a>
+            </div>`;
+    }
+    const stats = state.data?.ranking_maestros?.[state.user.id] || { total: 0, jornada: 0 };
+    const profile = state.contest?.profile || {};
+    const points = Number(stats.total ?? profile.hits ?? 0);
+    const rank = profile.position ?? getUserRankingPosition();
+    const firstName = String(state.user.name || "Maestro").split(" ")[0];
+    const jornadaHits = Number(stats.jornada ?? 0);
+    return `
+        <div class="cover-user-card">
+            <span>Tu jornada</span>
+            <strong>${escapeHtml(firstName)}</strong>
+            <div class="cover-user-metrics">
+                <b><small>Puntos</small>${points}</b>
+                <b><small>Ranking</small>${rank ? `#${rank}` : "-"}</b>
+                <b><small>Aciertos</small>${jornadaHits}/15</b>
+                <b><small>Boleto</small>${saved ? "OK" : "Pendiente"}</b>
+            </div>
+            <p>${finished ? `${finished} resultados cerrados` : "Jornada sin resolver"}.</p>
+            <button type="button" onclick="openProfileView()">Abrir perfil</button>
+        </div>`;
+}
+
 function renderNewspaperCoverPageV3() {
     const matches = state.data.partidos || [];
     const liveCount = matches.filter(match => isLiveStatus(match.status) || isLiveMatch(match)).length;
@@ -4081,12 +4112,6 @@ function renderNewspaperCoverPageV3() {
                         <b>${escapeHtml(coverCloseLabel())}</b>
                     </div>
                     ${coverProgramTicketHtml()}
-                    <div class="frontpage-facts cover-score-strip">
-                        <strong>${matches.length}<small>partidos</small></strong>
-                        <strong>${finished}<small>terminados</small></strong>
-                        <strong>${saved ? "OK" : "-"}<small>tu boleto</small></strong>
-                        <strong>${escapeHtml(coverCloseLabel())}<small>cierre</small></strong>
-                    </div>
                 </div>
             </article>
             <div class="cover-dashboard">
@@ -4098,10 +4123,8 @@ function renderNewspaperCoverPageV3() {
                     <div class="cover-panel-title"><span>Estado quiniela</span><b>jornada oficial</b></div>
                     ${coverQuinielaStatusHtml(matches, finished, saved, liveCount)}
                 </article>
-                <article class="cover-panel cover-actions">
-                    <button type="button" data-page-action="TICKET"><b>Jugar quiniela</b><span>Pag. 2</span></button>
-                    <button type="button" data-page-action="LIVE"><b>Ver directo</b><span>Pag. 3</span></button>
-                    <button type="button" data-page-action="CONTEST"><b>La Peña</b><span>Pag. 6</span></button>
+                <article class="cover-panel cover-user-summary">
+                    ${coverUserSummaryHtml(finished, saved)}
                 </article>
             </div>
         </section>`;
