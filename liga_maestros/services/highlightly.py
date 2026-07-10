@@ -1,11 +1,14 @@
 """Highlightly API integration: circuit breaker, usage tracking, refresh."""
+import logging
 import os, time, threading, requests
 from datetime import datetime, timedelta
 
 import config
 from ..db.connection import get_db
 from ..middleware.json_lock import write_json_locked, update_json_object_locked, update_json_list_by_id_locked
-from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, safe_read_json
+from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, safe_read_json, signo_for_match
+
+logger = logging.getLogger(__name__)
 
 HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
 HIGHLIGHTLY_DAILY_CALL_LIMIT = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_LIMIT", "7500"))
@@ -511,8 +514,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 if reversed_match:
                     home_goals, away_goals = away_goals, home_goals
                 status, minute = highlightly_status(state)
-                from ..scoring import score_prediction as _sp  # noqa
-                signo = _signo_for_match_simple(row["partido_id"], home_goals, away_goals)
+                signo = signo_for_match(row["partido_id"], home_goals, away_goals)
                 conn.execute("""
                     UPDATE resultados
                     SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?
@@ -525,25 +527,10 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
             update_json_object_locked(logo_path, logos)
         return updates
     except Exception:
+        logger.exception("Error refrescando resultados desde Highlightly")
         return 0
     finally:
         _highlightly_refresh_lock.release()
-
-
-def _signo_for_match_simple(partido_id, home_goals, away_goals):
-    if home_goals is None or away_goals is None:
-        return "-"
-    try:
-        match_id = int(partido_id)
-    except (TypeError, ValueError):
-        return "-"
-    if match_id == 15:
-        return f"{home_goals}-{away_goals}"
-    if home_goals > away_goals:
-        return "1"
-    if home_goals < away_goals:
-        return "2"
-    return "X"
 
 
 def trigger_highlightly_refresh_async(force=False, jornada=None):
