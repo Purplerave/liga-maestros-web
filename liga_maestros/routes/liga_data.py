@@ -1,4 +1,6 @@
 """Liga data route: the main data endpoint."""
+import logging
+
 from flask import Blueprint, jsonify, request, session
 
 import config
@@ -13,6 +15,7 @@ from ..services.ticket import compute_ticket_close_info, load_match_info_for_jor
 from ..utils import build_team_contract, load_team_logos
 
 bp = Blueprint("liga_data", __name__)
+logger = logging.getLogger(__name__)
 
 @bp.route("/api/liga/data")
 def get_liga_data():
@@ -83,6 +86,7 @@ def _detect_jornada_liga(conn):
         if row and row["avg_pj"] is not None:
             return str(int(round(row["avg_pj"])))
     except Exception:
+        logger.exception("No se pudo detectar la jornada de liga")
         return ""
     return ""
 

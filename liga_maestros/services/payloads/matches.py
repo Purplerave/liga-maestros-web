@@ -41,7 +41,8 @@ def build_jornada_matches(conn, jornada, team_logos):
                 dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
                 fecha_limpia = f"{dias[fecha_dt.weekday()]} {fecha_dt.strftime('%d/%m')}"
             except Exception:
-                fecha_limpia = str(r["fecha"]).replace("2026-", "").replace("/2026", "")
+                current_year = datetime.now().strftime("%Y")
+                fecha_limpia = str(r["fecha"]).replace(f"{current_year}-", "").replace(f"/{current_year}", "")
 
         if status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"):
             minuto_num = "".join(ch for ch in minuto if ch.isdigit())
@@ -108,4 +109,3 @@ def build_jornada_matches(conn, jornada, team_logos):
         })
         for i in range(1, 16)
     ]
-

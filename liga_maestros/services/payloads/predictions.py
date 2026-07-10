@@ -40,17 +40,9 @@ def _load_predictions(conn, jornada):
 
 
 def _build_pena_consensus(preds, participant_contract):
-    visible_master_ids = {
-        canonical_contest_id(column.get("id"))
-        for column in participant_contract.get("visible_ai_columns", [])
-    }
-    visible_master_ids.update({
-        canonical_contest_id(uid)
-        for uid in participant_contract.get("hidden_ids", [])
-    })
-    visible_master_ids.update({"programa", "v260_omnisciente", "consejo_ias", "consenso"})
+    visible_master_ids = _official_prediction_ids(participant_contract)
 
-    pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 15)}
+    pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 16)}
     seen_pena_votes = set()
     for raw_uid, data in preds.items():
         uid = canonical_contest_id(raw_uid)
@@ -121,10 +113,12 @@ def _filter_public_predictions(preds, participant_contract, current_user_id=None
         return preds
     official_ids = _official_prediction_ids(participant_contract)
     current_user_text = str(current_user_id or "").strip()
+    current_user_canonical = canonical_contest_id(current_user_text)
     public_preds = {}
     for raw_uid, data in preds.items():
         canonical = canonical_contest_id(raw_uid)
-        if str(canonical).lower() in official_ids or str(raw_uid) == current_user_text:
+        is_current_user = str(raw_uid) == current_user_text or canonical == current_user_canonical
+        if str(canonical).lower() in official_ids or is_current_user:
             public_preds[raw_uid] = data
     return public_preds
 
