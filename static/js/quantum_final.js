@@ -3965,15 +3965,16 @@ function coverPodiumHtml() {
     const rows = coverPodiumRows();
     const slots = [rows[1], rows[0], rows[2]];
     const labels = [2, 1, 3];
+    const unit = state.contest?.jornada?.rows?.length ? "aciertos" : "pts";
     if (!rows.length) return `<div class="cover-empty">Sin ranking todavia.</div>`;
     return `
         <div class="cover-podium-stage">
             ${slots.map((row, idx) => `
                 <div class="cover-podium-step rank-${labels[idx]} ${row ? "" : "is-empty"}">
-                    <span class="cover-medal">${labels[idx]}</span>
+                    <span class="cover-medal">${labels[idx]}.º</span>
                     <strong>${escapeHtml(row?.name || row?.winner || "-")}</strong>
-                    <b>${row ? Number(row.points || 0) : "-"}</b>
-                    <small>${labels[idx] === 1 ? "lider" : "podio"}</small>
+                    <b>${row ? `${Number(row.points || 0)} ${unit}` : "-"}</b>
+                    <small>${labels[idx] === 1 ? "líder" : "clasificado"}</small>
                 </div>
             `).join("")}
         </div>`;

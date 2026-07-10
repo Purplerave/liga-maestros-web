@@ -3274,6 +3274,88 @@ body.newspaper-ui.quiniela-focus .cover-spotlight-score span {
     color: rgba(11, 19, 32, 0.68) !important;
 }
 
+/* Balance pass: keep the editorial paper, recover dark premium competition modules. */
+body.newspaper-ui.quiniela-focus .cover-brand-card,
+body.newspaper-ui.quiniela-focus .cover-panel {
+    background:
+        repeating-linear-gradient(0deg, rgba(246, 239, 225, 0.045), rgba(246, 239, 225, 0.045) 1px, transparent 1px, transparent 7px),
+        linear-gradient(145deg, rgba(7, 14, 25, 0.98), rgba(10, 23, 40, 0.94)) !important;
+    border-color: rgba(45, 167, 216, 0.34) !important;
+    color: var(--news-paper) !important;
+    outline-color: rgba(45, 167, 216, 0.1) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-command-card {
+    background:
+        repeating-linear-gradient(0deg, rgba(6, 10, 18, 0.025), rgba(6, 10, 18, 0.025) 1px, transparent 1px, transparent 7px),
+        linear-gradient(145deg, #f2e7ce, #dfcfad) !important;
+    border-color: rgba(97, 72, 25, 0.46) !important;
+    color: #0b1320 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title,
+body.newspaper-ui.quiniela-focus .cover-panel-title b,
+body.newspaper-ui.quiniela-focus .cover-status-row b,
+body.newspaper-ui.quiniela-focus .cover-spotlight-team strong {
+    color: var(--news-paper) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-panel-title span,
+body.newspaper-ui.quiniela-focus .cover-status-row span,
+body.newspaper-ui.quiniela-focus .cover-spotlight-kicker {
+    color: var(--news-gold) !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-rail b {
+    border-color: rgba(13, 30, 52, 0.22) !important;
+    background: rgba(255, 255, 255, 0.32) !important;
+    color: #0b1320 !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-stage {
+    height: 126px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-1 {
+    height: 126px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-2 {
+    height: 102px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step.rank-3 {
+    height: 90px !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step .cover-medal {
+    width: auto !important;
+    min-width: 42px !important;
+    height: 26px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    color: var(--news-ink) !important;
+    background: var(--news-gold) !important;
+    border-color: rgba(217, 169, 40, 0.7) !important;
+    font-size: 0.82rem !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step b {
+    color: var(--news-gold) !important;
+    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-podium-step strong {
+    color: var(--news-paper) !important;
+    font-size: 0.96rem !important;
+}
+
+body.newspaper-ui.quiniela-focus .cover-status-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cover-control-room,
     body.newspaper-ui.quiniela-focus .cover-brand-card::after,
