@@ -1,17 +1,20 @@
 """Live routes: ticker, Q15 directo, sync status, health, refresh, probe."""
-import os, json, time
+import json
+import os
+import time
 from datetime import datetime
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 
 import config
 from ..db.connection import get_db
+from ..middleware.authz import is_admin_request
 from ..services.highlightly import (
     HIGHLIGHTLY_REFRESH_ENABLED, Q15_EXPECTED_MATCHES,
     resolve_jornada, compute_refresh_window,
     get_highlightly_circuit, get_highlightly_usage,
     trigger_highlightly_refresh_async, madrid_now,
 )
-from ..services.ticket import compute_ticket_close_info, validate_q15_payload
+from ..services.ticket import validate_q15_payload
 from ..middleware.json_lock import write_json_locked
 from ..utils import safe_read_json
 
@@ -19,15 +22,6 @@ bp = Blueprint("live", __name__)
 
 MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
 MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
-
-
-def _is_admin_request():
-    user = session.get("user") or {}
-    email = str(user.get("email") or "").strip().lower()
-    allow_local = os.getenv("ALLOW_LOCAL_ADMIN", "0").strip().lower() in ("1", "true", "yes", "on")
-    is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
-    admin_emails = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()}
-    return (allow_local and is_local) or (email and email in admin_emails)
 
 
 def _build_q15_cache_status(jornada):
@@ -146,7 +140,7 @@ def live_health():
 
 @bp.route('/api/live/refresh', methods=['POST'])
 def manual_live_refresh():
-    if not _is_admin_request():
+    if not is_admin_request():
         return jsonify({"status": "forbidden", "message": "Refresco externo limitado a entorno local/admin"}), 403
     if not HIGHLIGHTLY_REFRESH_ENABLED:
         return jsonify({"status": "disabled", "message": "Refresco externo desactivado"}), 409
@@ -163,7 +157,7 @@ def manual_live_refresh():
 
 @bp.route('/api/live/probe', methods=['POST'])
 def live_probe():
-    if not _is_admin_request():
+    if not is_admin_request():
         return jsonify({"status": "forbidden", "message": "Sondeo manual limitado a entorno local/admin"}), 403
     payload_json = request.get_json(silent=True) or {}
     requested_jornada = request.args.get("j") or payload_json.get("j")
