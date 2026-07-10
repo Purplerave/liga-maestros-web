@@ -20,9 +20,6 @@ from ..utils import safe_read_json
 
 bp = Blueprint("live", __name__)
 
-MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
-MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
-
 
 def _build_q15_cache_status(jornada):
     status = {"available": False, "ok": False, "last_sync": "--:--", "matches": 0, "matches_expected": Q15_EXPECTED_MATCHES, "matches_received": 0, "message": "sin_jornada"}

@@ -1,7 +1,7 @@
 """Predictions route: save user predictions."""
-import os
 from flask import Blueprint, request, jsonify, session
 
+import config
 from ..db.connection import get_db
 from ..scoring import normalize_prediction_sign
 from ..services.ticket import compute_ticket_close_info, madrid_now
@@ -10,10 +10,6 @@ from ..services.teams import is_scored_status, is_live_scored_status
 from ..middleware.rate_limit import is_rate_limited
 
 bp = Blueprint("predictions", __name__)
-
-MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
-MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
-
 
 @bp.route('/api/predicciones/save', methods=['POST'])
 def save_predictions():
@@ -45,7 +41,7 @@ def save_predictions():
         return jsonify({"status": "error", "message": "Completa los 15 partidos antes de guardar."}), 400
     doubles = sum(1 for sign in normalized_signs[:14] if len(sign) == 2)
     triples = sum(1 for sign in normalized_signs[:14] if len(sign) == 3)
-    if doubles > MAX_DOBLES_PER_TICKET or triples > MAX_TRIPLES_PER_TICKET:
+    if doubles > config.MAX_DOBLES_PER_TICKET or triples > config.MAX_TRIPLES_PER_TICKET:
         return jsonify({"status": "error", "message": "La quiniela supera el limite de dobles/triples permitido."}), 400
     try:
         target_jornada = int(j)

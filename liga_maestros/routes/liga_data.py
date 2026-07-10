@@ -1,8 +1,7 @@
 """Liga data route: the main data endpoint."""
-import os
-
 from flask import Blueprint, jsonify, request
 
+import config
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
 from ..services.payloads.league_matches import build_all_league_matches
@@ -14,11 +13,6 @@ from ..services.ticket import compute_ticket_close_info, load_match_info_for_jor
 from ..utils import build_team_contract, load_team_logos
 
 bp = Blueprint("liga_data", __name__)
-
-MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
-MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
-GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
-
 
 @bp.route("/api/liga/data")
 def get_liga_data():
@@ -59,11 +53,11 @@ def get_liga_data():
             "predicciones_actuales": predictions_payload["predicciones_actuales"],
             "consenso_pena": predictions_payload["consenso_pena"],
             "ranking_maestros": predictions_payload["ranking_maestros"],
-            "auth_enabled": GOOGLE_AUTH_ENABLED,
+            "auth_enabled": config.GOOGLE_AUTH_ENABLED,
             "is_admin": is_admin_request(),
             "ticket_policy": {
-                "max_dobles": MAX_DOBLES_PER_TICKET,
-                "max_triples": MAX_TRIPLES_PER_TICKET,
+                "max_dobles": config.MAX_DOBLES_PER_TICKET,
+                "max_triples": config.MAX_TRIPLES_PER_TICKET,
             },
         })
     finally:
