@@ -1,11 +1,16 @@
 """Highlightly API integration: circuit breaker, usage tracking, refresh."""
 import logging
-import os, time, threading, requests
+import os
+import threading
+import time
 from datetime import datetime, timedelta
+
+import requests
 
 import config
 from ..db.connection import get_db
 from ..middleware.json_lock import write_json_locked, update_json_object_locked, update_json_list_by_id_locked
+from .ticket import madrid_now, today_madrid
 from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, safe_read_json, signo_for_match
 
 logger = logging.getLogger(__name__)
@@ -24,22 +29,12 @@ HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_COOLDO
 HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS", "3600"))
 Q15_EXPECTED_MATCHES = 15
 
-_highlightly_refresh_lock = threading.Lock()
+_highlightly_refresh_lock = threading.RLock()
 _highlightly_last_refresh = 0
 _highlightly_refresh_thread = None
 _highlightly_refresh_started_at = 0
 _highlightly_thread_management_lock = threading.Lock()
 _highlightly_circuit_lock = threading.RLock()
-
-
-def madrid_now():
-    from zoneinfo import ZoneInfo
-    return datetime.now(ZoneInfo("Europe/Madrid"))
-
-
-def today_madrid():
-    return madrid_now().strftime("%Y-%m-%d")
-
 
 def resolve_jornada(conn, jornada=None):
     raw = str(jornada or "").strip()

@@ -40,9 +40,11 @@ def _load_external_matches():
     candidate_match_paths = [
         os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json"),
         os.path.join(config.BASE_DIR, "LIVE_ALL_MATCHES_V3.json"),
-        os.path.abspath(os.path.join(config.BASE_DIR, "..", "AUDITORIA", "data", "LIVE_ALL_MATCHES_V3.json")),
         os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES.json"),
     ]
+    extra_panel_path = os.getenv("LIVE_ALL_MATCHES_EXTRA_PATH", "").strip()
+    if extra_panel_path:
+        candidate_match_paths.insert(0, extra_panel_path)
     for path in candidate_match_paths:
         if not os.path.exists(path):
             continue
@@ -127,4 +129,3 @@ def _duplicates_quiniela_match(match, quiniela_pairs):
     home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
     away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
     return (normalize_team_key(home), normalize_team_key(away)) in quiniela_pairs
-
