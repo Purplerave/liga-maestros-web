@@ -15,38 +15,60 @@ const state = {
     evolutionChart: null,
     selectedAwardJornada: "",
     selectedAwardMonth: "",
+    newspaperPage: "ALL",
     commentsOpen: false,
     commentsLastSeenId: 0,
-    refreshErrorNotifiedAt: 0
+    refreshErrorNotifiedAt: 0,
+    snake: {
+        running: false,
+        over: false,
+        score: 0,
+        best: 0,
+        savedScore: 0,
+        timer: null,
+        dir: { x: 1, y: 0 },
+        nextDir: { x: 1, y: 0 },
+        dirQueue: [],
+        snake: [],
+        food: null,
+        cards: [],
+        reason: ""
+    }
 };
 
 const initialView = new URLSearchParams(window.location.search).get("view");
-if (initialView) state.currentFilter = initialView === "MATCHES" ? "ALL" : initialView;
+if (initialView) state.currentFilter = ["MATCHES", "PANEL"].includes(initialView) ? "ALL" : initialView;
 const initialContest = new URLSearchParams(window.location.search).get("contest");
 if (initialContest) state.contestView = initialContest;
 if (state.currentFilter === "CONTEST") {
     state.currentFilter = "ALL";
     state.contestView = "CONTEST_PROFILE";
 }
+document.body.classList.toggle("newspaper-cover-active", state.contestView === "MATCHES" && state.currentFilter === "ALL");
+document.body.classList.toggle("newspaper-ticket-active", state.contestView === "MATCHES" && state.currentFilter === "TICKET");
 
 const AI_COLUMNS = [
-    ["programa", "v260_omnisciente", "PROG"],
-    ["consejo_ias", "consenso", "CONS"],
-    ["gemini", null, "GEM"],
+    ["programa", "v260_omnisciente", "Programa"],
+    ["gemini", null, "Gemini"],
     ["grok", null, "GROK"],
-    ["claude", null, "CLAU"],
-    ["copilot", null, "COP"],
-    ["chatgpt", null, "GPT"]
+    ["claude", null, "Claude"],
+    ["copilot", null, "Copilot"],
+    ["chatgpt", null, "ChatGPT"]
 ];
 
 const COUNCIL_STYLE_JORNADAS = new Set(["67"]);
+const logoCache = new Map();
+const normalizeCache = new Map();
+let logoAliasIndex = null;
+let logoDataIndex = null;
+let standingContextCache = new Map();
 
 function isCouncilStyleJornada() {
-    return COUNCIL_STYLE_JORNADAS.has(String(state.data?.jornada || state.jornada || ""));
+    return COUNCIL_STYLE_JORNADAS.has(String(state.data.jornada || state.jornada || ""));
 }
 
-function getVisibleAIColumns(matches = state.data?.partidos || []) {
-    const preds = state.data?.predicciones_actuales || {};
+function getVisibleAIColumns(matches = state.data.partidos || []) {
+    const preds = state.data.predicciones_actuales || {};
     return AI_COLUMNS.filter(([primary, fallback]) =>
         matches.some((_, idx) => {
             const sign = getSign(preds, idx, primary, fallback);
@@ -85,20 +107,20 @@ function showToast(message, type = "success") {
 function getShortName(name) {
     if (!name) return "-";
     const clean = String(name).toUpperCase();
-    const normalized = clean.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const normalized = clean.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const map = {
         "CLUB ATLETICO DE MADRID": "AT. MADRID",
-        "CLUB ATLÉTICO DE MADRID": "AT. MADRID",
+        "CLUB ATLÃ‰TICO DE MADRID": "AT. MADRID",
         "REAL MADRID C.F.": "R. MADRID",
         "F.C. BARCELONA": "BARCA",
         "ATHLETIC CLUB BILBAO": "ATHLETIC",
         "REAL SOCIEDAD DE FUTBOL": "R. SOCIEDAD",
-        "REAL SOCIEDAD DE FÚTBOL": "R. SOCIEDAD",
+        "REAL SOCIEDAD DE FÃšTBOL": "R. SOCIEDAD",
         "VILLARREAL C.F.": "VILLARREAL",
         "REAL BETIS BALOMPIE": "BETIS",
-        "REAL BETIS BALOMPIÉ": "BETIS",
+        "REAL BETIS BALOMPIÃ‰": "BETIS",
         "DEPORTIVO ALAVES": "ALAVES",
-        "DEPORTIVO ALAVÉS": "ALAVES",
+        "DEPORTIVO ALAVÃ‰S": "ALAVES",
         "R.C.D. ESPANYOL DE BARCELONA": "ESPANYOL",
         "R.C.D. MALLORCA": "MALLORCA"
     };
@@ -174,16 +196,13 @@ function teamLogo(match, side) {
 }
 
 function fixedTeamLogo(name) {
+    const cacheKey = logoLookupKey(name);
+    if (logoCache.has(cacheKey)) return logoCache.get(cacheKey);
     const target = logoLookupKey(name);
-    const contractLogos = state.data?.team_contract?.logos || {};
-    for (const [rawName, logo] of Object.entries(contractLogos)) {
-        if (logoLookupKey(rawName) === target && logo) return logo;
-    }
-    const fixedLogos = state.data?.team_logos || {};
-    for (const [rawName, logo] of Object.entries(fixedLogos)) {
-        if (logoLookupKey(rawName) === target && logo) return logo;
-    }
-    return TEAM_LOGO_FILES[target] || "";
+    const logoIndex = getLogoDataIndex();
+    const result = logoIndex.get(target) || TEAM_LOGO_FILES[target] || "";
+    logoCache.set(cacheKey, result);
+    return result;
 }
 
 const TEAM_LOGO_ALIASES = {
@@ -284,14 +303,32 @@ const TEAM_LOGO_FILES = {
 
 function logoLookupKey(name) {
     const key = normalizeName(name);
+    return getLogoAliasIndex().get(key) || key;
+}
+
+function getLogoAliasIndex() {
+    if (logoAliasIndex) return logoAliasIndex;
+    logoAliasIndex = new Map();
     const contractAliases = state.data?.team_contract?.aliases || {};
     for (const [rawName, canonicalName] of Object.entries(contractAliases)) {
-        if (normalizeName(rawName) === key) return normalizeName(canonicalName);
+        logoAliasIndex.set(normalizeName(rawName), normalizeName(canonicalName));
     }
     for (const [rawName, canonicalName] of Object.entries(TEAM_LOGO_ALIASES)) {
-        if (normalizeName(rawName) === key) return normalizeName(canonicalName);
+        logoAliasIndex.set(normalizeName(rawName), normalizeName(canonicalName));
     }
-    return key;
+    return logoAliasIndex;
+}
+
+function getLogoDataIndex() {
+    if (logoDataIndex) return logoDataIndex;
+    logoDataIndex = new Map();
+    const add = (rawName, logo) => {
+        if (!rawName || !logo) return;
+        logoDataIndex.set(logoLookupKey(rawName), logo);
+    };
+    Object.entries(state.data?.team_contract?.logos || {}).forEach(([rawName, logo]) => add(rawName, logo));
+    Object.entries(state.data?.team_logos || {}).forEach(([rawName, logo]) => add(rawName, logo));
+    return logoDataIndex;
 }
 
 function logoBadge(name, logo) {
@@ -310,31 +347,40 @@ function teamCell(name, side = "left", logo = "") {
 
 function fixtureInline(homeName, awayName, homeLogo = "", awayLogo = "") {
     return `<div class="fixture-inline">
-        <span class="fixture-team">${logoBadge(homeName, homeLogo)}<span class="fixture-name">${escapeHtml(getShortName(homeName))}</span></span>
-        <span class="fixture-sep">-</span>
-        <span class="fixture-team">${logoBadge(awayName, awayLogo)}<span class="fixture-name">${escapeHtml(getShortName(awayName))}</span></span>
+        <span class="fixture-name fixture-name-home">${escapeHtml(getShortName(homeName))}</span>
+        <span class="fixture-crest-pair">
+            ${logoBadge(homeName, homeLogo)}
+            <span class="fixture-sep">-</span>
+            ${logoBadge(awayName, awayLogo)}
+        </span>
+        <span class="fixture-name fixture-name-away">${escapeHtml(getShortName(awayName))}</span>
     </div>`;
 }
 
 function findStandingContext(teamName) {
-    const standings = state.data?.standings || {};
-    const needle = normalizeName(teamName);
+    const cacheKey = normalizeName(teamName);
+    if (standingContextCache.has(cacheKey)) return standingContextCache.get(cacheKey);
+    const standings = state.data.standings || {};
+    const needle = cacheKey;
     for (const cat of ["primera", "segunda"]) {
         for (const team of (standings[cat] || [])) {
             if (normalizeName(team.n) === needle) {
-                return {
+                const result = {
                     pos: team.pos ?? "-",
                     pts: team.pts ?? "-",
                     pj: team.pj ?? "-"
                 };
+                standingContextCache.set(cacheKey, result);
+                return result;
             }
         }
     }
+    standingContextCache.set(cacheKey, null);
     return null;
 }
 
 function findQ15Directo(match) {
-    const matches = state.q15Directo?.matches || [];
+    const matches = state.q15Directo.matches || [];
     const byId = matches.find(item => Number(item.id) === Number(match.id));
     if (byId) return byId;
     const home = normalizeName(match.local);
@@ -353,7 +399,7 @@ function eventTypeLabel(type) {
 
 function renderQ15Events(match) {
     const detail = findQ15Directo(match);
-    const groups = detail?.events || [];
+    const groups = detail.events || [];
     const withEvents = groups.filter(group => (group.events || []).length);
     if (!withEvents.length) {
         return `<small class="q15-empty">Sin eventos cacheados para este partido.</small>`;
@@ -400,14 +446,14 @@ function renderMatchInsight(match) {
         pctTriplet("LAE", info.lae),
         pctTriplet("Mercado", info.apu)
     ].filter(Boolean).join("");
-    const historico = info.historico
-        ? `<small class="insight-muted">Histórico: ${escapeHtml(info.historico["1"] || 0)} local | ${escapeHtml(info.historico["X"] || 0)} empates | ${escapeHtml(info.historico["2"] || 0)} visitante</small>`
+    const historico = info.historico ?
+         `<small class="insight-muted">HistÃ³rico: ${escapeHtml(info.historico["1"] || 0)} local | ${escapeHtml(info.historico["X"] || 0)} empates | ${escapeHtml(info.historico["2"] || 0)} visitante</small>`
         : "";
-    const reason = maestra.razon
-        ? `<p class="insight-reason"><b>${escapeHtml(maestra.signo || "Maestra")}</b> ${escapeHtml(maestra.razon)}</p>`
+    const reason = maestra.razon ?
+         `<p class="insight-reason"><b>${escapeHtml(maestra.signo || "Maestra")}</b> ${escapeHtml(maestra.razon)}</p>`
         : "";
-    const detail = info.detalle
-        ? `<small class="insight-muted">${escapeHtml(info.detalle).slice(0, 220)}${String(info.detalle).length > 220 ? "..." : ""}</small>`
+    const detail = info.detalle ?
+         `<small class="insight-muted">${escapeHtml(info.detalle).slice(0, 220)}${String(info.detalle).length > 220 ? "..." : ""}</small>`
         : "";
     if (!chips && !reason && !historico && !detail) {
         return `<small class="q15-empty">Sin lectura previa cacheada para este partido.</small>`;
@@ -431,17 +477,17 @@ function renderMatchDetail(m, c) {
 function renderMatchDetailGrid(m, c) {
     const homeCtx = findStandingContext(m.local);
     const awayCtx = findStandingContext(m.visitante);
-    const homeLine = homeCtx
-        ? `${getShortName(m.local)} | #${homeCtx.pos} | ${homeCtx.pts} pts`
+    const homeLine = homeCtx ?
+         `${getShortName(m.local)} | #${homeCtx.pos} | ${homeCtx.pts} pts`
         : `${getShortName(m.local)} | sin ranking`;
-    const awayLine = awayCtx
-        ? `${getShortName(m.visitante)} | #${awayCtx.pos} | ${awayCtx.pts} pts`
+    const awayLine = awayCtx ?
+         `${getShortName(m.visitante)} | #${awayCtx.pos} | ${awayCtx.pts} pts`
         : `${getShortName(m.visitante)} | sin ranking`;
     const plenoDetail = Number(m.id) === 15 ? renderPenaPlenoDetail(14) : null;
     return `
         <div class="match-detail-grid">
             <div class="match-detail-box">
-                <span class="match-detail-label">La Peña</span>
+                <span class="match-detail-label">La PeÃ±a</span>
                 ${plenoDetail
                     ? plenoDetail
                     : `<strong>1 ${Number(c.p1 || 0)}% | X ${Number(c.px || 0)}% | 2 ${Number(c.p2 || 0)}%</strong>`}
@@ -465,6 +511,8 @@ function renderMatchDetailGrid(m, c) {
 
 function normalizeName(text) {
     if (!text) return "";
+    const cacheKey = String(text);
+    if (normalizeCache.has(cacheKey)) return normalizeCache.get(cacheKey);
     const rawCollapsed = String(text)
         .toUpperCase()
         .normalize("NFD")
@@ -503,7 +551,9 @@ function normalizeName(text) {
         RACINGSANTANDER: "RACINGSANTANDER",
         UDLASPALMAS: "LASPALMAS"
     };
-    return aliases[normalized] || aliases[rawCollapsed] || normalized;
+    const result = aliases[normalized] || aliases[rawCollapsed] || normalized;
+    normalizeCache.set(cacheKey, result);
+    return result;
 }
 
 function formatSmartDate(fechaRaw, horaRaw) {
@@ -529,7 +579,7 @@ function formatStatus(status, time = "", scheduled = "") {
         const h = String(scheduled || time || "").substring(0, 5);
         return h ? `${h}h` : "Por jugar";
     }
-    if (["FT", "FINISHED", "TERMINADO"].includes(raw)) return "";
+    if (["FT", "FINISHED", "TERMINADO", "STALE"].includes(raw)) return "";
     if (["LIVE", "IN PLAY", "EN JUEGO"].includes(raw)) return time ? `En directo ${time}` : "En directo";
     if (raw === "HT" || raw === "HALF TIME BREAK") return "Descanso";
     return status || "";
@@ -553,6 +603,15 @@ function competitionLabel(match) {
     if (raw === "SEGUNDA DIVISION" && lowerTierHint) return "SEGUNDA FEDERACION";
     if (raw === "SEGUNDA DIVISION") return "SEGUNDA DIVISION";
     return raw;
+}
+
+function matchCompetitionMeta(match) {
+    const league = competitionLabel(match);
+    const country = String(match.country || match.country_name || match.competition?.country?.name || "").trim();
+    const code = String(match.country_code || match.country?.code || match.competition?.country?.code || "").trim().toUpperCase();
+    const cleanLeague = league === "LIGA" ? "COMPETICION" : league;
+    const suffix = country || code;
+    return suffix ? `${cleanLeague} Â· ${suffix}` : cleanLeague;
 }
 
 function getSign(preds, idx, primary, fallback) {
@@ -594,17 +653,17 @@ function isLiveStatus(status) {
 }
 
 function isFinishedStatus(status) {
-    return ["FT", "FINISHED", "TERMINADO"].includes(String(status || "").toUpperCase());
+    return ["FT", "FINISHED", "TERMINADO", "STALE"].includes(String(status || "").toUpperCase());
 }
 
 function matchMinuteValue(match) {
-    const raw = String(match?.time || "").trim();
+    const raw = String(match.time || "").trim();
     const m = raw.match(/(\d{1,3})/);
     return m ? Number.parseInt(m[1], 10) : 0;
 }
 
 function isImplicitlyFinished(match) {
-    const score = scoreOnly(match?.score || match?.marcador || "");
+    const score = scoreOnly(match.score || match.marcador || "");
     const minute = matchMinuteValue(match);
     return Boolean(score && minute >= 105);
 }
@@ -633,7 +692,7 @@ function plenoScoreKey(value) {
 }
 
 function liveStage(match) {
-    const text = String(match?.marcador || match?.time || "").toUpperCase();
+    const text = String(match.marcador || match.time || "").toUpperCase();
     if (text.includes("DESC")) return "Desc.";
     const minute = text.match(/(\d+)'/);
     return minute ? `${minute[1]}'` : "Directo";
@@ -649,6 +708,7 @@ function changeJornada(jornada) {
 function filterLeague(league) {
     state.currentFilter = !league || league === "MATCHES" ? "ALL" : league;
     state.contestView = "MATCHES";
+    state.newspaperPage = state.currentFilter === "LIVE" ? "LIVE" : state.currentFilter === "ALL" ? "ALL" : "LEAGUES";
     syncUrlState();
     renderArena();
     loadLeagueNav();
@@ -661,20 +721,28 @@ function currentMainView() {
     if (state.contestView !== "MATCHES") return "CONTEST";
     if (String(state.currentFilter || "").startsWith("STANDINGS_")) return "STANDINGS";
     if (state.currentFilter === "LIVE" || state.currentFilter === "WAR_ROOM") return "LIVE";
+    if (state.currentFilter === "SNAKE_PAGE") return "SNAKE";
+    if (state.currentFilter === "QUIZ_PAGE") return "QUIZ";
+    if (state.currentFilter === "TICKET") return "TICKET";
     if (state.currentFilter && state.currentFilter !== "ALL") return "LEAGUES";
     return "ALL";
 }
 
 function changeMainView(view) {
     const target = view || "ALL";
+    state.newspaperPage = target;
+    hydrateNewspaperPageNav(target);
     if (target === "CONTEST") {
         state.currentFilter = "ALL";
-        state.contestView = "CONTEST_GENERAL";
+        state.contestView = "CONTEST_AWARDS";
     } else if (target === "STANDINGS") {
         state.currentFilter = "STANDINGS_PRIMERA";
         state.contestView = "MATCHES";
     } else if (target === "LIVE") {
         state.currentFilter = "LIVE";
+        state.contestView = "MATCHES";
+    } else if (target === "TICKET") {
+        state.currentFilter = "TICKET";
         state.contestView = "MATCHES";
     } else if (target === "LEAGUES") {
         const leagues = getAvailableLeagueOptions();
@@ -689,6 +757,45 @@ function changeMainView(view) {
     hydrateHero();
     loadLeagueNav();
     updateWarRoomButton();
+}
+
+function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
+    document.querySelectorAll("[data-page-action]").forEach(button => {
+        button.classList.toggle("active", button.dataset.pageAction === activePage);
+    });
+}
+
+function focusNewspaperPanel(selector) {
+    const panel = document.querySelector(selector);
+    if (!panel) return;
+    panel.classList.add("paper-focus");
+    panel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+    window.setTimeout(() => panel.classList.remove("paper-focus"), 1800);
+}
+
+function openNewspaperPage(page) {
+    const target = page || "ALL";
+    state.newspaperPage = target;
+    hydrateNewspaperPageNav(target);
+    if (target === "SNAKE") {
+        state.currentFilter = "SNAKE_PAGE";
+        state.contestView = "MATCHES";
+        syncUrlState();
+        renderArena();
+        loadLeagueNav();
+        loadSnakeRanking();
+        return;
+    }
+    if (target === "QUIZ") {
+        state.currentFilter = "QUIZ_PAGE";
+        state.contestView = "MATCHES";
+        syncUrlState();
+        renderArena();
+        loadLeagueNav();
+        updateWarRoomButton();
+        return;
+    }
+    changeMainView(target);
 }
 
 function changeSecondaryView(value) {
@@ -707,6 +814,7 @@ function changeSecondaryView(value) {
 function goHome() {
     state.currentFilter = "ALL";
     state.contestView = "MATCHES";
+    state.newspaperPage = "ALL";
     syncUrlState();
     renderArena();
     hydrateHero();
@@ -720,6 +828,7 @@ function changeContestView(view) {
     state.contestView = view || "MATCHES";
     if (state.contestView !== "MATCHES") {
         state.currentFilter = "ALL";
+        state.newspaperPage = "CONTEST";
     }
     syncUrlState();
     renderArena();
@@ -737,6 +846,7 @@ function changeStandingsView(view) {
     }
     state.currentFilter = view || "ALL";
     state.contestView = "MATCHES";
+    state.newspaperPage = "STANDINGS";
     syncUrlState();
     renderArena();
     loadLeagueNav();
@@ -747,10 +857,24 @@ function changeStandingsView(view) {
 
 function openProfileView() {
     state.contestView = "CONTEST_PROFILE";
+    state.newspaperPage = "CONTEST";
     if (state.currentFilter === "WAR_ROOM") state.currentFilter = "ALL";
     syncUrlState();
     renderArena();
     hydrateHero();
+    loadLeagueNav();
+    hydrateContestNav();
+    updateWarRoomButton();
+}
+
+function openAwardsView() {
+    state.contestView = "CONTEST_AWARDS";
+    state.newspaperPage = "CONTEST";
+    if (state.currentFilter === "WAR_ROOM") state.currentFilter = "ALL";
+    syncUrlState();
+    renderArena();
+    hydrateHero();
+    loadLeagueNav();
     hydrateContestNav();
     updateWarRoomButton();
 }
@@ -789,6 +913,9 @@ async function refreshData(options = {}) {
         ]);
         state.user = (await userRes.json()).user;
         state.data = await dataRes.json();
+        logoAliasIndex = null;
+        logoDataIndex = null;
+        logoCache.clear();
         state.contest = await contestRes.json();
         state.jornada = String(state.data.jornada || state.jornada);
         const sync = await syncRes.json();
@@ -810,8 +937,11 @@ async function refreshData(options = {}) {
         updateAuthUI();
         updateWarRoomButton();
         renderArena();
-        renderPrestigeRanking();
-        renderLiveStandings();
+        if (shouldRefreshSideModules()) {
+            renderLiveStandings();
+            loadPorra();
+            loadSnakeRanking();
+        }
         loadComments();
         renderEvolutionChart();
         loadLeagueNav();
@@ -869,26 +999,39 @@ function hydrateHero() {
     const title = state.contestView !== "MATCHES"
         ? contestViewTitle(state.contestView)
         : state.currentFilter === "ALL"
-        ? "Quiniela oficial"
-        : state.currentFilter === "LIVE"
-            ? "Partidos en directo"
-            : state.currentFilter === "WAR_ROOM"
-                ? "Directo"
-                : state.currentFilter === "STANDINGS_FULL"
-                    ? "Clasificaciones"
-                    : state.currentFilter === "STANDINGS_PRIMERA"
-                    ? "Clasificacion Primera"
-                    : state.currentFilter === "STANDINGS_SEGUNDA"
-                    ? "Clasificacion Segunda"
-                : state.currentFilter;
+            ? "Portada"
+            : state.currentFilter === "TICKET"
+                ? "Quiniela oficial"
+                : state.currentFilter === "SNAKE_PAGE"
+                    ? "Mundial Snake 1X2"
+                    : state.currentFilter === "QUIZ_PAGE"
+                        ? "Quiz"
+                : state.currentFilter === "LIVE"
+                    ? "Partidos en directo"
+                    : state.currentFilter === "WAR_ROOM"
+                        ? "Directo"
+                        : state.currentFilter === "STANDINGS_FULL"
+                            ? "Clasificaciones"
+                            : state.currentFilter === "STANDINGS_PRIMERA"
+                                ? "Clasificacion Primera"
+                                : state.currentFilter === "STANDINGS_SEGUNDA"
+                                    ? "Clasificacion Segunda"
+                                    : state.currentFilter;
     const arenaTitle = qs("arena-title");
     const arenaKicker = qs("arena-kicker");
     const topbarTitle = qs("topbar-title");
     const topbarKicker = qs("topbar-kicker");
     if (arenaTitle) arenaTitle.textContent = title;
     if (arenaKicker) arenaKicker.textContent = `Jornada ${state.data.jornada}`;
-    if (topbarTitle) topbarTitle.textContent = title;
-    if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada}`;
+    if (document.body.classList.contains("newspaper-ui")) {
+        if (topbarKicker) topbarKicker.textContent = "Liga de Maestros";
+        if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL"
+            ? "El diario de la jornada"
+            : title;
+    } else {
+        if (topbarTitle) topbarTitle.textContent = title;
+        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada}`;
+    }
     const save = qs("save-quiniela-btn");
     if (save) {
         const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
@@ -906,7 +1049,7 @@ function hydrateHero() {
     const share = qs("share-ticket-btn");
     if (share) {
         share.hidden = !state.user;
-        share.disabled = !state.data?.partidos?.length;
+        share.disabled = !state.data.partidos.length;
     }
     updatePicksProgress();
     updateHeroStrip();
@@ -927,7 +1070,7 @@ function updateWarRoomButton() {
     btn.hidden = false;
     const active = state.currentFilter === "WAR_ROOM";
     btn.classList.toggle("is-active", active);
-    btn.textContent = active ? "↩" : "◫";
+    btn.textContent = active ? "â†©" : "â—«";
     btn.title = active ? "Volver a la quiniela" : "Abrir Modo Directo";
 }
 
@@ -938,31 +1081,31 @@ function isContestView(value) {
 function contestViewTitle(value) {
     return {
         CONTEST_PROFILE: "Mi perfil",
-        CONTEST_GENERAL: "La Peña general",
-        CONTEST_MONTHLY: "La Peña mensual",
-        CONTEST_JORNADA: "La Peña jornada",
+        CONTEST_GENERAL: "La PeÃ±a general",
+        CONTEST_MONTHLY: "La PeÃ±a mensual",
+        CONTEST_JORNADA: "La PeÃ±a jornada",
         CONTEST_AWARDS: "Galardones"
-    }[value] || "La Peña";
+    }[value] || "La PeÃ±a";
 }
 
 function getAllLeagueMatches() {
-    return state.data?.all_league_matches || [];
+    return state.data.all_league_matches || [];
 }
 
 function isLiveMatch(match) {
-    const status = String(match?.status || "").toUpperCase();
+    const status = String(match.status || "").toUpperCase();
     if (isImplicitlyFinished(match)) return false;
     if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") return true;
-    const score = scoreOnly(match?.score || match?.marcador || "");
+    const score = scoreOnly(match.score || match.marcador || "");
     if (score && !isFinishedStatus(status)) return true;
-    const dateText = String(match?.added || match?.fecha_raw || "").slice(0, 10);
+    const dateText = String(match.added || match.fecha_raw || "").slice(0, 10);
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     return Boolean(score && dateText === today && !isFinishedStatus(status));
 }
 
 function getLiveLeagueMatches() {
-    const officialLive = (state.data?.partidos || []).filter(m => isLiveStatus(m.status) || isLiveMatch(m));
+    const officialLive = (state.data.partidos || []).filter(m => isLiveStatus(m.status) || isLiveMatch(m));
     const seen = new Set(officialLive.map(matchPairKey));
     const externalLive = getAllLeagueMatches()
         .filter(m => isLiveStatus(m.status) || isLiveMatch(m))
@@ -981,7 +1124,7 @@ function hasLiveLeagueMatches() {
 }
 
 function getNextLeagueMatch() {
-    const officialNext = (state.data?.partidos || [])
+    const officialNext = (state.data.partidos || [])
         .filter(m => isUpcomingScheduledMatch(m))
         .sort((a, b) => parseMatchTimestamp(a) - parseMatchTimestamp(b))[0];
     if (officialNext) return officialNext;
@@ -1058,7 +1201,7 @@ function updateHeroStrip() {
     const done = state.my_signs.filter(sign => String(sign || "-").trim() !== "-").length;
     if (picksNode) picksNode.textContent = `${done}/15`;
 
-    const partidos = state.data?.partidos || [];
+    const partidos = state.data.partidos || [];
     const nextMatch = partidos.find(match => isScheduledStatus(match.status));
     if (nextNode) {
         nextNode.textContent = nextMatch
@@ -1091,8 +1234,8 @@ function formatKickoffShort(fechaRaw, horaRaw) {
 }
 
 function parseMatchTimestamp(match) {
-    const rawDate = String(match?.added || match?.fecha_raw || "").split(" ")[0].trim();
-    const rawHour = String(match?.scheduled || match?.time || match?.hora || "").trim().slice(0, 5);
+    const rawDate = String(match.added || match.fecha_raw || "").split(" ")[0].trim();
+    const rawHour = String(match.scheduled || match.time || match.hora || "").trim().slice(0, 5);
     if (!rawDate) return Number.MAX_SAFE_INTEGER;
     const isoDate = rawDate.includes("/") ? rawDate.split("/").reverse().join("-") : rawDate;
     const clock = /^\d{2}:\d{2}$/.test(rawHour) ? rawHour : "23:59";
@@ -1102,15 +1245,15 @@ function parseMatchTimestamp(match) {
 }
 
 function isUpcomingScheduledMatch(match, graceMinutes = 15) {
-    if (!isScheduledStatus(match?.status) || isImplicitlyFinished(match) || isLiveMatch(match)) return false;
+    if (!isScheduledStatus(match.status) || isImplicitlyFinished(match) || isLiveMatch(match)) return false;
     const ts = parseMatchTimestamp(match);
     if (!Number.isFinite(ts) || ts === Number.MAX_SAFE_INTEGER) return false;
     return ts >= Date.now() - (graceMinutes * 60 * 1000);
 }
 
 function findMostOpenMatch() {
-    const partidos = state.data?.partidos || [];
-    const consenso = state.data?.consenso_pena || [];
+    const partidos = state.data.partidos || [];
+    const consenso = state.data.consenso_pena || [];
     let best = null;
     let bestGap = Infinity;
     for (const match of partidos) {
@@ -1182,9 +1325,8 @@ function hydrateUserSigns({ preserveLocalTicket = false } = {}) {
 
 function updateAuthUI() {
     const navAuth = qs("user-profile-nav");
-    if (!navAuth) return;
     if (!state.user) {
-        navAuth.innerHTML = state.data?.auth_enabled === false
+        if (navAuth) navAuth.innerHTML = state.data.auth_enabled === false
             ? `<span class="login-btn topbar-login-btn is-disabled" title="Google OAuth pendiente de configurar">Login off</span>`
             : `<a class="login-btn topbar-login-btn" href="/login/google">Entrar</a>`;
         return;
@@ -1195,11 +1337,12 @@ function updateAuthUI() {
     const rank = profile.position ?? getUserRankingPosition();
     const rankText = rank ? `#${rank}` : "-";
     const firstName = String(state.user.name || "Maestro").split(" ")[0];
-    navAuth.innerHTML = `
+    if (navAuth) navAuth.innerHTML = `
         <div class="topbar-user-summary" title="${escapeHtml(`${stats.jornada || 0} aciertos en la jornada actual`)}">
             <button class="topbar-user-name profile-link" type="button" onclick="openProfileView()">${escapeHtml(firstName)}</button>
             <span class="topbar-user-score topbar-user-points"><b>${points}</b> pts</span>
             <span class="topbar-user-score topbar-user-rank"><b>${escapeHtml(rankText)}</b> ranking</span>
+            <button class="topbar-mini-link" type="button" onclick="openProfileView()">Perfil</button>
         </div>
         <a class="logout-link compact-logout" href="/logout">Salir</a>`;
 }
@@ -1207,18 +1350,18 @@ function updateAuthUI() {
 function getUserRankingPosition() {
     if (!state.user) return null;
     const uid = String(state.user.id);
-    const ranking = state.data?.ranking_maestros || {};
+    const ranking = state.data.ranking_maestros || {};
     const rows = Object.entries(ranking)
         .map(([id, stats]) => ({
             id,
-            total: Number(stats?.total || 0),
-            jornada: Number(stats?.jornada || 0)
+            total: Number(stats.total || 0),
+            jornada: Number(stats.jornada || 0)
         }))
         .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.id.localeCompare(b.id));
     const idx = rows.findIndex(row => String(row.id) === uid);
     if (idx >= 0) return idx + 1;
-    const contestRow = (state.contest?.general || []).find(row => String(row.id) === uid || row.is_user);
-    return contestRow?.pos || null;
+    const contestRow = (state.contest.general || []).find(row => String(row.id) === uid || row.is_user);
+    return contestRow.pos || null;
 }
 
 async function loadLeagueNav() {
@@ -1232,11 +1375,12 @@ function hydrateMainViewNav() {
     const nav = qs("league-nav");
     if (!nav) return;
     const options = [
-        ["ALL", "La Quiniela"],
+        ["ALL", "Portada"],
+        ["TICKET", "La Quiniela"],
         ["LIVE", `Directo (${getLiveLeagueMatches().length})`],
         ["LEAGUES", "Ligas"],
-        ["CONTEST", "La Peña"],
-        ["STANDINGS", "Clasificaciones"]
+        ["CONTEST", "La PeÃ±a"],
+        ["STANDINGS", "Primera / Segunda"]
     ];
     const selected = currentMainView();
     nav.innerHTML = options.map(([value, label]) =>
@@ -1245,7 +1389,7 @@ function hydrateMainViewNav() {
 }
 
 function getAvailableLeagueOptions() {
-    const allMatches = state.data?.all_league_matches || [];
+    const allMatches = state.data.all_league_matches || [];
     const counts = allMatches.reduce((acc, match) => {
         const key = competitionLabel(match);
         acc[key] = (acc[key] || 0) + 1;
@@ -1258,8 +1402,8 @@ function getAvailableLeagueOptions() {
 
 function hydrateSecondaryNav() {
     const nav = qs("contest-nav");
-    const group = nav?.closest(".field-group");
-    const filters = qs("league-nav")?.closest(".topbar-filters");
+    const group = nav.closest(".field-group");
+    const filters = qs("league-nav").closest(".topbar-filters");
     if (!nav || !group) return;
     const main = currentMainView();
     let options = [];
@@ -1267,16 +1411,17 @@ function hydrateSecondaryNav() {
     let placeholder = "Detalle";
 
     if (main === "CONTEST") {
-        placeholder = "La Peña";
+        placeholder = "La PeÃ±a";
         selected = state.contestView;
         options = [
+            ["CONTEST_AWARDS", "Galardones"],
+            ["CONTEST_PROFILE", "Mi perfil"],
             ["CONTEST_GENERAL", "General"],
             ["CONTEST_MONTHLY", "Mensual"],
-            ["CONTEST_JORNADA", "Jornada"],
-            ["CONTEST_AWARDS", "Galardones"]
+            ["CONTEST_JORNADA", "Jornada"]
         ];
     } else if (main === "STANDINGS") {
-        placeholder = "Clasificación";
+        placeholder = "ClasificaciÃ³n";
         selected = state.currentFilter;
         options = [
             ["STANDINGS_PRIMERA", "Primera"],
@@ -1290,7 +1435,7 @@ function hydrateSecondaryNav() {
 
     const hasOptions = options.length > 0;
     group.classList.toggle("is-hidden", !hasOptions);
-    filters?.classList.toggle("has-secondary", hasOptions);
+    filters.classList.toggle("has-secondary", hasOptions);
     if (!hasOptions) {
         nav.innerHTML = "";
         return;
@@ -1307,8 +1452,8 @@ function hydrateSecondaryNav() {
 }
 
 function matchPairKey(match) {
-    const home = match?.local || match?.home_name || match?.home?.name || "";
-    const away = match?.visitante || match?.away_name || match?.away?.name || "";
+    const home = match.local || match.home_name || match.home?.name || "";
+    const away = match.visitante || match.away_name || match.away?.name || "";
     const a = logoLookupKey(home);
     const b = logoLookupKey(away);
     return a && b ? `${a}__${b}` : "";
@@ -1322,12 +1467,123 @@ function hydrateStandingsNav() {
     hydrateSecondaryNav();
 }
 
+function isTicketPage() {
+    return state.contestView === "MATCHES" && state.currentFilter === "TICKET";
+}
+
+function isCoverPage() {
+    return state.contestView === "MATCHES" && state.currentFilter === "ALL";
+}
+
+function isStandingsPage() {
+    return state.contestView === "MATCHES" && String(state.currentFilter || "").startsWith("STANDINGS_");
+}
+
+function isSnakePage() {
+    return state.contestView === "MATCHES" && state.currentFilter === "SNAKE_PAGE";
+}
+
+function isQuizPage() {
+    return state.contestView === "MATCHES" && state.currentFilter === "QUIZ_PAGE";
+}
+
+function isContestPage() {
+    return state.contestView !== "MATCHES";
+}
+
+function isLiveOrLeaguePage() {
+    return state.contestView === "MATCHES" && (
+        state.currentFilter === "LIVE" ||
+        state.currentFilter === "WAR_ROOM" ||
+        (state.currentFilter && !["ALL", "TICKET", "SNAKE_PAGE", "QUIZ_PAGE"].includes(state.currentFilter) && !String(state.currentFilter).startsWith("STANDINGS_"))
+    );
+}
+
+function shouldRefreshSideModules() {
+    return isCoverPage();
+}
+
+function relocateSnakeHud() {
+    const topbar = document.querySelector(".topbar-shell");
+    const cabinet = document.querySelector(".arcade-cabinet");
+    if (!topbar || !cabinet) return;
+    let hud = document.getElementById("snake-top-hud");
+    if (!hud) {
+        hud = document.createElement("div");
+        hud.id = "snake-top-hud";
+        hud.className = "snake-top-hud";
+    }
+    const header = document.querySelector(".arcade-header");
+    const scoreboard = document.querySelector(".scoreboard");
+    const gameLayout = cabinet.querySelector(".game-layout");
+    if (isSnakePage()) {
+        if (!topbar.contains(hud)) {
+            const actions = topbar.querySelector(".topbar-actions");
+            topbar.insertBefore(hud, actions || null);
+        }
+        if (header && !hud.contains(header)) hud.appendChild(header);
+        if (scoreboard && !hud.contains(scoreboard)) hud.appendChild(scoreboard);
+        return;
+    }
+    if (hud.contains(header) && gameLayout) cabinet.insertBefore(header, gameLayout);
+    if (hud.contains(scoreboard) && gameLayout) cabinet.insertBefore(scoreboard, gameLayout);
+    if (hud.parentElement) hud.remove();
+}
+
+function fixMojibakeLabels(root = document.body) {
+    if (!root) return;
+    const replacements = [
+        ["PeÃƒÂ±a", "Peña"],
+        ["PeÃ±a", "Peña"],
+        ["ClasificaciÃƒÂ³n", "Clasificación"],
+        ["ClasificaciÃ³n", "Clasificación"],
+        ["PosiciÃƒÂ³n", "Posición"],
+        ["PosiciÃ³n", "Posición"],
+        ["PronÃƒÂ³sticos", "Pronósticos"],
+        ["PronÃ³sticos", "Pronósticos"],
+        ["estadÃƒÂ­sticas", "estadísticas"],
+        ["estadÃ­sticas", "estadísticas"],
+        ["todavÃƒÂ­a", "todavía"],
+        ["todavÃ­a", "todavía"],
+        ["SeÃƒÂ±ales", "Señales"],
+        ["SeÃ±ales", "Señales"],
+        ["TÃƒÂº", "Tú"],
+        ["TÃº", "Tú"],
+        ["mÃƒÂ¡s", "más"],
+        ["mÃ¡s", "más"],
+        ["fÃƒÂºtbol", "fútbol"],
+        ["fÃºtbol", "fútbol"],
+    ];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+        let text = node.nodeValue;
+        replacements.forEach(([bad, good]) => {
+            text = text.replaceAll(bad, good);
+        });
+        node.nodeValue = text;
+    });
+}
+
 function renderArena() {
     const container = qs("matches-body");
     if (!container || !state.data) return;
+    standingContextCache = new Map();
+    document.body.classList.add("quiniela-focus");
+    document.body.classList.toggle("newspaper-cover-active", isCoverPage());
+    document.body.classList.toggle("newspaper-ticket-active", isTicketPage());
+    document.body.classList.toggle("newspaper-standings-active", isStandingsPage());
+    document.body.classList.toggle("newspaper-snake-active", isSnakePage());
+    document.body.classList.toggle("newspaper-quiz-active", isQuizPage());
+    document.body.classList.toggle("newspaper-contest-active", isContestPage());
+    document.body.classList.toggle("newspaper-live-active", isLiveOrLeaguePage());
+    relocateSnakeHud();
     hydrateHero();
     updateTopbarLiveTicker();
-    renderSidebarRadar();
+    if (shouldRefreshSideModules()) renderSidebarRadar();
+    hydrateNewspaperPageNav();
+    fixMojibakeLabels();
     document.body.classList.remove("standings-focus");
 
     if (state.currentFilter === "WAR_ROOM") {
@@ -1348,13 +1604,37 @@ function renderArena() {
         return;
     }
 
+    if (state.currentFilter === "QUIZ_PAGE") {
+        container.className = "arena-content newspaper-feature-page";
+        container.innerHTML = renderQuizNewspaperPage();
+        setTimeout(initQuiz, 50);
+        return;
+    }
+
+    if (state.currentFilter === "SNAKE_PAGE") {
+        container.className = "arena-content newspaper-feature-page snake-feature-copy";
+        container.innerHTML = `
+            <article class="newspaper-article-page">
+                <div class="article-page-kicker">Pag. 5 - Juego</div>
+                <h2>Snake gol</h2>
+                <p>Juego independiente con ranking propio. Usa flechas o WASD para empezar.</p>
+            </article>`;
+        return;
+    }
+
     if (state.currentFilter === "ALL") {
+        container.className = "arena-content newspaper-cover-mode";
+        container.innerHTML = renderNewspaperCoverPageV3();
+        return;
+    }
+
+    if (state.currentFilter === "TICKET") {
         const matches = state.data.partidos || [];
         container.className = "arena-content table-mode";
         container.innerHTML = `
             ${renderLiveScrutinyBadge(matches)}
             <div class="arena-table-wrap">
-                <table class="arena-table">
+                <table class="arena-table is-tension-table">
                     <thead id="arena-thead"></thead>
                     <tbody id="arena-body"></tbody>
                 </table>
@@ -1368,12 +1648,223 @@ function renderArena() {
         ? getLiveLeagueMatches()
         : allMatches.filter(m => competitionLabel(m) === state.currentFilter.toUpperCase());
 
-    container.className = "arena-content arena-grid";
+    container.className = "arena-content arena-grid live-grouped-grid";
     if (matches.length === 0) {
         container.innerHTML = `<div class="empty-state">No hay partidos para ${escapeHtml(state.currentFilter)}.</div>`;
         return;
     }
-    container.innerHTML = matches.map(renderMatchCard).join("");
+    container.innerHTML = renderGroupedMatchCards(matches, state.currentFilter !== "LIVE");
+}
+
+function renderNewspaperCoverPage() {
+    const matches = state.data.partidos || [];
+    const liveCount = getLiveLeagueMatches().length;
+    const finished = matches.filter(match => isFinishedStatus(match.status)).length;
+    const saved = hasSavedTicket();
+    const headline = liveCount ?
+         `${liveCount} partido${liveCount === 1 ? "" : "s"} en directo sacuden la jornada`
+        : saved ?
+             "Tu quiniela ya esta en la redaccion"
+            : "La PeÃ±a y los Maestros se juegan la jornada signo a signo";
+    const cards = [
+        ["TICKET", "Pag. 2", "Quiniela oficial", "El boleto de la jornada.", "Abrir"],
+        ["LIVE", "Pag. 3", "Directo", "Marcadores y estados.", "Ver"],
+        ["STANDINGS", "Pag. 4", "Ligas", "Primera y Segunda.", "Consultar"],
+        ["SNAKE", "Pag. 5", "Snake gol", "Juego y ranking.", "Jugar"],
+        ["CONTEST", "Pag. 6", "La PeÃ±a", "Campeones, ranking y perfil.", "Entrar"],
+        ["QUIZ", "Pag. 7", "Quiz", "Preguntas de futbol.", "Preparar"]
+    ];
+    return `
+        <section class="frontpage">
+            <article class="frontpage-lead">
+                <div class="frontpage-photo frontpage-cover-visual">
+                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+                    <strong>1X2</strong>
+                    <span>La PeÃ±a contra los Maestros IA</span>
+                </div>
+                <div class="frontpage-headline">
+                    <span>Portada</span>
+                    <h2>${escapeHtml(headline)}</h2>
+                    <p>Esta portada solo ordena el diario. Cada seccion vive en su propia pagina para que no se mezclen quiniela, directo, clasificaciones, juegos y La PeÃ±a.</p>
+                    <div class="frontpage-facts">
+                        <strong>${matches.length}<small>partidos</small></strong>
+                        <strong>${finished}<small>terminados</small></strong>
+                        <strong>${saved ? "OK" : "-"}<small>tu boleto</small></strong>
+                    </div>
+                </div>
+            </article>
+            <div class="frontpage-sections">
+                ${cards.map(([action, page, title, text, cta]) => `
+                    <button type="button" class="frontpage-card" data-page-action="${escapeHtml(action)}">
+                        <small>${escapeHtml(page)}</small>
+                        <strong>${escapeHtml(title)}</strong>
+                        <span>${escapeHtml(text)}</span>
+                        <em>${escapeHtml(cta)}</em>
+                    </button>
+                `).join("")}
+            </div>
+        </section>`;
+}
+
+function renderQuizNewspaperPage() {
+    const jornada = state.data.jornada || state.jornada;
+    if (!jornada) {
+        return `<article class="newspaper-article-page"><div class="article-page-kicker">Pag. 7 - Reto 10</div><h2>Reto 10 LaLiga</h2><p>No hay jornada activa.</p></article>`;
+    }
+    return `
+        <article class="quiz-feature-page">
+            <header class="quiz-hero">
+                <div>
+                    <div class="quiz-kicker">Pag. 7 - Desafio de Maestros</div>
+                    <h2>Reto 10</h2>
+                    <p>Jornada ${escapeHtml(String(jornada))}: diez preguntas, puntos por acierto y ranking propio.</p>
+                </div>
+                <div class="quiz-hero-score" aria-hidden="true">
+                    <span>1</span><span>X</span><span>2</span>
+                </div>
+            </header>
+            <section class="quiz-stage">
+                <div id="quiz-container" class="quiz-container">
+                    <div class="empty-state">Cargando preguntas...</div>
+                </div>
+            </section>
+        </article>`;
+}
+
+function initQuiz() {
+    const container = document.getElementById("quiz-container");
+    if (!container) return;
+    const jornada = state.data.jornada || state.jornada;
+    if (!jornada) { container.innerHTML = '<div class="empty-state">Sin jornada activa.</div>'; return; }
+
+    fetch(`/api/quiz/preguntas?j=${jornada}`, { credentials: "same-origin" })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.disponible || !data.preguntas || data.preguntas.length === 0) {
+                container.innerHTML = `
+                    <div class="quiz-empty">
+                        <div class="quiz-empty-icon"></div>
+                        <h3>Reto 10 no disponible</h3>
+                        <p>Aun no hay preguntas para la jornada ${escapeHtml(String(jornada))}. Vuelve mas tarde.</p>
+                    </div>`;
+                return;
+            }
+            renderQuizQuestions(container, data);
+        })
+        .catch(() => { container.innerHTML = '<div class="empty-state">Error al cargar el quiz.</div>'; });
+}
+
+function renderQuizQuestions(container, data) {
+    const preguntas = data.preguntas;
+    let currentQ = 0;
+    const answers = [];
+    const startTime = Date.now();
+    const total = preguntas.length;
+
+    function renderQuestion(idx) {
+        const p = preguntas[idx];
+        container.innerHTML = `
+            <div class="quiz-progress">
+                <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${((idx) / total) * 100}%"></div></div>
+                <span>${idx + 1} / ${total}</span>
+            </div>
+            <div class="quiz-question-card">
+                <div class="quiz-question-tema">${escapeHtml(p.tema || "")}</div>
+                <h3 class="quiz-question-text">${escapeHtml(p.enunciado)}</h3>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-q="${idx}" data-answer="A" type="button">
+                        <span class="quiz-option-letter">A</span>
+                        <span class="quiz-option-text">${escapeHtml(p.opcion_a)}</span>
+                    </button>
+                    <button class="quiz-option" data-q="${idx}" data-answer="B" type="button">
+                        <span class="quiz-option-letter">B</span>
+                        <span class="quiz-option-text">${escapeHtml(p.opcion_b)}</span>
+                    </button>
+                    <button class="quiz-option" data-q="${idx}" data-answer="C" type="button">
+                        <span class="quiz-option-letter">C</span>
+                        <span class="quiz-option-text">${escapeHtml(p.opcion_c)}</span>
+                    </button>
+                </div>
+            </div>`;
+
+        container.querySelectorAll(".quiz-option").forEach(btn => {
+            btn.addEventListener("click", () => {
+                answers[idx] = { pregunta_id: p.id, respuesta: btn.dataset.answer };
+                currentQ++;
+                if (currentQ < total) {
+                    renderQuestion(currentQ);
+                } else {
+                    submitQuiz(container, answers, startTime, data.jornada);
+                }
+            });
+        });
+    }
+
+    renderQuestion(0);
+}
+
+function submitQuiz(container, answers, startTime, jornada) {
+    const tiempo = Date.now() - startTime;
+    container.innerHTML = '<div class="empty-state">Enviando respuestas...</div>';
+
+    fetch("/api/quiz/submit", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jornada, respuestas: answers, tiempo_total_ms: tiempo }),
+    })
+    .then(r => r.json())
+    .then(result => {
+        if (result.status !== "ok") {
+            container.innerHTML = `<div class="quiz-result quiz-result-error"><h3>Error</h3><p>${escapeHtml(result.message || "No se pudo guardar.")}</p></div>`;
+            return;
+        }
+        renderQuizResult(container, result, jornada);
+    })
+    .catch(() => { container.innerHTML = '<div class="empty-state">Error de conexion.</div>'; });
+}
+
+function renderQuizResult(container, result, jornada) {
+    const minutes = Math.floor(result.total > 0 ? (result.tiempo_total_ms || 0) / 60000 : 0);
+    const seconds = Math.floor(((result.tiempo_total_ms || 0) % 60000) / 1000);
+    container.innerHTML = `
+        <div class="quiz-result">
+            <div class="quiz-result-score">
+                <div class="quiz-result-big">${result.aciertos}/${result.total}</div>
+                <div class="quiz-result-points">${result.puntos} puntos</div>
+                <div class="quiz-result-time">${minutes}:${String(seconds).padStart(2, "0")}</div>
+            </div>
+            ${result.posicion_jornada ? `<div class="quiz-result-position">Estas ${result.posicion_jornada}Âº en esta jornada</div>` : ""}
+            <div class="quiz-result-bonuses">
+                ${result.bonus_perfecto ? `<span class="quiz-bonus">Perfecto +300</span>` : ""}
+                ${result.bonus_rapidez ? `<span class="quiz-bonus">Rapidez +${result.bonus_rapidez}</span>` : ""}
+                ${result.racha_max >= 3 ? `<span class="quiz-bonus">Racha ${result.racha_max} +${(result.racha_max >= 5 ? 50 : 0)}</span>` : ""}
+            </div>
+        </div>
+        <div class="quiz-ranking-section">
+            <h3>Ranking jornada ${escapeHtml(String(jornada))}</h3>
+            <div id="quiz-ranking-list" class="quiz-ranking-list">Cargando...</div>
+        </div>`;
+
+    fetch(`/api/quiz/ranking?tipo=jornada&j=${jornada}`, { credentials: "same-origin" })
+        .then(r => r.json())
+        .then(data => {
+            const list = document.getElementById("quiz-ranking-list");
+            if (!list) return;
+            if (!data.ranking || data.ranking.length === 0) {
+                list.innerHTML = '<div class="empty-state">Sin ranking aun.</div>';
+                return;
+            }
+            list.innerHTML = data.ranking.map((entry, idx) => `
+                <div class="quiz-rank-row${entry.user_id === state.user.id ? " quiz-rank-mine" : ""}">
+                    <span class="quiz-rank-pos">${idx + 1}Âº</span>
+                    <span class="quiz-rank-name">${escapeHtml(entry.nombre)}</span>
+                    <span class="quiz-rank-hits">${entry.aciertos}/${entry.total_preguntas}</span>
+                    <span class="quiz-rank-pts">${entry.puntos} pts</span>
+                </div>
+            `).join("");
+        })
+        .catch(() => {});
 }
 
 function renderArenaTensionBody(matches) {
@@ -1386,12 +1877,12 @@ function renderArenaTensionBody(matches) {
         <tr>
             <th>#</th>
             <th style="text-align:left;">Partido</th>
-            <th>${councilStyle ? "Programa · Consejo · Peña · Tu quiniela" : "Consenso + signos"}</th>
+            <th>${councilStyle ? "SeÃ±ales" : "Consenso + signos"}</th>
         </tr>`;
 
-    const preds = state.data?.predicciones_actuales || {};
-    const consenso = state.data?.consenso_pena || [];
-    const canEdit = Boolean(state.user) && String(state.data?.jornada) === String(state.data?.max_jornada) && !state.data?.is_locked;
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
+    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
 
     tbody.innerHTML = matches.map((m, idx) => {
         const isPleno = idx === 14;
@@ -1413,13 +1904,12 @@ function renderArenaTensionBody(matches) {
             splitMatch ? "is-split-row" : ""
         ].filter(Boolean).join(" ");
         const statusText = scheduledMatch ? score : "";
-        const tension = getMatchTensionInfo(m, idx, c, preds, mySign);
         const scoreBadge = scheduledMatch
             ? ""
             : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}">${escapeHtml(score)}</span>`;
-        const penaChip = isPleno
-            ? renderTensionPenaChip(renderPenaPleno(consensoPleno, m.marcador, m.status), "Peña")
-            : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
+        const penaChip = isPleno ?
+             renderTensionPenaChip(renderPenaPleno(consensoPleno, m.marcador, m.status), "PeÃ±a")
+            : renderTensionPenaChip(renderConsensus(c, real, m.status), "PeÃ±a");
 
         return `
             <tr class="tension-row ${rowClass}">
@@ -1444,7 +1934,7 @@ function renderArenaTensionBody(matches) {
                             ? renderCouncilStyleChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)
                             : renderTensionAiChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)}
                         ${penaChip}
-                        <div class="tension-chip tension-chip-user"><span>Tú</span>${mine}</div>
+                        <div class="tension-chip tension-chip-user"><span>TÃº</span>${mine}</div>
                     </div>
                 </td>
             </tr>
@@ -1504,16 +1994,16 @@ function renderLiveScrutinyBadge(matches) {
         return count + (isHitSign(state.my_signs[idx], real, exactScore) ? 1 : 0);
     }, 0);
     const liveCount = matches.filter(match => isLiveStatus(match.status)).length;
-    return `<div class="live-scrutiny-badge">Escrutinio live <strong>${hits}/15</strong> provisionales · ${liveCount} en juego</div>`;
+    return `<div class="live-scrutiny-badge">Escrutinio live <strong>${hits}/15</strong> provisionales Â· ${liveCount} en juego</div>`;
 }
 
 function consensusLeader(consensus) {
     const values = [
-        ["1", Number(consensus?.p1 || 0)],
-        ["X", Number(consensus?.px || 0)],
-        ["2", Number(consensus?.p2 || 0)]
+        ["1", Number(consensus.p1 || 0)],
+        ["X", Number(consensus.px || 0)],
+        ["2", Number(consensus.p2 || 0)]
     ].sort((a, b) => b[1] - a[1]);
-    const rawWinner = normalizeSign(consensus?.ganador);
+    const rawWinner = normalizeSign(consensus.ganador);
     const sign = ["1", "X", "2"].includes(rawWinner) ? rawWinner : values[0][0];
     const pct = (values.find(([value]) => value === sign) || values[0])[1];
     return {
@@ -1538,8 +2028,8 @@ function tripletLeader(triplet) {
 }
 
 function buildSurpriseRadar(matches) {
-    const preds = state.data?.predicciones_actuales || {};
-    const consenso = state.data?.consenso_pena || [];
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
     const mySigns = state.my_signs || [];
     return (matches || []).slice(0, 14).map((match, idx) => {
         const c = consenso.find(item => Number(item.id) === Number(match.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
@@ -1600,7 +2090,7 @@ function renderSurpriseRadar(matches) {
                 ${items.map(item => `
                     <button class="surprise-radar-card" type="button" data-radar-match="${item.idx}">
                         <span class="surprise-radar-title">${escapeHtml(item.title)}</span>
-                        <span class="surprise-radar-meta">${escapeHtml(item.sign)} ${Math.round(item.pct)}% · ${escapeHtml(item.labels.join(" · ") || "riesgo")}</span>
+                        <span class="surprise-radar-meta">${escapeHtml(item.sign)} ${Math.round(item.pct)}% Â· ${escapeHtml(item.labels.join(" Â· ") || "riesgo")}</span>
                     </button>
                 `).join("")}
             </div>
@@ -1611,7 +2101,7 @@ function renderSidebarRadar() {
     const slot = qs("surprise-radar-slot");
     if (!slot) return;
     const matches = state.currentFilter === "ALL" && state.contestView === "MATCHES"
-        ? (state.data?.partidos || [])
+        ? (state.data.partidos || [])
         : [];
     slot.innerHTML = renderSurpriseRadar(matches);
 }
@@ -1644,15 +2134,15 @@ function renderConsensusBar(consensus, isPleno = false) {
     const w2 = Math.max(4, (p2 / total) * 100);
     return `
         <div class="consensus-bar-wrap" title="Consenso Pena: 1 ${p1}% | X ${px}% | 2 ${p2}%">
+            <div class="consensus-labels">
+                <span><b>1</b><em>${p1}%</em></span>
+                <span><b>X</b><em>${px}%</em></span>
+                <span><b>2</b><em>${p2}%</em></span>
+            </div>
             <div class="consensus-bar">
                 <span class="consensus-seg seg-1" style="width:${w1}%"></span>
                 <span class="consensus-seg seg-x" style="width:${wx}%"></span>
                 <span class="consensus-seg seg-2" style="width:${w2}%"></span>
-            </div>
-            <div class="consensus-labels">
-                <span>1 · ${p1}%</span>
-                <span>X · ${px}%</span>
-                <span>2 · ${p2}%</span>
             </div>
         </div>`;
 }
@@ -1678,7 +2168,7 @@ function renderCouncilStyleChips(preds, idx, real, status, exactScore = false) {
     const councilSign = getSign(preds, idx, "consejo_ias", "consenso");
     return [
         renderTensionChip("Programa", programSign, real, status, exactScore, "tension-chip-program"),
-        renderTensionChip("Consejo IA", councilSign, real, status, exactScore, "tension-chip-council")
+        renderTensionChip("Consejo", councilSign, real, status, exactScore, "tension-chip-council")
     ].join("");
 }
 
@@ -1704,12 +2194,12 @@ function renderArenaTableBody(matches) {
             <th style="text-align:center;">Estado / Marcador</th>
             ${visibleAIColumns.map(col => `<th>${col[2]}</th>`).join("")}
             <th>Tu</th>
-            <th>Peña</th>
+            <th>PeÃ±a</th>
         </tr>`;
 
-    const preds = state.data?.predicciones_actuales || {};
-    const consenso = state.data?.consenso_pena || [];
-    const canEdit = Boolean(state.user) && String(state.data?.jornada) === String(state.data?.max_jornada) && !state.data?.is_locked;
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
+    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
 
     tbody.innerHTML = matches.map((m, idx) => {
         const isPleno = idx === 14;
@@ -1758,7 +2248,41 @@ function renderArenaTableBody(matches) {
     }).join("");
 }
 
-function renderMatchCard(match) {
+function renderGroupedMatchCards(matches, singleCompetition = false) {
+    if (!Array.isArray(matches) || !matches.length) return "";
+    if (singleCompetition) {
+        return `<div class="match-card-container">${matches.map(match => renderMatchCard(match, { showCompetition: false })).join("")}</div>`;
+    }
+    const groups = [];
+    const indexByKey = new Map();
+    for (const match of matches) {
+        const key = competitionLabel(match);
+        if (!indexByKey.has(key)) {
+            indexByKey.set(key, groups.length);
+            groups.push({ key, label: matchCompetitionMeta(match), matches: [] });
+        }
+        groups[indexByKey.get(key)].matches.push(match);
+    }
+    groups.sort((a, b) => {
+        const liveDiff = b.matches.filter(isLiveMatch).length - a.matches.filter(isLiveMatch).length;
+        if (liveDiff) return liveDiff;
+        return a.label.localeCompare(b.label, "es");
+    });
+    return groups.map(group => `
+        <section class="league-match-group">
+            <header class="league-group-header">
+                <strong>${escapeHtml(group.label)}</strong>
+                <span>${group.matches.length} partido${group.matches.length === 1 ? "" : "s"}</span>
+            </header>
+            <div class="match-card-container">
+                ${group.matches.map(match => renderMatchCard(match, { showCompetition: false })).join("")}
+            </div>
+        </section>
+    `).join("");
+}
+
+function renderMatchCard(match, options = {}) {
+    const showCompetition = options.showCompetition !== false;
     const status = String(match.status || "");
     const finished = isFinishedStatus(status) || isImplicitlyFinished(match);
     const live = isLiveMatch(match);
@@ -1773,6 +2297,11 @@ function renderMatchCard(match) {
     const awayLogo = teamLogo(match, "away");
     return `
         <article class="match-card ${live ? "is-live" : ""} ${finished ? "is-finished" : ""}">
+            ${showCompetition ? `
+                <div class="card-competition-line">
+                    <span>${escapeHtml(matchCompetitionMeta(match))}</span>
+                    ${live ? `<b>LIVE</b>` : ""}
+                </div>` : ""}
             <div class="card-teams">
                 ${teamCell(home, "left", homeLogo)}
                 <div class="card-score-area">
@@ -1867,7 +2396,7 @@ function renderConsensus(c, real, status) {
     const sorted = [...values].sort((a, b) => b[1] - a[1]);
     const rawWinner = normalizeSign(c.ganador);
     const winner = ["1", "X", "2"].includes(rawWinner) ? rawWinner : sorted[0][0];
-    const winnerValue = values.find(([sign]) => sign === winner)?.[1] || 0;
+        const winnerValue = values.find(([sign]) => sign === winner)?.[1] || 0;
     const detail = `Pena: 1 ${Number(c.p1 || 0)}% | X ${Number(c.px || 0)}% | 2 ${Number(c.p2 || 0)}%`;
     return `<span class="pena-pick ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}"><b>${escapeHtml(winner)}</b><small>${winnerValue}%</small></span>`;
 }
@@ -1876,8 +2405,8 @@ function getPenaHiddenUserIds() {
     const visible = new Set(
         AI_COLUMNS.flatMap(([primary, fallback]) => [primary, fallback].filter(Boolean).map(id => String(id).toLowerCase()))
     );
-    const ignored = new Set(["hermes", "momo", "jenova", "manu", "consenso", "programa", "v260_omnisciente", "consejo_ias"]);
-    return Object.keys(state.data?.predicciones_actuales || {}).filter(uid => {
+    const ignored = new Set(["hermes", "jenova", "consenso", "programa", "v260_omnisciente", "consejo_ias"]);
+    return Object.keys(state.data.predicciones_actuales || {}).filter(uid => {
         const lower = String(uid).toLowerCase();
         if (visible.has(lower) || ignored.has(lower)) return false;
         if (state.user && String(state.user.id).toLowerCase() === lower) return false;
@@ -1891,7 +2420,7 @@ function bucketLabelForGoals(value) {
 }
 
 function getPenaPlenoSummary(idx = 14) {
-    const preds = state.data?.predicciones_actuales || {};
+    const preds = state.data.predicciones_actuales || {};
     const exactCounts = {};
     const homeBuckets = { "0": 0, "1": 0, "2": 0, "M": 0 };
     const awayBuckets = { "0": 0, "1": 0, "2": 0, "M": 0 };
@@ -1962,7 +2491,7 @@ function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
     if (!state.user) return `<span class="empty-user-pick" title="Entra para guardar tu quiniela">-</span>`;
     if (!canEdit) return `<span class="ia-signo active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign)}</span>`;
     if (hasSavedTicket() && !state.editMode && !state.draftDirty) {
-        return `<span class="saved-ticket-sign ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</span>`;
+        return `<span class="saved-ticket-sign ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "â€”" : mySign)}</span>`;
     }
     if (idx === 14) {
         return `<button class="pleno-main-btn clickable" data-match-idx="${idx}" data-pleno="1">${escapeHtml(mySign === "-" ? "0-0" : mySign)}</button>`;
@@ -1975,7 +2504,7 @@ function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
 
 function renderPrestigeRanking() {
     const container = qs("ranking-body");
-    const ranking = state.data?.ranking_maestros;
+    const ranking = state.data.ranking_maestros;
     if (!container || !ranking) return;
     const hiddenIds = new Set(["hermes", "HERMES", "momo", "MOMO", "jenova", "JENOVA", "manu", "MANU", "consenso", "CONSENSO"]);
 
@@ -2019,7 +2548,7 @@ function renderPrestigeRanking() {
         : "";
 
     container.innerHTML = `
-        <div class="rank-section-title">Clasificación general</div>
+        <div class="rank-section-title">ClasificaciÃ³n general</div>
         ${total.map((item, idx) => renderRankLine(item, idx, "total", "")).join("")}
         ${dailyBlock}`;
 }
@@ -2040,7 +2569,34 @@ function renderContestRows(rows = [], limit = 5) {
             <span class="contest-pos">${item.pos}</span>
             <span class="contest-name">${escapeHtml(item.name)}</span>
             <span class="contest-points">${item.points}</span>
-        </div>`).join("") || `<div class="empty-state">Sin datos cerrados todavía.</div>`;
+        </div>`).join("") || `<div class="empty-state">Sin datos cerrados todavÃ­a.</div>`;
+}
+
+function awardTierClass(idx) {
+    if (idx === 0) return "gold";
+    if (idx === 1) return "silver";
+    if (idx === 2) return "bronze";
+    return "";
+}
+
+function profileBadgeStrip(profile = {}) {
+    const badges = [];
+    const position = Number(profile.position || 0);
+    const bestPosition = Number(profile.best_position || 0);
+    const hitRate = Number(profile.hit_rate || 0);
+    const played = Number(profile.played || 0);
+    const hitsPerJornada = Number(profile.hits_per_jornada || 0);
+    if (position > 0 && position <= 3) badges.push(["elite", `Top ${position}`, "general"]);
+    if (bestPosition > 0 && bestPosition <= 3) badges.push(["gold", `Mejor #${bestPosition}`, "marca"]);
+    if (hitRate >= 60) badges.push(["green", `${hitRate}%`, "punteria"]);
+    if (hitsPerJornada >= 8) badges.push(["cyan", `${hitsPerJornada}`, "media"]);
+    if (played >= 5) badges.push(["steady", `${played}J`, "constancia"]);
+    return badges.slice(0, 4).map(([kind, value, label]) => `
+        <span class="profile-badge-pill ${kind}">
+            <b>${escapeHtml(value)}</b>
+            <small>${escapeHtml(label)}</small>
+        </span>
+    `).join("");
 }
 
 function renderContestPanel() {
@@ -2052,11 +2608,12 @@ function renderContestPanel() {
         <div class="contest-card">
             <div class="contest-title"><span>${escapeHtml(profile.name || "Perfil")}</span><small>perfil</small></div>
             <div class="profile-grid">
-                <div class="profile-stat"><span>Posición</span><strong>${profile.position ?? "-"}</strong></div>
+                <div class="profile-stat"><span>PosiciÃ³n</span><strong>${profile.position ?? "-"}</strong></div>
                 <div class="profile-stat"><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
                 <div class="profile-stat"><span>% acierto</span><strong>${profile.hit_rate ?? 0}%</strong></div>
                 <div class="profile-stat"><span>Jornadas</span><strong>${profile.played ?? 0}</strong></div>
             </div>
+            ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
         </div>` : "";
 
     const awards = (contest.galardones?.jornadas || []).slice(0, 5).map(item => `
@@ -2074,7 +2631,7 @@ function renderContestPanel() {
                 ${renderContestRows(contest.general || [], 6)}
             </div>
             <div class="contest-card">
-                <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>clasificación</small></div>
+                <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>clasificaciÃ³n</small></div>
                 ${renderContestRows(contest.jornada?.rows || [], 6)}
             </div>
             <div class="contest-card">
@@ -2090,23 +2647,24 @@ function renderContestPanel() {
 
 function renderContestPage(view = "CONTEST_PROFILE") {
     const contest = state.contest;
-    if (!contest) return `<div class="empty-state">No se pudo cargar La Peña.</div>`;
+    if (!contest) return `<div class="empty-state">No se pudo cargar La PeÃ±a.</div>`;
     const profile = contest.profile;
     const profileBlock = profile ? `
         <div class="contest-card">
             <div class="contest-title"><span>${escapeHtml(profile.name || "Perfil")}</span><small>perfil</small></div>
             <div class="profile-grid">
-                <div class="profile-stat"><span>Posición</span><strong>${profile.position ?? "-"}</strong></div>
-                <div class="profile-stat"><span>Pronósticos</span><strong>${profile.predictions ?? 0}</strong></div>
+                <div class="profile-stat"><span>PosiciÃ³n</span><strong>${profile.position ?? "-"}</strong></div>
+                <div class="profile-stat"><span>PronÃ³sticos</span><strong>${profile.predictions ?? 0}</strong></div>
                 <div class="profile-stat"><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
                 <div class="profile-stat"><span>% acierto</span><strong>${profile.hit_rate ?? 0}%</strong></div>
                 <div class="profile-stat"><span>Jornadas</span><strong>${profile.played ?? 0}</strong></div>
-                <div class="profile-stat"><span>Mejor posición</span><strong>${profile.best_position ?? "-"}</strong></div>
+                <div class="profile-stat"><span>Mejor posiciÃ³n</span><strong>${profile.best_position ?? "-"}</strong></div>
             </div>
+            ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
         </div>` : `
         <div class="contest-card">
-            <div class="contest-title"><span>Perfil</span><small>sesión</small></div>
-            <div class="empty-state">Entra con Google para ver tus estadísticas personales.</div>
+            <div class="contest-title"><span>Perfil</span><small>sesiÃ³n</small></div>
+            <div class="empty-state">Entra con Google para ver tus estadÃ­sticas personales.</div>
         </div>`;
 
     const awards = (contest.galardones?.jornadas || []).slice(0, 10).map(item => `
@@ -2114,7 +2672,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
             <span>J${item.jornada}</span>
             <b class="contest-name">${escapeHtml(item.winner)}</b>
             <strong class="contest-points">${item.points}</strong>
-        </div>`).join("") || `<div class="empty-state">Sin galardones todavía.</div>`;
+        </div>`).join("") || `<div class="empty-state">Sin galardones todavÃ­a.</div>`;
 
     const results = (profile?.results || []).slice().reverse().map(item => {
         const ticket = (item.ticket || []).map((sign, idx) => idx === 14 ? `[${sign}]` : sign).join(",");
@@ -2143,6 +2701,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                         <div class="profile-stat"><span>Aciertos/jornada</span><strong>${profile.hits_per_jornada ?? 0}</strong></div>
                         <div class="profile-stat"><span>Mejor posicion</span><strong>${profile.best_position ?? "-"}</strong></div>
                     </div>
+                    ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
                 </div>
                 <div class="contest-card">
                     <div class="contest-title"><span>Resultados</span><small>quiniela | aciertos | posicion</small></div>
@@ -2152,26 +2711,26 @@ function renderContestPage(view = "CONTEST_PROFILE") {
     }
 
     if (view === "CONTEST_GENERAL") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La Peña general</span><small>temporada</small></div>${renderContestRows(contest.general || [], 80)}</div></section>`;
+        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a general</span><small>temporada</small></div>${renderContestRows(contest.general || [], 80)}</div></section>`;
     }
 
     if (view === "CONTEST_MONTHLY") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La Peña mensual</span><small>${escapeHtml(contest.monthly?.month || "-")}</small></div>${renderContestRows(contest.monthly?.rows || [], 80)}</div></section>`;
+        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a mensual</span><small>${escapeHtml(contest.monthly?.month || "-")}</small></div>${renderContestRows(contest.monthly?.rows || [], 80)}</div></section>`;
     }
 
     if (view === "CONTEST_JORNADA") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La Peña jornada ${contest.jornada?.jornada || ""}</span><small>jornada actual</small></div>${renderContestRows(contest.jornada?.rows || [], 80)}</div></section>`;
+        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a jornada ${contest.jornada?.jornada || ""}</span><small>jornada actual</small></div>${renderContestRows(contest.jornada?.rows || [], 80)}</div></section>`;
     }
 
     if (view === "CONTEST_AWARDS") {
         const jornadaItems = contest.galardones?.jornadas || [];
         const monthItems = contest.galardones?.meses || [];
-        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0]?.jornada || "");
-        const selectedMonth = String(state.selectedAwardMonth || monthItems[0]?.month || "");
+        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0].jornada || "");
+        const selectedMonth = String(state.selectedAwardMonth || monthItems[0].month || "");
         const jornadaPick = jornadaItems.find(item => String(item.jornada) === selectedJornada) || jornadaItems[0];
         const monthPick = monthItems.find(item => String(item.month) === selectedMonth) || monthItems[0];
         const renderAwardChip = (item, idx, type = "jornada") => `
-            <div class="award-chip">
+            <div class="award-chip ${awardTierClass(idx)}">
                 <span class="award-medal">${idx + 1}</span>
                 <div><strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong><small>${type === "mes" ? "mes" : escapeHtml(item.date || "jornada")}</small></div>
                 <b>${escapeHtml(item.winner)}</b>
@@ -2250,13 +2809,13 @@ function renderContestPage(view = "CONTEST_PROFILE") {
     return `
         <section class="contest-page">
             <div class="contest-card">
-                <div class="contest-title"><span>La Peña general</span><small>temporada</small></div>
+                <div class="contest-title"><span>La PeÃ±a general</span><small>temporada</small></div>
                 ${renderContestRows(contest.general || [], 12)}
             </div>
             <div class="contest-grid-secondary">
                 ${profileBlock}
                 <div class="contest-card">
-                    <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>La Peña</small></div>
+                    <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>La PeÃ±a</small></div>
                     ${renderContestRows(contest.jornada?.rows || [], 8)}
                 </div>
             </div>
@@ -2269,14 +2828,14 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                 ${awards}
             </div>
             <div class="contest-card contest-wide">
-                <div class="contest-title"><span>Tus resultados</span><small>quiniela · aciertos · posición</small></div>
+                <div class="contest-title"><span>Tus resultados</span><small>quiniela Â· aciertos Â· posiciÃ³n</small></div>
                 ${results}
             </div>
         </section>`;
 }
 
 function renderLiveStandings() {
-    if (!state.data?.standings) return;
+    if (!state.data.standings) return;
     const liveResults = getLiveStandingsResults();
     drawStandings(state.data.standings.primera || [], "standings-1-body", liveResults, "primera");
     drawStandings(state.data.standings.segunda || [], "standings-2-body", liveResults, "segunda");
@@ -2290,7 +2849,7 @@ function getLiveStandingsResults() {
         const away = m.visitante || m.away_name || m.away?.name;
         const league = competitionLabel(m);
         if (!["LA LIGA", "SEGUNDA DIVISION"].includes(league)) return;
-        const score = scoreOnly(m.score || m.scores?.score || m.marcador);
+        const score = scoreOnly(m.score || m.scores.score || m.marcador);
         if (home && away && score) allMatches.push({ local: home, visitante: away, marcador: score, status: isLiveMatch(m) ? "LIVE" : m.status });
     });
     allMatches.forEach(match => {
@@ -2309,7 +2868,7 @@ function findTeamLogo(name) {
     const target = normalizeName(name);
     const fixed = fixedTeamLogo(name);
     if (fixed) return fixed;
-    const matches = [...(state.data?.partidos || []), ...(state.data?.all_league_matches || [])];
+    const matches = [...(state.data.partidos || []), ...(state.data.all_league_matches || [])];
     for (const match of matches) {
         const home = match.local || match.home?.name || match.home_name;
         const away = match.visitante || match.away?.name || match.away_name;
@@ -2327,7 +2886,7 @@ function drawStandingsLegacyTable(teams, containerId, liveResults) {
         <table class="cls-table">
             <thead><tr><th style="text-align:center;">#</th><th style="text-align:left;">Equipo</th><th style="text-align:center;" title="Partidos jugados">PJ</th><th style="text-align:center;">Jor</th><th style="text-align:center;">Pts</th></tr></thead>
             <tbody>${rows.map((team, idx) => `
-                <tr class="zone-${idx < 4 ? "champions" : idx < 6 ? "europe" : idx >= rows.length - 3 ? "danger" : "mid"}" title="G ${team.pgLive} / E ${team.peLive} / P ${team.ppLive} · GF ${team.gfLive} / GC ${team.gcLive} · Dif ${team.diffLive}">
+                <tr class="zone-${idx < 4 ? "champions" : idx < 6 ? "europe" : idx >= rows.length - 3 ? "danger" : "mid"}" title="G ${team.pgLive} / E ${team.peLive} / P ${team.ppLive} Â· GF ${team.gfLive} / GC ${team.gcLive} Â· Dif ${team.diffLive}">
                     <td class="cls-pos" style="text-align:center;">${idx + 1}</td>
                     <td class="cls-team"><span class="cls-team-main">${logoBadge(team.n, findTeamLogo(team.n))}<span>${escapeHtml(getShortName(team.n))}</span></span></td>
                     <td class="cls-pj" style="text-align:center;">${team.pjLive}</td>
@@ -2393,7 +2952,7 @@ function buildLiveStandingsRows(teams, liveResults) {
 }
 
 function liveResultClass(live) {
-    return live?.pts === 3 ? "cls-win" : live?.pts === 1 ? "cls-draw" : "cls-loss";
+    return live.pts === 3 ? "cls-win" : live.pts === 1 ? "cls-draw" : "cls-loss";
 }
 
 function renderFullStandingsPage() {
@@ -2406,21 +2965,21 @@ function renderFullStandingsPage() {
                 <div class="full-standings-head">
                     <div>
                         <span class="section-kicker">Clasificacion</span>
-                        <h2>Primera Division</h2>
+                        <h2>Liga de Primera</h2>
                     </div>
-                    <small>Tabla completa · directo integrado</small>
+                    <small>Tabla completa Â· directo integrado</small>
                 </div>
-                ${renderFullStandingsTable(state.data?.standings?.primera || [], liveResults, "primera")}
+                ${renderFullStandingsTable(state.data.standings.primera || [], liveResults, "primera")}
             </div>` : ""}
             ${showSegunda ? `<div class="full-standings-card">
                 <div class="full-standings-head">
                     <div>
                         <span class="section-kicker">Clasificacion</span>
-                        <h2>Segunda Division</h2>
+                        <h2>Liga de Segunda</h2>
                     </div>
-                    <small>Tabla completa · directo integrado</small>
+                    <small>Tabla completa Â· directo integrado</small>
                 </div>
-                ${renderFullStandingsTable(state.data?.standings?.segunda || [], liveResults, "segunda")}
+                ${renderFullStandingsTable(state.data.standings.segunda || [], liveResults, "segunda")}
             </div>` : ""}
         </section>`;
 }
@@ -2499,7 +3058,7 @@ async function loadComments() {
     if (helper) {
         helper.innerHTML = state.user
             ? "Comentario de la jornada"
-            : state.data?.auth_enabled === false
+            : state.data.auth_enabled === false
                 ? "Login pendiente de configurar"
                 : `<a class="comment-login-link" href="/login/google">Entra con Google para comentar</a>`;
     }
@@ -2516,11 +3075,11 @@ async function loadComments() {
         if (count) count.textContent = String(comments.length);
         if (newCount) newCount.textContent = String(freshCount);
         if (summary) {
-            summary.textContent = `${comments.length} comentario${comments.length === 1 ? "" : "s"}${freshCount ? ` · ${freshCount} nuevo${freshCount === 1 ? "" : "s"}` : ""}`;
+            summary.textContent = `${comments.length} comentario${comments.length === 1 ? "" : "s"}${freshCount ? ` Â· ${freshCount} nuevo${freshCount === 1 ? "" : "s"}` : ""}`;
         }
         if (!comments.length) {
             body.innerHTML = `<div class="comments-empty">
-                <strong style="display:block; margin-bottom:4px;">Sin comentarios todavía</strong>
+                <strong style="display:block; margin-bottom:4px;">Sin comentarios todavÃ­a</strong>
                 <span>${state.user ? "Deja el primero." : "Entra con Google y comenta."}</span>
             </div>`;
             return;
@@ -2543,6 +3102,475 @@ async function loadComments() {
     }
 }
 
+async function loadPorra() {
+    const body = qs("porra-body");
+    const summary = qs("porra-summary");
+    if (!body || !state.data) return;
+    try {
+        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
+        const data = await res.json();
+        if (!res.ok || data.status !== "ok" || !data.enabled) {
+            body.innerHTML = `<div class="empty-state">${escapeHtml(data.message || "Sin porra disponible.")}</div>`;
+            return;
+        }
+        const match = data.match || {};
+        const mine = data.mine || {};
+        const homeValue = mine.goles_local ?? "";
+        const awayValue = mine.goles_visitante ?? "";
+        const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
+        if (summary) summary.textContent = data.locked ? "Cerrada" : "Marcador exacto";
+        const totalEntries = Number(data.total_entries || 0);
+        const distribution = data.distribution || [];
+        const porraShare = distribution.slice(0, 3).map(item => {
+            const score = `${Number(item.goles_local)}-${Number(item.goles_visitante)}`;
+            const percent = Number(item.percent || 0);
+            return `
+                <span class="porra-share-pill">
+                    <b>${escapeHtml(score)}</b>
+                    <em>${percent.toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</em>
+                </span>`;
+        }).join("");
+        const shareBlock = totalEntries
+            ? `<div class="porra-share">
+                    <span class="porra-share-total">${totalEntries} porra${totalEntries === 1 ? "" : "s"}</span>
+                    ${porraShare}
+               </div>`
+            : "";
+        body.innerHTML = `
+            <div class="porra-match">
+                <strong>${escapeHtml(getShortName(match.local || "Local"))}</strong>
+                <em>vs</em>
+                <strong>${escapeHtml(getShortName(match.visitante || "Visitante"))}</strong>
+            </div>
+            ${hasMine
+                ? `<div class="porra-saved">
+                        <span>Tu porra</span>
+                        <b>${Number(homeValue)}-${Number(awayValue)}</b>
+                   </div>`
+                : `<form id="porra-form" class="porra-form">
+                        <input id="porra-home" type="number" min="0" max="15" inputmode="numeric" value="${escapeHtml(homeValue)}" ${data.locked ? "disabled" : ""}>
+                        <span>-</span>
+                        <input id="porra-away" type="number" min="0" max="15" inputmode="numeric" value="${escapeHtml(awayValue)}" ${data.locked ? "disabled" : ""}>
+                        <button type="submit" ${data.locked ? "disabled" : ""}>${data.auth ? "OK" : "Entrar"}</button>
+                   </form>`}
+            ${shareBlock}`;
+    } catch (error) {
+        body.innerHTML = `<div class="empty-state">No se pudo cargar la porra.</div>`;
+    }
+}
+
+async function submitPorra(event) {
+    event.preventDefault();
+    if (!state.user) {
+        window.location.href = "/login/google";
+        return;
+    }
+    try {
+        const res = await fetch("/api/porra", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                jornada: state.data.jornada || state.jornada,
+                goles_local: qs("porra-home").value,
+                goles_visitante: qs("porra-away").value
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== "ok") throw new Error(data.message || "No se pudo guardar la porra.");
+        showToast("Porra guardada.");
+        await loadPorra();
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+}
+
+function snakeCanvas() {
+    return qs("snake-canvas");
+}
+
+function snakeCellCount() {
+    return { cols: 26, rows: 18, size: 20 };
+}
+
+function snakeRandomCell(exclude = []) {
+    const { cols, rows } = snakeCellCount();
+    let cell = null;
+    let guard = 0;
+    do {
+        cell = {
+            x: Math.floor(Math.random() * cols),
+            y: Math.floor(Math.random() * rows)
+        };
+        guard += 1;
+    } while (guard < 200 && exclude.some(item => item.x === cell.x && item.y === cell.y));
+    return cell;
+}
+
+function resetSnakeGame(initialDir = { x: 1, y: 0 }) {
+    const s = state.snake;
+    s.running = true;
+    s.over = false;
+    s.score = 0;
+    s.reason = "";
+    s.dir = initialDir;
+    s.nextDir = initialDir;
+    s.dirQueue = [];
+    const { cols, rows } = snakeCellCount();
+    const head = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
+    s.snake = [
+        head,
+        { x: head.x - initialDir.x, y: head.y - initialDir.y },
+        { x: head.x - initialDir.x * 2, y: head.y - initialDir.y * 2 }
+    ];
+    s.food = snakeRandomCell(s.snake);
+    s.cards = [];
+    qs("snake-save-btn").setAttribute("disabled", "disabled");
+    updateSnakeHud();
+    drawSnakeGame();
+    if (s.timer) clearInterval(s.timer);
+    s.timer = setInterval(tickSnakeGame, 165);
+}
+
+function endSnakeGame(reason = "Final") {
+    const s = state.snake;
+    const previousBest = Number(s.best || 0);
+    s.running = false;
+    s.over = true;
+    s.reason = reason;
+    if (s.timer) clearInterval(s.timer);
+    s.best = Math.max(s.best, s.score);
+    const save = qs("snake-save-btn");
+    if (save && s.score > 0 && s.score > s.savedScore) save.disabled = false;
+    updateSnakeHud();
+    drawSnakeGame();
+    if (state.user && s.score > previousBest) {
+        saveSnakeScore({ auto: true });
+    }
+}
+
+function tickSnakeGame() {
+    const s = state.snake;
+    if (!s.running) return;
+    const { cols, rows } = snakeCellCount();
+    const queuedDir = s.dirQueue.shift();
+    if (queuedDir) {
+        s.dir = queuedDir;
+        s.nextDir = queuedDir;
+    } else {
+        s.dir = s.nextDir;
+    }
+    const head = s.snake[0];
+    const next = {
+        x: (head.x + s.dir.x + cols) % cols,
+        y: (head.y + s.dir.y + rows) % rows
+    };
+    if (s.snake.some(part => part.x === next.x && part.y === next.y)) return endSnakeGame("Te has cerrado");
+    if ((s.cards || []).some(card => card.x === next.x && card.y === next.y)) return endSnakeGame("Tarjeta roja");
+
+    s.snake.unshift(next);
+    if (s.food && s.food.x === next.x && s.food.y === next.y) {
+        s.score += 10;
+        s.food = snakeRandomCell([...s.snake, s.food, ...(s.cards || [])].filter(Boolean));
+        if (s.score % 40 === 0 && (s.cards || []).length < 7) {
+            s.cards = [...(s.cards || []), snakeRandomCell([...s.snake, s.food, ...(s.cards || [])].filter(Boolean))];
+        }
+    } else {
+        s.snake.pop();
+    }
+    updateSnakeHud();
+    drawSnakeGame();
+}
+
+function snakeOpposite(a, b) {
+    return a.x + b.x === 0 && a.y + b.y === 0;
+}
+
+function updateSnakeHud() {
+    const s = state.snake;
+    if (qs("snake-score")) qs("snake-score").textContent = String(s.score);
+    if (qs("snake-best")) qs("snake-best").textContent = String(s.best);
+}
+
+function drawSoccerBall(ctx, cx, cy, radius) {
+    ctx.save();
+    ctx.shadowColor = "rgba(255, 255, 255, 0.72)";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#020617";
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#020617";
+    ctx.beginPath();
+    for (let i = 0; i < 6; i += 1) {
+        const angle = -Math.PI / 2 + i * Math.PI * 2 / 5;
+        const r = i % 2 === 0 ? radius * 0.34 : radius * 0.18;
+        const px = cx + Math.cos(angle) * r;
+        const py = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(2, 6, 23, 0.88)";
+    ctx.lineWidth = 1.4;
+    [
+        [-0.72, -0.48],
+        [0.72, -0.48],
+        [-0.78, 0.32],
+        [0.78, 0.32],
+        [0, 0.82]
+    ].forEach(([dx, dy]) => {
+        const px = cx + dx * radius;
+        const py = cy + dy * radius;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(px, py, radius * 0.16, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.restore();
+}
+
+function drawSnakeBody(ctx, snake, size, direction) {
+    if (!snake.length) return;
+    const points = snake.map(part => ({
+        x: part.x * size + size / 2,
+        y: part.y * size + size / 2
+    }));
+    const head = points[0];
+    const tailToHead = points.slice().reverse();
+
+    const strokeSnakePath = () => {
+        ctx.beginPath();
+        tailToHead.forEach((point, idx) => {
+            const prev = tailToHead[idx - 1];
+            if (!prev || Math.abs(point.x - prev.x) > size * 1.5 || Math.abs(point.y - prev.y) > size * 1.5) {
+                ctx.moveTo(point.x, point.y);
+            } else {
+                ctx.lineTo(point.x, point.y);
+            }
+        });
+        ctx.stroke();
+    };
+
+    ctx.save();
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(2, 6, 23, 0.9)";
+    ctx.lineWidth = 18;
+    strokeSnakePath();
+
+    const bodyGradient = ctx.createLinearGradient(0, 0, ctx.canvas.width || 520, ctx.canvas.height || 360);
+    bodyGradient.addColorStop(0, "#38bdf8");
+    bodyGradient.addColorStop(0.55, "#22c55e");
+    bodyGradient.addColorStop(1, "#facc15");
+    ctx.shadowColor = "rgba(34, 197, 94, 0.36)";
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = bodyGradient;
+    ctx.lineWidth = 13;
+    strokeSnakePath();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.62)";
+    ctx.lineWidth = 2;
+    for (let idx = 1; idx < snake.length; idx += 2) {
+        const point = points[idx];
+        ctx.beginPath();
+        ctx.moveTo(point.x - 4, point.y - 4);
+        ctx.lineTo(point.x + 4, point.y + 4);
+        ctx.stroke();
+    }
+
+    const headGradient = ctx.createRadialGradient(head.x - 4, head.y - 5, 1, head.x, head.y, 11);
+    headGradient.addColorStop(0, "#fef08a");
+    headGradient.addColorStop(0.5, "#facc15");
+    headGradient.addColorStop(1, "#f97316");
+    ctx.shadowColor = "rgba(250, 204, 21, 0.55)";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = headGradient;
+    ctx.strokeStyle = "#020617";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 9.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    const eyeX = direction.x * 3;
+    const eyeY = direction.y * 3;
+    ctx.fillStyle = "#020617";
+    ctx.beginPath();
+    ctx.arc(head.x - 3 + eyeX, head.y - 2 + eyeY, 1.9, 0, Math.PI * 2);
+    ctx.arc(head.x + 3 + eyeX, head.y - 2 + eyeY, 1.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawSnakeGame() {
+    const canvas = snakeCanvas();
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const { cols, rows, size } = snakeCellCount();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const pitch = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    pitch.addColorStop(0, "#0d3f2a");
+    pitch.addColorStop(0.45, "#105f38");
+    pitch.addColorStop(1, "#0a2b22");
+    ctx.fillStyle = pitch;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < cols; x += 1) {
+        if (x % 4 < 2) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.035)";
+            ctx.fillRect(x * size, 0, size, canvas.height);
+        }
+    }
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(226, 232, 240, 0.34)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 8);
+    ctx.lineTo(canvas.width / 2, canvas.height - 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 48, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeRect(8, canvas.height / 2 - 60, 58, 120);
+    ctx.strokeRect(canvas.width - 66, canvas.height / 2 - 60, 58, 120);
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(125, 211, 252, 0.045)";
+    for (let x = 0; x <= cols; x += 1) {
+        ctx.beginPath();
+        ctx.moveTo(x * size, 0);
+        ctx.lineTo(x * size, rows * size);
+        ctx.stroke();
+    }
+    for (let y = 0; y <= rows; y += 1) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * size);
+        ctx.lineTo(cols * size, y * size);
+        ctx.stroke();
+    }
+
+    const s = state.snake;
+    if (s.food) {
+        const cx = s.food.x * size + size / 2;
+        const cy = s.food.y * size + size / 2;
+        drawSoccerBall(ctx, cx, cy, 10);
+    }
+    (s.cards || []).forEach(card => {
+        const x = card.x * size + 5;
+        const y = card.y * size + 3;
+        ctx.save();
+        ctx.shadowColor = "rgba(239, 68, 68, 0.58)";
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.roundRect(x, y, 10, 14, 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fecaca";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+    });
+    drawSnakeBody(ctx, s.snake, size, s.dir || { x: 1, y: 0 });
+    if (!s.running) {
+        ctx.fillStyle = "rgba(2, 6, 23, 0.62)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#e0f2fe";
+        ctx.font = "30px 'Patrick Hand', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(s.over ? (s.reason || "Final") : "Snake gol", canvas.width / 2, 116);
+        ctx.font = "13px Inter";
+        ctx.fillStyle = "#bae6fd";
+        ctx.fillText(s.over ? "Pulsa flechas o WASD para repetir" : "Pulsa flechas o WASD para empezar", canvas.width / 2, 142);
+        ctx.textAlign = "start";
+    }
+}
+
+async function loadSnakeRanking() {
+    const body = qs("snake-ranking");
+    if (!body) return;
+    try {
+        const res = await fetch("/api/snake");
+        const data = await res.json();
+        if (!res.ok || data.status !== "ok") throw new Error("snake");
+        state.snake.best = Math.max(Number(data.mine || 0), Number(state.snake.best || 0));
+        state.snake.savedScore = Math.max(Number(data.mine || 0), Number(state.snake.savedScore || 0));
+        updateSnakeHud();
+        body.innerHTML = (data.scores || []).map((row, idx) => `
+            <div class="snake-rank-row">
+                <span>${idx + 1}</span>
+                <b>${escapeHtml(row.nombre || "Maestro")}</b>
+                <strong>${Number(row.score || 0)}</strong>
+            </div>
+        `).join("") || `<div class="empty-state">Sin puntuaciones todavia.</div>`;
+    } catch {
+        body.innerHTML = `<div class="empty-state">Ranking no disponible.</div>`;
+    }
+}
+
+async function saveSnakeScore(options = {}) {
+    if (!state.user) {
+        if (!options.auto) window.location.href = "/login/google";
+        return;
+    }
+    const score = Number(state.snake.score || 0);
+    if (!score) return;
+    if (score <= Number(state.snake.savedScore || 0) && !options.force) return;
+    try {
+        const res = await fetch("/api/snake", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ score })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== "ok") throw new Error(data.message || "No se pudo guardar.");
+        state.snake.savedScore = score;
+        state.snake.best = Math.max(Number(state.snake.best || 0), score);
+        qs("snake-save-btn").setAttribute("disabled", "disabled");
+        if (!options.auto) showToast("Puntuacion guardada.");
+        await loadSnakeRanking();
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+}
+
+function changeSnakeDirection(key) {
+    const map = {
+        ArrowUp: { x: 0, y: -1 }, w: { x: 0, y: -1 }, W: { x: 0, y: -1 },
+        ArrowDown: { x: 0, y: 1 }, s: { x: 0, y: 1 }, S: { x: 0, y: 1 },
+        ArrowLeft: { x: -1, y: 0 }, a: { x: -1, y: 0 }, A: { x: -1, y: 0 },
+        ArrowRight: { x: 1, y: 0 }, d: { x: 1, y: 0 }, D: { x: 1, y: 0 }
+    };
+    const next = map[key];
+    if (!next) return false;
+    if (!state.snake.running && snakeCanvas()) {
+        resetSnakeGame(next);
+        return true;
+    }
+    const s = state.snake;
+    const effective = s.dirQueue.length ? s.dirQueue[s.dirQueue.length - 1] : s.nextDir;
+    if (snakeOpposite(effective, next)) return true;
+    if (effective.x === next.x && effective.y === next.y) return true;
+    s.dirQueue.push(next);
+    if (s.dirQueue.length > 3) s.dirQueue.shift();
+    s.nextDir = next;
+    return true;
+}
+
 function formatCommentTime(value) {
     const date = new Date(String(value || "").replace(" ", "T"));
     if (Number.isNaN(date.getTime())) return "";
@@ -2557,7 +3585,7 @@ async function submitComment(event) {
     event.preventDefault();
     if (!state.user) return showToast("Entra con Google para comentar.", "error");
     const text = qs("comment-text");
-    const value = String(text?.value || "").trim();
+    const value = String(text.value || "").trim();
     if (!value) return;
 
     try {
@@ -2565,7 +3593,7 @@ async function submitComment(event) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                jornada: state.data?.jornada || state.jornada,
+                jornada: state.data.jornada || state.jornada,
                 texto: value
             })
         });
@@ -2651,10 +3679,10 @@ async function savePredictions() {
 
 async function shareTicket() {
     if (!state.user) return showToast("Entra con Google para compartir.", "error");
-    const matches = state.data?.partidos || [];
+    const matches = state.data.partidos || [];
     if (!matches.length) return showToast("No hay jornada cargada para compartir.", "error");
     const lines = [
-        `🏆 LIGA DE MAESTROS | Mis pronósticos J${state.data.jornada}`,
+        `ðŸ† LIGA DE MAESTROS | Mis pronÃ³sticos J${state.data.jornada}`,
         ...matches.slice(0, 15).map((match, idx) => {
             const sign = state.my_signs[idx] && state.my_signs[idx] !== "-" ? state.my_signs[idx] : "sin marcar";
             const local = match.local || "Local";
@@ -2662,11 +3690,11 @@ async function shareTicket() {
             const label = idx === 14 ? "Pleno al 15" : `${local} - ${away}`;
             return `${idx + 1}. ${label} -> ${sign}`;
         }),
-        "🔥 Compite conmigo en la Liga de Maestros"
+        "ðŸ”¥ Compite conmigo en la Liga de Maestros"
     ];
     const text = lines.join("\n");
     try {
-        if (navigator.clipboard?.writeText) {
+        if (navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);
         } else {
             const area = document.createElement("textarea");
@@ -2692,11 +3720,22 @@ function bindEvents() {
     qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);
     qs("share-ticket-btn")?.addEventListener("click", shareTicket);
+    document.querySelectorAll("[data-page-action]").forEach(button => {
+        button.addEventListener("click", () => openNewspaperPage(button.dataset.pageAction));
+    });
+    qs("porra-body")?.addEventListener("submit", event => {
+        if (event.target.id === "porra-form") submitPorra(event);
+    });
     qs("comment-form")?.addEventListener("submit", submitComment);
     document.querySelector(".comments-panel-side .panel-head")?.addEventListener("click", () => {
         setCommentsOpen(!state.commentsOpen);
     });
     qs("matches-body")?.addEventListener("click", event => {
+        const pageBtn = event.target.closest("[data-page-action]");
+        if (pageBtn) {
+            openNewspaperPage(pageBtn.dataset.pageAction);
+            return;
+        }
         const radarBtn = event.target.closest("[data-radar-match]");
         if (radarBtn) {
             const idx = Number.parseInt(radarBtn.dataset.radarMatch, 10);
@@ -2719,7 +3758,7 @@ function bindEvents() {
         if (!state.data || String(state.data.jornada) !== String(state.data.max_jornada) || state.data.is_locked) {
             return showToast("Jornada bloqueada.", "error");
         }
-        const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]")?.dataset.matchIdx, 10);
+        const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]").dataset.matchIdx, 10);
         if (Number.isNaN(idx)) return;
         if (btn.dataset.pleno) {
             const value = window.prompt("Resultado del pleno al 15", state.my_signs[idx] === "-" ? "0-0" : state.my_signs[idx]);
@@ -2738,14 +3777,231 @@ function bindEvents() {
             document.querySelectorAll(".tab-btn[data-standings]").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".standings-pane").forEach(pane => pane.classList.remove("active"));
             button.classList.add("active");
-            qs(button.dataset.standings)?.classList.add("active");
+            qs(button.dataset.standings).classList.add("active");
         });
     });
+}
+
+function renderNewspaperCoverPageV2() {
+    const matches = state.data.partidos || [];
+    const liveCount = getLiveLeagueMatches().length;
+    const finished = matches.filter(match => isFinishedStatus(match.status)).length;
+    const saved = hasSavedTicket();
+    const jornada = state.data.jornada || state.jornada || "";
+    const headline = liveCount
+        ? `${liveCount} partido${liveCount === 1 ? "" : "s"} en directo`
+        : "Liga de Maestros";
+    const cards = [
+        ["TICKET", "Pag. 2", "Quiniela oficial", "Boleto, Maestros, Peña y tu signo.", "Abrir"],
+        ["LIVE", "Pag. 3", "Directo", "Marcadores agrupados y estados reales.", "Ver"],
+        ["STANDINGS", "Pag. 4", "Ligas", "Primera, Segunda y competiciones de la jornada.", "Consultar"],
+        ["SNAKE", "Pag. 5", "Mundial Snake 1X2", "Arcade ochentero con ranking.", "Jugar"],
+        ["CONTEST", "Pag. 6", "La Peña", "Ranking, galardones, perfiles y jornadas.", "Entrar"],
+        ["QUIZ", "Pag. 7", "Quiz", "Reto de fútbol cuando esté preparado.", "Preparar"]
+    ];
+    return `
+        <section class="frontpage frontpage-v2">
+            <article class="frontpage-lead">
+                <div class="frontpage-photo frontpage-cover-visual">
+                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+                    <strong>1X2</strong>
+                    <span>La Peña contra los Maestros IA</span>
+                </div>
+                <div class="frontpage-headline">
+                    <span>Jornada ${escapeHtml(String(jornada || "-"))}</span>
+                    <h2>${escapeHtml(headline)}</h2>
+                    <p>Un diario interactivo para seguir la quiniela: pronósticos de Maestros IA, voto de La Peña, directo, rankings, galardones y juegos separados por secciones.</p>
+                    <div class="frontpage-facts">
+                        <strong>${matches.length}<small>partidos</small></strong>
+                        <strong>${finished}<small>terminados</small></strong>
+                        <strong>${saved ? "OK" : "-"}<small>tu boleto</small></strong>
+                    </div>
+                </div>
+            </article>
+            <div class="frontpage-sections">
+                ${cards.map(([action, page, title, text, cta]) => `
+                    <button type="button" class="frontpage-card" data-page-action="${escapeHtml(action)}">
+                        <small>${escapeHtml(page)}</small>
+                        <strong>${escapeHtml(title)}</strong>
+                        <span>${escapeHtml(text)}</span>
+                        <em>${escapeHtml(cta)}</em>
+                    </button>
+                `).join("")}
+            </div>
+        </section>`;
+}
+
+function coverPodiumRows() {
+    const jornadaRows = state.contest?.jornada?.rows || [];
+    const rows = jornadaRows.length ? jornadaRows : (state.contest?.general || []);
+    return rows.slice(0, 3);
+}
+
+function coverCloseLabel() {
+    const raw = state.data.edit_deadline || state.data.kickoff_at || "";
+    if (!raw) return state.data.is_locked ? "cerrada" : "abierta";
+    const date = new Date(String(raw).replace(" ", "T"));
+    if (Number.isNaN(date.getTime())) return state.data.is_locked ? "cerrada" : "abierta";
+    const diff = date.getTime() - Date.now();
+    if (diff <= 0 || state.data.is_locked) return "cerrada";
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours >= 24) return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+    if (hours > 0) return `${hours}h ${String(mins).padStart(2, "0")}m`;
+    return `${Math.max(1, mins)}m`;
+}
+
+function coverMasterMajority(idx, matches = state.data.partidos || []) {
+    const preds = state.data.predicciones_actuales || {};
+    const counts = { "1": 0, "X": 0, "2": 0 };
+    getVisibleAIColumns(matches)
+        .filter(([id]) => id !== "programa")
+        .forEach(([id, fallback]) => {
+            const sign = normalizeSign(getSign(preds, idx, id, fallback));
+            if (counts[sign] !== undefined) counts[sign] += 1;
+        });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return { sign: sorted[0]?.[1] ? sorted[0][0] : "-", votes: counts };
+}
+
+function coverDiscrepancyMatch() {
+    const matches = state.data.partidos || [];
+    const preds = state.data.predicciones_actuales || {};
+    const pena = state.data.consenso_pena || [];
+    let best = null;
+    matches.slice(0, 14).forEach((match, idx) => {
+        const p = pena[idx] || {};
+        const penaSign = normalizeSign(p.ganador || "-");
+        const programSign = normalizeSign(getSign(preds, idx, "programa", "v260_omnisciente"));
+        const master = coverMasterMajority(idx, matches);
+        const maxPct = Math.max(Number(p.p1 || 0), Number(p.px || 0), Number(p.p2 || 0));
+        let score = 100 - maxPct;
+        if (programSign !== "-" && penaSign !== "-" && programSign !== penaSign) score += 34;
+        if (master.sign !== "-" && penaSign !== "-" && master.sign !== penaSign) score += 28;
+        if (programSign !== "-" && master.sign !== "-" && programSign !== master.sign) score += 18;
+        if (!best || score > best.score) {
+            best = { match, idx, pena: p, penaSign, programSign, masterSign: master.sign, score };
+        }
+    });
+    return best;
+}
+
+function coverPodiumHtml() {
+    const rows = coverPodiumRows();
+    const slots = [rows[1], rows[0], rows[2]];
+    const labels = [2, 1, 3];
+    if (!rows.length) return `<div class="cover-empty">Sin ranking todavia.</div>`;
+    return `
+        <div class="cover-podium-stage">
+            ${slots.map((row, idx) => `
+                <div class="cover-podium-step rank-${labels[idx]} ${row ? "" : "is-empty"}">
+                    <span class="cover-medal">${labels[idx]}</span>
+                    <strong>${escapeHtml(row?.name || row?.winner || "-")}</strong>
+                    <b>${row ? Number(row.points || 0) : "-"}</b>
+                    <small>${labels[idx] === 1 ? "lider" : "podio"}</small>
+                </div>
+            `).join("")}
+        </div>`;
+}
+
+function coverDiscrepancyHtml() {
+    const item = coverDiscrepancyMatch();
+    if (!item) return `<div class="cover-empty">Sin choque destacado.</div>`;
+    const { match, idx, pena, penaSign, programSign, masterSign } = item;
+    return `
+        <div class="cover-dispute-fixture">
+            <span>#${idx + 1}</span>
+            <strong>${escapeHtml(getShortName(match.local))}</strong>
+            <em>vs</em>
+            <strong>${escapeHtml(getShortName(match.visitante))}</strong>
+        </div>
+        <div class="cover-dispute-grid">
+            <div><span>Programa</span><b>${escapeHtml(programSign || "-")}</b></div>
+            <div><span>Maestros</span><b>${escapeHtml(masterSign || "-")}</b></div>
+            <div><span>La Pena</span><b>${escapeHtml(penaSign || "-")}</b><small>${Number(pena.total || 0)} votos</small></div>
+        </div>
+        <div class="cover-dispute-bars">
+            <span style="--w:${Number(pena.p1 || 0)}%"><b>1</b>${Number(pena.p1 || 0)}%</span>
+            <span style="--w:${Number(pena.px || 0)}%"><b>X</b>${Number(pena.px || 0)}%</span>
+            <span style="--w:${Number(pena.p2 || 0)}%"><b>2</b>${Number(pena.p2 || 0)}%</span>
+        </div>`;
+}
+
+function coverProgramTicketHtml() {
+    const preds = state.data.predicciones_actuales || {};
+    const signs = Array.from({ length: 15 }, (_, idx) => getSign(preds, idx, "programa", "v260_omnisciente") || "-");
+    const doubles = signs
+        .map((sign, idx) => String(sign).length > 1 && idx < 14 ? idx + 1 : null)
+        .filter(Boolean);
+    return `
+        <div class="cover-ticket-card">
+            <div class="cover-ticket-head">
+                <span>Boleto Programa</span>
+                <b>${doubles.length ? `${doubles.length} dobles: ${doubles.join(", ")}` : "sin dobles"}</b>
+            </div>
+            <div class="cover-ticket-strip">
+                ${signs.slice(0, 14).map((sign, idx) => `
+                    <span class="${String(sign).length > 1 ? "is-double" : ""}">
+                        <small>${idx + 1}</small><b>${escapeHtml(sign)}</b>
+                    </span>
+                `).join("")}
+                <span class="is-pleno"><small>15</small><b>${escapeHtml(signs[14] || "-")}</b></span>
+            </div>
+        </div>`;
+}
+
+function renderNewspaperCoverPageV3() {
+    const matches = state.data.partidos || [];
+    const liveCount = getLiveLeagueMatches().length;
+    const finished = matches.filter(match => isFinishedStatus(match.status)).length;
+    const saved = hasSavedTicket();
+    const jornada = state.data.jornada || state.jornada || "";
+    const headline = liveCount
+        ? `${liveCount} partido${liveCount === 1 ? "" : "s"} en directo`
+        : `Control J${escapeHtml(String(jornada || "-"))}`;
+    return `
+        <section class="frontpage frontpage-v2 cover-control-room">
+            <article class="frontpage-lead cover-hero-grid">
+                <div class="frontpage-photo frontpage-cover-visual cover-brand-card">
+                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+                    <strong>1X2</strong>
+                    <span>La Pena contra los Maestros IA</span>
+                </div>
+                <div class="frontpage-headline cover-command-card">
+                    <span>Jornada ${escapeHtml(String(jornada || "-"))}</span>
+                    <h2>${escapeHtml(headline)}</h2>
+                    ${coverProgramTicketHtml()}
+                    <div class="frontpage-facts cover-score-strip">
+                        <strong>${matches.length}<small>partidos</small></strong>
+                        <strong>${finished}<small>terminados</small></strong>
+                        <strong>${saved ? "OK" : "-"}<small>tu boleto</small></strong>
+                        <strong>${escapeHtml(coverCloseLabel())}<small>cierre</small></strong>
+                    </div>
+                </div>
+            </article>
+            <div class="cover-dashboard">
+                <article class="cover-panel cover-podium">
+                    <div class="cover-panel-title"><span>Podio</span><b>${state.contest?.jornada?.rows?.length ? "jornada" : "general"}</b></div>
+                    ${coverPodiumHtml()}
+                </article>
+                <article class="cover-panel cover-dispute">
+                    <div class="cover-panel-title"><span>Partido caliente</span><b>mayor discrepancia</b></div>
+                    ${coverDiscrepancyHtml()}
+                </article>
+                <article class="cover-panel cover-actions">
+                    <button type="button" data-page-action="TICKET"><b>Jugar quiniela</b><span>Pag. 2</span></button>
+                    <button type="button" data-page-action="LIVE"><b>Ver directo</b><span>Pag. 3</span></button>
+                    <button type="button" data-page-action="CONTEST"><b>La Pena</b><span>Pag. 6</span></button>
+                </article>
+            </div>
+        </section>`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     hydrateCommentsPanel();
     bindEvents();
+    drawSnakeGame();
     refreshData();
     setInterval(() => {
         refreshData({ auto: true });
@@ -2755,7 +4011,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function renderLiveTicker() {
     const allMatches = getAllLeagueMatches();
     const matches = state.currentFilter === "ALL"
-        ? (state.data?.partidos || [])
+        ? (state.data.partidos || [])
         : state.currentFilter === "LIVE"
             ? getLiveLeagueMatches()
             : state.currentFilter === "WAR_ROOM"
@@ -2770,7 +4026,7 @@ function renderLiveTicker() {
             const score = scoreOnly(m.marcador || m.score || m.scores?.score) || m.marcador || m.score || "";
             return `<span><b>${escapeHtml(getShortName(home))}</b> ${escapeHtml(score)} <b>${escapeHtml(getShortName(away))}</b></span>`;
         }).join("")
-        : `<span>${nextMatch ? `Próximo directo: <b>${escapeHtml(getShortName(nextMatch.local || nextMatch.home_name || nextMatch.home?.name || "-"))}</b> ${escapeHtml(formatKickoffShort(nextMatch.added || nextMatch.fecha_raw, nextMatch.scheduled || nextMatch.time || nextMatch.hora))}` : "Sin partidos en directo ahora mismo"}</span>`;
+        : `<span>${nextMatch ? `PrÃ³ximo directo: <b>${escapeHtml(getShortName(nextMatch.local || nextMatch.home_name || nextMatch.home?.name || "-"))}</b> ${escapeHtml(formatKickoffShort(nextMatch.added || nextMatch.fecha_raw, nextMatch.scheduled || nextMatch.time || nextMatch.hora))}` : "Sin partidos en directo ahora mismo"}</span>`;
     return `
         <div class="live-ticker ${live.length ? "has-live" : ""} ${live.length > 1 ? "is-marquee" : "is-static"}">
             <div class="live-ticker-track">
@@ -2784,3 +4040,4 @@ function updateTopbarLiveTicker() {
     if (!slot || !state.data) return;
     slot.innerHTML = renderLiveTicker();
 }
+

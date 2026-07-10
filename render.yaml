@@ -5,6 +5,9 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
     autoDeploy: true
+    disk:
+      name: liga-data
+      mountPath: /var/data
     envVars:
       - key: SECRET_KEY
         sync: false
@@ -14,6 +17,10 @@ services:
         value: Lax
       - key: PREFERRED_URL_SCHEME
         value: https
+      - key: DB_PATH
+        value: /var/data/LIGA_MAESTROS_PRO.db
+      - key: DATA_DIR
+        value: /var/data
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
@@ -26,3 +33,18 @@ services:
         value: "0"
       - key: ADMIN_EMAILS
         sync: false
+
+  - type: worker
+    name: liga-collector
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python LIVE_COLLECTOR.py
+    envVars:
+      - key: DB_PATH
+        value: /var/data/LIGA_MAESTROS_PRO.db
+      - key: DATA_DIR
+        value: /var/data
+      - key: HIGHLIGHTLY_API_KEY
+        sync: false
+      - key: HIGHLIGHTLY_REFRESH_ENABLED
+        value: "1"

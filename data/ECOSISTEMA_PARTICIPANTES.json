@@ -2,19 +2,15 @@
   "version": 1,
   "updated": "2026-06-10",
   "principios": [
-    "Programa, Consejo IA, Maestros, La Pena y usuario son capas distintas.",
+    "Programa, Maestros, La Pena y usuario son capas distintas.",
     "La Pena no es un usuario unico: es un grupo de participantes y aliases.",
-    "El Consejo IA es una columna de consenso; no sustituye a los Maestros individuales.",
-    "El usuario humano mantiene su quiniela separada de Programa y Consejo IA."
+    "El Programa es una columna editorial propia: mezcla datos, criterio y lectura de IAs cuando no hay motor especifico.",
+    "El usuario humano mantiene su quiniela separada de Programa y Maestros."
   ],
   "roles": {
     "programa": {
       "label": "Programa",
       "descripcion": "Motor estadistico propio."
-    },
-    "consejo": {
-      "label": "Consejo IA",
-      "descripcion": "Columna final nacida del debate entre modelos."
     },
     "maestro": {
       "label": "Maestros",
@@ -31,7 +27,6 @@
   },
   "maestros_oficiales": [
     "programa",
-    "consejo_ias",
     "claude",
     "grok",
     "chatgpt",
@@ -47,16 +42,23 @@
     "profe",
     "chipi",
     "fortu",
-    "oraculo"
+    "oraculo",
+    "manu",
+    "momo",
+    "meta",
+    "fistro",
+    "sesudo",
+    "jimmy",
+    "falcon"
   ],
   "ids_obsoletos": [
     "hermes",
     "molbot",
     "jenova",
-    "momo",
-    "manu",
     "manus",
-    "pena"
+    "pena",
+    "consejo_ias",
+    "consenso"
   ],
   "nombres_publicos": {
     "programa": "Programa",
@@ -76,6 +78,13 @@
     "profe": "Profe",
     "chipi": "Chipi",
     "fortu": "Fortu",
-    "oraculo": "Oraculo"
+    "oraculo": "Oraculo",
+    "manu": "Manu",
+    "momo": "Momo",
+    "meta": "Meta",
+    "fistro": "Fistro",
+    "sesudo": "Sesudo",
+    "jimmy": "Jimmy",
+    "falcon": "Falcon"
   }
 }

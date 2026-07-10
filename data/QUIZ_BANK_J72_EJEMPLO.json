@@ -1,0 +1,117 @@
+{
+  "jornada": 72,
+  "generated_at": "2026-07-05T12:00:00",
+  "source": "Generado por IA - Revisar antes de importar",
+  "preguntas": [
+    {
+      "tipo": "multiple",
+      "enunciado": "Quien llega lider a la jornada 72 de LaLiga?",
+      "opcion_a": "Barcelona",
+      "opcion_b": "Real Madrid",
+      "opcion_c": "Atletico Madrid",
+      "respuesta_correcta": "B",
+      "explicacion": "El Real Madrid llega lider con 72 puntos.",
+      "dificultad": 1,
+      "tema": "actualidad"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que equipo gano LaLiga en la temporada 2003/04?",
+      "opcion_a": "Real Madrid",
+      "opcion_b": "Valencia CF",
+      "opcion_c": "Barcelona",
+      "respuesta_correcta": "B",
+      "explicacion": "Valencia CF gano LaLiga 2003/04 con Benitez.",
+      "dificultad": 2,
+      "tema": "historia"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que equipo tiene mas goles en contra esta temporada?",
+      "opcion_a": "Racing de Santander",
+      "opcion_b": "Real Valladolid",
+      "opcion_c": "Deportivo Alaves",
+      "respuesta_correcta": "A",
+      "explicacion": "El Racing de Santander lidera los goles en contra.",
+      "dificultad": 2,
+      "tema": "estadistica"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que jugador jugo en Valencia, Barcelona y Atletico de Madrid?",
+      "opcion_a": "David Villa",
+      "opcion_b": "Diego Costa",
+      "opcion_c": "Fernando Torres",
+      "respuesta_correcta": "C",
+      "explicacion": "Fernando Torres jugo en los tres equipos.",
+      "dificultad": 1,
+      "tema": "jugadores"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que partido de esta jornada tiene mas porcentaje de empate en La Pena?",
+      "opcion_a": "Osasuna vs Real Sociedad",
+      "opcion_b": "Girona vs Espanyol",
+      "opcion_c": "Mallorca vs Rayo Vallecano",
+      "respuesta_correcta": "A",
+      "explicacion": "El derbi vasco tiene el mayor porcentaje de empate.",
+      "dificultad": 2,
+      "tema": "quiniela"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que estadio tiene capacidad para mas de 80.000 espectadores?",
+      "opcion_a": "Mestalla",
+      "opcion_b": "Santiago Bernabeu",
+      "opcion_c": "San Mames",
+      "respuesta_correcta": "B",
+      "explicacion": "El Santiago Bernabeu tiene capacidad para 83.000.",
+      "dificultad": 1,
+      "tema": "estadios"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que Maestro IA va mas arriba en el ranking general de Liga de Maestros?",
+      "opcion_a": "Gemini",
+      "opcion_b": "Claude",
+      "opcion_c": "ChatGPT",
+      "respuesta_correcta": "B",
+      "explicacion": "Claude lidera el ranking de Maestros IA.",
+      "dificultad": 2,
+      "tema": "liga_maestros"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que equipo lleva mas jornadas sin ganar fuera de casa?",
+      "opcion_a": "Real Betis",
+      "opcion_b": "Celta de Vigo",
+      "opcion_c": "Sevilla FC",
+      "respuesta_correcta": "C",
+      "explicacion": "Sevilla FC lleva 8 jornadas sin ganar fuera.",
+      "dificultad": 3,
+      "tema": "actualidad"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "En que jornada se juega el proximo El Clasico?",
+      "opcion_a": "Jornada 30",
+      "opcion_b": "Jornada 35",
+      "opcion_c": "Jornada 38",
+      "respuesta_correcta": "B",
+      "explicacion": "El Clasico se juega en la jornada 35.",
+      "dificultad": 1,
+      "tema": "actualidad"
+    },
+    {
+      "tipo": "multiple",
+      "enunciado": "Que entrenador lleva mas temporadas en LaLiga?",
+      "opcion_a": "Diego Simeone",
+      "opcion_b": "Ernesto Valverde",
+      "opcion_c": "Carlo Ancelotti",
+      "respuesta_correcta": "A",
+      "explicacion": "Simeone lleva 13 temporadas en el Atletico.",
+      "dificultad": 2,
+      "tema": "entrenadores"
+    }
+  ]
+}

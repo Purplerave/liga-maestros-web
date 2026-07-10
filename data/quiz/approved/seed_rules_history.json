@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-09",
+  "source_note": "Semilla inicial revisable. Sirve para probar el flujo tecnico del quiz.",
+  "questions": [
+    {
+      "id": "lmq_rules_0001",
+      "mode": "desafio_jornada",
+      "category": "reglas",
+      "difficulty": 1,
+      "prompt": "Si un saque de banda entra directamente en la porteria rival sin tocar a nadie, que se concede?",
+      "options": [
+        { "id": "A", "label": "Gol valido" },
+        { "id": "B", "label": "Saque de meta" },
+        { "id": "C", "label": "Se repite el saque" }
+      ],
+      "correct_option_id": "B",
+      "explanation": "No se puede marcar gol directamente de saque de banda. Si entra en la meta rival, se concede saque de meta.",
+      "source_facts": [{ "provider": "rules", "ref": "ifab_law_15", "license": "reference", "snapshot_at": "2026-07-09" }],
+      "tags": ["reglas", "facil"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_rules_0002",
+      "mode": "desafio_jornada",
+      "category": "reglas",
+      "difficulty": 1,
+      "prompt": "Cuantos jugadores como minimo necesita un equipo para que un partido pueda continuar?",
+      "options": [
+        { "id": "A", "label": "7" },
+        { "id": "B", "label": "8" },
+        { "id": "C", "label": "9" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Un partido no debe continuar si un equipo tiene menos de siete jugadores.",
+      "source_facts": [{ "provider": "rules", "ref": "ifab_law_3", "license": "reference", "snapshot_at": "2026-07-09" }],
+      "tags": ["reglas", "facil"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_rules_0003",
+      "mode": "desafio_jornada",
+      "category": "reglas",
+      "difficulty": 2,
+      "prompt": "En una quiniela 1X2, que significa la X?",
+      "options": [
+        { "id": "A", "label": "Victoria local" },
+        { "id": "B", "label": "Empate" },
+        { "id": "C", "label": "Victoria visitante" }
+      ],
+      "correct_option_id": "B",
+      "explanation": "En formato 1X2, 1 es local, X es empate y 2 es visitante.",
+      "source_facts": [{ "provider": "liga_maestros", "ref": "quiniela_1x2", "license": "own", "snapshot_at": "2026-07-09" }],
+      "tags": ["quiniela", "facil"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_world_0001",
+      "mode": "desafio_jornada",
+      "category": "mundial",
+      "difficulty": 2,
+      "prompt": "Que seleccion gano el Mundial masculino de 2022?",
+      "options": [
+        { "id": "A", "label": "Argentina" },
+        { "id": "B", "label": "Francia" },
+        { "id": "C", "label": "Croacia" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Argentina gano el Mundial de 2022 tras empatar 3-3 con Francia y vencer en la tanda de penaltis.",
+      "source_facts": [{ "provider": "openfootball", "ref": "worldcup_2022_final", "license": "CC0", "snapshot_at": "2026-07-09" }],
+      "tags": ["mundial", "historia"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_world_0002",
+      "mode": "desafio_jornada",
+      "category": "mundial",
+      "difficulty": 2,
+      "prompt": "Que seleccion gano el Mundial masculino de 2010?",
+      "options": [
+        { "id": "A", "label": "Paises Bajos" },
+        { "id": "B", "label": "Alemania" },
+        { "id": "C", "label": "Espana" }
+      ],
+      "correct_option_id": "C",
+      "explanation": "Espana gano el Mundial 2010 al vencer 1-0 a Paises Bajos en la final.",
+      "source_facts": [{ "provider": "openfootball", "ref": "worldcup_2010_final", "license": "CC0", "snapshot_at": "2026-07-09" }],
+      "tags": ["mundial", "espana"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_club_0001",
+      "mode": "desafio_jornada",
+      "category": "clubes",
+      "difficulty": 2,
+      "prompt": "Cual es el estadio asociado historicamente al Real Madrid CF?",
+      "options": [
+        { "id": "A", "label": "Santiago Bernabeu" },
+        { "id": "B", "label": "Mestalla" },
+        { "id": "C", "label": "Ramon Sanchez-Pizjuan" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "El Santiago Bernabeu es el estadio historico del Real Madrid CF.",
+      "source_facts": [{ "provider": "wikidata", "ref": "Q14116/P115", "license": "CC0", "snapshot_at": "2026-07-09" }],
+      "tags": ["clubes", "estadios"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_club_0002",
+      "mode": "desafio_jornada",
+      "category": "clubes",
+      "difficulty": 2,
+      "prompt": "Cual es el estadio asociado historicamente al Valencia CF?",
+      "options": [
+        { "id": "A", "label": "La Romareda" },
+        { "id": "B", "label": "Mestalla" },
+        { "id": "C", "label": "El Sadar" }
+      ],
+      "correct_option_id": "B",
+      "explanation": "Mestalla es el estadio historico del Valencia CF.",
+      "source_facts": [{ "provider": "wikidata", "ref": "Q10311/P115", "license": "CC0", "snapshot_at": "2026-07-09" }],
+      "tags": ["clubes", "estadios"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_player_0001",
+      "mode": "quien_es",
+      "category": "jugadores",
+      "difficulty": 2,
+      "prompt": "Gano el Mundial 2022 con Argentina y es conocido por vestir el dorsal 10. Quien es?",
+      "options": [
+        { "id": "A", "label": "Lionel Messi" },
+        { "id": "B", "label": "Angel Di Maria" },
+        { "id": "C", "label": "Emiliano Martinez" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Lionel Messi fue campeon del Mundial 2022 con Argentina y es el jugador historicamente asociado al dorsal 10.",
+      "source_facts": [{ "provider": "wikidata", "ref": "Q615", "license": "CC0", "snapshot_at": "2026-07-09" }],
+      "tags": ["jugadores", "mundial"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_quiz_0001",
+      "mode": "desafio_jornada",
+      "category": "quiniela",
+      "difficulty": 1,
+      "prompt": "En Liga de Maestros, que capa representa el voto colectivo frente a los Maestros IA?",
+      "options": [
+        { "id": "A", "label": "La Pena" },
+        { "id": "B", "label": "El calendario" },
+        { "id": "C", "label": "El directo" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "La Pena agrupa usuarios y participantes invitados que compiten contra los Maestros IA.",
+      "source_facts": [{ "provider": "liga_maestros", "ref": "ecosistema_participantes", "license": "own", "snapshot_at": "2026-07-09" }],
+      "tags": ["liga_maestros", "facil"],
+      "season": "2026-27",
+      "status": "approved"
+    },
+    {
+      "id": "lmq_quiz_0002",
+      "mode": "desafio_jornada",
+      "category": "quiniela",
+      "difficulty": 2,
+      "prompt": "Que representa el Programa en Liga de Maestros?",
+      "options": [
+        { "id": "A", "label": "Una columna oficial de referencia" },
+        { "id": "B", "label": "Un equipo de futbol" },
+        { "id": "C", "label": "Un arbitro de la jornada" }
+      ],
+      "correct_option_id": "A",
+      "explanation": "El Programa es la columna oficial propia que combina criterio, datos y lectura de la jornada.",
+      "source_facts": [{ "provider": "liga_maestros", "ref": "maestros_programa", "license": "own", "snapshot_at": "2026-07-09" }],
+      "tags": ["liga_maestros", "programa"],
+      "season": "2026-27",
+      "status": "approved"
+    }
+  ]
+}

@@ -23,20 +23,10 @@ CREATE TABLE api_usage_daily (
 CREATE TABLE clasificacion 
                       (equipo TEXT UNIQUE, pj INTEGER, pts INTEGER, division INTEGER, pos INTEGER, pg INTEGER DEFAULT 0, pe INTEGER DEFAULT 0, pp INTEGER DEFAULT 0, gf INTEGER DEFAULT 0, gc INTEGER DEFAULT 0, racha TEXT);
 
--- table: comentarios_jornada
-CREATE TABLE comentarios_jornada (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    jornada INTEGER NOT NULL,
-    user_id TEXT NOT NULL,
-    nombre TEXT NOT NULL,
-    texto TEXT NOT NULL,
-    etiqueta TEXT NOT NULL DEFAULT 'Bar',
-    created_at TEXT NOT NULL
-);
 
 -- table: consenso
-CREATE TABLE consenso 
-                      (jornada INTEGER, partido_id INTEGER, ganador TEXT, p1 INTEGER, px INTEGER, p2 INTEGER);
+CREATE TABLE consenso
+                      (jornada INTEGER, partido_id INTEGER, ganador TEXT, p1 INTEGER, px INTEGER, p2 INTEGER, PRIMARY KEY (jornada, partido_id));
 
 -- table: equipo_aliases
 CREATE TABLE equipo_aliases (
@@ -78,8 +68,6 @@ CREATE TABLE usuarios (
                 notificaciones INTEGER DEFAULT 1
             , peso REAL DEFAULT 1.0);
 
--- index: idx_comentarios_jornada_created
-CREATE INDEX idx_comentarios_jornada_created ON comentarios_jornada(jornada, created_at);
 
 -- index: idx_consenso_jornada_partido
 CREATE INDEX idx_consenso_jornada_partido ON consenso(jornada, partido_id);
@@ -90,8 +78,17 @@ CREATE INDEX idx_predicciones_jornada_partido ON predicciones(jornada, partido_i
 -- index: idx_predicciones_user_jornada
 CREATE INDEX idx_predicciones_user_jornada ON predicciones(user_id, jornada);
 
+-- index: ux_predicciones_user_jornada_partido
+CREATE UNIQUE INDEX ux_predicciones_user_jornada_partido ON predicciones(user_id, jornada, partido_id);
+
 -- index: idx_resultados_jornada_partido
 CREATE INDEX idx_resultados_jornada_partido ON resultados(jornada, partido_id);
 
 -- index: idx_resultados_status_fecha
 CREATE INDEX idx_resultados_status_fecha ON resultados(status, fecha);
+
+-- index: idx_resultados_api_id
+CREATE INDEX idx_resultados_api_id ON resultados(api_id);
+
+-- index: idx_clasificacion_div_pos
+CREATE INDEX idx_clasificacion_div_pos ON clasificacion(division, pos);

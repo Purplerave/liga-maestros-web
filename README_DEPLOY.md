@@ -81,6 +81,8 @@ Advertencia: en Render sin disco persistente, los cambios hechos en SQLite puede
 
 Si defines `DB_PATH` apuntando a un disco persistente y la DB no existe ahi, la app copia automaticamente la DB inicial incluida en `DATOS/LIGA_MAESTROS_PRO.db`.
 
+Nota Render importante: un Persistent Disk solo es accesible por la instancia del servicio al que se adjunta. No sirve como disco compartido entre `web` y `worker`. Si se separa `LIVE_COLLECTOR.py` como worker en produccion, antes hay que mover el estado compartido a Postgres/Redis o hacer que el worker actualice la web por API HTTP autenticada.
+
 ## Directo / Highlightly
 
 La web puede lanzar refrescos live desde endpoints internos ya existentes cuando hay uso. Para un directo fuerte 24/7, el siguiente paso sera montar un worker/cron con almacenamiento persistente compartido o migrar la DB a PostgreSQL.

@@ -44,6 +44,10 @@ def score_prediction(partido_id, prediction, real_sign):
     real = str(real_sign or "").strip().upper()
     if not pred or pred == "-" or not real or real == "-":
         return 0
-    if int(partido_id or 0) == 15:
+    try:
+        match_id = int(partido_id or 0)
+    except (TypeError, ValueError):
+        return 0
+    if match_id == 15:
         return 1 if pleno_score_key(pred) == pleno_score_key(real) else 0
     return 1 if real in pred else 0

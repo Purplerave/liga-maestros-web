@@ -1,0 +1,813 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@500;700;900&display=swap");
+
+:root {
+  --sg-bg: #05020c;
+  --sg-panel: #120825;
+  --sg-panel-2: #1c0f38;
+  --sg-neon-cyan: #27f7ff;
+  --sg-neon-pink: #ff3df2;
+  --sg-neon-yellow: #ffe75a;
+  --sg-neon-green: #45ff9a;
+  --sg-red: #ff365f;
+  --sg-white: #f8fbff;
+  --sg-muted: rgba(248, 251, 255, 0.66);
+  --sg-border: rgba(39, 247, 255, 0.34);
+  --sg-shadow: 0 0 22px rgba(39, 247, 255, 0.35), 0 0 44px rgba(255, 61, 242, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.snake-gol-shell {
+  color: var(--sg-white);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.snake-gol-shell {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.arcade-cabinet {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: clamp(14px, 2.2vw, 24px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 12%),
+    radial-gradient(circle at top, rgba(39, 247, 255, 0.16), transparent 38%),
+    linear-gradient(145deg, #16082f 0%, #080214 55%, #120824 100%);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.58),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.045),
+    var(--sg-shadow);
+}
+
+.arcade-cabinet::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  border-radius: 23px;
+  border: 1px solid rgba(39, 247, 255, 0.12);
+}
+
+.arcade-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.arcade-kicker {
+  grid-column: 1 / -1;
+  color: var(--sg-neon-green);
+  font: 700 10px/1.5 "Press Start 2P", monospace;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px rgba(69, 255, 154, 0.75);
+}
+
+.arcade-header h1 {
+  margin: 0;
+  font: 900 clamp(20px, 3.2vw, 38px)/1.12 "Press Start 2P", monospace;
+  color: var(--sg-white);
+  text-shadow:
+    3px 3px 0 rgba(255, 61, 242, 0.76),
+    -2px -2px 0 rgba(39, 247, 255, 0.55),
+    0 0 28px rgba(255, 255, 255, 0.35);
+}
+
+.arcade-lights {
+  display: flex;
+  gap: 8px;
+}
+
+.arcade-lights span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  color: #090214;
+  font: 900 14px "Press Start 2P", monospace;
+  background: var(--sg-neon-yellow);
+  box-shadow: 0 0 18px rgba(255, 231, 90, 0.9);
+}
+
+.arcade-lights span:nth-child(2) {
+  background: var(--sg-neon-cyan);
+  box-shadow: 0 0 18px rgba(39, 247, 255, 0.9);
+}
+
+.arcade-lights span:nth-child(3) {
+  background: var(--sg-neon-pink);
+  box-shadow: 0 0 18px rgba(255, 61, 242, 0.9);
+}
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.score-card {
+  min-height: 64px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)),
+    rgba(5, 2, 12, 0.76);
+  border: 1px solid rgba(39, 247, 255, 0.22);
+  box-shadow: inset 0 0 18px rgba(39, 247, 255, 0.06);
+}
+
+.score-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sg-muted);
+  font: 700 10px "Press Start 2P", monospace;
+}
+
+.score-card strong {
+  color: var(--sg-neon-cyan);
+  font: 900 clamp(16px, 2.1vw, 24px) "Press Start 2P", monospace;
+  text-shadow: 0 0 14px rgba(39, 247, 255, 0.68);
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.crt-frame {
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+  border-radius: 22px;
+  border: 1px solid var(--sg-border);
+  background: #05040b;
+  box-shadow:
+    inset 0 0 38px rgba(0, 0, 0, 0.82),
+    0 0 0 4px rgba(255, 255, 255, 0.035),
+    0 0 42px rgba(39, 247, 255, 0.16);
+}
+
+.crt-frame::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.055) 0,
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  opacity: 0.38;
+  mix-blend-mode: screen;
+}
+
+.crt-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, transparent 54%, rgba(0, 0, 0, 0.56) 100%),
+    linear-gradient(90deg, rgba(255, 0, 100, 0.045), rgba(0, 255, 255, 0.045));
+}
+
+#snakeGolCanvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 320px;
+  touch-action: none;
+}
+
+.screen-overlay {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  background:
+    radial-gradient(circle, rgba(9, 3, 24, 0.16), rgba(0, 0, 0, 0.62));
+}
+
+.screen-overlay.is-visible {
+  display: grid;
+}
+
+.overlay-card {
+  max-width: 560px;
+  padding: clamp(18px, 4vw, 32px);
+  border-radius: 22px;
+  border: 1px solid rgba(39, 247, 255, 0.35);
+  background: rgba(5, 2, 12, 0.76);
+  box-shadow:
+    inset 0 0 32px rgba(39, 247, 255, 0.08),
+    0 0 36px rgba(255, 61, 242, 0.26);
+  backdrop-filter: blur(5px);
+}
+
+.overlay-small {
+  margin-bottom: 14px;
+  color: var(--sg-neon-yellow);
+  font: 900 11px/1.5 "Press Start 2P", monospace;
+  animation: snakeBlink 1s steps(2, end) infinite;
+  text-shadow: 0 0 16px rgba(255, 231, 90, 0.82);
+}
+
+.overlay-title {
+  color: var(--sg-white);
+  font: 900 clamp(17px, 3.2vw, 28px)/1.35 "Press Start 2P", monospace;
+  text-shadow:
+    2px 2px 0 rgba(255, 61, 242, 0.8),
+    0 0 22px rgba(39, 247, 255, 0.52);
+}
+
+.overlay-text {
+  margin-top: 14px;
+  color: var(--sg-muted);
+  font: 800 clamp(12px, 1.6vw, 15px)/1.7 Inter, sans-serif;
+}
+
+.record-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 231, 90, 0.45);
+  background: rgba(255, 231, 90, 0.08);
+}
+
+.record-form label {
+  color: var(--sg-neon-yellow);
+  font: 900 10px/1.6 "Press Start 2P", monospace;
+}
+
+.record-form div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.record-form input,
+.record-form button {
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(39, 247, 255, 0.42);
+  font: 900 12px "Press Start 2P", monospace;
+}
+
+.record-form input {
+  min-width: 0;
+  padding: 0 12px;
+  color: var(--sg-white);
+  background: rgba(5, 2, 12, 0.9);
+  text-transform: uppercase;
+  outline: none;
+}
+
+.record-form input:focus {
+  border-color: var(--sg-neon-yellow);
+  box-shadow: 0 0 18px rgba(255, 231, 90, 0.25);
+}
+
+.record-form button {
+  cursor: pointer;
+  padding: 0 14px;
+  color: #05020c;
+  background: var(--sg-neon-yellow);
+}
+
+.ranking-panel {
+  border-radius: 20px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 61, 242, 0.12), transparent),
+    rgba(5, 2, 12, 0.72);
+  border: 1px solid rgba(255, 61, 242, 0.25);
+  box-shadow: inset 0 0 28px rgba(255, 61, 242, 0.08);
+}
+
+.ranking-title {
+  margin-bottom: 12px;
+  color: var(--sg-neon-pink);
+  font: 900 18px "Press Start 2P", monospace;
+  text-shadow: 0 0 18px rgba(255, 61, 242, 0.82);
+}
+
+.ranking-list {
+  list-style: decimal-leading-zero;
+  margin: 0;
+  padding-left: 28px;
+  color: var(--sg-muted);
+  font: 900 11px/1.55 "Press Start 2P", monospace;
+}
+
+.ranking-list li {
+  margin: 0 0 10px;
+  padding-left: 2px;
+}
+
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rank-name {
+  max-width: 95px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--sg-white);
+}
+
+.rank-score {
+  color: var(--sg-neon-green);
+  text-shadow: 0 0 10px rgba(69, 255, 154, 0.58);
+}
+
+.empty-rank {
+  color: rgba(248, 251, 255, 0.36);
+}
+
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.main-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.arcade-button,
+.pad-btn {
+  border: 0;
+  cursor: pointer;
+  user-select: none;
+  color: var(--sg-white);
+  font-family: "Press Start 2P", monospace;
+  letter-spacing: 0.03em;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent),
+    #1f0d42;
+  border: 1px solid rgba(39, 247, 255, 0.34);
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.32),
+    0 0 18px rgba(39, 247, 255, 0.15);
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+.arcade-button {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.arcade-button.primary {
+  color: #05020c;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent),
+    var(--sg-neon-green);
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.32),
+    0 0 22px rgba(69, 255, 154, 0.42);
+}
+
+.arcade-button.danger {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent),
+    #7f1230;
+  border-color: rgba(255, 54, 95, 0.6);
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.32),
+    0 0 22px rgba(255, 54, 95, 0.22);
+}
+
+.arcade-button:hover,
+.pad-btn:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.arcade-button:active,
+.pad-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.42),
+    0 0 12px rgba(39, 247, 255, 0.22);
+}
+
+.mobile-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-rows: repeat(3, 42px);
+  gap: 6px;
+  touch-action: none;
+}
+
+.pad-btn {
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.pad-btn.up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pad-btn.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.pad-btn.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.pad-btn.down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.arcade-help {
+  margin-top: 12px;
+  color: rgba(248, 251, 255, 0.52);
+  font: 800 12px/1.5 Inter, sans-serif;
+}
+
+@keyframes snakeBlink {
+  50% {
+    opacity: 0.28;
+  }
+}
+
+@media (max-width: 860px) {
+  .arcade-header {
+    grid-template-columns: 1fr;
+  }
+
+  .arcade-lights {
+    justify-content: flex-start;
+  }
+
+  .scoreboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-panel {
+    order: 2;
+  }
+
+  .ranking-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 18px;
+  }
+
+  .controls-row {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 620px) {
+  .snake-gol-shell {
+    width: min(100% - 12px, 1120px);
+    margin: 8px auto;
+  }
+
+  .arcade-cabinet {
+    border-radius: 20px;
+    padding: 12px;
+  }
+
+  .scoreboard {
+    gap: 8px;
+  }
+
+  .score-card {
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .score-card span {
+    font-size: 8px;
+  }
+
+  .score-card strong {
+    font-size: 15px;
+  }
+
+  #snakeGolCanvas,
+  .crt-frame {
+    min-height: 270px;
+  }
+
+  .controls-row {
+    flex-direction: column;
+  }
+
+  .main-buttons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .arcade-button {
+    padding: 0 10px;
+    font-size: 9px;
+  }
+
+  .mobile-pad {
+    grid-template-columns: repeat(3, 58px);
+    grid-template-rows: repeat(3, 48px);
+  }
+
+  .ranking-list {
+    grid-template-columns: 1fr;
+  }
+
+  .arcade-help {
+    font-size: 11px;
+  }
+}
+
+/* Liga de Maestros integration: compact enough to fit at 100% browser zoom. */
+body.newspaper-ui .snake-gol-shell {
+  max-width: min(1120px, calc(100vw - 40px));
+}
+
+body.newspaper-ui .arcade-cabinet {
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 20px rgba(39, 247, 255, 0.22);
+}
+
+body.newspaper-ui .arcade-cabinet::before {
+  inset: 6px;
+  border-radius: 14px;
+}
+
+body.newspaper-ui .arcade-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+body.newspaper-ui .arcade-kicker {
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+body.newspaper-ui .arcade-header h1 {
+  font-size: clamp(18px, 2.1vw, 30px);
+  line-height: 1.05;
+}
+
+body.newspaper-ui .arcade-lights {
+  gap: 6px;
+}
+
+body.newspaper-ui .arcade-lights span {
+  width: 30px;
+  height: 30px;
+  font-size: 10px;
+}
+
+body.newspaper-ui .scoreboard {
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+body.newspaper-ui .score-card {
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: 11px;
+}
+
+body.newspaper-ui .score-card span {
+  margin-bottom: 5px;
+  font-size: 7px;
+}
+
+body.newspaper-ui .score-card strong {
+  font-size: clamp(13px, 1.35vw, 18px);
+}
+
+body.newspaper-ui .game-layout {
+  grid-template-columns: minmax(0, 1fr) 188px;
+  gap: 10px;
+}
+
+body.newspaper-ui .crt-frame {
+  min-height: 250px;
+  border-radius: 15px;
+}
+
+body.newspaper-ui #snakeGolCanvas {
+  min-height: 250px;
+  aspect-ratio: 16 / 8.8;
+}
+
+body.newspaper-ui .ranking-panel {
+  border-radius: 14px;
+  padding: 10px;
+}
+
+body.newspaper-ui .ranking-title {
+  margin-bottom: 9px;
+  font-size: 14px;
+}
+
+body.newspaper-ui .ranking-list {
+  padding-left: 24px;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+body.newspaper-ui .ranking-list li {
+  margin-bottom: 7px;
+}
+
+body.newspaper-ui .rank-name {
+  max-width: 78px;
+}
+
+body.newspaper-ui .controls-row {
+  margin-top: 9px;
+  gap: 10px;
+}
+
+body.newspaper-ui .main-buttons {
+  gap: 8px;
+}
+
+body.newspaper-ui .arcade-button {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 8px;
+}
+
+body.newspaper-ui .mobile-pad {
+  grid-template-columns: repeat(3, 34px);
+  grid-template-rows: repeat(3, 30px);
+  gap: 4px;
+}
+
+body.newspaper-ui .pad-btn {
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+body.newspaper-ui .arcade-help {
+  margin-top: 7px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+body.newspaper-ui .overlay-card {
+  max-width: 430px;
+  padding: 18px;
+  border-radius: 14px;
+}
+
+body.newspaper-ui .overlay-small {
+  margin-bottom: 9px;
+  font-size: 8px;
+}
+
+body.newspaper-ui .overlay-title {
+  font-size: clamp(15px, 2vw, 22px);
+}
+
+body.newspaper-ui .overlay-text {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+body.newspaper-ui .record-form {
+  margin-top: 12px;
+  padding: 10px;
+}
+
+body.newspaper-ui .record-form label {
+  font-size: 8px;
+}
+
+body.newspaper-ui .record-form input,
+body.newspaper-ui .record-form button {
+  min-height: 34px;
+  font-size: 9px;
+}
+
+@media (max-width: 1100px) {
+  body.newspaper-ui .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.newspaper-ui .ranking-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 18px;
+  }
+}
+
+/* Embedded Liga de Maestros page: keep the arcade feel but waste less vertical space. */
+body.newspaper-snake-active .arcade-cabinet {
+  padding: clamp(8px, 1vw, 12px);
+  border-radius: 18px;
+}
+
+body.newspaper-snake-active .arcade-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+body.newspaper-snake-active .arcade-kicker {
+  font-size: 7px;
+  line-height: 1.2;
+}
+
+body.newspaper-snake-active .arcade-header h1 {
+  font-size: clamp(16px, 2vw, 24px);
+  line-height: 1;
+}
+
+body.newspaper-snake-active .arcade-lights span {
+  width: 26px;
+  height: 26px;
+  font-size: 9px;
+}
+
+body.newspaper-snake-active .scoreboard {
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+body.newspaper-snake-active .score-card {
+  min-height: 40px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+body.newspaper-snake-active .score-card span {
+  margin-bottom: 4px;
+  font-size: 7px;
+}
+
+body.newspaper-snake-active .score-card strong {
+  font-size: clamp(13px, 1.35vw, 18px);
+}
+
+body.newspaper-snake-active .game-layout {
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 210px;
+}
+
+body.newspaper-snake-active .crt-frame,
+body.newspaper-snake-active #snakeGolCanvas {
+  min-height: 390px;
+}
+
+body.newspaper-snake-active .controls-row {
+  margin-top: 8px;
+}
+
+body.newspaper-snake-active .arcade-help {
+  margin-top: 6px;
+  font-size: 9px;
+}
