@@ -1625,6 +1625,7 @@ function renderArena() {
     if (state.currentFilter === "ALL") {
         container.className = "arena-content newspaper-cover-mode";
         container.innerHTML = renderNewspaperCoverPageV3();
+        requestAnimationFrame(hydrateCoverTypewriter);
         return;
     }
 
@@ -3920,11 +3921,11 @@ function coverSpotlightHtml() {
     const item = coverDiscrepancyMatch();
     if (!item?.match) {
         return `
-            <div class="cover-spotlight-card">
-                <div class="cover-spotlight-kicker">La jornada en juego</div>
+            <div class="type-hot-card">
+                <div class="type-kicker">La jornada en juego</div>
                 <h3>Liga de Maestros</h3>
-                <p>La Peña y los Maestros IA juegan el mismo boleto, con directo, rankings y juegos por secciones.</p>
-                <button type="button" data-page-action="TICKET">Jugar quiniela</button>
+                <p>La Pe&ntilde;a y los Maestros IA juegan el mismo boleto. Quiniela, directo y ranking en una sola jornada.</p>
+                <button type="button" data-page-action="TICKET">Ver boleto</button>
             </div>`;
     }
     const { match, idx, penaSign, programSign, masterSign } = item;
@@ -3933,155 +3934,88 @@ function coverSpotlightHtml() {
     const score = scoreOnly(match.marcador || match.score || match.scores?.score || "");
     const status = isLiveStatus(match.status) || isLiveMatch(match) ? "En directo" : (score ? "Marcador" : "Partido caliente");
     return `
-        <div class="cover-spotlight-card">
-            <div class="cover-spotlight-kicker">#${idx + 1} · ${escapeHtml(status)}</div>
-            <div class="cover-spotlight-fixture">
-                <div class="cover-spotlight-team">
+        <div class="type-hot-card">
+            <div class="type-kicker">#${idx + 1} &middot; ${escapeHtml(status)}</div>
+            <div class="type-matchup">
+                <div class="type-team">
                     ${logoBadge(home, teamLogo(match, "home"))}
                     <strong>${escapeHtml(getShortName(home))}</strong>
                 </div>
-                <div class="cover-spotlight-score">
+                <div class="type-vs-block">
                     <b>${escapeHtml(score || "VS")}</b>
                     <span>mayor discrepancia</span>
                 </div>
-                <div class="cover-spotlight-team">
+                <div class="type-team">
                     ${logoBadge(away, teamLogo(match, "away"))}
                     <strong>${escapeHtml(getShortName(away))}</strong>
                 </div>
             </div>
-            <div class="cover-spotlight-picks">
+            <div class="type-picks">
                 <span>Programa <b>${escapeHtml(programSign || "-")}</b></span>
                 <span>Maestros <b>${escapeHtml(masterSign || "-")}</b></span>
-                <span>La Peña <b>${escapeHtml(penaSign || "-")}</b></span>
+                <span>La Pe&ntilde;a <b>${escapeHtml(penaSign || "-")}</b></span>
             </div>
-            <div class="cover-spotlight-actions">
+            <div class="type-actions">
                 <button type="button" data-page-action="LIVE">Ver directo</button>
-                <button type="button" data-page-action="TICKET">Jugar quiniela</button>
+                <button type="button" data-page-action="TICKET">Ver boleto</button>
             </div>
-        </div>`;
-}
-
-function coverPodiumHtml() {
-    const rows = coverPodiumRows();
-    const slots = [rows[1], rows[0], rows[2]];
-    const labels = [2, 1, 3];
-    const unit = state.contest?.jornada?.rows?.length ? "aciertos" : "pts";
-    if (!rows.length) return `<div class="cover-empty">Sin ranking todavia.</div>`;
-    return `
-        <div class="cover-podium-stage">
-            ${slots.map((row, idx) => `
-                <div class="cover-podium-step rank-${labels[idx]} ${row ? "" : "is-empty"}">
-                    <span class="cover-medal">${labels[idx]}.º</span>
-                    <strong>${escapeHtml(row?.name || row?.winner || "-")}</strong>
-                    <b>${row ? `${Number(row.points || 0)} ${unit}` : "-"}</b>
-                    <small>${labels[idx] === 1 ? "líder" : "clasificado"}</small>
-                </div>
-            `).join("")}
-        </div>`;
-}
-
-function coverDiscrepancyHtml() {
-    const item = coverDiscrepancyMatch();
-    if (!item) return `<div class="cover-empty">Sin choque destacado.</div>`;
-    const { match, idx, pena, penaSign, programSign, masterSign } = item;
-    return `
-        <div class="cover-dispute-fixture">
-            <span>#${idx + 1}</span>
-            <strong>${escapeHtml(getShortName(match.local))}</strong>
-            <em>vs</em>
-            <strong>${escapeHtml(getShortName(match.visitante))}</strong>
-        </div>
-        <div class="cover-dispute-grid">
-            <div><span>Programa</span><b>${escapeHtml(programSign || "-")}</b></div>
-            <div><span>Maestros</span><b>${escapeHtml(masterSign || "-")}</b></div>
-            <div><span>La Peña</span><b>${escapeHtml(penaSign || "-")}</b><small>${Number(pena.total || 0)} votos</small></div>
-        </div>
-        <div class="cover-dispute-bars">
-            <span style="--w:${Number(pena.p1 || 0)}%"><b>1</b>${Number(pena.p1 || 0)}%</span>
-            <span style="--w:${Number(pena.px || 0)}%"><b>X</b>${Number(pena.px || 0)}%</span>
-            <span style="--w:${Number(pena.p2 || 0)}%"><b>2</b>${Number(pena.p2 || 0)}%</span>
         </div>`;
 }
 
 function coverProgramTicketHtml() {
     const preds = state.data.predicciones_actuales || {};
+    const matches = state.data.partidos || [];
     const signs = Array.from({ length: 15 }, (_, idx) => getSign(preds, idx, "programa", "v260_omnisciente") || "-");
     const doubles = signs
         .map((sign, idx) => String(sign).length > 1 && idx < 14 ? idx + 1 : null)
         .filter(Boolean);
+    const visible = [0, 1, 2, 3, 14];
+    const labelFor = (idx) => {
+        const match = matches[idx] || {};
+        const home = getShortName(match.local || match.home_name || match.home?.name || (idx === 14 ? "Pleno al 15" : "Local"));
+        const away = getShortName(match.visitante || match.away_name || match.away?.name || (idx === 14 ? "" : "Visitante"));
+        return idx === 14 ? `Pleno al 15: ${home}${away ? ` - ${away}` : ""}` : `${home} - ${away}`;
+    };
     return `
-        <div class="cover-ticket-card">
-            <div class="cover-ticket-head">
-                <span>Pronóstico del programa</span>
+        <div class="type-ticket-card">
+            <div class="type-ticket-head">
+                <span>Boleto &middot; Jornada ${escapeHtml(String(state.data.jornada || state.jornada || "-"))}</span>
+                <span>1&nbsp;&nbsp;X&nbsp;&nbsp;2</span>
+            </div>
+            <div class="type-ticket-rows">
+                ${visible.map((idx) => `
+                    <div class="type-ticket-row ${idx === 14 ? "is-pleno" : ""}">
+                        <span class="type-ticket-num">${String(idx + 1).padStart(2, "0")}</span>
+                        <span class="type-ticket-match">${escapeHtml(labelFor(idx))}</span>
+                        <span class="type-ticket-line"></span>
+                        <b>${escapeHtml(signs[idx] || "-")}</b>
+                    </div>
+                `).join("")}
+            </div>
+            <div class="type-ticket-foot">
+                <span>+ 10 partidos en la quiniela completa</span>
                 <b>${doubles.length ? `${doubles.length} dobles: ${doubles.join(", ")}` : "sin dobles"}</b>
             </div>
-            <div class="cover-ticket-strip is-summary">
-                ${signs.slice(0, 8).map((sign, idx) => `
-                    <span class="${String(sign).length > 1 ? "is-double" : ""}">
-                        <small>${idx + 1}</small><b>${escapeHtml(sign)}</b>
-                    </span>
-                `).join("")}
-                <span class="cover-ticket-more"><small>...</small><b>+6</b></span>
-                <span class="is-pleno"><small>15</small><b>${escapeHtml(signs[14] || "-")}</b></span>
-            </div>
         </div>`;
 }
 
-function coverQuinielaStatusHtml(matches, finished, saved, liveCount) {
-    const nextIdx = matches.findIndex(match => !isFinishedStatus(match.status));
-    const nextMatch = nextIdx >= 0 ? matches[nextIdx] : null;
-    const nextFixture = nextMatch
-        ? `#${nextIdx + 1} ${getShortName(nextMatch.local)} vs ${getShortName(nextMatch.visitante)}`
-        : "Jornada completada";
-    const nextTime = nextMatch
-        ? formatKickoffShort(nextMatch.fecha_raw || nextMatch.fecha, nextMatch.scheduled || nextMatch.hora || nextMatch.time)
-        : "";
-    const rows = [
-        ["Quiniela", `${finished}/15 terminados`],
-        ["En juego", liveCount ? `${liveCount} de la quiniela` : "sin partidos de quiniela"],
-        ["Tu boleto", saved ? "guardado" : "pendiente"],
-        ["Próximo", nextTime ? `${nextFixture} · ${nextTime}` : nextFixture],
-    ];
-    return `
-        <div class="cover-status-board">
-            ${rows.map(([label, value]) => `
-                <div class="cover-status-row">
-                    <span>${escapeHtml(label)}</span>
-                    <b>${escapeHtml(value)}</b>
-                </div>
-            `).join("")}
-        </div>`;
-}
-
-function coverUserSummaryHtml(finished, saved) {
-    if (!state.user) {
-        return `
-            <div class="cover-user-card is-guest">
-                <span>Tu jornada</span>
-                <strong>Entra para guardar boleto</strong>
-                <small>Perfil, ranking y galardones se activan con Google.</small>
-                <a href="/login/google">Entrar</a>
-            </div>`;
+function hydrateCoverTypewriter() {
+    const title = document.getElementById("cover-type-title");
+    if (!title) return;
+    const text = title.dataset.text || title.textContent || "";
+    if (!text || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+        title.textContent = text;
+        return;
     }
-    const stats = state.data?.ranking_maestros?.[state.user.id] || { total: 0, jornada: 0 };
-    const profile = state.contest?.profile || {};
-    const points = Number(stats.total ?? profile.hits ?? 0);
-    const rank = profile.position ?? getUserRankingPosition();
-    const firstName = String(state.user.name || "Maestro").split(" ")[0];
-    const jornadaHits = Number(stats.jornada ?? 0);
-    return `
-        <div class="cover-user-card">
-            <span>Tu jornada</span>
-            <strong>${escapeHtml(firstName)}</strong>
-            <div class="cover-user-metrics">
-                <b><small>Puntos</small>${points}</b>
-                <b><small>Ranking</small>${rank ? `#${rank}` : "-"}</b>
-                <b><small>Aciertos</small>${jornadaHits}/15</b>
-                <b><small>Boleto</small>${saved ? "OK" : "Pendiente"}</b>
-            </div>
-            <p>${finished ? `${finished} resultados cerrados` : "Jornada sin resolver"}.</p>
-            <button type="button" onclick="openProfileView()">Abrir perfil</button>
-        </div>`;
+    title.textContent = "";
+    let i = 0;
+    const tick = () => {
+        if (!document.body.contains(title)) return;
+        title.textContent = text.slice(0, i);
+        i += 1;
+        if (i <= text.length) window.setTimeout(tick, 32 + Math.random() * 42);
+    };
+    tick();
 }
 
 function renderNewspaperCoverPageV3() {
@@ -4090,43 +4024,36 @@ function renderNewspaperCoverPageV3() {
     const finished = matches.filter(match => isFinishedStatus(match.status)).length;
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
-    const headline = liveCount
-        ? `${liveCount} partido${liveCount === 1 ? "" : "s"} de quiniela en directo`
-        : finished
-            ? `${finished} de 15 partidos resueltos`
-        : `Jornada ${escapeHtml(String(jornada || "-"))} bajo control`;
+    const headline = saved ? "Tu boleto contra las maquinas." : "Tu, contra la maquina.";
     const ticketState = saved ? "Boleto guardado" : "Boleto pendiente";
     const liveLabel = liveCount ? `${liveCount} de quiniela` : `${finished}/15 resueltos`;
     return `
-        <section class="frontpage frontpage-v2 cover-control-room">
-            <article class="frontpage-lead cover-hero-grid">
-                <div class="frontpage-photo frontpage-cover-visual cover-brand-card">
-                    ${coverSpotlightHtml()}
-                </div>
-                <div class="frontpage-headline cover-command-card">
-                    <span>Portada · Jornada ${escapeHtml(String(jornada || "-"))}</span>
-                    <h2>${escapeHtml(headline)}</h2>
-                    <div class="cover-status-rail" aria-label="Estado de la jornada">
-                        <b>${escapeHtml(ticketState)}</b>
-                        <b>${escapeHtml(liveLabel)}</b>
-                        <b>${escapeHtml(coverCloseLabel())}</b>
+        <section class="typewriter-cover">
+            <article class="typewriter-sheet">
+                <header class="typewriter-sheet-head">
+                    <div>
+                        <span>Liga de Maestros</span>
+                        <strong>El diario de la jornada</strong>
                     </div>
-                    ${coverProgramTicketHtml()}
+                    <b>J.${escapeHtml(String(jornada || "-"))}<br>${state.data.is_locked ? "Cerrada" : "En juego"}</b>
+                </header>
+                <div class="typewriter-main">
+                    <section class="typewriter-lead">
+                        <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
+                        <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
+                        <p>La Pe&ntilde;a rellena el mismo boleto que los Maestros IA. Se comparan pronosticos, ranking y cierre de jornada sin mezclarlo con el resto de secciones.</p>
+                        <div class="typewriter-rail" aria-label="Estado de la jornada">
+                            <b>${escapeHtml(ticketState)}</b>
+                            <b>${escapeHtml(liveLabel)}</b>
+                            <b>${escapeHtml(coverCloseLabel())}</b>
+                        </div>
+                        ${coverProgramTicketHtml()}
+                    </section>
+                    <section class="typewriter-hot">
+                        ${coverSpotlightHtml()}
+                    </section>
                 </div>
             </article>
-            <div class="cover-dashboard">
-                <article class="cover-panel cover-podium">
-                    <div class="cover-panel-title"><span>Podio</span><b>${state.contest?.jornada?.rows?.length ? "jornada" : "general"}</b></div>
-                    ${coverPodiumHtml()}
-                </article>
-                <article class="cover-panel cover-quiniela-status">
-                    <div class="cover-panel-title"><span>Estado quiniela</span><b>jornada oficial</b></div>
-                    ${coverQuinielaStatusHtml(matches, finished, saved, liveCount)}
-                </article>
-                <article class="cover-panel cover-user-summary">
-                    ${coverUserSummaryHtml(finished, saved)}
-                </article>
-            </div>
         </section>`;
 }
 
