@@ -41,6 +41,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     grid-column: 1 / -1 !important;
+    max-width: none !important;
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
@@ -62,7 +63,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     height: 100%;
     min-height: 0;
     place-items: stretch center;
-    padding: clamp(8px, 1vw, 14px);
+    padding: clamp(8px, 0.75vw, 14px);
     overflow: auto;
     color: var(--ink);
 }
@@ -70,13 +71,13 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .typewriter-sheet {
     position: relative;
     display: grid;
-    width: min(1180px, 100%);
+    width: min(1840px, 100%);
     height: 100%;
     min-height: 0;
     max-height: 100%;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    gap: clamp(9px, 1vw, 14px);
-    padding: clamp(14px, 1.5vw, 22px);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+    padding: clamp(16px, 1.35vw, 24px);
     border: 1px solid rgba(40, 34, 30, 0.22);
     background:
         radial-gradient(circle at 12% 22%, rgba(40, 34, 30, 0.06), transparent 38%),
@@ -87,7 +88,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
         0 22px 52px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.34);
     font-family: "Special Elite", "Courier New", monospace;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .typewriter-sheet::before {
@@ -106,16 +107,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     border: 1px dashed rgba(40, 34, 30, 0.16);
 }
 
-.typewriter-sheet-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding-bottom: 9px;
-    border-bottom: 2px dashed var(--ink-faint);
-}
-
-.typewriter-sheet-head span,
 .typewriter-kicker,
 .type-kicker {
     color: var(--red);
@@ -125,17 +116,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     text-transform: uppercase;
 }
 
-.typewriter-sheet-head strong {
-    display: block;
-    margin-top: 4px;
-    color: var(--ink);
-    font-size: clamp(1.2rem, 2vw, 1.9rem);
-    font-weight: 400;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.typewriter-sheet-head > b {
+.typewriter-stamp {
+    position: absolute;
+    z-index: 2;
+    top: clamp(18px, 1.5vw, 28px);
+    right: clamp(20px, 1.7vw, 34px);
     display: grid;
     min-width: 78px;
     min-height: 58px;
@@ -153,7 +138,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .typewriter-main {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+    grid-template-columns: minmax(0, 1.02fr) minmax(390px, 0.98fr);
     gap: clamp(14px, 1.8vw, 24px);
     min-height: 0;
 }
@@ -510,10 +495,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
     .typewriter-sheet {
         padding: 14px;
-    }
-
-    .typewriter-sheet-head {
-        align-items: flex-start;
     }
 
     .typewriter-lead h2 {

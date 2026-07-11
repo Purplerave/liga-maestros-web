@@ -1,0 +1,76 @@
+/* Lenguaje comun mecanografiado para la maqueta del diario. */
+
+body.newspaper-ui.quiniela-focus {
+    --type-paper: #ede6d6;
+    --type-ink: #28221e;
+    --type-red: #a83226;
+    --type-gold: #d9a928;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title,
+body.newspaper-ui.quiniela-focus .topbar-kicker,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    font-family: "Special Elite", "Courier New", monospace !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title {
+    color: var(--type-gold) !important;
+    font-size: clamp(1.08rem, 1.45vw, 1.55rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1.05 !important;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.72) !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-kicker {
+    border-left: 4px solid var(--type-red);
+    background: rgba(168, 50, 38, 0.2) !important;
+    color: var(--type-gold) !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover {
+    transform: translateY(-1px);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover {
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        var(--type-paper) !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active span,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover span {
+    color: var(--type-ink) !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
+    color: var(--type-gold) !important;
+    font-size: 0.72rem !important;
+    font-weight: 400 !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    color: rgba(246, 239, 225, 0.9) !important;
+    font-size: 0.76rem !important;
+    font-weight: 400 !important;
+}
+
+body.newspaper-ui.quiniela-focus .frontpage-card,
+body.newspaper-ui.quiniela-focus .news-card,
+body.newspaper-ui.quiniela-focus .contest-card,
+body.newspaper-ui.quiniela-focus .standings-panel {
+    background-image:
+        repeating-linear-gradient(0deg, rgba(243, 231, 207, 0.025), rgba(243, 231, 207, 0.025) 1px, transparent 1px, transparent 7px) !important;
+}
+
+body.newspaper-ui.quiniela-focus button {
+    letter-spacing: 0.02em;
+}

@@ -4030,13 +4030,7 @@ function renderNewspaperCoverPageV3() {
     return `
         <section class="typewriter-cover">
             <article class="typewriter-sheet">
-                <header class="typewriter-sheet-head">
-                    <div>
-                        <span>Liga de Maestros</span>
-                        <strong>El diario de la jornada</strong>
-                    </div>
-                    <b>J.${escapeHtml(String(jornada || "-"))}<br>${state.data.is_locked ? "Cerrada" : "En juego"}</b>
-                </header>
+                <b class="typewriter-stamp">J.${escapeHtml(String(jornada || "-"))}<br>${state.data.is_locked ? "Cerrada" : "En juego"}</b>
                 <div class="typewriter-main">
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
