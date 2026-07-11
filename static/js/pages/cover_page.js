@@ -119,18 +119,25 @@ function coverSpotlightHtml() {
 function coverMissionHtml() {
     return `
         <section class="type-mission">
-            <div class="type-kicker">Tres formas de leer el f&uacute;tbol. Un solo ganador.</div>
+            <div class="type-kicker">Tres rivales. Una clasificaci&oacute;n.</div>
             <p>
-                Aqu\u00ed no vienes solamente a rellenar una quiniela. Vienes a demostrar
-                que puedes acertar m\u00e1s que ChatGPT, Claude, Gemini, Grok, Copilot...
-                y que nuestro propio modelo.
+                No es una quiniela suelta: es una liga de aciertos. Cada jornada suma,
+                cada fallo pesa y el ranking pone a cada uno en su sitio.
             </p>
-            <ul>
-                <li>La Pe\u00f1a juega con la intuici\u00f3n colectiva.</li>
-                <li>El Programa analiza datos, probabilidades y valor.</li>
-                <li>Los Maestros IA hacen sus propios pron\u00f3sticos.</li>
-                <li>Cada jornada suma. El ranking decide qui\u00e9n acierta m\u00e1s cuando pasa el tiempo.</li>
-            </ul>
+            <div class="type-contender-grid">
+                <article>
+                    <span>T&uacute; / La Pe&ntilde;a</span>
+                    <b>Tu pron&oacute;stico entra en la pelea.</b>
+                </article>
+                <article>
+                    <span>Maestros IA</span>
+                    <b>Cinco IAs. Cinco pron&oacute;sticos. Cero excusas.</b>
+                </article>
+                <article>
+                    <span>El Programa</span>
+                    <b>Nuestro modelo juega con datos y probabilidades.</b>
+                </article>
+            </div>
         </section>`;
 }
 
@@ -156,7 +163,7 @@ function coverHeroActionsHtml({ saved, closed, liveCount }) {
     return `
         <div class="type-hero-actions">
             <button type="button" class="type-primary-action ${closed ? "is-closed" : ""}" data-page-action="TICKET">${escapeHtml(primary)}</button>
-            <button type="button" class="type-secondary-action" onclick="document.querySelector('.type-hot-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' })">Ver el duelo</button>
+            <button type="button" class="type-secondary-action" onclick="document.querySelector('.type-hot-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' })">Ver discrepancias</button>
         </div>`;
 }
 
@@ -201,7 +208,7 @@ function renderNewspaperCoverPageV3() {
     const finished = matches.filter(match => isFinishedStatus(match.status)).length;
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
-    const headline = "\u00bfQui\u00e9n sabe m\u00e1s de f\u00fatbol?";
+    const headline = "Humano vs. M\u00e1quina";
     const closed = coverIsClosed();
     return `
         <section class="typewriter-cover">
@@ -211,11 +218,11 @@ function renderNewspaperCoverPageV3() {
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
                         <div class="type-cover-intro">
-                            <strong>La batalla de la jornada</strong>
-                            <span>La Pe&ntilde;a, El Programa y cinco grandes IAs compiten jornada tras jornada por el ranking de aciertos.</span>
+                            <strong>Compite por ser el mejor</strong>
+                            <span>Reta a La Pe&ntilde;a, El Programa y los Maestros IA. Jornada tras jornada, el ranking pone a cada uno en su sitio.</span>
                         </div>
                         <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
-                        <p>Haz tu pron&oacute;stico, descubre d&oacute;nde no se ponen de acuerdo y sigue qui&eacute;n domina hoy... y qui&eacute;n manda a la larga.</p>
+                        <p>Entra en la jornada, reta a las IAs y pelea por ser el mejor en la clasificaci&oacute;n.</p>
                         ${coverHeroActionsHtml({ saved, closed, liveCount })}
                         ${coverStatusLineHtml({ liveCount, finished, saved, jornada, closed })}
                         ${coverMissionHtml()}
