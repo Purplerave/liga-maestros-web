@@ -20,6 +20,7 @@ def _get_assets_version():
         os.path.join(config.BASE_DIR, "static", "css", "typewriter_system.css"),
         os.path.join(config.BASE_DIR, "static", "css", "newspaper_cover.css"),
         os.path.join(config.BASE_DIR, "static", "js", "quantum_final.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "pages", "cover_page.js"),
         os.path.join(config.BASE_DIR, "static", "img", "ligademaestroslogo_trans.png"),
     ]
     mtimes = []
