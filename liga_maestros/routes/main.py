@@ -17,6 +17,7 @@ def _get_assets_version():
     paths = [
         os.path.join(config.BASE_DIR, "static", "css", "quantum_pro.css"),
         os.path.join(config.BASE_DIR, "static", "css", "newspaper_theme.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "newspaper_cover.css"),
         os.path.join(config.BASE_DIR, "static", "js", "quantum_final.js"),
         os.path.join(config.BASE_DIR, "static", "img", "ligademaestroslogo_trans.png"),
     ]
