@@ -196,6 +196,60 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     line-height: 1.32;
 }
 
+.type-hero-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    gap: 9px;
+}
+
+.type-hero-actions button {
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid rgba(40, 34, 30, 0.32);
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.82rem, 0.95vw, 1rem);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.type-hero-actions .type-primary-action {
+    border-color: rgba(168, 50, 38, 0.48);
+    background: rgba(168, 50, 38, 0.13);
+    color: var(--red);
+    font-size: clamp(0.95rem, 1.15vw, 1.16rem);
+}
+
+.type-hero-actions button:hover {
+    background: rgba(168, 50, 38, 0.18);
+}
+
+.type-status-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid var(--ink-faint);
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        rgba(255, 255, 255, 0.18);
+}
+
+.type-status-line span {
+    min-height: 34px;
+    padding: 8px 11px;
+    border-right: 1px dotted var(--ink-faint);
+    color: var(--ink);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+}
+
+.type-status-line span:last-child {
+    border-right: 0;
+}
+
 .typewriter-rail {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -603,6 +657,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
     .typewriter-rail,
     .type-picks,
+    .type-hero-actions,
     .type-summary-grid,
     .type-now {
         grid-template-columns: 1fr;
