@@ -1054,7 +1054,7 @@ function hydrateHero() {
     }
     if (document.body.classList.contains("newspaper-ui")) {
         if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} - La Pe\u00f1a vs Maestros IA`;
-        if (topbarTitle && currentMainView() === "ALL") topbarTitle.textContent = "La Pe\u00f1a contra los Maestros IA";
+        if (topbarTitle && currentMainView() === "ALL") topbarTitle.textContent = "Portada de la jornada";
     }
     const save = qs("save-quiniela-btn");
     if (save) {
