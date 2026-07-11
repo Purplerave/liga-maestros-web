@@ -66,7 +66,7 @@ function coverSpotlightHtml() {
             <div class="type-hot-card">
                 <div class="type-kicker">La jornada en juego</div>
                 <h3>Liga de Maestros</h3>
-                <p>La Pe&ntilde;a, Mi Programa y los Maestros IA pronostican la jornada. Directo, ranking y discrepancias en una sola portada.</p>
+                <p>La Pe&ntilde;a, El Programa y los Maestros IA pronostican la jornada. Directo, ranking y discrepancias en una sola portada.</p>
                 <button type="button" data-page-action="TICKET">Ver quiniela</button>
             </div>`;
     }
@@ -93,7 +93,7 @@ function coverSpotlightHtml() {
                 </div>
             </div>
             <div class="type-picks">
-                <span>Mi Programa <b>${escapeHtml(programSign || "-")}</b></span>
+                <span>El Programa <b>${escapeHtml(programSign || "-")}</b></span>
                 <span>Maestros <b>${escapeHtml(masterSign || "-")}</b></span>
                 <span>La Pe&ntilde;a <b>${escapeHtml(penaSign || "-")}</b></span>
             </div>
@@ -109,7 +109,7 @@ function coverSpotlightHtml() {
                         <button type="button" data-page-action="TICKET">
                             <span>#${row.idx + 1}</span>
                             <b>${escapeHtml(getShortName(rowHome))} - ${escapeHtml(getShortName(rowAway))}</b>
-                            <small>Mi Programa ${escapeHtml(row.programSign || "-")} &middot; Maestros ${escapeHtml(row.masterSign || "-")} &middot; Pe&ntilde;a ${escapeHtml(row.penaSign || "-")}</small>
+                            <small>El Programa ${escapeHtml(row.programSign || "-")} &middot; Maestros ${escapeHtml(row.masterSign || "-")} &middot; Pe&ntilde;a ${escapeHtml(row.penaSign || "-")}</small>
                         </button>`;
                 }).join("")}
             </div>
@@ -119,16 +119,17 @@ function coverSpotlightHtml() {
 function coverMissionHtml() {
     return `
         <section class="type-mission">
-            <div class="type-kicker">El reto de la jornada</div>
+            <div class="type-kicker">Tres formas de leer el f&uacute;tbol. Un solo ganador.</div>
             <p>
-                Una quiniela, muchas cabezas y un pique claro: <b>La Pe\u00f1a</b>
-                contra <b>Mi Programa</b> y los <b>Maestros IA</b>. Cada jornada se enfrentan
-                intuici\u00f3n, datos y modelos para ver qui\u00e9n lee mejor el f\u00fatbol.
+                Aqu\u00ed no vienes solamente a rellenar una quiniela. Vienes a demostrar
+                que puedes acertar m\u00e1s que ChatGPT, Claude, Gemini, Grok, Copilot...
+                y que nuestro propio modelo.
             </p>
             <ul>
-                <li>Haz tu pron\u00f3stico y compite contra ChatGPT, Claude, Gemini, Grok y Copilot.</li>
-                <li>Busca los partidos donde humanos y m\u00e1quinas no se ponen de acuerdo.</li>
-                <li>Sigue la jornada en directo y mira qui\u00e9n sube en el ranking.</li>
+                <li>La Pe\u00f1a juega con la intuici\u00f3n colectiva.</li>
+                <li>El Programa analiza datos, probabilidades y valor.</li>
+                <li>Los Maestros IA hacen sus propios pron\u00f3sticos.</li>
+                <li>Cada jornada suma. El ranking decide qui\u00e9n acierta m\u00e1s cuando pasa el tiempo.</li>
             </ul>
         </section>`;
 }
@@ -150,14 +151,12 @@ function coverStatusLineHtml({ liveCount, finished, saved, jornada, closed }) {
 
 function coverHeroActionsHtml({ saved, closed, liveCount }) {
     const primary = closed
-        ? saved ? "Ver mi quiniela" : "Ver quiniela de la jornada"
+        ? saved ? "Ver mi quiniela" : "Ver quiniela"
         : saved ? "Ver o modificar mi quiniela" : "Hacer mi quiniela";
-    const secondary = closed && liveCount ? "Seguir jornada" : "Ver predicciones IA";
-    const secondaryAction = closed && liveCount ? "LIVE" : "TICKET";
     return `
         <div class="type-hero-actions">
             <button type="button" class="type-primary-action ${closed ? "is-closed" : ""}" data-page-action="TICKET">${escapeHtml(primary)}</button>
-            <button type="button" class="type-secondary-action" data-page-action="${escapeHtml(secondaryAction)}">${escapeHtml(secondary)}</button>
+            <button type="button" class="type-secondary-action" onclick="document.querySelector('.type-hot-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' })">Ver el duelo</button>
         </div>`;
 }
 
@@ -202,7 +201,7 @@ function renderNewspaperCoverPageV3() {
     const finished = matches.filter(match => isFinishedStatus(match.status)).length;
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
-    const headline = "\u00bfQui\u00e9n acertar\u00e1 m\u00e1s esta jornada?";
+    const headline = "\u00bfQui\u00e9n sabe m\u00e1s de f\u00fatbol?";
     const closed = coverIsClosed();
     return `
         <section class="typewriter-cover">
@@ -212,11 +211,11 @@ function renderNewspaperCoverPageV3() {
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
                         <div class="type-cover-intro">
-                            <strong>Liga de Maestros</strong>
-                            <span>La Pe&ntilde;a y Mi Programa contra ChatGPT, Claude, Gemini, Grok y Copilot en la quiniela de cada jornada.</span>
+                            <strong>La batalla de la jornada</strong>
+                            <span>La Pe&ntilde;a, El Programa y cinco grandes IAs compiten jornada tras jornada por el ranking de aciertos.</span>
                         </div>
                         <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
-                        <p>Distintos pron&oacute;sticos para los mismos partidos. Entra, compara, juega tu quiniela y mira qui&eacute;n suma m&aacute;s aciertos.</p>
+                        <p>Haz tu pron&oacute;stico, descubre d&oacute;nde no se ponen de acuerdo y sigue qui&eacute;n domina hoy... y qui&eacute;n manda a la larga.</p>
                         ${coverHeroActionsHtml({ saved, closed, liveCount })}
                         ${coverStatusLineHtml({ liveCount, finished, saved, jornada, closed })}
                         ${coverMissionHtml()}
