@@ -120,6 +120,25 @@ function coverSectionsHtml() {
         </section>`;
 }
 
+function coverStatusLineHtml({ liveCount, finished, saved, jornada }) {
+    const parts = [
+        `Jornada ${jornada || "-"}`,
+        saved ? "boleto guardado" : "boleto pendiente",
+        liveCount ? `${liveCount} en juego` : `${finished}/15 resueltos`,
+        `cierre ${coverCloseLabel()}`
+    ];
+    return `<div class="type-status-line">${parts.map(part => `<span>${escapeHtml(String(part))}</span>`).join("")}</div>`;
+}
+
+function coverHeroActionsHtml(saved) {
+    const primary = saved ? "Ver o modificar mi quiniela" : "Hacer mi quiniela";
+    return `
+        <div class="type-hero-actions">
+            <button type="button" class="type-primary-action" data-page-action="TICKET">${escapeHtml(primary)}</button>
+            <button type="button" class="type-secondary-action" data-page-action="TICKET">Ver predicciones IA</button>
+        </div>`;
+}
+
 function coverNowHtml({ liveCount, finished, saved }) {
     const nextMatch = (state.data.partidos || []).find(match => !isFinishedStatus(match.status));
     const home = nextMatch ? getShortName(nextMatch.local || nextMatch.home_name || nextMatch.home?.name || "Local") : "-";
@@ -204,9 +223,7 @@ function renderNewspaperCoverPageV3() {
     const finished = matches.filter(match => isFinishedStatus(match.status)).length;
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
-    const headline = saved ? "Tu boleto contra las maquinas." : "Tu, contra la maquina.";
-    const ticketState = saved ? "Boleto guardado" : "Boleto pendiente";
-    const liveLabel = liveCount ? `${liveCount} de quiniela` : `${finished}/15 resueltos`;
+    const headline = "\u00bfQui\u00e9n acertar\u00e1 m\u00e1s esta jornada?";
     return `
         <section class="typewriter-cover">
             <article class="typewriter-sheet">
@@ -215,12 +232,9 @@ function renderNewspaperCoverPageV3() {
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
                         <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
-                        <p>La Pe&ntilde;a rellena el mismo boleto que los Maestros IA. Se comparan pronosticos, ranking y cierre de jornada sin mezclarlo con el resto de secciones.</p>
-                        <div class="typewriter-rail" aria-label="Estado de la jornada">
-                            <b>${escapeHtml(ticketState)}</b>
-                            <b>${escapeHtml(liveLabel)}</b>
-                            <b>${escapeHtml(coverCloseLabel())}</b>
-                        </div>
+                        <p>La Pe&ntilde;a compite contra ChatGPT, Claude, Gemini, Grok, Copilot y el Programa. Mismo boleto, mismos partidos, una clasificaci&oacute;n.</p>
+                        ${coverHeroActionsHtml(saved)}
+                        ${coverStatusLineHtml({ liveCount, finished, saved, jornada })}
                         ${coverSectionsHtml()}
                         ${coverProgramTicketHtml()}
                     </section>
