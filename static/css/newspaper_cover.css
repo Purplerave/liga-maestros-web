@@ -247,29 +247,39 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     font-weight: 400;
 }
 
-.type-mission ul {
+.type-contender-grid {
     display: grid;
-    gap: 5px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 2px;
 }
 
-.type-mission li {
-    position: relative;
-    padding-left: 18px;
-    color: rgba(40, 34, 30, 0.78);
-    font-family: "Special Elite", "Courier New", monospace;
-    font-size: clamp(0.8rem, 0.92vw, 0.92rem);
-    line-height: 1.28;
+.type-contender-grid article {
+    display: grid;
+    align-content: start;
+    min-height: 78px;
+    padding: 10px 11px;
+    border: 1px solid rgba(40, 34, 30, 0.24);
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        rgba(255, 255, 255, 0.16);
 }
 
-.type-mission li::before {
-    content: ">";
-    position: absolute;
-    left: 0;
-    top: 0;
+.type-contender-grid span {
     color: var(--red);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.78rem, 0.9vw, 0.92rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.type-contender-grid b {
+    margin-top: 7px;
+    color: var(--ink);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.72rem, 0.84vw, 0.86rem);
+    font-weight: 400;
+    line-height: 1.24;
 }
 
 .type-hero-actions {
@@ -819,9 +829,23 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
         line-height: 1.22;
     }
 
-    .type-mission li {
-        font-size: 0.72rem;
-        line-height: 1.16;
+    .type-contender-grid {
+        gap: 6px;
+    }
+
+    .type-contender-grid article {
+        min-height: 58px;
+        padding: 7px 8px;
+    }
+
+    .type-contender-grid span {
+        font-size: 0.66rem;
+    }
+
+    .type-contender-grid b {
+        margin-top: 4px;
+        font-size: 0.62rem;
+        line-height: 1.14;
     }
 
     .typewriter-lead p {
@@ -982,6 +1006,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     .type-picks,
     .type-hero-actions,
     .type-explain-grid,
+    .type-contender-grid,
     .type-now {
         grid-template-columns: 1fr;
     }
