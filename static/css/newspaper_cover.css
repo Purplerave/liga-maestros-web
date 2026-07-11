@@ -372,8 +372,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     height: auto;
     min-height: 0;
     align-content: start;
-    gap: 12px;
-    padding: clamp(12px, 1.5vw, 20px);
+    gap: 10px;
+    padding: clamp(11px, 1.25vw, 16px);
     border: 1px solid rgba(40, 34, 30, 0.3);
     background:
         radial-gradient(circle at 16% 20%, rgba(47, 107, 69, 0.12), transparent 35%),
@@ -384,7 +384,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-hot-card h3 {
     margin: 0;
     color: var(--ink);
-    font-size: clamp(1.35rem, 2.2vw, 2.35rem);
+    font-size: clamp(1.15rem, 1.65vw, 1.85rem);
     font-weight: 400;
     line-height: 1;
     text-align: center;
@@ -402,7 +402,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .type-team {
@@ -413,8 +413,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 }
 
 .type-team .team-badge {
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     border-color: rgba(40, 34, 30, 0.28);
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 14px rgba(40, 34, 30, 0.16);
@@ -433,8 +433,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-vs-block {
     display: grid;
-    min-width: 94px;
-    min-height: 72px;
+    min-width: 82px;
+    min-height: 58px;
     place-items: center;
     border: 1px solid rgba(168, 50, 38, 0.42);
     background: rgba(255, 255, 255, 0.22);
@@ -442,7 +442,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-vs-block b {
     color: var(--red);
-    font-size: clamp(1.55rem, 2.8vw, 2.7rem);
+    font-size: clamp(1.35rem, 2.2vw, 2.2rem);
     line-height: 1;
 }
 
@@ -503,49 +503,47 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     color: var(--red);
 }
 
-.type-summary {
+.type-explain {
     display: grid;
     gap: 8px;
     min-width: 0;
 }
 
-.type-summary-grid {
+.type-explain-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
 }
 
-.type-summary button {
+.type-explain article {
     display: grid;
     min-width: 0;
-    min-height: 52px;
+    min-height: 62px;
     align-content: start;
     gap: 3px;
     padding: 8px 9px;
     border: 1px dotted var(--ink-faint);
     background: rgba(255, 255, 255, 0.16);
     color: var(--ink);
-    cursor: pointer;
     font-family: "Special Elite", "Courier New", monospace;
     text-align: left;
 }
 
-.type-summary button:hover {
-    border-color: rgba(168, 50, 38, 0.45);
-    background: rgba(168, 50, 38, 0.06);
-}
-
-.type-summary span,
-.type-summary small {
+.type-explain span,
+.type-explain small {
     overflow: hidden;
     color: var(--ink-soft);
     font-size: 0.58rem;
     text-overflow: ellipsis;
     text-transform: uppercase;
-    white-space: nowrap;
 }
 
-.type-summary b {
+.type-explain span {
+    color: var(--red);
+    font-size: 0.78rem;
+}
+
+.type-explain b {
     overflow: hidden;
     color: var(--red);
     font-size: 0.8rem;
@@ -553,6 +551,56 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
+}
+
+.type-discrepancy-list {
+    display: grid;
+    gap: 6px;
+    padding-top: 2px;
+}
+
+.type-discrepancy-list button {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 2px 8px;
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px dotted var(--ink-faint);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Special Elite", "Courier New", monospace;
+    text-align: left;
+}
+
+.type-discrepancy-list button:hover {
+    border-color: rgba(168, 50, 38, 0.5);
+    background: rgba(168, 50, 38, 0.06);
+}
+
+.type-discrepancy-list span {
+    grid-row: 1 / span 2;
+    color: var(--red);
+    font-size: 0.76rem;
+}
+
+.type-discrepancy-list b,
+.type-discrepancy-list small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.type-discrepancy-list b {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+}
+
+.type-discrepancy-list small {
+    color: var(--ink-soft);
+    font-size: 0.58rem;
+    text-transform: uppercase;
 }
 
 .type-now {
@@ -584,13 +632,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 }
 
 .type-now-item b {
-    overflow: hidden;
     color: var(--ink);
     font-size: clamp(0.9rem, 1.4vw, 1.2rem);
     font-weight: 400;
-    text-overflow: ellipsis;
     text-transform: uppercase;
-    white-space: nowrap;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
 }
 
 .type-empty {
@@ -658,7 +705,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     .typewriter-rail,
     .type-picks,
     .type-hero-actions,
-    .type-summary-grid,
+    .type-explain-grid,
     .type-now {
         grid-template-columns: 1fr;
     }
