@@ -116,24 +116,20 @@ function coverSpotlightHtml() {
         </div>`;
 }
 
-function coverHowItWorksHtml() {
-    const rows = [
-        ["1", "Haz tu quiniela", "Marca los 15 signos de la jornada."],
-        ["2", "Cada uno pronostica", "Mi Programa, La Pe\u00f1a y las IA eligen sus signos para la jornada."],
-        ["3", "Ranking de aciertos", "Cuando cierran los partidos, gana quien suma m\u00e1s."]
-    ];
+function coverMissionHtml() {
     return `
-        <section class="type-explain">
-            <div class="type-kicker">\u00bfQu\u00e9 es Liga de Maestros?</div>
-            <div class="type-explain-grid">
-                ${rows.map(([num, title, text]) => `
-                    <article>
-                        <span>${escapeHtml(num)}</span>
-                        <b>${escapeHtml(title)}</b>
-                        <small>${escapeHtml(text)}</small>
-                    </article>
-                `).join("")}
-            </div>
+        <section class="type-mission">
+            <div class="type-kicker">El reto de la jornada</div>
+            <p>
+                Una quiniela, muchas cabezas y un pique claro: <b>La Pe\u00f1a</b>
+                contra <b>Mi Programa</b> y los <b>Maestros IA</b>. Cada jornada se enfrentan
+                intuici\u00f3n, datos y modelos para ver qui\u00e9n lee mejor el f\u00fatbol.
+            </p>
+            <ul>
+                <li>Haz tu pron\u00f3stico y compite contra ChatGPT, Claude, Gemini, Grok y Copilot.</li>
+                <li>Busca los partidos donde humanos y m\u00e1quinas no se ponen de acuerdo.</li>
+                <li>Sigue la jornada en directo y mira qui\u00e9n sube en el ranking.</li>
+            </ul>
         </section>`;
 }
 
@@ -193,43 +189,6 @@ function coverNowHtml({ liveCount, finished, saved }) {
         </section>`;
 }
 
-function coverProgramTicketHtml() {
-    const preds = state.data.predicciones_actuales || {};
-    const matches = state.data.partidos || [];
-    const signs = Array.from({ length: 15 }, (_, idx) => getSign(preds, idx, "programa", "v260_omnisciente") || "-");
-    const doubles = signs
-        .map((sign, idx) => String(sign).length > 1 && idx < 14 ? idx + 1 : null)
-        .filter(Boolean);
-    const visible = [0, 1, 2, 3, 14];
-    const labelFor = (idx) => {
-        const match = matches[idx] || {};
-        const home = getShortName(match.local || match.home_name || match.home?.name || (idx === 14 ? "Pleno al 15" : "Local"));
-        const away = getShortName(match.visitante || match.away_name || match.away?.name || (idx === 14 ? "" : "Visitante"));
-        return idx === 14 ? `Pleno al 15: ${home}${away ? ` - ${away}` : ""}` : `${home} - ${away}`;
-    };
-    return `
-        <div class="type-ticket-card">
-            <div class="type-ticket-head">
-                <span>Quiniela &middot; Jornada ${escapeHtml(String(state.data.jornada || state.jornada || "-"))}</span>
-                <span>1&nbsp;&nbsp;X&nbsp;&nbsp;2</span>
-            </div>
-            <div class="type-ticket-rows">
-                ${visible.map((idx) => `
-                    <div class="type-ticket-row ${idx === 14 ? "is-pleno" : ""}">
-                        <span class="type-ticket-num">${String(idx + 1).padStart(2, "0")}</span>
-                        <span class="type-ticket-match">${escapeHtml(labelFor(idx))}</span>
-                        <span class="type-ticket-line"></span>
-                        <b>${escapeHtml(signs[idx] || "-")}</b>
-                    </div>
-                `).join("")}
-            </div>
-            <div class="type-ticket-foot">
-                <span>+ 10 partidos en la quiniela completa</span>
-                <b>${doubles.length ? `${doubles.length} dobles: ${doubles.join(", ")}` : "sin dobles"}</b>
-            </div>
-        </div>`;
-}
-
 function hydrateCoverTypewriter() {
     const title = document.getElementById("cover-type-title");
     if (!title) return;
@@ -260,8 +219,7 @@ function renderNewspaperCoverPageV3() {
                         <p>Distintos pron&oacute;sticos para los mismos partidos. Entra, compara, juega tu quiniela y mira qui&eacute;n suma m&aacute;s aciertos.</p>
                         ${coverHeroActionsHtml({ saved, closed, liveCount })}
                         ${coverStatusLineHtml({ liveCount, finished, saved, jornada, closed })}
-                        ${coverHowItWorksHtml()}
-                        ${coverProgramTicketHtml()}
+                        ${coverMissionHtml()}
                     </section>
                     <section class="typewriter-hot">
                         ${coverSpotlightHtml()}
