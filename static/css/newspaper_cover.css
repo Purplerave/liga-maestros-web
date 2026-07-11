@@ -158,9 +158,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-cover-intro {
     display: grid;
-    gap: 5px;
+    gap: 7px;
     max-width: 680px;
-    padding: 10px 12px;
+    padding: 14px 14px;
     border-left: 5px solid var(--red);
     border-top: 1px solid rgba(40, 34, 30, 0.22);
     border-bottom: 1px solid rgba(40, 34, 30, 0.22);
@@ -172,7 +172,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-cover-intro strong {
     color: var(--red);
     font-family: "Special Elite", "Courier New", monospace;
-    font-size: clamp(0.98rem, 1.18vw, 1.18rem);
+    font-size: clamp(1.08rem, 1.35vw, 1.35rem);
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -181,8 +181,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-cover-intro span {
     color: var(--ink);
     font-family: "Special Elite", "Courier New", monospace;
-    font-size: clamp(0.82rem, 0.98vw, 0.98rem);
-    line-height: 1.28;
+    font-size: clamp(0.96rem, 1.16vw, 1.12rem);
+    line-height: 1.32;
 }
 
 .typewriter-hot {
@@ -198,21 +198,15 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     max-width: 680px;
     margin: 0;
     color: var(--ink);
-    font-size: clamp(1.65rem, 3.15vw, 3.15rem);
+    font-size: clamp(1.35rem, 2.35vw, 2.45rem);
     font-weight: 400;
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(81, 71, 122, 0.18);
 }
 
 .typewriter-lead h2::after {
-    content: "";
-    display: inline-block;
-    width: 0.42em;
-    height: 0.82em;
-    margin-left: 4px;
-    background: var(--ink);
-    vertical-align: -0.08em;
-    animation: typeCursor 0.9s step-end infinite;
+    content: none;
+    display: none;
 }
 
 @keyframes typeCursor {
@@ -229,6 +223,53 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     font-size: clamp(0.92rem, 1.05vw, 1.04rem);
     font-weight: 800;
     line-height: 1.32;
+}
+
+.type-mission {
+    display: grid;
+    gap: 8px;
+    max-width: 710px;
+    padding-top: 4px;
+    color: var(--ink);
+}
+
+.type-mission p {
+    max-width: none;
+    color: var(--ink);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.98rem, 1.15vw, 1.14rem);
+    font-weight: 400;
+    line-height: 1.34;
+}
+
+.type-mission p b {
+    color: var(--red);
+    font-weight: 400;
+}
+
+.type-mission ul {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.type-mission li {
+    position: relative;
+    padding-left: 18px;
+    color: rgba(40, 34, 30, 0.78);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.8rem, 0.92vw, 0.92rem);
+    line-height: 1.28;
+}
+
+.type-mission li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--red);
 }
 
 .type-hero-actions {
@@ -753,20 +794,34 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
     .typewriter-lead h2 {
         max-width: 640px;
-        font-size: clamp(1.55rem, 2.55vw, 2.55rem);
+        font-size: clamp(1.25rem, 2.05vw, 2.1rem);
     }
 
     .type-cover-intro {
-        padding: 8px 10px;
+        padding: 10px 11px;
     }
 
     .type-cover-intro strong {
-        font-size: 0.94rem;
+        font-size: 1rem;
     }
 
     .type-cover-intro span {
-        font-size: 0.78rem;
-        line-height: 1.2;
+        font-size: 0.88rem;
+        line-height: 1.23;
+    }
+
+    .type-mission {
+        gap: 6px;
+    }
+
+    .type-mission p {
+        font-size: 0.88rem;
+        line-height: 1.22;
+    }
+
+    .type-mission li {
+        font-size: 0.72rem;
+        line-height: 1.16;
     }
 
     .typewriter-lead p {
