@@ -1032,6 +1032,10 @@ function hydrateHero() {
         if (topbarTitle) topbarTitle.textContent = title;
         if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada}`;
     }
+    if (document.body.classList.contains("newspaper-ui")) {
+        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} - La Pe\u00f1a vs Maestros IA`;
+        if (topbarTitle && currentMainView() === "ALL") topbarTitle.textContent = "La Pe\u00f1a contra los Maestros IA";
+    }
     const save = qs("save-quiniela-btn");
     if (save) {
         const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
@@ -1044,6 +1048,10 @@ function hydrateHero() {
             save.textContent = "Editar quiniela";
         } else {
             save.textContent = hasSaved ? "Guardar cambios" : "Guardar quiniela";
+        }
+        if (!canSave) {
+            save.hidden = true;
+            save.textContent = "Guardar quiniela";
         }
     }
     const share = qs("share-ticket-btn");
