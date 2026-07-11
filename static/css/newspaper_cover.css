@@ -156,6 +156,35 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     min-width: 0;
 }
 
+.type-cover-intro {
+    display: grid;
+    gap: 5px;
+    max-width: 680px;
+    padding: 10px 12px;
+    border-left: 5px solid var(--red);
+    border-top: 1px solid rgba(40, 34, 30, 0.22);
+    border-bottom: 1px solid rgba(40, 34, 30, 0.22);
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        rgba(255, 255, 255, 0.18);
+}
+
+.type-cover-intro strong {
+    color: var(--red);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.98rem, 1.18vw, 1.18rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.type-cover-intro span {
+    color: var(--ink);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(0.82rem, 0.98vw, 0.98rem);
+    line-height: 1.28;
+}
+
 .typewriter-hot {
     display: grid;
     align-content: start;
@@ -166,10 +195,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .typewriter-lead h2 {
     position: relative;
-    max-width: 620px;
+    max-width: 680px;
     margin: 0;
     color: var(--ink);
-    font-size: clamp(1.85rem, 3.55vw, 3.55rem);
+    font-size: clamp(1.65rem, 3.15vw, 3.15rem);
     font-weight: 400;
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(81, 71, 122, 0.18);
@@ -723,8 +752,21 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     }
 
     .typewriter-lead h2 {
-        max-width: 590px;
-        font-size: clamp(1.8rem, 3vw, 3rem);
+        max-width: 640px;
+        font-size: clamp(1.55rem, 2.55vw, 2.55rem);
+    }
+
+    .type-cover-intro {
+        padding: 8px 10px;
+    }
+
+    .type-cover-intro strong {
+        font-size: 0.94rem;
+    }
+
+    .type-cover-intro span {
+        font-size: 0.78rem;
+        line-height: 1.2;
     }
 
     .typewriter-lead p {
@@ -875,6 +917,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
     .typewriter-lead h2 {
         font-size: clamp(2rem, 14vw, 3.6rem);
+    }
+
+    .type-cover-intro {
+        max-width: none;
     }
 
     .typewriter-rail,

@@ -93,7 +93,7 @@ function coverSpotlightHtml() {
                 </div>
             </div>
             <div class="type-picks">
-                <span>Programa <b>${escapeHtml(programSign || "-")}</b></span>
+                <span>Mi Programa <b>${escapeHtml(programSign || "-")}</b></span>
                 <span>Maestros <b>${escapeHtml(masterSign || "-")}</b></span>
                 <span>La Pe&ntilde;a <b>${escapeHtml(penaSign || "-")}</b></span>
             </div>
@@ -109,7 +109,7 @@ function coverSpotlightHtml() {
                         <button type="button" data-page-action="TICKET">
                             <span>#${row.idx + 1}</span>
                             <b>${escapeHtml(getShortName(rowHome))} - ${escapeHtml(getShortName(rowAway))}</b>
-                            <small>Programa ${escapeHtml(row.programSign || "-")} &middot; Maestros ${escapeHtml(row.masterSign || "-")} &middot; Pe&ntilde;a ${escapeHtml(row.penaSign || "-")}</small>
+                            <small>Mi Programa ${escapeHtml(row.programSign || "-")} &middot; Maestros ${escapeHtml(row.masterSign || "-")} &middot; Pe&ntilde;a ${escapeHtml(row.penaSign || "-")}</small>
                         </button>`;
                 }).join("")}
             </div>
@@ -145,10 +145,10 @@ function coverStatusLineHtml({ liveCount, finished, saved, jornada, closed }) {
     const matchStatus = liveCount ? coverLiveCountText(liveCount) : `${finished}/15 resultados cerrados`;
     const ticketStatus = saved
         ? "Tu quiniela esta guardada"
-        : closed ? "No hay quiniela guardada" : "Tu quiniela esta pendiente";
+        : closed ? "No hiciste quiniela en esta jornada" : "Tu quiniela esta pendiente";
     const parts = closed
-        ? [`Jornada ${jornada || "-"} cerrada`, matchStatus, ticketStatus]
-        : [`Jornada ${jornada || "-"} abierta`, ticketStatus, `Cierre en ${coverCloseLabel()}`];
+        ? [`Jornada ${jornada || "-"}: quiniela cerrada`, matchStatus, ticketStatus]
+        : [`Jornada ${jornada || "-"}: puedes participar`, ticketStatus, `Cierre en ${coverCloseLabel()}`];
     return `<div class="type-status-line ${closed ? "is-locked" : "is-open"}">${parts.map(part => `<span>${escapeHtml(String(part))}</span>`).join("")}</div>`;
 }
 
@@ -234,19 +234,7 @@ function hydrateCoverTypewriter() {
     const title = document.getElementById("cover-type-title");
     if (!title) return;
     const text = title.dataset.text || title.textContent || "";
-    if (!text || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
-        title.textContent = text;
-        return;
-    }
-    title.textContent = "";
-    let i = 0;
-    const tick = () => {
-        if (!document.body.contains(title)) return;
-        title.textContent = text.slice(0, i);
-        i += 1;
-        if (i <= text.length) window.setTimeout(tick, 32 + Math.random() * 42);
-    };
-    tick();
+    title.textContent = text;
 }
 
 function renderNewspaperCoverPageV3() {
@@ -264,8 +252,12 @@ function renderNewspaperCoverPageV3() {
                 <div class="typewriter-main">
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
+                        <div class="type-cover-intro">
+                            <strong>Liga de Maestros</strong>
+                            <span>La Pe&ntilde;a y Mi Programa contra ChatGPT, Claude, Gemini, Grok y Copilot en la quiniela de cada jornada.</span>
+                        </div>
                         <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
-                        <p>Mi Programa y La Pe&ntilde;a miden sus fuerzas contra ChatGPT, Claude, Gemini, Grok y Copilot. Distintos pron&oacute;sticos para los partidos de la jornada: gana quien suma m&aacute;s aciertos.</p>
+                        <p>Distintos pron&oacute;sticos para los mismos partidos. Entra, compara, juega tu quiniela y mira qui&eacute;n suma m&aacute;s aciertos.</p>
                         ${coverHeroActionsHtml({ saved, closed, liveCount })}
                         ${coverStatusLineHtml({ liveCount, finished, saved, jornada, closed })}
                         ${coverHowItWorksHtml()}
