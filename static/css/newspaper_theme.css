@@ -840,20 +840,53 @@ body.newspaper-ui.quiniela-focus .topbar-mini-link {
 
 body.newspaper-ui.quiniela-focus .match-score-badge.is-live-score,
 body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge {
+    position: relative !important;
+    display: inline-flex !important;
+    min-width: 96px !important;
+    min-height: 42px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 14px 10px 5px !important;
     border: 2px solid var(--news-red) !important;
     background: var(--news-red) !important;
     color: #fff !important;
     box-shadow: none !important;
+    line-height: 1 !important;
+    overflow: visible !important;
+}
+
+body.newspaper-ui.quiniela-focus .match-score-badge.is-live-score:not([data-live-label]),
+body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge:not([data-live-label]) {
+    min-height: 34px !important;
+    padding: 8px 10px !important;
 }
 
 body.newspaper-ui.quiniela-focus .match-score-badge.is-live-score::before,
 body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge::before {
-    content: "DIRECTO";
-    display: block;
-    color: #fff;
-    font-size: 0.5rem;
+    content: attr(data-live-label);
+    position: absolute !important;
+    top: -12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: inline-flex !important;
+    min-height: 18px !important;
+    align-items: center !important;
+    padding: 2px 9px !important;
+    border: 2px solid #17a34a !important;
+    border-radius: 999px !important;
+    background: #0f6b32 !important;
+    color: #fff !important;
+    font-size: 0.58rem !important;
+    font-weight: 900 !important;
     line-height: 1;
     letter-spacing: 0.08em;
+    white-space: nowrap !important;
+}
+
+body.newspaper-ui.quiniela-focus .match-score-badge.is-live-score:not([data-live-label])::before,
+body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge:not([data-live-label])::before {
+    content: none !important;
+    display: none !important;
 }
 
 body.newspaper-ui.quiniela-focus .topbar-mini-link,

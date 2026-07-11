@@ -10,6 +10,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .app-shell {
     overflow: hidden !important;
 }
 
+body.newspaper-ui.quiniela-focus.newspaper-cover-active {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-context::before {
     content: none !important;
     display: none !important;
@@ -55,16 +61,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     --ink: #28221e;
     --ink-soft: rgba(40, 34, 30, 0.68);
     --ink-faint: rgba(40, 34, 30, 0.24);
-    --red: #a83226;
+    --red: #8f241b;
     --stamp: #2f6b45;
     --carbon: #51477a;
     display: grid;
     width: 100%;
     height: 100%;
     min-height: 0;
-    place-items: stretch center;
+    place-items: start center;
     padding: clamp(8px, 0.75vw, 14px);
-    overflow: auto;
+    overflow: hidden;
     color: var(--ink);
 }
 
@@ -72,7 +78,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     position: relative;
     display: grid;
     width: min(1840px, 100%);
-    height: 100%;
+    height: auto;
     min-height: 0;
     max-height: 100%;
     grid-template-rows: minmax(0, 1fr);
@@ -216,14 +222,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 }
 
 .type-hero-actions .type-primary-action {
-    border-color: rgba(168, 50, 38, 0.48);
-    background: rgba(168, 50, 38, 0.13);
+    border-color: rgba(143, 36, 27, 0.58);
+    background: rgba(143, 36, 27, 0.16);
     color: var(--red);
     font-size: clamp(0.95rem, 1.15vw, 1.16rem);
 }
 
+.type-hero-actions .type-primary-action.is-closed {
+    border-color: rgba(40, 34, 30, 0.42);
+    background: rgba(255, 255, 255, 0.18);
+    color: var(--ink);
+}
+
 .type-hero-actions button:hover {
-    background: rgba(168, 50, 38, 0.18);
+    background: rgba(143, 36, 27, 0.18);
 }
 
 .type-status-line {
@@ -244,6 +256,23 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     font-family: "Special Elite", "Courier New", monospace;
     font-size: 0.74rem;
     text-transform: uppercase;
+}
+
+.type-status-line.is-locked {
+    border-color: rgba(143, 36, 27, 0.38);
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        rgba(143, 36, 27, 0.055);
+}
+
+.type-status-line.is-open {
+    border-color: rgba(47, 107, 69, 0.34);
+}
+
+.type-status-line.is-locked span:first-child,
+.type-status-line.is-open span:first-child {
+    color: var(--red);
+    font-weight: 700;
 }
 
 .type-status-line span:last-child {
@@ -522,8 +551,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     align-content: start;
     gap: 3px;
     padding: 8px 9px;
-    border: 1px dotted var(--ink-faint);
-    background: rgba(255, 255, 255, 0.16);
+    border: 1px dotted rgba(40, 34, 30, 0.34);
+    background: rgba(255, 255, 255, 0.2);
     color: var(--ink);
     font-family: "Special Elite", "Courier New", monospace;
     text-align: left;
@@ -532,7 +561,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-explain span,
 .type-explain small {
     overflow: hidden;
-    color: var(--ink-soft);
+    color: rgba(40, 34, 30, 0.76);
     font-size: 0.58rem;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -546,7 +575,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-explain b {
     overflow: hidden;
     color: var(--red);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 400;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -649,6 +678,152 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 @media (prefers-reduced-motion: reduce) {
     .typewriter-lead h2::after {
         animation: none;
+    }
+}
+
+/* Compact desktop fit: la portada debe caber a 100% en portatiles 1366x768. */
+@media (min-width: 981px) {
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .app-shell {
+        grid-template-rows: 78px 38px minmax(0, 1fr) !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .header-brand-panel {
+        min-height: 70px !important;
+        height: 70px !important;
+        padding-top: 7px !important;
+        padding-bottom: 7px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .sidebar-brand-image {
+        max-width: 176px !important;
+        max-height: 50px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav {
+        height: 38px !important;
+        min-height: 38px !important;
+    }
+
+    .typewriter-cover {
+        padding: 6px 10px;
+    }
+
+    .typewriter-sheet {
+        padding: 12px 18px;
+    }
+
+    .typewriter-main {
+        gap: 14px;
+    }
+
+    .typewriter-lead,
+    .typewriter-hot {
+        gap: 7px;
+    }
+
+    .typewriter-lead h2 {
+        max-width: 590px;
+        font-size: clamp(1.8rem, 3vw, 3rem);
+    }
+
+    .typewriter-lead p {
+        font-size: 0.9rem;
+        line-height: 1.18;
+    }
+
+    .type-hero-actions button {
+        min-height: 36px;
+        padding: 6px 10px;
+    }
+
+    .type-status-line span {
+        min-height: 27px;
+        padding: 6px 9px;
+        font-size: 0.68rem;
+    }
+
+    .type-explain {
+        gap: 6px;
+    }
+
+    .type-explain article {
+        min-height: 48px;
+        padding: 6px 8px;
+    }
+
+    .type-explain b {
+        font-size: 0.76rem;
+    }
+
+    .type-explain small {
+        font-size: 0.52rem;
+    }
+
+    .type-ticket-card {
+        padding: 7px 10px 5px;
+    }
+
+    .type-ticket-head,
+    .type-ticket-foot {
+        font-size: 0.6rem;
+    }
+
+    .type-ticket-row {
+        min-height: 17px;
+        padding: 1px 0;
+        font-size: 0.78rem;
+    }
+
+    .type-ticket-row b {
+        font-size: 0.86rem;
+    }
+
+    .type-hot-card {
+        gap: 7px;
+        padding: 10px 12px;
+    }
+
+    .type-hot-card h3 {
+        font-size: clamp(1.05rem, 1.45vw, 1.6rem);
+    }
+
+    .type-team {
+        gap: 4px;
+    }
+
+    .type-team .team-badge {
+        width: 30px;
+        height: 30px;
+    }
+
+    .type-vs-block {
+        min-height: 48px;
+    }
+
+    .type-picks span {
+        padding: 5px 7px;
+        font-size: 0.68rem;
+    }
+
+    .type-discrepancy-list {
+        gap: 4px;
+    }
+
+    .type-discrepancy-list button {
+        padding: 5px 7px;
+    }
+
+    .type-now {
+        gap: 7px;
+    }
+
+    .type-now-item {
+        padding: 7px 10px;
+    }
+
+    .type-now-item b {
+        font-size: clamp(0.82rem, 1.15vw, 1.04rem);
     }
 }
 

@@ -66,8 +66,8 @@ function coverSpotlightHtml() {
             <div class="type-hot-card">
                 <div class="type-kicker">La jornada en juego</div>
                 <h3>Liga de Maestros</h3>
-                <p>La Pe&ntilde;a y los Maestros IA juegan el mismo boleto. Quiniela, directo y ranking en una sola jornada.</p>
-                <button type="button" data-page-action="TICKET">Ver boleto</button>
+                <p>La Pe&ntilde;a, Mi Programa y los Maestros IA pronostican la jornada. Directo, ranking y discrepancias en una sola portada.</p>
+                <button type="button" data-page-action="TICKET">Ver quiniela</button>
             </div>`;
     }
     const { match, idx, penaSign, programSign, masterSign } = item;
@@ -99,7 +99,7 @@ function coverSpotlightHtml() {
             </div>
             <div class="type-actions">
                 ${coverSpotlightActionHtml(match)}
-                <button type="button" data-page-action="TICKET">Ver boleto</button>
+                <button type="button" data-page-action="TICKET">Ver quiniela</button>
             </div>
             <div class="type-discrepancy-list">
                 ${items.map(row => {
@@ -118,9 +118,9 @@ function coverSpotlightHtml() {
 
 function coverHowItWorksHtml() {
     const rows = [
-        ["1", "Haz tu quiniela", "Marca los 15 signos del boleto de la jornada."],
-        ["2", "Mismo boleto para todos", "La Pe\u00f1a compite contra ChatGPT, Claude, Gemini, Grok, Copilot y el Programa."],
-        ["3", "Ranking de jornada", "Cuando cierran los partidos, gana quien suma m\u00e1s aciertos."]
+        ["1", "Haz tu quiniela", "Marca los 15 signos de la jornada."],
+        ["2", "Cada uno pronostica", "Mi Programa, La Pe\u00f1a y las IA eligen sus signos para la jornada."],
+        ["3", "Ranking de aciertos", "Cuando cierran los partidos, gana quien suma m\u00e1s."]
     ];
     return `
         <section class="type-explain">
@@ -137,30 +137,31 @@ function coverHowItWorksHtml() {
         </section>`;
 }
 
-function coverStatusLineHtml({ liveCount, finished, saved, jornada }) {
-    const ticketStatus = saved ? "Tu boleto esta guardado" : "Tu boleto esta pendiente";
-    const matchStatus = liveCount
-        ? coverLiveCountText(liveCount)
-        : `${finished}/15 resultados cerrados`;
-    const closeLabel = coverCloseLabel();
-    const closeStatus = state.data.is_locked || closeLabel === "cerrada"
-        ? "Ya no se puede editar el boleto"
-        : `Cierre en ${closeLabel}`;
-    const parts = [
-        `Jornada ${jornada || "-"}`,
-        ticketStatus,
-        matchStatus,
-        closeStatus
-    ];
-    return `<div class="type-status-line">${parts.map(part => `<span>${escapeHtml(String(part))}</span>`).join("")}</div>`;
+function coverIsClosed() {
+    return Boolean(state.data.is_locked) || coverCloseLabel() === "cerrada";
 }
 
-function coverHeroActionsHtml(saved) {
-    const primary = saved ? "Ver o modificar mi quiniela" : "Hacer mi quiniela";
+function coverStatusLineHtml({ liveCount, finished, saved, jornada, closed }) {
+    const matchStatus = liveCount ? coverLiveCountText(liveCount) : `${finished}/15 resultados cerrados`;
+    const ticketStatus = saved
+        ? "Tu quiniela esta guardada"
+        : closed ? "No hay quiniela guardada" : "Tu quiniela esta pendiente";
+    const parts = closed
+        ? [`Jornada ${jornada || "-"} cerrada`, matchStatus, ticketStatus]
+        : [`Jornada ${jornada || "-"} abierta`, ticketStatus, `Cierre en ${coverCloseLabel()}`];
+    return `<div class="type-status-line ${closed ? "is-locked" : "is-open"}">${parts.map(part => `<span>${escapeHtml(String(part))}</span>`).join("")}</div>`;
+}
+
+function coverHeroActionsHtml({ saved, closed, liveCount }) {
+    const primary = closed
+        ? saved ? "Ver mi quiniela" : "Ver quiniela de la jornada"
+        : saved ? "Ver o modificar mi quiniela" : "Hacer mi quiniela";
+    const secondary = closed && liveCount ? "Seguir jornada" : "Ver predicciones IA";
+    const secondaryAction = closed && liveCount ? "LIVE" : "TICKET";
     return `
         <div class="type-hero-actions">
-            <button type="button" class="type-primary-action" data-page-action="TICKET">${escapeHtml(primary)}</button>
-            <button type="button" class="type-secondary-action" data-page-action="TICKET">Ver predicciones IA</button>
+            <button type="button" class="type-primary-action ${closed ? "is-closed" : ""}" data-page-action="TICKET">${escapeHtml(primary)}</button>
+            <button type="button" class="type-secondary-action" data-page-action="${escapeHtml(secondaryAction)}">${escapeHtml(secondary)}</button>
         </div>`;
 }
 
@@ -182,12 +183,12 @@ function coverNowHtml({ liveCount, finished, saved }) {
                 <b>${liveCount ? coverLiveCountText(liveCount) : `${finished}/15 cerrados`}</b>
             </div>
             <div class="type-now-item">
-                <span>Tu boleto</span>
+                <span>Tu quiniela</span>
                 <b>${saved ? "guardado" : "pendiente"}</b>
             </div>
             <div class="type-now-item is-wide">
                 <span>Siguiente foco</span>
-                <b>${escapeHtml(home)}${away !== "-" ? ` - ${escapeHtml(away)}` : ""}${time ? ` · ${escapeHtml(String(time))}` : ""}</b>
+                <b>${escapeHtml(home)}${away !== "-" ? ` - ${escapeHtml(away)}` : ""}${time ? ` - ${escapeHtml(String(time))}` : ""}</b>
             </div>
         </section>`;
 }
@@ -209,7 +210,7 @@ function coverProgramTicketHtml() {
     return `
         <div class="type-ticket-card">
             <div class="type-ticket-head">
-                <span>Boleto &middot; Jornada ${escapeHtml(String(state.data.jornada || state.jornada || "-"))}</span>
+                <span>Quiniela &middot; Jornada ${escapeHtml(String(state.data.jornada || state.jornada || "-"))}</span>
                 <span>1&nbsp;&nbsp;X&nbsp;&nbsp;2</span>
             </div>
             <div class="type-ticket-rows">
@@ -255,7 +256,7 @@ function renderNewspaperCoverPageV3() {
     const saved = hasSavedTicket();
     const jornada = state.data.jornada || state.jornada || "";
     const headline = "\u00bfQui\u00e9n acertar\u00e1 m\u00e1s esta jornada?";
-    const closed = state.data.is_locked || coverCloseLabel() === "cerrada";
+    const closed = coverIsClosed();
     return `
         <section class="typewriter-cover">
             <article class="typewriter-sheet">
@@ -264,9 +265,9 @@ function renderNewspaperCoverPageV3() {
                     <section class="typewriter-lead">
                         <p class="typewriter-kicker">Portada &middot; Jornada ${escapeHtml(String(jornada || "-"))}</p>
                         <h2 id="cover-type-title" data-text="${escapeHtml(headline)}">${escapeHtml(headline)}</h2>
-                        <p>La Pe&ntilde;a compite contra ChatGPT, Claude, Gemini, Grok, Copilot y el Programa. Todos juegan el mismo boleto; gana quien suma m&aacute;s aciertos.</p>
-                        ${coverHeroActionsHtml(saved)}
-                        ${coverStatusLineHtml({ liveCount, finished, saved, jornada })}
+                        <p>Mi Programa y La Pe&ntilde;a miden sus fuerzas contra ChatGPT, Claude, Gemini, Grok y Copilot. Distintos pron&oacute;sticos para los partidos de la jornada: gana quien suma m&aacute;s aciertos.</p>
+                        ${coverHeroActionsHtml({ saved, closed, liveCount })}
+                        ${coverStatusLineHtml({ liveCount, finished, saved, jornada, closed })}
                         ${coverHowItWorksHtml()}
                         ${coverProgramTicketHtml()}
                     </section>
