@@ -611,7 +611,7 @@ function matchCompetitionMeta(match) {
     const code = String(match.country_code || match.country?.code || match.competition?.country?.code || "").trim().toUpperCase();
     const cleanLeague = league === "LIGA" ? "COMPETICION" : league;
     const suffix = country || code;
-    return suffix ? `${cleanLeague} Â· ${suffix}` : cleanLeague;
+    return suffix ? `${cleanLeague} - ${suffix}` : cleanLeague;
 }
 
 function getSign(preds, idx, primary, fallback) {
@@ -696,6 +696,26 @@ function liveStage(match) {
     if (text.includes("DESC")) return "Desc.";
     const minute = text.match(/(\d+)'/);
     return minute ? `${minute[1]}'` : "Directo";
+}
+
+function liveScoreLabel(match) {
+    const rawStatus = String(match.status || "").toUpperCase();
+    const explicitMinute = Number.parseInt(String(match.minute || match.elapsed || "").trim(), 10);
+    if (Number.isFinite(explicitMinute) && explicitMinute > 0) return `${explicitMinute}'`;
+    const timeText = String(match.time || match.scheduled || "").toUpperCase();
+    const scoreText = String(match.marcador || match.score || match.scores?.score || "").toUpperCase();
+    const text = `${timeText} ${scoreText}`;
+    if (rawStatus === "HT" || text.includes("DESC") || text.includes("HALF")) return "DESC";
+    const minute = text.match(/(\d{1,3})\s*(?:'|MIN\b)/);
+    if (minute) return `${minute[1]}'`;
+    const stage = liveStage(match);
+    return stage && stage !== "Directo" ? stage.toUpperCase() : "";
+}
+
+function liveScoreAttrs(match, live) {
+    if (!live) return "";
+    const label = liveScoreLabel(match);
+    return label ? ` data-live-label="${escapeHtml(label)}"` : "";
 }
 
 function changeJornada(jornada) {
@@ -1516,26 +1536,12 @@ function relocateSnakeHud() {
     const cabinet = document.querySelector(".arcade-cabinet");
     if (!topbar || !cabinet) return;
     let hud = document.getElementById("snake-top-hud");
-    if (!hud) {
-        hud = document.createElement("div");
-        hud.id = "snake-top-hud";
-        hud.className = "snake-top-hud";
-    }
     const header = document.querySelector(".arcade-header");
     const scoreboard = document.querySelector(".scoreboard");
     const gameLayout = cabinet.querySelector(".game-layout");
-    if (isSnakePage()) {
-        if (!topbar.contains(hud)) {
-            const actions = topbar.querySelector(".topbar-actions");
-            topbar.insertBefore(hud, actions || null);
-        }
-        if (header && !hud.contains(header)) hud.appendChild(header);
-        if (scoreboard && !hud.contains(scoreboard)) hud.appendChild(scoreboard);
-        return;
-    }
-    if (hud.contains(header) && gameLayout) cabinet.insertBefore(header, gameLayout);
-    if (hud.contains(scoreboard) && gameLayout) cabinet.insertBefore(scoreboard, gameLayout);
-    if (hud.parentElement) hud.remove();
+    if (hud?.contains(header) && gameLayout) cabinet.insertBefore(header, gameLayout);
+    if (hud?.contains(scoreboard) && gameLayout) cabinet.insertBefore(scoreboard, gameLayout);
+    if (hud?.parentElement) hud.remove();
 }
 
 function fixMojibakeLabels(root = document.body) {
@@ -1865,7 +1871,7 @@ function renderArenaTensionBody(matches) {
         const statusText = scheduledMatch ? score : "";
         const scoreBadge = scheduledMatch
             ? ""
-            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}">${escapeHtml(score)}</span>`;
+            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(score)}</span>`;
         const penaChip = isPleno ?
              renderTensionPenaChip(renderPenaPleno(consensoPleno, m.marcador, m.status), "PeÃ±a")
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "PeÃ±a");
@@ -2193,7 +2199,7 @@ function renderArenaTableBody(matches) {
                     <button class="match-detail-toggle table-info-toggle" type="button" data-detail-toggle="1" data-match-idx="${idx}" title="Ver detalle">INFO</button>
                 </td>
                 <td class="fixture-cell">${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}</td>
-                <td style="text-align:center;"><span class="match-score-badge ${liveMatch ? "is-live-score" : ""} ${scheduledMatch ? "is-scheduled-time" : ""}">${escapeHtml(score)}</span>${statusBadge}</td>
+                <td style="text-align:center;"><span class="match-score-badge ${liveMatch ? "is-live-score" : ""} ${scheduledMatch ? "is-scheduled-time" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(score)}</span>${statusBadge}</td>
                 ${aiCells}
                 <td class="my-cell">${mine}</td>
                 <td class="pena-cell">${consensus}</td>
@@ -2249,7 +2255,7 @@ function renderMatchCard(match, options = {}) {
     const score = scheduled
         ? formatSmartDate(match.added || match.fecha_raw, match.scheduled || match.time || match.hora)
         : (match.marcador || match.score || match.scores?.score || "-");
-    const statusText = live ? "En directo" : (scheduled ? "" : formatStatus(finished ? "FINISHED" : status, match.time, match.scheduled));
+    const statusText = live ? liveScoreLabel(match) : (scheduled ? "" : formatStatus(finished ? "FINISHED" : status, match.time, match.scheduled));
     const home = match.local || match.home_name || match.home?.name || "-";
     const away = match.visitante || match.away_name || match.away?.name || "-";
     const homeLogo = teamLogo(match, "home");
@@ -2264,7 +2270,7 @@ function renderMatchCard(match, options = {}) {
             <div class="card-teams">
                 ${teamCell(home, "left", homeLogo)}
                 <div class="card-score-area">
-                    <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}">${escapeHtml(score)}</div>
+                    <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}"${liveScoreAttrs(match, live)}>${escapeHtml(score)}</div>
                     ${statusText ? `<div class="card-status">${escapeHtml(statusText)}</div>` : ""}
                 </div>
                 ${teamCell(away, "right", awayLogo)}
@@ -2327,7 +2333,7 @@ function renderArenaCards(matches) {
                     <div class="card-teams">
                         ${teamCell(m.local, "left", teamLogo(m, "home"))}
                         <div class="card-score-area">
-                            <div class="match-score-badge ${liveMatch ? "is-live-score" : (scheduledMatch ? "is-scheduled-time" : "")}">${escapeHtml(score)}</div>
+                            <div class="match-score-badge ${liveMatch ? "is-live-score" : (scheduledMatch ? "is-scheduled-time" : "")}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(score)}</div>
                             <div class="card-status">${statusBadge}${surpriseBadge}</div>
                         </div>
                         ${teamCell(m.visitante, "right", teamLogo(m, "away"))}
