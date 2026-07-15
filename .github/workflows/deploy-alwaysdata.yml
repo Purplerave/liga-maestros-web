@@ -106,6 +106,7 @@ jobs:
           curl --fail --silent --show-error \
             --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --request PATCH \
+            --data-urlencode "type=user_program" \
             --data-urlencode "command=$SITE_COMMAND" \
             --data-urlencode "working_directory=current" \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/" > /dev/null
