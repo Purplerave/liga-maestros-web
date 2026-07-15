@@ -1,0 +1,99 @@
+name: Deploy Alwaysdata
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-alwaysdata-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: deploy-validation-secret
+      ALWAYSDATA_HOST: ssh-ligademaestros.alwaysdata.net
+      ALWAYSDATA_USER: ligademaestros
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate release
+        run: |
+          python -m pip install --disable-pip-version-check -q -r requirements.txt pytest
+          pytest -q
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALWAYSDATA_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.ALWAYSDATA_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload immutable release
+        run: |
+          git archive --format=tar -o deploy.tar HEAD
+          scp deploy.tar "$ALWAYSDATA_USER@$ALWAYSDATA_HOST:/home/ligademaestros/deploy-$GITHUB_SHA.tar"
+
+      - name: Activate release without replacing persistent data
+        run: |
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
+          set -eu
+          SHA="$1"
+          HOME_DIR=/home/ligademaestros
+          RELEASE="$HOME_DIR/releases/$SHA"
+          ARCHIVE="$HOME_DIR/deploy-$SHA.tar"
+
+          mkdir -p "$RELEASE" "$HOME_DIR/runtime/data" "$HOME_DIR/runtime/backups"
+          tar -xf "$ARCHIVE" -C "$RELEASE"
+          rm "$ARCHIVE"
+          ln -sfn "$HOME_DIR/runtime/app.env" "$RELEASE/.env"
+
+          if [ ! -x "$HOME_DIR/venv/bin/python" ]; then
+            python -m venv "$HOME_DIR/venv"
+          fi
+          "$HOME_DIR/venv/bin/python" -m pip install --disable-pip-version-check -q -r "$RELEASE/requirements.txt"
+
+          if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ] && [ -x "$HOME_DIR/venv/bin/python" ]; then
+            cd "$HOME_DIR/current"
+            "$HOME_DIR/venv/bin/python" GESTIONAR_BACKUPS.py create --reason pre-deploy
+          fi
+
+          ln -sfn "$RELEASE" "$HOME_DIR/current"
+          cd "$HOME_DIR/current"
+          "$HOME_DIR/venv/bin/python" INICIALIZAR_PRODUCCION.py
+          REMOTE
+
+      - name: Restart website
+        env:
+          ALWAYSDATA_API_TOKEN: ${{ secrets.ALWAYSDATA_API_TOKEN }}
+          ALWAYSDATA_SITE_ID: ${{ secrets.ALWAYSDATA_SITE_ID }}
+        run: |
+          if [ -z "$ALWAYSDATA_API_TOKEN" ] || [ -z "$ALWAYSDATA_SITE_ID" ]; then
+            echo "Alwaysdata API token or site id is not configured."
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            --user "$ALWAYSDATA_API_TOKEN:" \
+            --request POST \
+            "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/restart/"
+
+      - name: Verify public health
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl --fail --silent --show-error \
+              "https://ligademaestros.alwaysdata.net/api/live/health"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
