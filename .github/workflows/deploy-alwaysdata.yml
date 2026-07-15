@@ -68,6 +68,11 @@ jobs:
             "$HOME_DIR/venv/bin/python" GESTIONAR_BACKUPS.py create --reason pre-deploy
           fi
 
+          if [ -d "$HOME_DIR/current" ] && [ ! -L "$HOME_DIR/current" ]; then
+            LEGACY="$HOME_DIR/releases/manual-current-$(date +%Y%m%d-%H%M%S)"
+            mv "$HOME_DIR/current" "$LEGACY"
+            echo "Archived the original current directory at $LEGACY"
+          fi
           ln -sfn "$RELEASE" "$HOME_DIR/current"
           cd "$HOME_DIR/current"
           "$HOME_DIR/venv/bin/python" INICIALIZAR_PRODUCCION.py
