@@ -10,7 +10,12 @@ bp = Blueprint("contest_routes", __name__)
 def get_contest():
     user = session.get('user') or {}
     jornada = request.args.get("j") or None
-    payload = build_contest_payload(jornada, user.get("id"))
+    if jornada and not str(jornada).isdigit():
+        jornada = None
+    try:
+        payload = build_contest_payload(jornada, user.get("id"))
+    except Exception:
+        payload = {"jornada": None, "galardones": {"jornadas": [], "meses": []}, "profile": None, "rows": []}
     return jsonify(payload)
 
 

@@ -8,13 +8,18 @@
     <title>Liga de Maestros - Humanos vs IAs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/quantum_pro.css', v=assets_v ~ '-v3-design-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/newspaper_theme.css', v=assets_v ~ '-newspaper-37') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/newspaper_cover.css', v=assets_v ~ '-newspaper-cover-14') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/quiz_page.css', v=assets_v ~ '-quiz-page-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/snake_gol_arcade.css', v=assets_v ~ '-snake-arcade-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/typewriter_system.css', v=assets_v ~ '-typewriter-6') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/smooth_ui.css', v=assets_v ~ '-smooth-2') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/games.css', v=assets_v ~ '-games-5') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/ticket_compact.css', v=assets_v ~ '-ticket-compact-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/legal.css', v=assets_v ~ '-legal-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}">
     <div class="app-shell">
@@ -48,6 +53,15 @@
 
             <div class="topbar-actions">
                 <div id="user-profile-nav" class="user-panel"></div>
+                <details class="topbar-legal-menu">
+                    <summary>Legal</summary>
+                    <div>
+                        <a href="/privacidad">Privacidad</a>
+                        <a href="/cookies">Cookies</a>
+                        <a href="/aviso-legal">Aviso legal</a>
+                        {% if user %}<a href="/cuenta">Mi cuenta</a>{% endif %}
+                    </div>
+                </details>
                 <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar">Actualizar</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
                 <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
@@ -57,13 +71,12 @@
         </header>
 
         <nav class="newspaper-page-nav" aria-label="Indice del diario">
-            <button class="active" type="button" data-page-action="ALL"><span>Portada</span><b>Pag. 1</b></button>
-            <button type="button" data-page-action="TICKET"><span>Quiniela</span><b>Pag. 2</b></button>
-            <button type="button" data-page-action="LIVE"><span>Directo</span><b>Pag. 3</b></button>
-            <button type="button" data-page-action="STANDINGS"><span>Ligas</span><b>Pag. 4</b></button>
-            <button type="button" data-page-action="SNAKE"><span>Snake gol</span><b>Pag. 5</b></button>
-            <button type="button" data-page-action="CONTEST"><span>La Peña</span><b>Pag. 6</b></button>
-            <button type="button" data-page-action="QUIZ"><span>Quiz</span><b>Pag. 7</b></button>
+            <button class="active" type="button" data-page-action="ALL"><span>Portada</span></button>
+            <button type="button" data-page-action="TICKET"><span>Quiniela</span></button>
+            <button type="button" data-page-action="LIVE"><span>Directo</span></button>
+            <button type="button" data-page-action="STANDINGS"><span>Ligas</span></button>
+            <button type="button" data-page-action="SNAKE"><span>Juegos</span></button>
+            <button type="button" data-page-action="CONTEST"><span>La Peña</span></button>
         </nav>
 
         <aside class="sidebar-left"></aside>
@@ -170,9 +183,21 @@
         </aside>
     </div>
     <div id="toast-container"></div>
+    <script defer src="{{ url_for('main.static_files', filename='js/utils.js', v=assets_v ~ '-utils-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/state.js', v=assets_v ~ '-state-3') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/logos.js', v=assets_v ~ '-logos-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/navigation.js', v=assets_v ~ '-navigation-2') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/live.js', v=assets_v ~ '-live-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/standings.js', v=assets_v ~ '-standings-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/contest.js', v=assets_v ~ '-contest-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/quiz.js', v=assets_v ~ '-quiz-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/pages/games_hub.js', v=assets_v ~ '-games-hub-9') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/arena.js', v=assets_v ~ '-arena-2') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-27') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/pages/cover_page.js', v=assets_v ~ '-cover-page-12') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/snake_gol_arcade.js', v=assets_v ~ '-snake-arcade-2') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/pages/ticket_page.js', v=assets_v ~ '-ticket-page-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/pages/cover_page.js', v=assets_v ~ '-cover-page-13') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/snake_gol_arcade.js', v=assets_v ~ '-snake-arcade-3') }}"></script>
 </body>
 </html>
 

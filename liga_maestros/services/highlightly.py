@@ -555,3 +555,77 @@ def trigger_highlightly_refresh_async(force=False, jornada=None):
         _highlightly_refresh_thread = threading.Thread(target=_runner, name="highlightly-refresh", daemon=True)
         _highlightly_refresh_thread.start()
         return True
+
+
+def fetch_highlightly_standings(league_id, season=None):
+    """Fetch standings for a league from Highlightly API.
+
+    Returns:
+        list of team dicts: [{n, pos, pj, pg, pe, pp, gf, gc, dg, pts}, ...]
+    """
+    if not reserve_highlightly_calls(1):
+        return []
+    headers = {"x-rapidapi-key": os.getenv("HIGHLIGHTLY_API_KEY", "")}
+    params = {"leagueId": league_id}
+    if season:
+        params["season"] = season
+    url = f"https://{config.HIGHLIGHTLY_HOST}/standings"
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+        record_highlightly_success()
+        data = response.json()
+        groups = data.get("groups", [])
+        if not groups:
+            return []
+        standings_raw = groups[0].get("standings", [])
+        teams = []
+        for idx, entry in enumerate(standings_raw, 1):
+            total = entry.get("total", {})
+            team_info = entry.get("team", {})
+            wins = total.get("wins", 0)
+            draws = total.get("draws", 0)
+            gf = total.get("scoredGoals", 0)
+            gc = total.get("receivedGoals", 0)
+            pts = wins * 3 + draws
+            teams.append({
+                "n": team_info.get("name", ""),
+                "pos": idx,
+                "pj": total.get("games", 0),
+                "pg": wins,
+                "pe": draws,
+                "pp": total.get("loses", 0),
+                "gf": gf,
+                "gc": gc,
+                "dg": gf - gc,
+                "pts": pts,
+                "logo": team_info.get("logo", ""),
+                "form": [],
+                "streak": "",
+                "last5_pts": 0,
+            })
+        return teams
+    except requests.RequestException as exc:
+        record_highlightly_failure(exc)
+        return []
+
+
+def fetch_all_standings(season=None):
+    """Fetch standings for all configured leagues.
+
+    Returns:
+        list of league dicts: [{name, teams, total_matches, source}, ...]
+    """
+    leagues = []
+    for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
+        if league_name.upper() in ("FRIENDLIES",):
+            continue
+        teams = fetch_highlightly_standings(league_id, season=season)
+        if teams:
+            leagues.append({
+                "name": league_name,
+                "teams": teams,
+                "total_matches": 0,
+                "source": "highlightly",
+            })
+    return leagues

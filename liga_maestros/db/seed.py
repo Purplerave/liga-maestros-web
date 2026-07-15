@@ -1,0 +1,58 @@
+"""Public, repeatable seed import for empty production databases."""
+import json
+import os
+
+import config
+
+
+PUBLIC_SEED_TABLES = (
+    "equipos",
+    "equipo_aliases",
+    "equipos_aliases",
+    "clasificacion",
+    "resultados",
+    "consenso",
+    "historico",
+    "predicciones",
+    "quiz_preguntas",
+)
+
+
+def _table_columns(conn, table):
+    return {row[1] for row in conn.execute(f'PRAGMA table_info("{table}")')}
+
+
+def import_public_seed_if_empty(conn, seed_path=None):
+    """Import public competition data once; never imports accounts or comments."""
+    seed_path = seed_path or config.PRODUCTION_SEED_PATH
+    count = conn.execute("SELECT COUNT(*) FROM resultados").fetchone()[0]
+    if count or not seed_path or not os.path.exists(seed_path):
+        return False
+
+    with open(seed_path, "r", encoding="utf-8") as fh:
+        payload = json.load(fh)
+
+    tables = payload.get("tables") or {}
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        for table in PUBLIC_SEED_TABLES:
+            block = tables.get(table) or {}
+            columns = block.get("columns") or []
+            rows = block.get("rows") or []
+            if not columns or not rows:
+                continue
+            available = _table_columns(conn, table)
+            if not set(columns).issubset(available):
+                missing = sorted(set(columns) - available)
+                raise RuntimeError(f"Semilla incompatible en {table}: {missing}")
+            quoted = ", ".join(f'"{column}"' for column in columns)
+            placeholders = ", ".join("?" for _ in columns)
+            conn.executemany(
+                f'INSERT INTO "{table}" ({quoted}) VALUES ({placeholders})',
+                rows,
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return True

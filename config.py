@@ -16,6 +16,11 @@ SEED_DATA_DIR = os.path.join(BASE_DIR, "data")
 BOOTSTRAP_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "LIGA_MAESTROS_PRO.db") if os.getenv("RENDER") else os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
 DB_PATH = os.getenv("DB_PATH", DEFAULT_DB_PATH)
+PRODUCTION_SEED_PATH = os.getenv(
+    "PRODUCTION_SEED_PATH",
+    os.path.join(BASE_DIR, "data", "bootstrap", "production_seed.json"),
+)
+DB_BACKUP_DIR = os.getenv("DB_BACKUP_DIR", os.path.join(DATA_DIR, "backups"))
 
 def data_path(*parts):
     return os.path.join(DATA_DIR, *parts)
@@ -42,11 +47,14 @@ HIGHLIGHTLY_LEAGUES = {
     "BUNDESLIGA": 67162,
     "LIGUE 1": 52695,
     "UEFA CHAMPIONS LEAGUE": 2486,
-    "FRIENDLIES": 9294,
-    "VEIKKAUSLIIGA": 208428,
-    "YKKOSLIIGA": 925821,
-    "ALLSVENSKAN": 96947,
-    "SUPERETTAN": 97798,
+}
+
+# Ligas para las que se muestran clasificaciones
+STANDINGS_LEAGUES = {
+    "PREMIER LEAGUE": 33973,
+    "BUNDESLIGA": 67162,
+    "LIGUE 1": 52695,
+    "UEFA CHAMPIONS LEAGUE": 2486,
 }
 
 # API-FOOTBALL / API-SPORTS: respaldo puntual, no motor de directo.
@@ -84,6 +92,9 @@ NEWS_GENERIC_KEYWORDS = [
 # Alias de Equipos para Logos
 TEAM_LOGO_ALIASES = {
     "ATHLETIC": "ATHLETIC CLUB",
+    "ATH CLUB": "ATHLETIC CLUB",
+    "R OVIEDO": "OVIEDO",
+    "REAL OVIEDO": "OVIEDO",
     "FC BARCELONA": "BARCELONA",
     "BARCA": "BARCELONA",
     "VILLARREAL CF": "VILLARREAL",
@@ -95,6 +106,8 @@ TEAM_LOGO_ALIASES = {
     "GETAFE CF": "GETAFE",
     "RAYO": "RAYO VALLECANO",
     "VALENCIA CF": "VALENCIA",
+    "R MADRID": "REAL MADRID",
+    "REAL MADRID": "REAL MADRID",
     "R SOCIEDAD": "REAL SOCIEDAD",
     "ELCHE CF": "ELCHE",
     "LEVANTE UD": "LEVANTE",

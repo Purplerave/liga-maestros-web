@@ -11,6 +11,7 @@ from .news import bp as news_bp
 from .teams_routes import bp as teams_bp
 from .user import bp as user_bp
 from .quiz import bp as quiz_bp
+from .legal import bp as legal_bp
 
 
 def register_routes(app):
@@ -26,3 +27,4 @@ def register_routes(app):
     app.register_blueprint(teams_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(quiz_bp)
+    app.register_blueprint(legal_bp)

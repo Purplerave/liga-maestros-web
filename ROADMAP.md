@@ -1,225 +1,143 @@
-# Roadmap Liga Maestros
+# Roadmap Liga de Maestros
 
-## Auditorias externas 2026-06-20
+Actualizado: 2026-07-15
 
-Objetivo: aplicar solo lo que mejora fiabilidad o producto real, sin meter mas ruido visual.
+## Objetivo
 
-Aplicado:
-- [x] Quitar API key de Highlightly incrustada en `app.py`; ahora solo se lee desde `.env`.
-- [x] Quitar fallback publico de `SECRET_KEY`; si falta, la app no arranca.
-- [x] Endurecer cookies de sesion: `HttpOnly`, `SameSite=Lax` y `Secure` configurable.
-- [x] Blindar `/api/live/refresh` y `/api/live/probe` para uso local/admin.
-- [x] Crear `/api/live/health` para leer el estado del collector sin lanzar scrapers ni API.
-- [x] Evitar que Highlightly arranque si no hay key o si esta desactivado.
-- [x] Activar SQLite con `busy_timeout`, `foreign_keys`, `journal_mode=WAL` y `synchronous=NORMAL` para reducir bloqueos durante directos.
-- [x] Reservar llamadas Highlightly antes de hacer la peticion, con bloqueo interno, para respetar mejor el limite diario.
-- [x] Hacer que el collector no muera en silencio: captura errores del bucle principal y escribe `data/LIVE_COLLECTOR_HEALTH.json`.
-- [x] Cerrar la quiniela antes del primer partido con margen configurable: `PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF` (por defecto 15).
-- [x] Quitar fallback silencioso a Jornada 61 si no hay datos.
-- [x] Hacer mas robusto el JSON de guardado de quiniela y comentarios.
-- [x] Validar en servidor que cada quiniela tenga 15 signos y que el Pleno al 15 tenga formato Quiniela valido.
-- [x] Hacer configurable el acceso admin por localhost con `ALLOW_LOCAL_ADMIN` para despliegues futuros.
-- [x] La auditoria de la Pena ya valida dobles contra Programa/Consenso actual.
-- [x] Resolver banderas locales de Austria e Iraq para J68.
-- [x] Crear contrato canonico `/api/teams/canonical` y enviarlo tambien en `/api/liga/data`.
-- [x] Empezar a consumir el contrato canonico de logos desde `quantum_final.js` antes de los mapas locales.
-- [x] Anadir Radar de Sorpresas compacto en la vista Quiniela: senala 2-3 partidos con consenso debil, desacuerdo Programa/Consejo/usuario o mercado dividido.
-- [x] Anadir reintentos con espera progresiva al scraper de Quiniela15 directo.
-- [x] Hacer que `with get_db()` cierre realmente SQLite mediante `ClosingConnection`.
-- [x] Guardar quiniela con transaccion explicita `BEGIN IMMEDIATE` + rollback si falla entre DELETE e INSERT.
-- [x] Usar `team_contract.aliases` en el lookup frontend de escudos antes de los alias hardcodeados.
-- [x] Anadir circuit breaker de Highlightly con cooldown configurable y exponerlo en `/api/live/health`.
-- [x] Compactar la vista principal de Quiniela: 15 partidos visibles en 1920x860, Radar fuera de la home, comentarios colapsados, filas/chips mas finos y partido+marcador mas agrupados.
-- [x] Simplificar navegacion superior: selector principal de vista + selector secundario contextual solo para Ligas, La Pena o Clasificaciones.
-- [x] Quitar el boton Directo duplicado de la cabecera; Directo queda como vista principal y el probe manual no ocupa espacio visual.
+Llegar al inicio de la temporada 2026/27 con una beta publica estable, facil de
+actualizar cada semana y capaz de conservar todo el historico de la competicion.
+La prioridad es fiabilidad primero, claridad visual despues y nuevas funciones
+solo cuando aporten una razon real para volver.
 
-No aplicado ahora:
-- [ ] Reescribir `LIVE_COLLECTOR.py` como APScheduler/systemd: importante para despliegue real, no urgente en local.
-- [ ] Pasar el presupuesto API de JSON + lock de proceso a lock/lease persistente en SQLite si se despliega con varios procesos.
-- [ ] Eliminar definitivamente los mapas/alias duplicados de JS cuando el contrato canonico cubra todos los equipos historicos.
-- [ ] Limpiar contrato DOM-JS-CSS: quitar referencias a nodos inexistentes y caminos de render muertos.
-- [ ] Cache/materializacion de `build_contest_payload`: conviene hacerlo, pero requiere invalidacion clara para no mostrar rankings viejos.
-- [ ] Render parcial de `renderArena`: mejora real, pero tocarlo ahora tiene riesgo alto de romper interaccion/foco.
-- [ ] Revisar ranking historico para eliminar supuestos tipo "no se solapan" y hacerlo recalculable.
-- [ ] Modularizar `static/js/quantum_final.js`: necesario a medio plazo, demasiado grande para tocar de golpe.
-- [ ] Eliminar `min-width: 1116px` y rehacer responsive: pendiente, pero requiere mirar capturas y no romper la vista escritorio.
-- [ ] Mover comentarios fuera del lateral fijo: buena idea, decidir con pantalla delante.
-- [ ] Rematar UX de menus con pruebas de usuario real: ya hay base principal/secundaria, falta decidir nombres finales y si Directo merece vista propia o solo ticker.
-- [ ] Resumen post-jornada compartible: idea fuerte de retencion.
-- [ ] Duelo usuario vs IA/humano: idea fuerte, requiere persistencia.
-- [ ] Rachas/logros reales: solo los que tengan sentido, no medallas tontas.
+## Estado actual
 
-## Bloque de saneamiento 2026-06-10
+### Arquitectura y seguridad
 
-Objetivo: reducir el caos semanal y separar bien Programa, Consejo IA, Maestros, La Pena y usuario.
+- [x] Backend Flask organizado con Blueprints y servicios independientes.
+- [x] JavaScript principal dividido en modulos: estado, navegacion, arena,
+  directo, clasificaciones, concurso, logos, eventos y utilidades.
+- [x] `quantum_final.js` reducido a inicializacion y flujos compartidos.
+- [x] Claves y configuracion sensible fuera del codigo.
+- [x] Cookies endurecidas y endpoints administrativos protegidos.
+- [x] Rate limiting en guardado de quinielas, juegos y acciones sensibles.
+- [x] SQLite configurado con WAL, `busy_timeout` y transacciones explicitas.
+- [x] CI con tests, compilacion y auditoria de dependencias informativa.
+- [x] Despliegue beta preparado para Render con web y collector coordinados.
+- [x] Arranque sobre disco vacio con esquema completo y semilla publica sin datos privados.
+- [x] Backups SQLite automaticos, rotativos y verificados con `integrity_check`.
+- [x] Privacidad, cookies, aviso legal y eliminacion transaccional de cuenta.
 
-Hecho:
-- [x] Crear `data/ECOSISTEMA_PARTICIPANTES.json` como fuente de verdad de roles.
-- [x] Corregir `data/PARTICIPANTES_MAESTROS.json`: Gemini vuelve a Maestros y Consejo IA queda separado.
-- [x] Anadir columna visible para `consejo_ias`/`consenso` en la tabla.
-- [x] Corregir puntuacion del Pleno al 15 para comparar por formato Quiniela (`M-0` equivale a `3-0`, `4-0`, etc.).
-- [x] Corregir J67: Consejo IA y usuario tenian 14/15; faltaba el partido 14 y se completo con `X` segun consenso cargado.
-- [x] Crear `AUDITAR_JORNADA_LIGA_MAESTROS.py`.
-- [x] Crear `OPERACION_SEMANAL.md`.
-- [x] Crear `COMPROBAR_JORNADA.bat`.
-- [x] Generar auditorias `data/auditorias/J67_estado.md` y `data/auditorias/J66_estado.md`.
+### Producto
 
-Estado actual:
-- J67 queda sin bloqueos.
-- J67 avisa que faltan quinielas individuales de Claude, Grok, ChatGPT, Copilot y Gemini. Esto es correcto si la jornada se juega como Programa + Consejo IA.
-- J66 queda cerrada sin bloqueos; aparece un ID historico obsoleto (`manu`) que no debe mostrarse como maestro.
+- [x] Portada competitiva con estado del usuario y pulso de la jornada.
+- [x] Vista Quiniela compacta con partidos, Maestros, Pena y usuario.
+- [x] Quiniela de escritorio reducida de 64 a 48 px por fila: 12 partidos
+  visibles en 1280x720 sin eliminar informacion.
+- [x] Perfil personal, clasificaciones general/mensual y palmares.
+- [x] Clasificaciones de Primera y Segunda.
+- [x] Vista de directo multiliga y estado de salud del collector.
+- [x] Contrato canonico inicial para equipos, alias y escudos.
+- [x] Juegos integrados con rankings: Snake Gol, Arkanoid y Maestros Invaders.
+- [x] J73 detectada y preparada para importacion.
 
-## Intervencion actual: Vista Quiniela con tension
+## Prioridad 0: beta fiable
 
-Fecha: 2026-06-06
+Estas tareas deben quedar terminadas antes de considerar la web lista para la
+temporada.
 
-Backup antes de tocar:
-`C:\Users\Mortadelo\Desktop\QUINIELAs\LIGA_MAESTROS\BACKUP_PRE_REDISENO_TENSION_20260606_133904`
+### Directo y datos
 
-Objetivo:
-Convertir la vista principal de Quiniela en una pantalla compacta de lectura competitiva, no en una parrilla administrativa de columnas.
+- [ ] Crear tests de integracion para el collector live y sus cambios de estado:
+  programado, directo, descanso, suspendido y finalizado.
+- [ ] Crear fixtures de proveedores para probar resultados sin gastar API.
+- [ ] Probar scrapers de Quiniela15 y calendarios ante cambios de HTML.
+- [ ] Evitar duplicados de partidos entre proveedores mediante el contrato
+  canonico de equipos y competiciones.
+- [ ] Registrar errores estructurados del collector y mostrar una alerta
+  administrativa cuando deje de actualizar.
+- [ ] Mantener las llamadas API completamente separadas de las visitas y
+  recargas de usuarios.
 
-Direccion acordada:
-- Mantener los 15 partidos visibles como prioridad.
-- Cambiar la fila principal hacia el modelo:
-  `# | Partido | Consenso + signos | Resultado`
-- Mostrar el partido de carrerilla: local - visitante, con hora o marcador.
-- Anadir barra compacta de consenso 1/X/2 cuando existan porcentajes.
-- Mostrar chips compactos para Programa, Maestro destacado, Pena y Tu.
-- Reducir o esconder la parrilla completa de Maestros en la home; el detalle debe ir al desplegable/fila expandida.
-- Marcar solo los focos importantes de la jornada:
-  - Fijo
-  - Partido abierto
-  - Empate oculto
-  - Golpe del programa
-  - Trampa del consenso
-  - Pleno caliente
-- Evitar nuevas llamadas API. Esto es solo presentacion usando datos ya cargados.
+### Historico reproducible
 
-No hacer en este bloque:
-- No reescribir backend.
-- No tocar scheduler/API live.
-- No crear menus nuevos grandes.
-- No meter noticias ni texto editorial largo.
-- No mezclar Pena con Maestros ni simular usuarios sin marcarlo.
+- [ ] Guardar un snapshot cerrado de cada jornada con partidos, horarios,
+  pronosticos, quinielas, resultados y clasificaciones.
+- [ ] Poder recalcular puntuaciones y rankings desde snapshots sin depender del
+  estado actual de la base de datos.
+- [x] Crear copia automatica y rotativa de SQLite cada seis horas.
+- [ ] Marcar automaticamente backups de apertura y cierre de cada jornada.
+- [ ] Anadir una comprobacion semanal unica que valide los 15 partidos, horarios,
+  participantes, logos, cierre y presupuesto API.
 
-Plan tecnico:
-- Revisar `templates/liga_index.html`, `static/js/quantum_final.js` y `static/css/quantum_pro.css`.
-- Localizar `renderArena`, `renderMatchCard`/render de filas y datos de consenso.
-- Implementar una primera version reversible de fila compacta.
-- Probar que no rompe:
-  - cambio de jornada
-  - vista Quiniela
-  - Directo basico
-  - tabs/botones laterales
-  - guardado de boleto si aplica
-- Hacer captura final antes de darlo por bueno.
+### J73 y operacion semanal
 
-Estado: vivo  
-Última actualización: 2026-05-26
+- [ ] Importar J73 cuando sus equipos y horarios sean definitivos.
+- [ ] Cargar Programa, Maestros, Pena y quiniela del usuario sin mezclar roles.
+- [ ] Documentar un unico comando de preparacion y otro de auditoria final.
+- [ ] Confirmar el procedimiento de importacion en Render sin subir SQLite a Git.
 
-## Ya resuelto
+## Prioridad 1: experiencia terminada
 
-- Web principal operativa con jornada 64 y 65
-- Refresco Highlightly estabilizado
-- Modo `Directo` básico
-- Peña separada de Maestros visibles
-- Escudos con mapa fijo + fallback
-- Jornada 65 cargada con partidos y horarios
+### Interfaz
 
-## Prioridad alta
+- [ ] Revisar visualmente todas las vistas a 1280x720, 1920x1080 y movil.
+- [ ] Eliminar los `min-width` heredados que impidan un responsive real.
+- [ ] Mantener estable la cabecera al cambiar de seccion.
+- [ ] Completar la separacion del CSS grande por componentes y paginas sin
+  acumular nuevas capas de overrides.
+- [ ] Revisar accesibilidad: foco visible, contraste, teclado y tamanos minimos.
 
-### 1. Identidad visual
-- [x] Crear logo base de Liga Maestros
-- [ ] Ajustar branding superior para que tenga más presencia
-- [ ] Unificar icono/logo en topbar, capturas y posibles vistas futuras
+### Perfil y retorno semanal
 
-### 2. Producto competitivo
-- [ ] Clasificación mensual
-- [ ] Ranking de jornada
-- [ ] Perfil personal
-  - [ ] posición actual
-  - [ ] puntos totales
-  - [ ] jornadas jugadas
-  - [ ] aciertos
-  - [ ] media por jornada
-  - [ ] mejor posición
-  - [ ] mejor jornada
-- [ ] Evolución personal por jornadas
+- [ ] Completar la evolucion por jornadas del usuario y la comparacion contra
+  cada Maestro.
+- [ ] Mostrar rachas que tengan significado: victorias de jornada, top 3 y
+  mejores marcas; no medallas arbitrarias.
+- [ ] Crear resumen post-jornada compartible con aciertos, posicion, Maestros
+  superados y cambio respecto a la jornada anterior.
+- [ ] Anadir historial navegable por jornada y mes sin listas interminables.
+- [ ] Crear rankings semanales de los juegos y reinicio controlado por temporada.
 
-### 3. Palmarés
-- [ ] Ganadores por jornada
-- [ ] Ganadores por mes
-- [ ] Veces líder
-- [ ] Veces top 3
-- [ ] Mejor racha top 3
+## Prioridad 2: temporada 2026/27
 
-### 4. Quiniela / motor
-- [ ] Ejecutar `Programa` para J65
-- [ ] Volcar columna del programa en la web
-- [ ] Definir rutina híbrida para próxima temporada:
-  - [ ] IAs visibles
-  - [ ] peña oculta
-  - [ ] programa
-  - [ ] compendio final
-- [ ] Crear capa de contexto 2026/27 para alimentar programa e IAs:
-  - [ ] Altas y bajas confirmadas por equipo
-  - [ ] Entrenador nuevo o continuidad
-  - [ ] Salidas clave y lesionados de larga duracion
-  - [ ] Minutos y resultados de pretemporada
-  - [ ] Senales manuales: equipo salvado, rotaciones, plantilla en construccion
-  - [ ] Fuentes candidatas: Marca mercado de fichajes, webs oficiales, LaLiga, prensa local
-  - [ ] Rumores separados de confirmados, con baja confianza
-  - [ ] Ficha compacta por equipo para prompts y motor
+- [ ] Crear ficha historica semanal por equipo: posicion, GF, GC, forma, local y
+  visitante.
+- [ ] Incorporar contexto confirmado de pretemporada: entrenador, altas, bajas,
+  lesiones y minutos; separar siempre hechos de rumores.
+- [ ] Guardar las probabilidades originales antes del partido para permitir
+  backtests honestos sin fuga de informacion.
+- [ ] Comparar Programa, mercado, Maestros y Pena con metricas acumuladas.
+- [ ] Mejorar el modelo solo cuando un backtest reproducible demuestre ganancia.
 
-## Prioridad media
+## Funciones posteriores a la beta
 
-### 5. Vista Directo / War Room
-- [ ] Solo visible cuando haya directos reales
-- [ ] Lista limpia de partidos live multiliga
-- [ ] Detectar mejor estados inconsistentes del proveedor
-- [ ] Mostrar resultado final aunque el proveedor deje `SCHEDULED`
+- [ ] Duelos usuario contra Maestro o contra otro usuario.
+- [ ] Ligas privadas de amigos.
+- [ ] Nuevos juegos solo si tienen ranking, reglas claras y buena rejugabilidad.
+- [ ] Notificaciones opcionales de incidencias o goles para administracion.
 
-### 6. Arena principal
-- [ ] Compactar más la topbar
-- [ ] Afilar tabla principal
-- [ ] Mejorar jerarquía de clasificación derecha
-- [ ] Revisar espaciado de columnas en vistas de ligas
+## Decisiones aplazadas
 
-### 7. Datos estables
-- [ ] Consolidar base fija de escudos
-- [ ] Consolidar alias de equipos
-- [ ] Separar mejor datos de competición, jornada y snapshots históricos
+No se abordaran antes de estabilizar la beta:
 
-## Prioridad baja
+- Migracion de SQLite a SQLAlchemy/Alembic.
+- Celery y Redis para el collector.
+- Sentry y servicios externos adicionales.
+- Docker como requisito del desarrollo local.
+- Noticias automaticas o contenido de relleno.
+- Monetizacion, premium o apertura publica del repositorio.
 
-### 8. Comunidad
-- [ ] Menú/área de Peña aparte
-- [ ] Historial de comentarios por jornada
-- [ ] Foro ligero si de verdad aporta
+Estas opciones se reevaluaran cuando la web tenga usuarios reales o la escala
+demuestre que la solucion actual se queda corta.
 
-### 9. Próxima temporada
-- [ ] Guardado sistemático por jornada:
-  - [ ] predicción de cada IA
-  - [ ] predicción del programa
-  - [ ] boleto final jugado
-  - [ ] resultado real
-  - [ ] ganador de jornada
-  - [ ] ganador de mes
-- [ ] Preparar soporte para jornadas mixtas con Mundial, amistosos o torneos cortos
-- [ ] Preparar dossier de pretemporada antes de la J1:
-  - [ ] Snapshot por equipo: plantilla, fichajes, bajas, entrenador, objetivo probable
-  - [ ] Peso manual de contexto: muy positivo / positivo / neutro / alerta / riesgo
-  - [ ] Archivo historico para comparar lo previsto con lo que realmente pasa
+## Criterio de beta lista
 
-## Decisiones ya tomadas
+La beta se considera lista cuando:
 
-- No meter medallas raras tipo `rey del empate`
-- Sí apostar por prestigio simple:
-  - ganador de jornada
-  - líder mensual
-  - top 3
-  - rachas reales
-  - récords personales
-- No llenar la home de bloques con texto inútil
-- Si algo no aporta de un vistazo, fuera
+1. Una jornada completa se importa, cierra, actualiza y puntua sin correcciones
+   manuales.
+2. Los resultados pueden recalcularse desde snapshots.
+3. Existe backup restaurable de la base de datos.
+4. Collector y scrapers tienen pruebas con datos simulados.
+5. No hay errores de consola ni solapamientos en las vistas principales.
+6. La actualizacion semanal se ejecuta con dos comandos documentados.

@@ -1,0 +1,50 @@
+/* Quiniela desktop: alta densidad sin ocultar informacion. */
+@media (min-width: 900px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
+        height: 48px !important;
+        padding: 3px 6px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-number {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.78rem !important;
+        line-height: 26px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-layout {
+        grid-template-columns: minmax(0, 1fr) 70px !important;
+        gap: 8px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-meta-line .match-score-badge,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table .match-score-badge.is-scheduled-time {
+        width: 68px !important;
+        min-width: 68px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        padding: 0 5px !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* La barra de consenso no se pinta en esta vista: no reserves una fila vacia. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-consensus-cell {
+        grid-template-rows: 32px !important;
+        gap: 0 !important;
+        padding: 3px 6px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip {
+        min-height: 30px !important;
+        height: 30px !important;
+        padding: 1px 2px !important;
+        grid-template-rows: 10px 18px !important;
+    }
+}

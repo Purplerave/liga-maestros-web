@@ -9,7 +9,7 @@ El repo debe incluir:
 - `templates/`;
 - `static/`;
 - `data/` con JSON necesarios;
-- `DATOS/LIGA_MAESTROS_PRO.db` como base inicial beta;
+- `data/bootstrap/production_seed.json` como semilla publica regenerable;
 - `requirements.txt`;
 - `render.yaml`;
 - `.env.example`.
@@ -51,13 +51,58 @@ GOOGLE_CLIENT_ID=<cliente OAuth de Google>
 GOOGLE_CLIENT_SECRET=<secreto OAuth de Google>
 HIGHLIGHTLY_API_KEY=<clave Highlightly/RapidAPI>
 ADMIN_EMAILS=<tu correo si quieres permisos admin>
+LEGAL_OWNER_NAME=<responsable de la web>
+LEGAL_OWNER_ID=<identificacion legal>
+LEGAL_OWNER_ADDRESS=<direccion de contacto>
+LEGAL_CONTACT_EMAIL=<correo publico de privacidad>
 ```
 
-Opcional si contratas/configuras disco persistente en Render:
+El `render.yaml` actual esta preparado como **beta de un solo servicio**:
 
-```env
-DB_PATH=/var/data/LIGA_MAESTROS_PRO.db
+- 1 web service con disco persistente en `/var/data`;
+- SQLite en `/var/data/LIGA_MAESTROS_PRO.db`;
+- inicializacion automatica desde una semilla sin cuentas ni datos privados;
+- backup SQLite verificado cada 6 horas, con 14 copias de retencion;
+- collector live interno activado con `WEB_COLLECTOR_ENABLED=1`;
+- Gunicorn con `--workers 1 --threads 8` para evitar dos collectors simultaneos.
+
+El disco persistente de Render requiere un servicio de pago. No publiques esta
+configuracion sobre una instancia efimera: los usuarios y quinielas se perderian.
+
+## Alternativa gratuita: Alwaysdata
+
+La beta tambien puede ejecutarse en el plan gratuito de Alwaysdata con un unico
+worker y SQLite persistente. La disposicion preparada es:
+
+```text
+/home/ligademaestros/current -> version activa
+/home/ligademaestros/releases/ -> versiones inmutables
+/home/ligademaestros/runtime/ -> base, datos, secretos y backups persistentes
+/home/ligademaestros/venv/ -> entorno Python compartido
 ```
+
+El sitio debe configurarse como `User program`:
+
+```text
+Working directory: /home/ligademaestros/current
+Command: /home/ligademaestros/venv/bin/gunicorn --workers 1 --threads 4 --timeout 120 --bind $IP:$PORT app:app
+Address: ligademaestros.alwaysdata.net
+Idle time: 0
+```
+
+El workflow `.github/workflows/deploy-alwaysdata.yml` publica automaticamente
+cada `push` a `main`, crea un backup antes de activar la nueva version y comprueba
+la salud publica. Requiere estos secretos de GitHub:
+
+```text
+ALWAYSDATA_SSH_KEY
+ALWAYSDATA_KNOWN_HOSTS
+ALWAYSDATA_API_TOKEN
+ALWAYSDATA_SITE_ID
+```
+
+El plan gratuito queda limitado al subdominio de Alwaysdata, 256 MB de RAM y uso
+no comercial. No se deben ejecutar varios workers ni duplicar el collector.
 
 ## Google OAuth
 
@@ -75,17 +120,61 @@ http://localhost:5000/authorize
 
 ## Base de datos
 
-Para beta rapida se sube `DATOS/LIGA_MAESTROS_PRO.db`.
+La base privada nunca se sube a Git. En el primer despliegue,
+`INICIALIZAR_PRODUCCION.py` crea el esquema completo e importa
+`data/bootstrap/production_seed.json`. La semilla conserva competicion e
+historico publico, pero excluye usuarios, correos, comentarios y actividad privada.
 
-Advertencia: en Render sin disco persistente, los cambios hechos en SQLite pueden perderse al redeploy/recrear instancia. Vale para probar online. Para produccion real, el siguiente paso sera migrar a PostgreSQL o configurar persistencia.
+Para regenerarla despues de actualizar el historico local:
 
-Si defines `DB_PATH` apuntando a un disco persistente y la DB no existe ahi, la app copia automaticamente la DB inicial incluida en `DATOS/LIGA_MAESTROS_PRO.db`.
+```powershell
+python EXPORTAR_SEMILLA_PRODUCCION.py
+```
 
-Nota Render importante: un Persistent Disk solo es accesible por la instancia del servicio al que se adjunta. No sirve como disco compartido entre `web` y `worker`. Si se separa `LIVE_COLLECTOR.py` como worker en produccion, antes hay que mover el estado compartido a Postgres/Redis o hacer que el worker actualice la web por API HTTP autenticada.
+La app tambien inicializa la base al arrancar, por lo que el `initialDeployHook`
+es una comprobacion adicional y no un punto unico de fallo.
+
+Nota Render importante: un Persistent Disk solo es accesible por la instancia del servicio al que se adjunta. Por eso la beta no usa un worker separado. Si mas adelante se separa `LIVE_COLLECTOR.py` como worker, antes hay que mover el estado compartido a Postgres/Redis o hacer que el worker actualice la web por API HTTP autenticada.
 
 ## Directo / Highlightly
 
-La web puede lanzar refrescos live desde endpoints internos ya existentes cuando hay uso. Para un directo fuerte 24/7, el siguiente paso sera montar un worker/cron con almacenamiento persistente compartido o migrar la DB a PostgreSQL.
+El refresco live no depende de que los usuarios recarguen la web. En Render lo ejecuta el collector interno:
+
+- `WEB_COLLECTOR_ENABLED=1`
+- `WEB_COLLECTOR_INTERVAL_SECONDS=60`
+- `WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS=60`
+
+El collector respeta la ventana de jornada, el limite diario y el circuit breaker. El estado se consulta en:
+
+```text
+/api/live/health
+/api/sync/status
+```
+
+Para un directo fuerte con varios procesos o servicios, el siguiente paso sera PostgreSQL/Redis.
+
+## Backups
+
+Render guarda las copias en `/var/data/backups`. Operaciones manuales:
+
+```bash
+python GESTIONAR_BACKUPS.py create --reason antes-jornada
+python GESTIONAR_BACKUPS.py list
+python GESTIONAR_BACKUPS.py verify /var/data/backups/NOMBRE.db
+```
+
+Una copia solo se conserva si supera `PRAGMA integrity_check`. Para restaurar,
+deten el servicio, conserva primero la base actual y sustituye `DB_PATH` por una
+copia verificada.
+
+## Antes de abrir al publico
+
+- rellenar todas las variables `LEGAL_*`;
+- comprobar `/privacidad`, `/cookies`, `/aviso-legal` y `/cuenta`;
+- probar login, guardado y eliminacion de una cuenta de prueba;
+- reiniciar el servicio y confirmar que los datos permanecen;
+- crear y verificar un backup manual;
+- ejecutar una jornada completa en staging.
 
 ## Revisiones con otra IA
 

@@ -10,6 +10,7 @@ from ..services.payloads.league_matches import build_all_league_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload
+from ..services.multi_standings import build_multi_league_standings
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
 from ..utils import build_team_contract, load_team_logos
@@ -31,6 +32,8 @@ def get_liga_data():
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
+        multi_league_leagues = build_multi_league_standings(standings)
+        multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = _detect_jornada_liga(conn)
         match_info = _load_and_repair_match_info(jornada, partidos)
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
@@ -55,6 +58,7 @@ def get_liga_data():
             "partidos": partidos,
             "all_league_matches": all_league_matches,
             "standings": standings,
+            "multi_league_standings": multi_league_standings,
             "team_logos": team_logos,
             "team_contract": build_team_contract(),
             "participant_contract": participant_contract,

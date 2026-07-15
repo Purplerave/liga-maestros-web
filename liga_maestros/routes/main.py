@@ -20,8 +20,23 @@ def _get_assets_version():
         os.path.join(config.BASE_DIR, "static", "css", "typewriter_system.css"),
         os.path.join(config.BASE_DIR, "static", "css", "newspaper_cover.css"),
         os.path.join(config.BASE_DIR, "static", "css", "pages", "quiz_page.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "pages", "legal.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "pages", "ticket_compact.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "snake_gol_arcade.css"),
+        os.path.join(config.BASE_DIR, "static", "js", "utils.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "state.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "logos.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "navigation.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "live.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "standings.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "contest.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "quiz.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "arena.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "events.js"),
         os.path.join(config.BASE_DIR, "static", "js", "quantum_final.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "pages", "ticket_page.js"),
         os.path.join(config.BASE_DIR, "static", "js", "pages", "cover_page.js"),
+        os.path.join(config.BASE_DIR, "static", "js", "snake_gol_arcade.js"),
         os.path.join(config.BASE_DIR, "static", "img", "ligademaestroslogo_trans.png"),
     ]
     mtimes = []
@@ -48,7 +63,8 @@ def index():
     try:
         return render_template('liga_index.html', jornada=j, user=user, assets_v=_get_assets_version())
     except Exception:
-        return f"La plantilla no se encontro. Jornada actual: {j}", 200
+        from markupsafe import escape
+        return f"La plantilla no se encontro. Jornada actual: {escape(j)}", 500
 
 
 @bp.route('/static/<path:filename>')
@@ -66,3 +82,8 @@ def static_files(filename):
     response = send_from_directory(os.path.join(config.BASE_DIR, "static"), filename, max_age=max_age)
     response.headers["Cache-Control"] = cache_control
     return response
+
+
+@bp.route('/juegos/<path:filename>')
+def juegos_files(filename):
+    return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
