@@ -8,23 +8,36 @@ Objetivo: que cada jornada salga igual de limpia sin revisar todo a mano.
 - Confirmar que hay 15 partidos en `resultados`.
 - Confirmar horas y fechas antes de generar predicciones.
 
-Comando de control:
+Camino rapido recomendado:
 
 ```powershell
-python AUDITAR_JORNADA_LIGA_MAESTROS.py --jornada 67
+# 1) Ver que extrae Quiniela15 sin escribir nada
+python SCRAPE_QUINIELA15_PROXIMA.py --dry-run
+
+# 2) Si esta bien, generar archivos base
+python SCRAPE_QUINIELA15_PROXIMA.py
+
+# 3) Importar a Liga de Maestros. Cambia N por la jornada nueva.
+python IMPORTAR_PROGRAMA_JORNADA.py --jornada N --dry-run --usar-q15-base
+python IMPORTAR_PROGRAMA_JORNADA.py --jornada N --usar-q15-base
+
+# 4) Auditoria obligatoria
+python AUDITAR_JORNADA_LIGA_MAESTROS.py --jornada N
 ```
+
+Regla: si la auditoria no dice que hay 15/15 partidos y predicciones completas, la jornada no se da por lista.
 
 ## 2. Generar predicciones
 
 Capas separadas:
 
 - `programa`: motor propio.
-- `consejo_ias`: consenso final de modelos.
+- `consejo_ias`: consenso final de modelos, solo cuando se decida usarlo en una jornada concreta.
 - `gemini`, `grok`, `claude`, `copilot`, `chatgpt`: maestros individuales cuando existan.
 - Usuario: quiniela personal autenticada.
 - La Pena: grupo social y aliases, nunca usuario unico.
 
-Regla: Programa, Consejo IA y usuario deben tener 15/15 antes de dar la jornada por lista.
+Regla: Programa y usuario deben tener 15/15 antes de dar la jornada por lista. Consejo IA es opcional.
 
 ## 3. Generar y importar el Quiz (Reto 10 LaLiga)
 
@@ -93,7 +106,7 @@ Abrir la web y comprobar que el "Reto 10" aparece con las 10 preguntas.
 Comprobar:
 
 - Programa 15/15.
-- Consejo IA 15/15.
+- Consejo IA 15/15 solo si esa jornada se juega con consenso IA.
 - Usuario 15/15 si ya se ha guardado.
 - Pleno al 15 en formato Quiniela: `0`, `1`, `2`, `M` por cada equipo. Ejemplo: `M-0`, no `3-0`.
 - Escudos/banderas resuelven desde `utils.load_team_logos()`.
@@ -103,6 +116,19 @@ Comprobar:
 - La web puede refrescar datos internos sin gastar API.
 - Las llamadas externas tienen que venir del colector/controlador, no del refresco del navegador.
 - Si hay partido suspendido, bloquear el resultado oficial LAE manualmente y auditar.
+
+Pruebas utiles antes de que empiece:
+
+```powershell
+# No debe gastar API si la ventana esta cerrada.
+python LIVE_COLLECTOR.py --once --jornada N
+
+# Solo para admin/local cuando quieras forzar una prueba puntual.
+python LIVE_COLLECTOR.py --once --force --jornada N
+```
+
+En produccion Render, el collector interno se activa con `WEB_COLLECTOR_ENABLED=1`.
+El navegador nunca debe llamar a Highlightly por refrescar la pagina.
 
 ## 5. Despues de la jornada
 
@@ -138,13 +164,19 @@ Comprobar:
 
 ```powershell
 # Auditoria
-python AUDITAR_JORNADA_LIGA_MAESTROS.py --jornada 72
+python AUDITAR_JORNADA_LIGA_MAESTROS.py --jornada N
+
+# Nueva jornada desde Quiniela15
+python SCRAPE_QUINIELA15_PROXIMA.py --dry-run
+python SCRAPE_QUINIELA15_PROXIMA.py
+python IMPORTAR_PROGRAMA_JORNADA.py --jornada N --dry-run --usar-q15-base
+python IMPORTAR_PROGRAMA_JORNADA.py --jornada N --usar-q15-base
 
 # Quiz - dry-run
-python IMPORTAR_QUIZ_JORNADA.py --jornada 72 --dry-run
+python IMPORTAR_QUIZ_JORNADA.py --jornada N --dry-run
 
 # Quiz - importar
-python IMPORTAR_QUIZ_JORNADA.py --jornada 72
+python IMPORTAR_QUIZ_JORNADA.py --jornada N
 
 # Compilar todo
 python -m py_compile app.py liga_maestros/__init__.py liga_maestros/services/quiz.py liga_maestros/routes/quiz.py

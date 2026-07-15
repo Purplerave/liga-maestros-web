@@ -227,3 +227,334 @@ body.newspaper-ui.quiniela-focus .quiz-rank-pos {
         min-width: 0 !important;
     }
 }
+
+/* ==========================================================================
+   PULSE & WORLD CUP QUIZ STYLES (FROM DIARY DASHBOARD)
+   ========================================================================== */
+
+.pulse-page {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.72fr) minmax(360px, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.pulse-hero,
+.pulse-card {
+    border: 1px solid rgba(56, 189, 248, 0.12);
+    border-radius: 10px;
+    background: rgba(10, 16, 28, 0.72);
+    box-shadow: var(--shadow-card);
+}
+
+.pulse-hero {
+    grid-column: 1 / -1;
+    min-height: 92px;
+    padding: 16px 18px;
+    background:
+        linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(245, 158, 11, 0.08)),
+        rgba(10, 16, 28, 0.78);
+}
+
+.pulse-title span {
+    color: var(--gold);
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.pulse-hero strong {
+    display: block;
+    margin-top: 2px;
+    color: #f8fbff;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 900;
+}
+
+.pulse-hero p,
+.pulse-card p {
+    margin: 5px 0 0;
+    color: #a8bdd6;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.pulse-card {
+    padding: 14px;
+}
+
+.pulse-title {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.world-cup-quiz-card .pulse-title {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.world-cup-quiz-card .pulse-title span,
+.world-cup-quiz-card .pulse-title strong {
+    grid-column: 1;
+}
+
+.quiz-score-pill {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding: 4px 9px;
+    border: 1px solid rgba(34, 197, 94, 0.24);
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.08);
+    color: #bbf7d0;
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 950;
+}
+
+.pulse-title strong {
+    color: #f8fbff;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.pulse-quiz-options,
+.pulse-news-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pulse-quiz-options button,
+.pulse-news-item {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 11px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.38);
+    color: #e8f2ff;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.pulse-quiz-options button:hover,
+.pulse-news-item:hover {
+    border-color: rgba(56, 189, 248, 0.38);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.pulse-quiz-options b,
+.pulse-news-item strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.86rem;
+}
+
+.pulse-quiz-options small,
+.pulse-news-item small,
+.pulse-news-item span,
+.pulse-quiz-result {
+    color: #9fb3cd;
+    font-size: 0.68rem;
+    line-height: 1.25;
+}
+
+.pulse-quiz-options button.is-correct {
+    border-color: rgba(34, 197, 94, 0.85);
+    background: rgba(22, 101, 52, 0.46);
+    color: #dcfce7;
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.26);
+}
+
+.pulse-quiz-options button.is-wrong {
+    border-color: rgba(239, 68, 68, 0.85);
+    background: rgba(127, 29, 29, 0.5);
+    color: #fee2e2;
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.24);
+}
+
+.pulse-quiz-options button.is-correct b {
+    color: #bbf7d0;
+}
+
+.pulse-quiz-options button.is-wrong b {
+    color: #fecaca;
+}
+
+.pulse-quiz-result {
+    margin-top: 10px;
+    font-weight: 800;
+}
+
+.world-cup-quiz-card {
+    align-content: start;
+}
+
+.world-cup-quiz-list {
+    display: grid;
+    gap: 9px;
+}
+
+.world-cup-question {
+    display: none;
+    gap: 7px;
+    padding: 8px;
+    border: 1px solid rgba(56, 189, 248, 0.12);
+    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.22);
+}
+
+.world-cup-question.is-active {
+    display: grid;
+}
+
+.world-cup-question-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.world-cup-question-head span,
+.world-cup-question-head em {
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-style: normal;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.world-cup-question-head span {
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    background: rgba(56, 189, 248, 0.08);
+    color: #bfdbfe;
+}
+
+.world-cup-question-head strong {
+    min-width: 0;
+    color: #edf6ff;
+    font-size: 0.78rem;
+    line-height: 1.2;
+}
+
+.world-cup-question-head em {
+    border: 1px solid rgba(34, 197, 94, 0.24);
+    background: rgba(34, 197, 94, 0.08);
+    color: #bbf7d0;
+}
+
+.world-cup-question .pulse-quiz-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 0;
+}
+
+.world-cup-question .pulse-quiz-options button {
+    min-height: 28px;
+    padding: 5px 7px;
+}
+
+.world-cup-question .pulse-quiz-options b {
+    font-size: 0.68rem;
+}
+
+.world-cup-question .pulse-quiz-result {
+    margin-top: 0;
+}
+
+.dashboard-challenge-card .world-cup-quiz-list {
+    gap: 6px;
+}
+
+.dashboard-challenge-card .world-cup-question {
+    gap: 5px;
+    padding: 6px;
+}
+
+.dashboard-challenge-card .world-cup-question-head {
+    gap: 6px;
+}
+
+.dashboard-challenge-card .world-cup-question-head strong {
+    font-size: 0.72rem;
+}
+
+.dashboard-challenge-card .world-cup-question-head em {
+    font-size: 0.58rem;
+}
+
+.world-cup-question.is-answered {
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.world-cup-quiz-final {
+    display: none;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    border-radius: 9px;
+    background: rgba(22, 101, 52, 0.16);
+    text-align: center;
+}
+
+.world-cup-quiz-final.is-active {
+    display: grid;
+}
+
+.world-cup-quiz-final span {
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.world-cup-quiz-final strong {
+    color: #bbf7d0;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 950;
+}
+
+.world-cup-quiz-final small {
+    color: #9fb3cd;
+    font-weight: 800;
+}
+
+.dashboard-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.dashboard-stat-grid div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid rgba(56, 189, 248, 0.12);
+    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.28);
+}
+
+.dashboard-stat-grid span {
+    color: #8ea6c5;
+    font-size: 0.58rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.dashboard-stat-grid strong {
+    color: #f8fbff;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 1.18rem;
+    font-weight: 950;
+}

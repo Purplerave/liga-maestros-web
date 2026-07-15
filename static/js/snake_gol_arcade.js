@@ -1,6 +1,10 @@
 (() => {
   "use strict";
 
+  if (typeof escapeHtml === "undefined") {
+    window.escapeHtml = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
   const STORAGE_KEY = "mundialSnake1x2.top10";
   const COLS = 30;
   const ROWS = 20;
@@ -152,15 +156,6 @@
 
     best = scores.length ? scores[0].score : 0;
     elBest.textContent = padScore(best);
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
   }
 
   function rebuildSnake(dir = dirs.right) {
@@ -511,9 +506,12 @@
   }
 
   function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    const width = Math.max(320, Math.floor(rect.width || 960));
-    const height = Math.max(260, Math.floor(width / 1.6));
+    const frame = canvas.parentElement;
+    const frameRect = frame?.getBoundingClientRect?.() || canvas.getBoundingClientRect();
+    const width = Math.max(320, Math.floor(frameRect.width || canvas.getBoundingClientRect().width || 960));
+    const availableHeight = Math.max(260, Math.floor(window.innerHeight - (frameRect.top || 0) - 18));
+    const idealHeight = Math.floor(width / (COLS / ROWS));
+    const height = Math.max(260, Math.min(idealHeight, availableHeight));
 
     view.dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     view.w = width;
@@ -1002,7 +1000,7 @@
     return Boolean(canvas?.offsetParent) && document.body.classList.contains("newspaper-snake-active");
   }
 
-  function bindEvents() {
+  function bindSnakeArcadeKeys() {
     window.addEventListener("keydown", (event) => {
       if (event.target?.matches?.("input, textarea, select")) return;
       if (!isArcadeVisible()) return;
@@ -1081,7 +1079,7 @@
     loadScores
   };
 
-  bindEvents();
+  bindSnakeArcadeKeys();
   resizeCanvas();
   reset();
   requestAnimationFrame(loop);

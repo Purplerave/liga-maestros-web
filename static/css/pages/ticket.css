@@ -1,0 +1,977 @@
+/* ==========================================================================
+   TICKET PAGE — Quiniela and Live Scrutiny Table
+   ========================================================================== */
+
+/* Quiniela tension view */
+.arena-table.is-tension-table {
+    table-layout: fixed;
+}
+
+.arena-table.is-tension-table th:nth-child(1),
+.arena-table.is-tension-table td:nth-child(1) {
+    width: 34px;
+}
+
+.arena-table.is-tension-table th:nth-child(2),
+.arena-table.is-tension-table td:nth-child(2) {
+    width: 52%;
+}
+
+.arena-table.is-tension-table th:nth-child(3),
+.arena-table.is-tension-table td:nth-child(3) {
+    width: 44%;
+}
+
+.tension-row td {
+    padding: 8px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    vertical-align: middle;
+    transition: background 0.2s ease;
+}
+
+.tension-row:hover td {
+    background: rgba(56, 189, 248, 0.02);
+}
+
+.tension-row:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.008);
+}
+
+.tension-row:nth-child(even):hover td {
+    background: rgba(56, 189, 248, 0.03);
+}
+
+.tension-fixture-cell {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.tension-fixture-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.tension-fixture-main .fixture-inline {
+    display: grid;
+    grid-template-columns: minmax(128px, 1fr) 12px minmax(128px, 1fr);
+    align-items: center;
+    width: min(100%, 360px);
+    gap: 6px;
+}
+
+.tension-fixture-main {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+}
+
+.tension-fixture-main .fixture-name {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+    font-weight: 900;
+    color: var(--text-main);
+    letter-spacing: 0.01em;
+}
+
+.tension-fixture-main .fixture-team {
+    min-width: 0;
+    gap: 4px;
+}
+
+.tension-fixture-main .fixture-team:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, auto) 22px;
+    justify-content: end;
+    text-align: right;
+    flex: initial;
+}
+
+.tension-fixture-main .fixture-team:last-child {
+    display: grid;
+    grid-template-columns: 22px minmax(0, auto);
+    justify-content: start;
+    text-align: left;
+    flex: initial;
+}
+
+.tension-fixture-main .fixture-team:first-child .team-badge {
+    grid-column: 2;
+}
+
+.tension-fixture-main .fixture-team:first-child .fixture-name {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.tension-fixture-main .fixture-sep {
+    text-align: center;
+    opacity: 0.5;
+}
+
+.tension-meta-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 15px;
+    flex-wrap: nowrap;
+    max-width: none;
+    min-width: 0;
+}
+
+.tension-meta-line .match-score-badge {
+    min-width: 68px;
+    padding: 3px 8px;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.tension-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    color: #7dd3fc;
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.tension-consensus-cell {
+    min-width: 0;
+}
+
+.tension-consensus-top {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+    min-width: 0;
+}
+
+.consensus-bar-wrap {
+    width: min(100%, 230px);
+    margin: 0 auto 3px;
+}
+
+.consensus-bar {
+    display: flex;
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.consensus-bar .consensus-seg {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.consensus-bar-empty {
+    min-height: 12px;
+    color: var(--text-muted);
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.consensus-seg {
+    display: block;
+    min-width: 4px;
+}
+
+.seg-1 {
+    background: linear-gradient(180deg, #93c5fd, #60a5fa);
+}
+
+.seg-x {
+    background: linear-gradient(180deg, #fbbf24, #f59e0b);
+}
+
+.seg-2 {
+    background: linear-gradient(180deg, #f9a8d4, #f472b6);
+}
+
+.consensus-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 3px;
+    color: #8fb7dc;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.consensus-labels span {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+}
+
+.consensus-labels span:first-child {
+    text-align: left;
+}
+
+.consensus-labels span:last-child {
+    text-align: right;
+}
+
+.consensus-bar-pleno {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--accent);
+    font-size: 0.54rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.tension-sign-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tension-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 32px;
+}
+
+.tension-chip > span {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.tension-chip .ia-signo,
+.tension-chip .saved-ticket-sign,
+.tension-chip .pena-pick {
+    width: 24px;
+    min-width: 24px;
+    height: 20px;
+    min-height: 20px;
+    padding: 0;
+    font-size: 0.62rem;
+    font-weight: 900;
+    background: transparent;
+    border-color: rgba(148, 163, 184, 0.16);
+}
+
+.tension-chip .pena-pick {
+    min-width: auto;
+    padding: 1px 5px;
+    gap: 2px;
+    background: rgba(251, 191, 36, 0.14);
+    border-color: rgba(251, 191, 36, 0.85);
+}
+
+.tension-chip .pena-pick small {
+    font-size: 0.55rem;
+}
+
+.tension-chip-user .action-buttons {
+    gap: 2px;
+}
+
+.tension-chip-user .action-buttons .ia-signo {
+    width: 22px;
+    min-width: 22px;
+}
+
+.tension-chip-program .ia-signo {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.6);
+}
+
+.tension-chip-council .ia-signo {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: rgba(168, 85, 247, 0.6);
+}
+
+.tension-chip-user .action-buttons button {
+    width: 22px;
+    height: 20px;
+    font-size: 0.6rem;
+}
+
+.pleno-picker {
+    display: grid;
+    gap: 3px;
+}
+
+.pleno-picker-preview {
+    color: var(--text-main);
+    font-size: 0.6rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.pleno-picker-side {
+    display: grid;
+    grid-template-columns: 44px repeat(4, 20px);
+    gap: 2px;
+    align-items: center;
+}
+
+.pleno-picker-side > span {
+    color: var(--text-muted);
+    font-size: 0.56rem;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pleno-picker .ia-signo {
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
+    min-height: 20px;
+    font-size: 0.62rem;
+}
+
+.tension-chip-user > span {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.tension-chip-user .ia-signo,
+.tension-chip-user .saved-ticket-sign,
+.tension-chip-user .empty-user-pick,
+.tension-chip-user .pleno-main-btn,
+.tension-chip-user .pleno-picker .ia-signo {
+    background: rgba(56, 189, 248, 0.06);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12);
+}
+
+.tension-chip-user .ia-signo.active,
+.action-buttons .ia-signo.active {
+    background: var(--gradient-accent);
+    border-color: #7dd3fc;
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4), 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.tension-row.is-council-row .tension-sign-row {
+    gap: 9px;
+}
+
+.tension-row.is-council-row .tension-chip {
+    min-width: 48px;
+}
+
+.tension-row.is-council-row .tension-chip > span {
+    font-size: 0.65rem;
+    letter-spacing: 0;
+}
+
+.tension-row.is-council-row .tension-chip .ia-signo,
+.tension-row.is-council-row .tension-chip .saved-ticket-sign,
+.tension-row.is-council-row .tension-chip .pena-pick {
+    width: auto;
+    min-width: 32px;
+    padding: 0 6px;
+}
+
+.tension-chip-council .ia-signo {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.45);
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.12);
+}
+
+.tension-chip-program .ia-signo {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.arena-table.is-council-table th:nth-child(2),
+.arena-table.is-council-table td:nth-child(2) {
+    width: 58%;
+}
+
+.arena-table.is-council-table th:nth-child(3),
+.arena-table.is-council-table td:nth-child(3) {
+    width: 38%;
+}
+
+.tension-row.is-council-row .tension-fixture-main .fixture-inline {
+    width: min(100%, 470px);
+    grid-template-columns: minmax(150px, 1fr) 12px minmax(150px, 1fr);
+}
+
+.tension-result-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tension-result-cell .match-score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    padding: 2px 5px;
+    font-size: 0.66rem;
+}
+
+.tension-result-sign {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.tension-result-cell .table-info-toggle {
+    display: block;
+    margin: 2px auto 0;
+    height: 15px;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* ==========================================================================
+   COMPACT & FOCUS OVERRIDES FOR TICKET PAGE
+   ========================================================================== */
+
+/* From Compact Quiniela Pass 2026-06-20 */
+.arena-table th {
+    padding: 2px 3px;
+    font-size: 0.54rem;
+}
+
+.arena-table td {
+    padding: 2px 3px;
+}
+
+.arena-table.is-tension-table th:nth-child(1),
+.arena-table.is-tension-table td:nth-child(1) {
+    width: 30px;
+}
+
+.arena-table.is-tension-table th:nth-child(2),
+.arena-table.is-tension-table td:nth-child(2) {
+    width: 43%;
+}
+
+.arena-table.is-tension-table th:nth-child(3),
+.arena-table.is-tension-table td:nth-child(3) {
+    width: 54%;
+    text-align: left;
+}
+
+.tension-row td {
+    padding: 8px 8px;
+}
+
+.match-number {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.68rem;
+    margin-right: 0;
+    color: var(--accent);
+    border-radius: 5px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.tension-fixture-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 330px) 78px;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+}
+
+.tension-fixture-main {
+    justify-content: flex-start;
+}
+
+.tension-fixture-main .fixture-inline {
+    width: 100%;
+    grid-template-columns: minmax(118px, 1fr) 10px minmax(118px, 1fr);
+    gap: 4px;
+}
+
+.tension-fixture-main .fixture-name {
+    max-width: 100%;
+    min-width: 0;
+    font-size: 0.88rem;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 900;
+}
+
+.tension-fixture-main .fixture-team {
+    gap: 3px;
+}
+
+.tension-fixture-main .fixture-team:first-child {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    align-items: center;
+}
+
+.tension-fixture-main .fixture-team:last-child {
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: center;
+}
+
+.team-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 0.58rem;
+}
+
+.tension-meta-line {
+    width: 86px;
+    gap: 3px;
+    min-height: 14px;
+    justify-content: flex-start;
+}
+
+.tension-meta-line .match-score-badge,
+.arena-table .match-score-badge.is-scheduled-time {
+    min-width: 70px;
+    padding: 3px 8px;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.tension-status {
+    min-height: 22px;
+    padding: 2px 9px;
+    font-size: 0.66rem;
+    border-radius: 999px;
+}
+
+.consensus-bar-wrap {
+    width: min(100%, 206px);
+    margin: 0 0 1px;
+}
+
+.consensus-bar {
+    height: 8px;
+}
+
+.tension-sign-row {
+    justify-content: flex-start;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.tension-chip {
+    min-width: 32px;
+    gap: 2px;
+}
+
+.tension-chip > span {
+    font-size: 0.72rem;
+    line-height: 0.95;
+    font-weight: 900;
+}
+
+.tension-chip .ia-signo,
+.tension-chip .saved-ticket-sign,
+.tension-chip .pena-pick {
+    width: 26px;
+    min-width: 26px;
+    height: 22px;
+    min-height: 22px;
+    font-size: 0.62rem;
+    font-weight: 900;
+}
+
+.tension-chip .pena-pick {
+    min-width: 54px;
+    padding: 3px 7px;
+}
+
+.tension-chip .pena-pick small {
+    font-size: 0.6rem;
+}
+
+.tension-chip-user .action-buttons {
+    gap: 2px;
+}
+
+.tension-chip-user .action-buttons .ia-signo {
+    width: 26px;
+    min-width: 26px;
+    height: 22px;
+}
+
+/* From Quiniela Focus 2026-07-02 */
+body.quiniela-focus .arena-content.table-mode {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 4px;
+}
+
+body.quiniela-focus .arena-table-wrap {
+    grid-column: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 0;
+}
+
+.boleto-hero {
+    grid-column: 1;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) repeat(3, minmax(90px, auto));
+    align-items: center;
+    gap: 5px 8px;
+    min-height: 0;
+    padding: 5px 8px;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, rgba(56, 189, 248, 0.12), rgba(245, 158, 11, 0.08)),
+        rgba(8, 15, 28, 0.78);
+}
+
+.boleto-checklist {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(72px, 1fr));
+    gap: 5px;
+    min-width: 0;
+}
+
+.boleto-check {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    min-height: 18px;
+    padding: 2px 5px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 6px;
+    background: rgba(2, 6, 23, 0.34);
+    color: #cbd5e1;
+    font-size: 0.52rem;
+    font-weight: 850;
+}
+
+.boleto-check b,
+.boleto-check strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.boleto-check b {
+    color: #8fb7dc;
+    text-transform: uppercase;
+}
+
+.boleto-check strong {
+    color: #f8fbff;
+}
+
+.boleto-check.is-done {
+    border-color: rgba(34, 197, 94, 0.26);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.boleto-check.is-done strong {
+    color: #bbf7d0;
+}
+
+.boleto-check.is-warn {
+    border-color: rgba(245, 158, 11, 0.28);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.boleto-check.is-warn strong {
+    color: #fde68a;
+}
+
+.boleto-hero-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.boleto-hero-main span {
+    color: var(--gold);
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.boleto-hero-main strong {
+    color: #f8fbff;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.boleto-hero-chip {
+    justify-self: end;
+    min-width: 0;
+    padding: 4px 8px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.7);
+    color: #dbe7f7;
+    font-size: 0.66rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.boleto-hero-chip.is-urgent {
+    border-color: rgba(245, 158, 11, 0.45);
+    background: rgba(245, 158, 11, 0.16);
+    color: #fde68a;
+}
+
+body.quiniela-focus .arena-table {
+    height: auto;
+    table-layout: fixed;
+}
+
+body.quiniela-focus .arena-table th {
+    height: 18px;
+    padding: 1px 4px;
+    font-size: 0.52rem;
+}
+
+body.quiniela-focus .tension-row td {
+    height: 40px;
+    padding: 2px 4px;
+}
+
+body.quiniela-focus .arena-table.is-tension-table th:nth-child(1),
+body.quiniela-focus .arena-table.is-tension-table td:nth-child(1) {
+    width: 28px;
+}
+
+body.quiniela-focus .arena-table.is-tension-table th:nth-child(2),
+body.quiniela-focus .arena-table.is-tension-table td:nth-child(2) {
+    width: 40%;
+}
+
+body.quiniela-focus .arena-table.is-tension-table th:nth-child(3),
+body.quiniela-focus .arena-table.is-tension-table td:nth-child(3) {
+    width: 60%;
+}
+
+body.quiniela-focus .match-number {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.62rem;
+}
+
+body.quiniela-focus .match-detail-toggle.table-info-toggle {
+    min-width: 18px;
+    height: 16px;
+    padding: 0;
+    font-size: 0.58rem;
+}
+
+body.quiniela-focus .tension-fixture-layout {
+    grid-template-columns: minmax(0, 1fr) 70px;
+    gap: 4px;
+}
+
+body.quiniela-focus .tension-fixture-main .fixture-inline {
+    grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr);
+    gap: 3px;
+}
+
+body.quiniela-focus .tension-fixture-main .fixture-name {
+    font-size: 0.74rem;
+    line-height: 0.95;
+}
+
+body.quiniela-focus .team-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 0.48rem;
+}
+
+body.quiniela-focus .tension-fixture-main .fixture-team:first-child {
+    grid-template-columns: minmax(0, 1fr) 18px;
+}
+
+body.quiniela-focus .tension-fixture-main .fixture-team:last-child {
+    grid-template-columns: 18px minmax(0, 1fr);
+}
+
+body.quiniela-focus .tension-meta-line {
+    width: 70px;
+    min-height: 0;
+}
+
+body.quiniela-focus .tension-meta-line .match-score-badge,
+body.quiniela-focus .arena-table .match-score-badge.is-scheduled-time {
+    min-width: 62px;
+    padding: 1px 5px;
+    font-size: 0.64rem;
+    line-height: 1.05;
+}
+
+body.quiniela-focus .tension-status {
+    min-height: 16px;
+    padding: 1px 5px;
+    font-size: 0.54rem;
+}
+
+body.quiniela-focus .tension-consensus-cell {
+    text-align: center;
+}
+
+body.quiniela-focus .tension-consensus-top {
+    width: 100%;
+    justify-items: center;
+}
+
+body.quiniela-focus .consensus-bar-wrap {
+    width: min(100%, 210px);
+    margin: 0 auto 2px;
+}
+
+body.quiniela-focus .risk-pill {
+    display: none;
+}
+
+body.quiniela-focus .consensus-bar {
+    height: 6px;
+}
+
+body.quiniela-focus .consensus-labels {
+    display: flex;
+    margin-top: 2px;
+    font-size: 0.54rem;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+body.quiniela-focus .tension-sign-row {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+body.quiniela-focus .tension-chip {
+    min-width: 0;
+    gap: 1px;
+}
+
+body.quiniela-focus .tension-chip > span {
+    display: block;
+    max-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #89a8c8;
+    font-size: 0.5rem;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+body.quiniela-focus .tension-chip .ia-signo,
+body.quiniela-focus .tension-chip .saved-ticket-sign,
+body.quiniela-focus .tension-chip .pena-pick,
+body.quiniela-focus .tension-chip-user .action-buttons .ia-signo {
+    width: 24px;
+    min-width: 24px;
+    height: 20px;
+    min-height: 20px;
+    padding: 0;
+    font-size: 0.6rem;
+}
+
+body.quiniela-focus .tension-chip .pena-pick {
+    min-width: 44px;
+    padding: 1px 4px;
+}
+
+body.quiniela-focus .tension-chip .pena-pick small {
+    font-size: 0.5rem;
+}
+
+body.quiniela-focus .tension-chip-user .action-buttons {
+    gap: 2px;
+}
+
+body.quiniela-focus .pleno-picker {
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    gap: 3px;
+}
+
+body.quiniela-focus .pleno-picker-preview {
+    font-size: 0.5rem;
+}
+
+body.quiniela-focus .pleno-picker-side {
+    grid-template-columns: repeat(4, 18px);
+    gap: 1px;
+}
+
+body.quiniela-focus .pleno-picker-side > span {
+    display: none;
+}
+
+body.quiniela-focus .pleno-picker .ia-signo {
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+    min-height: 18px;
+    font-size: 0.52rem;
+}
+
+body.quiniela-focus .live-scrutiny-badge {
+    display: none;
+}
+
+@media (pointer: coarse) {
+    .ia-signo.clickable,
+    .match-detail-toggle,
+    .primary-btn,
+    .secondary-btn,
+    .icon-btn,
+    .field-group select {
+        min-height: 34px;
+    }
+}

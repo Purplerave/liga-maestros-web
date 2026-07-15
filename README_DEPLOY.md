@@ -53,11 +53,12 @@ HIGHLIGHTLY_API_KEY=<clave Highlightly/RapidAPI>
 ADMIN_EMAILS=<tu correo si quieres permisos admin>
 ```
 
-Opcional si contratas/configuras disco persistente en Render:
+El `render.yaml` actual esta preparado como **beta de un solo servicio**:
 
-```env
-DB_PATH=/var/data/LIGA_MAESTROS_PRO.db
-```
+- 1 web service con disco persistente en `/var/data`;
+- SQLite en `/var/data/LIGA_MAESTROS_PRO.db`;
+- collector live interno activado con `WEB_COLLECTOR_ENABLED=1`;
+- Gunicorn con `--workers 1 --threads 8` para evitar dos collectors simultaneos.
 
 ## Google OAuth
 
@@ -77,15 +78,28 @@ http://localhost:5000/authorize
 
 Para beta rapida se sube `DATOS/LIGA_MAESTROS_PRO.db`.
 
-Advertencia: en Render sin disco persistente, los cambios hechos en SQLite pueden perderse al redeploy/recrear instancia. Vale para probar online. Para produccion real, el siguiente paso sera migrar a PostgreSQL o configurar persistencia.
+Advertencia: en Render sin disco persistente, los cambios hechos en SQLite pueden perderse al redeploy/recrear instancia. Para la beta se usa disco persistente.
 
 Si defines `DB_PATH` apuntando a un disco persistente y la DB no existe ahi, la app copia automaticamente la DB inicial incluida en `DATOS/LIGA_MAESTROS_PRO.db`.
 
-Nota Render importante: un Persistent Disk solo es accesible por la instancia del servicio al que se adjunta. No sirve como disco compartido entre `web` y `worker`. Si se separa `LIVE_COLLECTOR.py` como worker en produccion, antes hay que mover el estado compartido a Postgres/Redis o hacer que el worker actualice la web por API HTTP autenticada.
+Nota Render importante: un Persistent Disk solo es accesible por la instancia del servicio al que se adjunta. Por eso la beta no usa un worker separado. Si mas adelante se separa `LIVE_COLLECTOR.py` como worker, antes hay que mover el estado compartido a Postgres/Redis o hacer que el worker actualice la web por API HTTP autenticada.
 
 ## Directo / Highlightly
 
-La web puede lanzar refrescos live desde endpoints internos ya existentes cuando hay uso. Para un directo fuerte 24/7, el siguiente paso sera montar un worker/cron con almacenamiento persistente compartido o migrar la DB a PostgreSQL.
+El refresco live no depende de que los usuarios recarguen la web. En Render lo ejecuta el collector interno:
+
+- `WEB_COLLECTOR_ENABLED=1`
+- `WEB_COLLECTOR_INTERVAL_SECONDS=60`
+- `WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS=60`
+
+El collector respeta la ventana de jornada, el limite diario y el circuit breaker. El estado se consulta en:
+
+```text
+/api/live/health
+/api/sync/status
+```
+
+Para un directo fuerte con varios procesos o servicios, el siguiente paso sera PostgreSQL/Redis.
 
 ## Revisiones con otra IA
 

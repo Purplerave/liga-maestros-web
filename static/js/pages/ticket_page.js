@@ -1,0 +1,495 @@
+/* ==========================================================================
+   TICKET PAGE — Vista Quiniela compacta (tension, tabla, peña, pleno)
+   Funciones extraídas de quantum_final.js para mantenimiento fácil.
+   Dependencias: todas las funciones shared/ utility de quantum_final.js
+   deben cargarse ANTES que este archivo.
+   ========================================================================== */
+
+/* ---------- Insight y detalle de partido ---------- */
+
+function pctTriplet(label, values) {
+    if (!values) return "";
+    const p1 = values["1"] ?? values[1] ?? "-";
+    const px = values["X"] ?? values.x ?? values["x"] ?? "-";
+    const p2 = values["2"] ?? values[2] ?? "-";
+    return `<span class="insight-chip"><b>${escapeHtml(label)}</b> 1 ${escapeHtml(p1)}% | X ${escapeHtml(px)}% | 2 ${escapeHtml(p2)}%</span>`;
+}
+
+function renderMatchInsight(match) {
+    const info = state.data?.match_info?.[String(match.id)] || {};
+    const maestra = info.maestra || {};
+    const chips = [
+        pctTriplet("Tendencia", info.q15),
+        pctTriplet("LAE", info.lae),
+        pctTriplet("Mercado", info.apu)
+    ].filter(Boolean).join("");
+    const historico = info.historico ?
+         `<small class="insight-muted">HistÃ³rico: ${escapeHtml(info.historico["1"] || 0)} local | ${escapeHtml(info.historico["X"] || 0)} empates | ${escapeHtml(info.historico["2"] || 0)} visitante</small>`
+        : "";
+    const reason = maestra.razon ?
+         `<p class="insight-reason"><b>${escapeHtml(maestra.signo || "Maestra")}</b> ${escapeHtml(maestra.razon)}</p>`
+        : "";
+    const detail = info.detalle ?
+         `<small class="insight-muted">${escapeHtml(info.detalle).slice(0, 220)}${String(info.detalle).length > 220 ? "..." : ""}</small>`
+        : "";
+    if (!chips && !reason && !historico && !detail) {
+        return `<small class="q15-empty">Sin lectura previa cacheada para este partido.</small>`;
+    }
+    return `
+        <div class="match-insight">
+            ${reason}
+            ${chips ? `<div class="insight-chips">${chips}</div>` : ""}
+            ${historico}
+            ${detail}
+        </div>`;
+}
+
+function renderMatchDetail(m, c) {
+    return `
+        <div class="match-detail-row">
+            ${renderMatchDetailGrid(m, c)}
+        </div>`;
+}
+
+function renderMatchDetailGrid(m, c) {
+    const homeCtx = findStandingContext(m.local);
+    const awayCtx = findStandingContext(m.visitante);
+    const homeLine = homeCtx ?
+         `${getShortName(m.local)} | #${homeCtx.pos} | ${homeCtx.pts} pts`
+        : `${getShortName(m.local)} | sin ranking`;
+    const awayLine = awayCtx ?
+         `${getShortName(m.visitante)} | #${awayCtx.pos} | ${awayCtx.pts} pts`
+        : `${getShortName(m.visitante)} | sin ranking`;
+    const plenoDetail = Number(m.id) === 15 ? renderPenaPlenoDetail(14) : null;
+    return `
+        <div class="match-detail-grid">
+            <div class="match-detail-box">
+                <span class="match-detail-label">La Peña</span>
+                ${plenoDetail
+                    ? plenoDetail
+                    : `<strong>1 ${Number(c.p1 || 0)}% | X ${Number(c.px || 0)}% | 2 ${Number(c.p2 || 0)}%</strong>`}
+            </div>
+            <div class="match-detail-box">
+                <span class="match-detail-label">Tabla</span>
+                <strong>${escapeHtml(homeLine)}</strong>
+                <small>${escapeHtml(awayLine)}</small>
+            </div>
+            <div class="match-detail-box match-detail-box-wide">
+                <span class="match-detail-label">Lectura previa</span>
+                ${renderMatchInsight(m)}
+            </div>
+            <div class="match-detail-box match-detail-box-wide">
+                <span class="match-detail-label">Directo del partido</span>
+                ${renderQ15Events(m)}
+                ${renderQ15Meta(m)}
+            </div>
+        </div>`;
+}
+
+/* ---------- Consenso y Peña ---------- */
+
+function renderConsensus(c, real, status) {
+    const values = [
+        ["1", Number(c.p1 || 0), "home"],
+        ["X", Number(c.px || 0), "draw"],
+        ["2", Number(c.p2 || 0), "away"]
+    ];
+    const sorted = [...values].sort((a, b) => b[1] - a[1]);
+    const rawWinner = normalizeSign(c.ganador);
+    const winner = ["1", "X", "2"].includes(rawWinner) ? rawWinner : sorted[0][0];
+        const winnerValue = values.find(([sign]) => sign === winner)?.[1] || 0;
+    const detail = `Peña: 1 ${Number(c.p1 || 0)}% | X ${Number(c.px || 0)}% | 2 ${Number(c.p2 || 0)}%`;
+    return `<span class="pena-pick ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}"><b>${escapeHtml(winner)}</b><small>${winnerValue}%</small></span>`;
+}
+
+function renderConsensusBar(consensus, isPleno = false) {
+    if (isPleno) {
+        return `<div class="consensus-bar-wrap consensus-bar-pleno"><span>Pleno al 15</span></div>`;
+    }
+    const p1 = Math.max(0, Number(consensus.p1 || 0));
+    const px = Math.max(0, Number(consensus.px || 0));
+    const p2 = Math.max(0, Number(consensus.p2 || 0));
+    const total = p1 + px + p2 || 1;
+    const w1 = Math.max(4, (p1 / total) * 100);
+    const wx = Math.max(4, (px / total) * 100);
+    const w2 = Math.max(4, (p2 / total) * 100);
+    return `
+        <div class="consensus-bar-wrap" title="Consenso Peña: 1 ${p1}% | X ${px}% | 2 ${p2}%">
+            <div class="consensus-labels">
+                <span><b>1</b><em>${p1}%</em></span>
+                <span><b>X</b><em>${px}%</em></span>
+                <span><b>2</b><em>${p2}%</em></span>
+            </div>
+            <div class="consensus-bar">
+                <span class="consensus-seg seg-1" style="width:${w1}%"></span>
+                <span class="consensus-seg seg-x" style="width:${wx}%"></span>
+                <span class="consensus-seg seg-2" style="width:${w2}%"></span>
+            </div>
+        </div>`;
+}
+
+function getPenaHiddenUserIds() {
+    const visible = new Set(
+        getOfficialAIColumns().flatMap(([primary, fallback]) => [primary, fallback].filter(Boolean).map(id => String(id).toLowerCase()))
+    );
+    const ignored = new Set(["hermes", "jenova", "consenso", "programa", "v260_omnisciente", "consejo_ias"]);
+    return Object.keys(state.data.predicciones_actuales || {}).filter(uid => {
+        const lower = String(uid).toLowerCase();
+        if (visible.has(lower) || ignored.has(lower)) return false;
+        if (state.user && String(state.user.id).toLowerCase() === lower) return false;
+        return true;
+    });
+}
+
+function bucketLabelForGoals(value) {
+    if (!Number.isFinite(value) || value < 0) return null;
+    return value >= 3 ? "M" : String(value);
+}
+
+function getPenaPlenoSummary(idx = 14) {
+    const preds = state.data.predicciones_actuales || {};
+    const exactCounts = {};
+    const homeBuckets = { "0": 0, "1": 0, "2": 0, "M": 0 };
+    const awayBuckets = { "0": 0, "1": 0, "2": 0, "M": 0 };
+    let valid = 0;
+    let invalid = 0;
+
+    getPenaHiddenUserIds().forEach(uid => {
+        const sign = normalizeSign(preds?.[uid]?.signos?.[idx] || "-");
+        const score = scoreOnly(sign);
+        if (!score) {
+            invalid += 1;
+            return;
+        }
+        const match = score.match(/^(\d+)-(\d+)$/);
+        if (!match) {
+            invalid += 1;
+            return;
+        }
+        valid += 1;
+        exactCounts[score] = (exactCounts[score] || 0) + 1;
+        const gl = Number.parseInt(match[1], 10);
+        const gv = Number.parseInt(match[2], 10);
+        const homeBucket = bucketLabelForGoals(gl);
+        const awayBucket = bucketLabelForGoals(gv);
+        if (homeBucket) homeBuckets[homeBucket] += 1;
+        if (awayBucket) awayBuckets[awayBucket] += 1;
+    });
+
+    const topScore = Object.entries(exactCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] || null;
+    return { valid, invalid, exactCounts, homeBuckets, awayBuckets, topScore };
+}
+
+function renderPenaPleno(summary, realScore, status) {
+    if (!summary.topScore) {
+        return `<span class="pena-pick pena-pick-pleno" title="La Peña todavia no tiene un pleno claro"><b>-</b><small>s/d</small></span>`;
+    }
+    const [topScore, count] = summary.topScore;
+    const pct = summary.valid ? Math.round((count / summary.valid) * 100) : 0;
+    const detail = [
+        `Peña pleno: ${topScore} (${count}/${summary.valid})`,
+        `Local 0:${summary.homeBuckets["0"]} 1:${summary.homeBuckets["1"]} 2:${summary.homeBuckets["2"]} M:${summary.homeBuckets["M"]}`,
+        `Visit. 0:${summary.awayBuckets["0"]} 1:${summary.awayBuckets["1"]} 2:${summary.awayBuckets["2"]} M:${summary.awayBuckets["M"]}`,
+        summary.invalid ? `Sin marcador valido: ${summary.invalid}` : ""
+    ].filter(Boolean).join(" | ");
+    return `<span class="pena-pick pena-pick-pleno ${hitClass(topScore, realScore, status, true)}" title="${escapeHtml(detail)}"><b>${escapeHtml(topScore)}</b><small>${pct}%</small></span>`;
+}
+
+function renderPenaPlenoDetail(idx = 14) {
+    const summary = getPenaPlenoSummary(idx);
+    if (!summary.topScore) {
+        return `<strong>Sin pleno claro en la Peña</strong><small>Cuando tengan marcadores validos, aqui saldra el reparto 0 | 1 | 2 | M.</small>`;
+    }
+    const [topScore, count] = summary.topScore;
+    const exactTop = Object.entries(summary.exactCounts)
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 3)
+        .map(([score, qty]) => `${score} (${qty})`)
+        .join(" | ");
+    const bucketLine = (label, buckets) => `${label}: 0 ${buckets["0"]} | 1 ${buckets["1"]} | 2 ${buckets["2"]} | M ${buckets["M"]}`;
+    return `
+        <strong>${escapeHtml(topScore)} | ${count}/${summary.valid} Peña</strong>
+        <small>${escapeHtml(bucketLine("Local", summary.homeBuckets))}</small>
+        <small>${escapeHtml(bucketLine("Visit.", summary.awayBuckets))}</small>
+        <small>${escapeHtml(`Marcadores: ${exactTop}${summary.invalid ? ` | sin valido ${summary.invalid}` : ""}`)}</small>`;
+}
+
+/* ---------- Chips de tensión ---------- */
+
+function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "") {
+    const clean = sign && sign !== "-" ? sign : "-";
+    const fullLabel = repairMojibakeText(label);
+    const compactLabel = compactTensionLabel(fullLabel);
+    return `
+        <div class="tension-chip ${escapeHtml(extraClass)}">
+            <span title="${escapeHtml(fullLabel)}">${escapeHtml(compactLabel)}</span>
+            <b class="ia-signo ${hitClass(clean, real, status, exactScore)}">${escapeHtml(clean)}</b>
+        </div>`;
+}
+
+function renderTensionAiChips(preds, idx, real, status, exactScore = false) {
+    return getOfficialAIColumns().map(([primary, fallback, label]) => {
+        const sign = getSign(preds, idx, primary, fallback);
+        return renderTensionChip(label, sign, real, status, exactScore);
+    }).join("");
+}
+
+function renderCouncilStyleChips(preds, idx, real, status, exactScore = false) {
+    const programSign = getSign(preds, idx, "programa", "v260_omnisciente");
+    const councilSign = getSign(preds, idx, "consejo_ias", "consenso");
+    return [
+        renderTensionChip("Programa", programSign, real, status, exactScore, "tension-chip-program"),
+        renderTensionChip("Consejo", councilSign, real, status, exactScore, "tension-chip-council")
+    ].join("");
+}
+
+function renderTensionPenaChip(content, label) {
+    const fullLabel = repairMojibakeText(label);
+    const compactLabel = compactTensionLabel(fullLabel);
+    return `
+        <div class="tension-chip tension-chip-pena">
+            <span title="${escapeHtml(fullLabel)}">${escapeHtml(compactLabel)}</span>
+            ${content}
+        </div>`;
+}
+
+/* ---------- Celda del usuario ---------- */
+
+function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
+    if (!state.user) return `<span class="empty-user-pick" title="Entra para guardar tu quiniela">-</span>`;
+    if (!canEdit) return `<span class="ia-signo active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign)}</span>`;
+    if (hasSavedTicket() && !state.editMode && !state.draftDirty) {
+        return `<span class="saved-ticket-sign ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</span>`;
+    }
+    if (idx === 14) {
+        return `<button class="pleno-main-btn clickable" data-match-idx="${idx}" data-pleno="1">${escapeHtml(mySign === "-" ? "0-0" : mySign)}</button>`;
+    }
+    return `
+        <div class="action-buttons" data-match-idx="${idx}">
+            ${["1", "X", "2"].map(sign => `<button class="ia-signo clickable ${mySign === sign ? "active" : ""}" data-sign="${sign}" type="button">${sign}</button>`).join("")}
+        </div>`;
+}
+
+/* ---------- Badge de escrutinio live ---------- */
+
+function renderLiveScrutinyBadge(matches) {
+    if (!state.user || !Array.isArray(matches) || !matches.some(match => isMatchLiveNow(match))) return "";
+    const hits = matches.slice(0, 15).reduce((count, match, idx) => {
+        const exactScore = idx === 14;
+        const real = exactScore ? scoreOnly(match.marcador) : (match.signo_actual || "-");
+        return count + (isHitSign(state.my_signs[idx], real, exactScore) ? 1 : 0);
+    }, 0);
+    const liveCount = matches.filter(match => isMatchLiveNow(match)).length;
+    return `<div class="live-scrutiny-badge">Escrutinio live <strong>${hits}/15</strong> provisionales · ${liveCount} en juego</div>`;
+}
+
+/* ---------- Análisis de tensión por partido ---------- */
+
+function getMatchTensionInfo(match, idx, consensus, preds, mySign) {
+    const isPleno = idx === 14;
+    const values = [
+        ["1", Number(consensus.p1 || 0)],
+        ["X", Number(consensus.px || 0)],
+        ["2", Number(consensus.p2 || 0)]
+    ].sort((a, b) => b[1] - a[1]);
+    const rawWinner = normalizeSign(consensus.ganador);
+    const winner = ["1", "X", "2"].includes(rawWinner) ? rawWinner : values[0][0];
+    const gap = values[0][1] - values[1][1];
+    const programSign = getSign(preds, idx, "programa", "v260_omnisciente");
+    const maestro = pickFeaturedMaster(preds, idx);
+    const signs = getOfficialAIColumns().map(([primary, fallback]) => getSign(preds, idx, primary, fallback))
+        .concat([mySign])
+        .map(normalizeSign)
+        .filter(sign => sign && sign !== "-");
+    const disagreements = signs.filter(sign => {
+        if (isPleno) return sign !== programSign;
+        return sign !== winner;
+    }).length;
+
+    let badge = "";
+    if (isPleno) badge = "Pleno caliente";
+    else if (programSign && programSign !== "-" && programSign !== winner) badge = "Golpe del programa";
+    else if (winner === "X" && Number(consensus.px || 0) >= 28) badge = "Empate oculto";
+    else if (values[0][1] >= 60 && gap >= 24) badge = "Fijo";
+    else if (disagreements >= 3) badge = "Partido dividido";
+    else if (gap <= 10 && values[0][1] > 0) badge = "Partido abierto";
+    else if (gap <= 16 && values[0][1] > 0) badge = "Trampa del consenso";
+
+    return {
+        badge,
+        disagreements,
+        programSign,
+        maestroSign: maestro.sign,
+        maestroLabel: maestro.label
+    };
+}
+
+/* ---------- Tabla de tensión (vista principal Quiniela) ---------- */
+
+function renderArenaTensionBody(matches) {
+    const tbody = qs("arena-body");
+    const thead = qs("arena-thead");
+    if (!tbody || !thead) return;
+
+    const councilStyle = isCouncilStyleJornada();
+    thead.innerHTML = `
+        <tr>
+            <th>#</th>
+            <th style="text-align:left;">Partido</th>
+            <th>${councilStyle ? "Señales" : "Consenso + signos"}</th>
+        </tr>`;
+
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
+    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
+
+    tbody.innerHTML = matches.map((m, idx) => {
+        const isPleno = idx === 14;
+        const real = m.signo_actual || "-";
+        const realScore = scoreOnly(m.marcador);
+        const mySign = state.my_signs[idx] || "-";
+        const c = consenso.find(item => Number(item.id) === Number(m.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
+        const consensoPleno = getPenaPlenoSummary(idx);
+        const liveMatch = isMatchLiveNow(m);
+        const scheduledMatch = isScheduledStatus(m.status) && !liveMatch;
+        const score = scheduledMatch ? formatSmartDate(m.fecha_raw, m.hora) : (m.marcador || "-");
+        const scoreText = liveMatch ? liveScoreDisplay(m, score) : score;
+        const mine = renderMyCell(idx, mySign, isPleno ? m.marcador : real, m.status, canEdit, isPleno);
+        const isFinished = isFinishedStatus(m.status);
+        const values = [Number(c.p1 || 0), Number(c.px || 0), Number(c.p2 || 0)].sort((a, b) => b - a);
+        const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
+        const rowClass = [
+            councilStyle ? "is-council-row" : "",
+            liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
+            splitMatch ? "is-split-row" : ""
+        ].filter(Boolean).join(" ");
+        const statusText = scheduledMatch ? score : "";
+        const scoreBadge = scheduledMatch
+            ? ""
+            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>`;
+        const penaChip = isPleno ?
+             renderTensionPenaChip(renderPenaPleno(consensoPleno, m.marcador, m.status), "Peña")
+            : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
+
+        return `
+            <tr class="tension-row ${rowClass}">
+                <td class="match-index-cell">
+                    <span class="match-number">${idx + 1}</span>
+                </td>
+                <td class="fixture-cell tension-fixture-cell">
+                    <div class="tension-fixture-layout">
+                        <div class="tension-fixture-main">
+                            ${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}
+                        </div>
+                        <div class="tension-meta-line">
+                            ${scoreBadge}
+                            ${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}
+                        </div>
+                    </div>
+                </td>
+                <td class="tension-consensus-cell">
+                    <div class="tension-sign-row">
+                        ${councilStyle
+                            ? renderCouncilStyleChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)
+                            : renderTensionAiChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)}
+                        ${penaChip}
+                        <div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div>
+                    </div>
+                </td>
+            </tr>
+            ${state.expandedMatch === idx ? `
+                <tr class="match-detail-row">
+                    <td colspan="3">
+                        ${renderMatchDetailGrid(m, c)}
+                    </td>
+                </tr>` : ""}`;
+    }).join("");
+}
+
+/* ---------- Tabla completa (modo alternativo) ---------- */
+
+function renderArenaTableBody(matches) {
+    const tbody = qs("arena-body");
+    const thead = qs("arena-thead");
+    if (!tbody || !thead) return;
+    const visibleAIColumns = getVisibleAIColumns(matches);
+
+    const scoreHeader = matches.some(m => isScheduledStatus(m.status)) ? "Hora" : "Marcador";
+    thead.innerHTML = `
+        <tr>
+            <th>#</th>
+            <th style="text-align:left;">Partido</th>
+            <th style="text-align:center;">Estado / Marcador</th>
+            ${visibleAIColumns.map(col => `<th>${col[2]}</th>`).join("")}
+            <th>Tu</th>
+            <th>Peña</th>
+        </tr>`;
+
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
+    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
+
+    tbody.innerHTML = matches.map((m, idx) => {
+        const isPleno = idx === 14;
+        const real = m.signo_actual || "-";
+        const mySign = state.my_signs[idx] || "-";
+        const c = consenso.find(item => Number(item.id) === Number(m.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
+        const consensoPleno = getPenaPlenoSummary(idx);
+        const consensus = isPleno
+            ? renderPenaPleno(consensoPleno, m.marcador, m.status)
+            : renderConsensus(c, real, m.status);
+        const liveMatch = isMatchLiveNow(m);
+        const scheduledMatch = isScheduledStatus(m.status) && !liveMatch;
+        const score = scheduledMatch ? formatSmartDate(m.fecha_raw, m.hora) : (m.marcador || "-");
+        const scoreText = liveMatch ? liveScoreDisplay(m, score) : score;
+        const aiCells = visibleAIColumns.map(([primary, fallback, label]) => {
+            const sign = getSign(preds, idx, primary, fallback);
+            return `<td class="rival-cell"><span class="ia-signo ${hitClass(sign, isPleno ? m.marcador : real, m.status, isPleno)}" title="${escapeHtml(label)}">${escapeHtml(sign)}</span></td>`;
+        }).join("");
+        const mine = renderMyCell(idx, mySign, isPleno ? m.marcador : real, m.status, canEdit, isPleno);
+        const isFinished = isFinishedStatus(m.status);
+        const values = [Number(c.p1 || 0), Number(c.px || 0), Number(c.p2 || 0)].sort((a, b) => b - a);
+        const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
+        const rowClass = [
+            liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
+            splitMatch ? "is-split-row" : ""
+        ].filter(Boolean).join(" ");
+        const statusBadge = "";
+
+        return `
+            <tr class="${rowClass}">
+                <td class="match-index-cell">
+                    <span class="match-number">${idx + 1}</span>
+                    <button class="match-detail-toggle table-info-toggle" type="button" data-detail-toggle="1" data-match-idx="${idx}" title="Ver detalle">INFO</button>
+                </td>
+                <td class="fixture-cell">${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}</td>
+                <td style="text-align:center;"><span class="match-score-badge ${liveMatch ? "is-live-score" : ""} ${scheduledMatch ? "is-scheduled-time" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>${statusBadge}</td>
+                ${aiCells}
+                <td class="my-cell">${mine}</td>
+                <td class="pena-cell">${consensus}</td>
+            </tr>
+            ${state.expandedMatch === idx ? `
+                <tr class="match-detail-row">
+                    <td colspan="${6 + visibleAIColumns.length}">
+                        ${renderMatchDetailGrid(m, c)}
+                    </td>
+                </tr>` : ""}`;
+    }).join("");
+}
+
+/* ---------- Featured master para chips ---------- */
+
+function pickFeaturedMaster(preds, idx) {
+    const preferred = [
+        ["grok", null, "Grok"],
+        ["claude", null, "Claude"],
+        ["chatgpt", null, "GPT"],
+        ["gemini", null, "Gemini"],
+        ["copilot", null, "Copilot"]
+    ];
+    for (const [primary, fallback, label] of preferred) {
+        const sign = getSign(preds, idx, primary, fallback);
+        if (sign && sign !== "-") return { label, sign };
+    }
+    return { label: "Maestro", sign: "-" };
+}

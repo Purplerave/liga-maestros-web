@@ -232,12 +232,18 @@ def build_audit(jornada):
         critical.append(f"La jornada {jornada} tiene {len(results)}/15 partidos cargados.")
     if missing_results:
         critical.append(f"Faltan partidos en resultados: {missing_results}.")
-    for required in ("programa", "consejo_ias"):
+    for required in ("programa",):
         status = prediction_status.get(required)
         if not status:
             critical.append(f"Falta la columna obligatoria {names.get(required, required)}.")
         elif status["count"] != 15:
             critical.append(f"{status['name']} tiene {status['count']}/15 signos. Faltan: {status['missing']}.")
+    consejo_status = prediction_status.get("consejo_ias")
+    if consejo_status and consejo_status["count"] != 15:
+        warnings.append(
+            f"{consejo_status['name']} es opcional, pero tiene {consejo_status['count']}/15 signos. "
+            f"Faltan: {consejo_status['missing']}."
+        )
     for uid in official_masters:
         status = prediction_status.get(uid)
         if not status:
