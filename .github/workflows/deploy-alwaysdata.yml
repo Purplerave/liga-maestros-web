@@ -102,6 +102,13 @@ jobs:
           visible = {key: site.get(key) for key in ("id", "name", "type", "command", "working_directory")}
           print("SITE_CONFIG=" + json.dumps(visible, ensure_ascii=True))
           PY
+          SITE_COMMAND='/home/ligademaestros/venv/bin/gunicorn --chdir /home/ligademaestros/current --workers 1 --threads 4 --timeout 120 --bind "[$IP]:$PORT" app:app'
+          curl --fail --silent --show-error \
+            --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
+            --request PATCH \
+            --data-urlencode "command=$SITE_COMMAND" \
+            --data-urlencode "working_directory=current" \
+            "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/" > /dev/null
           curl --fail --silent --show-error \
             --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --header "alwaysdata-synchronous: true" \
