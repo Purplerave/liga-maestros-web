@@ -1,0 +1,320 @@
+{
+  "generated_at": "2026-07-15T19:27:37",
+  "jornada": 73,
+  "summary": {
+    "partidos": 15,
+    "finalizados": 0,
+    "directo": 0,
+    "pendientes": 15,
+    "participantes_con_prediccion": 7,
+    "consenso_rows": 14,
+    "estado": "OK"
+  },
+  "critical": [],
+  "warnings": [
+    "Pleno con formato no Quiniela: [{'user_id': 'chatgpt', 'signo': '-'}, {'user_id': 'claude', 'signo': '-'}, {'user_id': 'copilot', 'signo': '-'}, {'user_id': 'gemini', 'signo': '-'}, {'user_id': 'grok', 'signo': '-'}, {'user_id': 'programa', 'signo': '-'}].",
+    "Escudos sin resolver: ['AIK', 'Bodo-Glimt', 'Brann', 'Brommapojkarna', 'Elfsborg', 'Fredrikstad', 'GAIS Göteborg', 'Ganador Semifinal 1', 'Ganador Semifinal 2', 'Ham-Kam', 'Hammarby', 'Häcken', 'KFUM Oslo', 'Kristiansund', 'Lillestrøm SK', 'Mjällby', 'Molde FK', 'Rosenborg', 'Sandefjord', 'Sarpsborg', 'Sirius', 'Start', 'Viking']."
+  ],
+  "prediction_status": {
+    "116699982648036669051": {
+      "name": "Pablo Castro",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "usuario"
+    },
+    "chatgpt": {
+      "name": "ChatGPT",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "claude": {
+      "name": "Claude",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "copilot": {
+      "name": "Copilot",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "gemini": {
+      "name": "Gemini",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "grok": {
+      "name": "Grok",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "maestro"
+    },
+    "programa": {
+      "name": "Programa",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "programa"
+    }
+  },
+  "scoreboard": {
+    "chatgpt": {
+      "name": "ChatGPT",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "claude": {
+      "name": "Claude",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "copilot": {
+      "name": "Copilot",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "gemini": {
+      "name": "Gemini",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "grok": {
+      "name": "Grok",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "116699982648036669051": {
+      "name": "Pablo Castro",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "programa": {
+      "name": "Programa",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    }
+  },
+  "missing_logos": [
+    "AIK",
+    "Bodo-Glimt",
+    "Brann",
+    "Brommapojkarna",
+    "Elfsborg",
+    "Fredrikstad",
+    "GAIS Göteborg",
+    "Ganador Semifinal 1",
+    "Ganador Semifinal 2",
+    "Ham-Kam",
+    "Hammarby",
+    "Häcken",
+    "KFUM Oslo",
+    "Kristiansund",
+    "Lillestrøm SK",
+    "Mjällby",
+    "Molde FK",
+    "Rosenborg",
+    "Sandefjord",
+    "Sarpsborg",
+    "Sirius",
+    "Start",
+    "Viking"
+  ],
+  "matches": [
+    {
+      "partido_id": 1,
+      "local": "Bodo-Glimt",
+      "visitante": "Fredrikstad",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-17",
+      "hora": "19:15",
+      "minuto": ""
+    },
+    {
+      "partido_id": 2,
+      "local": "Ham-Kam",
+      "visitante": "Tromsø IL",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "14:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 3,
+      "local": "Lillestrøm SK",
+      "visitante": "KFUM Oslo",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "16:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 4,
+      "local": "Kristiansund",
+      "visitante": "Sarpsborg",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "16:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 5,
+      "local": "Start",
+      "visitante": "Rosenborg",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "16:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 6,
+      "local": "Molde FK",
+      "visitante": "Brann",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "18:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 7,
+      "local": "Viking",
+      "visitante": "Sandefjord",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "18:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 8,
+      "local": "Mjällby",
+      "visitante": "Vasteras SK FK",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-17",
+      "hora": "19:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 9,
+      "local": "AIK",
+      "visitante": "GAIS Göteborg",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-18",
+      "hora": "15:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 10,
+      "local": "IFK Göteborg",
+      "visitante": "Brommapojkarna",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-17",
+      "hora": "19:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 11,
+      "local": "Elfsborg",
+      "visitante": "Sirius",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-19",
+      "hora": "16:30",
+      "minuto": ""
+    },
+    {
+      "partido_id": 12,
+      "local": "Hammarby",
+      "visitante": "Degerfors IF",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-19",
+      "hora": "16:30",
+      "minuto": ""
+    },
+    {
+      "partido_id": 13,
+      "local": "Halmstad",
+      "visitante": "Häcken",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-19",
+      "hora": "16:30",
+      "minuto": ""
+    },
+    {
+      "partido_id": 14,
+      "local": "Kalmar FF",
+      "visitante": "Malmoe",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-20",
+      "hora": "19:00",
+      "minuto": ""
+    },
+    {
+      "partido_id": 15,
+      "local": "Ganador Semifinal 1",
+      "visitante": "Ganador Semifinal 2",
+      "goles_local": null,
+      "goles_visitante": null,
+      "signo_actual": "-",
+      "status": "NS",
+      "fecha": "2026-07-19",
+      "hora": "21:00",
+      "minuto": ""
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 """Liga de Maestros - Flask application factory."""
 import os
-from flask import Flask, g, has_request_context
+from flask import Flask, g, has_request_context, request
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -8,6 +8,7 @@ import config
 from .db.migrations import run_startup_migrations
 from .db.connection import get_db
 from .routes import register_routes
+from .workers.web_collector import start_web_collector
 
 load_dotenv()
 config.ensure_runtime_data_dir()
@@ -38,6 +39,18 @@ def create_app():
 
     register_routes(app)
 
+    @app.after_request
+    def set_security_headers(response):
+        if request.path.startswith("/juegos/"):
+            response.headers["X-Frame-Options"] = "SAMEORIGIN"
+            response.headers["Content-Security-Policy"] = "frame-ancestors 'self'"
+        else:
+            response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        return response
+
     @app.teardown_request
     def close_managed_db_connections(exc=None):
         for conn in getattr(g, "_managed_db_conns", []) or []:
@@ -47,5 +60,6 @@ def create_app():
                 pass
 
     run_startup_migrations()
+    start_web_collector(app)
 
     return app

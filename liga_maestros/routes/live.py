@@ -38,8 +38,8 @@ def _build_q15_cache_status(jornada):
             "matches": received, "matches_received": received,
             "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
         })
-    except Exception as exc:
-        status["message"] = f"error_cache: {exc}"
+    except Exception:
+        status["message"] = "error_cache"
     return status
 
 

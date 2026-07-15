@@ -3,13 +3,20 @@ services:
     name: liga-maestros
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120
     healthCheckPath: /api/live/health
     autoDeploy: true
     disk:
       name: liga-data
       mountPath: /var/data
+      sizeGB: 1
     envVars:
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: FLASK_ENV
+        value: production
+      - key: RENDER
+        value: "1"
       - key: SECRET_KEY
         sync: false
       - key: SESSION_COOKIE_SECURE
@@ -18,6 +25,8 @@ services:
         value: Lax
       - key: PREFERRED_URL_SCHEME
         value: https
+      - key: TRUST_PROXY_HEADERS
+        value: "1"
       - key: DB_PATH
         value: /var/data/LIGA_MAESTROS_PRO.db
       - key: DATA_DIR
@@ -30,22 +39,23 @@ services:
         sync: false
       - key: HIGHLIGHTLY_REFRESH_ENABLED
         value: "1"
+      - key: HIGHLIGHTLY_DAILY_CALL_LIMIT
+        value: "7500"
+      - key: HIGHLIGHTLY_DAILY_CALL_RESERVE
+        value: "250"
+      - key: HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT
+        value: "3"
+      - key: HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS
+        value: "600"
+      - key: HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS
+        value: "3600"
+      - key: WEB_COLLECTOR_ENABLED
+        value: "1"
+      - key: WEB_COLLECTOR_INTERVAL_SECONDS
+        value: "60"
+      - key: WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS
+        value: "60"
       - key: ALLOW_LOCAL_ADMIN
         value: "0"
       - key: ADMIN_EMAILS
         sync: false
-
-  - type: worker
-    name: liga-collector
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python LIVE_COLLECTOR.py
-    envVars:
-      - key: DB_PATH
-        value: /var/data/LIGA_MAESTROS_PRO.db
-      - key: DATA_DIR
-        value: /var/data
-      - key: HIGHLIGHTLY_API_KEY
-        sync: false
-      - key: HIGHLIGHTLY_REFRESH_ENABLED
-        value: "1"

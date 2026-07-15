@@ -1,0 +1,387 @@
+/* ==========================================================================
+   PORRA MODULE — Score Prediction Panel & Compact Views
+   ========================================================================== */
+
+.porra-panel {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border-color: rgba(251, 191, 36, 0.24);
+    background:
+        linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(56, 189, 248, 0.06)),
+        rgba(8, 13, 24, 0.86);
+}
+
+.porra-summary {
+    color: #facc15;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.porra-body {
+    display: grid;
+    gap: 8px;
+}
+
+.porra-match {
+    display: grid;
+    gap: 2px;
+    padding: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.36);
+    text-align: center;
+}
+
+.porra-match span,
+.porra-match em {
+    color: #92a8c4;
+    font-size: 0.58rem;
+    font-style: normal;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.porra-match strong {
+    overflow: hidden;
+    color: #f8fbff;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.porra-form {
+    display: grid;
+    grid-template-columns: 44px 12px 44px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+}
+
+.porra-form input {
+    width: 44px;
+    height: 34px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.72);
+    color: #7dd3fc;
+    font-size: 1rem;
+    font-weight: 900;
+    text-align: center;
+}
+
+.porra-form span {
+    color: #9fb1c8;
+    font-weight: 900;
+    text-align: center;
+}
+
+.porra-form button {
+    height: 34px;
+    border: 1px solid rgba(251, 191, 36, 0.42);
+    border-radius: 8px;
+    background: rgba(251, 191, 36, 0.14);
+    color: #fde68a;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.porra-prize {
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: rgba(20, 184, 166, 0.1);
+    color: #b8f7ea;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.porra-list {
+    display: grid;
+    gap: 4px;
+}
+
+.porra-entry {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 7px;
+    border-radius: 6px;
+    background: rgba(2, 6, 23, 0.3);
+    color: #cbd5e1;
+    font-size: 0.64rem;
+    font-weight: 800;
+}
+
+.porra-entry span {
+    color: #facc15;
+    font-weight: 900;
+}
+
+.porra-entry.is-empty {
+    justify-content: center;
+    color: #92a8c4;
+}
+
+/* Porra v2: compact useful module with score distribution */
+body.quiniela-focus .porra-panel {
+    min-height: 0;
+}
+
+body.quiniela-focus .porra-panel .panel-head {
+    margin-bottom: 6px;
+}
+
+body.quiniela-focus .porra-body {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.8fr) minmax(180px, 0.8fr) minmax(230px, 1.25fr);
+    align-items: stretch;
+    gap: 8px;
+}
+
+body.quiniela-focus .porra-match {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+    align-items: center;
+    min-height: 48px;
+    padding: 7px 9px;
+}
+
+body.quiniela-focus .porra-match strong {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.quiniela-focus .porra-saved {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-content: center;
+    align-items: center;
+    justify-content: start;
+    min-height: 48px;
+    padding: 7px 10px;
+}
+
+body.quiniela-focus .porra-form {
+    display: grid;
+    grid-template-columns: 42px 10px 42px 48px;
+    align-content: center;
+    align-items: center;
+    justify-content: start;
+    min-height: 48px;
+    gap: 6px;
+}
+
+body.quiniela-focus .porra-form input {
+    width: 42px;
+    height: 32px;
+}
+
+body.quiniela-focus .porra-form button {
+    width: 48px;
+    height: 32px;
+    padding: 0;
+}
+
+body.quiniela-focus .porra-share {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    min-height: 48px;
+    padding: 7px 9px;
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 10px 7px 11px 8px;
+    background: rgba(2, 6, 23, 0.28);
+}
+
+body.quiniela-focus .porra-share-head,
+body.quiniela-focus .porra-share-row {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 7px;
+}
+
+body.quiniela-focus .porra-share-head {
+    color: #91a4c0;
+    font-size: 0.58rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+body.quiniela-focus .porra-share-head b {
+    grid-column: 2 / -1;
+    color: #cfe8ff;
+}
+
+body.quiniela-focus .porra-share-row {
+    min-height: 14px;
+    font-size: 0.66rem;
+    font-weight: 900;
+}
+
+body.quiniela-focus .porra-share-row b {
+    color: #facc15;
+}
+
+body.quiniela-focus .porra-share-row span {
+    position: relative;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(148, 163, 184, 0.14);
+}
+
+body.quiniela-focus .porra-share-row i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #38bdf8, #facc15);
+}
+
+body.quiniela-focus .porra-share-row em,
+body.quiniela-focus .porra-share-empty {
+    color: #9fb1c8;
+    font-style: normal;
+    text-align: right;
+}
+
+body.quiniela-focus .porra-list,
+body.quiniela-focus .porra-prize,
+body.quiniela-focus .porra-leaderboard {
+    display: none;
+}
+
+/* Porra ultra compacta: una tira, no un panel grande. */
+body.quiniela-focus .porra-panel {
+    padding: 9px 10px;
+    min-height: 0;
+}
+
+body.quiniela-focus .porra-panel .panel-head {
+    display: none;
+}
+
+body.quiniela-focus .porra-body {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.95fr) minmax(140px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+}
+
+body.quiniela-focus .porra-match,
+body.quiniela-focus .porra-saved,
+body.quiniela-focus .porra-form,
+body.quiniela-focus .porra-share {
+    min-height: 34px;
+    height: 34px;
+    padding: 4px 7px;
+    border-radius: 8px;
+}
+
+body.quiniela-focus .porra-match {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+    align-items: center;
+}
+
+body.quiniela-focus .porra-match strong {
+    overflow: hidden;
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.quiniela-focus .porra-match em {
+    color: #8fb3d8;
+    font-size: 0.66rem;
+    font-style: normal;
+    font-weight: 900;
+    text-align: center;
+}
+
+body.quiniela-focus .porra-saved {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.quiniela-focus .porra-saved span,
+body.quiniela-focus .porra-saved small {
+    font-size: 0.58rem;
+}
+
+body.quiniela-focus .porra-saved b {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+body.quiniela-focus .porra-form {
+    display: grid;
+    grid-template-columns: 34px 8px 34px 42px;
+    align-items: center;
+    gap: 5px;
+}
+
+body.quiniela-focus .porra-form input,
+body.quiniela-focus .porra-form button {
+    width: 100%;
+    height: 26px;
+    min-height: 0;
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+body.quiniela-focus .porra-share {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    background: rgba(2, 6, 23, 0.25);
+}
+
+body.quiniela-focus .porra-share-total,
+body.quiniela-focus .porra-share-empty {
+    flex: 0 0 auto;
+    color: #91a4c0;
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+body.quiniela-focus .porra-share-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 3px 6px;
+    border: 1px solid rgba(250, 204, 21, 0.22);
+    border-radius: 999px;
+    background: rgba(250, 204, 21, 0.08);
+    white-space: nowrap;
+}
+
+body.quiniela-focus .porra-share-pill b {
+    color: #facc15;
+    font-size: 0.68rem;
+}
+
+body.quiniela-focus .porra-share-pill em {
+    color: #bae6fd;
+    font-size: 0.58rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+@media (max-width: 1280px) {
+    body.quiniela-focus .porra-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

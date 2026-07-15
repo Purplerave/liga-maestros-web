@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 venv/
 env/
+.mimocode/
 
 # Local logs and generated runtime state
 *.log
@@ -20,6 +21,7 @@ data/HIGHLIGHTLY_CIRCUIT.json
 data/LIVE_COLLECTOR.log
 data/LIVE_COLLECTOR_HEALTH.json
 data/RADAR_NOTICIAS.json
+data/quiniela15_directo_*.json
 data/*.jsonl
 data/*.lock
 data/*.tmp
@@ -35,6 +37,7 @@ BACKUP_*/
 BACKUP_PRE_*/
 OLD/
 aistudio/
+salida/
 
 # Local databases and backups. Never publish live DB files.
 DATOS/*.db
@@ -56,6 +59,7 @@ tmp_*.png
 *_preview*.png
 header_cleanup_preview.png
 tension_preview*.png
+_extract_*.py
 
 # OS/editor files
 .DS_Store

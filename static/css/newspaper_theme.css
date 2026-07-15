@@ -370,7 +370,7 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
 
 body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
     color: var(--news-gold);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 0.68rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -379,7 +379,7 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
 body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
     margin-top: 2px;
     color: #f6efe1;
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.02em;
@@ -488,7 +488,7 @@ body.newspaper-ui.quiniela-focus .frontpage-score {
     left: 22px;
     top: 18px;
     color: #fff;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(4rem, 8vw, 8rem);
     font-weight: 900;
     line-height: 0.9;
@@ -508,7 +508,7 @@ body.newspaper-ui.quiniela-focus .frontpage-cover-visual strong {
     position: relative;
     z-index: 1;
     color: var(--news-gold);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(1.8rem, 3vw, 3.2rem);
     line-height: 0.9;
     text-shadow: 3px 3px 0 #000;
@@ -518,7 +518,7 @@ body.newspaper-ui.quiniela-focus .frontpage-cover-visual span {
     position: relative;
     z-index: 1;
     color: var(--news-paper);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 1rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -538,7 +538,7 @@ body.newspaper-ui.quiniela-focus .frontpage-versus {
     background: rgba(2, 6, 23, 0.78);
     border-top: 3px double rgba(243, 231, 207, 0.62);
     border-bottom: 3px double rgba(243, 231, 207, 0.62);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-weight: 900;
     text-transform: uppercase;
 }
@@ -561,7 +561,7 @@ body.newspaper-ui.quiniela-focus .frontpage-headline > span {
     display: inline-block;
     margin-bottom: 8px;
     color: var(--news-gold);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -570,15 +570,17 @@ body.newspaper-ui.quiniela-focus .frontpage-headline > span {
 body.newspaper-ui.quiniela-focus .frontpage-headline h2 {
     margin: 0 0 10px;
     color: var(--news-paper);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(1.7rem, 3vw, 3.5rem);
+    font-weight: 300;
+    letter-spacing: 0.03em;
     line-height: 0.96;
 }
 
 body.newspaper-ui.quiniela-focus .frontpage-headline p {
     margin: 0;
     color: rgba(246, 239, 225, 0.9);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.98rem;
     font-weight: 800;
 }
@@ -596,13 +598,13 @@ body.newspaper-ui.quiniela-focus .frontpage-facts strong {
     place-items: center;
     border: 1px solid rgba(243, 231, 207, 0.26);
     color: var(--news-gold);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 1.4rem;
 }
 
 body.newspaper-ui.quiniela-focus .frontpage-facts small {
     color: rgba(246, 239, 225, 0.72);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.68rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -627,7 +629,7 @@ body.newspaper-ui.quiniela-focus .frontpage-card {
 body.newspaper-ui.quiniela-focus .frontpage-card small,
 body.newspaper-ui.quiniela-focus .frontpage-card em {
     color: var(--news-gold);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.74rem;
     font-style: normal;
     font-weight: 900;
@@ -637,7 +639,7 @@ body.newspaper-ui.quiniela-focus .frontpage-card em {
 
 body.newspaper-ui.quiniela-focus .frontpage-card strong {
     color: var(--news-paper);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 1rem;
     line-height: 1;
     text-transform: uppercase;
@@ -645,7 +647,7 @@ body.newspaper-ui.quiniela-focus .frontpage-card strong {
 
 body.newspaper-ui.quiniela-focus .frontpage-card span {
     color: rgba(246, 239, 225, 0.78);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-weight: 800;
     font-size: 0.82rem;
 }
@@ -678,7 +680,7 @@ body.newspaper-ui.quiniela-focus .topbar-context::before {
     content: none;
     display: none;
     color: var(--news-paper);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(1.25rem, 2vw, 2.2rem);
     font-weight: 900;
     line-height: 0.92;
@@ -689,9 +691,10 @@ body.newspaper-ui.quiniela-focus .topbar-context::before {
 
 body.newspaper-ui.quiniela-focus .topbar-title {
     color: var(--news-gold) !important;
-    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
     font-size: 0.98rem !important;
-    letter-spacing: 0.08em !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
 }
 
@@ -702,7 +705,7 @@ body.newspaper-ui.quiniela-focus .topbar-kicker {
     padding: 1px 6px;
     background: rgba(217, 169, 40, 0.16);
     color: var(--news-gold) !important;
-    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
     font-size: 0.62rem;
     font-weight: 900;
     letter-spacing: 0.08em !important;
@@ -734,7 +737,7 @@ body.newspaper-ui.quiniela-focus .standings-panel::before {
     display: block;
     margin-bottom: 6px;
     color: var(--news-gold);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.04em;
@@ -764,10 +767,10 @@ body.newspaper-ui.quiniela-focus .panel-head h3,
 body.newspaper-ui.quiniela-focus .contest-title span,
 body.newspaper-ui.quiniela-focus .rank-section-title {
     color: var(--news-paper) !important;
-    font-family: Georgia, "Times New Roman", serif !important;
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
     font-size: 1rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.02em !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
 }
 
@@ -775,7 +778,7 @@ body.newspaper-ui.quiniela-focus .side-card-kicker,
 body.newspaper-ui.quiniela-focus .field-group label,
 body.newspaper-ui.quiniela-focus .porra-share-total {
     color: var(--news-gold) !important;
-    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-family: "Inter", system-ui, sans-serif !important;
     letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
 }
@@ -788,9 +791,10 @@ body.newspaper-ui.quiniela-focus .arena-table {
 body.newspaper-ui.quiniela-focus .arena-table th {
     border-bottom: 3px double rgba(243, 231, 207, 0.46) !important;
     color: var(--news-paper) !important;
-    font-family: Georgia, "Times New Roman", serif !important;
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
     font-size: 0.72rem !important;
-    letter-spacing: 0.02em !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
 }
 
@@ -808,7 +812,7 @@ body.newspaper-ui.quiniela-focus .porra-match strong,
 body.newspaper-ui.quiniela-focus .rank-name,
 body.newspaper-ui.quiniela-focus .contest-name {
     color: #f6efe1 !important;
-    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-family: "Inter", system-ui, sans-serif !important;
     font-size: 0.9rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.01em !important;
@@ -821,7 +825,8 @@ body.newspaper-ui.quiniela-focus .match-number {
     background: transparent !important;
     color: var(--news-blue) !important;
     box-shadow: none !important;
-    font-family: Georgia, "Times New Roman", serif !important;
+    font-family: "Space Grotesk", system-ui, sans-serif !important;
+    font-weight: 300 !important;
 }
 
 body.newspaper-ui.quiniela-focus .match-score-badge,
@@ -895,7 +900,7 @@ body.newspaper-ui.quiniela-focus .tab-btn.active {
     background: var(--news-paper) !important;
     color: var(--news-ink) !important;
     border: 1px solid var(--news-paper) !important;
-    font-family: "Rajdhani", "Inter", sans-serif !important;
+    font-family: "Inter", system-ui, sans-serif !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
 }
@@ -908,7 +913,7 @@ body.newspaper-ui.quiniela-focus .topbar-mini-link.awards {
 body.newspaper-ui.quiniela-focus .snake-panel .panel-head h3::before {
     content: "PASATIEMPO  ";
     color: var(--news-red);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.68rem;
 }
 
@@ -936,7 +941,7 @@ body.newspaper-ui.quiniela-focus .article-page-kicker {
     padding: 2px 7px;
     background: var(--news-red);
     color: #fff;
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -945,8 +950,10 @@ body.newspaper-ui.quiniela-focus .article-page-kicker {
 body.newspaper-ui.quiniela-focus .newspaper-article-page h2 {
     margin: 0 0 12px;
     color: var(--news-paper);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(2rem, 4vw, 4rem);
+    font-weight: 300;
+    letter-spacing: 0.03em;
     line-height: 0.96;
     text-transform: uppercase;
 }
@@ -955,7 +962,7 @@ body.newspaper-ui.quiniela-focus .newspaper-article-page p {
     max-width: 760px;
     margin: 0 0 12px;
     color: rgba(246, 239, 225, 0.9);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: clamp(1rem, 1.5vw, 1.2rem);
     font-weight: 700;
 }
@@ -1102,7 +1109,7 @@ body.newspaper-ui.quiniela-focus .quiz-kicker {
     padding: 7px 10px;
     background: #e74d3d;
     color: #fff;
-    font-family: "Rajdhani", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 0.9rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -1112,7 +1119,7 @@ body.newspaper-ui.quiniela-focus .quiz-kicker {
 body.newspaper-ui.quiniela-focus .quiz-hero h2 {
     margin: 0;
     color: #f3e7cf;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(4rem, 8vw, 7.6rem);
     line-height: 0.86;
     letter-spacing: 0;
@@ -1123,7 +1130,7 @@ body.newspaper-ui.quiniela-focus .quiz-hero p {
     max-width: 28rem;
     margin: 24px 0 0;
     color: rgba(243, 231, 207, 0.88);
-    font-family: "Rajdhani", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: clamp(1.05rem, 1.4vw, 1.35rem);
     font-weight: 800;
     line-height: 1.28;
@@ -1141,7 +1148,7 @@ body.newspaper-ui.quiniela-focus .quiz-hero-score span {
     height: 56px;
     border: 2px solid #d9a928;
     color: #f3e7cf;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 1.65rem;
     font-weight: 900;
 }
@@ -1277,7 +1284,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels span 
     justify-content: center;
     gap: 6px;
     min-width: 0;
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 1rem !important;
     font-weight: 900;
     white-space: nowrap;

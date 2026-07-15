@@ -9,7 +9,7 @@ body.newspaper-ui.quiniela-focus {
 
 body.newspaper-ui.quiniela-focus,
 body.newspaper-ui.quiniela-focus :where(a, abbr, address, article, aside, b, button, caption, cite, code, dd, details, div, dl, dt, em, figcaption, footer, form, h1, h2, h3, h4, h5, h6, header, input, label, legend, li, main, mark, menu, nav, ol, option, output, p, pre, section, select, small, span, strong, summary, table, tbody, td, textarea, tfoot, th, thead, time, tr, ul) {
-    font-family: "Special Elite", "Courier New", monospace !important;
+    font-family: "Inter", system-ui, -apple-system, sans-serif !important;
 }
 
 body.newspaper-ui.quiniela-focus :where(input, select, textarea, button) {
@@ -20,14 +20,14 @@ body.newspaper-ui.quiniela-focus .topbar-title,
 body.newspaper-ui.quiniela-focus .topbar-kicker,
 body.newspaper-ui.quiniela-focus .newspaper-page-nav b,
 body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
-    font-family: "Special Elite", "Courier New", monospace !important;
+    font-family: "Inter", system-ui, sans-serif !important;
 }
 
 body.newspaper-ui.quiniela-focus .topbar-title {
     color: var(--type-gold) !important;
     font-size: clamp(1rem, 1.25vw, 1.34rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.08em !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.06em !important;
     line-height: 1.05 !important;
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.72) !important;
     text-align: left !important;
@@ -333,7 +333,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-context {
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title,
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-kicker {
-    font-family: "Special Elite", "Courier New", monospace !important;
+    font-family: "Inter", system-ui, sans-serif !important;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {

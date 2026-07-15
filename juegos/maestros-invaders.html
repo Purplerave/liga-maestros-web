@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maestros Invaders</title>
+  <link rel="stylesheet" href="/juegos/maestros-invaders.css?v=3">
+</head>
+<body>
+  <main class="arcade-shell">
+    <header class="arcade-head">
+      <div>
+        <span class="eyebrow">Liga de Maestros Arcade</span>
+        <h1>Maestros Invaders</h1>
+      </div>
+      <div class="hud" aria-label="Marcador">
+        <span>Puntos <strong id="score">000000</strong></span>
+        <span>Oleada <strong id="wave">01</strong></span>
+        <span>Vidas <strong id="lives">3</strong></span>
+        <span>Récord <strong id="best">000000</strong></span>
+      </div>
+    </header>
+
+    <section class="game-layout">
+      <div class="screen-frame">
+        <canvas id="game" width="960" height="600" aria-label="Maestros Invaders"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-card">
+            <span id="overlayKicker" class="eyebrow">Temporada arcade</span>
+            <h2 id="overlayTitle">Defiende el 1X2</h2>
+            <p id="overlayText">Muévete con el ratón, A/D o las flechas. Dispara con clic o espacio. Pulsa P para pausar.</p>
+            <label id="nameRow" class="name-row" hidden>
+              Nombre para el Top 10
+              <input id="playerName" maxlength="12" autocomplete="nickname" placeholder="Jugador">
+            </label>
+            <button id="primaryButton" type="button">Jugar</button>
+          </div>
+        </div>
+        <div class="touch-controls" aria-label="Controles táctiles">
+          <button type="button" data-control="left" aria-label="Mover a la izquierda">◀</button>
+          <button type="button" data-control="fire" class="fire" aria-label="Disparar">●</button>
+          <button type="button" data-control="right" aria-label="Mover a la derecha">▶</button>
+        </div>
+      </div>
+
+      <aside class="ranking-panel">
+        <div class="ranking-title">
+          <span class="eyebrow">Salón de la fama</span>
+          <h2>Top 10</h2>
+        </div>
+        <ol id="ranking"></ol>
+        <p class="ranking-note">El nombre solo se solicita si tu marca entra aquí.</p>
+      </aside>
+    </section>
+  </main>
+  <script src="/juegos/maestros-invaders.js?v=5"></script>
+</body>
+</html>
