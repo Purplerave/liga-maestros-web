@@ -124,8 +124,16 @@ def live_health():
             age_seconds = int(time.time() - os.path.getmtime(health_path))
         except Exception:
             age_seconds = None
+    release_path = os.path.join(config.BASE_DIR, ".release-sha")
+    build_sha = "local"
+    try:
+        with open(release_path, "r", encoding="utf-8") as release_file:
+            build_sha = release_file.read().strip() or "unknown"
+    except OSError:
+        pass
     return jsonify({
         "status": "ok",
+        "build_sha": build_sha,
         "collector": health or {"status": "missing", "error": "LIVE_COLLECTOR_HEALTH.json no existe"},
         "health_file": exists, "age_seconds": age_seconds,
         "stale": bool(age_seconds is None or age_seconds > 300),

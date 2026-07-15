@@ -121,35 +121,19 @@ jobs:
 
       - name: Verify activated release
         run: |
-          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
-          set -eu
-          SHA="$1"
-          ACTIVE_RELEASE=$(readlink -f /home/ligademaestros/current)
-          test "$(cat "$ACTIVE_RELEASE/.release-sha")" = "$SHA"
-          grep -q interface_polish "$ACTIVE_RELEASE/templates/liga_index.html"
-
-          for attempt in $(seq 1 15); do
-            for PID in $(pgrep -u ligademaestros -f '[g]unicorn|[l]iga-' || true); do
-              PROCESS_CWD=$(readlink -f "/proc/$PID/cwd" 2>/dev/null || true)
-              if [ "$PROCESS_CWD" = "$ACTIVE_RELEASE" ]; then
-                echo "ACTIVE_RELEASE=$ACTIVE_RELEASE"
-                echo "PROCESS_CWD=$PROCESS_CWD"
-                exit 0
-              fi
-            done
-            sleep 2
-          done
-          echo "Gunicorn did not start from $ACTIVE_RELEASE" >&2
-          exit 1
-          REMOTE
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "test \"\$(cat /home/ligademaestros/current/.release-sha)\" = '$GITHUB_SHA' && grep -q interface_polish /home/ligademaestros/current/templates/liga_index.html"
 
       - name: Verify public health
         run: |
-          for attempt in 1 2 3 4 5 6; do
-            if curl --fail --silent --show-error \
-              "https://ligademaestros.alwaysdata.net/api/live/health"; then
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            HEALTH=$(curl --fail --silent --show-error \
+              "https://ligademaestros.alwaysdata.net/api/live/health" || true)
+            BUILD_SHA=$(printf '%s' "$HEALTH" | python -c 'import json, sys; print(json.load(sys.stdin).get("build_sha", ""))' 2>/dev/null || true)
+            if [ "$BUILD_SHA" = "$GITHUB_SHA" ]; then
+              printf '%s\n' "$HEALTH"
               exit 0
             fi
-            sleep 10
+            echo "Waiting for build $GITHUB_SHA (public build: ${BUILD_SHA:-unavailable})"
+            sleep 5
           done
           exit 1
