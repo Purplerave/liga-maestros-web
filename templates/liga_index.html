@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/games.css', v=assets_v ~ '-games-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/ticket_compact.css', v=assets_v ~ '-ticket-compact-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/legal.css', v=assets_v ~ '-legal-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/interface_polish.css', v=assets_v ~ '-interface-polish-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}">
     <div class="app-shell">
@@ -34,27 +35,16 @@
             </div>
 
             <div class="topbar-filters">
-                <div class="field-group">
-                    <label for="jornada-nav">Jornada</label>
+                <div class="field-group ticket-jornada-filter">
+                    <label for="jornada-nav">Ver jornada</label>
                     <select id="jornada-nav" onchange="changeJornada(this.value)"></select>
                 </div>
-
-                <div class="field-group">
-                    <label for="league-nav">Vista</label>
-                    <select id="league-nav" onchange="changeMainView(this.value)"></select>
-                </div>
-
-                <div class="field-group nav-secondary">
-                    <label for="contest-nav">Detalle</label>
-                    <select id="contest-nav" onchange="changeSecondaryView(this.value)"></select>
-                </div>
-
             </div>
 
             <div class="topbar-actions">
                 <div id="user-profile-nav" class="user-panel"></div>
                 <details class="topbar-legal-menu">
-                    <summary>Legal</summary>
+                    <summary>Informaci&oacute;n</summary>
                     <div>
                         <a href="/privacidad">Privacidad</a>
                         <a href="/cookies">Cookies</a>
@@ -70,7 +60,7 @@
             <div id="topbar-live-slot" class="topbar-live-slot" aria-live="polite"></div>
         </header>
 
-        <nav class="newspaper-page-nav" aria-label="Indice del diario">
+        <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
             <button class="active" type="button" data-page-action="ALL"><span>Portada</span></button>
             <button type="button" data-page-action="TICKET"><span>Quiniela</span></button>
             <button type="button" data-page-action="LIVE"><span>Directo</span></button>

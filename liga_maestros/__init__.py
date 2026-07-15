@@ -61,6 +61,11 @@ def create_app():
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if request.is_secure:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        if request.path in {"/api/user/status", "/api/user/stats", "/cuenta"}:
+            response.headers["Cache-Control"] = "no-store, private"
         return response
 
     @app.teardown_request

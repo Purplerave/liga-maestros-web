@@ -449,7 +449,7 @@ function getUserRankingPosition() {
     const idx = rows.findIndex(row => String(row.id) === uid);
     if (idx >= 0) return idx + 1;
     const contestRow = (state.contest?.general || []).find(row => String(row.id) === uid || row.is_user);
-    return contestRow.pos || null;
+    return contestRow?.pos || null;
 }
 
 function isTicketPage() {

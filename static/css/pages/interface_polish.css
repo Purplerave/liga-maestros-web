@@ -1,0 +1,259 @@
+/* Ajustes finales de navegacion y densidad. Este modulo carga el ultimo. */
+
+body.newspaper-ui.quiniela-focus .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-standings-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-contest-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-live-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-quiz-active .app-shell,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .app-shell {
+    grid-template-rows: 66px 38px minmax(0, 1fr) !important;
+}
+
+body.newspaper-ui.quiniela-focus .header-brand-panel,
+body.newspaper-ui.quiniela-focus .topbar-shell,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .header-brand-panel,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-shell {
+    min-height: 66px !important;
+    height: 66px !important;
+}
+
+body.newspaper-ui.quiniela-focus .header-brand-panel {
+    padding: 5px 10px !important;
+}
+
+body.newspaper-ui.quiniela-focus .sidebar-brand-image {
+    max-height: 50px !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-shell {
+    grid-template-columns: minmax(220px, 1fr) auto max-content !important;
+    gap: 8px !important;
+    padding: 6px 10px !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-filters {
+    display: none !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-filters,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters,
+body.newspaper-ui.quiniela-focus.newspaper-live-active .topbar-filters,
+body.newspaper-ui.quiniela-focus.newspaper-standings-active .topbar-filters,
+body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
+    display: none !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters {
+    display: flex !important;
+}
+
+body.newspaper-ui.quiniela-focus .ticket-jornada-filter {
+    display: grid !important;
+    grid-template-columns: auto minmax(130px, 170px);
+    align-items: center;
+    gap: 7px;
+}
+
+body.newspaper-ui.quiniela-focus .ticket-jornada-filter label {
+    margin: 0 !important;
+    white-space: nowrap;
+}
+
+body.newspaper-ui.quiniela-focus .ticket-jornada-filter select {
+    width: 100% !important;
+    min-height: 32px !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav {
+    min-height: 38px !important;
+    height: 38px !important;
+    margin-bottom: 3px !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(3, 7, 18, 0.96) !important;
+    box-shadow: none !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 3px 9px !important;
+    font-family: "Inter", system-ui, sans-serif !important;
+    color: rgba(226, 232, 240, 0.72) !important;
+    background: transparent !important;
+    text-align: center !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button.active,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active {
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.12) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button span,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
+    margin: 0 !important;
+    font-family: "Inter", system-ui, sans-serif !important;
+    font-size: 0.72rem !important;
+    color: inherit !important;
+    text-shadow: none !important;
+}
+
+/* Juegos comparte la misma cabecera que el resto del producto. */
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-shell {
+    grid-template-columns: minmax(220px, 1fr) max-content !important;
+    align-content: center !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(5, 8, 15, 0.98)) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-context {
+    display: block !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-kicker,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
+    font-family: "Inter", system-ui, sans-serif !important;
+    text-shadow: none !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-kicker {
+    color: #f59e0b !important;
+    font-size: 0.62rem !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
+    color: #f8fafc !important;
+    font-size: 1rem !important;
+}
+
+/* Quiniela: quince filas legibles con toda la informacion visible. */
+@media (min-width: 900px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th {
+        height: 24px !important;
+        padding: 2px 5px !important;
+        font-size: 0.62rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(1),
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(1) {
+        width: 44px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(2),
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(2) {
+        width: 42% !important;
+        min-width: 0 !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(3),
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(3) {
+        width: auto !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
+        height: 37px !important;
+        padding: 2px 5px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-number {
+        width: 22px !important;
+        height: 22px !important;
+        line-height: 22px !important;
+        font-size: 0.68rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-layout {
+        grid-template-columns: minmax(0, 1fr) 78px !important;
+        gap: 6px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
+        grid-template-columns: minmax(70px, 1fr) auto minmax(70px, 1fr) !important;
+        column-gap: 6px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 0.73rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-crest-pair {
+        grid-template-columns: 20px 7px 20px !important;
+        gap: 3px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-meta-line .match-score-badge,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table .match-score-badge.is-scheduled-time {
+        width: 76px !important;
+        min-width: 76px !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        padding: 0 4px !important;
+        font-size: 0.66rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-consensus-cell,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-consensus-cell {
+        display: block !important;
+        padding: 2px 5px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-sign-row,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-sign-row {
+        grid-template-columns: repeat(6, minmax(35px, 1fr)) minmax(44px, 0.9fr) minmax(48px, 1fr) !important;
+        gap: 3px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip {
+        min-height: 29px !important;
+        height: 29px !important;
+        padding: 1px 2px !important;
+        grid-template-rows: 9px 17px !important;
+        gap: 0 !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip > span {
+        font-size: 0.46rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .saved-ticket-sign,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .action-buttons .ia-signo,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .empty-user-pick {
+        min-height: 17px !important;
+        height: 17px !important;
+        font-size: 0.7rem !important;
+    }
+}
+
+@media (max-width: 899px) {
+    body.newspaper-ui.quiniela-focus .app-shell {
+        grid-template-rows: auto auto minmax(0, 1fr) !important;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-shell {
+        height: auto !important;
+        min-height: 60px !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters {
+        justify-self: stretch;
+    }
+}

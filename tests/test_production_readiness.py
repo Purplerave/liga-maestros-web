@@ -138,3 +138,42 @@ def test_authenticated_writes_require_session_csrf(tmp_path, monkeypatch):
     assert client.post("/_test/write").status_code == 403
     response = client.post("/_test/write", headers={"X-CSRF-Token": "known-token"})
     assert response.status_code == 200
+
+
+def test_user_status_never_exposes_email(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "DB_PATH", str(tmp_path / "status.db"))
+    monkeypatch.setattr(config, "BOOTSTRAP_DB_PATH", str(tmp_path / "missing.db"))
+    monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
+    monkeypatch.setenv("SECRET_KEY", "status-test-secret")
+    monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
+    monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
+    app = create_app()
+    client = app.test_client()
+
+    assert client.get("/api/user/status").get_json() == {"csrf_token": None, "user": None}
+    with client.session_transaction() as flask_session:
+        flask_session["user"] = {
+            "id": "u1",
+            "name": "User",
+            "email": "private@example.test",
+            "is_admin": False,
+        }
+    payload = client.get("/api/user/status").get_json()
+    assert payload["user"] == {"id": "u1", "name": "User", "is_admin": False}
+    assert "private@example.test" not in json.dumps(payload)
+    assert client.get("/api/user/status").headers["Cache-Control"] == "no-store, private"
+
+
+def test_user_stats_are_private_to_account_owner(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "DB_PATH", str(tmp_path / "stats.db"))
+    monkeypatch.setattr(config, "BOOTSTRAP_DB_PATH", str(tmp_path / "missing.db"))
+    monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
+    monkeypatch.setenv("SECRET_KEY", "stats-test-secret")
+    monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
+    monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
+    app = create_app()
+    client = app.test_client()
+    with client.session_transaction() as flask_session:
+        flask_session["user"] = {"id": "u1", "name": "User", "is_admin": False}
+
+    assert client.get("/api/user/stats?uid=u2").status_code == 403

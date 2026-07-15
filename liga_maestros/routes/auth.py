@@ -8,6 +8,14 @@ from ..db.connection import get_db
 bp = Blueprint("auth", __name__)
 
 
+def _admin_emails():
+    return {
+        item.strip().lower()
+        for item in os.getenv("ADMIN_EMAILS", "").split(",")
+        if item.strip()
+    }
+
+
 def _get_google():
     from flask import current_app
     from authlib.integrations.flask_client import OAuth
@@ -48,7 +56,12 @@ def authorize():
             conn.commit()
         finally:
             conn.close()
-        session['user'] = {'id': user_info['sub'], 'name': user_info['name'], 'email': user_info['email']}
+        email = str(user_info.get('email') or '').strip().lower()
+        session['user'] = {
+            'id': user_info['sub'],
+            'name': user_info['name'],
+            'is_admin': email in _admin_emails(),
+        }
     return redirect('/')
 
 

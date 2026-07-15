@@ -12,7 +12,14 @@ bp = Blueprint("user", __name__)
 
 @bp.route('/api/user/status')
 def user_status():
-    user = session.get('user')
+    session_user = session.get('user') or {}
+    user = None
+    if session_user:
+        user = {
+            "id": session_user.get("id"),
+            "name": session_user.get("name"),
+            "is_admin": bool(session_user.get("is_admin")),
+        }
     return jsonify({"user": user, "csrf_token": get_csrf_token() if user else None})
 
 
@@ -23,7 +30,10 @@ def get_user_stats():
         return jsonify({})
     current_user = session.get("user") or {}
     current_uid = str(current_user.get("id") or "")
-    is_admin = bool(session.get("user", {}).get("email", "") in _admin_emails())
+    is_admin = bool(current_user.get("is_admin"))
+    if not is_admin:
+        email = str(current_user.get("email") or "").strip().lower()
+        is_admin = bool(email and email in _admin_emails())
     if str(uid) != current_uid and not is_admin:
         return jsonify({"status": "forbidden"}), 403
 

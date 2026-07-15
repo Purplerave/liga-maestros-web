@@ -36,9 +36,21 @@ def cookies():
 
 @bp.route("/cuenta")
 def account():
-    if not session.get("user"):
+    user = session.get("user") or {}
+    if not user:
         return redirect(url_for("auth.login"))
-    return render_template("legal/account.html", csrf_token=get_csrf_token(), **_legal_context())
+    account_user = {"id": user.get("id"), "name": user.get("name"), "email": ""}
+    conn = get_db()
+    try:
+        row = conn.execute("SELECT nombre, email FROM usuarios WHERE id = ?", (user.get("id"),)).fetchone()
+        if row:
+            account_user["name"] = row["nombre"] or account_user["name"]
+            account_user["email"] = row["email"] or ""
+    finally:
+        conn.close()
+    context = _legal_context()
+    context["user"] = account_user
+    return render_template("legal/account.html", csrf_token=get_csrf_token(), **context)
 
 
 def _table_exists(conn, table):
