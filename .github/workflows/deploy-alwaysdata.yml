@@ -93,7 +93,7 @@ jobs:
             exit 1
           fi
           curl --fail --silent --show-error \
-            --user "$ALWAYSDATA_API_TOKEN:" \
+            --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --header "alwaysdata-synchronous: true" \
             --request POST \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/restart/"
