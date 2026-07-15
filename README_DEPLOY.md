@@ -69,6 +69,41 @@ El `render.yaml` actual esta preparado como **beta de un solo servicio**:
 El disco persistente de Render requiere un servicio de pago. No publiques esta
 configuracion sobre una instancia efimera: los usuarios y quinielas se perderian.
 
+## Alternativa gratuita: Alwaysdata
+
+La beta tambien puede ejecutarse en el plan gratuito de Alwaysdata con un unico
+worker y SQLite persistente. La disposicion preparada es:
+
+```text
+/home/ligademaestros/current -> version activa
+/home/ligademaestros/releases/ -> versiones inmutables
+/home/ligademaestros/runtime/ -> base, datos, secretos y backups persistentes
+/home/ligademaestros/venv/ -> entorno Python compartido
+```
+
+El sitio debe configurarse como `User program`:
+
+```text
+Working directory: /home/ligademaestros/current
+Command: /home/ligademaestros/venv/bin/gunicorn --workers 1 --threads 4 --timeout 120 --bind $IP:$PORT app:app
+Address: ligademaestros.alwaysdata.net
+Idle time: 0
+```
+
+El workflow `.github/workflows/deploy-alwaysdata.yml` publica automaticamente
+cada `push` a `main`, crea un backup antes de activar la nueva version y comprueba
+la salud publica. Requiere estos secretos de GitHub:
+
+```text
+ALWAYSDATA_SSH_KEY
+ALWAYSDATA_KNOWN_HOSTS
+ALWAYSDATA_API_TOKEN
+ALWAYSDATA_SITE_ID
+```
+
+El plan gratuito queda limitado al subdominio de Alwaysdata, 256 MB de RAM y uso
+no comercial. No se deben ejecutar varios workers ni duplicar el collector.
+
 ## Google OAuth
 
 En Google Cloud Console, en el cliente OAuth de la app, anadir:
