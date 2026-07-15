@@ -1,6 +1,6 @@
 """Liga de Maestros - Flask application factory."""
 import os
-from flask import Flask, g, has_request_context, request
+from flask import Flask, g, jsonify, request, session
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -9,6 +9,8 @@ from .db.migrations import run_startup_migrations
 from .db.connection import get_db
 from .routes import register_routes
 from .workers.web_collector import start_web_collector
+from .db.backups import start_backup_scheduler
+from .middleware.csrf import valid_csrf_request
 
 load_dotenv()
 config.ensure_runtime_data_dir()
@@ -39,6 +41,16 @@ def create_app():
 
     register_routes(app)
 
+    @app.before_request
+    def protect_authenticated_writes():
+        if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return None
+        if not session.get("user"):
+            return None
+        if valid_csrf_request():
+            return None
+        return jsonify({"status": "error", "error": "Solicitud de seguridad caducada."}), 403
+
     @app.after_request
     def set_security_headers(response):
         if request.path.startswith("/juegos/"):
@@ -60,6 +72,7 @@ def create_app():
                 pass
 
     run_startup_migrations()
+    start_backup_scheduler(app)
     start_web_collector(app)
 
     return app

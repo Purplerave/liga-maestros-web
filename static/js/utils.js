@@ -18,6 +18,14 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+function authenticatedJsonHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    if (typeof state !== "undefined" && state.csrfToken) {
+        headers["X-CSRF-Token"] = state.csrfToken;
+    }
+    return headers;
+}
+
 function showToast(message, type = "success") {
     const container = qs("toast-container");
     if (!container) return;

@@ -1,0 +1,18 @@
+{% extends "legal/base.html" %}
+{% block title %}Mi cuenta - Liga de Maestros{% endblock %}
+{% block content %}
+<p class="legal-kicker">Cuenta</p>
+<h1>Tu cuenta</h1>
+<div class="account-summary">
+    <strong>{{ user.name }}</strong>
+    <span>{{ user.email }}</span>
+</div>
+<h2>Eliminar cuenta</h2>
+<p>Esta accion elimina tu perfil, quinielas, comentarios, porras y puntuaciones. No se puede deshacer.</p>
+<form class="delete-account-form" method="post" action="/cuenta/eliminar">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="confirmacion">Escribe <strong>ELIMINAR</strong> para confirmar</label>
+    <input id="confirmacion" name="confirmacion" autocomplete="off" required>
+    <button type="submit">Eliminar definitivamente mi cuenta</button>
+</form>
+{% endblock %}

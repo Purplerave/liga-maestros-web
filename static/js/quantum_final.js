@@ -15,7 +15,9 @@ async function refreshData(options = {}) {
             fetch(`/api/sync/status?j=${encodeURIComponent(state.jornada)}`),
             fetch(`/api/concurso?j=${encodeURIComponent(state.jornada)}`)
         ]);
-        state.user = (await userRes.json()).user;
+        const userPayload = await userRes.json();
+        state.user = userPayload.user;
+        state.csrfToken = userPayload.csrf_token || "";
         state.data = await dataRes.json();
         logoAliasIndex = null;
         logoDataIndex = null;
@@ -154,7 +156,7 @@ async function submitComment(event) {
     try {
         const res = await fetch("/api/comentarios", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authenticatedJsonHeaders(),
             body: JSON.stringify({
                 jornada: state.data.jornada || state.jornada,
                 texto: value
@@ -236,7 +238,7 @@ async function submitPorra(event) {
     try {
         const res = await fetch("/api/porra", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authenticatedJsonHeaders(),
             body: JSON.stringify({
                 jornada: state.data.jornada || state.jornada,
                 goles_local: qs("porra-home").value,
@@ -310,7 +312,7 @@ async function savePredictions() {
     try {
         const res = await fetch("/api/predicciones/save", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authenticatedJsonHeaders(),
             body: JSON.stringify({ user_id: state.user.id, jornada: state.data.jornada, signos: state.my_signs })
         });
         const result = await res.json();

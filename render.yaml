@@ -3,9 +3,10 @@ services:
     name: liga-maestros
     env: python
     buildCommand: pip install -r requirements.txt
+    initialDeployHook: python INICIALIZAR_PRODUCCION.py
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120
     healthCheckPath: /api/live/health
-    autoDeploy: true
+    autoDeployTrigger: checksPass
     disk:
       name: liga-data
       mountPath: /var/data
@@ -31,6 +32,14 @@ services:
         value: /var/data/LIGA_MAESTROS_PRO.db
       - key: DATA_DIR
         value: /var/data
+      - key: DB_BACKUP_ENABLED
+        value: "1"
+      - key: DB_BACKUP_DIR
+        value: /var/data/backups
+      - key: DB_BACKUP_INTERVAL_SECONDS
+        value: "21600"
+      - key: DB_BACKUP_RETENTION
+        value: "14"
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
@@ -58,4 +67,12 @@ services:
       - key: ALLOW_LOCAL_ADMIN
         value: "0"
       - key: ADMIN_EMAILS
+        sync: false
+      - key: LEGAL_OWNER_NAME
+        sync: false
+      - key: LEGAL_OWNER_ID
+        sync: false
+      - key: LEGAL_OWNER_ADDRESS
+        sync: false
+      - key: LEGAL_CONTACT_EMAIL
         sync: false

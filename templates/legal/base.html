@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#06090f">
+    <title>{% block title %}Liga de Maestros{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/legal.css') }}">
+</head>
+<body class="legal-page">
+    <header class="legal-header">
+        <a class="legal-brand" href="/">Liga de Maestros <small>1X2</small></a>
+        <nav aria-label="Informacion legal">
+            <a href="/privacidad">Privacidad</a>
+            <a href="/cookies">Cookies</a>
+            <a href="/aviso-legal">Aviso legal</a>
+            {% if user %}<a href="/cuenta">Mi cuenta</a>{% endif %}
+        </nav>
+    </header>
+    <main class="legal-content">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="legal-bottom"><a href="/">Volver a Liga de Maestros</a></footer>
+</body>
+</html>

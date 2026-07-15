@@ -1,0 +1,18 @@
+{% extends "legal/base.html" %}
+{% block title %}Aviso legal - Liga de Maestros{% endblock %}
+{% block content %}
+<p class="legal-kicker">Informacion</p>
+<h1>Aviso legal</h1>
+<dl class="legal-data">
+    <dt>Responsable</dt><dd>{{ owner_name }}</dd>
+    <dt>Identificacion</dt><dd>{{ owner_id }}</dd>
+    <dt>Direccion</dt><dd>{{ owner_address }}</dd>
+    <dt>Contacto</dt><dd>{{ contact_email }}</dd>
+</dl>
+<h2>Objeto</h2>
+<p>Liga de Maestros es una comunidad informativa y recreativa de pronosticos futbolisticos. No vende apuestas, no acepta dinero de juego y no garantiza premios ni resultados.</p>
+<h2>Uso del servicio</h2>
+<p>Las personas usuarias deben utilizar la plataforma de forma licita y respetuosa. Los comentarios ofensivos, fraudulentos o que vulneren derechos de terceros pueden ser retirados.</p>
+<h2>Datos deportivos</h2>
+<p>Marcadores, horarios y estadisticas pueden proceder de proveedores externos y contener retrasos o correcciones. La informacion mostrada no sustituye los resultados oficiales de SELAE ni de las competiciones.</p>
+{% endblock %}

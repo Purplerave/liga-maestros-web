@@ -20,6 +20,8 @@ def _get_assets_version():
         os.path.join(config.BASE_DIR, "static", "css", "typewriter_system.css"),
         os.path.join(config.BASE_DIR, "static", "css", "newspaper_cover.css"),
         os.path.join(config.BASE_DIR, "static", "css", "pages", "quiz_page.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "pages", "legal.css"),
+        os.path.join(config.BASE_DIR, "static", "css", "pages", "ticket_compact.css"),
         os.path.join(config.BASE_DIR, "static", "css", "snake_gol_arcade.css"),
         os.path.join(config.BASE_DIR, "static", "js", "utils.js"),
         os.path.join(config.BASE_DIR, "static", "js", "state.js"),

@@ -108,7 +108,7 @@ function submitQuiz(container, answers, startTime, jornada) {
     fetch("/api/quiz/submit", {
         method: "POST",
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
+        headers: authenticatedJsonHeaders(),
         body: JSON.stringify({ jornada, respuestas: answers, tiempo_total_ms: tiempo }),
     })
     .then(r => r.json())

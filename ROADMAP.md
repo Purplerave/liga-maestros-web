@@ -23,6 +23,9 @@ solo cuando aporten una razon real para volver.
 - [x] SQLite configurado con WAL, `busy_timeout` y transacciones explicitas.
 - [x] CI con tests, compilacion y auditoria de dependencias informativa.
 - [x] Despliegue beta preparado para Render con web y collector coordinados.
+- [x] Arranque sobre disco vacio con esquema completo y semilla publica sin datos privados.
+- [x] Backups SQLite automaticos, rotativos y verificados con `integrity_check`.
+- [x] Privacidad, cookies, aviso legal y eliminacion transaccional de cuenta.
 
 ### Producto
 
@@ -61,7 +64,8 @@ temporada.
   pronosticos, quinielas, resultados y clasificaciones.
 - [ ] Poder recalcular puntuaciones y rankings desde snapshots sin depender del
   estado actual de la base de datos.
-- [ ] Crear copia automatica y rotativa de SQLite antes y despues de cada jornada.
+- [x] Crear copia automatica y rotativa de SQLite cada seis horas.
+- [ ] Marcar automaticamente backups de apertura y cierre de cada jornada.
 - [ ] Anadir una comprobacion semanal unica que valide los 15 partidos, horarios,
   participantes, logos, cierre y presupuesto API.
 

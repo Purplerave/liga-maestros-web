@@ -52,6 +52,7 @@ DATOS/DATASET*.csv
 data/*.db
 data/*.db-wal
 data/*.db-shm
+data/backups/
 
 # Temporary screenshots and visual QA artifacts
 /*.png

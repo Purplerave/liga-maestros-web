@@ -34,9 +34,21 @@ GOOGLE_CLIENT_ID=<id de Google>
 GOOGLE_CLIENT_SECRET=<secret de Google>
 HIGHLIGHTLY_API_KEY=<clave>
 ADMIN_EMAILS=<tu email>
+LEGAL_OWNER_NAME=<responsable>
+LEGAL_OWNER_ID=<identificacion>
+LEGAL_OWNER_ADDRESS=<direccion>
+LEGAL_CONTACT_EMAIL=<correo publico>
 ```
 
-El `render.yaml` ya crea un servicio web con disco persistente `/var/data` y collector interno.
+El `render.yaml` crea un servicio de pago con disco persistente `/var/data`,
+collector interno, inicializacion publica y backups automaticos. La base privada
+local no se sube a GitHub.
+
+El primer despliegue ejecuta automaticamente:
+
+```bash
+python INICIALIZAR_PRODUCCION.py
+```
 
 ## 3. Subir cambios de codigo
 
@@ -118,3 +130,14 @@ Prueba manual local:
 python LIVE_COLLECTOR.py --once --jornada N
 python LIVE_COLLECTOR.py --once --force --jornada N
 ```
+
+## 7. Backups
+
+Antes de importar una jornada o hacer una operacion delicada:
+
+```bash
+python GESTIONAR_BACKUPS.py create --reason antes-jornada
+python GESTIONAR_BACKUPS.py list
+```
+
+Las copias automaticas se crean cada seis horas y se conservan las 14 ultimas.

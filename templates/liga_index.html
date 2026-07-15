@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/games.css', v=assets_v ~ '-games-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/ticket_compact.css', v=assets_v ~ '-ticket-compact-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/pages/legal.css', v=assets_v ~ '-legal-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}">
     <div class="app-shell">
@@ -52,6 +53,15 @@
 
             <div class="topbar-actions">
                 <div id="user-profile-nav" class="user-panel"></div>
+                <details class="topbar-legal-menu">
+                    <summary>Legal</summary>
+                    <div>
+                        <a href="/privacidad">Privacidad</a>
+                        <a href="/cookies">Cookies</a>
+                        <a href="/aviso-legal">Aviso legal</a>
+                        {% if user %}<a href="/cuenta">Mi cuenta</a>{% endif %}
+                    </div>
+                </details>
                 <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar">Actualizar</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
                 <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
