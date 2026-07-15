@@ -92,6 +92,16 @@ jobs:
             echo "Alwaysdata API token or site id is not configured."
             exit 1
           fi
+          SITE_JSON=$(curl --fail --silent --show-error \
+            --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
+            "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/")
+          export SITE_JSON
+          python - <<'PY'
+          import json, os
+          site = json.loads(os.environ["SITE_JSON"])
+          visible = {key: site.get(key) for key in ("id", "name", "type", "command", "working_directory")}
+          print("SITE_CONFIG=" + json.dumps(visible, ensure_ascii=True))
+          PY
           curl --fail --silent --show-error \
             --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --header "alwaysdata-synchronous: true" \
