@@ -8,6 +8,7 @@ const state = {
     contest: null,
     jornada: new URLSearchParams(window.location.search).get("j") || "",
     user: null,
+    csrfToken: "",
     my_signs: Array(15).fill("-"),
     server_signs: Array(15).fill("-"),
     draftDirty: false,

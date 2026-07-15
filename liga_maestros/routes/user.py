@@ -5,6 +5,7 @@ from ..db.connection import get_db
 from ..services.teams import canonical_contest_id, contest_aliases_for_uid, is_scored_status
 from ..services.contest import build_contest_payload
 from ..scoring import score_prediction
+from ..middleware.csrf import get_csrf_token
 
 bp = Blueprint("user", __name__)
 
@@ -12,7 +13,7 @@ bp = Blueprint("user", __name__)
 @bp.route('/api/user/status')
 def user_status():
     user = session.get('user')
-    return jsonify({"user": user})
+    return jsonify({"user": user, "csrf_token": get_csrf_token() if user else None})
 
 
 @bp.route('/api/user/stats')
