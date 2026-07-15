@@ -56,6 +56,7 @@ jobs:
           mkdir -p "$RELEASE" "$HOME_DIR/runtime/data" "$HOME_DIR/runtime/backups"
           tar -xf "$ARCHIVE" -C "$RELEASE"
           rm "$ARCHIVE"
+          printf '%s\n' "$SHA" > "$RELEASE/.release-sha"
           ln -sfn "$HOME_DIR/runtime/app.env" "$RELEASE/.env"
 
           if [ ! -x "$HOME_DIR/venv/bin/python" ]; then
@@ -95,6 +96,10 @@ jobs:
             --user "$ALWAYSDATA_API_TOKEN:" \
             --request POST \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/restart/"
+
+      - name: Verify activated release
+        run: |
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "set -eu; test \"\$(cat /home/ligademaestros/current/.release-sha)\" = '$GITHUB_SHA'; grep -q interface_polish /home/ligademaestros/current/templates/liga_index.html; echo ACTIVE_RELEASE=\$(readlink -f /home/ligademaestros/current); ps -u ligademaestros -o pid=,args= | grep -E '[g]unicorn|[p]ython.*app' || true"
 
       - name: Verify public health
         run: |
