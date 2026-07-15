@@ -112,6 +112,7 @@ jobs:
             --request PATCH \
             --data "$PATCH_PAYLOAD" \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/"
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "pkill -TERM -u ligademaestros -f '/home/ligademaestros/venv/bin/gunicorn' || true; sleep 2; pkill -KILL -u ligademaestros -f '/home/ligademaestros/venv/bin/gunicorn' || true"
           curl --fail --silent --show-error \
             --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --header "alwaysdata-synchronous: true" \
