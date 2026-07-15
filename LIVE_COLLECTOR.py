@@ -388,6 +388,8 @@ def next_sleep_seconds(window, base_interval):
             return max(60, min(remaining, 900))
     if window.get("live_now"):
         return max(60, min(int(base_interval or 120), 120))
+    if window.get("needs_result_catchup"):
+        return 900
     if not window.get("enabled"):
         next_kickoff = window.get("next_kickoff")
         if next_kickoff and next_kickoff > madrid_now().replace(tzinfo=None) + timedelta(minutes=20):
@@ -409,6 +411,7 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
         q15
         and window.get("jornada")
         and window.get("reason") == "ventana_jornada"
+        and enabled
     )
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
@@ -436,6 +439,9 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     highlightly_status = "disabled"
     if HIGHLIGHTLY_REFRESH_ENABLED and (enabled or force):
         now_ts = time.time()
+        api_interval = max(60, int(highlightly_interval or 300))
+        if window.get("needs_result_catchup") and not window.get("live_now"):
+            api_interval = max(api_interval, 900)
         circuit = get_highlightly_circuit()
         if circuit.get("open"):
             highlightly_status = "circuit_open"
@@ -444,7 +450,7 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
             except Exception:
                 until = "desconocido"
             log_line(f"highlightly_skip=circuit_open until={until}")
-        elif force or now_ts - LAST_HIGHLIGHTLY_RUN >= max(60, int(highlightly_interval or 300)):
+        elif force or now_ts - LAST_HIGHLIGHTLY_RUN >= api_interval:
             highlightly_status = "refresh_api"
             updates = refresh_current_matches_from_highlightly(
                 force=True,

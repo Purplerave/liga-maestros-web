@@ -101,6 +101,17 @@ ALWAYSDATA_API_TOKEN
 ALWAYSDATA_SITE_ID
 ```
 
+Desde Windows se puede validar y publicar todo con un solo comando:
+
+```powershell
+PUBLICAR_WEB.bat "Descripcion breve del cambio"
+```
+
+El script ejecuta los tests, prepara el commit y hace `push` a `main`. A partir
+de ahi GitHub Actions despliega en Alwaysdata sin depender del PC. El antiguo
+`INICIAR_LIGA_MAESTROS_PRO.bat` queda solo para trabajar en `localhost`; no es
+necesario dejarlo abierto para que funcionen la web publica ni sus directos.
+
 El plan gratuito queda limitado al subdominio de Alwaysdata, 256 MB de RAM y uso
 no comercial. No se deben ejecutar varios workers ni duplicar el collector.
 
@@ -109,7 +120,7 @@ no comercial. No se deben ejecutar varios workers ni duplicar el collector.
 En Google Cloud Console, en el cliente OAuth de la app, anadir:
 
 ```text
-https://TU-DOMINIO-DE-RENDER.onrender.com/authorize
+https://ligademaestros.alwaysdata.net/authorize
 ```
 
 Tambien puedes anadir para pruebas locales:
@@ -138,13 +149,19 @@ Nota Render importante: un Persistent Disk solo es accesible por la instancia de
 
 ## Directo / Highlightly
 
-El refresco live no depende de que los usuarios recarguen la web. En Render lo ejecuta el collector interno:
+El refresco live no depende de que los usuarios recarguen la web ni de que el
+ordenador local este encendido. En Alwaysdata lo ejecuta el collector interno:
 
 - `WEB_COLLECTOR_ENABLED=1`
 - `WEB_COLLECTOR_INTERVAL_SECONDS=60`
 - `WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS=60`
 
-El collector respeta la ventana de jornada, el limite diario y el circuit breaker. El estado se consulta en:
+Highlightly se consulta cada minuto desde dos minutos antes de cada partido hasta
+un maximo de tres horas despues de su inicio. Si un resultado queda sin cerrar,
+se hace una comprobacion de recuperacion cada 15 minutos durante un maximo de
+24 horas. Fuera de esas ventanas no se realizan llamadas a la API ni scraping
+del directo. El collector tambien respeta el limite diario y el circuit breaker.
+El estado se consulta en:
 
 ```text
 /api/live/health
