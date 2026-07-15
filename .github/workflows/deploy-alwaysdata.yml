@@ -112,7 +112,7 @@ jobs:
             --request PATCH \
             --data "$PATCH_PAYLOAD" \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/"
-          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "pkill -TERM -u ligademaestros -f '[g]unicorn' || true; sleep 2; pkill -KILL -u ligademaestros -f '[g]unicorn' || true"
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "pkill -TERM -u ligademaestros -f '[g]unicorn|[l]iga-' || true; sleep 2; pkill -KILL -u ligademaestros -f '[g]unicorn|[l]iga-' || true"
           curl --fail --silent --show-error \
             --user "$ALWAYSDATA_API_TOKEN account=$ALWAYSDATA_USER:" \
             --header "alwaysdata-synchronous: true" \
@@ -129,7 +129,7 @@ jobs:
           grep -q interface_polish "$ACTIVE_RELEASE/templates/liga_index.html"
 
           for attempt in $(seq 1 15); do
-            for PID in $(pgrep -u ligademaestros -f gunicorn || true); do
+            for PID in $(pgrep -u ligademaestros -f '[g]unicorn|[l]iga-' || true); do
               PROCESS_CWD=$(readlink -f "/proc/$PID/cwd" 2>/dev/null || true)
               if [ "$PROCESS_CWD" = "$ACTIVE_RELEASE" ]; then
                 echo "ACTIVE_RELEASE=$ACTIVE_RELEASE"
