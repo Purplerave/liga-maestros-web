@@ -126,22 +126,15 @@ jobs:
           test "$(cat "$ACTIVE_RELEASE/.release-sha")" = "$SHA"
           grep -q interface_polish "$ACTIVE_RELEASE/templates/liga_index.html"
 
-          PID=$(pgrep -u ligademaestros -o -f gunicorn || true)
-          if [ -n "$PID" ] && [ "$(readlink -f "/proc/$PID/cwd")" != "$ACTIVE_RELEASE" ]; then
-            echo "Restarting stale Gunicorn process group"
-            pkill -TERM -u ligademaestros -f '/home/ligademaestros/venv/bin/gunicorn' || true
-          fi
-
           for attempt in $(seq 1 15); do
-            PID=$(pgrep -u ligademaestros -o -f gunicorn || true)
-            if [ -n "$PID" ]; then
-              PROCESS_CWD=$(readlink -f "/proc/$PID/cwd")
+            for PID in $(pgrep -u ligademaestros -f gunicorn || true); do
+              PROCESS_CWD=$(readlink -f "/proc/$PID/cwd" 2>/dev/null || true)
               if [ "$PROCESS_CWD" = "$ACTIVE_RELEASE" ]; then
                 echo "ACTIVE_RELEASE=$ACTIVE_RELEASE"
                 echo "PROCESS_CWD=$PROCESS_CWD"
                 exit 0
               fi
-            fi
+            done
             sleep 2
           done
           echo "Gunicorn did not start from $ACTIVE_RELEASE" >&2
