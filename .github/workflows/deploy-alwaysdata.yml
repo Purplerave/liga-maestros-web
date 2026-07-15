@@ -102,7 +102,8 @@ jobs:
           visible = {key: site.get(key) for key in ("id", "name", "type", "command", "working_directory")}
           print("SITE_CONFIG=" + json.dumps(visible, ensure_ascii=True))
           PY
-          SITE_COMMAND='/home/ligademaestros/venv/bin/gunicorn --chdir /home/ligademaestros/current --workers 1 --threads 4 --timeout 120 --bind "[$IP]:$PORT" app:app'
+          SHORT_SHA="${GITHUB_SHA:0:8}"
+          SITE_COMMAND="/home/ligademaestros/venv/bin/gunicorn --name liga-$SHORT_SHA --chdir /home/ligademaestros/current --workers 1 --threads 4 --timeout 120 --bind \"[\$IP]:\$PORT\" app:app"
           export SITE_COMMAND
           PATCH_PAYLOAD=$(python -c 'import json, os; print(json.dumps({"type": "user_program", "command": os.environ["SITE_COMMAND"], "working_directory": "current"}))')
           curl --fail-with-body --silent --show-error \
