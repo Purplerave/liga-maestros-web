@@ -119,8 +119,8 @@ jobs:
 
           PID=$(pgrep -u ligademaestros -o -f gunicorn || true)
           if [ -n "$PID" ] && [ "$(readlink -f "/proc/$PID/cwd")" != "$ACTIVE_RELEASE" ]; then
-            echo "Restarting stale Gunicorn process $PID"
-            kill -TERM "$PID"
+            echo "Restarting stale Gunicorn process group"
+            pkill -TERM -u ligademaestros -f '/home/ligademaestros/venv/bin/gunicorn' || true
           fi
 
           for attempt in $(seq 1 15); do
