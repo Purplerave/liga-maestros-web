@@ -99,7 +99,7 @@ jobs:
 
       - name: Verify activated release
         run: |
-          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "set -eu; test \"\$(cat /home/ligademaestros/current/.release-sha)\" = '$GITHUB_SHA'; grep -q interface_polish /home/ligademaestros/current/templates/liga_index.html; echo ACTIVE_RELEASE=\$(readlink -f /home/ligademaestros/current); ps -u ligademaestros -o pid=,args= | grep -E '[g]unicorn|[p]ython.*app' || true"
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "set -eu; test \"\$(cat /home/ligademaestros/current/.release-sha)\" = '$GITHUB_SHA'; grep -q interface_polish /home/ligademaestros/current/templates/liga_index.html; echo ACTIVE_RELEASE=\$(readlink -f /home/ligademaestros/current); PID=\$(pgrep -u ligademaestros -o -f gunicorn || true); if [ -n \"\$PID\" ]; then echo PROCESS_CWD=\$(readlink -f /proc/\$PID/cwd); fi; ps -u ligademaestros -o pid=,args= | grep -E '[g]unicorn|[p]ython.*app' || true"
 
       - name: Verify public health
         run: |
