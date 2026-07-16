@@ -239,7 +239,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
         background: transparent !important;
     }
 
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip > span[title] {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip > span:first-child[title] {
         display: none !important;
     }
 
@@ -257,13 +257,40 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick {
-        width: 45px !important;
-        min-width: 45px !important;
+        display: grid !important;
+        width: 68px !important;
+        min-width: 68px !important;
         line-height: 1 !important;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick small {
+        display: block !important;
         font-size: 0.48rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-breakdown {
+        grid-template-columns: repeat(3, 1fr) !important;
+        align-items: stretch !important;
+        gap: 1px !important;
+        padding: 2px !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item {
+        display: grid !important;
+        place-content: center !important;
+        gap: 1px !important;
+        min-width: 0 !important;
+        color: #8291a8 !important;
+        font-style: normal !important;
+        line-height: 1 !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item b {
+        font-size: 0.62rem !important;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item.is-leader {
+        color: #f8c84b !important;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons {

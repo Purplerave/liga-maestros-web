@@ -97,9 +97,12 @@ function renderConsensus(c, real, status) {
     const sorted = [...values].sort((a, b) => b[1] - a[1]);
     const rawWinner = normalizeSign(c.ganador);
     const winner = ["1", "X", "2"].includes(rawWinner) ? rawWinner : sorted[0][0];
-        const winnerValue = values.find(([sign]) => sign === winner)?.[1] || 0;
     const detail = `Peña: 1 ${Number(c.p1 || 0)}% | X ${Number(c.px || 0)}% | 2 ${Number(c.p2 || 0)}%`;
-    return `<span class="pena-pick ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}"><b>${escapeHtml(winner)}</b><small>${winnerValue}%</small></span>`;
+    const breakdown = values.map(([sign, value]) => `
+        <span class="pena-breakdown-item ${sign === winner ? "is-leader" : ""}">
+            <b>${escapeHtml(sign)}</b><small>${value}%</small>
+        </span>`).join("");
+    return `<span class="pena-pick pena-pick-breakdown ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}" aria-label="${escapeHtml(detail)}">${breakdown}</span>`;
 }
 
 function renderConsensusBar(consensus, isPleno = false) {
