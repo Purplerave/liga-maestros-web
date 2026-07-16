@@ -74,6 +74,13 @@
       "signos": ["1", "X2", "1", "2", "2", "1", "1", "1X", "1", "1", "1", "2", "1", "2", "1-2"],
       "verified_at": "2026-07-16",
       "source": "j73 peña.md / Luzia"
+    },
+    {
+      "jornada": 73,
+      "user_id": "fistro",
+      "signos": ["1", "X", "1", "X2", "2", "1", "1", "1X", "1", "1", "1", "1", "2", "2", "1-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Baidu; huecos completados por criterio editorial"
     }
   ]
 }
