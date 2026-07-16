@@ -1,4 +1,4 @@
-/* Portada — LA LIGA DE MAESTROS */
+/* Portada competitiva de Liga de Maestros. */
 
 function hydrateCoverTypewriter() {}
 
@@ -21,78 +21,208 @@ function coverIsClosed() {
     return Boolean(state.data.is_locked) || coverCloseLabel() === "cerrada";
 }
 
+function coverMasterColumns() {
+    return (state.data?.participant_contract?.visible_ai_columns || []).map(col => ({
+        id: Array.isArray(col) ? col[0] : col.id,
+        label: Array.isArray(col) ? (col[2] || col[0]) : (col.name || col.label || col.id),
+    })).filter(col => col.id);
+}
+
 function coverMasterNames() {
-    const cols = (state.data?.participant_contract?.visible_ai_columns || []);
-    return cols
-        .map(col => {
-            if (Array.isArray(col)) return col[2] || col[0];
-            return col.name || col.label || col.id || "";
-        })
-        .filter(name => name && String(name).toLowerCase() !== "programa");
+    return coverMasterColumns()
+        .filter(col => String(col.id).toLowerCase() !== "programa")
+        .map(col => col.label);
+}
+
+function coverDisplayName(uid) {
+    const names = state.data?.participant_contract?.names || {};
+    const id = String(uid || "").toLowerCase();
+    if (state.user && String(state.user.id).toLowerCase() === id) return state.user.name || "Tu";
+    return names[id] || names[uid] || String(uid || "").split("@")[0];
+}
+
+function coverRankingRows() {
+    const ranking = state.data?.ranking_maestros || {};
+    const hidden = new Set((state.data?.participant_contract?.hidden_ids || []).map(id => String(id).toLowerCase()));
+    return Object.entries(ranking)
+        .filter(([uid]) => !hidden.has(String(uid).toLowerCase()))
+        .map(([uid, values]) => ({
+            uid,
+            name: coverDisplayName(uid),
+            total: Number(values?.total || 0),
+            jornada: Number(values?.jornada_live ?? values?.jornada ?? 0),
+        }))
+        .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.name.localeCompare(b.name, "es"));
+}
+
+function coverPredictionSigns(entry) {
+    if (Array.isArray(entry)) return entry;
+    return Array.isArray(entry?.signos) ? entry.signos : [];
+}
+
+function coverDisagreementMatch(matches) {
+    const columns = coverMasterColumns();
+    const predictions = state.data?.predicciones_actuales || {};
+    let best = null;
+    matches.slice(0, 14).forEach((match, index) => {
+        const picks = columns.map(col => ({
+            id: col.id,
+            label: col.label,
+            sign: coverPredictionSigns(predictions[col.id])[index] || "-",
+        })).filter(item => item.sign !== "-");
+        const unique = new Set(picks.map(item => item.sign)).size;
+        const score = unique * 10 + picks.filter(item => item.sign.length > 1).length;
+        if (!best || score > best.score) best = { match, picks, unique, score };
+    });
+    return best;
+}
+
+function coverTightPenaMatch(matches) {
+    const rows = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
+    let best = null;
+    rows.forEach(row => {
+        const match = matches.find(item => Number(item.id) === Number(row.id));
+        if (!match || !Number(row.total || 0)) return;
+        const peak = Math.max(Number(row.p1 || 0), Number(row.px || 0), Number(row.p2 || 0));
+        if (!best || peak < best.peak) best = { match, row, peak };
+    });
+    return best;
+}
+
+function coverMatchTimestamp(match) {
+    const rawDate = String(match?.fecha_raw || match?.fecha || "").split(" ")[0];
+    const rawHour = String(match?.hora || "00:00").slice(0, 5);
+    const stamp = Date.parse(`${rawDate}T${rawHour}:00`);
+    return Number.isNaN(stamp) ? Number.MAX_SAFE_INTEGER : stamp;
+}
+
+function coverNextMatch(matches) {
+    const live = matches.find(match => isLiveStatus(match.status) || isLiveMatch(match));
+    if (live) return { match: live, live: true };
+    const pending = matches
+        .filter(match => !(isFinishedStatus(match.status) || isImplicitlyFinished(match)) && coverMatchTimestamp(match) >= Date.now() - 3600000)
+        .slice()
+        .sort((a, b) => coverMatchTimestamp(a) - coverMatchTimestamp(b));
+    return { match: pending[0] || matches[0] || null, live: false };
+}
+
+function coverFixtureHtml(match, compact = false) {
+    if (!match) return `<span class="cp-empty">Horario pendiente</span>`;
+    return `<div class="cp-fixture ${compact ? "is-compact" : ""}">
+        <span class="cp-team cp-team-home">${logoBadge(match.local, teamLogo(match, "home"))}<strong>${escapeHtml(getShortName(match.local))}</strong></span>
+        <span class="cp-fixture-sep">VS</span>
+        <span class="cp-team cp-team-away">${logoBadge(match.visitante, teamLogo(match, "away"))}<strong>${escapeHtml(getShortName(match.visitante))}</strong></span>
+    </div>`;
+}
+
+function coverNavHtml(liveCount) {
+    const links = [
+        ["TICKET", "Quiniela"],
+        ["LIVE", liveCount ? `Directo ${liveCount}` : "Directo"],
+        ["STANDINGS", "Ligas"],
+        ["SNAKE", "Juegos"],
+        ["CONTEST", "La Pe&ntilde;a"],
+    ];
+    return links.map(([action, label]) =>
+        `<button type="button" class="cp-nav-link" data-page-action="${action}">${label}</button>`
+    ).join("");
+}
+
+function coverAccountHtml(rankingRows) {
+    if (!state.user) return `<a class="cp-account" href="/login/google">Entrar</a>`;
+    const uid = String(state.user.id).toLowerCase();
+    const index = rankingRows.findIndex(row => String(row.uid).toLowerCase() === uid);
+    const row = index >= 0 ? rankingRows[index] : null;
+    const firstName = String(state.user.name || "Jugador").split(" ")[0];
+    return `<button type="button" class="cp-account is-user" onclick="openProfileView()">
+        <strong>${escapeHtml(firstName)}</strong><span>#${index >= 0 ? index + 1 : "-"} &middot; ${row?.total || 0} pts</span>
+    </button>`;
 }
 
 function renderNewspaperCoverPageV3() {
-    const matches = state.data.partidos || [];
+    const matches = state.data?.partidos || [];
     const closed = coverIsClosed();
-    const jornada = state.data.jornada || state.jornada || "";
-    const liveCount = matches.filter(m => isLiveStatus(m.status) || isLiveMatch(m)).length;
     const saved = hasSavedTicket();
-    const names = coverMasterNames();
-    const namesStr = names.length
-        ? names.slice(0, 3).join(", ") + (names.length > 3 ? " y el resto" : "")
-        : "las IAs";
-    const numPlayers = Object.keys(state.data.ranking_maestros || {}).length || 0;
-
+    const jornada = state.data?.jornada || state.jornada || "";
+    const liveCount = matches.filter(match => isLiveStatus(match.status) || isLiveMatch(match)).length;
+    const masterNames = coverMasterNames();
+    const masterColumns = coverMasterColumns();
+    const penaVotes = Number(state.data?.consenso_pena?.[0]?.total || 0);
+    const rankingRows = coverRankingRows();
+    const disagreement = coverDisagreementMatch(matches);
+    const penaPulse = coverTightPenaMatch(matches);
+    const next = coverNextMatch(matches);
     const ctaLabel = closed
         ? (saved ? "Ver mi quiniela" : "Ver resultados")
-        : (saved ? "Ver o modificar mi quiniela" : "Hacer mi quiniela");
+        : (saved ? "Revisar mi quiniela" : "Hacer mi quiniela");
+    const statusLabel = closed ? "Jornada cerrada" : `Cierre en ${coverCloseLabel()}`;
+    const distinctReadings = disagreement?.unique || 0;
 
-    return `
-        <div class="cp">
-            <div class="cp-hero">
-                <img class="cp-hero-logo" src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
-                <h1 class="cp-hero-title">&iexcl;Haz tu quiniela!</h1>
-                <p class="cp-hero-desc">
-                    Cada jornada te la juegas contra los Maestros IA y la Pe&ntilde;a.
-                    &iquest;Pleno al 15? Ese es tu trono. &iexcl;Ve a por &eacute;l!
-                </p>
-                <p class="cp-hero-tagline">&iexcl;Demu&eacute;stralo! &iexcl;Sube en el ranking! &iexcl;S&eacute; el mejor!</p>
-                <div class="cp-hero-actions">
-                    <button type="button" class="cp-hero-btn" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    ${!closed && !saved ? `<span class="cp-hero-deadline">Cierre en ${escapeHtml(coverCloseLabel())}</span>` : ""}
+    return `<div class="cp">
+        <header class="cp-masthead">
+            <button type="button" class="cp-brand" data-page-action="ALL" aria-label="Portada de Liga de Maestros">
+                <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+            </button>
+            <nav class="cp-nav" aria-label="Secciones de Liga de Maestros">${coverNavHtml(liveCount)}</nav>
+            ${coverAccountHtml(rankingRows)}
+        </header>
+
+        <main class="cp-stage">
+            <section class="cp-intro" aria-labelledby="cp-title">
+                <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span>${escapeHtml(statusLabel)}</span></div>
+                <h1 id="cp-title">&iexcl;Haz tu quiniela!</h1>
+                <p class="cp-lead">Compite contra los Maestros IA y contra toda La Pe&ntilde;a. Suma aciertos, escala en el ranking y conquista la jornada. <strong>&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
+                <div class="cp-actions">
+                    <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Ver clasificaci&oacute;n</button>
                 </div>
-                <div class="cp-hero-proof"><b>${numPlayers}</b> jugadores esta temporada</div>
-            </div>
-            <div class="cp-features">
-                <button type="button" class="cp-feat" data-page-action="TICKET">
-                    <span class="cp-feat-icon">&#9917;</span>
-                    <div class="cp-feat-text">
-                        <b>Quiniela</b>
-                        <p>Haz tu pron&oacute;stico para esta jornada.</p>
+                <div class="cp-proof" aria-label="Datos de la competici&oacute;n">
+                    <span><b>${rankingRows.length}</b> participantes</span>
+                    <span><b>${masterNames.length}</b> Maestros IA</span>
+                    <span><b>15</b> partidos</span>
+                </div>
+            </section>
+
+            <section class="cp-duel" aria-label="La Pe&ntilde;a contra los Maestros IA">
+                <div class="cp-duel-kicker">EL DUELO DE LA JORNADA</div>
+                <div class="cp-versus">
+                    <div class="cp-side is-pena"><span>HUMANOS</span><strong>LA PE&Ntilde;A</strong><small>${penaVotes || rankingRows.length} columnas</small></div>
+                    <div class="cp-vs">VS</div>
+                    <div class="cp-side is-ai"><span>RIVALES</span><strong>MAESTROS IA</strong><small>${masterNames.length} IAs + Programa</small></div>
+                </div>
+                <div class="cp-master-line">
+                    <span class="is-program">Programa</span>
+                    ${masterNames.map(name => `<span>${escapeHtml(name)}</span>`).join("")}
+                </div>
+                ${disagreement ? `<div class="cp-focus">
+                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} lecturas distintas</b></div>
+                    ${coverFixtureHtml(disagreement.match, true)}
+                    <div class="cp-picks">${disagreement.picks.map(item => `<span title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}</div>
+                </div>` : ""}
+            </section>
+        </main>
+
+        ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Entra en la sala de seguimiento</em></button>` : ""}
+
+        <section class="cp-dashboard" aria-label="Estado de la jornada">
+            <button type="button" class="cp-data-card cp-next" data-page-action="${next.live ? "LIVE" : "TICKET"}">
+                <div class="cp-card-head"><span>${next.live ? "AHORA MISMO" : "PR&Oacute;XIMO PARTIDO"}</span><b>${next.live ? "EN DIRECTO" : formatSmartDate(next.match?.fecha_raw, next.match?.hora)}</b></div>
+                ${coverFixtureHtml(next.match)}
+            </button>
+
+            <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
+                <div class="cp-card-head"><span>PULSO DE LA PE&Ntilde;A</span><b>El partido m&aacute;s abierto</b></div>
+                ${penaPulse ? `${coverFixtureHtml(penaPulse.match, true)}
+                    <div class="cp-pulse-bars" aria-label="1 ${penaPulse.row.p1}%, X ${penaPulse.row.px}%, 2 ${penaPulse.row.p2}%">
+                        <i class="is-one" style="width:${penaPulse.row.p1}%"></i><i class="is-draw" style="width:${penaPulse.row.px}%"></i><i class="is-two" style="width:${penaPulse.row.p2}%"></i>
                     </div>
-                </button>
-                <button type="button" class="cp-feat" data-page-action="LIVE">
-                    <span class="cp-feat-icon">&#9200;</span>
-                    <div class="cp-feat-text">
-                        <b>Directo Mundial</b>
-                        <p>Resultados en tiempo real de todas las ligas.</p>
-                    </div>
-                </button>
-                <button type="button" class="cp-feat" data-page-action="STANDINGS">
-                    <span class="cp-feat-icon">&#128200;</span>
-                    <div class="cp-feat-text">
-                        <b>Ligas</b>
-                        <p>Clasificaciones de Primera y Segunda.</p>
-                    </div>
-                </button>
-                <button type="button" class="cp-feat" data-page-action="SNAKE">
-                    <span class="cp-feat-icon">&#127922;</span>
-                    <div class="cp-feat-text">
-                        <b>Juegos</b>
-                        <p>Snake Gol, Quiz y m&aacute;s.</p>
-                    </div>
-                </button>
-            </div>
-            ${liveCount ? `<div class="cp-live-banner"><span class="cp-live-dot"></span> ${liveCount} partido${liveCount > 1 ? "s" : ""} en directo &mdash; <button type="button" data-page-action="LIVE">Ver directo</button></div>` : ""}
-        </div>`;
+                    <div class="cp-pulse-labels"><span>1 &middot; ${penaPulse.row.p1}%</span><span>X &middot; ${penaPulse.row.px}%</span><span>2 &middot; ${penaPulse.row.p2}%</span></div>` : `<span class="cp-empty">A&uacute;n no hay pron&oacute;sticos</span>`}
+            </button>
+
+            <button type="button" class="cp-data-card cp-leaders" data-page-action="CONTEST">
+                <div class="cp-card-head"><span>CLASIFICACI&Oacute;N GENERAL</span><b>La pelea por el liderato</b></div>
+                <ol>${rankingRows.slice(0, 3).map((row, index) => `<li><i>${index + 1}</i><strong>${escapeHtml(row.name)}</strong><span>${row.total} pts</span></li>`).join("")}</ol>
+            </button>
+        </section>
+    </div>`;
 }
