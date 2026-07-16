@@ -15,7 +15,7 @@
       "Hammarby vuelve a crecer y lleva once duelos sin perder ante Degerfors.",
       "Häcken concede demasiado, pero tiene más calidad ante un Halmstad debilitado.",
       "Malmö viene de golear y Kalmar sufre frente a los equipos de mayor nivel.",
-      ""
+      "Argentina puede ser más eficaz en un partido cerrado aunque España controle la posesión."
     ],
     "grok": [
       "Bodø/Glimt es fuerte en casa y llega mejor situado que Fredrikstad.",
@@ -32,7 +32,7 @@
       "Hammarby está arriba y suele imponerse como local ante Degerfors.",
       "Häcken tiene más potencial y llega mejor posicionado que Halmstad.",
       "Malmö posee una calidad superior pese a su irregularidad reciente.",
-      ""
+      "Argentina aporta más experiencia en finales y una gran capacidad para sufrir y remontar."
     ],
     "claude": [
       "Bodø/Glimt presenta una diferencia de nivel notable y juega en casa.",
@@ -49,7 +49,7 @@
       "Hammarby es un local fuerte ante un Degerfors de la zona baja.",
       "Häcken tiene más nivel y Halmstad llega en una mala racha.",
       "Kalmar está en la zona baja y Malmö llega en clara mejoría.",
-      ""
+      "España tiene una ligera ventaja por profundidad de plantilla y solidez defensiva."
     ],
     "gemini": [
       "La solvencia local de Bodø/Glimt y su contundente precedente sostienen el uno.",
@@ -66,7 +66,11 @@
       "La fortaleza local de Hammarby debe imponerse ante un Degerfors endeble.",
       "Halmstad carece de solidez para contener el potencial ofensivo de Häcken.",
       "Malmö ha recuperado sensaciones y su jerarquía debe decidir el partido.",
-      ""
+      "España llega más sólida y fresca; Argentina conserva suficiente amenaza para marcar."
+    ],
+    "chatgpt": [
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+      "Final muy cerrada: la solidez defensiva de España puede decidirla por un solo gol."
     ]
   }
 }

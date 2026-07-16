@@ -15,9 +15,37 @@
     {
       "jornada": 73,
       "user_id": "copilot",
-      "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "-"],
+      "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "1-2"],
       "verified_at": "2026-07-16",
-      "source": "J73.txt"
+      "source": "J73.txt + pleno final aportado por el usuario"
+    },
+    {
+      "jornada": 73,
+      "user_id": "claude",
+      "signos": ["1", "X2", "1", "1X", "2", "1", "1", "1", "1", "2", "2", "1", "2", "2", "2-1"],
+      "verified_at": "2026-07-16",
+      "source": "J73.txt + pleno final aportado por el usuario"
+    },
+    {
+      "jornada": 73,
+      "user_id": "grok",
+      "signos": ["1", "2", "1", "X2", "2", "1", "1", "1", "1", "1", "X", "1", "2", "2", "1-2"],
+      "verified_at": "2026-07-16",
+      "source": "J73.txt + pleno final aportado por el usuario"
+    },
+    {
+      "jornada": 73,
+      "user_id": "chatgpt",
+      "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "1-0"],
+      "verified_at": "2026-07-16",
+      "source": "J73.txt + pleno final aportado por el usuario"
+    },
+    {
+      "jornada": 73,
+      "user_id": "gemini",
+      "signos": ["1", "2", "1", "2", "2", "1", "1", "1X", "1", "1", "X2", "1", "2", "2", "2-1"],
+      "verified_at": "2026-07-16",
+      "source": "J73.txt + pleno final aportado por el usuario"
     },
     {
       "jornada": 73,
