@@ -216,21 +216,30 @@ function renderPenaPlenoDetail(idx = 14) {
 
 /* ---------- Chips de tensión ---------- */
 
-function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "") {
+function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "", reason = "") {
     const clean = sign && sign !== "-" ? sign : "-";
     const fullLabel = repairMojibakeText(label);
     const compactLabel = compactTensionLabel(fullLabel);
+    const cleanReason = repairMojibakeText(reason || "").trim();
+    const explanation = cleanReason ? `${fullLabel}: ${cleanReason}` : fullLabel;
     return `
         <div class="tension-chip ${escapeHtml(extraClass)}">
             <span title="${escapeHtml(fullLabel)}">${escapeHtml(compactLabel)}</span>
-            <b class="ia-signo ${hitClass(clean, real, status, exactScore)}">${escapeHtml(clean)}</b>
+            <b class="ia-signo ${cleanReason ? "has-analysis" : ""} ${hitClass(clean, real, status, exactScore)}" title="${escapeHtml(explanation)}">${escapeHtml(clean)}</b>
         </div>`;
+}
+
+function getPredictionReason(preds, idx, primary, fallback) {
+    const first = preds?.[primary]?.motivos?.[idx];
+    if (first) return first;
+    return fallback ? (preds?.[fallback]?.motivos?.[idx] || "") : "";
 }
 
 function renderTensionAiChips(preds, idx, real, status, exactScore = false) {
     return getOfficialAIColumns().map(([primary, fallback, label]) => {
         const sign = getSign(preds, idx, primary, fallback);
-        return renderTensionChip(label, sign, real, status, exactScore);
+        const reason = getPredictionReason(preds, idx, primary, fallback);
+        return renderTensionChip(label, sign, real, status, exactScore, "", reason);
     }).join("");
 }
 
@@ -378,7 +387,8 @@ function renderArenaTensionBody(matches) {
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
         const predictorCells = predictorColumns.map(([primary, fallback, label]) => {
             const sign = getSign(preds, idx, primary, fallback);
-            return `<td class="ticket-pick-cell" title="${escapeHtml(label)}">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno)}</td>`;
+            const reason = getPredictionReason(preds, idx, primary, fallback);
+            return `<td class="ticket-pick-cell">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno, "", reason)}</td>`;
         }).join("");
 
         return `

@@ -65,7 +65,8 @@ def apply_fixture_corrections(conn, corrections_path=None):
         return 0
 
     with open(corrections_path, "r", encoding="utf-8") as fh:
-        corrections = json.load(fh).get("fixtures") or []
+        payload = json.load(fh)
+    corrections = payload.get("fixtures") or []
 
     changed = 0
     for item in corrections:
@@ -85,5 +86,31 @@ def apply_fixture_corrections(conn, corrections_path=None):
             (local, visitante, jornada, partido_id, old_local, old_visitante),
         )
         changed += cursor.rowcount
+
+    prediction_corrections = payload.get("predictions") or []
+    for item in prediction_corrections:
+        jornada = int(item["jornada"])
+        user_id = str(item["user_id"]).strip().lower()
+        jornada_exists = conn.execute(
+            "SELECT 1 FROM resultados WHERE jornada = ? LIMIT 1",
+            (jornada,),
+        ).fetchone()
+        if not jornada_exists:
+            continue
+        signs = list(item.get("signos") or [])[:15]
+        for partido_id, raw_sign in enumerate(signs, start=1):
+            sign = str(raw_sign or "-").strip().upper()
+            current = conn.execute(
+                "SELECT signo FROM predicciones WHERE user_id = ? AND jornada = ? AND partido_id = ?",
+                (user_id, jornada, partido_id),
+            ).fetchone()
+            current_sign = current[0] if current else None
+            if current_sign == sign:
+                continue
+            conn.execute(
+                "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+                (user_id, jornada, partido_id, sign),
+            )
+            changed += 1
     conn.commit()
     return changed

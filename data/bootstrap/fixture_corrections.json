@@ -10,5 +10,14 @@
       "verified_at": "2026-07-16",
       "source": "RFEF"
     }
+  ],
+  "predictions": [
+    {
+      "jornada": 73,
+      "user_id": "copilot",
+      "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "-"],
+      "verified_at": "2026-07-16",
+      "source": "J73.txt"
+    }
   ]
 }

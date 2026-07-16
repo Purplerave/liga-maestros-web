@@ -82,6 +82,28 @@ def test_fixture_corrections_update_only_the_expected_placeholder(tmp_path):
     assert apply_fixture_corrections(conn, str(corrections_path)) == 0
 
 
+def test_fixture_corrections_can_update_public_master_predictions(tmp_path):
+    corrections_path = tmp_path / "fixture_corrections.json"
+    corrections_path.write_text(json.dumps({"predictions": [{
+        "jornada": 73,
+        "user_id": "copilot",
+        "signos": ["1", "X2", "-"],
+    }]}), encoding="utf-8")
+
+    conn = sqlite3.connect(":memory:")
+    conn.execute("CREATE TABLE resultados (jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT)")
+    conn.execute("CREATE TABLE predicciones (user_id TEXT, jornada INTEGER, partido_id INTEGER, signo TEXT)")
+    conn.execute("CREATE UNIQUE INDEX ux_test_predictions ON predicciones(user_id, jornada, partido_id)")
+    conn.execute("INSERT INTO resultados VALUES (73, 1, 'Local', 'Visitante')")
+    conn.execute("INSERT INTO predicciones VALUES ('copilot', 73, 1, '2')")
+
+    assert apply_fixture_corrections(conn, str(corrections_path)) == 3
+    assert conn.execute(
+        "SELECT signo FROM predicciones WHERE user_id = 'copilot' AND jornada = 73 ORDER BY partido_id"
+    ).fetchall() == [("1",), ("X2",), ("-",)]
+    assert apply_fixture_corrections(conn, str(corrections_path)) == 0
+
+
 def test_backup_is_created_and_passes_integrity_check(tmp_path, monkeypatch):
     db_path = tmp_path / "source.db"
     backup_dir = tmp_path / "backups"

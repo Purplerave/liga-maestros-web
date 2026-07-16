@@ -1,5 +1,10 @@
 """Build predictions, La Pena consensus and ranking payloads."""
 
+import json
+import os
+
+from ... import config
+
 from ...scoring import score_prediction
 from ...services.contest import CONTEST_DYNAMIC_START_JORNADA
 from ...services.teams import (
@@ -36,7 +41,35 @@ def _load_predictions(conn, jornada):
         p_idx = row["partido_id"] - 1
         if 0 <= p_idx < 15:
             preds[uid]["signos"][p_idx] = row["signo"]
+    reasons = _load_prediction_reasons(jornada)
+    for uid, items in reasons.items():
+        if uid in preds:
+            preds[uid]["motivos"] = items
     return preds
+
+
+def _load_prediction_reasons(jornada):
+    candidates = [
+        os.path.join(config.DATA_DIR, "PREDICTION_REASONS.json"),
+        os.path.join(config.SEED_DATA_DIR, "PREDICTION_REASONS.json"),
+    ]
+    for path in dict.fromkeys(candidates):
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        jornada_reasons = payload.get(str(jornada), {}) if isinstance(payload, dict) else {}
+        if not isinstance(jornada_reasons, dict):
+            return {}
+        normalized = {}
+        for raw_uid, raw_items in jornada_reasons.items():
+            if not isinstance(raw_items, list):
+                continue
+            items = [str(item or "").strip() for item in raw_items[:15]]
+            normalized[str(raw_uid).strip().lower()] = (items + [""] * 15)[:15]
+        return normalized
+    return {}
 
 
 def _build_pena_consensus(preds, participant_contract):

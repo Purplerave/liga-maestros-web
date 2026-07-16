@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-15T17:51:05.089361+00:00",
+  "generated_at": "2026-07-16T13:50:28.514016+00:00",
   "privacy": "No contiene usuarios, correos, comentarios ni actividad privada.",
   "tables": {
     "equipos": {
@@ -92051,7 +92051,7 @@
           "copilot",
           73,
           4,
-          "2"
+          "X2"
         ],
         [
           "gemini",
@@ -92087,7 +92087,7 @@
           "copilot",
           73,
           5,
-          "2"
+          "1X"
         ],
         [
           "gemini",
@@ -92195,7 +92195,7 @@
           "copilot",
           73,
           8,
-          "1X"
+          "1"
         ],
         [
           "gemini",
@@ -92267,7 +92267,7 @@
           "copilot",
           73,
           10,
-          "1"
+          "2"
         ],
         [
           "gemini",
@@ -92303,7 +92303,7 @@
           "copilot",
           73,
           11,
-          "1"
+          "2"
         ],
         [
           "gemini",
@@ -92375,7 +92375,7 @@
           "copilot",
           73,
           13,
-          "X2"
+          "2"
         ],
         [
           "gemini",
