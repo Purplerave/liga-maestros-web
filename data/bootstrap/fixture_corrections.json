@@ -78,9 +78,9 @@
     {
       "jornada": 73,
       "user_id": "fistro",
-      "signos": ["1", "X", "1", "X2", "2", "1", "1", "1X", "1", "1", "1", "1", "2", "2", "1-1"],
+      "signos": ["1", "X", "1", "X", "2", "1", "1", "X", "1", "1", "1", "1", "2", "2", "M-M"],
       "verified_at": "2026-07-16",
-      "source": "j73 peña.md / Baidu; huecos completados por criterio editorial"
+      "source": "j73 peña.md / Baidu; signos inferidos literalmente de sus explicaciones"
     }
   ]
 }
