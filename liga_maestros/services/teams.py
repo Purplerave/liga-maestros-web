@@ -34,9 +34,14 @@ def public_contest_name(uid, users):
         "copilot": "COPILOT",
         "chatgpt": "CHATGPT",
         "chipi": "CHIPI",
-        "deepseek": "CHIPI",
-        "kimi": "KIMI",
+        "geli": "GELI",
+        "pepe": "PEPE",
         "profe": "PROFE",
+        "fortu": "FORTU",
+        "oraculo": "ORACULO",
+        "fistro": "FISTRO",
+        "sesudo": "SESUDO",
+        "jimmy": "JIMMY",
     }
     if uid in names:
         return names[uid]
@@ -51,13 +56,23 @@ def canonical_contest_id(uid):
     low = value.lower()
     if low in ("v260_omnisciente", "programa"):
         return "programa"
-    if low in ("deepseek", "chipi"):
-        return "chipi"
+    pena_aliases = {
+        "deepseek": "chipi", "chipi": "chipi",
+        "glm5": "geli", "geli_glm5": "geli", "geli": "geli",
+        "perplexity": "pepe", "pepe": "pepe",
+        "meta": "profe", "profe_llama": "profe", "profe": "profe",
+        "mistral": "fortu", "fortu": "fortu",
+        "qwen": "oraculo", "gwen": "oraculo", "oraculo": "oraculo",
+        "ernie": "fistro", "ernie_ai": "fistro", "fistro": "fistro",
+        "kimi": "sesudo", "sesudo": "sesudo",
+        "luzia": "jimmy", "jimmy": "jimmy",
+    }
+    if low in pena_aliases:
+        return pena_aliases[low]
     if low in (
-        "gemini", "grok", "claude", "copilot", "chatgpt", "kimi", "profe",
-        "ernie", "fortu", "geli", "mrpurple", "oraculo", "pepe", "consenso",
+        "gemini", "grok", "claude", "copilot", "chatgpt", "mrpurple", "consenso",
         "hermes", "jenova", "momo", "manu", "manus", "qwen", "gwen", "meta",
-        "perplexity", "glm5", "geli_glm5", "chema_cohere", "momo_molbot",
+        "chema_cohere", "momo_molbot",
         "tecnotron", "consejo_ias", "fistro", "sesudo", "jimmy", "falcon",
     ):
         return low
@@ -69,8 +84,18 @@ def contest_aliases_for_uid(uid):
     aliases = {str(uid or "").strip(), canonical}
     if canonical == "programa":
         aliases.update({"programa", "v260_omnisciente"})
-    elif canonical == "chipi":
-        aliases.update({"chipi", "deepseek"})
+    pena_sources = {
+        "chipi": {"chipi", "deepseek"},
+        "geli": {"geli", "glm5", "geli_glm5"},
+        "pepe": {"pepe", "perplexity"},
+        "profe": {"profe", "meta", "profe_llama"},
+        "fortu": {"fortu", "mistral"},
+        "oraculo": {"oraculo", "qwen", "gwen"},
+        "fistro": {"fistro", "ernie", "ernie_ai"},
+        "sesudo": {"sesudo", "kimi"},
+        "jimmy": {"jimmy", "luzia"},
+    }
+    aliases.update(pena_sources.get(canonical, set()))
     return sorted(alias for alias in aliases if alias)
 
 
@@ -79,10 +104,6 @@ def prediction_source_priority(uid):
     if low == "programa":
         return 0
     if low == "v260_omnisciente":
-        return 1
-    if low == "chipi":
-        return 0
-    if low == "deepseek":
         return 1
     canonical = canonical_contest_id(low)
     return 0 if low == canonical else 1
@@ -97,8 +118,9 @@ def is_live_scored_status(status):
 
 
 def build_participant_contract():
-    path = os.path.join(config.DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")
-    raw = safe_read_json(path, {})
+    seed_path = os.path.join(config.SEED_DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")
+    runtime_path = os.path.join(config.DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")
+    raw = safe_read_json(seed_path, {}) or safe_read_json(runtime_path, {})
     names_raw = raw.get("nombres_publicos", {}) if isinstance(raw, dict) else {}
     names = {
         canonical_contest_id(uid): name
@@ -113,6 +135,11 @@ def build_participant_contract():
     fallback_aliases = {
         "programa": "v260_omnisciente",
     }
+    pena_ids = []
+    for uid in (raw.get("pena_aliases", []) if isinstance(raw, dict) else []):
+        canonical = canonical_contest_id(uid)
+        if canonical and canonical not in pena_ids:
+            pena_ids.append(canonical)
     visible_ai_columns = []
     for uid in (raw.get("maestros_oficiales", []) if isinstance(raw, dict) else []):
         canonical = canonical_contest_id(uid)
@@ -140,6 +167,7 @@ def build_participant_contract():
         "version": raw.get("version", 1) if isinstance(raw, dict) else 1,
         "names": names,
         "hidden_ids": hidden_ids,
+        "pena_ids": pena_ids,
         "visible_ai_columns": visible_ai_columns,
         "roles": raw.get("roles", {}) if isinstance(raw, dict) else {},
     }

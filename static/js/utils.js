@@ -230,19 +230,18 @@ function isImplicitlyFinished(match) {
 }
 
 function scoreOnly(value) {
-    const raw = String(value || "").trim();
+    const raw = String(value || "").trim().toUpperCase();
     if (!raw || raw === "-") return null;
-    const m = raw.match(/^(\d+\s*[-–]\s*\d+)/);
+    const m = raw.match(/^([0-9M]+\s*[-–]\s*[0-9M]+)/);
     return m ? m[1].replace(/\s/g, "") : null;
 }
 
 function plenoScoreKey(value) {
-    const raw = String(value || "").trim();
-    const m = raw.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    const raw = String(value || "").trim().toUpperCase();
+    const m = raw.match(/^([0-9M]+)\s*[-–]\s*([0-9M]+)$/);
     if (!m) return raw;
-    const h = Math.min(Number(m[1]), 3);
-    const a = Math.min(Number(m[2]), 3);
-    return `${h}-${a}`;
+    const bucket = valuePart => valuePart === "M" || Number(valuePart) >= 3 ? "M" : String(Number(valuePart));
+    return `${bucket(m[1])}-${bucket(m[2])}`;
 }
 
 /* ---------- Live score ---------- */

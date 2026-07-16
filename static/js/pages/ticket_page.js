@@ -141,12 +141,9 @@ function getPenaHiddenUserIds() {
     });
 }
 
-function bucketLabelForGoals(value) {
-    if (!Number.isFinite(value) || value < 0) return null;
-    return value >= 3 ? "M" : String(value);
-}
-
 function getPenaPlenoSummary(idx = 14) {
+    const serverSummary = state.data?.consenso_pleno_pena;
+    if (serverSummary && Number(serverSummary.valid || 0) > 0) return serverSummary;
     const preds = state.data.predicciones_actuales || {};
     const exactCounts = {};
     const homeBuckets = { "0": 0, "1": 0, "2": 0, "M": 0 };
@@ -156,22 +153,20 @@ function getPenaPlenoSummary(idx = 14) {
 
     getPenaHiddenUserIds().forEach(uid => {
         const sign = normalizeSign(preds?.[uid]?.signos?.[idx] || "-");
-        const score = scoreOnly(sign);
+        const score = plenoScoreKey(sign);
         if (!score) {
             invalid += 1;
             return;
         }
-        const match = score.match(/^(\d+)-(\d+)$/);
+        const match = score.match(/^([012M])-([012M])$/);
         if (!match) {
             invalid += 1;
             return;
         }
         valid += 1;
         exactCounts[score] = (exactCounts[score] || 0) + 1;
-        const gl = Number.parseInt(match[1], 10);
-        const gv = Number.parseInt(match[2], 10);
-        const homeBucket = bucketLabelForGoals(gl);
-        const awayBucket = bucketLabelForGoals(gv);
+        const homeBucket = match[1];
+        const awayBucket = match[2];
         if (homeBucket) homeBuckets[homeBucket] += 1;
         if (awayBucket) awayBuckets[awayBucket] += 1;
     });

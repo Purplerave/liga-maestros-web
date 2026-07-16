@@ -18,6 +18,62 @@
       "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "-"],
       "verified_at": "2026-07-16",
       "source": "J73.txt"
+    },
+    {
+      "jornada": 73,
+      "user_id": "chipi",
+      "signos": ["1", "X", "1", "X", "X2", "1", "1", "1", "1X", "X", "1", "1", "2", "2", "2-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / DeepSeek"
+    },
+    {
+      "jornada": 73,
+      "user_id": "geli",
+      "signos": ["1", "X", "1X", "1", "X2", "X", "1", "1", "1", "1", "1", "1", "2", "2", "1-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / GLM"
+    },
+    {
+      "jornada": 73,
+      "user_id": "pepe",
+      "signos": ["1", "X2", "1", "X", "2", "X2", "1", "1", "1", "1X", "1", "1", "2", "2", "M-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Perplexity"
+    },
+    {
+      "jornada": 73,
+      "user_id": "profe",
+      "signos": ["1", "X2", "1", "2", "2", "1", "1", "1", "1X", "2", "2", "1", "2", "2", "1-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Meta"
+    },
+    {
+      "jornada": 73,
+      "user_id": "fortu",
+      "signos": ["1", "2", "1", "X", "X", "1", "1", "1", "1", "1", "1", "1", "2", "2", "1-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Mistral"
+    },
+    {
+      "jornada": 73,
+      "user_id": "oraculo",
+      "signos": ["1", "X2", "1", "1", "2", "1", "1", "1", "1X", "1", "1", "1", "2", "2", "1-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Qwen"
+    },
+    {
+      "jornada": 73,
+      "user_id": "sesudo",
+      "signos": ["1", "1X", "1", "2", "X", "1", "1", "2", "X", "X", "X2", "1", "2", "2", "2-1"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Kimi"
+    },
+    {
+      "jornada": 73,
+      "user_id": "jimmy",
+      "signos": ["1", "X2", "1", "2", "2", "1", "1", "1X", "1", "1", "1", "2", "1", "2", "1-2"],
+      "verified_at": "2026-07-16",
+      "source": "j73 peña.md / Luzia"
     }
   ]
 }

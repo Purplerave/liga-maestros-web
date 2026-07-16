@@ -65,6 +65,7 @@ def get_liga_data():
             "match_info": match_info,
             "predicciones_actuales": predictions_payload["predicciones_actuales"],
             "consenso_pena": predictions_payload["consenso_pena"],
+            "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
             "ranking_maestros": predictions_payload["ranking_maestros"],
             "auth_enabled": config.GOOGLE_AUTH_ENABLED,
             "is_admin": is_admin_request(),

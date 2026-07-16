@@ -35,21 +35,15 @@
   ],
   "pena_aliases": [
     "mrpurple",
-    "ernie",
+    "chipi",
     "geli",
-    "kimi",
     "pepe",
     "profe",
-    "chipi",
     "fortu",
     "oraculo",
-    "manu",
-    "momo",
-    "meta",
     "fistro",
     "sesudo",
-    "jimmy",
-    "falcon"
+    "jimmy"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -71,20 +65,14 @@
     "copilot": "Copilot",
     "gemini": "Gemini",
     "mrpurple": "MrPurple",
-    "ernie": "Ernie",
     "geli": "Geli",
-    "kimi": "Kimi",
     "pepe": "Pepe",
     "profe": "Profe",
     "chipi": "Chipi",
     "fortu": "Fortu",
     "oraculo": "Oraculo",
-    "manu": "Manu",
-    "momo": "Momo",
-    "meta": "Meta",
     "fistro": "Fistro",
     "sesudo": "Sesudo",
-    "jimmy": "Jimmy",
-    "falcon": "Falcon"
+    "jimmy": "Jimmy"
   }
 }
