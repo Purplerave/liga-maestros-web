@@ -1,0 +1,14 @@
+{
+  "fixtures": [
+    {
+      "jornada": 73,
+      "partido_id": 15,
+      "old_local": "Ganador Semifinal 1",
+      "old_visitante": "Ganador Semifinal 2",
+      "local": "España",
+      "visitante": "Argentina",
+      "verified_at": "2026-07-16",
+      "source": "RFEF"
+    }
+  ]
+}

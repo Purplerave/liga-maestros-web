@@ -20,6 +20,10 @@ PRODUCTION_SEED_PATH = os.getenv(
     "PRODUCTION_SEED_PATH",
     os.path.join(BASE_DIR, "data", "bootstrap", "production_seed.json"),
 )
+FIXTURE_CORRECTIONS_PATH = os.getenv(
+    "FIXTURE_CORRECTIONS_PATH",
+    os.path.join(BASE_DIR, "data", "bootstrap", "fixture_corrections.json"),
+)
 DB_BACKUP_DIR = os.getenv("DB_BACKUP_DIR", os.path.join(DATA_DIR, "backups"))
 
 def data_path(*parts):

@@ -239,7 +239,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
         background: transparent !important;
     }
 
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip > span {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip > span[title] {
         display: none !important;
     }
 

@@ -438,8 +438,8 @@
     },
     {
       "num": 15,
-      "local": "Ganador Semifinal 1",
-      "visitante": "Ganador Semifinal 2",
+      "local": "España",
+      "visitante": "Argentina",
       "fuerza_local": 0.0,
       "fuerza_visitante": 0.0,
       "historico": {
@@ -469,7 +469,7 @@
       ],
       "fecha": "2026-07-19",
       "hora": "21:00",
-      "detalle": " domingo 19 jul 21:00h Estado de Forma (Últimos 6) Ganador Semifinal 1 Clasificación: #- Ganador Semifinal 2 Clasificación: #-"
+      "detalle": " domingo 19 jul 21:00h Final del Mundial 2026 España - Argentina"
     }
   ],
   "horarios": {

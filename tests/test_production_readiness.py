@@ -13,6 +13,7 @@ from liga_maestros.db.migrations import (
     ensure_snake_table,
     run_startup_migrations,
 )
+from liga_maestros.db.seed import apply_fixture_corrections
 from liga_maestros.routes.legal import delete_user_data
 
 
@@ -59,6 +60,26 @@ def test_repository_seed_contains_no_private_account_tables():
     prediction_ids = {str(row[0]) for row in tables["predicciones"]["rows"]}
     assert prediction_ids
     assert not any(user_id.isdigit() for user_id in prediction_ids)
+
+
+def test_fixture_corrections_update_only_the_expected_placeholder(tmp_path):
+    corrections_path = tmp_path / "fixture_corrections.json"
+    corrections_path.write_text(json.dumps({"fixtures": [{
+        "jornada": 73,
+        "partido_id": 15,
+        "old_local": "Ganador Semifinal 1",
+        "old_visitante": "Ganador Semifinal 2",
+        "local": "España",
+        "visitante": "Argentina",
+    }]}), encoding="utf-8")
+
+    conn = sqlite3.connect(":memory:")
+    conn.execute("CREATE TABLE resultados (jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT)")
+    conn.execute("INSERT INTO resultados VALUES (73, 15, 'Ganador Semifinal 1', 'Ganador Semifinal 2')")
+
+    assert apply_fixture_corrections(conn, str(corrections_path)) == 1
+    assert conn.execute("SELECT local, visitante FROM resultados").fetchone() == ("España", "Argentina")
+    assert apply_fixture_corrections(conn, str(corrections_path)) == 0
 
 
 def test_backup_is_created_and_passes_integrity_check(tmp_path, monkeypatch):

@@ -225,8 +225,9 @@ def run_startup_migrations():
             conn.execute("PRAGMA busy_timeout = 30000")
             ensure_core_tables(conn)
             ensure_quiz_tables(conn)
-            from .seed import import_public_seed_if_empty
+            from .seed import apply_fixture_corrections, import_public_seed_if_empty
             import_public_seed_if_empty(conn)
+            apply_fixture_corrections(conn)
             ensure_predicciones_unique_index(conn)
             ensure_porra_table(conn)
             ensure_snake_table(conn)

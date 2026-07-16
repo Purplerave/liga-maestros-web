@@ -56,3 +56,34 @@ def import_public_seed_if_empty(conn, seed_path=None):
         conn.rollback()
         raise
     return True
+
+
+def apply_fixture_corrections(conn, corrections_path=None):
+    """Apply verified late fixture names to existing persistent databases."""
+    corrections_path = corrections_path or config.FIXTURE_CORRECTIONS_PATH
+    if not corrections_path or not os.path.exists(corrections_path):
+        return 0
+
+    with open(corrections_path, "r", encoding="utf-8") as fh:
+        corrections = json.load(fh).get("fixtures") or []
+
+    changed = 0
+    for item in corrections:
+        jornada = int(item["jornada"])
+        partido_id = int(item["partido_id"])
+        old_local = str(item.get("old_local") or "")
+        old_visitante = str(item.get("old_visitante") or "")
+        local = str(item["local"])
+        visitante = str(item["visitante"])
+        cursor = conn.execute(
+            """
+            UPDATE resultados
+               SET local = ?, visitante = ?
+             WHERE jornada = ? AND partido_id = ?
+               AND local = ? AND visitante = ?
+            """,
+            (local, visitante, jornada, partido_id, old_local, old_visitante),
+        )
+        changed += cursor.rowcount
+    conn.commit()
+    return changed
