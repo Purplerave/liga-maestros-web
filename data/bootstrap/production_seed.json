@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-16T16:49:08.108566+00:00",
+  "generated_at": "2026-07-16T20:04:14.257199+00:00",
   "privacy": "No contiene usuarios, correos, comentarios ni actividad privada.",
   "tables": {
     "equipos": {
@@ -92939,7 +92939,7 @@
           "chatgpt",
           73,
           15,
-          "-"
+          "1-0"
         ],
         [
           "chipi",
@@ -92951,13 +92951,13 @@
           "claude",
           73,
           15,
-          "-"
+          "2-1"
         ],
         [
           "copilot",
           73,
           15,
-          "-"
+          "1-2"
         ],
         [
           "fortu",
@@ -92975,13 +92975,13 @@
           "gemini",
           73,
           15,
-          "-"
+          "2-1"
         ],
         [
           "grok",
           73,
           15,
-          "-"
+          "1-2"
         ],
         [
           "oraculo",
@@ -93005,7 +93005,7 @@
           "programa",
           73,
           15,
-          "-"
+          "2-1"
         ]
       ]
     },

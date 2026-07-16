@@ -14,6 +14,13 @@
   "predictions": [
     {
       "jornada": 73,
+      "user_id": "programa",
+      "signos": ["1", "X2", "1", "X2", "2", "1", "1", "1", "1", "1X", "2", "1", "X2", "2", "2-1"],
+      "verified_at": "2026-07-16",
+      "source": "Análisis final Liga de Maestros: España 2-1 Argentina"
+    },
+    {
+      "jornada": 73,
       "user_id": "copilot",
       "signos": ["1", "2", "1", "X2", "1X", "1", "1", "1", "1", "2", "2", "1", "2", "2", "1-2"],
       "verified_at": "2026-07-16",
