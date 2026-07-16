@@ -332,11 +332,17 @@ function renderArenaTensionBody(matches) {
     if (!tbody || !thead) return;
 
     const councilStyle = isCouncilStyleJornada();
+    const predictorColumns = councilStyle
+        ? [["programa", "v260_omnisciente", "Programa"], ["consejo_ias", "consenso", "Consejo IA"]]
+        : getOfficialAIColumns();
     thead.innerHTML = `
         <tr>
             <th>#</th>
             <th style="text-align:left;">Partido</th>
-            <th>${councilStyle ? "Señales" : "Consenso + signos"}</th>
+            <th class="ticket-status-heading">Hora / resultado</th>
+            ${predictorColumns.map(([, , label]) => `<th class="ticket-predictor-heading" title="${escapeHtml(label)}">${escapeHtml(label)}</th>`).join("")}
+            <th class="ticket-predictor-heading ticket-pena-heading">Peña</th>
+            <th class="ticket-user-heading">Tu quiniela</th>
         </tr>`;
 
     const preds = state.data.predicciones_actuales || {};
@@ -370,6 +376,10 @@ function renderArenaTensionBody(matches) {
         const penaChip = isPleno ?
              renderTensionPenaChip(renderPenaPleno(consensoPleno, m.marcador, m.status), "Peña")
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
+        const predictorCells = predictorColumns.map(([primary, fallback, label]) => {
+            const sign = getSign(preds, idx, primary, fallback);
+            return `<td class="ticket-pick-cell" title="${escapeHtml(label)}">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno)}</td>`;
+        }).join("");
 
         return `
             <tr class="tension-row ${rowClass}">
@@ -377,29 +387,21 @@ function renderArenaTensionBody(matches) {
                     <span class="match-number">${idx + 1}</span>
                 </td>
                 <td class="fixture-cell tension-fixture-cell">
-                    <div class="tension-fixture-layout">
-                        <div class="tension-fixture-main">
-                            ${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}
-                        </div>
-                        <div class="tension-meta-line">
-                            ${scoreBadge}
-                            ${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}
-                        </div>
+                    <div class="tension-fixture-main">
+                        ${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}
                     </div>
                 </td>
-                <td class="tension-consensus-cell">
-                    <div class="tension-sign-row">
-                        ${councilStyle
-                            ? renderCouncilStyleChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)
-                            : renderTensionAiChips(preds, idx, isPleno ? m.marcador : real, m.status, isPleno)}
-                        ${penaChip}
-                        <div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div>
-                    </div>
+                <td class="ticket-status-cell">
+                    ${scoreBadge}
+                    ${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}
                 </td>
+                ${predictorCells}
+                <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
+                <td class="ticket-pick-cell ticket-user-cell"><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
             </tr>
             ${state.expandedMatch === idx ? `
                 <tr class="match-detail-row">
-                    <td colspan="3">
+                    <td colspan="${predictorColumns.length + 5}">
                         ${renderMatchDetailGrid(m, c)}
                     </td>
                 </tr>` : ""}`;
