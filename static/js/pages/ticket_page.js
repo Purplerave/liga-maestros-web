@@ -257,9 +257,9 @@ function renderTensionPenaChip(content, label) {
 
 function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
     if (!state.user) return `<span class="empty-user-pick" title="Entra para guardar tu quiniela">-</span>`;
-    if (!canEdit) return `<span class="ia-signo active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign)}</span>`;
+    if (!canEdit) return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</b>`;
     if (hasSavedTicket() && !state.editMode && !state.draftDirty) {
-        return `<span class="saved-ticket-sign ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</span>`;
+        return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</b>`;
     }
     if (idx === 14) {
         return `<button class="pleno-main-btn clickable" data-match-idx="${idx}" data-pleno="1">${escapeHtml(mySign === "-" ? "0-0" : mySign)}</button>`;
