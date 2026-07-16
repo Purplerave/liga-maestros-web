@@ -50,8 +50,8 @@ def _load_predictions(conn, jornada):
 
 def _load_prediction_reasons(jornada):
     candidates = [
-        os.path.join(config.DATA_DIR, "PREDICTION_REASONS.json"),
         os.path.join(config.SEED_DATA_DIR, "PREDICTION_REASONS.json"),
+        os.path.join(config.DATA_DIR, "PREDICTION_REASONS.json"),
     ]
     for path in dict.fromkeys(candidates):
         try:
