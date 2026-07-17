@@ -44,6 +44,9 @@ puede ofrecer Flask y exige rotar credenciales.
 - SQLite fuera de las versiones inmutables, permisos `0600`, WAL, backups
   rotativos y `integrity_check`.
 - CI bloqueante para tests, dependencias vulnerables y material sensible rastreado.
+- Repositorio privado, permisos de Actions en solo lectura, acciones permitidas
+  restringidas y cada dependencia de CI fijada a un commit oficial verificado.
+- Alertas y correcciones automaticas de Dependabot activadas.
 
 ## Hallazgos corregidos en julio de 2026
 
@@ -57,6 +60,9 @@ puede ofrecer Flask y exige rotar credenciales.
 6. Se anadieron pruebas de regresion sobre IDOR, CSRF, headers, limites,
    minimizacion de datos y exposicion de endpoints.
 7. Se elimino del historial publico de Git la base que habia sido versionada.
+8. Se reescribieron las ramas, se fijaron las Actions por SHA y se restringio la
+   cadena de suministro del despliegue. La purga de referencias internas de la
+   PR #1 debe solicitarse a GitHub Support para completar el borrado fisico.
 
 ## Operacion segura
 
@@ -85,3 +91,9 @@ puede ofrecer Flask y exige rotar credenciales.
 - Los juegos aplican validacion heuristica, no un sistema anti-trampas infalible.
 - Las paginas legales requieren los datos reales del responsable antes del
   lanzamiento oficial; no deben quedar campos `Pendiente de configurar`.
+- GitHub puede conservar temporalmente objetos antiguos tras reescribir el
+  historial. La base retirada no esta en ramas ni tags y el repositorio es
+  privado, pero la referencia interna debe quedar purgada por GitHub Support.
+- GitHub no permite activar reglas de proteccion de rama en este repositorio
+  privado personal sin un plan compatible; CI y despliegue siguen siendo
+  obligatorios, pero el propietario conserva capacidad de `force-push`.
