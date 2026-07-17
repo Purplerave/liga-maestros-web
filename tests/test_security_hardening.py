@@ -1,5 +1,4 @@
 import json
-import os
 
 import config
 from liga_maestros import create_app
