@@ -190,14 +190,10 @@ function renderNewspaperCoverPageV3() {
                     <div class="cp-vs">VS</div>
                     <div class="cp-side is-ai"><span>RIVALES</span><strong>MAESTROS IA</strong><small>${masterNames.length} IAs + Programa</small></div>
                 </div>
-                <div class="cp-master-line">
-                    <span class="is-program">Programa</span>
-                    ${masterNames.map(name => `<span>${escapeHtml(name)}</span>`).join("")}
-                </div>
                 ${disagreement ? `<div class="cp-focus">
-                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} lecturas distintas</b></div>
+                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} pron&oacute;sticos distintos</b></div>
                     ${coverFixtureHtml(disagreement.match, true)}
-                    <div class="cp-picks">${disagreement.picks.map(item => `<span title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}</div>
+                    <div class="cp-picks" aria-label="Pron&oacute;sticos de los Maestros">${disagreement.picks.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}</div>
                 </div>` : ""}
             </section>
         </main>
