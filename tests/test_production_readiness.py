@@ -13,7 +13,7 @@ from liga_maestros.db.migrations import (
     ensure_snake_table,
     run_startup_migrations,
 )
-from liga_maestros.db.seed import apply_fixture_corrections
+from liga_maestros.db.seed import apply_fixture_corrections, import_profile_history
 from liga_maestros.routes.legal import delete_user_data
 
 
@@ -102,6 +102,30 @@ def test_fixture_corrections_can_update_public_master_predictions(tmp_path):
         "SELECT signo FROM predicciones WHERE user_id = 'copilot' AND jornada = 73 ORDER BY partido_id"
     ).fetchall() == [("1",), ("X2",), ("-",)]
     assert apply_fixture_corrections(conn, str(corrections_path)) == 0
+
+
+def test_profile_history_matches_public_name_and_never_overwrites(tmp_path):
+    history_path = tmp_path / "profile_history.json"
+    history_path.write_text(json.dumps({"profiles": [{
+        "account_name": "Pablo Castro",
+        "jornadas": {"60": ["1", "X", "2"]},
+    }]}), encoding="utf-8")
+
+    conn = sqlite3.connect(":memory:")
+    ensure_core_tables(conn)
+    conn.execute("CREATE UNIQUE INDEX ux_test_history ON predicciones(user_id, jornada, partido_id)")
+    conn.execute("INSERT INTO usuarios (id, nombre) VALUES ('private-id', 'Pablo Castro')")
+    conn.execute("INSERT INTO resultados (jornada, partido_id) VALUES (60, 1)")
+    conn.execute("INSERT INTO predicciones VALUES ('private-id', 60, 2, '2')")
+    conn.commit()
+
+    assert import_profile_history(conn, str(history_path)) == 2
+    assert conn.execute(
+        "SELECT partido_id, signo FROM predicciones WHERE user_id = 'private-id' ORDER BY partido_id"
+    ).fetchall() == [(1, "1"), (2, "2"), (3, "2")]
+    assert import_profile_history(conn, str(history_path)) == 0
+    assert "private-id" not in history_path.read_text(encoding="utf-8")
+    conn.close()
 
 
 def test_backup_is_created_and_passes_integrity_check(tmp_path, monkeypatch):

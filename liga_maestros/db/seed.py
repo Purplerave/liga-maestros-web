@@ -114,3 +114,51 @@ def apply_fixture_corrections(conn, corrections_path=None):
             changed += 1
     conn.commit()
     return changed
+
+
+def import_profile_history(conn, history_path=None):
+    """Restore public historical tickets without storing account identifiers."""
+    history_path = history_path or os.path.join(
+        config.SEED_DATA_DIR, "bootstrap", "profile_history.json"
+    )
+    if not history_path or not os.path.exists(history_path):
+        return 0
+
+    with open(history_path, "r", encoding="utf-8") as fh:
+        payload = json.load(fh)
+
+    changed = 0
+    for profile in payload.get("profiles") or []:
+        account_name = str(profile.get("account_name") or "").strip()
+        if not account_name:
+            continue
+        user = conn.execute(
+            """
+            SELECT id FROM usuarios
+            WHERE LOWER(TRIM(nombre)) = LOWER(?)
+            ORDER BY rowid LIMIT 1
+            """,
+            (account_name,),
+        ).fetchone()
+        if not user:
+            continue
+        user_id = str(user[0])
+        for raw_jornada, raw_signs in (profile.get("jornadas") or {}).items():
+            jornada = int(raw_jornada)
+            if not conn.execute(
+                "SELECT 1 FROM resultados WHERE jornada = ? LIMIT 1", (jornada,)
+            ).fetchone():
+                continue
+            for partido_id, raw_sign in enumerate(list(raw_signs or [])[:15], start=1):
+                sign = str(raw_sign or "-").strip().upper()
+                cursor = conn.execute(
+                    """
+                    INSERT OR IGNORE INTO predicciones
+                        (user_id, jornada, partido_id, signo)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (user_id, jornada, partido_id, sign),
+                )
+                changed += cursor.rowcount
+    conn.commit()
+    return changed
