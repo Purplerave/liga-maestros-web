@@ -206,6 +206,27 @@ def test_authenticated_writes_require_session_csrf_token(tmp_path, monkeypatch):
     assert accepted.status_code != 403
 
 
+def test_runtime_and_repository_files_are_not_publicly_served(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    client = app.test_client()
+    sensitive_paths = (
+        "/.env",
+        "/.git/config",
+        "/requirements.txt",
+        "/config.py",
+        "/DATOS/LIGA_MAESTROS_PRO.db",
+        "/data/backups/",
+        "/server_stderr.log",
+        "/static/%2e%2e/.env",
+        "/juegos/%2e%2e/.env",
+        "/static/%2e%2e%2fDATOS%2fLIGA_MAESTROS_PRO.db",
+    )
+
+    for path in sensitive_paths:
+        response = client.get(path)
+        assert response.status_code == 404, path
+
+
 def test_startup_removes_stored_emails(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
     with app.app_context():
