@@ -99,13 +99,16 @@ def sync_status():
             last_sync_source = "quiniela15"
     finally:
         conn.close()
-    return jsonify({
+    payload = {
         "jornada": target_jornada, "live_matches": live, "pending_matches": pending,
         "last_sync": last_sync, "last_sync_source": last_sync_source, "auto_refresh": False,
         "refresh_available": bool(HIGHLIGHTLY_REFRESH_ENABLED and refresh_window.get("enabled")),
         "refresh_reason": refresh_window.get("reason", "cache-only"),
-        "api_usage": api_usage, "q15_cache": q15_cache,
-    })
+        "q15_cache": q15_cache,
+    }
+    if is_admin_request():
+        payload["api_usage"] = api_usage
+    return jsonify(payload)
 
 
 @bp.route('/api/live/health')
@@ -131,16 +134,23 @@ def live_health():
             build_sha = release_file.read().strip() or "unknown"
     except OSError:
         pass
-    return jsonify({
+    payload = {
         "status": "ok",
         "build_sha": build_sha,
-        "collector": health or {"status": "missing", "error": "LIVE_COLLECTOR_HEALTH.json no existe"},
-        "health_file": exists, "age_seconds": age_seconds,
+        "collector_status": (health or {}).get("status", "missing"),
         "stale": bool(age_seconds is None or age_seconds > 300),
-        "jornada": target_jornada, "q15_cache": _build_q15_cache_status(target_jornada),
-        "api_usage": get_highlightly_usage(),
-        "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
-    })
+    }
+    if is_admin_request():
+        payload.update({
+            "collector": health or {"status": "missing"},
+            "health_file": exists,
+            "age_seconds": age_seconds,
+            "jornada": target_jornada,
+            "q15_cache": _build_q15_cache_status(target_jornada),
+            "api_usage": get_highlightly_usage(),
+            "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
+        })
+    return jsonify(payload)
 
 
 @bp.route('/api/live/refresh', methods=['POST'])

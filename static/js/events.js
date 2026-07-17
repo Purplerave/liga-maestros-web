@@ -5,6 +5,7 @@
 
 
 function bindEvents() {
+    qs("jornada-nav")?.addEventListener("change", event => changeJornada(event.target.value));
     qs("warroom-btn")?.addEventListener("click", () => {
         filterLeague(state.currentFilter === "WAR_ROOM" ? "ALL" : "WAR_ROOM");
     });
@@ -72,6 +73,14 @@ function bindEvents() {
         });
     });
     document.addEventListener("click", event => {
+        if (event.target.closest("[data-open-profile]")) {
+            openProfileView();
+            return;
+        }
+        if (event.target.closest("[data-close-game]")) {
+            closeActiveGame();
+            return;
+        }
         const tab = event.target.closest("[data-league-tab]");
         if (!tab) return;
         const targetId = tab.dataset.leagueTab;
@@ -80,6 +89,16 @@ function bindEvents() {
         tab.classList.add("active");
         const pane = qs("league-standings-" + targetId);
         if (pane) pane.classList.add("active");
+    });
+    document.addEventListener("change", event => {
+        if (event.target.matches("[data-award-jornada]")) changeAwardJornada(event.target.value);
+        if (event.target.matches("[data-award-month]")) changeAwardMonth(event.target.value);
+    });
+    document.addEventListener("keydown", event => {
+        if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-open-profile][role='button']")) {
+            event.preventDefault();
+            openProfileView();
+        }
     });
 }
 

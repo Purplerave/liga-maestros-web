@@ -363,7 +363,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                     <div class="award-strip">${recentJornadas}</div>
                     <div class="award-picker">
                         <label>Consultar jornada</label>
-                        <select onchange="changeAwardJornada(this.value)">${jornadaOptions}</select>
+                        <select data-award-jornada>${jornadaOptions}</select>
                     </div>
                     ${jornadaPick ? `<div class="award-feature">
                         <span>J${jornadaPick.jornada}</span>
@@ -376,7 +376,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                     <div class="award-strip">${recentMonths}</div>
                     <div class="award-picker">
                         <label>Consultar mes</label>
-                        <select onchange="changeAwardMonth(this.value)">${monthOptions}</select>
+                        <select data-award-month>${monthOptions}</select>
                     </div>
                     ${monthPick ? `<div class="award-feature">
                         <span>${escapeHtml(monthPick.month)}</span>

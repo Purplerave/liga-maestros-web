@@ -134,7 +134,7 @@ function coverAccountHtml(rankingRows) {
     const index = rankingRows.findIndex(row => String(row.uid).toLowerCase() === uid);
     const row = index >= 0 ? rankingRows[index] : null;
     const firstName = String(state.user.name || "Jugador").split(" ")[0];
-    return `<button type="button" class="cp-account is-user" onclick="openProfileView()">
+    return `<button type="button" class="cp-account is-user" data-open-profile>
         <strong>${escapeHtml(firstName)}</strong><span>#${index >= 0 ? index + 1 : "-"} &middot; ${row?.total || 0} pts</span>
     </button>`;
 }

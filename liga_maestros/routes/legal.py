@@ -39,13 +39,12 @@ def account():
     user = session.get("user") or {}
     if not user:
         return redirect(url_for("auth.login"))
-    account_user = {"id": user.get("id"), "name": user.get("name"), "email": ""}
+    account_user = {"id": user.get("id"), "name": user.get("name")}
     conn = get_db()
     try:
-        row = conn.execute("SELECT nombre, email FROM usuarios WHERE id = ?", (user.get("id"),)).fetchone()
+        row = conn.execute("SELECT nombre FROM usuarios WHERE id = ?", (user.get("id"),)).fetchone()
         if row:
             account_user["name"] = row["nombre"] or account_user["name"]
-            account_user["email"] = row["email"] or ""
     finally:
         conn.close()
     context = _legal_context()

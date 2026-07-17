@@ -8,6 +8,7 @@ from ..services.quiz import (
     get_quiz_ranking_jornada, get_quiz_ranking_temporada,
     get_quiz_ranking_mensual, get_user_quiz_stats,
 )
+from ..services.privacy import publicize_identifiers
 
 bp = Blueprint("quiz", __name__)
 
@@ -103,11 +104,11 @@ def quiz_ranking():
         if not jornada.isdigit():
             return jsonify({"status": "error", "message": "Jornada invalida"}), 400
         ranking = get_quiz_ranking_jornada(int(jornada))
-        return jsonify({"status": "ok", "tipo": "jornada", "jornada": int(jornada), "ranking": ranking})
+        return jsonify({"status": "ok", "tipo": "jornada", "jornada": int(jornada), "ranking": publicize_identifiers(ranking, (session.get("user") or {}).get("id"))})
     
     elif tipo == "temporada":
         ranking = get_quiz_ranking_temporada()
-        return jsonify({"status": "ok", "tipo": "temporada", "ranking": ranking})
+        return jsonify({"status": "ok", "tipo": "temporada", "ranking": publicize_identifiers(ranking, (session.get("user") or {}).get("id"))})
     
     elif tipo == "mensual":
         mes = request.args.get("mes", "").strip()
@@ -115,7 +116,7 @@ def quiz_ranking():
             from datetime import datetime
             mes = datetime.now().strftime("%Y-%m")
         ranking = get_quiz_ranking_mensual(mes)
-        return jsonify({"status": "ok", "tipo": "mensual", "mes": mes, "ranking": ranking})
+        return jsonify({"status": "ok", "tipo": "mensual", "mes": mes, "ranking": publicize_identifiers(ranking, (session.get("user") or {}).get("id"))})
     
     return jsonify({"status": "error", "message": "Tipo de ranking invalido"}), 400
 

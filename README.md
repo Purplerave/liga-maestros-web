@@ -70,3 +70,4 @@ node --check static\js\snake_gol_arcade.js
 - La quiniela se cierra por sesion, jornada, longitud de 15 signos y hora de inicio.
 - Snake y Quiz tienen validaciones servidor para evitar puntuaciones triviales inventadas desde consola.
 - La base `DATOS/LIGA_MAESTROS_PRO.db` debe tratarse como dato vivo local o de disco persistente, no como fuente de codigo.
+- La auditoria, los controles activos y el procedimiento ante incidentes estan en `SECURITY.md`.

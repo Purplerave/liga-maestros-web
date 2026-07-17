@@ -427,10 +427,10 @@ function updateAuthUI() {
     const firstName = String(state.user.name || "Maestro").split(" ")[0];
     if (navAuth) navAuth.innerHTML = `
         <div class="topbar-user-summary" title="${escapeHtml(`${stats.jornada || 0} aciertos en la jornada actual`)}">
-            <button class="topbar-user-name profile-link" type="button" onclick="openProfileView()">${escapeHtml(firstName)}</button>
+            <button class="topbar-user-name profile-link" type="button" data-open-profile>${escapeHtml(firstName)}</button>
             <span class="topbar-user-score topbar-user-points"><b>${points}</b> pts</span>
             <span class="topbar-user-score topbar-user-rank"><b>${escapeHtml(rankText)}</b> ranking</span>
-            <button class="topbar-mini-link" type="button" onclick="openProfileView()">Perfil</button>
+            <button class="topbar-mini-link" type="button" data-open-profile>Perfil</button>
         </div>
         <a class="logout-link compact-logout" href="/logout">Salir</a>`;
 }

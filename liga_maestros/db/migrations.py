@@ -209,6 +209,12 @@ def ensure_missing_indexes(conn):
     conn.commit()
 
 
+def minimize_stored_personal_data(conn):
+    """Email is used during OAuth authorization but is not needed at rest."""
+    conn.execute("UPDATE usuarios SET email = NULL WHERE email IS NOT NULL")
+    conn.commit()
+
+
 def run_startup_migrations():
     ensure_db_file()
     lock_path = f"{config.DB_PATH}.schema.lock"
@@ -233,6 +239,7 @@ def run_startup_migrations():
             ensure_porra_table(conn)
             ensure_snake_table(conn)
             ensure_missing_indexes(conn)
+            minimize_stored_personal_data(conn)
         finally:
             if conn is not None:
                 try:

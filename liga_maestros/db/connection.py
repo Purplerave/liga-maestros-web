@@ -25,11 +25,15 @@ def ensure_db_file():
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
     if os.path.exists(config.DB_PATH):
+        if os.name != "nt":
+            os.chmod(config.DB_PATH, 0o600)
         return
     default_path = getattr(config, "BOOTSTRAP_DB_PATH", getattr(config, "DEFAULT_DB_PATH", ""))
     if default_path and os.path.exists(default_path) and os.path.abspath(default_path) != os.path.abspath(config.DB_PATH):
         import shutil
         shutil.copy2(default_path, config.DB_PATH)
+    if os.path.exists(config.DB_PATH) and os.name != "nt":
+        os.chmod(config.DB_PATH, 0o600)
 
 
 def get_db():

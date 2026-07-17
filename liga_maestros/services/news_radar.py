@@ -1,19 +1,25 @@
 """News radar: RSS feeds, relevance scoring, cache."""
-import os, time, urllib.request, urllib.error
-import xml.etree.ElementTree as ET
+import time
+from urllib.parse import urlsplit
+from defusedxml import ElementTree as ET
 from datetime import datetime
+import requests
 
 import config
 from ..utils import strip_html, normalize_news_text, news_relevance_score, parse_rfc822_to_iso, sanitize_xml_payload, safe_read_json, safe_write_json
 
 
 def fetch_feed_items(feed):
-    req = urllib.request.Request(
+    feed_url = urlsplit(feed["url"])
+    if feed_url.scheme not in {"http", "https"} or not feed_url.hostname:
+        raise ValueError("Fuente RSS no permitida")
+    response = requests.get(
         feed["url"],
-        headers={"User-Agent": "Mozilla/5.0 LigaMaestrosRadar/1.0", "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8"}
+        headers={"User-Agent": "Mozilla/5.0 LigaMaestrosRadar/1.0", "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8"},
+        timeout=12,
     )
-    with urllib.request.urlopen(req, timeout=12) as response:
-        payload = sanitize_xml_payload(response.read())
+    response.raise_for_status()
+    payload = sanitize_xml_payload(response.content)
     root = ET.fromstring(payload)
     items = []
     for item in root.findall(".//item"):
@@ -23,7 +29,8 @@ def fetch_feed_items(feed):
         pub = parse_rfc822_to_iso(item.findtext("pubDate", ""))
         joined = f"{title} {desc}".strip()
         score = news_relevance_score(joined)
-        if not title or not link:
+        link_parts = urlsplit(link)
+        if not title or link_parts.scheme not in {"http", "https"} or not link_parts.hostname:
             continue
         items.append({
             "source": feed["name"],

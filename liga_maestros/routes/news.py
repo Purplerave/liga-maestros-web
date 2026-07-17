@@ -11,4 +11,8 @@ def get_news_radar():
     force = request.args.get("force", "").strip().lower() in ("1", "true", "yes")
     if force and not is_admin_request():
         return jsonify({"status": "forbidden", "message": "force limitado a admin"}), 403
-    return jsonify(build_news_radar(force=force))
+    payload = build_news_radar(force=force)
+    if not is_admin_request():
+        payload = dict(payload)
+        payload.pop("errors", None)
+    return jsonify(payload)

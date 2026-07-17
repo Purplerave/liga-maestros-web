@@ -29,7 +29,9 @@ def verify_backup(path):
 def create_backup(reason="manual"):
     if not os.path.isfile(config.DB_PATH):
         raise FileNotFoundError(config.DB_PATH)
-    os.makedirs(config.DB_BACKUP_DIR, exist_ok=True)
+    os.makedirs(config.DB_BACKUP_DIR, mode=0o700, exist_ok=True)
+    if os.name != "nt":
+        os.chmod(config.DB_BACKUP_DIR, 0o700)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     safe_reason = "".join(ch for ch in reason.lower() if ch.isalnum() or ch in "-_") or "manual"
     final_path = os.path.join(config.DB_BACKUP_DIR, f"liga_maestros_{stamp}_{safe_reason}.db")
@@ -50,6 +52,8 @@ def create_backup(reason="manual"):
                 pass
             raise RuntimeError("La copia SQLite no supera integrity_check")
         os.replace(temp_path, final_path)
+        if os.name != "nt":
+            os.chmod(final_path, 0o600)
         prune_backups()
     return final_path
 
@@ -72,6 +76,27 @@ def prune_backups(retention=None):
             os.remove(path)
         except OSError:
             pass
+
+
+def minimize_backup_personal_data():
+    """Remove legacy stored emails from retained SQLite backups."""
+    cleaned = 0
+    for path in list_backups():
+        conn = sqlite3.connect(path, timeout=20)
+        try:
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(usuarios)")}
+            if "email" not in columns:
+                continue
+            cursor = conn.execute("UPDATE usuarios SET email = NULL WHERE email IS NOT NULL")
+            conn.commit()
+            cleaned += max(0, int(cursor.rowcount or 0))
+        finally:
+            conn.close()
+        if os.name != "nt":
+            os.chmod(path, 0o600)
+        if not verify_backup(path):
+            raise RuntimeError(f"La copia no supera integrity_check tras minimizar datos: {path}")
+    return cleaned
 
 
 def start_backup_scheduler(app=None):

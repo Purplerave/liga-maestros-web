@@ -14,13 +14,14 @@ from ...services.teams import (
     is_scored_status,
     prediction_source_priority,
 )
+from ...services.privacy import public_participant_id, publicize_mapping_keys
 
 
 def build_predictions_payload(conn, jornada, current_user_id=None, reveal_all=False):
     preds = _load_predictions(conn, jornada)
     participant_contract = build_participant_contract()
     consenso = _build_pena_consensus(preds, participant_contract)
-    ranking = _build_ranking(conn, jornada)
+    ranking = publicize_mapping_keys(_build_ranking(conn, jornada), current_user_id)
     return {
         "predicciones_actuales": _filter_public_predictions(preds, participant_contract, current_user_id, reveal_all),
         "participant_contract": participant_contract,
@@ -195,7 +196,7 @@ def _official_prediction_ids(participant_contract):
 
 def _filter_public_predictions(preds, participant_contract, current_user_id=None, reveal_all=False):
     if reveal_all:
-        return preds
+        return publicize_mapping_keys(preds, current_user_id)
     official_ids = _official_prediction_ids(participant_contract)
     current_user_text = str(current_user_id or "").strip()
     current_user_canonical = canonical_contest_id(current_user_text)
@@ -204,7 +205,7 @@ def _filter_public_predictions(preds, participant_contract, current_user_id=None
         canonical = canonical_contest_id(raw_uid)
         is_current_user = str(raw_uid) == current_user_text or canonical == current_user_canonical
         if str(canonical).lower() in official_ids or is_current_user:
-            public_preds[raw_uid] = data
+            public_preds[public_participant_id(raw_uid, current_user_id)] = data
     return public_preds
 
 

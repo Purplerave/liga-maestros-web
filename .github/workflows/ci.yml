@@ -29,7 +29,14 @@ jobs:
         run: ruff check app.py scoring.py tests --select E,F,W --ignore E501,E741,F841
 
       - name: Dependency security audit
-        run: pip-audit -r requirements.txt --progress-spinner off || true
+        run: pip-audit -r requirements.txt --progress-spinner off
+
+      - name: Reject databases and private key material
+        run: |
+          if git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)|id_rsa|id_ed25519)$'; then
+            echo "Sensitive runtime material is tracked by Git."
+            exit 1
+          fi
 
       - name: Python syntax check
         run: python -m py_compile app.py utils.py scoring.py config.py LIVE_COLLECTOR.py AUDITAR_JORNADA_LIGA_MAESTROS.py SCRAPE_QUINIELA15_DIRECTO.py IMPORTAR_PROGRAMA_JORNADA.py liga_maestros/__init__.py liga_maestros/workers/web_collector.py liga_maestros/routes/snake.py liga_maestros/routes/quiz.py liga_maestros/services/quiz.py

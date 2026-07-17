@@ -88,7 +88,7 @@ function showSnakeGame() {
     const panel = snakePanel.closest(".snake-panel");
     if (panel && !qs("snake-game-back")) {
         panel.insertAdjacentHTML("afterbegin", `
-            <button id="snake-game-back" class="game-back-btn" type="button" onclick="closeActiveGame()">&#8592; Volver a Juegos</button>`);
+            <button id="snake-game-back" class="game-back-btn" type="button" data-close-game>&#8592; Volver a Juegos</button>`);
     }
     document.body.classList.add("games-snake-open");
     panel?.classList.add("is-game-open");
@@ -108,7 +108,7 @@ function showArkanoidGame() {
     setGamesHubTitle("Arkanoid Liga");
     area.innerHTML = `
         <div class="game-iframe-wrap">
-            <button class="game-back-btn" type="button" onclick="closeActiveGame()">&#8592; Volver a Juegos</button>
+            <button class="game-back-btn" type="button" data-close-game>&#8592; Volver a Juegos</button>
             <iframe src="/juegos/arkanoid.html" class="game-iframe" title="Arkanoid Liga" allowfullscreen></iframe>
         </div>`;
 }
@@ -126,7 +126,7 @@ function showInvadersGame() {
     setGamesHubTitle("Maestros Invaders");
     area.innerHTML = `
         <div class="game-iframe-wrap">
-            <button class="game-back-btn" type="button" onclick="closeActiveGame()">&#8592; Volver a Juegos</button>
+            <button class="game-back-btn" type="button" data-close-game>&#8592; Volver a Juegos</button>
             <iframe src="/juegos/maestros-invaders.html?v=5" class="game-iframe" title="Maestros Invaders" allow="autoplay" allowfullscreen></iframe>
         </div>`;
 }

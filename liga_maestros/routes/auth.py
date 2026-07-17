@@ -1,9 +1,10 @@
 """Auth routes: Google OAuth login/authorize/logout."""
-from flask import Blueprint, redirect, url_for, session
+from flask import Blueprint, redirect, url_for, session, request
 import os
 
 import config
 from ..db.connection import get_db
+from ..middleware.rate_limit import is_rate_limited
 
 bp = Blueprint("auth", __name__)
 
@@ -33,6 +34,8 @@ def _get_google():
 def login():
     if not config.GOOGLE_AUTH_ENABLED:
         return "Google OAuth no configurado en variables de entorno.", 503
+    if is_rate_limited("oauth_login", request.remote_addr, 2):
+        return "Espera un momento antes de volver a iniciar sesion.", 429
     google = _get_google()
     redirect_uri = url_for('auth.authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
@@ -51,12 +54,14 @@ def authorize():
             conn.execute("""
                 INSERT INTO usuarios (id, nombre, email)
                 VALUES (?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email
-            """, (user_info['sub'], user_info['name'], user_info['email']))
+                ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=NULL
+            """, (user_info['sub'], user_info['name'], None))
             conn.commit()
         finally:
             conn.close()
         email = str(user_info.get('email') or '').strip().lower()
+        session.clear()
+        session.permanent = True
         session['user'] = {
             'id': user_info['sub'],
             'name': user_info['name'],
@@ -67,5 +72,5 @@ def authorize():
 
 @bp.route('/logout')
 def logout():
-    session.pop('user', None)
+    session.clear()
     return redirect('/')

@@ -1,6 +1,6 @@
 # Roadmap Liga de Maestros
 
-Actualizado: 2026-07-15
+Actualizado: 2026-07-17
 
 ## Objetivo
 
@@ -21,11 +21,16 @@ solo cuando aporten una razon real para volver.
 - [x] Cookies endurecidas y endpoints administrativos protegidos.
 - [x] Rate limiting en guardado de quinielas, juegos y acciones sensibles.
 - [x] SQLite configurado con WAL, `busy_timeout` y transacciones explicitas.
-- [x] CI con tests, compilacion y auditoria de dependencias informativa.
-- [x] Despliegue beta preparado para Render con web y collector coordinados.
+- [x] CI con tests, compilacion y auditoria de dependencias bloqueante.
+- [x] Despliegue beta en Alwaysdata con datos persistentes separados de releases.
 - [x] Arranque sobre disco vacio con esquema completo y semilla publica sin datos privados.
 - [x] Backups SQLite automaticos, rotativos y verificados con `integrity_check`.
 - [x] Privacidad, cookies, aviso legal y eliminacion transaccional de cuenta.
+- [x] Auditoria de seguridad: CSP, CSRF, hosts confiables, limites de peticion,
+  minimizacion de datos, IDs publicos opacos y telemetria administrativa privada.
+- [x] Dependencias sin vulnerabilidades conocidas segun `pip-audit`.
+- [x] Historial Git saneado para retirar la antigua base SQLite versionada.
+- [x] Procedimiento de respuesta a incidentes documentado en `SECURITY.md`.
 
 ### Producto
 

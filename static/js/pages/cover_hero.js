@@ -41,7 +41,7 @@ function coverProfileCardHtml() {
     const initials = (state.user.name || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
     return `
-        <div class="cp-profile-card" onclick="openProfileView()" role="button" tabindex="0">
+        <div class="cp-profile-card" data-open-profile role="button" tabindex="0">
             <div class="cp-profile-avatar">${escapeHtml(initials)}</div>
             <div class="cp-profile-info">
                 <div class="cp-profile-name">${escapeHtml(state.user.name || "Jugador")}</div>
