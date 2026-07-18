@@ -323,9 +323,17 @@ function getSign(preds, idx, primary, fallback) {
 
 function normalizeSign(value) {
     const raw = String(value || "").trim().toUpperCase();
-    if (["1", "X", "2"].includes(raw)) return raw;
     if (raw === "0") return "X";
+    if (raw && [...raw].every(char => ["1", "X", "2"].includes(char))) {
+        return ["1", "X", "2"].filter(char => raw.includes(char)).join("");
+    }
     return raw || "-";
+}
+
+function standardSignMatches(sign, real) {
+    const prediction = normalizeSign(sign);
+    const result = normalizeSign(real);
+    return ["1", "X", "2"].includes(result) && prediction.includes(result);
 }
 
 function hitClass(sign, real, status, exactScore = false) {
@@ -336,13 +344,13 @@ function hitClass(sign, real, status, exactScore = false) {
         const realKey = plenoScoreKey(real);
         return userKey === realKey ? "hit-exact" : "";
     }
-    return sign === normalizeSign(real) ? "hit" : "miss";
+    return standardSignMatches(sign, real) ? "hit" : "miss";
 }
 
 function isHitSign(sign, real, exactScore = false) {
     if (!sign || sign === "-") return false;
     if (exactScore) return plenoScoreKey(sign) === plenoScoreKey(real);
-    return sign === normalizeSign(real);
+    return standardSignMatches(sign, real);
 }
 
 /* ---------- Timestamps ---------- */
