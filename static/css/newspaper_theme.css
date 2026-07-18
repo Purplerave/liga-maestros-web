@@ -868,6 +868,13 @@ body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge:not
     padding: 8px 10px !important;
 }
 
+body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge {
+    min-width: 78px !important;
+    min-height: 27px !important;
+    padding: 4px 7px !important;
+    font-size: 0.72rem !important;
+}
+
 body.newspaper-ui.quiniela-focus .match-score-badge.is-live-score::before,
 body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge::before {
     content: attr(data-live-label);

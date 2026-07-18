@@ -259,7 +259,7 @@ function liveStage(match) {
 
 function liveScoreLabel(match) {
     const stage = liveStage(match);
-    if (stage === "HT") return "Descanso";
+    if (stage === "HT") return "DESC.";
     if (stage === "FT") return "";
     const minute = matchMinuteValue(match);
     if (minute) return `${minute}'`;
@@ -282,7 +282,7 @@ function liveScoreDisplay(match, fallbackScore = "") {
     const score = scoreOnly(rawScore) || rawScore;
     const minute = matchMinuteValue(match);
     const stage = liveStage(match);
-    if (stage === "HT") return `${score} · Descanso`;
+    if (stage === "HT") return `${score} · DESC.`;
     if (minute) return `${score} · ${minute}'`;
     return score;
 }
