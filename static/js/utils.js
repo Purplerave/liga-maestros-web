@@ -361,10 +361,14 @@ function formatKickoffShort(fechaRaw, horaRaw) {
 }
 
 function parseMatchTimestamp(match) {
-    const raw = String(match.added || match.fecha_raw || "");
-    if (!raw) return null;
-    const iso = raw.includes("/") ? raw.split("/").reverse().join("-") : raw;
-    const ts = new Date(iso.replace(" ", "T")).getTime();
+    const rawDate = String(match.added || match.fecha_raw || match.fecha || "").trim();
+    if (!rawDate) return null;
+    const datePart = rawDate.split(/[ T]/)[0];
+    const isoDate = datePart.includes("/") ? datePart.split("/").reverse().join("-") : datePart;
+    const embeddedTime = rawDate.match(/[ T](\d{1,2}:\d{2})/)?.[1] || "";
+    const explicitTime = String(match.hora || match.scheduled || "").match(/\d{1,2}:\d{2}/)?.[0] || "";
+    const timePart = explicitTime || embeddedTime || "00:00";
+    const ts = new Date(`${isoDate}T${timePart}`).getTime();
     return Number.isNaN(ts) ? null : ts;
 }
 
@@ -372,8 +376,7 @@ function isUpcomingScheduledMatch(match, graceMinutes = 15) {
     if (!isScheduledStatus(match.status)) return false;
     const ts = parseMatchTimestamp(match);
     if (!ts) return false;
-    const diff = ts - Date.now();
-    return diff > 0 && diff < graceMinutes * 60 * 1000;
+    return ts > Date.now() - graceMinutes * 60 * 1000;
 }
 
 function findMostOpenMatch() {
