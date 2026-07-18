@@ -61,8 +61,9 @@ puede ofrecer Flask y exige rotar credenciales.
    minimizacion de datos y exposicion de endpoints.
 7. Se elimino del historial publico de Git la base que habia sido versionada.
 8. Se reescribieron las ramas, se fijaron las Actions por SHA y se restringio la
-   cadena de suministro del despliegue. La purga de referencias internas de la
-   PR #1 debe solicitarse a GitHub Support para completar el borrado fisico.
+   cadena de suministro del despliegue. El 18 de julio de 2026 se solicito a
+   GitHub Support la purga de referencias internas de la PR #1 mediante el
+   ticket #4581722; permanece pendiente hasta que GitHub confirme el borrado.
 
 ## Operacion segura
 
@@ -93,7 +94,8 @@ puede ofrecer Flask y exige rotar credenciales.
   lanzamiento oficial; no deben quedar campos `Pendiente de configurar`.
 - GitHub puede conservar temporalmente objetos antiguos tras reescribir el
   historial. La base retirada no esta en ramas ni tags y el repositorio es
-  privado, pero la referencia interna debe quedar purgada por GitHub Support.
+  privado. El objeto antiguo continua accesible por SHA mientras GitHub procesa
+  el ticket #4581722 para retirar la referencia interna y sus vistas en cache.
 - GitHub no permite activar reglas de proteccion de rama en este repositorio
   privado personal sin un plan compatible; CI y despliegue siguen siendo
   obligatorios, pero el propietario conserva capacidad de `force-push`.
