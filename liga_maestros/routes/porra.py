@@ -19,12 +19,52 @@ def _porra_target_match(conn, jornada):
     if not rows:
         return None
     matches = [dict(row) for row in rows]
-    for match in matches:
+
+    existing = conn.execute("""
+        SELECT partido_id, MIN(created_at) AS first_entry
+        FROM porra_entries
+        WHERE jornada = ?
+        GROUP BY partido_id
+        ORDER BY datetime(first_entry) ASC, partido_id ASC
+        LIMIT 1
+    """, (jornada,)).fetchone()
+    if existing:
+        target_id = int(existing["partido_id"])
+        fixed_match = next((match for match in matches if int(match["partido_id"]) == target_id), None)
+        if fixed_match:
+            return fixed_match
+
+    candidates = []
+    for match in matches[:14]:
         status = str(match.get("status") or "").upper()
         kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
         if status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or madrid_now() < kickoff):
-            return match
-    return matches[0]
+            candidates.append(match)
+    if not candidates:
+        return matches[0]
+
+    prediction_rows = conn.execute("""
+        SELECT partido_id, signo
+        FROM predicciones
+        WHERE jornada = ? AND partido_id BETWEEN 1 AND 14 AND signo NOT IN ('', '-')
+    """, (jornada,)).fetchall()
+    votes_by_match = {}
+    for row in prediction_rows:
+        counts = votes_by_match.setdefault(int(row["partido_id"]), {"1": 0, "X": 0, "2": 0})
+        raw_sign = str(row["signo"] or "").upper()
+        for sign in counts:
+            if sign in raw_sign:
+                counts[sign] += 1
+
+    def interest_score(match):
+        counts = votes_by_match.get(int(match["partido_id"]), {})
+        total = sum(counts.values())
+        if not total:
+            return (-1, 0, -int(match["partido_id"]))
+        balance = 1 - (max(counts.values()) / total)
+        return (balance, total, -int(match["partido_id"]))
+
+    return max(candidates, key=interest_score)
 
 
 def _porra_is_locked(match):

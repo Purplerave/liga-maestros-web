@@ -541,9 +541,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 
 .cp-dashboard {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    width: min(880px, calc(100vw - 80px));
+    width: min(1160px, calc(100vw - 80px));
     margin: 0 auto;
 }
 
@@ -670,6 +670,72 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     font-weight: 850;
 }
 
+.cp-porra-content {
+    min-height: 78px;
+}
+
+.cp-porra .cp-fixture.is-compact {
+    grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+    gap: 7px;
+    margin-top: 16px;
+}
+
+.cp-porra .cp-fixture.is-compact .team-badge {
+    width: 24px;
+    height: 24px;
+}
+
+.cp-porra .cp-fixture.is-compact .cp-team strong {
+    font-size: 0.66rem;
+}
+
+.cp-porra-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.cp-porra-foot strong {
+    color: var(--cp-gold);
+    font-size: 0.68rem;
+    white-space: nowrap;
+}
+
+.cp-porra-foot span {
+    overflow: hidden;
+    color: var(--cp-muted);
+    font-size: 0.57rem;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cp-porra-foot small {
+    color: var(--cp-text);
+    font-size: inherit;
+}
+
+.cp-porra-loading {
+    display: block;
+    width: 78%;
+    height: 10px;
+    margin-top: 28px;
+    overflow: hidden;
+    color: transparent;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(148,163,184,.08), rgba(148,163,184,.22), rgba(148,163,184,.08));
+    background-size: 200% 100%;
+    animation: cpPorraLoad 1.25s linear infinite;
+}
+
+@keyframes cpPorraLoad {
+    to { background-position: -200% 0; }
+}
+
 .cp-empty {
     display: block;
     margin-top: 18px;
@@ -689,8 +755,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp-intro h1 { font-size: 2.65rem; }
     .cp-lead { font-size: 0.9rem; }
     .cp-dashboard { grid-template-columns: 1fr 1fr; }
-    .cp-leaders { grid-column: 1 / -1; min-height: auto; }
-    .cp-leaders ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cp-leaders { min-height: auto; }
 }
 
 @media (max-width: 760px) {

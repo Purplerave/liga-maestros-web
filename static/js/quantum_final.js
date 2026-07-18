@@ -45,8 +45,8 @@ async function refreshData(options = {}) {
         renderArena();
         if (shouldRefreshSideModules()) {
             renderLiveStandings();
-            loadPorra();
         }
+        loadPorra();
         loadComments();
         renderEvolutionChart();
         loadLeagueNav();
@@ -175,10 +175,12 @@ async function submitComment(event) {
 async function loadPorra() {
     const body = qs("porra-body");
     const summary = qs("porra-summary");
-    if (!body || !state.data) return;
+    if (!state.data) return;
     try {
         const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
         const data = await res.json();
+        if (typeof hydrateCoverPorra === "function") hydrateCoverPorra(data);
+        if (!body) return;
         if (!res.ok || data.status !== "ok" || !data.enabled) {
             body.innerHTML = `<div class="empty-state">${escapeHtml(data.message || "Sin porra disponible.")}</div>`;
             return;
@@ -225,7 +227,8 @@ async function loadPorra() {
                    </form>`}
             ${shareBlock}`;
     } catch (error) {
-        body.innerHTML = `<div class="empty-state">No se pudo cargar la porra.</div>`;
+        if (typeof hydrateCoverPorra === "function") hydrateCoverPorra({ enabled: false, message: "No se pudo cargar la porra" });
+        if (body) body.innerHTML = `<div class="empty-state">No se pudo cargar la porra.</div>`;
     }
 }
 

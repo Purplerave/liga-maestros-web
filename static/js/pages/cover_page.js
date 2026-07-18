@@ -139,6 +139,29 @@ function coverAccountHtml(rankingRows) {
     </button>`;
 }
 
+function hydrateCoverPorra(data) {
+    const target = document.getElementById("cover-porra-content");
+    if (!target) return;
+    if (!data?.enabled || !data.match) {
+        target.innerHTML = `<span class="cp-empty">${escapeHtml(data?.message || "Sin porra disponible")}</span>`;
+        return;
+    }
+    const match = data.match;
+    const mine = data.mine || {};
+    const hasMine = mine.goles_local !== undefined && mine.goles_local !== null
+        && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
+    const leaders = (data.distribution || []).slice(0, 3);
+    const status = hasMine
+        ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}`
+        : data.locked ? "Porra cerrada" : "Haz tu porra";
+    target.innerHTML = `
+        ${coverFixtureHtml(match, true)}
+        <div class="cp-porra-foot">
+            <strong>${escapeHtml(status)}</strong>
+            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" &middot; ")}</span>` : `<span>S&eacute; el primero en mojarte</span>`}
+        </div>`;
+}
+
 function renderNewspaperCoverPageV3() {
     const matches = state.data?.partidos || [];
     const closed = coverIsClosed();
@@ -218,6 +241,13 @@ function renderNewspaperCoverPageV3() {
             <button type="button" class="cp-data-card cp-leaders" data-page-action="CONTEST">
                 <div class="cp-card-head"><span>CLASIFICACI&Oacute;N GENERAL</span><b>La pelea por el liderato</b></div>
                 <ol>${rankingRows.slice(0, 3).map((row, index) => `<li><i>${index + 1}</i><strong>${escapeHtml(row.name)}</strong><span>${row.total} pts</span></li>`).join("")}</ol>
+            </button>
+
+            <button type="button" class="cp-data-card cp-porra" data-page-action="TICKET">
+                <div class="cp-card-head"><span>PORRA DE LA JORNADA</span><b>Marcador exacto</b></div>
+                <div id="cover-porra-content" class="cp-porra-content" aria-live="polite">
+                    <span class="cp-porra-loading">Buscando el partido m&aacute;s abierto</span>
+                </div>
             </button>
         </section>
     </div>`;
