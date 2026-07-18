@@ -14,7 +14,7 @@
 
 .porra-summary {
     color: #facc15;
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 0.64rem;
     font-weight: 900;
     text-transform: uppercase;

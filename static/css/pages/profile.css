@@ -49,7 +49,7 @@ body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
     font-size: 1.3rem;
     font-weight: 800;
 }
-.profile-name { margin: 0 0 4px; color: #f8fafc; font: 700 1.6rem 'Inter', system-ui, sans-serif; }
+.profile-name { margin: 0 0 4px; color: #f8fafc; font: 700 1.6rem var(--font-ui); }
 .profile-sub { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 0.8rem; }
 .profile-position { color: #f59e0b; font-weight: 700; }
 .profile-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
@@ -63,7 +63,7 @@ body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
     border-radius: 10px;
     background: rgba(15, 23, 42, 0.45);
 }
-.profile-stat-value { color: #f59e0b; font: 700 1rem 'Inter', system-ui, sans-serif; }
+.profile-stat-value { color: #f59e0b; font: 700 1rem var(--font-data); }
 .profile-stat-label { color: #64748b; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .profile-history-title { margin: 0 0 10px; color: #f59e0b; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
 .profile-history-list { display: flex; flex-direction: column; gap: 3px; }

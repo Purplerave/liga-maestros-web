@@ -258,7 +258,7 @@ body.newspaper-ui.quiniela-focus .quiz-rank-pos {
 
 .pulse-title span {
     color: var(--gold);
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 0.68rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -268,7 +268,7 @@ body.newspaper-ui.quiniela-focus .quiz-rank-pos {
     display: block;
     margin-top: 2px;
     color: #f8fbff;
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 1.75rem;
     font-weight: 900;
 }
@@ -519,7 +519,7 @@ body.newspaper-ui.quiniela-focus .quiz-rank-pos {
 
 .world-cup-quiz-final strong {
     color: #bbf7d0;
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 1.9rem;
     font-weight: 950;
 }
@@ -554,7 +554,7 @@ body.newspaper-ui.quiniela-focus .quiz-rank-pos {
 
 .dashboard-stat-grid strong {
     color: #f8fbff;
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 1.18rem;
     font-weight: 950;
 }

@@ -158,7 +158,7 @@
     display: grid;
     gap: 1px;
     color: var(--muted);
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 0.58rem;
@@ -215,7 +215,7 @@
 }
 
 .arena-table th {
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     padding: 4px 4px;
     font-size: 0.6rem;
     line-height: 1.05;

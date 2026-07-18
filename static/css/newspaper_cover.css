@@ -93,7 +93,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     box-shadow:
         0 22px 52px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.34);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     overflow: hidden;
 }
 
@@ -171,7 +171,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-cover-intro strong {
     color: var(--red);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(1.08rem, 1.35vw, 1.35rem);
     font-weight: 400;
     letter-spacing: 0.08em;
@@ -180,7 +180,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-cover-intro span {
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(0.96rem, 1.16vw, 1.12rem);
     line-height: 1.32;
 }
@@ -219,7 +219,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     max-width: 620px;
     margin: 0;
     color: var(--ink-soft);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: var(--font-display);
     font-size: clamp(0.92rem, 1.05vw, 1.04rem);
     font-weight: 800;
     line-height: 1.32;
@@ -236,7 +236,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-mission p {
     max-width: none;
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(0.98rem, 1.15vw, 1.14rem);
     font-weight: 400;
     line-height: 1.34;
@@ -267,7 +267,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-contender-grid span {
     color: var(--red);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(0.78rem, 0.9vw, 0.92rem);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -276,7 +276,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-contender-grid b {
     margin-top: 7px;
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(0.72rem, 0.84vw, 0.86rem);
     font-weight: 400;
     line-height: 1.24;
@@ -295,7 +295,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     background: rgba(255, 255, 255, 0.2);
     color: var(--ink);
     cursor: pointer;
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: clamp(0.82rem, 0.95vw, 1rem);
     text-align: center;
     text-transform: uppercase;
@@ -333,7 +333,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     padding: 8px 11px;
     border-right: 1px dotted var(--ink-faint);
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: 0.74rem;
     text-transform: uppercase;
 }
@@ -376,7 +376,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     place-items: center;
     padding: 4px 8px;
     color: var(--ink);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: var(--font-display);
     font-size: 0.78rem;
     font-weight: 900;
     text-align: center;
@@ -503,7 +503,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 .type-hot-card p {
     margin: 0;
     color: var(--ink-soft);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: var(--font-display);
     font-weight: 800;
 }
 
@@ -534,7 +534,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     max-width: 100%;
     overflow: hidden;
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
@@ -576,7 +576,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     padding: 7px 8px;
     border: 1px dotted var(--ink-faint);
     color: var(--ink-soft);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: var(--font-display);
     font-size: 0.76rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -597,7 +597,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     background: transparent;
     color: var(--ink);
     cursor: pointer;
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     font-size: 0.82rem;
     text-decoration: none;
 }
@@ -634,7 +634,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     border: 1px dotted rgba(40, 34, 30, 0.34);
     background: rgba(255, 255, 255, 0.2);
     color: var(--ink);
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     text-align: left;
 }
 
@@ -678,7 +678,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
     background: rgba(255, 255, 255, 0.12);
     color: var(--ink);
     cursor: pointer;
-    font-family: "Special Elite", "Courier New", monospace;
+    font-family: var(--font-display);
     text-align: left;
 }
 
@@ -751,7 +751,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-cover-mode {
 
 .type-empty {
     color: var(--ink-soft);
-    font-family: "Rajdhani", "Inter", sans-serif;
+    font-family: var(--font-display);
     font-weight: 800;
 }
 

@@ -19,7 +19,7 @@
 
 .snake-gol-shell {
   color: var(--sg-white);
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .snake-gol-shell {
@@ -240,7 +240,7 @@
 .overlay-text {
   margin-top: 14px;
   color: var(--sg-muted);
-  font: 800 clamp(12px, 1.6vw, 15px)/1.7 Inter, sans-serif;
+  font: 800 clamp(12px, 1.6vw, 15px)/1.7 var(--font-ui);
 }
 
 .record-form {
@@ -455,7 +455,7 @@
 .arcade-help {
   margin-top: 12px;
   color: rgba(248, 251, 255, 0.52);
-  font: 800 12px/1.5 Inter, sans-serif;
+  font: 800 12px/1.5 var(--font-ui);
 }
 
 @keyframes snakeBlink {

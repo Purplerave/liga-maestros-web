@@ -81,7 +81,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav butt
     min-height: 30px !important;
     height: 30px !important;
     padding: 3px 9px !important;
-    font-family: "Inter", system-ui, sans-serif !important;
+    font-family: var(--font-ui) !important;
     color: rgba(226, 232, 240, 0.72) !important;
     background: transparent !important;
     text-align: center !important;
@@ -96,7 +96,7 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active {
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button span,
 body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
     margin: 0 !important;
-    font-family: "Inter", system-ui, sans-serif !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.72rem !important;
     color: inherit !important;
     text-shadow: none !important;
@@ -118,7 +118,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-context {
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-kicker,
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
-    font-family: "Inter", system-ui, sans-serif !important;
+    font-family: var(--font-ui) !important;
     text-shadow: none !important;
 }
 
@@ -321,4 +321,49 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-title {
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters {
         justify-self: stretch;
     }
+}
+
+/* A single typographic voice: readable UI, compact headlines and stable data. */
+body.newspaper-ui.quiniela-focus .match-score-badge,
+body.newspaper-ui.quiniela-focus .ia-signo,
+body.newspaper-ui.quiniela-focus .saved-ticket-sign,
+body.newspaper-ui.quiniela-focus .empty-user-pick,
+body.newspaper-ui.quiniela-focus .pena-pick,
+body.newspaper-ui.quiniela-focus .tension-status,
+body.newspaper-ui.quiniela-focus .topbar-user-score,
+body.newspaper-ui.quiniela-focus .contest-points,
+body.newspaper-ui.quiniela-focus .rank-total,
+body.newspaper-ui.quiniela-focus .full-points,
+body.newspaper-ui.quiniela-focus .cp-picks b,
+body.newspaper-ui.quiniela-focus .cp-rank-pts,
+body.newspaper-ui.quiniela-focus .profile-stat-value,
+body.newspaper-ui.quiniela-focus .porra-form input,
+body.newspaper-ui.quiniela-focus .porra-saved b,
+body.newspaper-ui.quiniela-focus .porra-share-pill b,
+body.newspaper-ui.quiniela-focus .live-card-score,
+body.newspaper-ui.quiniela-focus .quiz-result-score,
+body.newspaper-ui.quiniela-focus .quiz-result-points,
+body.newspaper-ui.quiniela-focus .quiz-result-time,
+body.newspaper-ui.quiniela-focus .quiz-rank-hits,
+body.newspaper-ui.quiniela-focus .quiz-rank-pts {
+    font-family: var(--font-data) !important;
+    font-variant-numeric: tabular-nums;
+}
+
+body.newspaper-ui.quiniela-focus .arena-table th,
+body.newspaper-ui.quiniela-focus h1,
+body.newspaper-ui.quiniela-focus h2,
+body.newspaper-ui.quiniela-focus h3,
+body.newspaper-ui.quiniela-focus .topbar-title,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button,
+body.newspaper-ui.quiniela-focus .fixture-name,
+body.newspaper-ui.quiniela-focus .contest-title,
+body.newspaper-ui.quiniela-focus .rank-name,
+body.newspaper-ui.quiniela-focus .full-team-name,
+body.newspaper-ui.quiniela-focus .cp-kicker,
+body.newspaper-ui.quiniela-focus .cp-data-card > span,
+body.newspaper-ui.quiniela-focus .cp-side strong,
+body.newspaper-ui.quiniela-focus .cp-fixture strong,
+body.newspaper-ui.quiniela-focus .profile-name {
+    font-family: var(--font-display) !important;
 }

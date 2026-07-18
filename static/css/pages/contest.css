@@ -71,7 +71,7 @@
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 7px;
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     color: #f8fbff;
     font-weight: 800;
 }
@@ -177,7 +177,7 @@
 .awards-head span {
     display: block;
     color: var(--accent);
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 0.58rem;
     font-weight: 900;
     letter-spacing: 0.06em;
@@ -405,7 +405,7 @@
 .awards-history-grid h4 {
     margin: 0 0 6px;
     color: var(--accent);
-    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-family: var(--font-display);
     font-size: 0.66rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;

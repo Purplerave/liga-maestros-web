@@ -88,7 +88,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
     border-radius: 6px;
     background: #07111f;
     color: #f8fafc;
-    font: 800 0.72rem Inter, sans-serif;
+    font: 800 0.72rem var(--font-data);
     text-align: center;
 }
 

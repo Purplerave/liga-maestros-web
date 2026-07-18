@@ -1,6 +1,6 @@
 :root {
     color-scheme: dark;
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--font-ui);
     background: #06090f;
     color: #edf5ff;
 }

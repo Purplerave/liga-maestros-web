@@ -2,10 +2,10 @@
    LIGA DE MAESTROS — STYLE MANIFEST
    ========================================================================== */
 
-@import url('base/tokens.css');
-@import url('layout/app_shell.css');
-@import url('components/match_cards.css');
-@import url('pages/ticket.css');
-@import url('pages/standings.css');
-@import url('pages/contest.css');
-@import url('pages/live.css');
+@import url('base/tokens.css?v=plex-1');
+@import url('layout/app_shell.css?v=plex-1');
+@import url('components/match_cards.css?v=plex-1');
+@import url('pages/ticket.css?v=plex-1');
+@import url('pages/standings.css?v=plex-1');
+@import url('pages/contest.css?v=plex-1');
+@import url('pages/live.css?v=plex-1');
