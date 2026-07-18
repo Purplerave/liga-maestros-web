@@ -15,8 +15,8 @@ function bindEvents() {
     document.querySelectorAll("[data-page-action]").forEach(button => {
         button.addEventListener("click", () => openNewspaperPage(button.dataset.pageAction));
     });
-    qs("porra-body")?.addEventListener("submit", event => {
-        if (event.target.id === "porra-form") submitPorra(event);
+    document.addEventListener("submit", event => {
+        if (event.target.matches("[data-porra-form]")) submitPorra(event);
     });
     qs("comment-form")?.addEventListener("submit", submitComment);
     document.querySelector(".comments-panel-side .panel-head")?.addEventListener("click", () => {

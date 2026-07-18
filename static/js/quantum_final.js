@@ -173,16 +173,18 @@ async function submitComment(event) {
 
 // --- Porra ---
 async function loadPorra() {
-    const body = qs("porra-body");
+    const bodies = [qs("porra-body"), qs("ticket-porra-body")].filter(Boolean);
     const summary = qs("porra-summary");
     if (!state.data) return;
     try {
         const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
         const data = await res.json();
         if (typeof hydrateCoverPorra === "function") hydrateCoverPorra(data);
-        if (!body) return;
+        if (!bodies.length) return;
         if (!res.ok || data.status !== "ok" || !data.enabled) {
-            body.innerHTML = `<div class="empty-state">${escapeHtml(data.message || "Sin porra disponible.")}</div>`;
+            bodies.forEach(body => {
+                body.innerHTML = `<div class="empty-state">${escapeHtml(data.message || "Sin porra disponible.")}</div>`;
+            });
             return;
         }
         const match = data.match || {};
@@ -208,7 +210,9 @@ async function loadPorra() {
                     ${porraShare}
                </div>`
             : "";
-        body.innerHTML = `
+        const renderBody = (body, index) => {
+            const suffix = index ? "-ticket" : "";
+            body.innerHTML = `
             <div class="porra-match">
                 <strong>${escapeHtml(getShortName(match.local || "Local"))}</strong>
                 <em>vs</em>
@@ -219,16 +223,20 @@ async function loadPorra() {
                         <span>Tu porra</span>
                         <b>${Number(homeValue)}-${Number(awayValue)}</b>
                    </div>`
-                : `<form id="porra-form" class="porra-form">
-                        <input id="porra-home" type="number" min="0" max="15" inputmode="numeric" value="${escapeHtml(homeValue)}" ${data.locked ? "disabled" : ""}>
+                : `<form id="porra-form${suffix}" class="porra-form" data-porra-form>
+                        <input id="porra-home${suffix}" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${escapeHtml(homeValue)}" ${data.locked ? "disabled" : ""}>
                         <span>-</span>
-                        <input id="porra-away" type="number" min="0" max="15" inputmode="numeric" value="${escapeHtml(awayValue)}" ${data.locked ? "disabled" : ""}>
+                        <input id="porra-away${suffix}" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${escapeHtml(awayValue)}" ${data.locked ? "disabled" : ""}>
                         <button type="submit" ${data.locked ? "disabled" : ""}>${data.auth ? "OK" : "Entrar"}</button>
                    </form>`}
             ${shareBlock}`;
+        };
+        bodies.forEach(renderBody);
     } catch (error) {
         if (typeof hydrateCoverPorra === "function") hydrateCoverPorra({ enabled: false, message: "No se pudo cargar la porra" });
-        if (body) body.innerHTML = `<div class="empty-state">No se pudo cargar la porra.</div>`;
+        bodies.forEach(body => {
+            body.innerHTML = `<div class="empty-state">No se pudo cargar la porra.</div>`;
+        });
     }
 }
 
@@ -238,14 +246,18 @@ async function submitPorra(event) {
         window.location.href = "/login/google";
         return;
     }
+    const form = event.target.closest("[data-porra-form]");
+    const homeInput = form?.querySelector("[data-porra-home]");
+    const awayInput = form?.querySelector("[data-porra-away]");
+    if (!homeInput || !awayInput) return;
     try {
         const res = await fetch("/api/porra", {
             method: "POST",
             headers: authenticatedJsonHeaders(),
             body: JSON.stringify({
                 jornada: state.data.jornada || state.jornada,
-                goles_local: qs("porra-home").value,
-                goles_visitante: qs("porra-away").value
+                goles_local: homeInput.value,
+                goles_visitante: awayInput.value
             })
         });
         const data = await res.json();

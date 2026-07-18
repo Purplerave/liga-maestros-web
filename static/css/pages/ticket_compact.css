@@ -1,4 +1,132 @@
 /* Quiniela desktop: alta densidad sin ocultar informacion. */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mode {
+    align-content: start;
+    grid-template-rows: auto auto;
+}
+
+.ticket-porra-strip {
+    display: grid;
+    grid-template-columns: 145px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin: 0 8px 8px;
+    padding: 7px 11px;
+    border: 1px solid rgba(56, 189, 248, 0.24);
+    border-radius: 8px;
+    background: rgba(8, 17, 31, 0.94);
+}
+
+.ticket-porra-heading {
+    display: grid;
+    gap: 2px;
+}
+
+.ticket-porra-heading span {
+    color: #38d9ff;
+    font-size: 0.58rem;
+    font-weight: 900;
+}
+
+.ticket-porra-heading strong {
+    color: #f5c451;
+    font-size: 0.72rem;
+}
+
+.ticket-porra-strip .porra-body {
+    display: grid;
+    grid-template-columns: minmax(170px, 0.8fr) minmax(140px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+}
+
+.ticket-porra-strip .porra-match,
+.ticket-porra-strip .porra-saved,
+.ticket-porra-strip .porra-share {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    min-height: 30px;
+    padding: 4px 8px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 7px;
+}
+
+.ticket-porra-strip .porra-match {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+}
+
+.ticket-porra-strip .porra-match strong {
+    overflow: hidden;
+    color: #f8fafc;
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ticket-porra-strip .porra-match em {
+    color: #7dd3fc;
+    font-size: 0.6rem;
+    font-style: normal;
+    text-align: center;
+}
+
+.ticket-porra-strip .porra-form {
+    display: grid;
+    grid-template-columns: 34px 8px 34px 48px;
+    align-items: center;
+    gap: 5px;
+}
+
+.ticket-porra-strip .porra-form input,
+.ticket-porra-strip .porra-form button {
+    width: 100%;
+    height: 28px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 6px;
+    background: #07111f;
+    color: #f8fafc;
+    font: 800 0.72rem Inter, sans-serif;
+    text-align: center;
+}
+
+.ticket-porra-strip .porra-form button {
+    background: #21bff3;
+    color: #04111d;
+    cursor: pointer;
+}
+
+.ticket-porra-strip .porra-share {
+    overflow: hidden;
+}
+
+.ticket-porra-strip .porra-share-total,
+.ticket-porra-strip .porra-share-pill {
+    flex: 0 0 auto;
+    font-size: 0.58rem;
+    white-space: nowrap;
+}
+
+.ticket-porra-strip .porra-share-pill {
+    display: inline-flex;
+    gap: 3px;
+    color: #f5c451;
+}
+
+.ticket-porra-strip .porra-share-pill em {
+    color: #9fb1c8;
+    font-style: normal;
+}
+
+@media (max-width: 900px) {
+    .ticket-porra-strip,
+    .ticket-porra-strip .porra-body {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (min-width: 900px) {
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
         height: 48px !important;

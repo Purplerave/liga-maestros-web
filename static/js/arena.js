@@ -72,6 +72,15 @@ function renderArena() {
         const matches = state.data.partidos || [];
         container.className = "arena-content table-mode";
         container.innerHTML = `
+            <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
+                <div class="ticket-porra-heading">
+                    <span>PORRA DE LA JORNADA</span>
+                    <strong id="ticket-porra-title">Marcador exacto</strong>
+                </div>
+                <div id="ticket-porra-body" class="porra-body">
+                    <div class="empty-state">Cargando porra...</div>
+                </div>
+            </section>
             ${renderLiveScrutinyBadge(matches)}
             <div class="arena-table-wrap">
                 <table class="arena-table is-tension-table">
@@ -80,6 +89,7 @@ function renderArena() {
                 </table>
             </div>`;
         renderArenaTensionBody(matches);
+        loadPorra();
         return;
     }
 
