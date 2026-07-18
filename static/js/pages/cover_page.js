@@ -171,7 +171,7 @@ function renderNewspaperCoverPageV3() {
             <section class="cp-intro" aria-labelledby="cp-title">
                 <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span>${escapeHtml(statusLabel)}</span></div>
                 <h1 id="cp-title">&iexcl;Haz tu quiniela!</h1>
-                <p class="cp-lead">Compite contra los Maestros IA y contra toda La Pe&ntilde;a. Suma aciertos, escala en el ranking y conquista la jornada. <strong>&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
+                <p class="cp-lead">Compite contra nuestro Programa, los Maestros IA y toda La Pe&ntilde;a. Suma aciertos, escala en el ranking y conquista la jornada.<strong class="cp-challenge">&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Ver clasificaci&oacute;n</button>

@@ -209,6 +209,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     font-weight: 800;
 }
 
+.cp-lead .cp-challenge {
+    display: block;
+    margin-top: 8px;
+    white-space: nowrap;
+}
+
 .cp-actions {
     display: flex;
     align-items: center;
