@@ -150,6 +150,7 @@ function hydrateCoverPorra(data) {
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null
         && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
+    const totalEntries = Number(data.total_entries || 0);
     const leaders = (data.distribution || []).slice(0, 3);
     const status = hasMine
         ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}`
@@ -158,7 +159,7 @@ function hydrateCoverPorra(data) {
         ${coverFixtureHtml(match, true)}
         <div class="cp-porra-foot">
             <strong>${escapeHtml(status)}</strong>
-            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" &middot; ")}</span>` : `<span>S&eacute; el primero en mojarte</span>`}
+            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${totalEntries === 1 ? "pron&oacute;stico &uacute;nico" : `${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%`}</small>`).join(" &middot; ")}</span>` : `<span>S&eacute; el primero en mojarte</span>`}
         </div>`;
 }
 

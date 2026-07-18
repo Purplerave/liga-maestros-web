@@ -201,12 +201,12 @@ async function loadPorra() {
             return `
                 <span class="porra-share-pill">
                     <b>${escapeHtml(score)}</b>
-                    <em>${percent.toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</em>
+                    <em>${totalEntries === 1 ? "&uacute;nico pron&oacute;stico" : `${percent.toLocaleString("es-ES", { maximumFractionDigits: 0 })}%`}</em>
                 </span>`;
         }).join("");
         const shareBlock = totalEntries
             ? `<div class="porra-share">
-                    <span class="porra-share-total">${totalEntries} porra${totalEntries === 1 ? "" : "s"}</span>
+                    <span class="porra-share-total">${totalEntries} participante${totalEntries === 1 ? "" : "s"}</span>
                     ${porraShare}
                </div>`
             : "";
