@@ -151,7 +151,9 @@ function renderMatchCard(match, options = {}) {
     const scheduled = isScheduledStatus(match.status) && !live && !finished;
     const score = scheduled
         ? formatSmartDate(match.added || match.fecha_raw, match.scheduled || match.time || match.hora)
-        : (match.marcador || match.score || match.scores?.score || "-");
+        : live
+            ? liveScoreDisplay(match, "-")
+            : (match.marcador || match.score || match.scores?.score || "-");
 
     const matchIdx = (state.data.partidos || []).findIndex(m => Number(m.id) === Number(match.id));
     const idx = matchIdx >= 0 ? matchIdx : -1;
@@ -162,7 +164,6 @@ function renderMatchCard(match, options = {}) {
         return `<span class="ia-signo" title="${escapeHtml(label)}">${escapeHtml(sign)}</span>`;
     }).join(" ");
 
-    const statusBadge = live ? `<span class="badge badge-live">LIVE</span>` : "";
     const cardClass = live ? "is-live" : (finished ? "is-finished" : "");
 
     return `
@@ -171,7 +172,6 @@ function renderMatchCard(match, options = {}) {
                 ${teamCell(home, "left", teamLogo(match, "home"))}
                 <div class="card-score-area">
                     <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}"${liveScoreAttrs(match, live)}>${escapeHtml(score)}</div>
-                    <div class="card-status">${statusBadge}</div>
                 </div>
                 ${teamCell(away, "right", teamLogo(match, "away"))}
             </div>

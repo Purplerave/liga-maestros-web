@@ -426,12 +426,42 @@
 }
 
 .live-grouped-grid {
-    gap: 14px;
+    align-content: start;
+    gap: 12px;
 }
 
 .league-match-group {
     border: 1px solid var(--border-main);
+    border-radius: 8px;
     background: rgba(7, 12, 22, 0.76);
+    overflow: hidden;
+}
+
+.live-grouped-grid .match-card {
+    min-height: 88px;
+    padding: 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--border-main);
+    border-radius: 0;
+}
+
+.live-grouped-grid .match-card:last-child {
+    border-bottom: 0;
+}
+
+.live-grouped-grid .card-teams {
+    grid-template-columns: minmax(0, 1fr) 116px minmax(0, 1fr);
+}
+
+.live-grouped-grid .team-cell {
+    min-width: 0;
+    font-size: 0.82rem;
+}
+
+.live-grouped-grid .team-cell strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .league-group-header {

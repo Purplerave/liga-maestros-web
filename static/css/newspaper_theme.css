@@ -848,15 +848,17 @@ body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge {
     position: relative !important;
     display: inline-flex !important;
     min-width: 96px !important;
-    min-height: 42px !important;
+    min-height: 32px !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 14px 10px 5px !important;
-    border: 2px solid var(--news-red) !important;
-    background: var(--news-red) !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgba(34, 197, 94, 0.72) !important;
+    border-radius: 7px !important;
+    background: rgba(10, 76, 44, 0.74) !important;
     color: #fff !important;
     box-shadow: none !important;
     line-height: 1 !important;
+    white-space: nowrap !important;
     overflow: visible !important;
 }
 

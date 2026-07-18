@@ -218,8 +218,11 @@ function isScheduledStatus(status) {
 }
 
 function matchMinuteValue(match) {
-    const raw = String(match.time || match.minute || "").replace(/[^0-9]/g, "");
-    return raw ? Number(raw) : 0;
+    const direct = String(match.time || match.minute || "").match(/\d{1,3}/);
+    if (direct) return Number(direct[0]);
+    const score = String(match.marcador || match.score || match.scores?.score || "");
+    const embedded = score.match(/\((\d{1,3})\s*['’]?\)/) || score.match(/\b(\d{1,3})\s*['’]/);
+    return embedded ? Number(embedded[1]) : 0;
 }
 
 function isImplicitlyFinished(match) {
@@ -275,11 +278,12 @@ function liveScoreAttrs(match, live) {
 }
 
 function liveScoreDisplay(match, fallbackScore = "") {
-    const score = match.marcador || match.score || match.scores?.score || fallbackScore || "";
+    const rawScore = match.marcador || match.score || match.scores?.score || fallbackScore || "";
+    const score = scoreOnly(rawScore) || rawScore;
     const minute = matchMinuteValue(match);
     const stage = liveStage(match);
-    if (stage === "HT") return `${score} (descanso)`;
-    if (minute) return `${score} ${minute}'`;
+    if (stage === "HT") return `${score} · Descanso`;
+    if (minute) return `${score} · ${minute}'`;
     return score;
 }
 
@@ -297,6 +301,12 @@ function competitionLabel(match) {
     const raw = String(match.competition_name || match.competition?.name || "Liga").toUpperCase();
     const home = normalizeName(match.local || match.home_name || match.home?.name);
     const away = normalizeName(match.visitante || match.away_name || match.away?.name);
+    const teams = `${home}|${away}`;
+    const generic = ["LIGA", "COMPETICION", "FRIENDLIES", "FRIENDLIES CLUBS"].includes(raw);
+    const norwegianTeams = ["BODOGLIMT", "FREDRIKSTAD", "HAMKAM", "TROMSOIL", "LILLESTROMSK", "KFUMOSLO", "KRISTIANSUND", "SARPSBORG", "START", "ROSENBORG", "MOLDEFK", "BRANN", "VIKING", "SANDEFJORD"];
+    const swedishTeams = ["MJALLBY", "VASTERASSKFK", "AIK", "GAISGOTEBORG", "IFKGOTEBORG", "BROMMAPOJKARNA", "ELFSBORG", "SIRIUS", "HAMMARBY", "DEGERFORSIF", "HALMSTAD", "HACKEN", "KALMARFF", "MALMOE"];
+    if (generic && norwegianTeams.some(team => teams.includes(team))) return "ELITESERIEN";
+    if (generic && swedishTeams.some(team => teams.includes(team))) return "ALLSVENSKAN";
     const lowerTierHint = home.includes("ESTEPONA") || away.includes("ESTEPONA") || home.includes("MADRIDIII") || away.includes("MADRIDIII") || home.includes("REALMADRIDIII") || away.includes("REALMADRIDIII");
     if (raw === "SEGUNDA DIVISION" && lowerTierHint) return "SEGUNDA FEDERACION";
     if (raw === "SEGUNDA DIVISION") return "SEGUNDA DIVISION";
@@ -305,7 +315,8 @@ function competitionLabel(match) {
 
 function matchCompetitionMeta(match) {
     const league = competitionLabel(match);
-    const country = String(match.country || match.country_name || match.competition?.country?.name || "").trim();
+    const inferredCountry = league === "ELITESERIEN" ? "Noruega" : league === "ALLSVENSKAN" ? "Suecia" : "";
+    const country = String(match.country || match.country_name || match.competition?.country?.name || inferredCountry).trim();
     const code = String(match.country_code || match.country?.code || match.competition?.country?.code || "").trim().toUpperCase();
     const cleanLeague = league === "LIGA" ? "COMPETICION" : league;
     const suffix = country || code;
