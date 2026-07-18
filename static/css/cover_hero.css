@@ -564,6 +564,35 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     margin-top: 21px;
 }
 
+.cp-pulse .cp-fixture.is-compact {
+    grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.cp-pulse .cp-fixture.is-compact .cp-team {
+    display: flex;
+    gap: 0;
+    text-align: left;
+}
+
+.cp-pulse .cp-fixture.is-compact .cp-team-home {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.cp-pulse .cp-fixture.is-compact .team-badge {
+    display: none;
+}
+
+.cp-pulse .cp-fixture.is-compact .cp-team strong {
+    overflow: visible;
+    font-size: 0.72rem;
+    line-height: 1.12;
+    text-overflow: clip;
+    white-space: normal;
+}
+
 .cp-pulse-bars {
     display: flex;
     width: 100%;
