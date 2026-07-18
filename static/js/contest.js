@@ -194,6 +194,108 @@ function profileBadgeStrip(profile = {}) {
     return "";
 }
 
+function profileTone(value) {
+    const number = Number(value || 0);
+    return number > 0 ? "good" : number < 0 ? "bad" : "mid";
+}
+
+function renderProfileDashboard(profile) {
+    const results = (profile.results || []).slice().reverse();
+    const vsPena = profile.vs_pena || {};
+    const streak = profile.streak || {};
+    const rivalries = profile.rivalries || [];
+    const awards = profile.awards || [];
+    const initials = String(profile.name || "M")
+        .split(/\s+/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase();
+    const comparison = Number(vsPena.diff || 0);
+    const comparisonText = comparison > 0 ? `+${comparison}` : String(comparison || 0);
+    const resultRows = results.map(item => {
+        const points = Number(item.points || 0);
+        const peerAverage = Number(item.pena_avg || 0);
+        const diff = Math.round((points - peerAverage) * 10) / 10;
+        const ticket = (item.ticket || []).join(" ");
+        return `
+            <div class="profile-result-row">
+                <strong>J${escapeHtml(item.jornada)}</strong>
+                <span class="profile-result-score">${points}<small> aciertos</small></span>
+                <span class="profile-result-position">#${escapeHtml(item.pos || "-")}</span>
+                        <span class="profile-result-diff ${profileTone(diff)}">${diff > 0 ? "+" : ""}${diff}</span>
+                <span class="profile-result-meter"><i style="width:${Math.min(100, Math.max(0, points / 15 * 100))}%"></i></span>
+                <span class="profile-result-ticket" title="${escapeHtml(ticket)}">${escapeHtml(ticket)}</span>
+            </div>`;
+    }).join("") || `<div class="profile-empty">Aun no hay jornadas cerradas en tu historial.</div>`;
+    const rivalryRows = rivalries.slice(0, 5).map(item => `
+        <div class="profile-rival-row">
+            <span>${escapeHtml(item.name)}</span>
+            <strong class="${profileTone(item.diff)}">${item.wins}-${item.draws}-${item.losses}</strong>
+            <small>${Number(item.diff || 0) > 0 ? "+" : ""}${item.diff}</small>
+        </div>`).join("") || `<div class="profile-empty compact">Aun no hay duelos comparables.</div>`;
+    const awardRows = awards.slice(0, 4).map(item => `
+        <div class="profile-award-row"><span>J${escapeHtml(item.jornada)}</span><strong>Campeon</strong><b>${item.points}</b></div>`
+    ).join("") || `<div class="profile-empty compact">Tu primer galardon sigue en juego.</div>`;
+
+    return `
+        <section class="profile-page-pro">
+            <header class="profile-summary">
+                <button type="button" class="profile-back" data-page-action="ALL">&larr; Portada</button>
+                <div class="profile-identity">
+                    <div class="profile-avatar-compact">${escapeHtml(initials || "M")}</div>
+                    <div>
+                        <span>Mi temporada</span>
+                        <h2>${escapeHtml(profile.name || "Maestro")}</h2>
+                    </div>
+                </div>
+                <div class="profile-summary-rank"><span>Clasificacion</span><strong>#${profile.position ?? "-"}</strong></div>
+                <div class="profile-summary-actions">
+                    <a href="/cuenta">Cuenta</a>
+                    <a href="/logout">Salir</a>
+                </div>
+            </header>
+
+            <div class="profile-kpi-strip">
+                <div><span>Puntos</span><strong>${profile.points ?? profile.hits ?? 0}</strong></div>
+                <div><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
+                <div><span>Pronosticos</span><strong>${profile.predictions ?? 0}</strong></div>
+                <div><span>Eficacia</span><strong>${profile.hit_rate ?? 0}%</strong></div>
+                <div><span>Jornadas</span><strong>${profile.played ?? 0}</strong></div>
+                <div><span>Media</span><strong>${profile.hits_per_jornada ?? 0}</strong></div>
+                <div><span>Mejor puesto</span><strong>#${profile.best_position ?? "-"}</strong></div>
+            </div>
+
+            <div class="profile-dashboard-grid">
+                <section class="profile-panel profile-results-panel">
+                    <div class="profile-panel-head">
+                        <div><span>Evolucion</span><h3>Jornada a jornada</h3></div>
+                        <small>Aciertos · puesto · diferencia con La Pe&ntilde;a</small>
+                    </div>
+                    <div class="profile-result-head"><span>Jornada</span><span>Aciertos</span><span>Puesto</span><span>Vs Pena</span><span>Rendimiento</span></div>
+                    <div class="profile-results-list">${resultRows}</div>
+                </section>
+
+                <aside class="profile-side-column">
+                    <section class="profile-panel profile-comparison-panel">
+                        <div class="profile-panel-head"><div><span>Tu nivel</span><h3>Frente a La Pe&ntilde;a</h3></div></div>
+                        <div class="profile-comparison-value ${profileTone(comparison)}">${comparisonText}<small> puntos</small></div>
+                        <p>Media de la Pe&ntilde;a: <b>${vsPena.average_points ?? 0}</b>. Vas por delante de <b>${vsPena.ahead_of ?? 0}</b> rivales.</p>
+                        <div class="profile-mini-stats">
+                            <div><span>Racha 8+</span><b>${streak.current ?? 0}</b></div>
+                            <div><span>Mejor racha</span><b>${streak.best ?? 0}</b></div>
+                            <div><span>Mejorando</span><b>${streak.improving ?? 0}</b></div>
+                        </div>
+                    </section>
+                    <section class="profile-panel">
+                        <div class="profile-panel-head"><div><span>Ultimas 5</span><h3>Rivales directos</h3></div><small>G-E-P</small></div>
+                        <div class="profile-rivals-list">${rivalryRows}</div>
+                    </section>
+                    <section class="profile-panel">
+                        <div class="profile-panel-head"><div><span>Palmares</span><h3>Tus jornadas</h3></div></div>
+                        <div class="profile-awards-list">${awardRows}</div>
+                    </section>
+                </aside>
+            </div>
+        </section>`;
+}
+
 function renderContestPanel() {
     const container = qs("contest-body");
     const contest = state.contest;
@@ -283,26 +385,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
         if (!profile) {
             return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>Perfil</span><small>sesion</small></div><div class="empty-state">Entra con Google para ver tus estadisticas personales.</div></div></section>`;
         }
-        return `
-            <section class="contest-page single">
-                <div class="contest-card">
-                    <div class="contest-title"><span>Perfil y estadisticas de ${escapeHtml(profile.name || "Maestro")}</span><small>personal</small></div>
-                    <div class="profile-grid">
-                        <div class="profile-stat"><span>Posicion</span><strong>${profile.position ?? "-"}</strong></div>
-                        <div class="profile-stat"><span>Pronosticos</span><strong>${profile.predictions ?? 0}</strong></div>
-                        <div class="profile-stat"><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
-                        <div class="profile-stat"><span>% acierto</span><strong>${profile.hit_rate ?? 0}%</strong></div>
-                        <div class="profile-stat"><span>Jornadas jugadas</span><strong>${profile.played ?? 0}</strong></div>
-                        <div class="profile-stat"><span>Aciertos/jornada</span><strong>${profile.hits_per_jornada ?? 0}</strong></div>
-                        <div class="profile-stat"><span>Mejor posicion</span><strong>${profile.best_position ?? "-"}</strong></div>
-                    </div>
-                    ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
-                </div>
-                <div class="contest-card">
-                    <div class="contest-title"><span>Resultados</span><small>quiniela | aciertos | posicion</small></div>
-                    ${results}
-                </div>
-            </section>`;
+        return renderProfileDashboard(profile);
     }
 
     if (view === "CONTEST_GENERAL") {
