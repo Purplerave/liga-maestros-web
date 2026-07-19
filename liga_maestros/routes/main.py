@@ -1,6 +1,6 @@
 """Main routes: index page, static files."""
 import os, time
-from flask import Blueprint, render_template, request, jsonify, send_from_directory, session
+from flask import Blueprint, make_response, render_template, request, jsonify, send_from_directory, session
 
 import config
 from ..services.ticket import madrid_now, today_madrid
@@ -61,7 +61,9 @@ def index():
         conn.close()
     j = request.args.get('j', str(max_j))
     try:
-        return render_template('liga_index.html', jornada=j, user=user, assets_v=_get_assets_version())
+        response = make_response(render_template('liga_index.html', jornada=j, user=user, assets_v=_get_assets_version()))
+        response.headers["Cache-Control"] = "no-store, max-age=0"
+        return response
     except Exception:
         from markupsafe import escape
         return f"La plantilla no se encontro. Jornada actual: {escape(j)}", 500

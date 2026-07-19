@@ -107,6 +107,30 @@ function bindEvents() {
     });
 }
 
+async function refreshLiveSnapshot() {
+    if (!state.data || document.hidden) return;
+    try {
+        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const freshData = await response.json();
+        if (String(freshData.jornada || "") !== String(state.jornada || "")) return;
+        const hadLive = hasLiveLeagueMatches();
+        state.data = freshData;
+        logoAliasIndex = null;
+        logoDataIndex = null;
+        logoCache.clear();
+        const hasLive = hasLiveLeagueMatches();
+        if (!hadLive && !hasLive) return;
+        updateWarRoomButton();
+        hydrateHero();
+        renderArena();
+        if (shouldRefreshSideModules()) renderLiveStandings();
+        loadPorra();
+    } catch (error) {
+        console.warn("No se pudo refrescar el directo", error);
+    }
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
     hydrateCommentsPanel();
@@ -115,14 +139,19 @@ document.addEventListener("DOMContentLoaded", () => {
     let autoRefreshId = setInterval(() => {
         refreshData({ auto: true });
     }, 60000);
+    let liveRefreshId = setInterval(refreshLiveSnapshot, 30000);
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
             clearInterval(autoRefreshId);
+            clearInterval(liveRefreshId);
             autoRefreshId = null;
+            liveRefreshId = null;
         } else if (!autoRefreshId) {
+            refreshLiveSnapshot();
             autoRefreshId = setInterval(() => {
                 refreshData({ auto: true });
             }, 60000);
+            liveRefreshId = setInterval(refreshLiveSnapshot, 30000);
         }
     });
 });
