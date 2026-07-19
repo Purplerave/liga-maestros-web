@@ -39,7 +39,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 }
 
 .cp {
-    --cp-font-headline: "Barlow Condensed", "IBM Plex Sans Condensed", sans-serif;
     --cp-bg: #050914;
     --cp-panel: #0b1322;
     --cp-panel-2: #0e192a;
@@ -190,10 +189,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-intro h1 {
     margin: 0 0 15px;
     color: var(--cp-text);
-    font-family: var(--cp-font-headline);
-    font-size: 2.7rem;
-    font-weight: 800;
-    line-height: 0.95;
+    font-family: var(--font-ui);
+    font-size: 2.45rem;
+    font-weight: 700;
+    line-height: 1.02;
     letter-spacing: 0;
 }
 
@@ -335,8 +334,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 
 .cp-side strong {
     color: var(--cp-text);
-    font-family: var(--cp-font-headline);
-    font-size: 1.22rem;
+    font-family: var(--font-display);
+    font-size: 1.16rem;
     font-weight: 800;
 }
 
@@ -362,7 +361,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     border-radius: 50%;
     background: #10192a;
     color: var(--cp-pink);
-    font-family: var(--cp-font-headline);
+    font-family: var(--font-display);
     font-size: 0.76rem;
     font-weight: 900;
 }
