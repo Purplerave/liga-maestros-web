@@ -371,5 +371,5 @@ body.newspaper-ui.quiniela-focus .profile-name {
 /* El titular de portada debe ser limpio; las cabeceras de datos siguen usando
    la variante condensada del sistema. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-intro h1 {
-    font-family: var(--font-ui) !important;
+    font-family: var(--cp-font-hand) !important;
 }

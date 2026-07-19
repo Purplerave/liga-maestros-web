@@ -39,6 +39,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 }
 
 .cp {
+    --cp-font-hand: "Kalam", "Segoe Print", cursive;
     --cp-bg: #050914;
     --cp-panel: #0b1322;
     --cp-panel-2: #0e192a;
@@ -189,10 +190,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-intro h1 {
     margin: 0 0 15px;
     color: var(--cp-text);
-    font-family: var(--font-ui);
-    font-size: 2.45rem;
+    font-family: var(--cp-font-hand);
+    font-size: 2.65rem;
     font-weight: 700;
-    line-height: 1.02;
+    line-height: 1;
     letter-spacing: 0;
 }
 
