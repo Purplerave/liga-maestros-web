@@ -223,11 +223,15 @@ async function loadPorra() {
                         <span>Tu porra</span>
                         <b>${Number(homeValue)}-${Number(awayValue)}</b>
                    </div>`
+                : data.locked
+                    ? `<div class="porra-saved porra-closed">
+                            <span>Porra cerrada</span>
+                       </div>`
                 : `<form id="porra-form${suffix}" class="porra-form" data-porra-form>
-                        <input id="porra-home${suffix}" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${escapeHtml(homeValue)}" ${data.locked ? "disabled" : ""}>
+                        <input id="porra-home${suffix}" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${escapeHtml(homeValue)}">
                         <span>-</span>
-                        <input id="porra-away${suffix}" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${escapeHtml(awayValue)}" ${data.locked ? "disabled" : ""}>
-                        <button type="submit" ${data.locked ? "disabled" : ""}>${data.auth ? "OK" : "Entrar"}</button>
+                        <input id="porra-away${suffix}" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${escapeHtml(awayValue)}">
+                        <button type="submit">${data.auth ? "OK" : "Entrar"}</button>
                    </form>`}
             ${shareBlock}`;
         };

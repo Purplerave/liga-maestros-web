@@ -1,6 +1,9 @@
 import sqlite3
 
-from liga_maestros.routes.porra import _porra_target_match
+from datetime import timedelta
+
+from liga_maestros.routes.porra import _porra_is_locked, _porra_target_match
+from liga_maestros.services.ticket import madrid_now
 
 
 def porra_connection():
@@ -48,3 +51,14 @@ def test_porra_keeps_match_that_already_has_entries():
 
     assert _porra_target_match(conn, 73)["partido_id"] == 1
     conn.close()
+
+
+def test_porra_is_locked_after_kickoff():
+    past = madrid_now() - timedelta(minutes=1)
+    match = {"fecha": past.strftime("%Y-%m-%d"), "hora": past.strftime("%H:%M"), "status": "NS"}
+    assert _porra_is_locked(match) is True
+
+
+def test_porra_is_locked_when_match_is_live_or_finished():
+    assert _porra_is_locked({"fecha": "2099-01-01", "hora": "12:00", "status": "LIVE"}) is True
+    assert _porra_is_locked({"fecha": "2099-01-01", "hora": "12:00", "status": "FT"}) is True
