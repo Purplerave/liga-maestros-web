@@ -403,72 +403,142 @@ function renderContestPage(view = "CONTEST_PROFILE") {
     if (view === "CONTEST_AWARDS") {
         const jornadaItems = contest.galardones?.jornadas || [];
         const monthItems = contest.galardones?.meses || [];
-        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0].jornada || "");
-        const selectedMonth = String(state.selectedAwardMonth || monthItems[0].month || "");
+        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0]?.jornada || "");
+        const selectedMonth = String(state.selectedAwardMonth || monthItems[0]?.month || "");
         const jornadaPick = jornadaItems.find(item => String(item.jornada) === selectedJornada) || jornadaItems[0];
         const monthPick = monthItems.find(item => String(item.month) === selectedMonth) || monthItems[0];
-        const renderAwardChip = (item, idx, type = "jornada") => `
-            <div class="award-chip ${awardTierClass(idx)}">
-                <span class="award-medal">${idx + 1}</span>
-                <div><strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong><small>${type === "mes" ? "mes" : escapeHtml(item.date || "jornada")}</small></div>
-                <b>${escapeHtml(item.winner)}</b>
-                <em>${item.points}</em>
-            </div>`;
-        const renderHistoryRow = (item, idx, type = "jornada") => `
-            <div class="award-history-row">
-                <span>${idx + 1}</span>
-                <strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong>
-                <b>${escapeHtml(item.winner)}</b>
-                <em>${item.points}</em>
-            </div>`;
+
+        const renderAwardChip = (item, idx, type = "jornada") => {
+            const tier = awardTierClass(idx);
+            const medalClass = tier ? tier : "neutral";
+            return `
+                <div class="award-chip ${tier}">
+                    <span class="award-medal ${medalClass}">${idx + 1}</span>
+                    <div>
+                        <strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong>
+                        <small>${type === "mes" ? "mes" : escapeHtml(item.date || "jornada")}</small>
+                    </div>
+                    <b>${escapeHtml(item.winner)}</b>
+                    <em>${item.points} pts</em>
+                </div>`;
+        };
+
+        const renderHistoryRow = (item, idx, type = "jornada") => {
+            const rankClass = idx < 3 ? `rank-${idx + 1}` : "";
+            return `
+                <div class="award-history-row ${rankClass}">
+                    <span>${idx + 1}</span>
+                    <strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong>
+                    <b>${escapeHtml(item.winner)}</b>
+                    <em>${item.points} pts</em>
+                </div>`;
+        };
+
         const recentJornadas = jornadaItems.slice(0, 5).map((item, idx) => renderAwardChip(item, idx)).join("") || `<div class="empty-state">Sin ganadores de jornada.</div>`;
         const recentMonths = monthItems.slice(0, 5).map((item, idx) => renderAwardChip(item, idx, "mes")).join("") || `<div class="empty-state">Sin ganadores mensuales.</div>`;
-        const jornadaHistory = jornadaItems.slice(0, 14).map((item, idx) => renderHistoryRow(item, idx)).join("") || `<div class="empty-state">Sin historico de jornadas.</div>`;
-        const monthHistory = monthItems.slice(0, 10).map((item, idx) => renderHistoryRow(item, idx, "mes")).join("") || `<div class="empty-state">Sin historico mensual.</div>`;
+        const jornadaHistory = jornadaItems.slice(0, 14).map((item, idx) => renderHistoryRow(item, idx)).join("") || `<div class="empty-state">Sin histórico de jornadas.</div>`;
+        const monthHistory = monthItems.slice(0, 10).map((item, idx) => renderHistoryRow(item, idx, "mes")).join("") || `<div class="empty-state">Sin histórico mensual.</div>`;
         const jornadaOptions = jornadaItems.map(item => `<option value="${escapeHtml(item.jornada)}" ${String(item.jornada) === selectedJornada ? "selected" : ""}>Jornada ${escapeHtml(item.jornada)}</option>`).join("");
         const monthOptions = monthItems.map(item => `<option value="${escapeHtml(item.month)}" ${String(item.month) === selectedMonth ? "selected" : ""}>${escapeHtml(item.month)}</option>`).join("");
+
         return `
             <section class="contest-page awards-page">
                 <div class="contest-card awards-head">
-                    <div>
-                        <span>Galardones</span>
-                        <strong>Campeones de la Pena</strong>
+                    <div class="awards-head-left">
+                        <div class="awards-trophy-container">
+                            <svg class="awards-trophy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                <path d="M4 22h16"></path>
+                                <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path>
+                                <path d="M12 2a5 5 0 0 0-5 5v3.5c0 1.5 1.4 3.5 3.5 4.3a4.5 4.5 0 0 0 3 0c2.1-.8 3.5-2.8 3.5-4.3V7a5 5 0 0 0-5-5z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span>Galardones</span>
+                            <strong>Campeones de la Peña</strong>
+                            <p>Ganadores por jornada y por mes, con consulta rápida del histórico.</p>
+                        </div>
                     </div>
-                    <p>Ganadores por jornada y por mes, con consulta rapida del historico.</p>
                     <div class="awards-totals">
-                        <b>${jornadaItems.length}</b><small>jornadas</small>
-                        <b>${monthItems.length}</b><small>meses</small>
+                        <div>
+                            <b>${jornadaItems.length}</b>
+                            <small>jornadas</small>
+                        </div>
+                        <div>
+                            <b>${monthItems.length}</b>
+                            <small>meses</small>
+                        </div>
                     </div>
                 </div>
                 <div class="awards-grid">
                 <div class="contest-card awards-card">
-                    <div class="contest-title"><span>Ultimos campeones</span><small>jornada</small></div>
+                    <div class="contest-title"><span>Últimos campeones</span><small>jornada</small></div>
                     <div class="award-strip">${recentJornadas}</div>
                     <div class="award-picker">
                         <label>Consultar jornada</label>
                         <select data-award-jornada>${jornadaOptions}</select>
                     </div>
-                    ${jornadaPick ? `<div class="award-feature">
-                        <span>J${jornadaPick.jornada}</span>
-                        <strong>${escapeHtml(jornadaPick.winner)}</strong>
-                        <em>${jornadaPick.points} pts</em>
-                    </div>` : ""}
+                    ${jornadaPick ? `
+                        <div class="award-feature">
+                            <div class="award-feature-header">
+                                <span class="award-feature-badge">🏆 CAMPEÓN J${jornadaPick.jornada}</span>
+                                <span class="award-feature-title">Destacado</span>
+                            </div>
+                            <div class="award-feature-main">
+                                <div class="award-feature-trophy">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                        <path d="M4 22h16"></path>
+                                        <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path>
+                                        <path d="M12 2a5 5 0 0 0-5 5v3.5c0 1.5 1.4 3.5 3.5 4.3a4.5 4.5 0 0 0 3 0c2.1-.8 3.5-2.8 3.5-4.3V7a5 5 0 0 0-5-5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="award-feature-info">
+                                    <span>Soberano de la Jornada</span>
+                                    <strong>${escapeHtml(jornadaPick.winner)}</strong>
+                                </div>
+                                <div class="award-feature-score">
+                                    ${jornadaPick.points} <small style="font-size: 0.65em; font-weight: 800;">pts</small>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ""}
                 </div>
                 <div class="contest-card awards-card">
-                    <div class="contest-title"><span>Reyes del mes</span><small>ultimos 3</small></div>
+                    <div class="contest-title"><span>Reyes del mes</span><small>últimos 3</small></div>
                     <div class="award-strip">${recentMonths}</div>
                     <div class="award-picker">
                         <label>Consultar mes</label>
                         <select data-award-month>${monthOptions}</select>
                     </div>
-                    ${monthPick ? `<div class="award-feature">
-                        <span>${escapeHtml(monthPick.month)}</span>
-                        <strong>${escapeHtml(monthPick.winner)}</strong>
-                        <em>${monthPick.points} pts</em>
-                    </div>` : ""}
+                    ${monthPick ? `
+                        <div class="award-feature">
+                            <div class="award-feature-header">
+                                <span class="award-feature-badge" style="background: rgba(167, 139, 250, 0.15); color: #c084fc; border-color: rgba(167, 139, 250, 0.25);">👑 REY DEL MES</span>
+                                <span class="award-feature-title">${escapeHtml(monthPick.month)}</span>
+                            </div>
+                            <div class="award-feature-main">
+                                <div class="award-feature-trophy" style="background: linear-gradient(135deg, #a78bfa, #7c3aed); border-color: #ddd6fe; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"></path>
+                                        <path d="M5 20h14a1 1 0 0 0 1-1v-1H4v1a1 1 0 0 0 1 1z"></path>
+                                    </svg>
+                                </div>
+                                <div class="award-feature-info">
+                                    <span>Líder de la Peña</span>
+                                    <strong>${escapeHtml(monthPick.winner)}</strong>
+                                </div>
+                                <div class="award-feature-score" style="background: linear-gradient(135deg, #ddd6fe, #7c3aed); color: #fff; border-color: #ddd6fe; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);">
+                                    ${monthPick.points} <small style="font-size: 0.65em; font-weight: 800;">pts</small>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ""}
                 </div>
                 <div class="contest-card awards-history-card">
-                    <div class="contest-title"><span>Historico</span><small>consulta rapida</small></div>
+                    <div class="contest-title"><span>Histórico</span><small>consulta rápida</small></div>
                     <div class="awards-history-grid">
                         <div>
                             <h4>Jornadas</h4>
