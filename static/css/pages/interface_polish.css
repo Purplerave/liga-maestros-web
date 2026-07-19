@@ -367,3 +367,11 @@ body.newspaper-ui.quiniela-focus .cp-fixture strong,
 body.newspaper-ui.quiniela-focus .profile-name {
     font-family: var(--font-display) !important;
 }
+
+/* La portada tiene una voz deportiva propia; esta regla debe ganar a la
+   normalizacion tipografica general anterior. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-intro h1,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-side strong,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-vs {
+    font-family: var(--cp-font-headline) !important;
+}
