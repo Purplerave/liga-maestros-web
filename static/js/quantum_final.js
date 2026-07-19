@@ -8,6 +8,11 @@
 async function refreshData(options = {}) {
     if (options.auto && Date.now() - state.lastUserEdit < 12000) return;
     const preserveLocalTicket = Boolean(options.auto && (state.editMode || state.draftDirty));
+    const scrollState = options.auto ? {
+        x: window.scrollX,
+        y: window.scrollY,
+        tableX: qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0
+    } : null;
     try {
         const [userRes, dataRes, syncRes, contestRes] = await Promise.all([
             fetch("/api/user/status"),
@@ -43,6 +48,11 @@ async function refreshData(options = {}) {
         updateAuthUI();
         updateWarRoomButton();
         renderArena();
+        if (scrollState) {
+            window.scrollTo(scrollState.x, scrollState.y);
+            const table = qs("matches-body")?.querySelector(".arena-table-wrap");
+            if (table) table.scrollLeft = scrollState.tableX;
+        }
         if (shouldRefreshSideModules()) {
             renderLiveStandings();
         }

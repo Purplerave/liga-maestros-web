@@ -110,20 +110,39 @@ function bindEvents() {
 async function refreshLiveSnapshot() {
     if (!state.data || document.hidden) return;
     try {
+        const liveSignature = data => [...(data?.partidos || []), ...(data?.all_league_matches || [])]
+            .filter(match => isLiveStatus(match.status) || isLiveMatch(match))
+            .map(match => [
+                matchPairKey(match),
+                String(match.status || ""),
+                String(match.minuto || match.time || ""),
+                scoreOnly(match.marcador || match.score || match.scores?.score || "")
+            ].join(":"))
+            .sort()
+            .join("|");
+        const previousSignature = liveSignature(state.data);
         const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
         if (!response.ok) return;
         const freshData = await response.json();
         if (String(freshData.jornada || "") !== String(state.jornada || "")) return;
         const hadLive = hasLiveLeagueMatches();
+        const nextSignature = liveSignature(freshData);
         state.data = freshData;
         logoAliasIndex = null;
         logoDataIndex = null;
         logoCache.clear();
         const hasLive = hasLiveLeagueMatches();
         if (!hadLive && !hasLive) return;
+        if (previousSignature === nextSignature) return;
+        const pageX = window.scrollX;
+        const pageY = window.scrollY;
+        const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
         updateWarRoomButton();
         hydrateHero();
         renderArena();
+        window.scrollTo(pageX, pageY);
+        const nextTable = qs("matches-body")?.querySelector(".arena-table-wrap");
+        if (nextTable) nextTable.scrollLeft = tableScroll;
         if (shouldRefreshSideModules()) renderLiveStandings();
         loadPorra();
     } catch (error) {
