@@ -175,7 +175,7 @@ async function submitComment(event) {
 async function loadPorra() {
     const bodies = [qs("porra-body"), qs("ticket-porra-body")].filter(Boolean);
     const summary = qs("porra-summary");
-    const title = qs("porra-title");
+    const labels = document.querySelectorAll("[data-porra-label]");
     if (!state.data) return;
     try {
         const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
@@ -189,7 +189,7 @@ async function loadPorra() {
             return;
         }
         const match = data.match || {};
-        if (title) title.textContent = data.label || "Porra";
+        labels.forEach(label => { label.textContent = data.label || "Porra"; });
         const mine = data.mine || {};
         const homeValue = mine.goles_local ?? "";
         const awayValue = mine.goles_visitante ?? "";
@@ -233,7 +233,8 @@ async function loadPorra() {
                         <input id="porra-home${suffix}" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${escapeHtml(homeValue)}">
                         <span>-</span>
                         <input id="porra-away${suffix}" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${escapeHtml(awayValue)}">
-                        <button type="submit">${data.auth ? "OK" : "Entrar"}</button>
+                        <button type="button" data-porra-submit>${data.auth ? "OK" : "Entrar"}</button>
+                        <small class="porra-form-status" data-porra-status aria-live="polite"></small>
                    </form>`}
             ${shareBlock}`;
         };
@@ -255,7 +256,15 @@ async function submitPorra(event) {
     const form = event.target.closest("[data-porra-form]");
     const homeInput = form?.querySelector("[data-porra-home]");
     const awayInput = form?.querySelector("[data-porra-away]");
+    const submitButton = form?.querySelector("[data-porra-submit]");
+    const formStatus = form?.querySelector("[data-porra-status]");
     if (!homeInput || !awayInput) return;
+    if (submitButton?.disabled) return;
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Guardando...";
+    }
+    if (formStatus) formStatus.textContent = "";
     try {
         const res = await fetch("/api/porra", {
             method: "POST",
@@ -267,10 +276,15 @@ async function submitPorra(event) {
             })
         });
         const data = await res.json();
-        if (!res.ok || data.status !== "ok") throw new Error(data.message || "No se pudo guardar la porra.");
-        showToast("Porra guardada.");
+        if (!res.ok || data.status !== "ok") throw new Error(data.message || data.error || "No se pudo guardar la porra.");
         await loadPorra();
+        showToast("Porra guardada.");
     } catch (error) {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = state.user ? "OK" : "Entrar";
+        }
+        if (formStatus) formStatus.textContent = error.message;
         showToast(error.message, "error");
     }
 }

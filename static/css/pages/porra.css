@@ -257,6 +257,13 @@ body.quiniela-focus .porra-leaderboard {
     display: none;
 }
 
+.porra-form-status {
+    grid-column: 1 / -1;
+    min-height: 1em;
+    color: var(--miss, #f87171);
+    font-size: 0.7rem;
+}
+
 /* Porra ultra compacta: una tira, no un panel grande. */
 body.quiniela-focus .porra-panel {
     padding: 9px 10px;

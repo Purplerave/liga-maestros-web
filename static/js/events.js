@@ -73,6 +73,11 @@ function bindEvents() {
         });
     });
     document.addEventListener("click", event => {
+        const porraSubmit = event.target.closest("[data-porra-submit]");
+        if (porraSubmit) {
+            submitPorra(event);
+            return;
+        }
         if (event.target.closest("[data-open-profile]")) {
             openProfileView();
             return;

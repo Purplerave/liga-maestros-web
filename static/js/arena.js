@@ -74,7 +74,7 @@ function renderArena() {
         container.innerHTML = `
             <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
                 <div class="ticket-porra-heading">
-                    <span>PORRA DE LA JORNADA</span>
+                    <span data-porra-label>PORRA</span>
                     <strong id="ticket-porra-title">Marcador exacto</strong>
                 </div>
                 <div id="ticket-porra-body" class="porra-body">
