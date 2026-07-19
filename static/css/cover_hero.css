@@ -39,7 +39,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 }
 
 .cp {
-    --cp-font-hand: "Kalam", "Segoe Print", cursive;
+    --cp-font-hand: "Sacramento", "Segoe Script", cursive;
     --cp-bg: #050914;
     --cp-panel: #0b1322;
     --cp-panel-2: #0e192a;
@@ -191,10 +191,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     margin: 0 0 15px;
     color: var(--cp-text);
     font-family: var(--cp-font-hand);
-    font-size: 2.65rem;
-    font-weight: 700;
+    font-size: 3.15rem;
+    font-weight: 400;
     line-height: 1;
     letter-spacing: 0;
+    padding-inline: 0.08em;
 }
 
 .cp-lead {
@@ -800,7 +801,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp-brand { width: 150px; }
     .cp-account { font-size: 0.7rem; }
     .cp-account.is-user { min-width: 92px; }
-    .cp-intro h1 { max-width: 100%; font-size: 1.55rem; white-space: normal; }
+    .cp-intro h1 { max-width: 100%; font-size: 2.1rem; white-space: normal; }
     .cp-lead { max-width: 100%; font-size: 0.82rem; overflow-wrap: anywhere; }
     .cp-actions { flex-direction: column; align-items: stretch; }
     .cp-primary, .cp-secondary { width: 100%; flex: none; }
