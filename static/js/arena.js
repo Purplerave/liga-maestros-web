@@ -139,6 +139,39 @@ function renderGroupedMatchCards(matches, singleCompetition = false) {
     `).join("");
 }
 
+function liveMatchDomKey(match) {
+    return encodeURIComponent(matchPairKey(match) || String(match.id || ""));
+}
+
+function patchLiveArena() {
+    if (state.currentFilter !== "LIVE") return false;
+    const container = qs("matches-body");
+    if (!container) return false;
+
+    const matches = getLiveLeagueMatches();
+    const cards = [...container.querySelectorAll(".match-card[data-live-key]")];
+    if (!cards.length || cards.length !== matches.length) return false;
+
+    const cardsByKey = new Map(cards.map(card => [card.dataset.liveKey, card]));
+    if (new Set(matches.map(liveMatchDomKey)).size !== matches.length) return false;
+    if (matches.some(match => !cardsByKey.has(liveMatchDomKey(match)))) return false;
+
+    for (const match of matches) {
+        const card = cardsByKey.get(liveMatchDomKey(match));
+        const scoreNode = card.querySelector("[data-live-score]");
+        if (!scoreNode) return false;
+
+        const nextScore = liveScoreDisplay(match, "-");
+        if (scoreNode.textContent !== nextScore) scoreNode.textContent = nextScore;
+        scoreNode.dataset.liveMatch = String(match.id || "");
+        scoreNode.dataset.liveMinute = String(matchMinuteValue(match) || "");
+        scoreNode.dataset.liveStage = liveStage(match) || "LIVE";
+        card.classList.add("is-live");
+        card.classList.remove("is-finished");
+    }
+    return true;
+}
+
 function renderMatchCard(match, options = {}) {
     const home = match.local || match.home_name || match.home?.name || "Local";
     const away = match.visitante || match.away_name || match.away?.name || "Visitante";
@@ -167,11 +200,11 @@ function renderMatchCard(match, options = {}) {
     const cardClass = live ? "is-live" : (finished ? "is-finished" : "");
 
     return `
-        <article class="match-card ${cardClass}" data-match-id="${match.id || ""}">
+        <article class="match-card ${cardClass}" data-match-id="${match.id || ""}"${live ? ` data-live-key="${escapeHtml(liveMatchDomKey(match))}"` : ""}>
             <div class="card-teams">
                 ${teamCell(home, "left", teamLogo(match, "home"))}
                 <div class="card-score-area">
-                    <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}"${liveScoreAttrs(match, live)}>${escapeHtml(score)}</div>
+                    <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}"${live ? " data-live-score" : ""}${liveScoreAttrs(match, live)}>${escapeHtml(score)}</div>
                 </div>
                 ${teamCell(away, "right", teamLogo(match, "away"))}
             </div>

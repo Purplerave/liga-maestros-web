@@ -41,6 +41,9 @@ async function refreshData(options = {}) {
             syncUrlState();
         }
 
+        const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && patchLiveArena());
+        if (patchedLiveView) return;
+
         hydrateJornadaNav();
         hydrateUserSigns({ preserveLocalTicket });
         hydrateStatus(sync);
