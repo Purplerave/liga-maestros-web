@@ -20,6 +20,24 @@ def _porra_target_match(conn, jornada):
         return None
     matches = [dict(row) for row in rows]
 
+    def is_open(match):
+        status = str(match.get("status") or "").upper()
+        kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
+        return status in ("", "NS", "SCHEDULED", "NOT STARTED") and (
+            not kickoff or madrid_now() < kickoff
+        )
+
+    open_matches = [match for match in matches if is_open(match)]
+
+    # El Pleno al 15 ya es un pronostico de marcador exacto y debe ser la
+    # porra principal mientras admita participaciones.
+    pleno = next(
+        (match for match in open_matches if int(match["partido_id"]) == 15),
+        None,
+    )
+    if pleno:
+        return pleno
+
     existing = conn.execute("""
         SELECT partido_id, MIN(created_at) AS first_entry
         FROM porra_entries
@@ -30,18 +48,30 @@ def _porra_target_match(conn, jornada):
     """, (jornada,)).fetchone()
     if existing:
         target_id = int(existing["partido_id"])
-        fixed_match = next((match for match in matches if int(match["partido_id"]) == target_id), None)
+        fixed_match = next(
+            (match for match in open_matches if int(match["partido_id"]) == target_id),
+            None,
+        )
         if fixed_match:
             return fixed_match
 
-    candidates = []
-    for match in matches[:14]:
-        status = str(match.get("status") or "").upper()
-        kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
-        if status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or madrid_now() < kickoff):
-            candidates.append(match)
+    candidates = [match for match in open_matches if int(match["partido_id"]) <= 14]
     if not candidates:
-        return matches[0]
+        return None
+
+    # Una sola porra por fecha: entre los partidos del dia mas cercano se
+    # elige el que tenga las opiniones mas repartidas.
+    dated_candidates = [
+        (parse_madrid_datetime(match.get("fecha"), match.get("hora")), match)
+        for match in candidates
+    ]
+    known_dates = [kickoff.date() for kickoff, _match in dated_candidates if kickoff]
+    if known_dates:
+        nearest_day = min(known_dates)
+        candidates = [
+            match for kickoff, match in dated_candidates
+            if kickoff and kickoff.date() == nearest_day
+        ]
 
     prediction_rows = conn.execute("""
         SELECT partido_id, signo
@@ -65,6 +95,14 @@ def _porra_target_match(conn, jornada):
         return (balance, total, -int(match["partido_id"]))
 
     return max(candidates, key=interest_score)
+
+
+def _porra_presentation(match):
+    if int(match.get("partido_id") or 0) == 15:
+        return {"kind": "pleno15", "label": "Porra del Pleno al 15"}
+    kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
+    label = "Porra del dia" if kickoff and kickoff.date() == madrid_now().date() else "Proxima porra"
+    return {"kind": "daily", "label": label}
 
 
 def _porra_is_locked(match):
@@ -92,6 +130,7 @@ def get_porra():
         match = _porra_target_match(conn, jornada)
         if not match:
             return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra"})
+        presentation = _porra_presentation(match)
         entries = conn.execute("""
             SELECT nombre, goles_local, goles_visitante, updated_at
             FROM porra_entries WHERE jornada = ? AND partido_id = ?
@@ -117,6 +156,7 @@ def get_porra():
             mine = dict(mine_row) if mine_row else None
         return jsonify({
             "status": "ok", "enabled": True, "jornada": jornada, "match": match,
+            **presentation,
             "locked": _porra_is_locked(match),
             "prize": os.getenv("PORRA_PRIZE_TEXT", "Premio symbolico: insignia semanal"),
             "entries": [dict(row) for row in entries], "distribution": distribution,

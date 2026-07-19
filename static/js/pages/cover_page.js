@@ -60,9 +60,25 @@ function coverPredictionSigns(entry) {
     return Array.isArray(entry?.signos) ? entry.signos : [];
 }
 
+function coverPenaReading(row) {
+    if (!row || !Number(row.total || 0)) return null;
+    const readings = [
+        { sign: "1", percent: Number(row.p1 || 0) },
+        { sign: "X", percent: Number(row.px || 0) },
+        { sign: "2", percent: Number(row.p2 || 0) },
+    ];
+    const peak = Math.max(...readings.map(item => item.percent));
+    return {
+        sign: readings.filter(item => item.percent === peak).map(item => item.sign).join(""),
+        percent: peak,
+        total: Number(row.total || 0),
+    };
+}
+
 function coverDisagreementMatch(matches) {
     const columns = coverMasterColumns();
     const predictions = state.data?.predicciones_actuales || {};
+    const penaRows = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
     let best = null;
     matches.slice(0, 14).forEach((match, index) => {
         const picks = columns.map(col => ({
@@ -70,9 +86,12 @@ function coverDisagreementMatch(matches) {
             label: col.label,
             sign: coverPredictionSigns(predictions[col.id])[index] || "-",
         })).filter(item => item.sign !== "-");
-        const unique = new Set(picks.map(item => item.sign)).size;
-        const score = unique * 10 + picks.filter(item => item.sign.length > 1).length;
-        if (!best || score > best.score) best = { match, picks, unique, score };
+        const penaRow = penaRows.find(row => Number(row.id) === Number(match.id));
+        const pena = coverPenaReading(penaRow);
+        const allSigns = pena ? [pena.sign, ...picks.map(item => item.sign)] : picks.map(item => item.sign);
+        const unique = new Set(allSigns).size;
+        const score = unique * 10 + allSigns.filter(sign => sign.length > 1).length;
+        if (!best || score > best.score) best = { match, picks, pena, unique, score };
     });
     return best;
 }
@@ -141,12 +160,14 @@ function coverAccountHtml(rankingRows) {
 
 function hydrateCoverPorra(data) {
     const target = document.getElementById("cover-porra-content");
+    const title = document.getElementById("cover-porra-title");
     if (!target) return;
     if (!data?.enabled || !data.match) {
         target.innerHTML = `<span class="cp-empty">${escapeHtml(data?.message || "Sin porra disponible")}</span>`;
         return;
     }
     const match = data.match;
+    if (title) title.textContent = data.label || "Porra de la jornada";
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null
         && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
@@ -171,7 +192,7 @@ function renderNewspaperCoverPageV3() {
     const liveCount = matches.filter(match => isLiveStatus(match.status) || isLiveMatch(match)).length;
     const masterNames = coverMasterNames();
     const masterColumns = coverMasterColumns();
-    const penaVotes = Number(state.data?.consenso_pena?.[0]?.total || 0);
+    const penaVotes = Math.max(0, ...(state.data?.consenso_pena || []).map(row => Number(row.total || 0)));
     const rankingRows = coverRankingRows();
     const disagreement = coverDisagreementMatch(matches);
     const penaPulse = coverTightPenaMatch(matches);
@@ -210,14 +231,17 @@ function renderNewspaperCoverPageV3() {
             <section class="cp-duel" aria-label="La Pe&ntilde;a contra los Maestros IA">
                 <div class="cp-duel-kicker">EL DUELO DE LA JORNADA</div>
                 <div class="cp-versus">
-                    <div class="cp-side is-pena"><span>HUMANOS</span><strong>LA PE&Ntilde;A</strong><small>${penaVotes || rankingRows.length} columnas</small></div>
+                    <div class="cp-side is-pena"><span>HUMANOS</span><strong>LA PE&Ntilde;A</strong><small>${penaVotes || rankingRows.length} pron&oacute;sticos</small></div>
                     <div class="cp-vs">VS</div>
                     <div class="cp-side is-ai"><span>RIVALES</span><strong>MAESTROS IA</strong><small>${masterNames.length} IAs + Programa</small></div>
                 </div>
                 ${disagreement ? `<div class="cp-focus">
-                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} pron&oacute;sticos distintos</b></div>
+                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} posturas distintas</b></div>
                     ${coverFixtureHtml(disagreement.match, true)}
-                    <div class="cp-picks" aria-label="Pron&oacute;sticos de los Maestros">${disagreement.picks.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}</div>
+                    <div class="cp-picks" aria-label="Pron&oacute;sticos de La Pe&ntilde;a, el Programa y los Maestros">
+                        ${disagreement.pena ? `<span class="is-pena" title="Consenso de ${disagreement.pena.total} pron&oacute;sticos"><small>La Pe&ntilde;a</small><b>${escapeHtml(disagreement.pena.sign)}</b><em>${disagreement.pena.percent}%</em></span>` : ""}
+                        ${disagreement.picks.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}
+                    </div>
                 </div>` : ""}
             </section>
         </main>
@@ -245,7 +269,7 @@ function renderNewspaperCoverPageV3() {
             </button>
 
             <button type="button" class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span>PORRA DE LA JORNADA</span><b>Marcador exacto</b></div>
+                <div class="cp-card-head"><span id="cover-porra-title">PORRA DE LA JORNADA</span><b>Marcador exacto</b></div>
                 <div id="cover-porra-content" class="cp-porra-content" aria-live="polite">
                     <span class="cp-porra-loading">Buscando el partido m&aacute;s abierto</span>
                 </div>

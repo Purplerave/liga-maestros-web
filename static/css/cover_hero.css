@@ -452,7 +452,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 
 .cp-picks {
     display: grid;
-    grid-template-columns: repeat(6, minmax(62px, 1fr));
+    grid-template-columns: repeat(7, minmax(52px, 1fr));
     gap: 7px;
     margin-top: 12px;
 }
@@ -491,6 +491,28 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     background: rgba(56, 217, 255, 0.1);
     color: var(--cp-cyan);
     font-size: 0.76rem;
+}
+
+.cp-picks em {
+    color: var(--cp-muted);
+    font-size: 0.56rem;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.cp-picks > span.is-pena {
+    border-color: rgba(240, 138, 181, 0.38);
+    background: rgba(240, 138, 181, 0.08);
+}
+
+.cp-picks > span.is-pena small,
+.cp-picks > span.is-pena b {
+    color: var(--cp-pink);
+}
+
+.cp-picks > span.is-pena b {
+    border-color: rgba(240, 138, 181, 0.4);
+    background: rgba(240, 138, 181, 0.1);
 }
 
 .cp-picks > span.is-program {

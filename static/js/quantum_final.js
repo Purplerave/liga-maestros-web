@@ -175,6 +175,7 @@ async function submitComment(event) {
 async function loadPorra() {
     const bodies = [qs("porra-body"), qs("ticket-porra-body")].filter(Boolean);
     const summary = qs("porra-summary");
+    const title = qs("porra-title");
     if (!state.data) return;
     try {
         const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
@@ -188,6 +189,7 @@ async function loadPorra() {
             return;
         }
         const match = data.match || {};
+        if (title) title.textContent = data.label || "Porra";
         const mine = data.mine || {};
         const homeValue = mine.goles_local ?? "";
         const awayValue = mine.goles_visitante ?? "";
