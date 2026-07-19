@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshData();
     let autoRefreshId = setInterval(() => {
         refreshData({ auto: true });
-    }, 120000);
+    }, 60000);
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
             clearInterval(autoRefreshId);
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (!autoRefreshId) {
             autoRefreshId = setInterval(() => {
                 refreshData({ auto: true });
-            }, 120000);
+            }, 60000);
         }
     });
 });

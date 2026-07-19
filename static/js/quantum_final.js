@@ -266,16 +266,27 @@ async function submitPorra(event) {
     }
     if (formStatus) formStatus.textContent = "";
     try {
-        const res = await fetch("/api/porra", {
-            method: "POST",
-            headers: authenticatedJsonHeaders(),
-            body: JSON.stringify({
+        const payload = {
                 jornada: state.data.jornada || state.jornada,
                 goles_local: homeInput.value,
                 goles_visitante: awayInput.value
-            })
-        });
-        const data = await res.json();
+        };
+        const sendPorra = async () => {
+            const response = await fetch("/api/porra", {
+                method: "POST",
+                headers: authenticatedJsonHeaders(),
+                body: JSON.stringify(payload)
+            });
+            return { response, data: await response.json() };
+        };
+        let { response: res, data } = await sendPorra();
+        if (res.status === 403 && String(data.error || data.message || "").toLowerCase().includes("seguridad")) {
+            const statusResponse = await fetch("/api/user/status", { cache: "no-store" });
+            const statusPayload = await statusResponse.json();
+            state.user = statusPayload.user || state.user;
+            state.csrfToken = statusPayload.csrf_token || "";
+            ({ response: res, data } = await sendPorra());
+        }
         if (!res.ok || data.status !== "ok") throw new Error(data.message || data.error || "No se pudo guardar la porra.");
         await loadPorra();
         showToast("Porra guardada.");
