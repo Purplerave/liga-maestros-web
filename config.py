@@ -9,20 +9,18 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RENDER_DATA_DIR = "/var/data"
 DEFAULT_DATA_DIR = RENDER_DATA_DIR if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR) else os.path.join(BASE_DIR, "data")
-DATA_DIR = os.getenv("DATA_DIR", DEFAULT_DATA_DIR)
+DATA_DIR = os.getenv("DATA_DIR", "").strip() or DEFAULT_DATA_DIR
 SEED_DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # Base de Datos
 BOOTSTRAP_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "LIGA_MAESTROS_PRO.db") if os.getenv("RENDER") else os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
-DB_PATH = os.getenv("DB_PATH", DEFAULT_DB_PATH)
-PRODUCTION_SEED_PATH = os.getenv(
-    "PRODUCTION_SEED_PATH",
-    os.path.join(BASE_DIR, "data", "bootstrap", "production_seed.json"),
+DB_PATH = os.getenv("DB_PATH", "").strip() or DEFAULT_DB_PATH
+PRODUCTION_SEED_PATH = os.getenv("PRODUCTION_SEED_PATH", "").strip() or os.path.join(
+    BASE_DIR, "data", "bootstrap", "production_seed.json"
 )
-FIXTURE_CORRECTIONS_PATH = os.getenv(
-    "FIXTURE_CORRECTIONS_PATH",
-    os.path.join(BASE_DIR, "data", "bootstrap", "fixture_corrections.json"),
+FIXTURE_CORRECTIONS_PATH = os.getenv("FIXTURE_CORRECTIONS_PATH", "").strip() or os.path.join(
+    BASE_DIR, "data", "bootstrap", "fixture_corrections.json"
 )
 DB_BACKUP_DIR = os.getenv("DB_BACKUP_DIR", os.path.join(DATA_DIR, "backups"))
 

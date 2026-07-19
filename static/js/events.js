@@ -53,8 +53,8 @@ function bindEvents() {
         const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]").dataset.matchIdx, 10);
         if (Number.isNaN(idx)) return;
         if (btn.dataset.pleno) {
-            const value = window.prompt("Resultado del pleno al 15", state.my_signs[idx] === "-" ? "0-0" : state.my_signs[idx]);
-            if (value) state.my_signs[idx] = value.trim();
+            openPlenoModal(idx);
+            return;
         } else {
             state.my_signs[idx] = state.my_signs[idx] === btn.dataset.sign ? "-" : btn.dataset.sign;
         }
