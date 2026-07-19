@@ -42,7 +42,8 @@ async function refreshData(options = {}) {
         }
 
         const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && patchLiveArena());
-        if (patchedLiveView) return;
+        const patchedTicketView = Boolean(options.auto && state.currentFilter === "TICKET" && patchTicketArena());
+        if (patchedLiveView || patchedTicketView) return;
 
         hydrateJornadaNav();
         hydrateUserSigns({ preserveLocalTicket });

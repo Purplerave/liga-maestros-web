@@ -390,7 +390,7 @@ function renderArenaTensionBody(matches) {
         }).join("");
 
         return `
-            <tr class="tension-row ${rowClass}">
+            <tr class="tension-row ${rowClass}" data-ticket-row="${idx}">
                 <td class="match-index-cell">
                     <span class="match-number">${idx + 1}</span>
                 </td>
@@ -399,7 +399,7 @@ function renderArenaTensionBody(matches) {
                         ${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}
                     </div>
                 </td>
-                <td class="ticket-status-cell">
+                <td class="ticket-status-cell" data-ticket-status>
                     ${scoreBadge}
                     ${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}
                 </td>
@@ -414,6 +414,77 @@ function renderArenaTensionBody(matches) {
                     </td>
                 </tr>` : ""}`;
     }).join("");
+}
+
+function patchTicketArena() {
+    if (state.currentFilter !== "TICKET") return false;
+    const matches = state.data?.partidos || [];
+    const rows = [...document.querySelectorAll("#arena-body tr.tension-row[data-ticket-row]")];
+    if (!matches.length || rows.length !== matches.length) return false;
+
+    const councilStyle = isCouncilStyleJornada();
+    const predictorColumns = councilStyle
+        ? [["programa", "v260_omnisciente", "Programa"], ["consejo_ias", "consenso", "Consejo IA"]]
+        : getOfficialAIColumns();
+    const preds = state.data.predicciones_actuales || {};
+    const consenso = state.data.consenso_pena || [];
+    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
+
+    for (const [idx, match] of matches.entries()) {
+        const row = rows.find(item => Number(item.dataset.ticketRow) === idx);
+        if (!row) return false;
+        const predictorCells = [...row.querySelectorAll(".ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell)")];
+        if (predictorCells.length !== predictorColumns.length) return false;
+
+        const isPleno = idx === 14;
+        const real = match.signo_actual || "-";
+        const mySign = state.my_signs[idx] || "-";
+        const liveMatch = isMatchLiveNow(match);
+        const scheduledMatch = isScheduledStatus(match.status) && !liveMatch;
+        const isFinished = isFinishedStatus(match.status);
+        const score = scheduledMatch ? formatSmartDate(match.fecha_raw, match.hora) : (match.marcador || "-");
+        const scoreText = liveMatch ? liveScoreDisplay(match, score) : score;
+        const statusCell = row.querySelector("[data-ticket-status]");
+        if (!statusCell) return false;
+        statusCell.innerHTML = scheduledMatch
+            ? `<span class="tension-status">${escapeHtml(score)}</span>`
+            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(match, liveMatch)}>${escapeHtml(scoreText)}</span>`;
+
+        const consensus = consenso.find(item => Number(item.id) === Number(match.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
+        const values = [Number(consensus.p1 || 0), Number(consensus.px || 0), Number(consensus.p2 || 0)].sort((a, b) => b - a);
+        const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
+        row.className = [
+            "tension-row",
+            councilStyle ? "is-council-row" : "",
+            liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
+            splitMatch ? "is-split-row" : ""
+        ].filter(Boolean).join(" ");
+
+        predictorColumns.forEach(([primary, fallback, label], columnIdx) => {
+            const sign = getSign(preds, idx, primary, fallback);
+            const reason = getPredictionReason(preds, idx, primary, fallback);
+            predictorCells[columnIdx].innerHTML = renderTensionChip(
+                label,
+                sign,
+                isPleno ? match.marcador : real,
+                match.status,
+                isPleno,
+                "",
+                reason
+            );
+        });
+
+        const penaCell = row.querySelector(".ticket-pena-cell");
+        const userCell = row.querySelector(".ticket-user-cell");
+        if (!penaCell || !userCell) return false;
+        const penaContent = isPleno
+            ? renderPenaPleno(getPenaPlenoSummary(idx), match.marcador, match.status)
+            : renderConsensus(consensus, real, match.status);
+        penaCell.innerHTML = renderTensionPenaChip(penaContent, "Peña");
+        const mine = renderMyCell(idx, mySign, isPleno ? match.marcador : real, match.status, canEdit, isPleno);
+        userCell.innerHTML = `<div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div>`;
+    }
+    return true;
 }
 
 /* ---------- Tabla completa (modo alternativo) ---------- */

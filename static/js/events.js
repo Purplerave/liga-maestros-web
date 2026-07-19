@@ -135,6 +135,7 @@ async function refreshLiveSnapshot() {
         if (!hadLive && !hasLive) return;
         if (previousSignature === nextSignature) return;
         if (state.currentFilter === "LIVE" && patchLiveArena()) return;
+        if (state.currentFilter === "TICKET" && patchTicketArena()) return;
         const pageX = window.scrollX;
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
