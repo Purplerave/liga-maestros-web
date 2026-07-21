@@ -1,19 +1,27 @@
 {
-  "generated_at": "2026-07-15T19:27:37",
+  "generated_at": "2026-07-16T22:04:14",
   "jornada": 73,
   "summary": {
     "partidos": 15,
     "finalizados": 0,
     "directo": 0,
     "pendientes": 15,
-    "participantes_con_prediccion": 7,
+    "participantes_con_prediccion": 16,
     "consenso_rows": 14,
     "estado": "OK"
   },
   "critical": [],
   "warnings": [
-    "Pleno con formato no Quiniela: [{'user_id': 'chatgpt', 'signo': '-'}, {'user_id': 'claude', 'signo': '-'}, {'user_id': 'copilot', 'signo': '-'}, {'user_id': 'gemini', 'signo': '-'}, {'user_id': 'grok', 'signo': '-'}, {'user_id': 'programa', 'signo': '-'}].",
-    "Escudos sin resolver: ['AIK', 'Bodo-Glimt', 'Brann', 'Brommapojkarna', 'Elfsborg', 'Fredrikstad', 'GAIS Göteborg', 'Ganador Semifinal 1', 'Ganador Semifinal 2', 'Ham-Kam', 'Hammarby', 'Häcken', 'KFUM Oslo', 'Kristiansund', 'Lillestrøm SK', 'Mjällby', 'Molde FK', 'Rosenborg', 'Sandefjord', 'Sarpsborg', 'Sirius', 'Start', 'Viking']."
+    "Chipi tiene 2 dobles; esperado 4.",
+    "Fistro tiene 0 dobles; esperado 4.",
+    "Fortu tiene 0 dobles; esperado 4.",
+    "Geli tiene 2 dobles; esperado 4.",
+    "Jimmy tiene 2 dobles; esperado 4.",
+    "Oraculo tiene 2 dobles; esperado 4.",
+    "Pepe tiene 3 dobles; esperado 4.",
+    "Profe tiene 2 dobles; esperado 4.",
+    "Sesudo tiene 2 dobles; esperado 4.",
+    "Escudos sin resolver: ['AIK', 'Bodo-Glimt', 'Brann', 'Brommapojkarna', 'Elfsborg', 'Fredrikstad', 'GAIS Göteborg', 'Ham-Kam', 'Hammarby', 'Häcken', 'KFUM Oslo', 'Kristiansund', 'Lillestrøm SK', 'Mjällby', 'Molde FK', 'Rosenborg', 'Sandefjord', 'Sarpsborg', 'Sirius', 'Start', 'Viking']."
   ],
   "prediction_status": {
     "116699982648036669051": {
@@ -30,6 +38,13 @@
       "extra": [],
       "role": "maestro"
     },
+    "chipi": {
+      "name": "Chipi",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
     "claude": {
       "name": "Claude",
       "count": 15,
@@ -43,6 +58,27 @@
       "missing": [],
       "extra": [],
       "role": "maestro"
+    },
+    "fistro": {
+      "name": "Fistro",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "fortu": {
+      "name": "Fortu",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "geli": {
+      "name": "Geli",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
     },
     "gemini": {
       "name": "Gemini",
@@ -58,12 +94,47 @@
       "extra": [],
       "role": "maestro"
     },
+    "jimmy": {
+      "name": "Jimmy",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "oraculo": {
+      "name": "Oraculo",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "pepe": {
+      "name": "Pepe",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
+    "profe": {
+      "name": "Profe",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
+    },
     "programa": {
       "name": "Programa",
       "count": 15,
       "missing": [],
       "extra": [],
       "role": "programa"
+    },
+    "sesudo": {
+      "name": "Sesudo",
+      "count": 15,
+      "missing": [],
+      "extra": [],
+      "role": "pena"
     }
   },
   "scoreboard": {
@@ -73,6 +144,12 @@
       "played": 0,
       "missing_played": []
     },
+    "chipi": {
+      "name": "Chipi",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
     "claude": {
       "name": "Claude",
       "hits": 0,
@@ -85,6 +162,24 @@
       "played": 0,
       "missing_played": []
     },
+    "fistro": {
+      "name": "Fistro",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "fortu": {
+      "name": "Fortu",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "geli": {
+      "name": "Geli",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
     "gemini": {
       "name": "Gemini",
       "hits": 0,
@@ -93,6 +188,18 @@
     },
     "grok": {
       "name": "Grok",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "jimmy": {
+      "name": "Jimmy",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "oraculo": {
+      "name": "Oraculo",
       "hits": 0,
       "played": 0,
       "missing_played": []
@@ -103,8 +210,26 @@
       "played": 0,
       "missing_played": []
     },
+    "pepe": {
+      "name": "Pepe",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "profe": {
+      "name": "Profe",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
     "programa": {
       "name": "Programa",
+      "hits": 0,
+      "played": 0,
+      "missing_played": []
+    },
+    "sesudo": {
+      "name": "Sesudo",
       "hits": 0,
       "played": 0,
       "missing_played": []
@@ -118,8 +243,6 @@
     "Elfsborg",
     "Fredrikstad",
     "GAIS Göteborg",
-    "Ganador Semifinal 1",
-    "Ganador Semifinal 2",
     "Ham-Kam",
     "Hammarby",
     "Häcken",
@@ -306,8 +429,8 @@
     },
     {
       "partido_id": 15,
-      "local": "Ganador Semifinal 1",
-      "visitante": "Ganador Semifinal 2",
+      "local": "España",
+      "visitante": "Argentina",
       "goles_local": null,
       "goles_visitante": null,
       "signo_actual": "-",

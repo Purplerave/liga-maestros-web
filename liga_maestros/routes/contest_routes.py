@@ -25,10 +25,7 @@ def get_contest():
 def get_contest_profile(uid):
     jornada = request.args.get("j") or None
     conn = get_db()
-    try:
-        resolved = resolve_public_participant_id(conn, uid)
-    finally:
-        conn.close()
+    resolved = resolve_public_participant_id(conn, uid)
     if not resolved:
         return jsonify({"status": "error", "message": "Perfil no encontrado"}), 404
     target = canonical_contest_id(resolved)

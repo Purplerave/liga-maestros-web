@@ -7,46 +7,21 @@ from ..services.ticket import madrid_now, today_madrid
 
 bp = Blueprint("main", __name__)
 
-_assets_version = None
-
 
 def _get_assets_version():
-    global _assets_version
-    if _assets_version:
-        return _assets_version
-    paths = [
-        os.path.join(config.BASE_DIR, "static", "css", "quantum_pro.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "newspaper_theme.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "typewriter_system.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "newspaper_cover.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "pages", "quiz_page.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "pages", "legal.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "pages", "ticket_compact.css"),
-        os.path.join(config.BASE_DIR, "static", "css", "snake_gol_arcade.css"),
-        os.path.join(config.BASE_DIR, "static", "js", "utils.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "state.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "logos.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "navigation.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "live.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "standings.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "contest.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "quiz.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "arena.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "events.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "quantum_final.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "pages", "ticket_page.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "pages", "cover_page.js"),
-        os.path.join(config.BASE_DIR, "static", "js", "snake_gol_arcade.js"),
-        os.path.join(config.BASE_DIR, "static", "img", "ligademaestroslogo_trans.png"),
-    ]
+    static_dir = os.path.join(config.BASE_DIR, "static")
     mtimes = []
-    for path in paths:
-        try:
-            mtimes.append(int(os.path.getmtime(path)))
-        except OSError:
-            continue
-    _assets_version = str(max(mtimes or [int(time.time())]))
-    return _assets_version
+    try:
+        for root, _, files in os.walk(static_dir):
+            for file in files:
+                if file.endswith((".css", ".js", ".png", ".jpg", ".svg")):
+                    try:
+                        mtimes.append(int(os.path.getmtime(os.path.join(root, file))))
+                    except OSError:
+                        continue
+    except OSError:
+        pass
+    return str(max(mtimes) if mtimes else int(time.time()))
 
 
 @bp.route('/')

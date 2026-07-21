@@ -74,9 +74,16 @@ def save_predictions():
         conn.execute("BEGIN IMMEDIATE")
         transaction_started = True
         conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, target_jornada))
-        for i, signo in enumerate(normalized_signs, 1):
-            if signo != "-":
-                conn.execute("INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)", (uid, target_jornada, i, signo))
+        insert_tuples = [
+            (uid, target_jornada, i, signo)
+            for i, signo in enumerate(normalized_signs, 1)
+            if signo != "-"
+        ]
+        if insert_tuples:
+            conn.executemany(
+                "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+                insert_tuples
+            )
         saved_rows = conn.execute("SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id", (uid, target_jornada)).fetchall()
         saved_signs = ["-"] * Q15_EXPECTED_MATCHES
         for row in saved_rows:

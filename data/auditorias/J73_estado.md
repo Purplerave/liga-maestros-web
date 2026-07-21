@@ -1,6 +1,6 @@
 # Auditoria Jornada 73
 
-Generado: 2026-07-15T19:27:37
+Generado: 2026-07-16T22:04:14
 
 Estado: **OK**
 
@@ -8,7 +8,7 @@ Estado: **OK**
 
 | Partidos | Finalizados | Directo | Pendientes | Participantes | Consenso |
 | --- | --- | --- | --- | --- | --- |
-| 15 | 0 | 0 | 15 | 7 | 14 |
+| 15 | 0 | 0 | 15 | 16 | 14 |
 
 ## Critico
 
@@ -16,8 +16,16 @@ Estado: **OK**
 
 ## Avisos
 
-- Pleno con formato no Quiniela: [{'user_id': 'chatgpt', 'signo': '-'}, {'user_id': 'claude', 'signo': '-'}, {'user_id': 'copilot', 'signo': '-'}, {'user_id': 'gemini', 'signo': '-'}, {'user_id': 'grok', 'signo': '-'}, {'user_id': 'programa', 'signo': '-'}].
-- Escudos sin resolver: ['AIK', 'Bodo-Glimt', 'Brann', 'Brommapojkarna', 'Elfsborg', 'Fredrikstad', 'GAIS Göteborg', 'Ganador Semifinal 1', 'Ganador Semifinal 2', 'Ham-Kam', 'Hammarby', 'Häcken', 'KFUM Oslo', 'Kristiansund', 'Lillestrøm SK', 'Mjällby', 'Molde FK', 'Rosenborg', 'Sandefjord', 'Sarpsborg', 'Sirius', 'Start', 'Viking'].
+- Chipi tiene 2 dobles; esperado 4.
+- Fistro tiene 0 dobles; esperado 4.
+- Fortu tiene 0 dobles; esperado 4.
+- Geli tiene 2 dobles; esperado 4.
+- Jimmy tiene 2 dobles; esperado 4.
+- Oraculo tiene 2 dobles; esperado 4.
+- Pepe tiene 3 dobles; esperado 4.
+- Profe tiene 2 dobles; esperado 4.
+- Sesudo tiene 2 dobles; esperado 4.
+- Escudos sin resolver: ['AIK', 'Bodo-Glimt', 'Brann', 'Brommapojkarna', 'Elfsborg', 'Fredrikstad', 'GAIS Göteborg', 'Ham-Kam', 'Hammarby', 'Häcken', 'KFUM Oslo', 'Kristiansund', 'Lillestrøm SK', 'Mjällby', 'Molde FK', 'Rosenborg', 'Sandefjord', 'Sarpsborg', 'Sirius', 'Start', 'Viking'].
 
 ## Predicciones
 
@@ -28,6 +36,15 @@ Estado: **OK**
 | maestro | copilot | Copilot | 15/15 | - |
 | maestro | gemini | Gemini | 15/15 | - |
 | maestro | grok | Grok | 15/15 | - |
+| pena | chipi | Chipi | 15/15 | - |
+| pena | fistro | Fistro | 15/15 | - |
+| pena | fortu | Fortu | 15/15 | - |
+| pena | geli | Geli | 15/15 | - |
+| pena | jimmy | Jimmy | 15/15 | - |
+| pena | oraculo | Oraculo | 15/15 | - |
+| pena | pepe | Pepe | 15/15 | - |
+| pena | profe | Profe | 15/15 | - |
+| pena | sesudo | Sesudo | 15/15 | - |
 | programa | programa | Programa | 15/15 | - |
 | usuario | 116699982648036669051 | Pablo Castro | 15/15 | - |
 
@@ -53,4 +70,4 @@ Estado: **OK**
 | 12 | Hammarby - Degerfors IF | 2026-07-19 16:30 | NS | - | - |
 | 13 | Halmstad - Häcken | 2026-07-19 16:30 | NS | - | - |
 | 14 | Kalmar FF - Malmoe | 2026-07-20 19:00 | NS | - | - |
-| 15 | Ganador Semifinal 1 - Ganador Semifinal 2 | 2026-07-19 21:00 | NS | - | - |
+| 15 | España - Argentina | 2026-07-19 21:00 | NS | - | - |

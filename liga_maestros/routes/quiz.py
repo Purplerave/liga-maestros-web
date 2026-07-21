@@ -56,6 +56,10 @@ def quiz_submit():
     if not user:
         return jsonify({"status": "error", "message": "Entra con Google para participar."}), 401
     
+    from ..middleware.rate_limit import is_rate_limited
+    if is_rate_limited("quiz_submit", user.get("id"), 3):
+        return jsonify({"status": "error", "message": "Espera unos segundos antes de enviar respuestas."}), 429
+    
     data = request.get_json(silent=True) or {}
     jornada = data.get("jornada")
     respuestas = data.get("respuestas")

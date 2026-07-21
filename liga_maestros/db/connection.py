@@ -38,6 +38,13 @@ def ensure_db_file():
 
 def get_db():
     global _sqlite_wal_ready
+    from flask import has_request_context, g
+    if has_request_context():
+        if not hasattr(g, "_managed_db_conns"):
+            g._managed_db_conns = []
+        if g._managed_db_conns:
+            return g._managed_db_conns[0]
+
     ensure_db_file()
     conn = sqlite3.connect(config.DB_PATH, timeout=10, factory=ClosingConnection)
     conn.row_factory = sqlite3.Row
@@ -53,4 +60,7 @@ def get_db():
                     _sqlite_wal_ready = True
                 except sqlite3.Error:
                     pass
+
+    if has_request_context():
+        g._managed_db_conns.append(conn)
     return conn

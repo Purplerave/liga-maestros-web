@@ -155,6 +155,24 @@ def ensure_snake_table(conn):
     conn.commit()
 
 
+def ensure_arcade_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS arcade_scores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            game_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            nombre TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_arcade_game_score
+        ON arcade_scores(game_id, score DESC, created_at ASC)
+    """)
+    conn.commit()
+
+
 def ensure_quiz_tables(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS quiz_preguntas (
@@ -238,6 +256,7 @@ def run_startup_migrations():
             import_profile_history(conn)
             ensure_porra_table(conn)
             ensure_snake_table(conn)
+            ensure_arcade_table(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
         finally:

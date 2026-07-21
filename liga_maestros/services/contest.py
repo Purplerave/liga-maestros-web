@@ -26,30 +26,27 @@ def contest_month_key(date_text):
 
 def contest_cache_signature():
     conn = get_db()
-    try:
-        pred = conn.execute("""
-            SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
-            FROM predicciones WHERE jornada >= ?
-        """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchone()
-        results = conn.execute("""
-            SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
-                COALESCE(SUM(COALESCE(goles_local, -99) * 31 + COALESCE(goles_visitante, -99) * 17), 0) AS goals_sig,
-                COALESCE(SUM(LENGTH(COALESCE(status, '')) + LENGTH(COALESCE(signo_actual, ''))), 0) AS state_sig
-            FROM resultados
-        """).fetchone()
-        users = conn.execute("""
-            SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
-                COALESCE(SUM(COALESCE(puntos_acumulados, 0)), 0) AS points_sig
-            FROM usuarios
-        """).fetchone()
-        return (
-            int(pred["n"] or 0), int(pred["max_rowid"] or 0),
-            int(results["n"] or 0), int(results["max_rowid"] or 0),
-            int(results["goals_sig"] or 0), int(results["state_sig"] or 0),
-            int(users["n"] or 0), int(users["max_rowid"] or 0), int(users["points_sig"] or 0),
-        )
-    finally:
-        conn.close()
+    pred = conn.execute("""
+        SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
+        FROM predicciones WHERE jornada >= ?
+    """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchone()
+    results = conn.execute("""
+        SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
+            COALESCE(SUM(COALESCE(goles_local, -99) * 31 + COALESCE(goles_visitante, -99) * 17), 0) AS goals_sig,
+            COALESCE(SUM(LENGTH(COALESCE(status, '')) + LENGTH(COALESCE(signo_actual, ''))), 0) AS state_sig
+        FROM resultados
+    """).fetchone()
+    users = conn.execute("""
+        SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
+            COALESCE(SUM(COALESCE(puntos_acumulados, 0)), 0) AS points_sig
+        FROM usuarios
+    """).fetchone()
+    return (
+        int(pred["n"] or 0), int(pred["max_rowid"] or 0),
+        int(results["n"] or 0), int(results["max_rowid"] or 0),
+        int(results["goals_sig"] or 0), int(results["state_sig"] or 0),
+        int(users["n"] or 0), int(users["max_rowid"] or 0), int(users["points_sig"] or 0),
+    )
 
 
 def build_contest_payload(current_jornada=None, current_user_id=None):
@@ -103,7 +100,6 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
         FROM predicciones WHERE jornada >= ?
     """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchall()
-    conn.close()
 
     totals = {}
     raw_hits = {}
