@@ -2,17 +2,37 @@
 ACTUALIZAR PREDICCIONES - Script que siempre actualiza las predicciones de J74
 Ejecutar después de IMPORTAR_J74_COMPLETO.py para corregir datos
 """
+import os
 import sqlite3
 import sys
 from pathlib import Path
 
-# Usar config para obtener la ruta correcta de la BD
-try:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    import config
-    DB_PATH = Path(config.DB_PATH)
-except Exception:
-    DB_PATH = Path(__file__).resolve().parent / "DATOS" / "LIGA_MAESTROS_PRO.db"
+# Buscar la BD en múltiples ubicaciones
+ROOT = Path(__file__).resolve().parent
+candidates = [
+    os.getenv("DB_PATH", ""),
+    "/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db",  # alwaysdata
+    str(ROOT / "DATOS" / "LIGA_MAESTROS_PRO.db"),  # local
+    str(ROOT.parent / "DATOS" / "LIGA_MAESTROS_PRO.db"),  # parent dir
+]
+
+DB_PATH = None
+for candidate in candidates:
+    if candidate and Path(candidate).exists():
+        DB_PATH = Path(candidate)
+        break
+
+if not DB_PATH:
+    # Try config as last resort
+    try:
+        sys.path.insert(0, str(ROOT))
+        import config
+        DB_PATH = Path(config.DB_PATH)
+    except Exception:
+        print("ERROR: No se encontró la base de datos")
+        sys.exit(1)
+
+print(f"Usando BD: {DB_PATH}")
 
 # Predicciones CORRECTAS del J74_MAESTROS_RESUMEN.md
 CORRECT_PREDICTIONS = {
