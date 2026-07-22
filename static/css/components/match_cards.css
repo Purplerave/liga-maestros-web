@@ -284,8 +284,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     vertical-align: middle;
-    font-size: 0.82rem;
-    font-weight: 800;
+    font-size: 0.72rem;
+    font-weight: 700;
 }
 
 .fixture-name-home {
@@ -298,7 +298,7 @@
 
 .match-team {
     display: inline-block;
-    max-width: 132px;
+    max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;

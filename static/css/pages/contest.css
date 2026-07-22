@@ -1,7 +1,175 @@
 /* ==========================================================================
-   CONTEST & AWARDS PAGE — La Peña Rankings, Awards & History
+   CONTEST & AWARDS PAGE — La Peña Compact Layout
    ========================================================================== */
 
+/* Compact Layout - 2 Columns */
+.contest-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+}
+
+.contest-compact-profile {
+    margin-bottom: 2px;
+}
+
+.contest-compact-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    align-items: stretch;
+}
+
+.contest-compact-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.contest-compact-general {
+    flex: 1;
+}
+
+.contest-compact-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contest-compact-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.contest-compact-card {
+    background: rgba(10, 16, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 6px 8px;
+    min-width: 0;
+}
+
+.contest-compact-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.contest-compact-title {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f8fbff;
+}
+
+.contest-compact-sub {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.contest-compact-card .contest-row {
+    min-height: 20px;
+    padding: 1px 3px;
+    font-size: 0.68rem;
+}
+
+.contest-compact-card .contest-medal {
+    font-size: 0.65rem;
+}
+
+.contest-compact-card .contest-pos {
+    font-size: 0.6rem;
+}
+
+.contest-compact-card .contest-name {
+    font-size: 0.68rem;
+}
+
+.contest-compact-card .contest-points {
+    font-size: 0.62rem;
+    min-width: 35px;
+}
+
+.contest-compact-card .contest-hit-rate {
+    font-size: 0.58rem;
+}
+
+/* Compact Awards */
+.contest-compact-award {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.65rem;
+}
+
+.contest-compact-award:last-child {
+    border-bottom: none;
+}
+
+.contest-compact-award-j {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: var(--font-data);
+    min-width: 28px;
+}
+
+.contest-compact-award-name {
+    flex: 1;
+    color: var(--text-main);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contest-compact-award-pts {
+    color: var(--gold);
+    font-weight: 700;
+    font-family: var(--font-data);
+    font-size: 0.6rem;
+}
+
+/* Expand Button */
+.contest-expand-btn {
+    display: block;
+    width: 100%;
+    padding: 6px;
+    margin-top: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.contest-expand-btn:hover {
+    background: rgba(56, 189, 248, 0.08);
+    border-color: var(--accent);
+}
+
+/* Full List (hidden by default) */
+.contest-full-list {
+    display: none;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.contest-full-list.is-visible {
+    display: block;
+}
+
+/* Old Layout (for reference) */
 .contest-block {
     display: grid;
     gap: 10px;
@@ -9,8 +177,8 @@
 
 .contest-page {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-    gap: 12px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
+    gap: 10px;
     align-items: start;
 }
 
@@ -55,7 +223,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: var(--radius-md);
-    padding: 12px;
+    padding: 10px;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
@@ -70,10 +238,11 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     font-family: var(--font-display);
     color: #f8fbff;
     font-weight: 800;
+    font-size: 0.85rem;
 }
 
 .contest-title small {
@@ -82,17 +251,99 @@
 }
 
 .contest-row {
-    display: grid;
-    grid-template-columns: 24px minmax(0, 1fr) 48px;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    min-height: 32px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
-    font-size: 0.78rem;
+    gap: 6px;
+    min-height: 28px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+    font-size: 0.72rem;
     overflow: hidden;
     position: relative;
     transition: background 0.15s ease;
-    padding: 2px 0;
+    padding: 2px 6px;
+}
+
+.contest-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.contest-row.is-user {
+    background: rgba(56, 189, 248, 0.1);
+    border-left: 3px solid var(--accent);
+    font-weight: 700;
+}
+
+.contest-row.is-near-user {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contest-medal,
+.contest-pos {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.contest-medal {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.contest-pos {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.contest-name {
+    flex: 1;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 0.72rem;
+}
+
+.contest-hit-rate {
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-family: var(--font-data);
+    flex-shrink: 0;
+}
+
+.contest-points {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: var(--font-data);
+    font-size: 0.68rem;
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 42px;
+}
+
+.contest-separator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--accent);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+}
+
+.contest-separator span {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.3;
+}
+
+.contest-card-main {
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    background: rgba(10, 16, 28, 0.8);
 }
 
 .contest-row:hover {
@@ -460,4 +711,140 @@
     .awards-history-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+}
+
+/* Month Selector */
+.contest-month-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 4px;
+    background: rgba(10, 16, 28, 0.6);
+    border-radius: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.month-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.month-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.month-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+
+/* Contest Filter Group */
+.contest-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contest-filter-group.is-hidden {
+    display: none;
+}
+
+.contest-filter-group label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.contest-filter-group select {
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(10, 16, 28, 0.8);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.contest-filter-group select:hover {
+    border-color: var(--accent);
+}
+
+.contest-filter-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+/* Expand Button */
+.contest-expand-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.contest-expand-btn:hover {
+    background: rgba(56, 189, 248, 0.08);
+    border-color: var(--accent);
+}
+
+/* Full List (hidden by default) */
+.contest-full-list {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.contest-full-list.is-visible {
+    display: block;
+}
+
+/* Compact Contest Rows */
+.contest-card-main .contest-row {
+    min-height: 30px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+}
+
+.contest-card-main .contest-medal {
+    font-size: 0.8rem;
+}
+
+.contest-card-main .contest-pos {
+    font-size: 0.68rem;
+}
+
+.contest-card-main .contest-name {
+    font-size: 0.75rem;
+}
+
+.contest-card-main .contest-points {
+    font-size: 0.7rem;
+    min-width: 45px;
+}
+
+.contest-card-main .contest-hit-rate {
+    font-size: 0.65rem;
 }

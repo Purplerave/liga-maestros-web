@@ -320,7 +320,20 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         }
 
     general = rows_from_scores(totals)
-    selected_jornada = int(current_jornada or max(jornada_scores.keys() or [0]))
+    # Si hay jornada solicitada, usarla; si no tiene datos, usar la última CON datos
+    if current_jornada:
+        requested = int(current_jornada)
+        # Si la jornada solicitada no tiene scores, buscar la última que sí tenga
+        if requested in jornada_scores and jornada_scores[requested]:
+            selected_jornada = requested
+        elif jornada_scores:
+            selected_jornada = max(jornada_scores.keys())
+        else:
+            selected_jornada = requested
+    elif jornada_scores:
+        selected_jornada = max(jornada_scores.keys())
+    else:
+        selected_jornada = 0
     jornada_rows = rows_from_scores(jornada_scores.get(selected_jornada, {}))
     latest_month = sorted(monthly_scores.keys())[-1] if monthly_scores else ""
     monthly_rows = rows_from_scores(monthly_scores.get(latest_month, {}))

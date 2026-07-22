@@ -39,7 +39,7 @@ function changeMainView(view) {
     hydrateNewspaperPageNav(target);
     if (target === "CONTEST") {
         state.currentFilter = "ALL";
-        state.contestView = "CONTEST_AWARDS";
+        state.contestView = "CONTEST_GENERAL";
     } else if (target === "STANDINGS") {
         state.currentFilter = "STANDINGS_PRIMERA";
         state.contestView = "MATCHES";
@@ -250,11 +250,12 @@ function hydrateSecondaryNav() {
         placeholder = "La Peña";
         selected = state.contestView;
         options = [
-            ["CONTEST_AWARDS", "Galardones"],
-            ["CONTEST_PROFILE", "Mi perfil"],
-            ["CONTEST_GENERAL", "General"],
-            ["CONTEST_MONTHLY", "Mensual"],
-            ["CONTEST_JORNADA", "Jornada"]
+            ["CONTEST_PROFILE", "👤 Mi perfil"],
+            ["CONTEST_GENERAL", "🏆 General"],
+            ["CONTEST_MONTHLY", "📅 Mensual"],
+            ["CONTEST_JORNADA", "⚡ Jornada"],
+            ["CONTEST_HISTORY", "📊 Histórico"],
+            ["CONTEST_AWARDS", "🎖️ Galardones"]
         ];
     } else if (main === "STANDINGS") {
         placeholder = "Clasificación";

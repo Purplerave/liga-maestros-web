@@ -74,10 +74,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.88rem;
-    font-weight: 900;
+    font-size: 0.78rem;
+    font-weight: 700;
     color: var(--text-main);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
 }
 
 .tension-fixture-main .fixture-team {
@@ -520,12 +520,12 @@
 .tension-fixture-main .fixture-name {
     max-width: 100%;
     min-width: 0;
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     line-height: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 .tension-fixture-main .fixture-team {

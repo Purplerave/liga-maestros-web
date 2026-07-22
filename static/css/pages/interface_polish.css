@@ -45,8 +45,19 @@ body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
     display: none !important;
 }
 
-body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters {
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters,
+body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
     display: flex !important;
+}
+
+.contest-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contest-filter-group.is-hidden {
+    display: none;
 }
 
 body.newspaper-ui.quiniela-focus .ticket-jornada-filter {
@@ -373,3 +384,321 @@ body.newspaper-ui.quiniela-focus .profile-name {
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-intro h1 {
     font-family: var(--cp-font-hand) !important;
 }
+
+/* --- Visual Polish Enhancements --- */
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(10, 15, 26, 0.6);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 158, 11, 0.6);
+}
+
+/* Interactive Navigation Tabs Polish */
+.newspaper-page-nav button {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+}
+.newspaper-page-nav button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: translateY(-1px);
+}
+.newspaper-page-nav button.active {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #f59e0b !important;
+    box-shadow: inset 0 -2px 0 #f59e0b !important;
+}
+
+/* Primary and Icon Action Buttons */
+.primary-btn, .icon-btn, .action-buttons button {
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+.primary-btn:hover, .icon-btn:hover {
+    transform: translateY(-1px) !important;
+    filter: brightness(1.1) !important;
+}
+.primary-btn:active, .icon-btn:active {
+    transform: translateY(0) !important;
+}
+
+/* Focus States for Accessibility */
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid #f59e0b !important;
+    outline-offset: 2px !important;
+}
+
+/* Card hover and smooth elevation */
+.panel, .cp-card, .porra-card, .quiz-card, .live-match-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.panel:hover, .cp-card:hover {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* --- Refined High-Contrast Typography --- */
+body {
+    font-family: var(--font-ui) !important;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, .topbar-title, .panel-title, .section-title, .display-font {
+    font-family: var(--font-display) !important;
+    letter-spacing: -0.022em;
+    font-weight: 700;
+}
+
+.topbar-kicker, .badge, .chip, .kicker-tag, .tag {
+    font-family: var(--font-ui) !important;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.match-score, .num-badge, .stat-value, .score-display, .font-data {
+    font-family: var(--font-data) !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* --- Futuristic Next-Gen UI Upgrades --- */
+@keyframes pulse-live-dot {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes gold-ambient-glow {
+    0% { border-color: rgba(245, 158, 11, 0.2); box-shadow: 0 4px 20px -5px rgba(245, 158, 11, 0.05); }
+    50% { border-color: rgba(245, 158, 11, 0.45); box-shadow: 0 4px 25px -2px rgba(245, 158, 11, 0.18); }
+    100% { border-color: rgba(245, 158, 11, 0.2); box-shadow: 0 4px 20px -5px rgba(245, 158, 11, 0.05); }
+}
+
+/* Glassmorphism & Elevation */
+.panel, .cp-card, .ticket-card, .live-match-card, .porra-card {
+    background: rgba(13, 19, 33, 0.75) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Live Match Pulse Indicator */
+.live-status-dot, .is-live-badge::before {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    animation: pulse-live-dot 2s infinite ease-in-out;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* Futuristic 1X2 Selector Buttons */
+.sign-btn, .pred-selector button, .option-pill {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    border-radius: 8px !important;
+    font-family: var(--font-data) !important;
+    font-weight: 700 !important;
+}
+
+.sign-btn:hover, .pred-selector button:hover {
+    transform: scale(1.06) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2) !important;
+}
+
+.sign-btn.active, .pred-selector button.selected {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #030712 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Featured / Hero Match Highlight */
+.featured-match-panel, .hero-match-card {
+    animation: gold-ambient-glow 4s infinite ease-in-out;
+}
+
+/* Progress and Distribution Bars */
+.porra-bar-fill, .prob-bar-fill {
+    background: linear-gradient(90deg, #3b82f6 0%, #f59e0b 100%) !important;
+    border-radius: 4px !important;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Topbar Brand & Header Polish */
+.header-brand-panel {
+    background: linear-gradient(90deg, rgba(3, 7, 18, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2) !important;
+}
+
+.newspaper-page-nav {
+    background: rgba(3, 7, 18, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Master Glassmorphism & High-Tech Visual Overhaul */
+:root {
+    --news-paper: #090d16 !important;
+    --news-ink: #f3f4f6 !important;
+    --news-red: #ef4444 !important;
+    --news-blue: #3b82f6 !important;
+    --news-gold: #f59e0b !important;
+}
+
+body.newspaper-ui.quiniela-focus {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+        linear-gradient(180deg, #05070d 0%, #0a0f1d 50%, #05070d 100%) !important;
+    background-attachment: fixed !important;
+    color: #f3f4f6 !important;
+}
+
+/* Glassmorphic Panel Surfaces */
+.panel, .cp-card, .ticket-card, .live-match-card, .porra-card, .contest-card, .quiz-card, .newspaper-hero-card {
+    background: rgba(13, 19, 33, 0.85) !important;
+    backdrop-filter: blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.panel:hover, .cp-card:hover, .ticket-card:hover {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* 1X2 Pronósticos / Quiniela Buttons */
+.sign-btn, .pred-selector button, .option-pill {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #e5e7eb !important;
+    border-radius: 8px !important;
+    font-family: var(--font-data) !important;
+    font-weight: 700 !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.sign-btn:hover, .pred-selector button:hover {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) scale(1.04) !important;
+}
+
+.sign-btn.active, .pred-selector button.selected, .sign-btn.selected {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #030712 !important;
+    border-color: #fbbf24 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.45) !important;
+}
+
+/* Tables and Standings */
+table, .standings-table {
+    color: #f3f4f6 !important;
+}
+
+table th {
+    background: rgba(15, 23, 42, 0.85) !important;
+    color: #9ca3af !important;
+    font-family: var(--font-display) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: 2px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+table tr:hover td {
+    background: rgba(245, 158, 11, 0.08) !important;
+}
+
+/* Primary Action Buttons */
+.primary-btn, button.btn-primary {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #030712 !important;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+
+.primary-btn:hover, button.btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+/* Full Override for Typewriter & Newspaper Cover Sheets to Modern Quantum Dark UI */
+.typewriter-cover {
+    --paper: #090d18 !important;
+    --paper-2: #0f172a !important;
+    --paper-1: #0d1322 !important;
+    --ink: #f3f4f6 !important;
+    --ink-soft: rgba(243, 244, 246, 0.72) !important;
+    --ink-faint: rgba(243, 244, 246, 0.25) !important;
+    --red: #f59e0b !important;
+    --stamp: #10b981 !important;
+    color: #f3f4f6 !important;
+}
+
+.typewriter-sheet, .cp-sheet {
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, rgba(13, 19, 33, 0.92) 0%, rgba(6, 9, 18, 0.96) 100%) !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+}
+
+.typewriter-sheet::before,
+.typewriter-sheet::after {
+    border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.typewriter-stamp {
+    border-color: rgba(245, 158, 11, 0.6) !important;
+    color: #f59e0b !important;
+}
+
+.type-cover-intro {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border-left: 4px solid #f59e0b !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+}
+
+.type-cover-intro strong {
+    color: #f59e0b !important;
+}
+
+.type-cover-intro span, .typewriter-lead p, .type-mission p {
+    color: #d1d5db !important;
+}
+
+.typewriter-lead h2 {
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+
+

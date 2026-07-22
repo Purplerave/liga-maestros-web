@@ -52,12 +52,23 @@ def static_files(filename):
         cache_control = "public, max-age=31536000, immutable"
     elif normalized.startswith(("css/", "js/")):
         max_age = 0
-        cache_control = "no-cache, max-age=0"
+        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
     else:
         max_age = 0
-        cache_control = "no-cache, max-age=0"
-    response = send_from_directory(os.path.join(config.BASE_DIR, "static"), filename, max_age=max_age)
+        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
+    
+    file_path = os.path.join(config.BASE_DIR, "static", filename)
+    if not os.path.exists(file_path):
+        from flask import abort
+        abort(404)
+    
+    with open(file_path, "rb") as f:
+        content = f.read()
+    
+    from flask import Response
+    response = Response(content)
     response.headers["Cache-Control"] = cache_control
+    response.headers["Content-Type"] = "application/javascript" if filename.endswith(".js") else "text/css" if filename.endswith(".css") else "application/octet-stream"
     return response
 
 

@@ -48,7 +48,7 @@ const initialContest = new URLSearchParams(window.location.search).get("contest"
 if (initialContest) state.contestView = initialContest;
 if (state.currentFilter === "CONTEST") {
     state.currentFilter = "ALL";
-    state.contestView = "CONTEST_AWARDS";
+    state.contestView = "CONTEST_GENERAL";
 }
 document.body.classList.toggle("newspaper-cover-active", state.contestView === "MATCHES" && state.currentFilter === "ALL");
 document.body.classList.toggle("newspaper-ticket-active", state.contestView === "MATCHES" && state.currentFilter === "TICKET");
@@ -224,6 +224,7 @@ function contestViewTitle(value) {
         CONTEST_GENERAL: "La Peña general",
         CONTEST_MONTHLY: "La Peña mensual",
         CONTEST_JORNADA: "La Peña jornada",
+        CONTEST_HISTORY: "Histórico",
         CONTEST_AWARDS: "Galardones"
     }[value] || "La Peña";
 }

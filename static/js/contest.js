@@ -3,6 +3,14 @@
    Dependencias: utils.js, logos.js, state.js, ticket_page.js
    ========================================================================== */
 
+function formatMonthES(month) {
+    if (!month || typeof month !== "string") return month || "-";
+    const parts = month.split("-");
+    if (parts.length === 2) {
+        return `${parts[1]}-${parts[0]}`;
+    }
+    return month;
+}
 
 function consensusLeader(consensus) {
     const values = [
@@ -174,13 +182,37 @@ function renderRankLine(item, idx, field, label) {
         </div>`;
 }
 
-function renderContestRows(rows = [], limit = 5) {
-    return rows.slice(0, limit).map(item => `
-        <div class="contest-row ${item.is_user ? "is-user" : ""}">
-            <span class="contest-pos">${item.pos}</span>
-            <span class="contest-name">${escapeHtml(item.name)}</span>
-            <span class="contest-points">${item.points}</span>
-        </div>`).join("") || `<div class="empty-state">Sin datos cerrados todavÃ­a.</div>`;
+function renderContestRows(rows = [], limit = 5, options = {}) {
+    const { showTop = true, highlightUser = true, showMedals = true } = options;
+    const limited = rows.slice(0, limit);
+    if (!limited.length) return `<div class="empty-state">Sin datos cerrados todavÃ­a.</div>`;
+
+    const userRow = highlightUser ? rows.find(r => r.is_user) : null;
+    const userPos = userRow ? userRow.pos : null;
+
+    return limited.map((item, idx) => {
+        const medal = showMedals && idx === 0 ? "🥇" : showMedals && idx === 1 ? "🥈" : showMedals && idx === 2 ? "🥉" : "";
+        const isUser = item.is_user;
+        const isNearUser = userPos && Math.abs(item.pos - userPos) <= 2 && !isUser && item.pos !== userPos;
+        const separator = userPos && item.pos === userPos - 1 && limited[idx + 1]?.pos === userPos;
+
+        let html = `<div class="contest-row ${isUser ? "is-user" : ""} ${isNearUser ? "is-near-user" : ""}">`;
+        if (medal) {
+            html += `<span class="contest-medal">${medal}</span>`;
+        } else {
+            html += `<span class="contest-pos">${item.pos}</span>`;
+        }
+        html += `<span class="contest-name">${escapeHtml(item.name)}</span>`;
+        html += `<span class="contest-hit-rate">${item.played ? Math.round((item.points / (item.played * 15)) * 100) : 0}%</span>`;
+        html += `<span class="contest-points">${item.points} pts</span>`;
+        html += `</div>`;
+
+        if (separator) {
+            html += `<div class="contest-separator"><span></span><small>TU POSICIÓN</small><span></span></div>`;
+        }
+
+        return html;
+    }).join("");
 }
 
 function awardTierClass(idx) {
@@ -320,24 +352,54 @@ function renderContestPanel() {
             <strong class="contest-points">${item.points}</strong>
         </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`;
 
+    const generalRows = contest.general || [];
+    const top10 = generalRows.slice(0, 10);
+    const hasMore = generalRows.length > 10;
+
     container.innerHTML = `
-        <div class="contest-block">
-            ${profileBlock}
-            <div class="contest-card">
-                <div class="contest-title"><span>General</span><small>temporada</small></div>
-                ${renderContestRows(contest.general || [], 6)}
-            </div>
-            <div class="contest-card">
-                <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>clasificaciÃ³n</small></div>
-                ${renderContestRows(contest.jornada?.rows || [], 6)}
-            </div>
-            <div class="contest-card">
-                <div class="contest-title"><span>Mes ${escapeHtml(contest.monthly?.month || "-")}</span><small>mensual</small></div>
-                ${renderContestRows(contest.monthly?.rows || [], 5)}
-            </div>
-            <div class="contest-card">
-                <div class="contest-title"><span>Galardones</span><small>ganadores</small></div>
-                ${awards}
+        <div class="contest-compact">
+            ${profileBlock ? `<div class="contest-compact-profile">${profileBlock}</div>` : ""}
+            <div class="contest-compact-columns">
+                <div class="contest-compact-left">
+                    <div class="contest-compact-card contest-compact-general">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🏆 General</span>
+                            <span class="contest-compact-sub">temporada</span>
+                        </div>
+                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
+                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
+                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
+                    </div>
+                </div>
+                <div class="contest-compact-right">
+                    <div class="contest-compact-top">
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
+                                <span class="contest-compact-sub">jornada</span>
+                            </div>
+                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
+                        </div>
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
+                                <span class="contest-compact-sub">mensual</span>
+                            </div>
+                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
+                        </div>
+                    </div>
+                    <div class="contest-compact-card">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🎖️ Galardones</span>
+                        <span class="contest-compact-sub">últimos</span>
+                    </div>
+                    ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
+                        <div class="contest-compact-award">
+                            <span class="contest-compact-award-j">J${item.jornada}</span>
+                            <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
+                            <span class="contest-compact-award-pts">${item.points} pts</span>
+                        </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
+                </div>
             </div>
         </div>`;
 }
@@ -389,15 +451,92 @@ function renderContestPage(view = "CONTEST_PROFILE") {
     }
 
     if (view === "CONTEST_GENERAL") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a general</span><small>temporada</small></div>${renderContestRows(contest.general || [], 80)}</div></section>`;
+        const generalRows = contest.general || [];
+        const top10 = generalRows.slice(0, 10);
+        const hasMore = generalRows.length > 10;
+        return `
+        <div class="contest-compact">
+            <div class="contest-compact-columns">
+                <div class="contest-compact-left">
+                    <div class="contest-compact-card contest-compact-general">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🏆 General</span>
+                            <span class="contest-compact-sub">temporada</span>
+                        </div>
+                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
+                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
+                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
+                    </div>
+                </div>
+                <div class="contest-compact-right">
+                    <div class="contest-compact-top">
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
+                                <span class="contest-compact-sub">jornada</span>
+                            </div>
+                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
+                        </div>
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
+                                <span class="contest-compact-sub">mensual</span>
+                            </div>
+                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
+                        </div>
+                    </div>
+                    <div class="contest-compact-card">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🎖️ Galardones</span>
+                            <span class="contest-compact-sub">últimos</span>
+                        </div>
+                        ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
+                            <div class="contest-compact-award">
+                                <span class="contest-compact-award-j">J${item.jornada}</span>
+                                <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
+                                <span class="contest-compact-award-pts">${item.points} pts</span>
+                            </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
+                    </div>
+                </div>
+            </div>
+        </div>`;
     }
 
     if (view === "CONTEST_MONTHLY") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a mensual</span><small>${escapeHtml(contest.monthly?.month || "-")}</small></div>${renderContestRows(contest.monthly?.rows || [], 80)}</div></section>`;
+        const monthlyMonths = contest.monthly?.months || [];
+        const currentMonth = contest.monthly?.month || "";
+        const monthSelector = monthlyMonths.length > 1 ? `
+            <div class="contest-month-selector">
+                ${monthlyMonths.map(m => `<button type="button" class="month-btn ${m === currentMonth ? "active" : ""}" data-month="${escapeHtml(m)}">${escapeHtml(formatMonthES(m))}</button>`).join("")}
+            </div>` : "";
+        return `<section class="contest-page single">
+            <div class="contest-card">
+                <div class="contest-title"><span>La Peña mensual</span><small>${escapeHtml(formatMonthES(currentMonth))}</small></div>
+                ${monthSelector}
+                <div id="monthly-rows">${renderContestRows(contest.monthly?.rows || [], 80, { showMedals: true })}</div>
+            </div>
+        </section>`;
     }
 
     if (view === "CONTEST_JORNADA") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La PeÃ±a jornada ${contest.jornada?.jornada || ""}</span><small>jornada actual</small></div>${renderContestRows(contest.jornada?.rows || [], 80)}</div></section>`;
+        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La Peña jornada ${contest.jornada?.jornada || ""}</span><small>jornada actual</small></div>${renderContestRows(contest.jornada?.rows || [], 80, { showMedals: true })}</div></section>`;
+    }
+
+    if (view === "CONTEST_HISTORY") {
+        const historyMonths = contest.history?.months || [];
+        const selectedHistoryMonth = state.selectedHistoryMonth || (historyMonths[0] || "");
+        const historyRows = contest.history?.data?.[selectedHistoryMonth] || [];
+        const monthSelector = historyMonths.length > 1 ? `
+            <div class="contest-month-selector">
+                ${historyMonths.map(m => `<button type="button" class="month-btn ${m === selectedHistoryMonth ? "active" : ""}" data-history-month="${escapeHtml(m)}">${escapeHtml(m)}</button>`).join("")}
+            </div>` : "";
+        return `<section class="contest-page single">
+            <div class="contest-card">
+                <div class="contest-title"><span>Histórico</span><small>${escapeHtml(selectedHistoryMonth || "todos los meses")}</small></div>
+                ${monthSelector}
+                <div id="history-rows">${renderContestRows(historyRows, 80, { showMedals: true })}</div>
+            </div>
+        </section>`;
     }
 
     if (view === "CONTEST_AWARDS") {
@@ -410,23 +549,23 @@ function renderContestPage(view = "CONTEST_PROFILE") {
         const renderAwardChip = (item, idx, type = "jornada") => `
             <div class="award-chip ${awardTierClass(idx)}">
                 <span class="award-medal">${idx + 1}</span>
-                <div><strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong><small>${type === "mes" ? "mes" : escapeHtml(item.date || "jornada")}</small></div>
+                <div><strong>${type === "mes" ? escapeHtml(formatMonthES(item.month)) : `J${escapeHtml(item.jornada)}`}</strong><small>${type === "mes" ? "mes" : escapeHtml(item.date || "jornada")}</small></div>
                 <b>${escapeHtml(item.winner)}</b>
                 <em>${item.points}</em>
             </div>`;
         const renderHistoryRow = (item, idx, type = "jornada") => `
             <div class="award-history-row">
                 <span>${idx + 1}</span>
-                <strong>${type === "mes" ? escapeHtml(item.month) : `J${escapeHtml(item.jornada)}`}</strong>
+                <strong>${type === "mes" ? escapeHtml(formatMonthES(item.month)) : `J${escapeHtml(item.jornada)}`}</strong>
                 <b>${escapeHtml(item.winner)}</b>
                 <em>${item.points}</em>
             </div>`;
         const recentJornadas = jornadaItems.slice(0, 5).map((item, idx) => renderAwardChip(item, idx)).join("") || `<div class="empty-state">Sin ganadores de jornada.</div>`;
         const recentMonths = monthItems.slice(0, 5).map((item, idx) => renderAwardChip(item, idx, "mes")).join("") || `<div class="empty-state">Sin ganadores mensuales.</div>`;
-        const jornadaHistory = jornadaItems.slice(0, 14).map((item, idx) => renderHistoryRow(item, idx)).join("") || `<div class="empty-state">Sin historico de jornadas.</div>`;
-        const monthHistory = monthItems.slice(0, 10).map((item, idx) => renderHistoryRow(item, idx, "mes")).join("") || `<div class="empty-state">Sin historico mensual.</div>`;
+        const jornadaHistory = jornadaItems.map((item, idx) => renderHistoryRow(item, idx)).join("") || `<div class="empty-state">Sin historico de jornadas.</div>`;
+        const monthHistory = monthItems.map((item, idx) => renderHistoryRow(item, idx, "mes")).join("") || `<div class="empty-state">Sin historico mensual.</div>`;
         const jornadaOptions = jornadaItems.map(item => `<option value="${escapeHtml(item.jornada)}" ${String(item.jornada) === selectedJornada ? "selected" : ""}>Jornada ${escapeHtml(item.jornada)}</option>`).join("");
-        const monthOptions = monthItems.map(item => `<option value="${escapeHtml(item.month)}" ${String(item.month) === selectedMonth ? "selected" : ""}>${escapeHtml(item.month)}</option>`).join("");
+        const monthOptions = monthItems.map(item => `<option value="${escapeHtml(item.month)}" ${String(item.month) === selectedMonth ? "selected" : ""}>${escapeHtml(formatMonthES(item.month))}</option>`).join("");
         return `
             <section class="contest-page awards-page">
                 <div class="contest-card awards-head">
@@ -462,7 +601,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                         <select data-award-month>${monthOptions}</select>
                     </div>
                     ${monthPick ? `<div class="award-feature">
-                        <span>${escapeHtml(monthPick.month)}</span>
+                        <span>${escapeHtml(formatMonthES(monthPick.month))}</span>
                         <strong>${escapeHtml(monthPick.winner)}</strong>
                         <em>${monthPick.points} pts</em>
                     </div>` : ""}
@@ -484,30 +623,54 @@ function renderContestPage(view = "CONTEST_PROFILE") {
             </section>`;
     }
 
+    const generalRows = contest.general || [];
+    const top10 = generalRows.slice(0, 10);
+    const hasMore = generalRows.length > 10;
+
     return `
-        <section class="contest-page">
-            <div class="contest-card">
-                <div class="contest-title"><span>La PeÃ±a general</span><small>temporada</small></div>
-                ${renderContestRows(contest.general || [], 12)}
-            </div>
-            <div class="contest-grid-secondary">
-                ${profileBlock}
-                <div class="contest-card">
-                    <div class="contest-title"><span>Jornada ${contest.jornada?.jornada || ""}</span><small>La PeÃ±a</small></div>
-                    ${renderContestRows(contest.jornada?.rows || [], 8)}
+        <div class="contest-compact">
+            <div class="contest-compact-columns">
+                <div class="contest-compact-left">
+                    <div class="contest-compact-card contest-compact-general">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🏆 General</span>
+                            <span class="contest-compact-sub">temporada</span>
+                        </div>
+                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
+                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
+                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
+                    </div>
+                </div>
+                <div class="contest-compact-right">
+                    <div class="contest-compact-top">
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
+                                <span class="contest-compact-sub">jornada</span>
+                            </div>
+                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
+                        </div>
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
+                                <span class="contest-compact-sub">mensual</span>
+                            </div>
+                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
+                        </div>
+                    </div>
+                    <div class="contest-compact-card">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">🎖️ Galardones</span>
+                            <span class="contest-compact-sub">últimos</span>
+                        </div>
+                        ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
+                            <div class="contest-compact-award">
+                                <span class="contest-compact-award-j">J${item.jornada}</span>
+                                <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
+                                <span class="contest-compact-award-pts">${item.points} pts</span>
+                            </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
+                    </div>
                 </div>
             </div>
-            <div class="contest-card">
-                <div class="contest-title"><span>Mensual ${escapeHtml(contest.monthly?.month || "-")}</span><small>mes actual</small></div>
-                ${renderContestRows(contest.monthly?.rows || [], 10)}
-            </div>
-            <div class="contest-card">
-                <div class="contest-title"><span>Galardones</span><small>ganadores de jornada</small></div>
-                ${awards}
-            </div>
-            <div class="contest-card contest-wide">
-                <div class="contest-title"><span>Tus resultados</span><small>quiniela Â· aciertos Â· posiciÃ³n</small></div>
-                ${results}
-            </div>
-        </section>`;
+        </div>`;
 }
