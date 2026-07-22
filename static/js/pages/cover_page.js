@@ -248,11 +248,26 @@ function renderNewspaperCoverPageV3() {
 
         ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Entra en la sala de seguimiento</em></button>` : ""}
 
-        <section class="cp-dashboard" aria-label="Estado de la jornada">
-            <button type="button" class="cp-data-card cp-next" data-page-action="${next.live ? "LIVE" : "TICKET"}">
-                <div class="cp-card-head"><span>${next.live ? "AHORA MISMO" : "PR&Oacute;XIMO PARTIDO"}</span><b>${next.live ? "EN DIRECTO" : formatSmartDate(next.match?.fecha_raw, next.match?.hora)}</b></div>
-                ${coverFixtureHtml(next.match)}
+        <section class="cp-dashboard-next" aria-label="Próximo partido">
+            <button type="button" class="cp-next-card" data-page-action="${next.live ? "LIVE" : "TICKET"}">
+                <div class="cp-next-head">
+                    <span class="cp-next-label">${next.live ? "🔴 AHORA MISMO" : "⚡ PRÓXIMO PARTIDO"}</span>
+                    <span class="cp-next-date">${next.live ? "EN DIRECTO" : formatSmartDate(next.match?.fecha_raw, next.match?.hora)}</span>
+                </div>
+                <div class="cp-next-fixture">
+                    <div class="cp-next-team">
+                        ${logoBadge(next.match?.local, teamLogo(next.match, "home"))}
+                        <span class="cp-next-team-name">${escapeHtml(next.match?.local || "Local")}</span>
+                    </div>
+                    <span class="cp-next-vs">VS</span>
+                    <div class="cp-next-team">
+                        ${logoBadge(next.match?.visitante, teamLogo(next.match, "away"))}
+                        <span class="cp-next-team-name">${escapeHtml(next.match?.visitante || "Visitante")}</span>
+                    </div>
+                </div>
             </button>
+        </section>
+        <section class="cp-dashboard" aria-label="Estado de la jornada">
 
             <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
                 <div class="cp-card-head"><span>PULSO DE LA PE&Ntilde;A</span><b>El partido m&aacute;s abierto</b></div>

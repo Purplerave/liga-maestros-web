@@ -111,6 +111,15 @@ def backup_db():
 
 def import_j74():
     """Importa toda la Jornada 74."""
+    # Verificar si J74 ya está importada
+    if DB_PATH.exists():
+        conn_check = sqlite3.connect(str(DB_PATH))
+        existing = conn_check.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 74").fetchone()[0]
+        conn_check.close()
+        if existing > 0:
+            print("J74 ya está importada. Saltando.")
+            return None
+
     print("=" * 60)
     print("IMPORTACIÓN COMPLETA JORNADA 74")
     print("=" * 60)

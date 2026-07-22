@@ -12,10 +12,18 @@ function renderWarRoom() {
         .sort((a, b) => (parseMatchTimestamp(a) || 0) - (parseMatchTimestamp(b) || 0));
     const finished = allMatches.filter(m => isFinishedStatus(m.status) || isImplicitlyFinished(m));
 
+    // Si no hay partidos en vivo ni próximos, mostrar mensaje informativo
     if (!live.length && !upcoming.length) {
-        return `<div class="empty-state">
-            <div class="empty-state-title">Sin partidos en directo</div>
-            <p>No hay partidos en juego ahora mismo. Vuelve mas tarde.</p>
+        const jornada = state.data?.jornada || "?";
+        const nextMatch = allMatches.length > 0 ? allMatches[0] : null;
+        const nextDate = nextMatch ? formatSmartDate(nextMatch.added || nextMatch.fecha_raw, nextMatch.scheduled || nextMatch.hora) : "";
+
+        return `<div class="live-empty-state">
+            <div class="live-empty-icon">⚽</div>
+            <h3 class="live-empty-title">Directo se activa los fines de semana</h3>
+            <p class="live-empty-text">Cuando empiece la Jornada ${jornada}, los partidos aparecerán aquí en directo.</p>
+            ${nextDate ? `<p class="live-empty-next">Próximo: <strong>${escapeHtml(nextDate)}</strong></p>` : ""}
+            <p class="live-empty-hint">Mientras tanto, puedes hacer tu quiniela o ver la clasificación.</p>
         </div>`;
     }
 

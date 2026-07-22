@@ -100,9 +100,23 @@ def _infer_match_competition(match, standings_db):
 
 
 def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):
+    # Si no hay partidos de quiniela, no mostrar externos
+    if not quiniela_league_matches:
+        return []
+
+    # Verificar si hay partidos de quiniela en vivo o terminados
+    quiniela_has_live = any(
+        str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED")
+        for m in quiniela_league_matches
+    )
+
+    # Si no hay partidos en vivo/terminados en la quiniela, no mostrar externos
+    if not quiniela_has_live:
+        return []
+
     quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
     if not quiniela_datetimes:
-        return all_league_matches
+        return []
 
     window_start = min(quiniela_datetimes) - timedelta(days=1)
     window_end = max(quiniela_datetimes) + timedelta(days=1)

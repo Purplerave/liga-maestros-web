@@ -82,6 +82,10 @@ jobs:
           ln -sfn "$RELEASE" "$HOME_DIR/current"
           cd "$HOME_DIR/current"
           "$HOME_DIR/venv/bin/python" INICIALIZAR_PRODUCCION.py
+          if [ -f IMPORTAR_J74_COMPLETO.py ]; then
+            echo "Importando datos de J74..."
+            "$HOME_DIR/venv/bin/python" IMPORTAR_J74_COMPLETO.py || echo "Importación J74 omitida o ya existente"
+          fi
           chmod 600 "$HOME_DIR/runtime/app.env"
           if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ]; then
             chmod 600 "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db"

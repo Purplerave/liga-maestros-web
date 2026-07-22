@@ -600,9 +600,96 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     font-style: normal;
 }
 
+/* Próximo Partido - Full Width Card */
+.cp-dashboard-next {
+    width: min(1160px, calc(100vw - 80px));
+    margin: 0 auto 16px;
+}
+
+.cp-next-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 24px;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(13, 20, 36, 0.9) 100%);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.1);
+    cursor: pointer;
+    transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: center;
+}
+
+.cp-next-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.2);
+}
+
+.cp-next-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cp-next-label {
+    color: #fbbf24;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cp-next-date {
+    color: var(--cp-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.cp-next-fixture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+
+.cp-next-team {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cp-next-team img,
+.cp-next-team .team-badge {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+}
+
+.cp-next-team-name {
+    color: var(--cp-text);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cp-next-vs {
+    color: var(--cp-pink);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+/* Dashboard Grid - Other Cards */
 .cp-dashboard {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
     width: min(1160px, calc(100vw - 80px));
     margin: 0 auto;
