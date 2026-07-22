@@ -129,6 +129,10 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         seen_predictions.add(pred_key)
         real = results.get((jornada, partido_id))
         if not real:
+            # Si no hay resultado, registrar la predicción pero sin puntos
+            jornada_scores.setdefault(jornada, {})
+            if uid not in jornada_scores[jornada]:
+                jornada_scores[jornada][uid] = 0
             continue
         hit = score_prediction(partido_id, pred["signo"], real)
         evaluated_predictions[uid] = evaluated_predictions.get(uid, 0) + 1
@@ -320,12 +324,13 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         }
 
     general = rows_from_scores(totals)
-    # Si hay jornada solicitada, usarla; si no tiene datos, usar la última CON datos
+    # Si hay jornada solicitada, usarla; si no tiene scores, usar la última CON datos
     if current_jornada:
         requested = int(current_jornada)
-        # Si la jornada solicitada no tiene scores, buscar la última que sí tenga
+        # Si la jornada solicitada tiene scores, usarla
         if requested in jornada_scores and jornada_scores[requested]:
             selected_jornada = requested
+        # Si no tiene scores pero tiene predicciones, usarla (mostrar predicciones pendientes)
         elif jornada_scores:
             selected_jornada = max(jornada_scores.keys())
         else:
