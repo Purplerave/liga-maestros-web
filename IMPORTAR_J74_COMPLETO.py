@@ -10,12 +10,20 @@ IMPORTAR J74 COMPLETO - Script maestro que importa TODO de la Jornada 74:
 import json
 import sqlite3
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
-DB_PATH = ROOT / "DATOS" / "LIGA_MAESTROS_PRO.db"
+
+# Try to use config.DB_PATH, fallback to local path
+try:
+    sys.path.insert(0, str(ROOT))
+    import config
+    DB_PATH = Path(config.DB_PATH)
+except Exception:
+    DB_PATH = ROOT / "DATOS" / "LIGA_MAESTROS_PRO.db"
 
 # =============================================================================
 # PREDICCIONES DE LOS MAESTROS - J74
