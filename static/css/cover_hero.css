@@ -62,7 +62,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
         linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 64px 64px, 64px 64px;
-    padding: 16px 24px 26px;
+    padding: 8px 24px 16px;
     font-family: var(--font-ui);
 }
 
@@ -75,11 +75,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     display: grid;
     grid-template-columns: 248px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 24px;
+    gap: 20px;
     width: min(1100px, calc(100vw - 48px));
-    min-height: 66px;
+    min-height: 50px;
     margin: 0 auto;
-    padding: 0 16px 12px;
+    padding: 0 16px 8px;
     border-bottom: 1px solid var(--cp-line);
 }
 
@@ -159,10 +159,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     display: grid;
     grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
     align-items: stretch;
-    gap: 24px;
+    gap: 20px;
     width: min(880px, calc(100vw - 48px));
     margin: 0 auto;
-    padding: 24px 16px 18px;
+    padding: 12px 16px 10px;
 }
 
 .cp-intro {
