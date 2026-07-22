@@ -63,32 +63,15 @@ def update_all():
         signs_list = list(signs[:14])
         full_signs = signs_list + [pleno]
         
-        # Verificar si hay predicciones actuales
-        current = conn.execute(
-            "SELECT signo FROM predicciones WHERE user_id=? AND jornada=74 ORDER BY partido_id",
-            (user_id,)
-        ).fetchall()
-        current_signs = [r[0] for r in current] if current else []
-        
-        # Comparar
-        needs_update = False
-        if len(current_signs) != 15:
-            needs_update = True
-        else:
-            for i, (curr, new) in enumerate(zip(current_signs, full_signs)):
-                if curr != new:
-                    needs_update = True
-                    break
-        
-        if needs_update:
-            conn.execute("DELETE FROM predicciones WHERE user_id=? AND jornada=74", (user_id,))
-            for idx, sign in enumerate(full_signs, start=1):
-                conn.execute(
-                    "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 74, ?, ?)",
-                    (user_id, idx, sign)
-                )
-            updated += 1
-            print(f"  ✓ {user_id}: {' '.join(full_signs[:14])} | {pleno}")
+        # Siempre actualizar - eliminar y reinsertar
+        conn.execute("DELETE FROM predicciones WHERE user_id=? AND jornada=74", (user_id,))
+        for idx, sign in enumerate(full_signs, start=1):
+            conn.execute(
+                "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 74, ?, ?)",
+                (user_id, idx, sign)
+            )
+        updated += 1
+        print(f"  ✓ {user_id}: {' '.join(full_signs[:14])} | {pleno}")
     
     conn.commit()
     conn.close()
