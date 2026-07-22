@@ -159,10 +159,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     display: grid;
     grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
     align-items: stretch;
-    gap: 32px;
+    gap: 24px;
     width: min(880px, calc(100vw - 48px));
     margin: 0 auto;
-    padding: 34px 16px 26px;
+    padding: 24px 16px 18px;
 }
 
 .cp-intro {
@@ -603,20 +603,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 /* Próximo Partido - Full Width Card */
 .cp-dashboard-next {
     width: min(1160px, calc(100vw - 80px));
-    margin: 0 auto 16px;
+    margin: 0 auto 10px;
 }
 
 .cp-next-card {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 20px 24px;
+    gap: 8px;
+    padding: 14px 20px;
     border: 1px solid rgba(245, 158, 11, 0.35);
-    border-radius: 14px;
+    border-radius: 12px;
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(13, 20, 36, 0.9) 100%);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 158, 11, 0.08);
     cursor: pointer;
     transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
     text-align: center;
@@ -690,15 +690,15 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-dashboard {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
     width: min(1160px, calc(100vw - 80px));
     margin: 0 auto;
 }
 
 .cp-data-card {
     min-width: 0;
-    min-height: 130px;
-    padding: 16px 18px;
+    min-height: 100px;
+    padding: 12px 14px;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 12px;
     background: rgba(13, 20, 36, 0.8);
