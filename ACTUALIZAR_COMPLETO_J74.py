@@ -60,7 +60,8 @@ def update_all():
         
         # La predicción completa es: 14 signos + pleno al 15
         # El pleno va en la posición 15 (partido 15)
-        full_signs = signs[:14] + [pleno]
+        signs_list = list(signs[:14])
+        full_signs = signs_list + [pleno]
         
         # Verificar si hay predicciones actuales
         current = conn.execute(
