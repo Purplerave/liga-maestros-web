@@ -86,6 +86,10 @@ jobs:
             echo "Importando datos de J74..."
             "$HOME_DIR/venv/bin/python" IMPORTAR_J74_COMPLETO.py || echo "Importación J74 omitida o ya existente"
           fi
+          if [ -f ACTUALIZAR_PREDICCIONES.py ]; then
+            echo "Actualizando predicciones..."
+            "$HOME_DIR/venv/bin/python" ACTUALIZAR_PREDICCIONES.py || echo "Actualización de predicciones omitida"
+          fi
           chmod 600 "$HOME_DIR/runtime/app.env"
           if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ]; then
             chmod 600 "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db"
