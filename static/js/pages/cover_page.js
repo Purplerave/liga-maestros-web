@@ -1,5 +1,15 @@
 /* Portada competitiva de Liga de Maestros. */
 
+let _sacramentoLoaded = false;
+function loadSacramentoFont() {
+    if (_sacramentoLoaded) return;
+    _sacramentoLoaded = true;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Sacramento&display=swap";
+    document.head.appendChild(link);
+}
+
 function hydrateCoverTypewriter() {}
 
 function coverCloseLabel() {

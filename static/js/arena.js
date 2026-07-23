@@ -44,6 +44,7 @@ function renderArena() {
     standingContextCache = new Map();
     document.body.classList.add("quiniela-focus");
     document.body.classList.toggle("newspaper-cover-active", isCoverPage());
+    if (isCoverPage()) loadSacramentoFont();
     document.body.classList.toggle("newspaper-ticket-active", isTicketPage());
     document.body.classList.toggle("newspaper-standings-active", isStandingsPage());
     document.body.classList.toggle("newspaper-snake-active", isSnakePage());
