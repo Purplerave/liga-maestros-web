@@ -377,6 +377,7 @@ function renderContestPanel() {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
                                 <span class="contest-compact-sub">jornada</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_JORNADA')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
                         </div>
@@ -384,6 +385,7 @@ function renderContestPanel() {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
                                 <span class="contest-compact-sub">mensual</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_MONTHLY')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
                         </div>
@@ -474,6 +476,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
                                 <span class="contest-compact-sub">jornada</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_JORNADA')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
                         </div>
@@ -481,6 +484,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
                                 <span class="contest-compact-sub">mensual</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_MONTHLY')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
                         </div>
@@ -647,6 +651,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
                                 <span class="contest-compact-sub">jornada</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_JORNADA')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
                         </div>
@@ -654,6 +659,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
                             <div class="contest-compact-header">
                                 <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
                                 <span class="contest-compact-sub">mensual</span>
+                                <button class="ver-todos-btn" type="button" onclick="changeContestView('CONTEST_MONTHLY')">Ver todos</button>
                             </div>
                             ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
                         </div>

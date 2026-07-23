@@ -349,6 +349,8 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         if not rows:
             continue
         top_score = rows[0]["points"]
+        if top_score == 0:
+            continue
         winners = [row for row in rows if row["points"] == top_score]
         galardones_jornada.append({
             "jornada": jornada,
@@ -362,6 +364,8 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         rows = rows_from_scores(monthly_scores[month])
         if rows:
             top_score = rows[0]["points"]
+            if top_score == 0:
+                continue
             winners = [row for row in rows if row["points"] == top_score]
             galardones_mes.append({
                 "month": month,

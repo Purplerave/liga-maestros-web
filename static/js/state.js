@@ -98,7 +98,7 @@ function hydrateJornadaNav() {
     const nav = qs("jornada-nav");
     if (!nav || !state.data) return;
     const max = Number(state.data.max_jornada || state.data.jornada || 64);
-    const min = Math.max(1, max - 14);
+    const min = Math.max(1, max - 29);
     nav.innerHTML = "";
     for (let i = max; i >= min; i--) {
         const opt = document.createElement("option");
@@ -106,6 +106,13 @@ function hydrateJornadaNav() {
         opt.textContent = `Jornada ${i}`;
         opt.selected = String(i) === String(state.data.jornada);
         nav.appendChild(opt);
+    }
+    if (min > 1) {
+        const more = document.createElement("option");
+        more.value = "0";
+        more.textContent = `Jornadas 1-${min - 1}`;
+        more.disabled = true;
+        nav.appendChild(more);
     }
 }
 
