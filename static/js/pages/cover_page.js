@@ -206,7 +206,7 @@ function renderNewspaperCoverPageV3() {
     return `<div class="cp">
         <header class="cp-masthead">
             <button type="button" class="cp-brand" data-page-action="ALL" aria-label="Portada de Liga de Maestros">
-                <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+                <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros" loading="eager" fetchpriority="high">
             </button>
             <nav class="cp-nav" aria-label="Secciones de Liga de Maestros">${coverNavHtml(liveCount)}</nav>
             ${coverAccountHtml(rankingRows)}

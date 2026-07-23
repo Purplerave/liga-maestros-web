@@ -1,27 +1,47 @@
 """Main routes: index page, static files."""
-import os, time
-from flask import Blueprint, make_response, render_template, request, jsonify, send_from_directory, session
+import hashlib
+import os
+import time
+from pathlib import Path
+
+from flask import Blueprint, make_response, render_template, request, jsonify, send_from_directory, session, abort
 
 import config
 from ..services.ticket import madrid_now, today_madrid
 
 bp = Blueprint("main", __name__)
 
+_STATIC_HASH_CACHE = None
+_STATIC_HASH_DIRTY = False
+
+
+def _get_static_fingerprint():
+    global _STATIC_HASH_CACHE, _STATIC_HASH_DIRTY
+    if _STATIC_HASH_CACHE and not _STATIC_HASH_DIRTY:
+        return _STATIC_HASH_CACHE
+    h = hashlib.sha256()
+    static_dir = Path(config.BASE_DIR) / "static"
+    for path in sorted(static_dir.rglob("*")):
+        if path.is_file() and path.suffix in {".css", ".js"}:
+            try:
+                h.update(path.relative_to(static_dir).as_posix().encode())
+                h.update(b"\0")
+                h.update(str(path.stat().st_mtime_ns).encode())
+                h.update(b"\0")
+            except OSError:
+                continue
+    _STATIC_HASH_CACHE = h.hexdigest()[:10]
+    _STATIC_HASH_DIRTY = False
+    return _STATIC_HASH_CACHE
+
 
 def _get_assets_version():
-    static_dir = os.path.join(config.BASE_DIR, "static")
-    mtimes = []
-    try:
-        for root, _, files in os.walk(static_dir):
-            for file in files:
-                if file.endswith((".css", ".js", ".png", ".jpg", ".svg")):
-                    try:
-                        mtimes.append(int(os.path.getmtime(os.path.join(root, file))))
-                    except OSError:
-                        continue
-    except OSError:
-        pass
-    return str(max(mtimes) if mtimes else int(time.time()))
+    return _get_static_fingerprint()
+
+
+def invalidate_assets_version():
+    global _STATIC_HASH_DIRTY
+    _STATIC_HASH_DIRTY = True
 
 
 @bp.route('/')
@@ -46,29 +66,29 @@ def index():
 
 @bp.route('/static/<path:filename>')
 def static_files(filename):
-    normalized = filename.replace("\\", "/")
-    if normalized.startswith("img/"):
-        max_age = 31536000
-        cache_control = "public, max-age=31536000, immutable"
-    elif normalized.startswith(("css/", "js/")):
-        max_age = 0
-        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
-    else:
-        max_age = 0
-        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
-    
-    file_path = os.path.join(config.BASE_DIR, "static", filename)
-    if not os.path.exists(file_path):
-        from flask import abort
+    if "\0" in filename or filename.startswith(("/", "\\")):
         abort(404)
-    
-    with open(file_path, "rb") as f:
-        content = f.read()
-    
-    from flask import Response
-    response = Response(content)
-    response.headers["Cache-Control"] = cache_control
-    response.headers["Content-Type"] = "application/javascript" if filename.endswith(".js") else "text/css" if filename.endswith(".css") else "application/octet-stream"
+    is_long_term = filename.startswith("img/")
+    static_dir = os.path.join(config.BASE_DIR, "static")
+    if not os.path.isfile(os.path.join(static_dir, filename)):
+        abort(404)
+    response = send_from_directory(
+        static_dir,
+        filename,
+        max_age=31536000 if is_long_term else 0,
+        conditional=True,
+        as_attachment=False,
+    )
+    if is_long_term:
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    if filename.endswith((".js", ".mjs")):
+        response.headers["Content-Type"] = "application/javascript; charset=utf-8"
+    elif filename.endswith(".css"):
+        response.headers["Content-Type"] = "text/css; charset=utf-8"
+    elif filename.endswith(".svg"):
+        response.headers["Content-Type"] = "image/svg+xml"
     return response
 
 

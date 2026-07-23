@@ -1,5 +1,7 @@
 """Liga data route: the main data endpoint."""
 import logging
+import time
+import threading
 
 from flask import Blueprint, jsonify, request, session
 
@@ -18,16 +20,50 @@ from ..utils import build_team_contract, load_team_logos
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
 
+_max_jornada_cache = {"value": None, "ts": 0.0, "lock": threading.Lock()}
+_MAX_JORNADA_TTL = 5.0
+
+
+def _get_cached_max_jornada(conn, ttl=_MAX_JORNADA_TTL):
+    now = time.time()
+    if _max_jornada_cache["value"] is not None and now - _max_jornada_cache["ts"] < ttl:
+        return _max_jornada_cache["value"]
+    with _max_jornada_cache["lock"]:
+        if _max_jornada_cache["value"] is not None and time.time() - _max_jornada_cache["ts"] < ttl:
+            return _max_jornada_cache["value"]
+        row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
+        _max_jornada_cache["value"] = row[0] if row and row[0] is not None else None
+        _max_jornada_cache["ts"] = time.time()
+        return _max_jornada_cache["value"]
+
+
+def invalidate_max_jornada_cache():
+    _max_jornada_cache["ts"] = 0.0
+
+
 @bp.route("/api/liga/data")
 def get_liga_data():
-    requested_jornada = request.args.get("j", "")
+    requested_jornada = request.args.get("j", "").strip()
     conn = get_db()
     try:
-        max_jornada = _resolve_max_jornada(conn)
+        max_jornada = _get_cached_max_jornada(conn)
         if max_jornada is None:
             return jsonify({"status": "error", "message": "No hay jornadas cargadas en resultados"}), 404
 
-        jornada = requested_jornada or max_jornada
+        jornada = int(requested_jornada) if requested_jornada.isdigit() else max_jornada
+        if jornada < 1 or jornada > max_jornada + 2:
+            return jsonify({"status": "error", "message": "Jornada no disponible", "max_jornada": max_jornada}), 404
+
+        has_matches = conn.execute(
+            "SELECT 1 FROM resultados WHERE jornada = ? LIMIT 1", (jornada,)
+        ).fetchone()
+        if not has_matches:
+            return jsonify({
+                "status": "error",
+                "message": "Jornada sin partidos cargados",
+                "max_jornada": max_jornada,
+            }), 404
+
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
@@ -76,13 +112,6 @@ def get_liga_data():
         })
     finally:
         conn.close()
-
-
-def _resolve_max_jornada(conn):
-    row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
-    if not row or row[0] is None:
-        return None
-    return row[0]
 
 
 def _detect_jornada_liga(conn):

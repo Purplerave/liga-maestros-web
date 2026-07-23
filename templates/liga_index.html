@@ -28,7 +28,7 @@
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}">
     <div class="app-shell">
         <section class="panel header-brand-panel">
-            <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Peña vs IA">
+            <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Peña vs IA" loading="eager" fetchpriority="high">
         </section>
 
         <header class="topbar-shell">
