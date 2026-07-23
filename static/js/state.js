@@ -183,23 +183,25 @@ function hydrateHero() {
     if (save) {
         const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
         const hasSaved = hasSavedTicket();
-        save.hidden = !state.user;
-        save.disabled = !canSave;
-        if (!canSave) {
+        save.disabled = !canSave || !state.user;
+        if (!state.user) {
+            save.style.visibility = "hidden";
+            save.style.width = save.offsetWidth + "px";
+        } else if (!canSave) {
             save.textContent = "Cerrada";
+            save.style.visibility = "visible";
         } else if (hasSaved && !state.editMode && !state.draftDirty) {
             save.textContent = "Editar quiniela";
+            save.style.visibility = "visible";
         } else {
             save.textContent = hasSaved ? "Guardar cambios" : "Guardar quiniela";
-        }
-        if (!canSave) {
-            save.hidden = true;
-            save.textContent = "Guardar quiniela";
+            save.style.visibility = "visible";
         }
     }
     const share = qs("share-ticket-btn");
     if (share) {
-        share.hidden = !state.user;
+        share.style.visibility = state.user ? "visible" : "hidden";
+        if (!share.style.width) share.style.width = share.offsetWidth + "px";
         share.disabled = !state.data.partidos.length;
     }
     updatePicksProgress();

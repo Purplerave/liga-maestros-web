@@ -215,6 +215,15 @@
     min-width: 0;
 }
 
+.topbar-actions .primary-btn,
+.topbar-actions .icon-btn {
+    flex-shrink: 0;
+}
+
+.topbar-actions [style*="visibility: hidden"] {
+    pointer-events: none;
+}
+
 .user-panel {
     display: inline-flex;
     align-items: center;
