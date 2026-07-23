@@ -162,7 +162,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     gap: 20px;
     width: min(880px, calc(100vw - 48px));
     margin: 0 auto;
-    padding: 12px 16px 10px;
+    padding: 12px 20px 10px;
+    overflow: visible;
 }
 
 .cp-intro {
@@ -170,6 +171,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     flex-direction: column;
     justify-content: center;
     min-width: 0;
+    overflow: visible;
 }
 
 .cp-kicker {
@@ -202,15 +204,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     margin: 0 0 15px;
     color: #ffffff;
     font-family: var(--cp-font-hand), "Outfit", sans-serif;
-    font-size: 3.4rem;
+    font-size: 3.2rem;
     font-weight: 400;
-    line-height: 1.05;
+    line-height: 1.1;
     letter-spacing: -0.01em;
     background: linear-gradient(135deg, #ffffff 30%, #f59e0b 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
-    padding-inline: 0.08em;
+    padding: 0 0.15em;
+    overflow: visible;
 }
 
 .cp-lead {
