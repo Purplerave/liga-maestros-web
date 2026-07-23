@@ -101,8 +101,8 @@
 }
 
 .topbar-filters {
-    display: grid;
-    grid-template-columns: 120px minmax(180px, 235px);
+    display: flex;
+    align-items: center;
     gap: 8px;
     margin-left: 0;
     min-width: 0;

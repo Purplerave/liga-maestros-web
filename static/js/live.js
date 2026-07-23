@@ -11,19 +11,24 @@ function renderWarRoom() {
         .filter(m => isScheduledStatus(m.status) && !isImplicitlyFinished(m))
         .sort((a, b) => (parseMatchTimestamp(a) || 0) - (parseMatchTimestamp(b) || 0));
     const finished = allMatches.filter(m => isFinishedStatus(m.status) || isImplicitlyFinished(m));
+    const hasAnyMatches = allMatches.length > 0;
+    const jornada = state.data?.jornada || "?";
 
-    // Si no hay partidos en vivo ni próximos, mostrar mensaje informativo
+    if (!hasAnyMatches) {
+        return `<div class="live-empty-state">
+            <div class="live-empty-icon">📺</div>
+            <h3 class="live-empty-title">Sin datos de partidos</h3>
+            <p class="live-empty-text">No hay partidos cargados para la Jornada ${jornada}.</p>
+        </div>`;
+    }
+
     if (!live.length && !upcoming.length) {
-        const jornada = state.data?.jornada || "?";
-        const nextMatch = allMatches.length > 0 ? allMatches[0] : null;
-        const nextDate = nextMatch ? formatSmartDate(nextMatch.added || nextMatch.fecha_raw, nextMatch.scheduled || nextMatch.hora) : "";
-
+        const nextMatch = finished.length > 0 ? finished[finished.length - 1] : null;
         return `<div class="live-empty-state">
             <div class="live-empty-icon">⚽</div>
-            <h3 class="live-empty-title">Directo se activa los fines de semana</h3>
-            <p class="live-empty-text">Cuando empiece la Jornada ${jornada}, los partidos aparecerán aquí en directo.</p>
-            ${nextDate ? `<p class="live-empty-next">Próximo: <strong>${escapeHtml(nextDate)}</strong></p>` : ""}
-            <p class="live-empty-hint">Mientras tanto, puedes hacer tu quiniela o ver la clasificación.</p>
+            <h3 class="live-empty-title">Jornada ${jornada} finalizada</h3>
+            <p class="live-empty-text">Todos los partidos han terminado.</p>
+            <p class="live-empty-hint">Puedes ver la clasificación o tus resultados en La Peña.</p>
         </div>`;
     }
 

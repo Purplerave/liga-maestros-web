@@ -204,14 +204,16 @@ body.newspaper-ui.quiniela-focus .league-overview-card {
 }
 
 .league-tabs .tab-btn:hover {
-    border-color: rgba(245, 158, 11, 0.2);
+    border-color: rgba(56, 189, 248, 0.3);
     color: #e2e8f0;
+    background: rgba(56, 189, 248, 0.08);
 }
 
 .league-tabs .tab-btn.active {
-    background: rgba(245, 158, 11, 0.12);
-    border-color: rgba(245, 158, 11, 0.3);
-    color: #f59e0b;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.15));
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
 }
 
 .league-standings-pane {

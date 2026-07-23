@@ -224,8 +224,10 @@ function hydrateMainViewNav() {
 
 function getAvailableLeagueOptions() {
     const allMatches = state.data?.all_league_matches || [];
+    const excluded = new Set(["UEFA CHAMPIONS LEAGUE", "CHAMPIONS LEAGUE", "UEFA EUROPA LEAGUE", "EUROPA LEAGUE", "FRIENDLIES", "AMISTOSOS"]);
     const counts = allMatches.reduce((acc, match) => {
         const key = competitionLabel(match);
+        if (excluded.has(key)) return acc;
         acc[key] = (acc[key] || 0) + 1;
         return acc;
     }, {});

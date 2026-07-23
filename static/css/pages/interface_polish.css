@@ -34,20 +34,17 @@ body.newspaper-ui.quiniela-focus .topbar-shell {
 }
 
 body.newspaper-ui.quiniela-focus .topbar-filters {
-    display: none !important;
-}
-
-body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-filters,
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters,
-body.newspaper-ui.quiniela-focus.newspaper-live-active .topbar-filters,
-body.newspaper-ui.quiniela-focus.newspaper-standings-active .topbar-filters,
-body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
-    display: none !important;
-}
-
-body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-filters,
-body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
     display: flex !important;
+    align-items: center;
+    gap: 8px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-filters {
+    display: none !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters {
+    display: none !important;
 }
 
 .contest-filter-group {
@@ -61,20 +58,21 @@ body.newspaper-ui.quiniela-focus.newspaper-contest-active .topbar-filters {
 }
 
 body.newspaper-ui.quiniela-focus .ticket-jornada-filter {
-    display: grid !important;
-    grid-template-columns: auto minmax(130px, 170px);
+    display: flex !important;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
 }
 
 body.newspaper-ui.quiniela-focus .ticket-jornada-filter label {
     margin: 0 !important;
     white-space: nowrap;
+    font-size: 0.65rem;
+    color: var(--text-muted);
 }
 
 body.newspaper-ui.quiniela-focus .ticket-jornada-filter select {
-    width: 100% !important;
-    min-height: 32px !important;
+    min-height: 30px !important;
+    min-width: 120px !important;
 }
 
 body.newspaper-ui.quiniela-focus .newspaper-page-nav,
