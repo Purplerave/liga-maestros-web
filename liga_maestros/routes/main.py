@@ -95,3 +95,37 @@ def static_files(filename):
 @bp.route('/juegos/<path:filename>')
 def juegos_files(filename):
     return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
+
+
+@bp.route('/robots.txt')
+def robots_txt():
+    from flask import Response
+    return Response(
+        "User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /static/\nSitemap: https://ligademaestros.alwaysdata.net/sitemap.xml\n",
+        mimetype="text/plain",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
+@bp.route('/sitemap.xml')
+def sitemap_xml():
+    from flask import Response
+    from ..db.connection import get_db
+    base = "https://ligademaestros.alwaysdata.net"
+    pages = [
+        f"  <url><loc>{base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>",
+        f"  <url><loc>{base}/privacidad</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",
+        f"  <url><loc>{base}/aviso-legal</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",
+        f"  <url><loc>{base}/cookies</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",
+    ]
+    conn = get_db()
+    try:
+        row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
+        max_j = row[0] if row and row[0] else None
+        if max_j:
+            for j in range(max(1, max_j - 5), max_j + 1):
+                pages.append(f"  <url><loc>{base}/?j={j}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>")
+    finally:
+        conn.close()
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(pages) + "\n</urlset>"
+    return Response(xml, mimetype="application/xml", headers={"Cache-Control": "public, max-age=3600"})

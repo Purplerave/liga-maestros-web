@@ -108,11 +108,15 @@ function hydrateJornadaNav() {
         nav.appendChild(opt);
     }
     if (min > 1) {
-        const more = document.createElement("option");
-        more.value = "0";
-        more.textContent = `Jornadas 1-${min - 1}`;
-        more.disabled = true;
-        nav.appendChild(more);
+        const group = document.createElement("optgroup");
+        group.label = `Jornadas más antiguas (1-${min - 1})`;
+        for (let i = Math.min(min - 1, 10); i >= 1; i--) {
+            const opt = document.createElement("option");
+            opt.value = String(i);
+            opt.textContent = `Jornada ${i}`;
+            group.appendChild(opt);
+        }
+        nav.appendChild(group);
     }
 }
 

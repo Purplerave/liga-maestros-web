@@ -9,3 +9,12 @@
 @import url('pages/standings.css?v=plex-1');
 @import url('pages/contest.css?v=plex-1');
 @import url('pages/live.css?v=plex-1');
+
+/* Comment styles (CSP-safe, no inline styles) */
+.comment-empty-title {
+    display: block;
+    margin-bottom: 4px;
+}
+.comment-author {
+    color: var(--accent);
+}

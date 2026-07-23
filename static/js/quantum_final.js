@@ -127,7 +127,7 @@ async function loadComments() {
         }
         if (!comments.length) {
             body.innerHTML = `<div class="comments-empty">
-                <strong style="display:block; margin-bottom:4px;">Sin comentarios todavia</strong>
+                <strong class="comment-empty-title">Sin comentarios todavia</strong>
                 <span>${state.user ? "Deja el primero." : "Entra con Google y comenta."}</span>
             </div>`;
             return;
@@ -135,7 +135,7 @@ async function loadComments() {
         body.innerHTML = comments.map(comment => `
             <article class="comment-card">
                 <div class="comment-meta">
-                    <strong style="color:var(--accent);">${escapeHtml(comment.nombre || "Maestro")}</strong>
+                    <strong class="comment-author">${escapeHtml(comment.nombre || "Maestro")}</strong>
                     <span>${escapeHtml(formatCommentTime(comment.created_at))}</span>
                 </div>
                 <p>${escapeHtml(comment.texto)}</p>

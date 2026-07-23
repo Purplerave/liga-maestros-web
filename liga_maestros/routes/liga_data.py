@@ -15,7 +15,8 @@ from ..services.payloads.standings import build_standings_payload
 from ..services.multi_standings import build_multi_league_standings
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
-from ..utils import build_team_contract, load_team_logos
+from ..utils import build_team_contract, load_team_logos, normalize_team_key
+from ..middleware.rate_limit import is_rate_limited
 
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
@@ -43,6 +44,8 @@ def invalidate_max_jornada_cache():
 
 @bp.route("/api/liga/data")
 def get_liga_data():
+    if is_rate_limited("liga_data_read", request.remote_addr, 2):
+        return jsonify({"status": "error", "message": "Demasiadas peticiones"}), 429
     requested_jornada = request.args.get("j", "").strip()
     conn = get_db()
     try:
@@ -64,8 +67,15 @@ def get_liga_data():
                 "max_jornada": max_jornada,
             }), 404
 
-        team_logos = load_team_logos()
-        partidos = build_jornada_matches(conn, jornada, team_logos)
+        team_logos_all = load_team_logos()
+        partidos = build_jornada_matches(conn, jornada, team_logos_all)
+        needed = set()
+        for match in partidos:
+            for field in ("local", "visitante"):
+                name = match.get(field) or ""
+                if name and name != "-":
+                    needed.add(normalize_team_key(name))
+        team_logos = {k: v for k, v in team_logos_all.items() if k in needed}
         standings, standings_db = build_standings_payload(conn, partidos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         multi_league_leagues = build_multi_league_standings(standings)
