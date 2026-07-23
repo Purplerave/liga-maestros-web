@@ -16,11 +16,7 @@ def is_admin_request():
     allow_local = os.getenv("ALLOW_LOCAL_ADMIN", "0").strip().lower() in ("1", "true", "yes", "on")
     if not allow_local:
         return False
-    trust_proxy = os.getenv("TRUST_PROXY_HEADERS", "0").strip().lower() in ("1", "true", "yes", "on")
-    if trust_proxy:
-        forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-        is_local = forwarded in ("127.0.0.1", "::1", "localhost", "")
-    else:
-        is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
+    # Only use real remote_addr, never X-Forwarded-For for admin bypass
+    is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
     return is_local
 

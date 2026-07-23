@@ -516,39 +516,3 @@ function relocateSnakeHud() {
     if (hud?.contains(scoreboard) && gameLayout) cabinet.insertBefore(scoreboard, gameLayout);
     if (hud?.parentElement) hud.remove();
 }
-
-function fixMojibakeLabels(root = document.body) {
-    if (!root) return;
-    const replacements = [
-        ["PeÃƒÂ±a", "Peña"],
-        ["PeÃ±a", "Peña"],
-        ["ClasificaciÃƒÂ³n", "Clasificación"],
-        ["ClasificaciÃ³n", "Clasificación"],
-        ["PosiciÃƒÂ³n", "Posición"],
-        ["PosiciÃ³n", "Posición"],
-        ["PronÃƒÂ³sticos", "Pronósticos"],
-        ["PronÃ³sticos", "Pronósticos"],
-        ["estadÃƒÂ­sticas", "estadísticas"],
-        ["estadÃ­sticas", "estadísticas"],
-        ["todavÃƒÂ­a", "todavía"],
-        ["todavÃ­a", "todavía"],
-        ["SeÃƒÂ±ales", "Señales"],
-        ["SeÃ±ales", "Señales"],
-        ["TÃƒÂº", "Tú"],
-        ["TÃº", "Tú"],
-        ["mÃƒÂ¡s", "más"],
-        ["mÃ¡s", "más"],
-        ["fÃƒÂºtbol", "fútbol"],
-        ["fÃºtbol", "fútbol"],
-    ];
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => {
-        let text = node.nodeValue;
-        replacements.forEach(([bad, good]) => {
-            text = text.replaceAll(bad, good);
-        });
-        node.nodeValue = text;
-    });
-}
