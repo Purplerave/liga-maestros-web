@@ -1,4 +1,5 @@
 """Predictions route: save user predictions."""
+import logging
 from flask import Blueprint, request, jsonify, session
 
 import config
@@ -10,6 +11,7 @@ from ..services.teams import is_scored_status, is_live_scored_status
 from ..middleware.rate_limit import is_rate_limited
 
 bp = Blueprint("predictions", __name__)
+logger = logging.getLogger(__name__)
 
 @bp.route('/api/predicciones/save', methods=['POST'])
 def save_predictions():
@@ -23,6 +25,7 @@ def save_predictions():
     uid = data.get('user_id')
     j = data.get('jornada')
     signos = data.get('signos')
+    logger.info("Save request: uid=%s, jornada=%s, signos_len=%s", uid, j, len(signos) if signos else 0)
 
     if not uid or not j or not signos:
         return jsonify({"status": "error", "message": "Datos incompletos"}), 400
@@ -96,6 +99,7 @@ def save_predictions():
         conn.commit()
         return jsonify({"status": "ok", "message": "Quiniela guardada correctamente", "jornada": target_jornada, "saved_count": len([sign for sign in saved_signs if sign != "-"]), "signos": saved_signs})
     except Exception as exc:
+        logger.exception("Error guardando quiniela para user=%s jornada=%s", uid, target_jornada)
         if transaction_started:
             conn.rollback()
         return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500
