@@ -25,17 +25,25 @@ _max_jornada_cache = {"value": None, "ts": 0.0, "lock": threading.Lock()}
 _MAX_JORNADA_TTL = 5.0
 
 
-def _get_cached_max_jornada(conn, ttl=_MAX_JORNADA_TTL):
+def _get_cached_max_jornada(conn=None, ttl=_MAX_JORNADA_TTL):
     now = time.time()
     if _max_jornada_cache["value"] is not None and now - _max_jornada_cache["ts"] < ttl:
         return _max_jornada_cache["value"]
     with _max_jornada_cache["lock"]:
         if _max_jornada_cache["value"] is not None and time.time() - _max_jornada_cache["ts"] < ttl:
             return _max_jornada_cache["value"]
-        row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
-        _max_jornada_cache["value"] = row[0] if row and row[0] is not None else None
-        _max_jornada_cache["ts"] = time.time()
-        return _max_jornada_cache["value"]
+        close_conn = False
+        if conn is None:
+            conn = get_db()
+            close_conn = True
+        try:
+            row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
+            _max_jornada_cache["value"] = row[0] if row and row[0] is not None else None
+            _max_jornada_cache["ts"] = time.time()
+            return _max_jornada_cache["value"]
+        finally:
+            if close_conn:
+                conn.close()
 
 
 def invalidate_max_jornada_cache():
