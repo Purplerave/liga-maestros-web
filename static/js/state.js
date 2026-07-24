@@ -197,7 +197,12 @@ function getBrowsableLeagueMatches() {
 function isLiveMatch(match) {
     const status = String(match.status || "").toUpperCase();
     if (isImplicitlyFinished(match)) return false;
-    if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") return true;
+    if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") {
+        const kickoff = parseMatchTimestamp(match);
+        const threeHoursAgo = Date.now() - (3 * 60 * 60 * 1000);
+        if (kickoff && kickoff < threeHoursAgo) return false;
+        return true;
+    }
     return false;
 }
 
