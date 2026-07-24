@@ -208,19 +208,8 @@ function isLiveMatch(match) {
 
 function getLiveLeagueMatches() {
     const currentJornada = String(state.data?.jornada || "");
-    const officialLive = (state.data?.partidos || [])
+    return (state.data?.partidos || [])
         .filter(m => (isLiveStatus(m.status) || isLiveMatch(m)) && String(m.jornada || currentJornada) === currentJornada);
-    const seen = new Set(officialLive.map(matchPairKey));
-    const externalLive = getAllLeagueMatches()
-        .filter(m => (isLiveStatus(m.status) || isLiveMatch(m)))
-        .filter(m => competitionLabel(m) !== "FRIENDLIES")
-        .filter(m => {
-            const key = matchPairKey(m);
-            if (!key || seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-    return [...officialLive, ...externalLive];
 }
 
 function hasLiveLeagueMatches() {
