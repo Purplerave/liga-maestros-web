@@ -1,3 +1,4 @@
+@layer badges {
 .team-badge {
     display: flex;
     align-items: center;
@@ -31,4 +32,5 @@
 .team-badge.has-logo {
     border-color: rgba(255, 255, 255, 0.12);
     background: linear-gradient(135deg, rgba(20, 30, 50, 0.9), rgba(10, 18, 30, 0.95));
+}
 }

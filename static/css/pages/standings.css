@@ -1,7 +1,8 @@
+@layer pages {
 /* Clasificaciones de ligas. Perfil y La Pena tienen sus propios estilos. */
 
 #matches-body.standings-full-mode {
-    display: block !important;
+    display: block;
     width: 100%;
     padding: 0;
     overflow: auto;
@@ -198,13 +199,14 @@
     height: 18px;
     border-radius: 999px;
     color: #06101e;
-    font-size: 0.54rem;
+    font-size: 0.62rem;
     font-weight: 900;
 }
 
 .form-win { background: var(--gradient-live); }
 .form-draw { background: linear-gradient(135deg, #a3a3a3, #737373); }
 .form-loss { background: var(--gradient-danger); color: #fff; }
+.form-draw { color: #0f0f0f; }
 
 @media (max-width: 900px) {
     .full-standings-card {
@@ -268,4 +270,5 @@
     .full-standings-table td:nth-child(n+3):nth-child(-n+11) {
         width: 34px;
     }
+}
 }

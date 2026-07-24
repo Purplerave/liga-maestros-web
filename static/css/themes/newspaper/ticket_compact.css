@@ -1,200 +1,201 @@
+@layer theme {
 /* Ticket page compact pass: one readable row per match, no oversized blocks. */
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table-wrap {
-    overflow-x: hidden !important;
+    overflow-x: hidden;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table {
-    width: 100% !important;
-    min-width: 0 !important;
-    table-layout: fixed !important;
-    border-spacing: 0 !important;
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    border-spacing: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(1),
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(1) {
-    width: 54px !important;
+    width: 54px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(2),
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(2) {
-    width: 34% !important;
+    width: 34%;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(3),
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(3) {
-    width: auto !important;
+    width: auto;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
-    height: 64px !important;
-    padding: 5px 8px !important;
-    vertical-align: middle !important;
+    height: 64px;
+    padding: 5px 8px;
+    vertical-align: middle;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-number {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 4px !important;
-    font-size: 1.05rem !important;
-    line-height: 32px !important;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    font-size: 1.05rem;
+    line-height: 32px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-layout {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 76px !important;
-    align-items: center !important;
-    gap: 12px !important;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 76px;
+    align-items: center;
+    gap: 12px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main {
-    min-width: 0 !important;
+    min-width: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
-    display: grid !important;
-    grid-template-columns: minmax(92px, 1fr) 26px 14px 26px minmax(92px, 1fr) !important;
-    align-items: center !important;
-    justify-items: center !important;
-    gap: 6px !important;
-    width: 100% !important;
+    display: grid;
+    grid-template-columns: minmax(92px, 1fr) 26px 14px 26px minmax(92px, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 6px;
+    width: 100%;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-team {
-    min-width: 0 !important;
-    width: 100% !important;
+    min-width: 0;
+    width: 100%;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-team:first-child {
-    justify-content: flex-end !important;
-    text-align: right !important;
+    justify-content: flex-end;
+    text-align: right;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-team:last-child {
-    justify-content: flex-start !important;
-    text-align: left !important;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
 }
 
 /* Product pass: portada as an index, not another duplicated control panel. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters {
-    display: none !important;
+    display: none;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-context {
-    align-self: center !important;
+    align-self: center;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-kicker {
-    font-size: 0.78rem !important;
-    color: #ffd43b !important;
+    font-size: 0.78rem;
+    color: #ffd43b;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title {
-    font-size: clamp(1.05rem, 1.6vw, 1.45rem) !important;
-    line-height: 1.05 !important;
+    font-size: clamp(1.05rem, 1.6vw, 1.45rem);
+    line-height: 1.05;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-name,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .fixture-inline .team-name {
-    max-width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    font-size: 0.72rem !important;
-    line-height: 1.05 !important;
-    white-space: nowrap !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.72rem;
+    line-height: 1.05;
+    white-space: nowrap;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-meta-line {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-meta-line .match-score-badge,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table .match-score-badge.is-scheduled-time {
-    width: 72px !important;
-    min-width: 72px !important;
-    height: 28px !important;
-    min-height: 28px !important;
-    padding: 0 8px !important;
-    border-radius: 4px !important;
-    font-size: 0.78rem !important;
+    width: 72px;
+    min-width: 72px;
+    height: 28px;
+    min-height: 28px;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 0.78rem;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-consensus-cell {
-    display: grid !important;
-    grid-template-rows: 16px 36px !important;
-    gap: 4px !important;
-    min-width: 0 !important;
-    padding-left: 8px !important;
+    display: grid;
+    grid-template-rows: 16px 36px;
+    gap: 4px;
+    min-width: 0;
+    padding-left: 8px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-consensus-cell > .consensus-bar-wrap {
-    width: 100% !important;
-    max-width: none !important;
-    display: grid !important;
-    gap: 1px !important;
+    width: 100%;
+    max-width: none;
+    display: grid;
+    gap: 1px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px !important;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels span {
-    justify-content: center !important;
-    gap: 3px !important;
-    font-size: 0.67rem !important;
-    line-height: 1 !important;
+    justify-content: center;
+    gap: 3px;
+    font-size: 0.67rem;
+    line-height: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels b {
-    font-size: 0.72rem !important;
+    font-size: 0.72rem;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels em {
-    font-size: 0.62rem !important;
+    font-size: 0.62rem;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-bar {
-    height: 8px !important;
-    border-radius: 999px !important;
+    height: 8px;
+    border-radius: 999px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-sign-row,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-sign-row {
-    width: 100% !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(7, minmax(44px, 1fr)) minmax(54px, 0.85fr) minmax(54px, 0.85fr) !important;
-    gap: 4px !important;
-    align-items: center !important;
+    width: 100%;
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(44px, 1fr)) minmax(54px, 0.85fr) minmax(54px, 0.85fr);
+    gap: 4px;
+    align-items: center;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip {
-    min-width: 0 !important;
-    min-height: 32px !important;
-    height: 32px !important;
-    padding: 2px 3px !important;
-    display: grid !important;
-    grid-template-rows: 11px 18px !important;
-    gap: 1px !important;
-    border-radius: 3px !important;
+    min-width: 0;
+    min-height: 32px;
+    height: 32px;
+    padding: 2px 3px;
+    display: grid;
+    grid-template-rows: 11px 18px;
+    gap: 1px;
+    border-radius: 3px;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip > span {
-    font-size: 0.54rem !important;
-    line-height: 1 !important;
+    font-size: 0.54rem;
+    line-height: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo,
@@ -202,35 +203,35 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .saved-ti
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .action-buttons .ia-signo,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .empty-user-pick {
-    width: 100% !important;
-    min-height: 18px !important;
-    height: 18px !important;
-    border-radius: 3px !important;
-    font-size: 0.82rem !important;
-    line-height: 1 !important;
+    width: 100%;
+    min-height: 18px;
+    height: 18px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    line-height: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick {
-    gap: 0 !important;
+    gap: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small {
-    display: none !important;
+    display: none;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .action-buttons {
-    width: 100% !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 2px !important;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
 }
 
 @media (max-width: 1100px) {
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table-wrap {
-        overflow-x: auto !important;
+        overflow-x: auto;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table {
-        min-width: 1040px !important;
+        min-width: 1040px;
     }
 }
 /* Quiniela: fixture legible con local, escudos y visitante completos. */
@@ -258,7 +259,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
     display: grid;
-    grid-template-columns: minmax(130px, 1fr) auto minmax(130px, 1fr) !important;
+    grid-template-columns: minmax(130px, 1fr) auto minmax(130px, 1fr);
     align-items: center;
     column-gap: 10px;
 }
@@ -274,17 +275,17 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name-home {
-    grid-column: 1 !important;
+    grid-column: 1;
     text-align: right;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name-away {
-    grid-column: 3 !important;
+    grid-column: 3;
     text-align: left;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-crest-pair {
-    grid-column: 2 !important;
+    grid-column: 2;
     display: grid;
     grid-template-columns: 28px 10px 28px;
     align-items: center;
@@ -295,4 +296,5 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
     width: 28px;
     height: 28px;
+}
 }

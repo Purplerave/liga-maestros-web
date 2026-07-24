@@ -1,3 +1,4 @@
+@layer pages {
 /* Compact cards used only by Directo and league match lists. */
 
 .match-card-container {
@@ -214,4 +215,5 @@
         padding-inline: 6px;
         font-size: 0.88rem;
     }
+}
 }

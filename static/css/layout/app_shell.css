@@ -1,3 +1,4 @@
+@layer base {
 /* Layout */
 .app-shell {
     position: relative;
@@ -65,7 +66,7 @@
 
 .topbar-kicker {
     font-family: var(--font-display);
-    font-size: 0.65rem;
+    font-size: 0.72rem;
     line-height: 1;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -187,7 +188,7 @@
     font-weight: 800;
     color: var(--text-main);
     line-height: 1;
-    max-width: 58px;
+    max-width: clamp(60px, 12vw, 140px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -201,7 +202,7 @@
     border-radius: 999px;
     background: rgba(255,255,255,0.06);
     color: var(--text-muted);
-    font-size: 0.58rem;
+    font-size: 0.7rem;
     line-height: 1;
     white-space: nowrap;
 }
@@ -289,17 +290,26 @@
 
 /* Buttons */
 .primary-btn, .login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
     background: var(--gradient-accent);
-    color: #000;
+    color: #06121f;
     border: none;
-    padding: 4px 9px;
+    padding: 8px 14px;
     border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 0.64rem;
+    font-size: 0.72rem;
     cursor: pointer;
-    transition: var(--transition);
+    transition: transform 120ms var(--ease-out), filter 120ms var(--ease-out);
     position: relative;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+    .primary-btn, .login-btn { min-height: 44px; padding: 10px 16px; font-size: 0.8rem; }
 }
 
 .primary-btn::after {
@@ -381,4 +391,5 @@
 
 .sidebar-brand-image:hover {
     filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.18));
+}
 }

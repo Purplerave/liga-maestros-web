@@ -1,3 +1,4 @@
+@layer typography {
 /* Voz tipografica compartida: interfaz, titulares y datos. */
 body.newspaper-ui.quiniela-focus .match-score-badge,
 body.newspaper-ui.quiniela-focus .ia-signo,
@@ -21,7 +22,7 @@ body.newspaper-ui.quiniela-focus .quiz-result-points,
 body.newspaper-ui.quiniela-focus .quiz-result-time,
 body.newspaper-ui.quiniela-focus .quiz-rank-hits,
 body.newspaper-ui.quiniela-focus .quiz-rank-pts {
-    font-family: var(--font-data) !important;
+    font-family: var(--font-data);
     font-variant-numeric: tabular-nums;
 }
 
@@ -40,12 +41,12 @@ body.newspaper-ui.quiniela-focus .cp-data-card > span,
 body.newspaper-ui.quiniela-focus .cp-side strong,
 body.newspaper-ui.quiniela-focus .cp-fixture strong,
 body.newspaper-ui.quiniela-focus .profile-name {
-    font-family: var(--font-display) !important;
+    font-family: var(--font-display);
 }
 
 /* El titular de portada debe ser limpio; las cabeceras de datos siguen usando
    la variante condensada del sistema. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-intro h1 {
-    font-family: "Rajdhani", "Outfit", sans-serif !important;
+    font-family: "Rajdhani", "Outfit", sans-serif;
 }
-
+}

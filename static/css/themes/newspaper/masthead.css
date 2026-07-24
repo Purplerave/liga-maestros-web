@@ -1,32 +1,33 @@
+@layer theme {
 /* Header polish: the brand panel must read as a real masthead block. */
 body.newspaper-ui.quiniela-focus .header-brand-panel {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
 }
 
 body.newspaper-ui.quiniela-focus .sidebar-brand-image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    object-position: center !important;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
     display: block;
 }
 
 body.newspaper-ui.quiniela-focus .topbar-actions {
     min-width: 0;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 6px !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
 }
 
 body.newspaper-ui.quiniela-focus .topbar-user-summary {
     min-width: 0;
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     white-space: nowrap;
 }
 
@@ -34,25 +35,26 @@ body.newspaper-ui.quiniela-focus .topbar-mini-link,
 body.newspaper-ui.quiniela-focus .compact-logout,
 body.newspaper-ui.quiniela-focus .primary-btn,
 body.newspaper-ui.quiniela-focus .icon-btn {
-    min-height: 28px !important;
-    padding: 5px 9px !important;
-    font-size: 0.72rem !important;
-    line-height: 1 !important;
+    min-height: 28px;
+    padding: 5px 9px;
+    font-size: 0.72rem;
+    line-height: 1;
     white-space: nowrap;
 }
 
 body.newspaper-ui.quiniela-focus #refresh-btn {
-    width: auto !important;
+    width: auto;
 }
 
 body.newspaper-ui.quiniela-focus .snake-arcade-panel {
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 body.newspaper-ui.quiniela-focus .snake-arcade-panel::before {
-    display: none !important;
-    content: none !important;
+    display: none;
+    content: none;
+}
 }

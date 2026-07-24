@@ -60,11 +60,13 @@ def static_files(filename):
     if not stays_inside_static or not os.path.isfile(file_path):
         abort(404)
 
-    cache_control = (
-        "public, max-age=31536000, immutable"
-        if normalized.startswith("img/")
-        else "no-store, no-cache, must-revalidate, max-age=0"
-    )
+    # Las URLs versionadas (?v=<cambian con el contenido>) pueden cachearse de
+    # forma inmutable: si el archivo cambia, la plantilla emite una URL nueva.
+    has_fingerprint = bool(request.args.get("v"))
+    if normalized.startswith("img/") or has_fingerprint:
+        cache_control = "public, max-age=31536000, immutable"
+    else:
+        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
     response = send_from_directory(static_root, normalized, conditional=True)
     response.headers["Cache-Control"] = cache_control
     return response
@@ -72,3 +74,44 @@ def static_files(filename):
 @bp.route('/juegos/<path:filename>')
 def juegos_files(filename):
     return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
+
+
+@bp.route('/health')
+def health():
+    """Probe ligero para monitores de uptime (sin datos sensibles)."""
+    return {"status": "ok", "service": "liga-maestros-web"}
+
+
+@bp.route('/robots.txt')
+def robots_txt():
+    body = (
+        "User-agent: *\n"
+        "Allow: /$\n"
+        "Allow: /static/\n"
+        "Disallow: /api/\n"
+        "Disallow: /cuenta\n"
+        "Disallow: /login\n"
+        "Disallow: /auth/\n\n"
+        f"Sitemap: {request.url_root.rstrip('/')}/sitemap.xml\n"
+    )
+    response = make_response(body)
+    response.headers["Content-Type"] = "text/plain; charset=utf-8"
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
+@bp.route('/sitemap.xml')
+def sitemap_xml():
+    root = request.url_root.rstrip("/")
+    urls = "".join(
+        f"  <url><loc>{root}{path}</loc><changefreq>{freq}</changefreq></url>\n"
+        for path, freq in (("/", "daily"), ("/privacidad", "yearly"), ("/cookies", "yearly"), ("/aviso-legal", "yearly"))
+    )
+    response = make_response(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{urls}</urlset>\n"
+    )
+    response.headers["Content-Type"] = "application/xml; charset=utf-8"
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response

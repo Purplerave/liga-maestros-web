@@ -1,6 +1,7 @@
+@layer pages {
 /* Hub y juegos comparten la arena principal. */
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .main-arena {
-    display: block !important;
+    display: block;
 }
 
 .games-hub-page {
@@ -118,7 +119,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .main-arena {
 }
 
 body.games-snake-open .main-arena {
-    display: none !important;
+    display: none;
 }
 
 body.games-snake-open #snake-game-back {
@@ -126,9 +127,9 @@ body.games-snake-open #snake-game-back {
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .arena-content.games-hub {
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
+    display: block;
+    width: 100%;
+    max-width: none;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .games-hub-page {
@@ -257,4 +258,5 @@ body.games-invaders-open .game-iframe {
         width: calc(50% - 7px);
         justify-self: center;
     }
+}
 }
