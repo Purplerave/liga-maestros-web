@@ -99,8 +99,9 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav butt
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button.active {
-    background: linear-gradient(180deg, #ffe75a, #ff3df2) !important;
-    color: #080214 !important;
+    background: rgba(56, 189, 248, 0.15) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    color: #38bdf8 !important;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav b {
