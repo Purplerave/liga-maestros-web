@@ -14,7 +14,7 @@ function ensureSnakeAssets() {
         ),
         loadStylesheetOnce(
             "snake-gol-styles",
-            versionedAsset("/static/css/snake_gol_arcade.css", "snake-arcade-7")
+            versionedAsset("/static/css/snake_gol_arcade.css", "snake-arcade-8")
         ),
         import(versionedAsset("/static/js/snake/index.js", "snake-modules-2"))
     ]).then(() => undefined).catch(error => {

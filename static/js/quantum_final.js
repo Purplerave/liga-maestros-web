@@ -254,6 +254,17 @@ async function shareTicket() {
         "🔥 Compite conmigo en la Liga de Maestros"
     ];
     const text = lines.join("\n");
+    // En móviles con Web Share API, abrir la hoja nativa de compartir
+    // (WhatsApp, Telegram, X...). Fallback: portapapeles.
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: "Liga de Maestros", text });
+            showToast("Pronostico compartido.");
+            return;
+        } catch (shareError) {
+            if (shareError && shareError.name === "AbortError") return;
+        }
+    }
     try {
         if (navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);

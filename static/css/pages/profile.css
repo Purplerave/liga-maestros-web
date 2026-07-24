@@ -1,36 +1,37 @@
+@layer pages {
 
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .app-shell {
-    grid-template-columns: 150px minmax(0, 1fr) !important;
-    grid-template-rows: 54px 38px minmax(0, 1fr) !important;
+    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-rows: 54px 38px minmax(0, 1fr);
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .header-brand-panel {
-    display: flex !important;
-    grid-column: 1 !important;
-    grid-row: 1 !important;
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .topbar-shell {
-    display: grid !important;
-    grid-column: 2 !important;
-    grid-row: 1 !important;
+    display: grid;
+    grid-column: 2;
+    grid-row: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .newspaper-page-nav {
-    display: grid !important;
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
-    grid-column: 1 / -1 !important;
-    grid-row: 3 !important;
-    width: 100% !important;
-    min-height: 0 !important;
-    height: auto !important;
-    overflow-y: auto !important;
-    padding: 8px !important;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    overflow-y: auto;
+    padding: 8px;
 }
 
 .profile-page-pro {
@@ -134,9 +135,9 @@ body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
 .profile-result-meter { position: relative; height: 5px; overflow: hidden; border-radius: 2px; background: rgba(148, 163, 184, 0.12); }
 .profile-result-meter i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #1ea7fd, #36d399); }
 .profile-result-ticket { display: none; }
-.profile-page-pro .good { color: #34d399 !important; }
-.profile-page-pro .mid { color: #fbbf24 !important; }
-.profile-page-pro .bad { color: #fb7185 !important; }
+.profile-page-pro .good { color: #34d399; }
+.profile-page-pro .mid { color: #fbbf24; }
+.profile-page-pro .bad { color: #fb7185; }
 
 .profile-comparison-value { margin: 3px 0; font: 900 1.35rem var(--font-data); }
 .profile-comparison-value small { font-size: 0.62rem; }
@@ -167,11 +168,11 @@ body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
 }
 
 @media (max-width: 640px) {
-    body.newspaper-ui.quiniela-focus.newspaper-profile-active .app-shell { grid-template-columns: 1fr !important; grid-template-rows: auto auto minmax(0, 1fr) !important; }
-    body.newspaper-ui.quiniela-focus.newspaper-profile-active .header-brand-panel { display: none !important; }
-    body.newspaper-ui.quiniela-focus.newspaper-profile-active .topbar-shell { grid-column: 1 !important; }
-    body.newspaper-ui.quiniela-focus.newspaper-profile-active .newspaper-page-nav { grid-row: 2 !important; }
-    body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena { grid-row: 3 !important; padding: 5px !important; }
+    body.newspaper-ui.quiniela-focus.newspaper-profile-active .app-shell { grid-template-columns: 1fr; grid-template-rows: auto auto minmax(0, 1fr); }
+    body.newspaper-ui.quiniela-focus.newspaper-profile-active .header-brand-panel { display: none; }
+    body.newspaper-ui.quiniela-focus.newspaper-profile-active .topbar-shell { grid-column: 1; }
+    body.newspaper-ui.quiniela-focus.newspaper-profile-active .newspaper-page-nav { grid-row: 2; }
+    body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena { grid-row: 3; padding: 5px; }
     .profile-summary { grid-template-columns: auto minmax(0, 1fr) auto; gap: 7px; }
     .profile-summary-rank { display: none; }
     .profile-summary-actions a:first-child { display: none; }
@@ -182,4 +183,5 @@ body.newspaper-ui.quiniela-focus.newspaper-profile-active .main-arena {
     .profile-result-head,
     .profile-result-row { grid-template-columns: 45px 78px 48px 58px minmax(70px, 1fr); gap: 4px; }
     .profile-result-score small { display: none; }
+}
 }

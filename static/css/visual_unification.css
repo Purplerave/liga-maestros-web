@@ -1,3 +1,4 @@
+@layer unification {
 /* ═══════════════════════════════════════════════════════════════
    VISUAL UNIFICATION — Liga de Maestros
    ───────────────────────────────────────────────────────────────
@@ -602,4 +603,5 @@ body.newspaper-ui.quiniela-focus .field-group select:focus {
         animation-duration: 0.01ms;
         transition-duration: 0.01ms;
     }
+}
 }

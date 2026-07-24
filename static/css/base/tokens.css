@@ -1,21 +1,43 @@
+@layer tokens {
+/* ==========================================================================
+   LIGA DE MAESTROS — DESIGN TOKENS (fuente única de verdad)
+   Paleta "Deep Space Premium": diario deportivo nocturno con acentos
+   gold/cyan. Todos los componentes deben consumir estos tokens.
+   ========================================================================== */
 :root {
+    /* ---------- Typography ---------- */
     --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     --font-display: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
     --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-    --font-main: var(--font-ui);
-    --fu: var(--font-ui);
+    --font-headline: "Rajdhani", "Outfit", sans-serif;
+    --font-main: var(--font-ui); /* alias legacy */
+    --fu: var(--font-ui);        /* alias legacy */
 
-    /* Premium Deep Space Palette — Liga de Maestros */
+    /* Escala tipográfica (uso opcional; los legados siguen abajo) */
+    --text-2xs: 0.625rem;   /* 10px — solo datos decorativos */
+    --text-xs:  0.75rem;    /* 12px — labels, captions (min legible) */
+    --text-sm:  0.875rem;   /* 14px */
+    --text-base: 1rem;      /* 16px */
+    --text-md:  1.125rem;
+    --text-lg:  1.25rem;
+    --text-xl:  1.5625rem;
+    --text-2xl: 1.953rem;
+    --text-3xl: 2.441rem;
+    --text-4xl: 3.052rem;
+
+    /* ---------- Color core ---------- */
     --bg-main: #06090f;
+    --bg-surface: #0d1423;
+    --bg-surface-strong: #131d30;
     --bg-card: rgba(13, 20, 35, 0.75);
     --bg-card-hover: rgba(22, 34, 55, 0.85);
-    --bg-surface: #0d1423;
     --border-main: rgba(255, 255, 255, 0.07);
     --border-accent: rgba(56, 189, 248, 0.35);
 
     --text-main: #f0f4f8;
-    --text-muted: #8b9dc3;
-    --text-dim: #6b7fa0;
+    --text-primary: var(--text-main);
+    --text-muted: #8b9dc3;    /* 5.2:1 sobre bg — WCAG AA */
+    --text-dim: #6b7fa0;      /* 4.5:1 sobre bg — WCAG AA */
 
     --accent: #38bdf8;
     --accent-glow: rgba(56, 189, 248, 0.25);
@@ -25,56 +47,79 @@
     --cyan: var(--accent);
     --brand: var(--gold);
     --muted: var(--text-muted);
-    --bg-surface-strong: #131d30;
+    --success: var(--green);
+    --danger: var(--red);
 
-    /* Cartoon legacy aliases (used in profile badges) */
-    --cartoon-paper: #0d1423;
-    --cartoon-ink: #f0f4f8;
-    --cartoon-gold: #fbbf24;
-    --cartoon-green: #22c55e;
-    --cartoon-cyan: #38bdf8;
-    --cartoon-coral: #f97316;
+    /* Foco accesible unificado (antes: oro en interactions, cyan en shell) */
+    --color-focus: #38bdf8;
 
-    --font-main: "Plus Jakarta Sans", system-ui, sans-serif;
-
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --shadow-card: 0 2px 16px -2px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.03);
-    --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.2);
-    --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-fast: all 0.12s ease;
-
-    /* Accent gradients */
-    --gradient-accent: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-    --gradient-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    --gradient-live: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
-    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-
-    /* Cartoon badge palette (usado en profile badges) */
+    /* Paleta "cartoon" usada en las medallas del perfil */
     --cartoon-paper: #f3e7cf;
     --cartoon-ink: #1a1612;
     --cartoon-gold: #f5c451;
     --cartoon-green: #4ade80;
     --cartoon-cyan: #38d9ff;
     --cartoon-coral: #fb923c;
+
+    /* ---------- Spacing (base 4px) ---------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* ---------- Radii ---------- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-full: 999px;
+
+    /* ---------- Shadows ---------- */
+    --shadow-card: 0 2px 16px -2px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.03);
+    --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 20px -4px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 30px -6px rgba(0, 0, 0, 0.6);
+    --shadow-glow-accent: 0 0 16px rgba(56, 189, 248, 0.25);
+    --shadow-glow-brand: 0 0 16px rgba(245, 158, 11, 0.25);
+
+    /* ---------- Motion ---------- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.12s ease;
+
+    /* ---------- Gradients ---------- */
+    --gradient-accent: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    --gradient-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --gradient-live: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+
+    /* ---------- Z-index scale ---------- */
+    --z-sticky: 100;
+    --z-overlay: 1000;
+    --z-modal: 5000;
+    --z-toast: 9000;
 }
 
-/* ============================================
-   VISIBLE UPGRADE — Targeted size increases
-   ============================================ */
-
+/* ==========================================================================
+   BASE RESET + ATMÓSFERA
+   ========================================================================== */
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 html, body {
     height: 100%;
     margin: 0;
-    background: #06090f;
+    background: var(--bg-main);
     color: var(--text-main);
     font-family: var(--font-ui);
     overflow-x: hidden;
     overflow-y: auto;
     scroll-behavior: smooth;
+    color-scheme: dark;
 }
 
 /* Atmospheric depth background */
@@ -91,7 +136,7 @@ body::before {
         radial-gradient(circle at 50% 100%, rgba(6, 9, 15, 1) 0%, transparent 50%);
 }
 
-/* Floating ambient orbs */
+/* Floating ambient orb */
 body::after {
     content: "";
     position: fixed;
@@ -111,21 +156,41 @@ body::after {
     100% { transform: translateX(-48%) translateY(30px); opacity: 1; }
 }
 
-/* Selection color */
 ::selection {
     background: rgba(56, 189, 248, 0.3);
     color: #fff;
 }
 
+/* Foco visible unificado y accesible (WCAG 2.1) */
+:focus { outline: none; }
+:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Respeta usuarios con sensibilidad al movimiento */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        transition-duration: 0.01ms;
+        scroll-behavior: auto;
+    }
+}
+
 /* Ensure all content sits above atmospheric layers */
 .app-shell { position: relative; z-index: 1; }
-#toast-container { z-index: 10000; }
+#toast-container { z-index: var(--z-toast, 9000); }
 
+/* ==========================================================================
+   MEDALLAS DE PERFIL ("cartoon pills")
+   ========================================================================== */
 .profile-badge-strip {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
 }
 
 .profile-badge-pill {
@@ -136,7 +201,7 @@ body::after {
     min-height: 24px;
     padding: 4px 8px;
     border: 2px solid rgba(6, 17, 31, 0.72);
-    border-radius: 10px 7px 11px 8px;
+    border-radius: var(--radius-md);
     background: var(--cartoon-paper);
     color: var(--cartoon-ink);
     box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.28);
@@ -150,7 +215,7 @@ body::after {
 }
 
 .profile-badge-pill small {
-    font-size: 0.56rem;
+    font-size: var(--text-2xs);
     font-weight: 900;
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -173,9 +238,12 @@ body::after {
     background: linear-gradient(180deg, #ffe9df, var(--cartoon-coral));
 }
 
+/* ==========================================================================
+   PREMIOS DE LA PEÑA
+   ========================================================================== */
 .contest-page.awards-page .awards-head {
     border: 2px solid rgba(246, 196, 83, 0.26);
-    border-radius: 12px 8px 14px 9px;
+    border-radius: var(--radius-lg);
     background:
         linear-gradient(135deg, rgba(246, 196, 83, 0.14), rgba(70, 195, 255, 0.07)),
         rgba(10, 16, 28, 0.86);
@@ -189,14 +257,12 @@ body::after {
     letter-spacing: 0;
 }
 
-.contest-page.awards-page .awards-head p {
-    max-width: 58ch;
-}
+.contest-page.awards-page .awards-head p { max-width: 58ch; }
 
 .contest-page.awards-page .award-chip {
     border-width: 2px;
     border-color: rgba(6, 17, 31, 0.56);
-    border-radius: 12px 8px 13px 9px;
+    border-radius: var(--radius-md);
     box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.18);
 }
 
@@ -219,13 +285,16 @@ body::after {
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.22);
 }
 
+/* ==========================================================================
+   TOASTS
+   ========================================================================== */
 .toast {
     position: relative;
     width: 100%;
     min-height: 46px;
-    padding: 12px 16px;
+    padding: var(--space-3) var(--space-4);
     border: 1px solid rgba(56, 189, 248, 0.4);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     background: rgba(8, 18, 34, 0.96);
     backdrop-filter: blur(12px);
     color: var(--text-main);
@@ -257,6 +326,5 @@ body::after {
     background: rgba(44, 12, 17, 0.98);
 }
 
-.toast.error strong {
-    color: #fecaca;
+.toast.error strong { color: #fecaca; }
 }

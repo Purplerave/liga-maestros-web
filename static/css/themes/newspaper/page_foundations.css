@@ -1,18 +1,19 @@
+@layer theme {
 body.newspaper-ui.quiniela-focus .newspaper-cover-mode {
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
+    display: block;
+    width: 100%;
+    max-width: none;
     height: auto;
     overflow: visible;
-    padding: 0 !important;
+    padding: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mode {
-    display: grid !important;
+    display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     width: 100%;
-    padding: 0 !important;
+    padding: 0;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table-wrap {
@@ -72,12 +73,12 @@ body.newspaper-ui.quiniela-focus .topbar-context::before {
 }
 
 body.newspaper-ui.quiniela-focus .topbar-title {
-    color: var(--news-gold) !important;
-    font-family: var(--font-display) !important;
-    font-size: 0.98rem !important;
-    font-weight: 300 !important;
-    letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
+    color: var(--news-gold);
+    font-family: var(--font-display);
+    font-size: 0.98rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
 body.newspaper-ui.quiniela-focus .topbar-kicker {
@@ -86,10 +87,11 @@ body.newspaper-ui.quiniela-focus .topbar-kicker {
     margin-bottom: 3px;
     padding: 1px 6px;
     background: rgba(217, 169, 40, 0.16);
-    color: var(--news-gold) !important;
-    font-family: var(--font-display) !important;
+    color: var(--news-gold);
+    font-family: var(--font-display);
     font-size: 0.62rem;
     font-weight: 900;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
 }

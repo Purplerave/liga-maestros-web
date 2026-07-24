@@ -4,6 +4,31 @@
 > **Auditor:** Principal UI/UX Designer & Lead Frontend Architect  
 > **Stack:** Flask + Jinja2 · Vanilla JS · CSS puro (27 archivos · 7.629 líneas)  
 > **Tema visual:** "Diario deportivo nocturno" (dark mode + acentos gold/cyan)
+>
+> ---
+>
+> ## ✅ ESTADO: REMEDIADA el 24 de julio de 2026
+>
+> Los hallazgos de esta auditoría quedaron resueltos en la misma fecha
+> (ver `CHANGELOG.md` — "2026-07 — Design System Refresh"):
+>
+> - 🔴 **802+ `!important`** → **0** (arquitectura `@layer` + tests de gobernanza).
+> - 🔴 **Variables fantasma** (`--cartoon-*`, `--font-main`, `--text-primary`) → definidas
+>   en `base/tokens.css` reconstruido; test activo contra regresiones.
+> - 🔴 **CSS ingobernable** → orden de cascada canónico declarado en
+>   `templates/liga_index.html` (`@layer tokens, base, badges, theme, typewriter,
+>   surfaces, hero, typography, layout, interactions, unification, pages;`).
+> - ✅ Sprint 1 (quick wins): todos aplicados (nav 6 columnas, foco unificado,
+>   tamaños mínimos legibles, targets táctiles ≥36/44px).
+> - ✅ Sprint 2 (foundation): `@layer` en producción, tokens completo, duplicados
+>   de `masthead/surface/shell` gobernados por capas.
+> - ✅ Sprint 3 (cleanup): `!important` eliminados, colores agrupados en tokens,
+>   soporte `prefers-reduced-motion`.
+> - ✅ Extras: caché inmutable de assets versionados, `/health`, `robots.txt`,
+>   `sitemap.xml`, PWA manifest, Open Graph/Twitter cards, Web Share API.
+>
+> El documento original se conserva debajo como registro histórico del estado
+> previo a la remediación.
 
 ---
 
