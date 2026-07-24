@@ -29,7 +29,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     min-height: 100%;
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
     color: var(--cp-text);
     background-color: #030712;
     background-image:
@@ -102,7 +102,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
-    padding: 0.1em 0.2em;
+    padding: 0.15em 0.2em 0.15em 0.5em;
     overflow: visible;
     white-space: nowrap;
 }
