@@ -46,6 +46,6 @@ body.newspaper-ui.quiniela-focus .profile-name {
 /* El titular de portada debe ser limpio; las cabeceras de datos siguen usando
    la variante condensada del sistema. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-intro h1 {
-    font-family: "Orbitron", "Rajdhani", sans-serif !important;
+    font-family: "Rajdhani", "Outfit", sans-serif !important;
 }
 

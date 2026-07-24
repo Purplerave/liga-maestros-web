@@ -93,11 +93,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-intro h1 {
     margin: 0 0 15px;
     color: #ffffff;
-    font-family: "Orbitron", "Rajdhani", sans-serif;
-    font-size: clamp(1.2rem, 2.8vw, 2rem);
+    font-family: "Rajdhani", "Outfit", sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: 0.05em;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     background: linear-gradient(135deg, #ffffff 30%, #f59e0b 100%);
     -webkit-background-clip: text;
