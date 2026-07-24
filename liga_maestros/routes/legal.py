@@ -1,22 +1,33 @@
 """Public legal pages and authenticated account deletion."""
 import os
+import logging
 
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
 
 from ..db.connection import get_db
 from ..middleware.csrf import get_csrf_token
 
 bp = Blueprint("legal", __name__)
+logger = logging.getLogger(__name__)
 
 
 def _legal_context():
-    return {
-        "owner_name": os.getenv("LEGAL_OWNER_NAME", "Responsable de Liga de Maestros"),
-        "owner_id": os.getenv("LEGAL_OWNER_ID", "Pendiente de configurar"),
-        "owner_address": os.getenv("LEGAL_OWNER_ADDRESS", "Pendiente de configurar"),
-        "contact_email": os.getenv("LEGAL_CONTACT_EMAIL", "Pendiente de configurar"),
+    env = os.environ
+    context = {
+        "owner_name": env.get("LEGAL_OWNER_NAME"),
+        "owner_id": env.get("LEGAL_OWNER_ID"),
+        "owner_address": env.get("LEGAL_OWNER_ADDRESS"),
+        "contact_email": env.get("LEGAL_CONTACT_EMAIL"),
         "user": session.get("user"),
     }
+    if env.get("FLASK_ENV") == "production" or env.get("RENDER") == "1":
+        missing = [k for k, v in context.items() if k != "user" and not v]
+        if missing:
+            logger.critical("Legal text incomplete - missing env vars: %s", missing)
+    for key in ("owner_name", "owner_id", "owner_address", "contact_email"):
+        if not context[key]:
+            context[key] = "No configurado"
+    return context
 
 
 @bp.route("/privacidad")

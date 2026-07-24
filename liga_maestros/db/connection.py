@@ -44,7 +44,11 @@ def get_db():
         if not hasattr(g, "_managed_db_conns"):
             g._managed_db_conns = []
         if g._managed_db_conns:
-            return g._managed_db_conns[0]
+            try:
+                g._managed_db_conns[0].execute("SELECT 1")
+                return g._managed_db_conns[0]
+            except Exception:
+                g._managed_db_conns.clear()
 
     ensure_db_file()
     conn = sqlite3.connect(config.DB_PATH, timeout=10, factory=ClosingConnection)

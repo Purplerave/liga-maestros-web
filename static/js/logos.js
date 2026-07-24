@@ -140,7 +140,7 @@ function getLogoAliasIndex() {
 
 function logoBadge(name, logo) {
     if (logo) {
-        return `<span class="team-badge has-logo"><img src="${escapeHtml(logo)}" alt=""></span>`;
+        return `<span class="team-badge has-logo"><img src="${escapeHtml(logo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="24" height="24"></span>`;
     }
     return `<span class="team-badge">${escapeHtml(teamToken(name))}</span>`;
 }

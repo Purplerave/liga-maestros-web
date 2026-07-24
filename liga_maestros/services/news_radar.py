@@ -73,7 +73,10 @@ def build_news_radar(force=False):
         "fetched_at_ts": now,
         "items": selected,
         "sources": [feed["name"] for feed in config.NEWS_FEEDS],
-        "errors": errors[:5],
     }
+    if force:
+        payload["errors"] = errors[:5]
     safe_write_json(config.NEWS_CACHE_PATH, payload)
+    if errors:
+        payload["errors"] = errors[:5]
     return payload

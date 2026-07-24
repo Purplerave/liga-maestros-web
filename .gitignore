@@ -66,3 +66,19 @@ _extract_*.py
 .DS_Store
 Thumbs.db
 *.code-workspace
+
+# Dead scripts / one-shot fixtures
+J[0-9][0-9].txt
+*_J[0-9][0-9]*.py
+ACTUALIZAR_COMPLETO_*.py
+ACTUALIZAR_PREDICCIONES.py
+ACTUALIZAR_RADAR_NOTICIAS.py
+IMPORTAR_J74_COMPLETO.py
+IMPORTAR_PROGRAMA_JORNADA.py
+IMPORTAR_QUIZ_JORNADA.py
+EXPORTAR_semilla_produccion.py
+FIX_*.py
+COMPROBAR_JORNADA.bat
+PUBLICAR_WEB.bat
+data/LIVE_ALL_MATCHES*.json
+data/LIVE_TICKER.json

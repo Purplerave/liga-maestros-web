@@ -48,8 +48,8 @@
 }
 
 .topbar-filters {
-    display: grid;
-    grid-template-columns: 120px minmax(180px, 235px);
+    display: flex;
+    align-items: center;
     gap: 8px;
     margin-left: 0;
     min-width: 0;
@@ -156,6 +156,15 @@
     gap: 5px;
     margin-left: 4px;
     min-width: 0;
+}
+
+.topbar-actions .primary-btn,
+.topbar-actions .icon-btn {
+    flex-shrink: 0;
+}
+
+.topbar-actions [style*="visibility: hidden"] {
+    pointer-events: none;
 }
 
 .user-panel {
