@@ -32,7 +32,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-h
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-kicker {
     grid-column: 1 / -1;
-    font-size: 0.46rem !important;
+    font-size: 0.65rem !important;
     line-height: 1.1 !important;
     color: #45ff9a !important;
 }
@@ -63,7 +63,7 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-ca
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-card span {
     margin-bottom: 5px !important;
-    font-size: 0.44rem !important;
+    font-size: 0.62rem !important;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-card strong {

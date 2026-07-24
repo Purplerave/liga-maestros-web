@@ -26,6 +26,16 @@
     --muted: var(--text-muted);
     --bg-surface-strong: #131d30;
 
+    /* Cartoon legacy aliases (used in profile badges) */
+    --cartoon-paper: #0d1423;
+    --cartoon-ink: #f0f4f8;
+    --cartoon-gold: #fbbf24;
+    --cartoon-green: #22c55e;
+    --cartoon-cyan: #38bdf8;
+    --cartoon-coral: #f97316;
+
+    --font-main: "Plus Jakarta Sans", system-ui, sans-serif;
+
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;

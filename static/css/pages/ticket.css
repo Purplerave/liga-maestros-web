@@ -682,7 +682,7 @@ body.quiniela-focus .arena-table-wrap {
     border-radius: 6px;
     background: rgba(2, 6, 23, 0.34);
     color: #cbd5e1;
-    font-size: 0.52rem;
+    font-size: 0.65rem;
     font-weight: 850;
 }
 
@@ -771,7 +771,7 @@ body.quiniela-focus .arena-table {
 body.quiniela-focus .arena-table th {
     height: 18px;
     padding: 1px 4px;
-    font-size: 0.52rem;
+    font-size: 0.65rem;
 }
 
 body.quiniela-focus .tension-row td {
@@ -825,7 +825,7 @@ body.quiniela-focus .tension-fixture-main .fixture-name {
 body.quiniela-focus .team-badge {
     width: 18px;
     height: 18px;
-    font-size: 0.48rem;
+    font-size: 0.6rem;
 }
 
 body.quiniela-focus .tension-fixture-main .fixture-team:first-child {
@@ -958,7 +958,7 @@ body.quiniela-focus .pleno-picker .ia-signo {
     min-width: 18px;
     height: 18px;
     min-height: 18px;
-    font-size: 0.52rem;
+    font-size: 0.65rem;
 }
 
 body.quiniela-focus .live-scrutiny-badge {
