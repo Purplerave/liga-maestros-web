@@ -10,7 +10,7 @@ function versionedAsset(path, tag) {
 
 const VIEW_STYLES = {
     CONTEST: [
-        ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-3")],
+        ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-4")],
         ["view-profile-styles", versionedAsset("/static/css/pages/profile.css", "profile-3")],
     ],
     STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-2")]],
