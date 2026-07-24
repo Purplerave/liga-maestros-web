@@ -46,29 +46,24 @@ function renderContestRows(rows = [], limit = 5, options = {}) {
     const userRow = highlightUser ? rows.find(r => r.is_user) : null;
     const userPos = userRow ? userRow.pos : null;
 
-    return limited.map((item, idx) => {
-        const medal = showMedals && idx === 0 ? "🥇" : showMedals && idx === 1 ? "🥈" : showMedals && idx === 2 ? "🥉" : "";
+    return `<div class="contest-rows-grid">${limited.map((item, idx) => {
+        const rank = showMedals && idx < 3 ? ["1º", "2º", "3º"][idx] : item.pos;
         const isUser = item.is_user;
         const isNearUser = userPos && Math.abs(item.pos - userPos) <= 2 && !isUser && item.pos !== userPos;
         const separator = userPos && item.pos === userPos - 1 && limited[idx + 1]?.pos === userPos;
 
-        let html = `<div class="contest-row ${isUser ? "is-user" : ""} ${isNearUser ? "is-near-user" : ""}">`;
-        if (medal) {
-            html += `<span class="contest-medal">${medal}</span>`;
-        } else {
-            html += `<span class="contest-pos">${item.pos}</span>`;
-        }
-        html += `<span class="contest-name">${escapeHtml(item.name)}</span>`;
-        html += `<span class="contest-hit-rate">${item.played ? Math.round((item.points / (item.played * 15)) * 100) : 0}%</span>`;
-        html += `<span class="contest-points">${item.points} pts</span>`;
+        let html = `<div class="contest-card-row ${isUser ? "is-user" : ""} ${isNearUser ? "is-near-user" : ""}">`;
+        html += `<span class="ccr-rank">${rank}</span>`;
+        html += `<span class="ccr-name">${escapeHtml(item.name)}</span>`;
+        html += `<span class="ccr-pts">${item.points}</span>`;
         html += `</div>`;
 
         if (separator) {
-            html += `<div class="contest-separator"><span></span><small>TU POSICIÓN</small><span></span></div>`;
+            html += `<div class="contest-separator"><small>TU POSICION</small></div>`;
         }
 
         return html;
-    }).join("");
+    }).join("")}</div>`;
 }
 
 function awardTierClass(idx) {
