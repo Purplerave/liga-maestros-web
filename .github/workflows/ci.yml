@@ -44,7 +44,7 @@ jobs:
       - name: JavaScript syntax check
         run: |
           node --check static/js/quantum_final.js
-          node --check static/js/snake_gol_arcade.js
+          node --check static/js/snake/index.js
 
       - name: Tests
         run: pytest -q
