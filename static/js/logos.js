@@ -23,9 +23,7 @@ function teamLogo(match, side) {
 function fixedTeamLogo(name) {
     const cacheKey = logoLookupKey(name);
     if (logoCache.has(cacheKey)) return logoCache.get(cacheKey);
-    const target = logoLookupKey(name);
-    const logoIndex = getLogoDataIndex();
-    const result = logoIndex.get(target) || TEAM_LOGO_FILES[target] || "";
+    const result = TEAM_LOGO_FILES[cacheKey] || "";
     logoCache.set(cacheKey, result);
     return result;
 }
@@ -134,26 +132,10 @@ function logoLookupKey(name) {
 function getLogoAliasIndex() {
     if (logoAliasIndex) return logoAliasIndex;
     logoAliasIndex = new Map();
-    const contractAliases = state.data?.team_contract?.aliases || {};
-    for (const [rawName, canonicalName] of Object.entries(contractAliases)) {
-        logoAliasIndex.set(normalizeName(rawName), normalizeName(canonicalName));
-    }
     for (const [rawName, canonicalName] of Object.entries(TEAM_LOGO_ALIASES)) {
         logoAliasIndex.set(normalizeName(rawName), normalizeName(canonicalName));
     }
     return logoAliasIndex;
-}
-
-function getLogoDataIndex() {
-    if (logoDataIndex) return logoDataIndex;
-    logoDataIndex = new Map();
-    const add = (rawName, logo) => {
-        if (!rawName || !logo) return;
-        logoDataIndex.set(logoLookupKey(rawName), logo);
-    };
-    Object.entries(state.data?.team_contract?.logos || {}).forEach(([rawName, logo]) => add(rawName, logo));
-    Object.entries(state.data?.team_logos || {}).forEach(([rawName, logo]) => add(rawName, logo));
-    return logoDataIndex;
 }
 
 function logoBadge(name, logo) {

@@ -2,10 +2,9 @@
 import threading
 from datetime import datetime
 
-import config
 from ..db.connection import get_db
 from ..scoring import score_prediction
-from .teams import canonical_contest_id, public_contest_name, is_scored_status, is_live_scored_status
+from .teams import canonical_contest_id, public_contest_name, is_scored_status
 
 CONTEST_DYNAMIC_START_JORNADA = 58
 Q15_EXPECTED_MATCHES = 15

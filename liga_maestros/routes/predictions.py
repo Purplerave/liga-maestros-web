@@ -59,7 +59,6 @@ def save_predictions():
         if len(rows) != Q15_EXPECTED_MATCHES or ids != set(range(1, Q15_EXPECTED_MATCHES + 1)):
             return jsonify({"status": "error", "message": "La jornada no tiene 15 partidos validos."}), 400
         close_info = compute_ticket_close_info(rows, source=f"save_predictions_j{target_jornada}")
-        first_kickoff = close_info["first_kickoff"]
         close_at = close_info["close_at"]
         already_closed = bool(close_at and madrid_now() >= close_at)
         already_closed = already_closed or any(is_scored_status(row["status"]) or is_live_scored_status(row["status"]) for row in rows)
@@ -95,7 +94,7 @@ def save_predictions():
             return jsonify({"status": "error", "message": "No se pudo verificar el guardado completo de la quiniela."}), 500
         conn.commit()
         return jsonify({"status": "ok", "message": "Quiniela guardada correctamente", "jornada": target_jornada, "saved_count": len([sign for sign in saved_signs if sign != "-"]), "signos": saved_signs})
-    except Exception as exc:
+    except Exception:
         if transaction_started:
             conn.rollback()
         return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500

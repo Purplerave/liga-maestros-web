@@ -132,7 +132,7 @@ function renderQuizResult(container, result, jornada) {
                 <div class="quiz-result-points">${result.puntos} puntos</div>
                 <div class="quiz-result-time">${minutes}:${String(seconds).padStart(2, "0")}</div>
             </div>
-            ${result.posicion_jornada ? `<div class="quiz-result-position">Estas ${result.posicion_jornada}Âº en esta jornada</div>` : ""}
+            ${result.posicion_jornada ? `<div class="quiz-result-position">Estas ${result.posicion_jornada}º en esta jornada</div>` : ""}
             <div class="quiz-result-bonuses">
                 ${result.bonus_perfecto ? `<span class="quiz-bonus">Perfecto +300</span>` : ""}
                 ${result.bonus_rapidez ? `<span class="quiz-bonus">Rapidez +${result.bonus_rapidez}</span>` : ""}
@@ -155,7 +155,7 @@ function renderQuizResult(container, result, jornada) {
             }
             list.innerHTML = data.ranking.map((entry, idx) => `
                 <div class="quiz-rank-row${entry.user_id === state.user.id ? " quiz-rank-mine" : ""}">
-                    <span class="quiz-rank-pos">${idx + 1}Âº</span>
+                    <span class="quiz-rank-pos">${idx + 1}º</span>
                     <span class="quiz-rank-name">${escapeHtml(entry.nombre)}</span>
                     <span class="quiz-rank-hits">${entry.aciertos}/${entry.total_preguntas}</span>
                     <span class="quiz-rank-pts">${entry.puntos} pts</span>

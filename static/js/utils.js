@@ -46,17 +46,17 @@ function getShortName(name) {
     const normalized = clean.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const map = {
         "CLUB ATLETICO DE MADRID": "AT. MADRID",
-        "CLUB ATLÃ‰TICO DE MADRID": "AT. MADRID",
+        "CLUB ATLÉTICO DE MADRID": "AT. MADRID",
         "REAL MADRID C.F.": "R. MADRID",
         "F.C. BARCELONA": "BARCA",
         "ATHLETIC CLUB BILBAO": "ATHLETIC",
         "REAL SOCIEDAD DE FUTBOL": "R. SOCIEDAD",
-        "REAL SOCIEDAD DE FÃšTBOL": "R. SOCIEDAD",
+        "REAL SOCIEDAD DE FÚTBOL": "R. SOCIEDAD",
         "VILLARREAL C.F.": "VILLARREAL",
         "REAL BETIS BALOMPIE": "BETIS",
-        "REAL BETIS BALOMPIÃ‰": "BETIS",
+        "REAL BETIS BALOMPIÉ": "BETIS",
         "DEPORTIVO ALAVES": "ALAVES",
-        "DEPORTIVO ALAVÃ‰S": "ALAVES",
+        "DEPORTIVO ALAVÉS": "ALAVES",
         "R.C.D. ESPANYOL DE BARCELONA": "ESPANYOL",
         "R.C.D. MALLORCA": "MALLORCA"
     };
@@ -180,28 +180,6 @@ function formatSmartDate(fechaRaw, horaRaw) {
     return `${parts[2]}/${parts[1]} ${hourLabel}`;
 }
 
-function formatStatus(status, time = "", scheduled = "") {
-    const raw = String(status || "").toUpperCase();
-    if (["SCHEDULED", "NS", "NOT STARTED", ""].includes(raw)) {
-        const h = String(scheduled || time || "").substring(0, 5);
-        return h ? `${h}h` : "Por jugar";
-    }
-    if (["FT", "FINISHED", "TERMINADO", "STALE"].includes(raw)) return "";
-    if (["LIVE", "IN PLAY", "EN JUEGO"].includes(raw)) return time ? `En directo ${time}` : "En directo";
-    if (raw === "HT" || raw === "HALF TIME BREAK") return "Descanso";
-    return status || "";
-}
-
-function isPastScheduled(match) {
-    const raw = String(match.status || "").toUpperCase();
-    if (!["SCHEDULED", "NS", "NOT STARTED", ""].includes(raw)) return false;
-    const dateText = String(match.added || match.fecha_raw || "").slice(0, 10);
-    if (!dateText) return false;
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    return dateText < today;
-}
-
 function isLiveStatus(status) {
     const raw = String(status || "").toUpperCase();
     return ["LIVE", "IN PLAY", "EN JUEGO", "1H", "2H", "HT", "ET", "P", "SUSPENDED"].includes(raw);
@@ -254,16 +232,6 @@ function liveStage(match) {
     if (["HT", "HALF TIME BREAK"].includes(raw)) return "HT";
     if (["FT", "FINISHED", "TERMINADO"].includes(raw)) return "FT";
     if (["LIVE", "IN PLAY", "EN JUEGO", "1H", "2H", "ET", "P"].includes(raw)) return "LIVE";
-    return "";
-}
-
-function liveScoreLabel(match) {
-    const stage = liveStage(match);
-    if (stage === "HT") return "DESC.";
-    if (stage === "FT") return "";
-    const minute = matchMinuteValue(match);
-    if (minute) return `${minute}'`;
-    if (stage === "LIVE") return "En vivo";
     return "";
 }
 
@@ -468,7 +436,7 @@ function renderQ15Meta(match) {
 
 function repairMojibakeText(value) {
     let text = String(value || "");
-    for (let i = 0; i < 3 && /[ÃÃ‚]/.test(text); i += 1) {
+    for (let i = 0; i < 3 && /[\u00c2\u00c3]/.test(text); i += 1) {
         try {
             const decoded = decodeURIComponent(escape(text));
             if (!decoded || decoded === text) break;
@@ -492,13 +460,13 @@ function compactTensionLabel(label) {
         chatgpt: "GPT",
         consejo: "CONS",
         pena: "PENA",
-        "peÃ±a": "PENA",
+        "peña": "PENA",
         tu: "TU",
-        "tÃº": "TU",
+        "tú": "TU",
         boleto: "TU"
     };
-    if (clean === "peÃ±a" || clean.includes("peÃ±a")) return "PENA";
-    if (clean === "tÃº" || clean.includes("tÃº")) return "TU";
+    if (clean === "peña" || clean.includes("peña")) return "PENA";
+    if (clean === "tú" || clean.includes("tú")) return "TU";
     return map[clean] || fullLabel.trim().slice(0, 4).toUpperCase();
 }
 

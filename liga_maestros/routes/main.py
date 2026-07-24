@@ -1,13 +1,16 @@
 """Main routes: index page, static files."""
-import os, time
-from flask import Blueprint, make_response, render_template, request, jsonify, send_from_directory, session
+import os
+import time
+from functools import lru_cache
+
+from flask import Blueprint, abort, make_response, render_template, request, send_from_directory, session
 
 import config
-from ..services.ticket import madrid_now, today_madrid
 
 bp = Blueprint("main", __name__)
 
 
+@lru_cache(maxsize=1)
 def _get_assets_version():
     static_dir = os.path.join(config.BASE_DIR, "static")
     mtimes = []
@@ -46,31 +49,25 @@ def index():
 
 @bp.route('/static/<path:filename>')
 def static_files(filename):
-    normalized = filename.replace("\\", "/")
-    if normalized.startswith("img/"):
-        max_age = 31536000
-        cache_control = "public, max-age=31536000, immutable"
-    elif normalized.startswith(("css/", "js/")):
-        max_age = 0
-        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
-    else:
-        max_age = 0
-        cache_control = "no-store, no-cache, must-revalidate, max-age=0"
-    
-    file_path = os.path.join(config.BASE_DIR, "static", filename)
-    if not os.path.exists(file_path):
-        from flask import abort
-        abort(404)
-    
-    with open(file_path, "rb") as f:
-        content = f.read()
-    
-    from flask import Response
-    response = Response(content)
-    response.headers["Cache-Control"] = cache_control
-    response.headers["Content-Type"] = "application/javascript" if filename.endswith(".js") else "text/css" if filename.endswith(".css") else "application/octet-stream"
-    return response
+    static_root = os.path.realpath(os.path.join(config.BASE_DIR, "static"))
+    normalized = filename.replace("\\", "/").lstrip("/")
+    file_path = os.path.realpath(os.path.join(static_root, normalized))
 
+    try:
+        stays_inside_static = os.path.commonpath((static_root, file_path)) == static_root
+    except ValueError:
+        stays_inside_static = False
+    if not stays_inside_static or not os.path.isfile(file_path):
+        abort(404)
+
+    cache_control = (
+        "public, max-age=31536000, immutable"
+        if normalized.startswith("img/")
+        else "no-store, no-cache, must-revalidate, max-age=0"
+    )
+    response = send_from_directory(static_root, normalized, conditional=True)
+    response.headers["Cache-Control"] = cache_control
+    return response
 
 @bp.route('/juegos/<path:filename>')
 def juegos_files(filename):

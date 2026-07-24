@@ -1,7 +1,7 @@
 :root {
-    --font-ui: "Plus Jakarta Sans", "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     --font-display: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
-    --font-data: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+    --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
     --fu: var(--font-ui);
 
     /* Premium Deep Space Palette — Liga de Maestros */

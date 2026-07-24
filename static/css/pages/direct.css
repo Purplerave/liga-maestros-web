@@ -1,0 +1,73 @@
+/* Estado de la pagina Directo cuando no hay partidos en juego. */
+body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-empty-page {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    place-items: start center;
+    width: 100% !important;
+    max-width: none !important;
+    padding: clamp(36px, 8vh, 88px) 20px !important;
+}
+
+.direct-empty-state {
+    display: grid;
+    justify-items: center;
+    width: min(620px, 100%);
+    margin-inline: auto;
+    padding: clamp(28px, 5vw, 48px);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    background: rgba(10, 17, 30, 0.82);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+    text-align: center;
+}
+
+.direct-empty-kicker {
+    color: #38d9ff;
+    font: 800 0.68rem var(--font-data);
+}
+
+.direct-empty-state h2 {
+    margin: 10px 0 8px;
+    color: #f8fafc;
+    font: 700 clamp(1.35rem, 3vw, 2rem) var(--font-display);
+}
+
+.direct-empty-state > p {
+    max-width: 50ch;
+    margin: 0;
+    color: #91a1b8;
+    line-height: 1.55;
+}
+
+.direct-empty-next {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.direct-empty-next span,
+.direct-empty-next small {
+    color: #91a1b8;
+    font-size: 0.7rem;
+}
+
+.direct-empty-next strong {
+    color: #f8c84b;
+    font-size: 1rem;
+}
+
+.direct-empty-action {
+    min-height: 38px;
+    margin-top: 20px;
+    padding: 0 20px;
+    border: 1px solid #f59e0b;
+    border-radius: 7px;
+    background: #f59e0b;
+    color: #07111f;
+    font-weight: 800;
+    cursor: pointer;
+}

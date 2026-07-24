@@ -24,7 +24,7 @@ function renderMatchInsight(match) {
         pctTriplet("Mercado", info.apu)
     ].filter(Boolean).join("");
     const historico = info.historico ?
-         `<small class="insight-muted">HistÃ³rico: ${escapeHtml(info.historico["1"] || 0)} local | ${escapeHtml(info.historico["X"] || 0)} empates | ${escapeHtml(info.historico["2"] || 0)} visitante</small>`
+         `<small class="insight-muted">Histórico: ${escapeHtml(info.historico["1"] || 0)} local | ${escapeHtml(info.historico["X"] || 0)} empates | ${escapeHtml(info.historico["2"] || 0)} visitante</small>`
         : "";
     const reason = maestra.razon ?
          `<p class="insight-reason"><b>${escapeHtml(maestra.signo || "Maestra")}</b> ${escapeHtml(maestra.razon)}</p>`
@@ -41,13 +41,6 @@ function renderMatchInsight(match) {
             ${chips ? `<div class="insight-chips">${chips}</div>` : ""}
             ${historico}
             ${detail}
-        </div>`;
-}
-
-function renderMatchDetail(m, c) {
-    return `
-        <div class="match-detail-row">
-            ${renderMatchDetailGrid(m, c)}
         </div>`;
 }
 
@@ -103,32 +96,6 @@ function renderConsensus(c, real, status) {
             <b>${escapeHtml(sign)}</b><small>${value}%</small>
         </span>`).join("");
     return `<span class="pena-pick pena-pick-breakdown ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}" aria-label="${escapeHtml(detail)}">${breakdown}</span>`;
-}
-
-function renderConsensusBar(consensus, isPleno = false) {
-    if (isPleno) {
-        return `<div class="consensus-bar-wrap consensus-bar-pleno"><span>Pleno al 15</span></div>`;
-    }
-    const p1 = Math.max(0, Number(consensus.p1 || 0));
-    const px = Math.max(0, Number(consensus.px || 0));
-    const p2 = Math.max(0, Number(consensus.p2 || 0));
-    const total = p1 + px + p2 || 1;
-    const w1 = Math.max(4, (p1 / total) * 100);
-    const wx = Math.max(4, (px / total) * 100);
-    const w2 = Math.max(4, (p2 / total) * 100);
-    return `
-        <div class="consensus-bar-wrap" title="Consenso Peña: 1 ${p1}% | X ${px}% | 2 ${p2}%">
-            <div class="consensus-labels">
-                <span><b>1</b><em>${p1}%</em></span>
-                <span><b>X</b><em>${px}%</em></span>
-                <span><b>2</b><em>${p2}%</em></span>
-            </div>
-            <div class="consensus-bar">
-                <span class="consensus-seg seg-1" style="width:${w1}%"></span>
-                <span class="consensus-seg seg-x" style="width:${wx}%"></span>
-                <span class="consensus-seg seg-2" style="width:${w2}%"></span>
-            </div>
-        </div>`;
 }
 
 function getPenaHiddenUserIds() {
@@ -233,23 +200,6 @@ function getPredictionReason(preds, idx, primary, fallback) {
     return fallback ? (preds?.[fallback]?.motivos?.[idx] || "") : "";
 }
 
-function renderTensionAiChips(preds, idx, real, status, exactScore = false) {
-    return getOfficialAIColumns().map(([primary, fallback, label]) => {
-        const sign = getSign(preds, idx, primary, fallback);
-        const reason = getPredictionReason(preds, idx, primary, fallback);
-        return renderTensionChip(label, sign, real, status, exactScore, "", reason);
-    }).join("");
-}
-
-function renderCouncilStyleChips(preds, idx, real, status, exactScore = false) {
-    const programSign = getSign(preds, idx, "programa", "v260_omnisciente");
-    const councilSign = getSign(preds, idx, "consejo_ias", "consenso");
-    return [
-        renderTensionChip("Programa", programSign, real, status, exactScore, "tension-chip-program"),
-        renderTensionChip("Consejo", councilSign, real, status, exactScore, "tension-chip-council")
-    ].join("");
-}
-
 function renderTensionPenaChip(content, label) {
     const fullLabel = repairMojibakeText(label);
     const compactLabel = compactTensionLabel(fullLabel);
@@ -291,47 +241,6 @@ function renderLiveScrutinyBadge(matches) {
 }
 
 /* ---------- Análisis de tensión por partido ---------- */
-
-function getMatchTensionInfo(match, idx, consensus, preds, mySign) {
-    const isPleno = idx === 14;
-    const values = [
-        ["1", Number(consensus.p1 || 0)],
-        ["X", Number(consensus.px || 0)],
-        ["2", Number(consensus.p2 || 0)]
-    ].sort((a, b) => b[1] - a[1]);
-    const rawWinner = normalizeSign(consensus.ganador);
-    const winner = ["1", "X", "2"].includes(rawWinner) ? rawWinner : values[0][0];
-    const gap = values[0][1] - values[1][1];
-    const programSign = getSign(preds, idx, "programa", "v260_omnisciente");
-    const maestro = pickFeaturedMaster(preds, idx);
-    const signs = getOfficialAIColumns().map(([primary, fallback]) => getSign(preds, idx, primary, fallback))
-        .concat([mySign])
-        .map(normalizeSign)
-        .filter(sign => sign && sign !== "-");
-    const disagreements = signs.filter(sign => {
-        if (isPleno) return sign !== programSign;
-        return sign !== winner;
-    }).length;
-
-    let badge = "";
-    if (isPleno) badge = "Pleno caliente";
-    else if (programSign && programSign !== "-" && programSign !== winner) badge = "Golpe del programa";
-    else if (winner === "X" && Number(consensus.px || 0) >= 28) badge = "Empate oculto";
-    else if (values[0][1] >= 60 && gap >= 24) badge = "Fijo";
-    else if (disagreements >= 3) badge = "Partido dividido";
-    else if (gap <= 10 && values[0][1] > 0) badge = "Partido abierto";
-    else if (gap <= 16 && values[0][1] > 0) badge = "Trampa del consenso";
-
-    return {
-        badge,
-        disagreements,
-        programSign,
-        maestroSign: maestro.sign,
-        maestroLabel: maestro.label
-    };
-}
-
-/* ---------- Tabla de tensión (vista principal Quiniela) ---------- */
 
 function renderArenaTensionBody(matches) {
     const tbody = qs("arena-body");
@@ -485,92 +394,4 @@ function patchTicketArena() {
         userCell.innerHTML = `<div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div>`;
     }
     return true;
-}
-
-/* ---------- Tabla completa (modo alternativo) ---------- */
-
-function renderArenaTableBody(matches) {
-    const tbody = qs("arena-body");
-    const thead = qs("arena-thead");
-    if (!tbody || !thead) return;
-    const visibleAIColumns = getVisibleAIColumns(matches);
-
-    const scoreHeader = matches.some(m => isScheduledStatus(m.status)) ? "Hora" : "Marcador";
-    thead.innerHTML = `
-        <tr>
-            <th>#</th>
-            <th style="text-align:left;">Partido</th>
-            <th style="text-align:center;">Estado / Marcador</th>
-            ${visibleAIColumns.map(col => `<th>${col[2]}</th>`).join("")}
-            <th>Tu</th>
-            <th>Peña</th>
-        </tr>`;
-
-    const preds = state.data.predicciones_actuales || {};
-    const consenso = state.data.consenso_pena || [];
-    const canEdit = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
-
-    tbody.innerHTML = matches.map((m, idx) => {
-        const isPleno = idx === 14;
-        const real = m.signo_actual || "-";
-        const mySign = state.my_signs[idx] || "-";
-        const c = consenso.find(item => Number(item.id) === Number(m.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
-        const consensoPleno = getPenaPlenoSummary(idx);
-        const consensus = isPleno
-            ? renderPenaPleno(consensoPleno, m.marcador, m.status)
-            : renderConsensus(c, real, m.status);
-        const liveMatch = isMatchLiveNow(m);
-        const scheduledMatch = isScheduledStatus(m.status) && !liveMatch;
-        const score = scheduledMatch ? formatSmartDate(m.fecha_raw, m.hora) : (m.marcador || "-");
-        const scoreText = liveMatch ? liveScoreDisplay(m, score) : score;
-        const aiCells = visibleAIColumns.map(([primary, fallback, label]) => {
-            const sign = getSign(preds, idx, primary, fallback);
-            return `<td class="rival-cell"><span class="ia-signo ${hitClass(sign, isPleno ? m.marcador : real, m.status, isPleno)}" title="${escapeHtml(label)}">${escapeHtml(sign)}</span></td>`;
-        }).join("");
-        const mine = renderMyCell(idx, mySign, isPleno ? m.marcador : real, m.status, canEdit, isPleno);
-        const isFinished = isFinishedStatus(m.status);
-        const values = [Number(c.p1 || 0), Number(c.px || 0), Number(c.p2 || 0)].sort((a, b) => b - a);
-        const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
-        const rowClass = [
-            liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
-            splitMatch ? "is-split-row" : ""
-        ].filter(Boolean).join(" ");
-        const statusBadge = "";
-
-        return `
-            <tr class="${rowClass}">
-                <td class="match-index-cell">
-                    <span class="match-number">${idx + 1}</span>
-                    <button class="match-detail-toggle table-info-toggle" type="button" data-detail-toggle="1" data-match-idx="${idx}" title="Ver detalle">INFO</button>
-                </td>
-                <td class="fixture-cell">${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}</td>
-                <td style="text-align:center;"><span class="match-score-badge ${liveMatch ? "is-live-score" : ""} ${scheduledMatch ? "is-scheduled-time" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>${statusBadge}</td>
-                ${aiCells}
-                <td class="my-cell">${mine}</td>
-                <td class="pena-cell">${consensus}</td>
-            </tr>
-            ${state.expandedMatch === idx ? `
-                <tr class="match-detail-row">
-                    <td colspan="${6 + visibleAIColumns.length}">
-                        ${renderMatchDetailGrid(m, c)}
-                    </td>
-                </tr>` : ""}`;
-    }).join("");
-}
-
-/* ---------- Featured master para chips ---------- */
-
-function pickFeaturedMaster(preds, idx) {
-    const preferred = [
-        ["grok", null, "Grok"],
-        ["claude", null, "Claude"],
-        ["chatgpt", null, "GPT"],
-        ["gemini", null, "Gemini"],
-        ["copilot", null, "Copilot"]
-    ];
-    for (const [primary, fallback, label] of preferred) {
-        const sign = getSign(preds, idx, primary, fallback);
-        if (sign && sign !== "-") return { label, sign };
-    }
-    return { label: "Maestro", sign: "-" };
 }

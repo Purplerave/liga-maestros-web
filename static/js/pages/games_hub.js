@@ -1,6 +1,28 @@
 /* GAMES HUB — Selector de juegos arcade */
 
 let activeGamesHubGame = null;
+let snakeAssetsPromise = null;
+
+function ensureSnakeAssets() {
+    if (window.SnakeGol) return Promise.resolve();
+    if (snakeAssetsPromise) return snakeAssetsPromise;
+
+    snakeAssetsPromise = Promise.all([
+        loadStylesheetOnce(
+            "snake-gol-font",
+            "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+        ),
+        loadStylesheetOnce(
+            "snake-gol-styles",
+            versionedAsset("/static/css/snake_gol_arcade.css", "snake-arcade-7")
+        ),
+        import(versionedAsset("/static/js/snake/index.js", "snake-modules-2"))
+    ]).then(() => undefined).catch(error => {
+        snakeAssetsPromise = null;
+        throw error;
+    });
+    return snakeAssetsPromise;
+}
 
 function renderGamesHub() {
     return `
@@ -48,20 +70,6 @@ function renderArcadeTopFive(storageKey) {
     }
 }
 
-function getSnakeBestScore() {
-    try {
-        const data = JSON.parse(localStorage.getItem("mundialSnake1x2.top10") || "[]");
-        return data.length ? data[0].score : 0;
-    } catch (e) { return 0; }
-}
-
-function getArkanoidBestScore() {
-    try {
-        const data = JSON.parse(localStorage.getItem("arkanoidLiga.topScores") || "[]");
-        return data.length ? data[0].score : 0;
-    } catch (e) { return 0; }
-}
-
 function initGamesHub() {
     document.querySelectorAll(".game-card[data-game]").forEach(card => {
         card.addEventListener("click", () => {
@@ -71,27 +79,40 @@ function initGamesHub() {
             else if (game === "invaders") launchInvadersGame();
         });
     });
-    if (activeGamesHubGame === "snake") showSnakeGame();
+    if (activeGamesHubGame === "snake") launchSnakeGame();
     if (activeGamesHubGame === "arkanoid") showArkanoidGame();
     if (activeGamesHubGame === "invaders") showInvadersGame();
 }
 
-function launchSnakeGame() {
+async function launchSnakeGame() {
     resetActiveGamePresentation();
     activeGamesHubGame = "snake";
-    showSnakeGame();
+    const area = qs("game-active-area");
+    if (area) area.innerHTML = `<div class="empty-state">Cargando Snake Gol...</div>`;
+    try {
+        await ensureSnakeAssets();
+        if (activeGamesHubGame === "snake") showSnakeGame();
+    } catch (error) {
+        console.error("No se pudo cargar Snake Gol", error);
+        if (activeGamesHubGame === "snake" && area) {
+            area.innerHTML = `<div class="empty-state">No se pudo iniciar Snake Gol.</div>`;
+        }
+    }
 }
 
 function showSnakeGame() {
-    const snakePanel = qs("mundial-snake-1x2");
-    if (!snakePanel) return;
-    const panel = snakePanel.closest(".snake-panel");
-    if (panel && !qs("snake-game-back")) {
-        panel.insertAdjacentHTML("afterbegin", `
-            <button id="snake-game-back" class="game-back-btn" type="button" data-close-game>&#8592; Volver a Juegos</button>`);
+    const area = qs("game-active-area");
+    if (!area || !window.SnakeGol) return;
+    area.innerHTML = `
+        <div class="snake-game-view">
+            <button class="game-back-btn" type="button" data-close-game>&#8592; Volver a Juegos</button>
+            <div id="snake-game-mount"></div>
+        </div>`;
+    if (!window.SnakeGol.mount(qs("snake-game-mount"))) {
+        area.innerHTML = `<div class="empty-state">No se pudo iniciar Snake Gol.</div>`;
+        return;
     }
     document.body.classList.add("games-snake-open");
-    panel?.classList.add("is-game-open");
     setGamesHubTitle("Snake Gol");
 }
 
@@ -138,11 +159,10 @@ function closeActiveGame() {
 }
 
 function resetActiveGamePresentation() {
+    window.SnakeGol?.unmount();
     document.body.classList.remove("games-snake-open", "games-arkanoid-open", "games-invaders-open");
     const area = qs("game-active-area");
     if (area) area.innerHTML = "";
-    document.querySelector(".snake-panel")?.classList.remove("is-game-open");
-    qs("snake-game-back")?.remove();
 }
 
 function leaveGamesHub() {

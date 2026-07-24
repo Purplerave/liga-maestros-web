@@ -23,7 +23,7 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     all_league_matches = _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches)
     all_league_matches = [
         match for match in all_league_matches
-        if not _duplicates_quiniela_match(match, quiniela_pairs)
+        if _is_domestic_league_match(match) and not _duplicates_quiniela_match(match, quiniela_pairs)
     ]
     all_league_matches = quiniela_league_matches + all_league_matches
 
@@ -135,6 +135,19 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
 
     return [match for match in all_league_matches if keep_external_match(match)]
 
+def _is_domestic_league_match(match):
+    competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()
+    blocked = (
+        "UEFA",
+        "CHAMPIONS",
+        "EUROPA LEAGUE",
+        "CONFERENCE LEAGUE",
+        "SUPERCUP",
+        "SUPER CUP",
+        "FRIENDLIES",
+        "FRIENDLY",
+    )
+    return not any(token in competition for token in blocked)
 
 def _duplicates_quiniela_match(match, quiniela_pairs):
     competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()

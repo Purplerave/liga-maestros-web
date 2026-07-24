@@ -52,7 +52,7 @@ No subas `.env` ni bases de datos vivas con usuarios reales.
 ```powershell
 python -m pytest -q
 node --check static\js\quantum_final.js
-node --check static\js\snake_gol_arcade.js
+Get-ChildItem static\js\snake\*.js | ForEach-Object { node --check $_.FullName }
 ```
 
 ## Estructura
@@ -63,6 +63,7 @@ node --check static\js\snake_gol_arcade.js
 - `static/`: CSS, JS e imagenes.
 - `data/`: JSON publicos/semillas.
 - `DATOS/`: base SQLite y datos runtime locales.
+- `scripts/archive/`: utilidades historicas apartadas del flujo activo.
 - `tests/`: pruebas unitarias.
 
 ## Seguridad practica

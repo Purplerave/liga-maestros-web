@@ -1,6 +1,4 @@
-/* Perfil compacto integrado en la estructura principal. */
-body.newspaper-ui.quiniela-focus.newspaper-profile-active .sidebar-left,
-body.newspaper-ui.quiniela-focus.newspaper-profile-active .sidebar-right { display: none !important; }
+
 
 body.newspaper-ui.quiniela-focus.newspaper-profile-active .app-shell {
     grid-template-columns: 150px minmax(0, 1fr) !important;

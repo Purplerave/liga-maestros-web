@@ -1,0 +1,184 @@
+/* Liga de Maestros - piel visual "Diario deportivo nocturno".
+   La geometria compartida vive en layout/stable_masthead.css. */
+
+body.newspaper-ui.quiniela-focus {
+    --news-paper: #f3e7cf;
+    --news-ink: #101827;
+    --news-red: #e74d3d;
+    --news-blue: #2da7d8;
+    --news-gold: #d9a928;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+        #05070c !important;
+    background-size: 18px 18px, 18px 18px, auto !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud {
+    display: grid;
+    grid-template-columns: minmax(360px, 0.72fr) minmax(520px, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-header {
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-kicker {
+    grid-column: 1 / -1;
+    font-size: 0.46rem !important;
+    line-height: 1.1 !important;
+    color: #45ff9a !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-header h1 {
+    font-size: clamp(1rem, 1.9vw, 1.75rem) !important;
+    line-height: 1 !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .arcade-lights span {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.62rem !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .scoreboard {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(90px, 1fr)) !important;
+    gap: 7px !important;
+    margin: 0 !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-card {
+    min-height: 50px !important;
+    padding: 7px 10px !important;
+    border-radius: 10px !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-card span {
+    margin-bottom: 5px !important;
+    font-size: 0.44rem !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .snake-top-hud .score-card strong {
+    font-size: clamp(0.95rem, 1.45vw, 1.35rem) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-actions {
+    align-self: start !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-actions .primary-btn,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-actions .icon-btn,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .topbar-mini-link,
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .compact-logout {
+    border: 1px solid rgba(39, 247, 255, 0.35) !important;
+    background: rgba(5, 2, 12, 0.72) !important;
+    color: #f8fbff !important;
+    box-shadow: inset 0 0 18px rgba(39, 247, 255, 0.08) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav {
+    background:
+        linear-gradient(180deg, rgba(5, 2, 12, 0.96), rgba(18, 8, 36, 0.96)) !important;
+    border-top: 1px solid rgba(39, 247, 255, 0.24) !important;
+    border-bottom: 1px solid rgba(255, 61, 242, 0.24) !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button {
+    padding: 5px 10px !important;
+    font-family: "Press Start 2P", monospace !important;
+    color: #f8fbff !important;
+    background: transparent !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav button.active {
+    background: linear-gradient(180deg, #ffe75a, #ff3df2) !important;
+    color: #080214 !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav b {
+    font-size: 0.72rem !important;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .newspaper-page-nav span {
+    font-size: 0.62rem !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-shell {
+    border: 0 !important;
+    border-top: 5px double rgba(243, 231, 207, 0.76) !important;
+    border-bottom: 5px double rgba(243, 231, 207, 0.76) !important;
+    border-radius: 0 !important;
+    background:
+        repeating-linear-gradient(0deg, rgba(243, 231, 207, 0.045), rgba(243, 231, 207, 0.045) 1px, transparent 1px, transparent 7px),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(5, 8, 15, 0.98)) !important;
+    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.35) !important;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-shell::before {
+    display: none !important;
+    content: none !important;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+    margin: -4px 0 8px;
+    border-top: 1px solid rgba(243, 231, 207, 0.54);
+    border-bottom: 3px double rgba(243, 231, 207, 0.62);
+    background:
+        repeating-linear-gradient(0deg, rgba(243, 231, 207, 0.05), rgba(243, 231, 207, 0.05) 1px, transparent 1px, transparent 6px),
+        rgba(8, 12, 22, 0.98);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    min-width: 0;
+    min-height: 34px;
+    padding: 5px 9px 6px;
+    border: 0;
+    border-right: 1px solid rgba(243, 231, 207, 0.22);
+    background: transparent;
+    color: #f3e7cf;
+    cursor: pointer;
+    text-align: left;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:last-child {
+    border-right: 0;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
+    color: var(--news-gold);
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    margin-top: 2px;
+    color: #f6efe1;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}

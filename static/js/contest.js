@@ -3,6 +3,32 @@
    Dependencias: utils.js, logos.js, state.js, ticket_page.js
    ========================================================================== */
 
+let contestRequest = null;
+
+async function ensureContestData({ force = false } = {}) {
+    if (!state.data) return null;
+    const jornada = String(state.data.jornada || state.jornada || "");
+    if (!force && state.contest && state.contestJornada === jornada) {
+        return state.contest;
+    }
+    if (contestRequest) return contestRequest;
+
+    contestRequest = fetch(`/api/concurso?j=${encodeURIComponent(jornada)}`, { cache: "no-store" })
+        .then(response => {
+            if (!response.ok) throw new Error("No se pudo cargar La Peña");
+            return response.json();
+        })
+        .then(payload => {
+            state.contest = payload;
+            state.contestJornada = jornada;
+            return payload;
+        })
+        .finally(() => {
+            contestRequest = null;
+        });
+    return contestRequest;
+}
+
 function formatMonthES(month) {
     if (!month || typeof month !== "string") return month || "-";
     const parts = month.split("-");
@@ -12,180 +38,10 @@ function formatMonthES(month) {
     return month;
 }
 
-function consensusLeader(consensus) {
-    const values = [
-        ["1", Number(consensus.p1 || 0)],
-        ["X", Number(consensus.px || 0)],
-        ["2", Number(consensus.p2 || 0)]
-    ].sort((a, b) => b[1] - a[1]);
-    const rawWinner = normalizeSign(consensus.ganador);
-    const sign = ["1", "X", "2"].includes(rawWinner) ? rawWinner : values[0][0];
-    const pct = (values.find(([value]) => value === sign) || values[0])[1];
-    return {
-        sign,
-        pct,
-        top: values[0],
-        second: values[1],
-        gap: values[0][1] - values[1][1]
-    };
-}
-
-function tripletLeader(triplet) {
-    if (!triplet) return null;
-    const values = [
-        ["1", Number(triplet["1"] ?? triplet.p1 ?? 0)],
-        ["X", Number(triplet.X ?? triplet.x ?? triplet.px ?? 0)],
-        ["2", Number(triplet["2"] ?? triplet.p2 ?? 0)]
-    ];
-    if (!values.some(([, value]) => value > 0)) return null;
-    values.sort((a, b) => b[1] - a[1]);
-    return values[0][0];
-}
-
-function buildSurpriseRadar(matches) {
-    const preds = state.data.predicciones_actuales || {};
-    const consenso = state.data.consenso_pena || [];
-    const mySigns = state.my_signs || [];
-    return (matches || []).slice(0, 14).map((match, idx) => {
-        const c = consenso.find(item => Number(item.id) === Number(match.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
-        const leader = consensusLeader(c);
-        if (!leader.top || leader.top[1] <= 0) return null;
-
-        const programSign = normalizeSign(getSign(preds, idx, "programa", "v260_omnisciente"));
-        const councilSign = normalizeSign(getSign(preds, idx, "consejo_ias", "consenso"));
-        const userSign = normalizeSign(mySigns[idx] || "-");
-        const info = state.data?.match_info?.[String(match.id)] || {};
-        const externalLeaders = [info.q15, info.lae, info.apu].map(tripletLeader).filter(Boolean);
-        const externalSplit = new Set(externalLeaders).size > 1;
-
-        let score = Math.max(0, 64 - leader.top[1]) + Math.max(0, 18 - leader.gap);
-        const labels = [];
-        if (leader.gap <= 12) labels.push("abierto");
-        if (programSign && programSign !== "-" && programSign !== leader.sign) {
-            score += 24;
-            labels.push("programa contra");
-        }
-        if (councilSign && councilSign !== "-" && councilSign !== leader.sign) {
-            score += 18;
-            labels.push("consejo duda");
-        }
-        if (userSign && userSign !== "-" && userSign !== leader.sign) {
-            score += 10;
-            labels.push("tu vas contra");
-        }
-        if (externalSplit) {
-            score += 14;
-            labels.push("mercado roto");
-        }
-        if (score < 24) return null;
-
-        return {
-            idx,
-            title: `${getShortName(match.local)} - ${getShortName(match.visitante)}`,
-            sign: leader.sign,
-            pct: leader.pct,
-            score,
-            labels: [...new Set(labels)].slice(0, 2)
-        };
-    }).filter(Boolean)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-}
-
-function renderSurpriseRadar(matches) {
-    const items = buildSurpriseRadar(matches);
-    if (!items.length) return "";
-    return `
-        <section class="surprise-radar" aria-label="Radar de partidos con riesgo">
-            <div class="surprise-radar-head">
-                <span>Radar</span>
-                <strong>${items.length} focos</strong>
-            </div>
-            <div class="surprise-radar-list">
-                ${items.map(item => `
-                    <button class="surprise-radar-card" type="button" data-radar-match="${item.idx}">
-                        <span class="surprise-radar-title">${escapeHtml(item.title)}</span>
-                        <span class="surprise-radar-meta">${escapeHtml(item.sign)} ${Math.round(item.pct)}% Â· ${escapeHtml(item.labels.join(" Â· ") || "riesgo")}</span>
-                    </button>
-                `).join("")}
-            </div>
-        </section>`;
-}
-
-function renderSidebarRadar() {
-    const slot = qs("surprise-radar-slot");
-    if (!slot) return;
-    const matches = state.currentFilter === "ALL" && state.contestView === "MATCHES"
-        ? (state.data.partidos || [])
-        : [];
-    slot.innerHTML = renderSurpriseRadar(matches);
-}
-
-function renderPrestigeRanking() {
-    const container = qs("ranking-body");
-    const ranking = state.data.ranking_maestros;
-    if (!container || !ranking) return;
-    const hiddenIds = new Set(["hermes", "HERMES", "momo", "MOMO", "jenova", "JENOVA", "manu", "MANU", "consenso", "CONSENSO"]);
-
-    const nameMap = {
-        "v260_omnisciente": "TECNO",
-        "programa": "PROGRAMA",
-        "consejo_ias": "CONSEJO IA",
-        "gemini": "GEMA",
-        "claude": "CLAUDE",
-        "chatgpt": "CHATGPT",
-        "grok": "GROK",
-        "copilot": "COPILOT",
-        "chipi": "CHIPI",
-        "deepseek": "CHIPI",
-        "ernie": "ERNIE",
-        "kimi": "KIMI",
-        "pepe": "PEPE",
-        "geli": "GELI",
-        "profe": "PROFE",
-        "fortu": "FORTU",
-        "mrpurple": "MRPURPLE",
-        "111242361526361637939": "MRPURPLE R.",
-        "oraculo": "ORACULO"
-    };
-
-    const rows = Object.entries(ranking).filter(([id]) => !hiddenIds.has(id)).map(([id, stats]) => ({
-        id,
-        name: nameMap[id] || (state.user && id === state.user.id ? "YO" : id.length > 10 ? id.substring(0, 10) : id),
-        total: stats.total || 0,
-        jornada: stats.jornada || 0,
-        isUser: state.user && id === state.user.id
-    }));
-
-    const total = [...rows].sort((a, b) => b.total - a.total || b.jornada - a.jornada).slice(0, 8);
-    const today = [...rows].filter(item => Number(item.jornada || 0) > 0)
-        .sort((a, b) => b.jornada - a.jornada || b.total - a.total)
-        .slice(0, 5);
-    const dailyBlock = today.length
-        ? `<div class="rank-section-title" style="margin-top:10px;">Jornada actual</div>
-           ${today.map((item, idx) => renderRankLine(item, idx, "jornada", "hoy")).join("")}`
-        : "";
-
-    container.innerHTML = `
-        <div class="rank-section-title">ClasificaciÃ³n general</div>
-        ${total.map((item, idx) => renderRankLine(item, idx, "total", "")).join("")}
-        ${dailyBlock}`;
-}
-
-function renderRankLine(item, idx, field, label) {
-    return `
-        <div class="rank-line ${idx === 0 ? "is-leader" : ""} ${item.isUser ? "is-user" : ""}">
-            <span class="rank-pos">${idx + 1}</span>
-            <span class="rank-name">${escapeHtml(item.name)}</span>
-            <small class="rank-label">${label ? escapeHtml(label) : ""}</small>
-            <b class="rank-total">${item[field]}</b>
-        </div>`;
-}
-
 function renderContestRows(rows = [], limit = 5, options = {}) {
     const { showTop = true, highlightUser = true, showMedals = true } = options;
     const limited = rows.slice(0, limit);
-    if (!limited.length) return `<div class="empty-state">Sin datos cerrados todavÃ­a.</div>`;
+    if (!limited.length) return `<div class="empty-state">Sin datos cerrados todavía.</div>`;
 
     const userRow = highlightUser ? rows.find(r => r.is_user) : null;
     const userPos = userRow ? userRow.pos : null;
@@ -222,8 +78,60 @@ function awardTierClass(idx) {
     return "";
 }
 
-function profileBadgeStrip(profile = {}) {
-    return "";
+function renderContestOverview(contest) {
+    const generalRows = contest.general || [];
+    const top10 = generalRows.slice(0, 10);
+    const hasMore = generalRows.length > 10;
+    const recentAwards = (contest.galardones?.jornadas || []).slice(0, 5);
+
+    return `
+        <div class="contest-compact">
+            <div class="contest-compact-columns">
+                <div class="contest-compact-left">
+                    <div class="contest-compact-card contest-compact-general">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">General</span>
+                            <span class="contest-compact-sub">temporada</span>
+                        </div>
+                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
+                        ${hasMore ? `
+                            <button type="button" class="contest-expand-btn" data-contest-expand="compact-general-full" aria-expanded="false">Ver todos</button>
+                            <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>
+                        ` : ""}
+                    </div>
+                </div>
+                <div class="contest-compact-right">
+                    <div class="contest-compact-top">
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">J${contest.jornada?.jornada || ""}</span>
+                                <span class="contest-compact-sub">jornada</span>
+                            </div>
+                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
+                        </div>
+                        <div class="contest-compact-card">
+                            <div class="contest-compact-header">
+                                <span class="contest-compact-title">${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
+                                <span class="contest-compact-sub">mensual</span>
+                            </div>
+                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
+                        </div>
+                    </div>
+                    <div class="contest-compact-card">
+                        <div class="contest-compact-header">
+                            <span class="contest-compact-title">Galardones</span>
+                            <span class="contest-compact-sub">ultimos</span>
+                        </div>
+                        ${recentAwards.map(item => `
+                            <div class="contest-compact-award">
+                                <span class="contest-compact-award-j">J${item.jornada}</span>
+                                <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
+                                <span class="contest-compact-award-pts">${item.points} pts</span>
+                            </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
+                    </div>
+                </div>
+            </div>
+        </div>`;
 }
 
 function profileTone(value) {
@@ -328,120 +236,31 @@ function renderProfileDashboard(profile) {
         </section>`;
 }
 
-function renderContestPanel() {
-    const container = qs("contest-body");
-    const contest = state.contest;
-    if (!container || !contest) return;
-    const profile = contest.profile;
-    const profileBlock = profile ? `
-        <div class="contest-card">
-            <div class="contest-title"><span>${escapeHtml(profile.name || "Perfil")}</span><small>perfil</small></div>
-            <div class="profile-grid">
-                <div class="profile-stat"><span>PosiciÃ³n</span><strong>${profile.position ?? "-"}</strong></div>
-                <div class="profile-stat"><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
-                <div class="profile-stat"><span>% acierto</span><strong>${profile.hit_rate ?? 0}%</strong></div>
-                <div class="profile-stat"><span>Jornadas</span><strong>${profile.played ?? 0}</strong></div>
-            </div>
-            ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
-        </div>` : "";
-
-    const awards = (contest.galardones?.jornadas || []).slice(0, 5).map(item => `
-        <div class="award-row">
-            <span>J${item.jornada}</span>
-            <b class="contest-name">${escapeHtml(item.winner)}</b>
-            <strong class="contest-points">${item.points}</strong>
-        </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`;
-
-    const generalRows = contest.general || [];
-    const top10 = generalRows.slice(0, 10);
-    const hasMore = generalRows.length > 10;
-
-    container.innerHTML = `
-        <div class="contest-compact">
-            ${profileBlock ? `<div class="contest-compact-profile">${profileBlock}</div>` : ""}
-            <div class="contest-compact-columns">
-                <div class="contest-compact-left">
-                    <div class="contest-compact-card contest-compact-general">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🏆 General</span>
-                            <span class="contest-compact-sub">temporada</span>
-                        </div>
-                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
-                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
-                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
-                    </div>
-                </div>
-                <div class="contest-compact-right">
-                    <div class="contest-compact-top">
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
-                                <span class="contest-compact-sub">jornada</span>
-                            </div>
-                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
-                        </div>
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
-                                <span class="contest-compact-sub">mensual</span>
-                            </div>
-                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
-                        </div>
-                    </div>
-                    <div class="contest-compact-card">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🎖️ Galardones</span>
-                        <span class="contest-compact-sub">últimos</span>
-                    </div>
-                    ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
-                        <div class="contest-compact-award">
-                            <span class="contest-compact-award-j">J${item.jornada}</span>
-                            <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
-                            <span class="contest-compact-award-pts">${item.points} pts</span>
-                        </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
-                </div>
-            </div>
-        </div>`;
+function renderContestPage(view = "CONTEST_GENERAL") {
+    const tabs = [
+        ["CONTEST_GENERAL", "General"],
+        ["CONTEST_JORNADA", "Jornada"],
+        ["CONTEST_MONTHLY", "Mensual"],
+        ["CONTEST_HISTORY", "Historico"],
+        ["CONTEST_AWARDS", "Galardones"],
+        ["CONTEST_PROFILE", "Mi perfil"]
+    ];
+    return `
+        <section class="contest-section">
+            <nav class="contest-view-tabs" aria-label="Secciones de La Peña">
+                ${tabs.map(([value, label]) => `
+                    <button type="button" class="${view === value ? "active" : ""}" data-contest-view="${value}">
+                        ${label}
+                    </button>`).join("")}
+            </nav>
+            <div class="contest-view">${renderContestPageContent(view)}</div>
+        </section>`;
 }
 
-function renderContestPage(view = "CONTEST_PROFILE") {
+function renderContestPageContent(view = "CONTEST_GENERAL") {
     const contest = state.contest;
-    if (!contest) return `<div class="empty-state">No se pudo cargar La PeÃ±a.</div>`;
+    if (!contest) return `<div class="empty-state">No se pudo cargar La Peña.</div>`;
     const profile = contest.profile;
-    const profileBlock = profile ? `
-        <div class="contest-card">
-            <div class="contest-title"><span>${escapeHtml(profile.name || "Perfil")}</span><small>perfil</small></div>
-            <div class="profile-grid">
-                <div class="profile-stat"><span>PosiciÃ³n</span><strong>${profile.position ?? "-"}</strong></div>
-                <div class="profile-stat"><span>PronÃ³sticos</span><strong>${profile.predictions ?? 0}</strong></div>
-                <div class="profile-stat"><span>Aciertos</span><strong>${profile.hits ?? 0}</strong></div>
-                <div class="profile-stat"><span>% acierto</span><strong>${profile.hit_rate ?? 0}%</strong></div>
-                <div class="profile-stat"><span>Jornadas</span><strong>${profile.played ?? 0}</strong></div>
-                <div class="profile-stat"><span>Mejor posiciÃ³n</span><strong>${profile.best_position ?? "-"}</strong></div>
-            </div>
-            ${profileBadgeStrip(profile) ? `<div class="profile-badge-strip">${profileBadgeStrip(profile)}</div>` : ""}
-        </div>` : `
-        <div class="contest-card">
-            <div class="contest-title"><span>Perfil</span><small>sesiÃ³n</small></div>
-            <div class="empty-state">Entra con Google para ver tus estadÃ­sticas personales.</div>
-        </div>`;
-
-    const awards = (contest.galardones?.jornadas || []).slice(0, 10).map(item => `
-        <div class="award-row">
-            <span>J${item.jornada}</span>
-            <b class="contest-name">${escapeHtml(item.winner)}</b>
-            <strong class="contest-points">${item.points}</strong>
-        </div>`).join("") || `<div class="empty-state">Sin galardones todavÃ­a.</div>`;
-
-    const results = (profile?.results || []).slice().reverse().map(item => {
-        const ticket = (item.ticket || []).map((sign, idx) => idx === 14 ? `[${sign}]` : sign).join(",");
-        return `
-            <div class="contest-row">
-                <span class="contest-pos">J${item.jornada}</span>
-                <span class="contest-ticket">${escapeHtml(ticket)}</span>
-                <span class="contest-points">${item.points}</span>
-            </div>`;
-    }).join("") || `<div class="empty-state">Sin resultados personales.</div>`;
 
     if (view === "CONTEST_PROFILE") {
         if (!profile) {
@@ -450,57 +269,7 @@ function renderContestPage(view = "CONTEST_PROFILE") {
         return renderProfileDashboard(profile);
     }
 
-    if (view === "CONTEST_GENERAL") {
-        const generalRows = contest.general || [];
-        const top10 = generalRows.slice(0, 10);
-        const hasMore = generalRows.length > 10;
-        return `
-        <div class="contest-compact">
-            <div class="contest-compact-columns">
-                <div class="contest-compact-left">
-                    <div class="contest-compact-card contest-compact-general">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🏆 General</span>
-                            <span class="contest-compact-sub">temporada</span>
-                        </div>
-                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
-                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
-                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
-                    </div>
-                </div>
-                <div class="contest-compact-right">
-                    <div class="contest-compact-top">
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
-                                <span class="contest-compact-sub">jornada</span>
-                            </div>
-                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
-                        </div>
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
-                                <span class="contest-compact-sub">mensual</span>
-                            </div>
-                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
-                        </div>
-                    </div>
-                    <div class="contest-compact-card">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🎖️ Galardones</span>
-                            <span class="contest-compact-sub">últimos</span>
-                        </div>
-                        ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
-                            <div class="contest-compact-award">
-                                <span class="contest-compact-award-j">J${item.jornada}</span>
-                                <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
-                                <span class="contest-compact-award-pts">${item.points} pts</span>
-                            </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    }
+    if (view === "CONTEST_GENERAL") return renderContestOverview(contest);
 
     if (view === "CONTEST_MONTHLY") {
         const monthlyMonths = contest.monthly?.months || [];
@@ -623,54 +392,5 @@ function renderContestPage(view = "CONTEST_PROFILE") {
             </section>`;
     }
 
-    const generalRows = contest.general || [];
-    const top10 = generalRows.slice(0, 10);
-    const hasMore = generalRows.length > 10;
-
-    return `
-        <div class="contest-compact">
-            <div class="contest-compact-columns">
-                <div class="contest-compact-left">
-                    <div class="contest-compact-card contest-compact-general">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🏆 General</span>
-                            <span class="contest-compact-sub">temporada</span>
-                        </div>
-                        <div id="compact-general-top10">${renderContestRows(top10, 10, { showTop: true, highlightUser: true, showMedals: true })}</div>
-                        ${hasMore ? `<button type="button" class="contest-expand-btn" onclick="document.getElementById('compact-general-full').classList.toggle('is-visible');this.textContent=this.textContent.includes('Ver todos')?'Ocultar ▴':'Ver todos ▾'">Ver todos ▾</button>
-                        <div id="compact-general-full" class="contest-full-list">${renderContestRows(generalRows.slice(10), generalRows.length, { showMedals: false })}</div>` : ""}
-                    </div>
-                </div>
-                <div class="contest-compact-right">
-                    <div class="contest-compact-top">
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">⚡ J${contest.jornada?.jornada || ""}</span>
-                                <span class="contest-compact-sub">jornada</span>
-                            </div>
-                            ${renderContestRows(contest.jornada?.rows || [], 6, { showMedals: true })}
-                        </div>
-                        <div class="contest-compact-card">
-                            <div class="contest-compact-header">
-                                <span class="contest-compact-title">📅 ${escapeHtml(formatMonthES(contest.monthly?.month))}</span>
-                                <span class="contest-compact-sub">mensual</span>
-                            </div>
-                            ${renderContestRows(contest.monthly?.rows || [], 6, { showMedals: true })}
-                        </div>
-                    </div>
-                    <div class="contest-compact-card">
-                        <div class="contest-compact-header">
-                            <span class="contest-compact-title">🎖️ Galardones</span>
-                            <span class="contest-compact-sub">últimos</span>
-                        </div>
-                        ${(contest.galardones?.jornadas || []).slice(0, 5).map(item => `
-                            <div class="contest-compact-award">
-                                <span class="contest-compact-award-j">J${item.jornada}</span>
-                                <span class="contest-compact-award-name">${escapeHtml(item.winner)}</span>
-                                <span class="contest-compact-award-pts">${item.points} pts</span>
-                            </div>`).join("") || `<div class="empty-state">Sin galardones.</div>`}
-                    </div>
-                </div>
-            </div>
-        </div>`;
+    return renderContestOverview(contest);
 }

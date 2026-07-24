@@ -53,7 +53,7 @@ def test_porra_keeps_match_that_already_has_entries():
     conn.close()
 
 
-def test_porra_prioritizes_open_pleno_al_15():
+def test_porra_excludes_pleno_al_15():
     conn = porra_connection()
     conn.execute(
         "INSERT INTO resultados VALUES (73, 15, 'Espana', 'Argentina', '2099-07-19', '21:00', 'NS', NULL, NULL)"
@@ -62,7 +62,7 @@ def test_porra_prioritizes_open_pleno_al_15():
         "INSERT INTO porra_entries VALUES (73, 1, 'u1', 'Pablo', 2, 1, '2099-07-17 10:00:00', '2099-07-17 10:00:00')"
     )
 
-    assert _porra_target_match(conn, 73)["partido_id"] == 15
+    assert _porra_target_match(conn, 73)["partido_id"] == 1
     conn.close()
 
 

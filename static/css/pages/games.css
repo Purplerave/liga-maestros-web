@@ -1,10 +1,128 @@
-/* Reglas finales del hub. Aislan los juegos del layout historico de sidebars. */
-body.newspaper-ui.quiniela-focus.newspaper-snake-active:not(.games-snake-open) .main-arena {
+/* Hub y juegos comparten la arena principal. */
+body.newspaper-ui.quiniela-focus.newspaper-snake-active .main-arena {
     display: block !important;
 }
 
-body.newspaper-ui.quiniela-focus.newspaper-snake-active:not(.games-snake-open) .sidebar-right {
+.games-hub-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 32px);
+}
+
+.games-hub-header {
+    margin-bottom: 20px;
+}
+
+.games-hub-header h2 {
+    margin: 4px 0;
+    color: #f8fafc;
+    font-size: 1.4rem;
+}
+
+.games-hub-header small {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.game-card {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.08);
+    border-radius: 12px;
+    appearance: none;
+    background: rgba(15, 23, 42, 0.5);
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.game-card:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 3px;
+}
+
+.game-card:hover {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.05);
+    transform: translateY(-2px);
+}
+
+.game-card-icon {
+    margin-bottom: 8px;
+    font-size: 2.4rem;
+}
+
+.game-card h3 {
+    margin: 0 0 6px;
+    color: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.game-card p {
+    margin: 0 0 8px;
+    color: #64748b;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.game-card-best {
+    color: #f59e0b;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.game-iframe-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 16px auto 0;
+}
+
+.game-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 6px 14px;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.5);
+    color: #94a3b8;
+    font-family: var(--fu);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.game-back-btn:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+    color: #e2e8f0;
+}
+
+.game-iframe {
+    width: 100%;
+    height: 70vh;
+    border: 1px solid rgba(56, 189, 248, 0.08);
+    border-radius: 10px;
+    background: #060a0f;
+}
+
+body.games-snake-open .main-arena {
     display: none !important;
+}
+
+body.games-snake-open #snake-game-back {
+    display: inline-flex;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-snake-active .arena-content.games-hub {
@@ -61,29 +179,8 @@ body.newspaper-ui.quiniela-focus.newspaper-snake-active .games-grid {
     font-size: 0.68rem;
 }
 
-body.newspaper-ui.quiniela-focus.newspaper-snake-active.games-snake-open .main-arena {
-    display: none !important;
-}
-
-body.newspaper-ui.quiniela-focus.newspaper-snake-active.games-snake-open .sidebar-right {
-    display: block !important;
-    grid-column: 1 / -1 !important;
-    grid-row: 3 !important;
-    width: min(1120px, calc(100vw - 32px)) !important;
-    max-height: none !important;
-    overflow: visible !important;
-    justify-self: center;
-}
-
-body.games-snake-open .sidebar-right > :not(.snake-panel) {
-    display: none !important;
-}
-
-body.games-snake-open .snake-panel {
-    display: block !important;
-    width: 100% !important;
-}
-
+body.games-snake-open .games-grid,
+body.games-snake-open .games-hub-header,
 body.games-arkanoid-open .games-grid,
 body.games-arkanoid-open .games-hub-header,
 body.games-invaders-open .games-grid,
@@ -91,12 +188,15 @@ body.games-invaders-open .games-hub-header {
     display: none;
 }
 
+body.newspaper-ui.quiniela-focus.newspaper-snake-active.games-snake-open .games-hub-page,
 body.newspaper-ui.quiniela-focus.newspaper-snake-active.games-arkanoid-open .games-hub-page,
 body.newspaper-ui.quiniela-focus.newspaper-snake-active.games-invaders-open .games-hub-page {
     width: 100%;
     padding: 6px 16px 12px;
 }
 
+body.games-snake-open #game-active-area,
+body.games-snake-open .snake-game-view,
 body.games-arkanoid-open #game-active-area,
 body.games-arkanoid-open .game-iframe-wrap,
 body.games-invaders-open #game-active-area,
@@ -104,6 +204,11 @@ body.games-invaders-open .game-iframe-wrap {
     width: 100%;
     max-width: 1120px;
     margin: 0 auto;
+}
+
+.snake-game-view {
+    display: grid;
+    gap: 5px;
 }
 
 body.games-arkanoid-open .game-iframe-wrap,
@@ -118,6 +223,7 @@ body.games-invaders-open .game-iframe-wrap {
     min-height: 390px;
 }
 
+body.games-snake-open .game-back-btn,
 body.games-arkanoid-open .game-back-btn,
 body.games-invaders-open .game-back-btn {
     width: fit-content;

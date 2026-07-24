@@ -1,4 +1,4 @@
-:root {
+.snake-gol-shell {
   --sg-bg: #05020c;
   --sg-panel: #120825;
   --sg-panel-2: #1c0f38;
@@ -11,15 +11,15 @@
   --sg-muted: rgba(248, 251, 255, 0.66);
   --sg-border: rgba(39, 247, 255, 0.34);
   --sg-shadow: 0 0 22px rgba(39, 247, 255, 0.35), 0 0 44px rgba(255, 61, 242, 0.16);
-}
-
-* {
   box-sizing: border-box;
-}
-
-.snake-gol-shell {
   color: var(--sg-white);
   font-family: var(--font-ui);
+}
+
+.snake-gol-shell *,
+.snake-gol-shell *::before,
+.snake-gol-shell *::after {
+  box-sizing: border-box;
 }
 
 .snake-gol-shell {
@@ -975,5 +975,41 @@ body.newspaper-snake-active .arcade-help {
   body.newspaper-snake-active .arcade-help {
     grid-column: 2;
     grid-row: 5;
+  }
+}
+
+/* Mobile game: the pitch is the primary control surface; ranking follows below. */
+@media (max-width: 980px) {
+  body.newspaper-snake-active .snake-gol-shell,
+  body.newspaper-snake-active .arcade-cabinet {
+    width: 100%;
+  }
+
+  body.newspaper-snake-active .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  body.newspaper-snake-active .crt-frame,
+  body.newspaper-snake-active #snakeGolCanvas {
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: 3 / 2;
+  }
+
+  body.newspaper-snake-active .ranking-panel {
+    min-height: 0;
+    padding: 8px;
+  }
+
+  body.newspaper-snake-active .ranking-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 14px;
+    padding-left: 24px;
+  }
+
+  body.newspaper-snake-active .ranking-list li {
+    margin-bottom: 3px;
   }
 }

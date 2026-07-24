@@ -6,6 +6,7 @@
 const state = {
     data: null,
     contest: null,
+    contestJornada: "",
     jornada: new URLSearchParams(window.location.search).get("j") || "",
     user: null,
     csrfToken: "",
@@ -18,12 +19,10 @@ const state = {
     contestView: "MATCHES",
     expandedMatch: null,
     q15Directo: {},
-    evolutionChart: null,
+    q15DirectoJornada: "",
     selectedAwardJornada: "",
     selectedAwardMonth: "",
     newspaperPage: "ALL",
-    commentsOpen: false,
-    commentsLastSeenId: 0,
     refreshErrorNotifiedAt: 0,
     snake: {
         running: false,
@@ -65,7 +64,6 @@ const AI_COLUMNS = [
 const COUNCIL_STYLE_JORNADAS = new Set(["67"]);
 const logoCache = new Map();
 let logoAliasIndex = null;
-let logoDataIndex = null;
 let standingContextCache = new Map();
 
 function isCouncilStyleJornada() {
@@ -84,46 +82,24 @@ function getOfficialAIColumns() {
         .filter(([id, , label]) => id && label);
 }
 
-function getVisibleAIColumns(matches = state.data?.partidos || []) {
-    const preds = state.data?.predicciones_actuales || {};
-    return getOfficialAIColumns().filter(([primary, fallback]) =>
-        matches.some((_, idx) => {
-            const sign = getSign(preds, idx, primary, fallback);
-            return sign && sign !== "-";
-        })
-    );
-}
-
 function hydrateJornadaNav() {
     const nav = qs("jornada-nav");
     if (!nav || !state.data) return;
-    const max = Number(state.data.max_jornada || state.data.jornada || 64);
-    const min = Math.max(1, max - 14);
+    const jornadas = (Array.isArray(state.data.jornadas_disponibles) && state.data.jornadas_disponibles.length
+        ? state.data.jornadas_disponibles
+        : [state.data.jornada || state.data.max_jornada])
+        .map(value => Number(value))
+        .filter(value => Number.isFinite(value))
+        .filter((value, index, list) => list.indexOf(value) === index)
+        .sort((a, b) => b - a);
     nav.innerHTML = "";
-    for (let i = max; i >= min; i--) {
+    jornadas.forEach(jornada => {
         const opt = document.createElement("option");
-        opt.value = String(i);
-        opt.textContent = `Jornada ${i}`;
-        opt.selected = String(i) === String(state.data.jornada);
+        opt.value = String(jornada);
+        opt.textContent = `Jornada ${jornada}`;
+        opt.selected = String(jornada) === String(state.data.jornada);
         nav.appendChild(opt);
-    }
-}
-
-function hydrateStatus(sync) {
-    const statLive = qs("stat-live");
-    const statPending = qs("stat-pending");
-    const statSync = qs("stat-sync");
-    const statApi = qs("stat-api");
-    const liveMatches = Number(sync.live_matches ?? 0);
-    if (statLive) statLive.textContent = liveMatches;
-    if (statPending) statPending.textContent = sync.pending_matches ?? 0;
-    if (statSync) statSync.textContent = sync.last_sync ?? "--:--";
-    if (statApi) {
-        const usage = sync.api_usage || {};
-        statApi.textContent = `${usage.calls ?? 0}/${usage.limit ?? 7500}`;
-        statApi.title = `Quedan ${usage.remaining ?? "-"} llamadas; reserva ${usage.reserve ?? "-"}`;
-    }
-    document.body.classList.toggle("live-now", liveMatches > 0);
+    });
 }
 
 function hydrateHero() {
@@ -140,8 +116,6 @@ function hydrateHero() {
                         ? "Quiz"
                 : state.currentFilter === "LIVE"
                     ? "Partidos en directo"
-                    : state.currentFilter === "WAR_ROOM"
-                        ? "Directo"
                         : state.currentFilter === "STANDINGS_FULL"
                             ? "Clasificaciones"
                             : state.currentFilter === "STANDINGS_PRIMERA"
@@ -156,17 +130,11 @@ function hydrateHero() {
     if (arenaTitle) arenaTitle.textContent = title;
     if (arenaKicker) arenaKicker.textContent = `Jornada ${state.data.jornada}`;
     if (document.body.classList.contains("newspaper-ui")) {
-        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} · La Peña vs Maestros IA`;
-        if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL"
-            ? "El diario de la jornada"
-            : title;
+        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} - La Peña vs Maestros IA`;
+        if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL" ? "Portada de la jornada" : title;
     } else {
         if (topbarTitle) topbarTitle.textContent = title;
         if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada}`;
-    }
-    if (document.body.classList.contains("newspaper-ui")) {
-        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} - La Pe\u00f1a vs Maestros IA`;
-        if (topbarTitle && currentMainView() === "ALL") topbarTitle.textContent = "Portada de la jornada";
     }
     const save = qs("save-quiniela-btn");
     if (save) {
@@ -195,29 +163,6 @@ function hydrateHero() {
     updateHeroStrip();
 }
 
-function updateWarRoomButton() {
-    const btn = qs("warroom-btn");
-    if (!btn) return;
-    if (state.contestView !== "MATCHES") {
-        btn.hidden = true;
-        return;
-    }
-    const liveAvailable = hasLiveLeagueMatches();
-    if (!liveAvailable && state.currentFilter !== "WAR_ROOM") {
-        btn.hidden = true;
-        return;
-    }
-    btn.hidden = false;
-    const active = state.currentFilter === "WAR_ROOM";
-    btn.classList.toggle("is-active", active);
-    btn.textContent = active ? "←" : "«";
-    btn.title = active ? "Volver a la quiniela" : "Abrir Modo Directo";
-}
-
-function isContestView(value) {
-    return String(value || "").startsWith("CONTEST_");
-}
-
 function contestViewTitle(value) {
     return {
         CONTEST_PROFILE: "Mi perfil",
@@ -231,6 +176,22 @@ function contestViewTitle(value) {
 
 function getAllLeagueMatches() {
     return state.data?.all_league_matches || [];
+}
+
+function getBrowsableLeagueMatches() {
+    const blockedTokens = [
+        "FRIENDL",
+        "UEFA",
+        "CHAMPIONS",
+        "EUROPA LEAGUE",
+        "CONFERENCE LEAGUE",
+        "SUPER CUP",
+        "SUPERCUP"
+    ];
+    return getAllLeagueMatches().filter(match => {
+        const competition = competitionLabel(match);
+        return !blockedTokens.some(token => competition.includes(token));
+    });
 }
 
 function isLiveMatch(match) {
@@ -283,39 +244,6 @@ function draftKey() {
     const owner = state.user?.id || "anon";
     const jornada = state.data?.jornada || state.jornada || "actual";
     return `liga_maestros_borrador_${owner}_${jornada}`;
-}
-
-function commentsSeenKey(jornada = state.data?.jornada || state.jornada || "actual") {
-    return `liga_maestros_comments_seen_${jornada}`;
-}
-
-function readSeenCommentId(jornada = state.data?.jornada || state.jornada || "actual") {
-    try {
-        return Number(window.localStorage.getItem(commentsSeenKey(jornada)) || "0");
-    } catch {
-        return 0;
-    }
-}
-
-function writeSeenCommentId(value, jornada = state.data?.jornada || state.jornada || "actual") {
-    state.commentsLastSeenId = Number(value || 0);
-    try {
-        window.localStorage.setItem(commentsSeenKey(jornada), String(value));
-    } catch {}
-}
-
-function setCommentsOpen(nextOpen) {
-    state.commentsOpen = Boolean(nextOpen);
-    const panel = document.querySelector(".comments-panel-side");
-    const content = qs("comments-panel-content");
-    if (panel) panel.classList.toggle("is-open", state.commentsOpen);
-    if (content) content.hidden = !state.commentsOpen;
-}
-
-function hydrateCommentsPanel() {
-    state.commentsOpen = false;
-    state.commentsLastSeenId = readSeenCommentId();
-    setCommentsOpen(state.commentsOpen);
 }
 
 function updatePicksProgress() {
@@ -484,60 +412,6 @@ function isContestPage() {
 function isLiveOrLeaguePage() {
     return state.contestView === "MATCHES" && (
         state.currentFilter === "LIVE" ||
-        state.currentFilter === "WAR_ROOM" ||
         (state.currentFilter && !["ALL", "TICKET", "SNAKE_PAGE", "QUIZ_PAGE"].includes(state.currentFilter) && !String(state.currentFilter).startsWith("STANDINGS_"))
     );
-}
-
-function shouldRefreshSideModules() {
-    return isCoverPage();
-}
-
-function relocateSnakeHud() {
-    const topbar = document.querySelector(".topbar-shell");
-    const cabinet = document.querySelector(".arcade-cabinet");
-    if (!topbar || !cabinet) return;
-    let hud = document.getElementById("snake-top-hud");
-    const header = document.querySelector(".arcade-header");
-    const scoreboard = document.querySelector(".scoreboard");
-    const gameLayout = cabinet.querySelector(".game-layout");
-    if (hud?.contains(header) && gameLayout) cabinet.insertBefore(header, gameLayout);
-    if (hud?.contains(scoreboard) && gameLayout) cabinet.insertBefore(scoreboard, gameLayout);
-    if (hud?.parentElement) hud.remove();
-}
-
-function fixMojibakeLabels(root = document.body) {
-    if (!root) return;
-    const replacements = [
-        ["PeÃƒÂ±a", "Peña"],
-        ["PeÃ±a", "Peña"],
-        ["ClasificaciÃƒÂ³n", "Clasificación"],
-        ["ClasificaciÃ³n", "Clasificación"],
-        ["PosiciÃƒÂ³n", "Posición"],
-        ["PosiciÃ³n", "Posición"],
-        ["PronÃƒÂ³sticos", "Pronósticos"],
-        ["PronÃ³sticos", "Pronósticos"],
-        ["estadÃƒÂ­sticas", "estadísticas"],
-        ["estadÃ­sticas", "estadísticas"],
-        ["todavÃƒÂ­a", "todavía"],
-        ["todavÃ­a", "todavía"],
-        ["SeÃƒÂ±ales", "Señales"],
-        ["SeÃ±ales", "Señales"],
-        ["TÃƒÂº", "Tú"],
-        ["TÃº", "Tú"],
-        ["mÃƒÂ¡s", "más"],
-        ["mÃ¡s", "más"],
-        ["fÃƒÂºtbol", "fútbol"],
-        ["fÃºtbol", "fútbol"],
-    ];
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => {
-        let text = node.nodeValue;
-        replacements.forEach(([bad, good]) => {
-            text = text.replaceAll(bad, good);
-        });
-        node.nodeValue = text;
-    });
 }

@@ -1,4 +1,5 @@
-import os, sqlite3
+import os
+import sqlite3
 import config
 from .connection import ClosingConnection, ensure_db_file
 

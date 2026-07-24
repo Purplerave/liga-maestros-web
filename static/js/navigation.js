@@ -3,29 +3,121 @@
    Dependencias: utils.js, logos.js, state.js
    ========================================================================== */
 
+function versionedAsset(path, tag) {
+    const version = document.body.dataset.assetsV || "dev";
+    return `${path}?v=${encodeURIComponent(version)}-${tag}`;
+}
+
+const VIEW_STYLES = {
+    CONTEST: [
+        ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-3")],
+        ["view-profile-styles", versionedAsset("/static/css/pages/profile.css", "profile-3")],
+    ],
+    STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-2")]],
+    LIVE: [
+        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-3")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-2")],
+    ],
+    LEAGUES: [
+        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-3")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-2")],
+    ],
+    SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-5")]],
+    QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-2")]],
+    TICKET: [
+        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-2")],
+        ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-4")],
+        ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-1")],
+    ],
+};
+
+const VIEW_SCRIPTS = {
+    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-21")]],
+    CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-4")]],
+    STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-2")]],
+    SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
+    QUIZ: [["view-quiz-script", versionedAsset("/static/js/quiz.js", "quiz-2")]],
+    TICKET: [
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-3")],
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-1")],
+    ],
+};
+
+function loadStylesheetOnce(id, href) {
+    return new Promise((resolve, reject) => {
+        const existing = document.getElementById(id);
+        if (existing) {
+            if (existing.dataset.loaded === "true") resolve();
+            else {
+                existing.addEventListener("load", resolve, { once: true });
+                existing.addEventListener("error", reject, { once: true });
+            }
+            return;
+        }
+        const link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        link.href = href;
+        link.addEventListener("load", () => {
+            link.dataset.loaded = "true";
+            resolve();
+        }, { once: true });
+        link.addEventListener("error", reject, { once: true });
+        document.head.appendChild(link);
+    });
+}
+
+function loadScriptOnce(id, src) {
+    return new Promise((resolve, reject) => {
+        const existing = document.getElementById(id);
+        if (existing) {
+            if (existing.dataset.loaded === "true") resolve();
+            else {
+                existing.addEventListener("load", resolve, { once: true });
+                existing.addEventListener("error", reject, { once: true });
+            }
+            return;
+        }
+        const script = document.createElement("script");
+        script.id = id;
+        script.src = src;
+        script.async = true;
+        script.addEventListener("load", () => {
+            script.dataset.loaded = "true";
+            resolve();
+        }, { once: true });
+        script.addEventListener("error", reject, { once: true });
+        document.body.appendChild(script);
+    });
+}
+
+function ensureViewStyles(view = currentMainView()) {
+    return Promise.all((VIEW_STYLES[view] || []).map(([id, href]) => loadStylesheetOnce(id, href)));
+}
+
+function ensureViewScripts(view = currentMainView()) {
+    return Promise.all((VIEW_SCRIPTS[view] || []).map(([id, src]) => loadScriptOnce(id, src)));
+}
+
+function ensureViewAssets(view = currentMainView()) {
+    return Promise.all([ensureViewStyles(view), ensureViewScripts(view)]);
+}
+
 function changeJornada(jornada) {
     persistDraft();
     state.jornada = jornada;
+    state.contest = null;
+    state.contestJornada = "";
+    state.q15Directo = {};
+    state.q15DirectoJornada = "";
     syncUrlState();
     refreshData();
-}
-
-function filterLeague(league) {
-    state.currentFilter = !league || league === "MATCHES" ? "ALL" : league;
-    state.contestView = "MATCHES";
-    state.newspaperPage = state.currentFilter === "LIVE" ? "LIVE" : state.currentFilter === "ALL" ? "ALL" : "LEAGUES";
-    syncUrlState();
-    renderArena();
-    loadLeagueNav();
-    hydrateContestNav();
-    hydrateStandingsNav();
-    updateWarRoomButton();
 }
 
 function currentMainView() {
     if (state.contestView !== "MATCHES") return "CONTEST";
     if (String(state.currentFilter || "").startsWith("STANDINGS_")) return "STANDINGS";
-    if (state.currentFilter === "LIVE" || state.currentFilter === "WAR_ROOM") return "LIVE";
+    if (state.currentFilter === "LIVE") return "LIVE";
     if (state.currentFilter === "SNAKE_PAGE") return "SNAKE";
     if (state.currentFilter === "QUIZ_PAGE") return "QUIZ";
     if (state.currentFilter === "TICKET") return "TICKET";
@@ -33,8 +125,9 @@ function currentMainView() {
     return "ALL";
 }
 
-function changeMainView(view) {
+async function changeMainView(view) {
     const target = view || "ALL";
+    await ensureViewAssets(target);
     state.newspaperPage = target;
     hydrateNewspaperPageNav(target);
     if (target === "CONTEST") {
@@ -60,8 +153,6 @@ function changeMainView(view) {
     syncUrlState();
     renderArena();
     hydrateHero();
-    loadLeagueNav();
-    updateWarRoomButton();
 }
 
 function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
@@ -70,16 +161,9 @@ function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
     });
 }
 
-function focusNewspaperPanel(selector) {
-    const panel = document.querySelector(selector);
-    if (!panel) return;
-    panel.classList.add("paper-focus");
-    panel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-    window.setTimeout(() => panel.classList.remove("paper-focus"), 1800);
-}
-
-function openNewspaperPage(page) {
+async function openNewspaperPage(page) {
     const target = page || "ALL";
+    await ensureViewAssets(target);
     state.newspaperPage = target;
     hydrateNewspaperPageNav(target);
     if (target === "SNAKE") {
@@ -87,7 +171,6 @@ function openNewspaperPage(page) {
         state.contestView = "MATCHES";
         syncUrlState();
         renderArena();
-        loadLeagueNav();
         return;
     }
     if (target === "QUIZ") {
@@ -95,92 +178,18 @@ function openNewspaperPage(page) {
         state.contestView = "MATCHES";
         syncUrlState();
         renderArena();
-        loadLeagueNav();
-        updateWarRoomButton();
         return;
     }
-    changeMainView(target);
+    await changeMainView(target);
 }
 
-function changeSecondaryView(value) {
-    if (!value) return;
-    if (String(value).startsWith("CONTEST_")) {
-        changeContestView(value);
-        return;
-    }
-    if (String(value).startsWith("STANDINGS_")) {
-        changeStandingsView(value);
-        return;
-    }
-    filterLeague(value);
-}
-
-function goHome() {
-    state.currentFilter = "ALL";
-    state.contestView = "MATCHES";
-    state.newspaperPage = "ALL";
-    syncUrlState();
-    renderArena();
-    hydrateHero();
-    loadLeagueNav();
-    hydrateContestNav();
-    hydrateStandingsNav();
-    updateWarRoomButton();
-}
-
-function changeContestView(view) {
-    state.contestView = view || "MATCHES";
-    if (state.contestView !== "MATCHES") {
-        state.currentFilter = "ALL";
-        state.newspaperPage = "CONTEST";
-    }
-    syncUrlState();
-    renderArena();
-    hydrateHero();
-    loadLeagueNav();
-    hydrateContestNav();
-    hydrateStandingsNav();
-    updateWarRoomButton();
-}
-
-function changeStandingsView(view) {
-    if (!view || view === "MATCHES") {
-        goHome();
-        return;
-    }
-    state.currentFilter = view || "ALL";
-    state.contestView = "MATCHES";
-    state.newspaperPage = "STANDINGS";
-    syncUrlState();
-    renderArena();
-    loadLeagueNav();
-    hydrateContestNav();
-    hydrateStandingsNav();
-    updateWarRoomButton();
-}
-
-function openProfileView() {
+async function openProfileView() {
+    await ensureViewAssets("CONTEST");
     state.contestView = "CONTEST_PROFILE";
     state.newspaperPage = "CONTEST";
-    if (state.currentFilter === "WAR_ROOM") state.currentFilter = "ALL";
     syncUrlState();
     renderArena();
     hydrateHero();
-    loadLeagueNav();
-    hydrateContestNav();
-    updateWarRoomButton();
-}
-
-function openAwardsView() {
-    state.contestView = "CONTEST_AWARDS";
-    state.newspaperPage = "CONTEST";
-    if (state.currentFilter === "WAR_ROOM") state.currentFilter = "ALL";
-    syncUrlState();
-    renderArena();
-    hydrateHero();
-    loadLeagueNav();
-    hydrateContestNav();
-    updateWarRoomButton();
 }
 
 function changeAwardJornada(value) {
@@ -205,25 +214,8 @@ function syncUrlState() {
     } catch {}
 }
 
-function hydrateMainViewNav() {
-    const nav = qs("league-nav");
-    if (!nav) return;
-    const options = [
-        ["ALL", "Portada"],
-        ["TICKET", "La Quiniela"],
-        ["LIVE", `Directo (${getLiveLeagueMatches().length})`],
-        ["LEAGUES", "Ligas"],
-        ["CONTEST", "La Peña"],
-        ["STANDINGS", "Primera / Segunda"]
-    ];
-    const selected = currentMainView();
-    nav.innerHTML = options.map(([value, label]) =>
-        `<option value="${escapeHtml(value)}" ${selected === value ? "selected" : ""}>${escapeHtml(label)}</option>`
-    ).join("");
-}
-
 function getAvailableLeagueOptions() {
-    const allMatches = state.data?.all_league_matches || [];
+    const allMatches = getBrowsableLeagueMatches();
     const counts = allMatches.reduce((acc, match) => {
         const key = competitionLabel(match);
         acc[key] = (acc[key] || 0) + 1;
@@ -232,73 +224,4 @@ function getAvailableLeagueOptions() {
     return Object.keys(counts)
         .sort((a, b) => a.localeCompare(b))
         .map(key => [key, `${key.replaceAll("_", " ")} (${counts[key]})`]);
-}
-
-function hydrateSecondaryNav() {
-    const nav = qs("contest-nav");
-    if (!nav) return;
-    const group = nav.closest(".field-group");
-    const leagueNav = qs("league-nav");
-    const filters = leagueNav?.closest(".topbar-filters");
-    if (!group || !filters) return;
-    const main = currentMainView();
-    let options = [];
-    let selected = "";
-    let placeholder = "Detalle";
-
-    if (main === "CONTEST") {
-        placeholder = "La Peña";
-        selected = state.contestView;
-        options = [
-            ["CONTEST_PROFILE", "👤 Mi perfil"],
-            ["CONTEST_GENERAL", "🏆 General"],
-            ["CONTEST_MONTHLY", "📅 Mensual"],
-            ["CONTEST_JORNADA", "⚡ Jornada"],
-            ["CONTEST_HISTORY", "📊 Histórico"],
-            ["CONTEST_AWARDS", "🎖️ Galardones"]
-        ];
-    } else if (main === "STANDINGS") {
-        placeholder = "Clasificación";
-        selected = state.currentFilter;
-        options = [
-            ["STANDINGS_PRIMERA", "Primera"],
-            ["STANDINGS_SEGUNDA", "Segunda"]
-        ];
-    } else if (main === "LEAGUES") {
-        placeholder = "Liga";
-        selected = state.currentFilter;
-        options = getAvailableLeagueOptions();
-    }
-
-    const hasOptions = options.length > 0;
-    group.classList.toggle("is-hidden", !hasOptions);
-    filters.classList.toggle("has-secondary", hasOptions);
-    if (!hasOptions) {
-        nav.innerHTML = "";
-        return;
-    }
-    nav.innerHTML = [
-        `<option value="" disabled hidden>${escapeHtml(placeholder)}</option>`,
-        ...options.map(([value, label]) =>
-            `<option value="${escapeHtml(value)}" ${selected === value ? "selected" : ""}>${escapeHtml(label)}</option>`
-        )
-    ].join("");
-    if (options.some(([value]) => value === selected)) {
-        nav.value = selected;
-    }
-}
-
-function hydrateContestNav() {
-    hydrateSecondaryNav();
-}
-
-function hydrateStandingsNav() {
-    hydrateSecondaryNav();
-}
-
-async function loadLeagueNav() {
-    const nav = qs("league-nav");
-    if (!nav) return;
-    hydrateMainViewNav();
-    hydrateSecondaryNav();
 }

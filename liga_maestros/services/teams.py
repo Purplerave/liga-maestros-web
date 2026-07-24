@@ -1,11 +1,9 @@
 """Teams: logos, contracts, name normalization, participant ecosystem."""
 import os
-import json
 import re
-from datetime import datetime
 
 import config
-from ..utils import normalize_team_key, clean_team_key, short_team_name, team_token, load_team_logos, build_team_contract, safe_read_json
+from ..utils import safe_read_json
 
 
 def short_ai_label(name, uid):

@@ -14,58 +14,42 @@ async function refreshData(options = {}) {
         tableX: qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0
     } : null;
     try {
-        const [userRes, dataRes, syncRes, contestRes] = await Promise.all([
-            fetch("/api/user/status"),
-            fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`),
-            fetch(`/api/sync/status?j=${encodeURIComponent(state.jornada)}`),
-            fetch(`/api/concurso?j=${encodeURIComponent(state.jornada)}`)
+        const userRequest = options.auto
+            ? Promise.resolve(null)
+            : fetch("/api/user/status");
+        const [userRes, dataRes] = await Promise.all([
+            userRequest,
+            fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`)
         ]);
-        const userPayload = await userRes.json();
-        state.user = userPayload.user;
-        state.csrfToken = userPayload.csrf_token || "";
+        if (userRes) {
+            const userPayload = await userRes.json();
+            state.user = userPayload.user;
+            state.csrfToken = userPayload.csrf_token || "";
+        }
         state.data = await dataRes.json();
         logoAliasIndex = null;
-        logoDataIndex = null;
         logoCache.clear();
-        state.contest = await contestRes.json();
         state.jornada = String(state.data.jornada || state.jornada);
-        const sync = await syncRes.json();
-        try {
-            const q15Res = await fetch(`/api/q15/directo?j=${encodeURIComponent(state.jornada)}`);
-            state.q15Directo = await q15Res.json();
-        } catch {
-            state.q15Directo = {};
-        }
-        if (state.currentFilter === "WAR_ROOM" && !hasLiveLeagueMatches()) {
-            state.currentFilter = "ALL";
-            syncUrlState();
-        }
-
+        await ensureViewAssets(currentMainView());
         const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && patchLiveArena());
-        const patchedTicketView = Boolean(options.auto && state.currentFilter === "TICKET" && patchTicketArena());
+        const patchedTicketView = Boolean(
+            options.auto
+            && state.currentFilter === "TICKET"
+            && typeof patchTicketArena === "function"
+            && patchTicketArena()
+        );
         if (patchedLiveView || patchedTicketView) return;
 
         hydrateJornadaNav();
         hydrateUserSigns({ preserveLocalTicket });
-        hydrateStatus(sync);
         hydrateHero();
         updateAuthUI();
-        updateWarRoomButton();
         renderArena();
         if (scrollState) {
             window.scrollTo(scrollState.x, scrollState.y);
             const table = qs("matches-body")?.querySelector(".arena-table-wrap");
             if (table) table.scrollLeft = scrollState.tableX;
         }
-        if (shouldRefreshSideModules()) {
-            renderLiveStandings();
-        }
-        loadPorra();
-        loadComments();
-        renderEvolutionChart();
-        loadLeagueNav();
-        hydrateContestNav();
-        hydrateStandingsNav();
     } catch (error) {
         console.error(error);
         if (options.auto && state.data) {
@@ -81,108 +65,17 @@ async function refreshData(options = {}) {
     }
 }
 
-// --- Comentarios ---
-async function loadComments() {
-    const body = qs("comments-body");
-    const form = qs("comment-form");
-    const text = qs("comment-text");
-    const helper = qs("comment-helper");
-    const submit = form?.querySelector("button[type='submit']");
-    const count = qs("comment-count");
-    const newCount = qs("comment-new-count");
-    const summary = qs("comments-summary");
-    if (!body || !state.data) return;
-
-    if (form) form.classList.toggle("is-disabled", !state.user);
-    if (submit) {
-        submit.disabled = !state.user;
-        submit.hidden = !state.user;
-    }
-    if (text) {
-        text.disabled = !state.user;
-        text.hidden = !state.user;
-        text.placeholder = state.user ? "Comenta la jornada..." : "";
-    }
-    if (helper) {
-        helper.innerHTML = state.user
-            ? "Comentario de la jornada"
-            : state.data.auth_enabled === false
-                ? "Login pendiente de configurar"
-                : `<a class="comment-login-link" href="/login/google">Entra con Google para comentar</a>`;
-    }
-
+async function ensureQ15Directo() {
+    const jornada = String(state.data?.jornada || state.jornada || "");
+    if (!jornada || state.q15DirectoJornada === jornada) return false;
     try {
-        const res = await fetch(`/api/comentarios?j=${encodeURIComponent(state.data.jornada)}`);
-        const data = await res.json();
-        const comments = data.comentarios || [];
-        const latestId = comments.reduce((max, comment) => Math.max(max, Number(comment.id || 0)), 0);
-        const seenId = readSeenCommentId(state.data.jornada);
-        const freshCount = comments.filter(comment => Number(comment.id || 0) > seenId).length;
-        body.dataset.latestCommentId = String(latestId);
-        if (latestId) writeSeenCommentId(latestId, state.data.jornada);
-        if (count) count.textContent = String(comments.length);
-        if (newCount) newCount.textContent = String(freshCount);
-        if (summary) {
-            summary.textContent = `${comments.length} comentario${comments.length === 1 ? "" : "s"}${freshCount ? ` · ${freshCount} nuevo${freshCount === 1 ? "" : "s"}` : ""}`;
-        }
-        if (!comments.length) {
-            body.innerHTML = `<div class="comments-empty">
-                <strong style="display:block; margin-bottom:4px;">Sin comentarios todavia</strong>
-                <span>${state.user ? "Deja el primero." : "Entra con Google y comenta."}</span>
-            </div>`;
-            return;
-        }
-        body.innerHTML = comments.map(comment => `
-            <article class="comment-card">
-                <div class="comment-meta">
-                    <strong style="color:var(--accent);">${escapeHtml(comment.nombre || "Maestro")}</strong>
-                    <span>${escapeHtml(formatCommentTime(comment.created_at))}</span>
-                </div>
-                <p>${escapeHtml(comment.texto)}</p>
-            </article>
-        `).join("");
-        body.scrollTop = body.scrollHeight;
-    } catch (error) {
-        if (count) count.textContent = "!";
-        if (newCount) newCount.textContent = "!";
-        if (summary) summary.textContent = "No se pudieron cargar los comentarios.";
-        body.innerHTML = `<div class="comments-empty">No se pudieron cargar los comentarios.</div>`;
+        const response = await fetch(`/api/q15/directo?j=${encodeURIComponent(jornada)}`);
+        state.q15Directo = response.ok ? await response.json() : {};
+    } catch {
+        state.q15Directo = {};
     }
-}
-
-function formatCommentTime(value) {
-    const date = new Date(String(value || "").replace(" ", "T"));
-    if (Number.isNaN(date.getTime())) return "";
-    const now = new Date();
-    const sameDay = date.toDateString() === now.toDateString();
-    return sameDay
-        ? date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
-        : date.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" });
-}
-
-async function submitComment(event) {
-    event.preventDefault();
-    if (!state.user) return showToast("Entra con Google para comentar.", "error");
-    const text = qs("comment-text");
-    const value = String(text.value || "").trim();
-    if (!value) return;
-
-    try {
-        const res = await fetch("/api/comentarios", {
-            method: "POST",
-            headers: authenticatedJsonHeaders(),
-            body: JSON.stringify({
-                jornada: state.data.jornada || state.jornada,
-                texto: value
-            })
-        });
-        const result = await res.json();
-        if (!res.ok || result.status !== "ok") throw new Error(result.message || "No se pudo comentar");
-        text.value = "";
-        await loadComments();
-    } catch (error) {
-        showToast(error.message, "error");
-    }
+    state.q15DirectoJornada = jornada;
+    return true;
 }
 
 // --- Porra ---
@@ -191,6 +84,7 @@ async function loadPorra() {
     const summary = qs("porra-summary");
     const labels = document.querySelectorAll("[data-porra-label]");
     if (!state.data) return;
+    if (!bodies.length && !qs("cover-porra-content")) return;
     try {
         const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
         const data = await res.json();
@@ -311,49 +205,6 @@ async function submitPorra(event) {
         }
         if (formStatus) formStatus.textContent = error.message;
         showToast(error.message, "error");
-    }
-}
-
-// --- Grafico de evolucion ---
-async function renderEvolutionChart() {
-    const canvas = qs("evolutionChart");
-    const empty = qs("evolution-empty");
-    if (!canvas || !window.Chart) return;
-    if (!state.user) {
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.hidden = true;
-        if (empty) empty.hidden = false;
-        return;
-    }
-    canvas.hidden = false;
-    if (empty) empty.hidden = true;
-    try {
-        const res = await fetch(`/api/user/evolution?uid=${encodeURIComponent(state.user.id)}`);
-        const data = await res.json();
-        if (state.evolutionChart) state.evolutionChart.destroy();
-        state.evolutionChart = new Chart(canvas.getContext("2d"), {
-            type: "line",
-            data: {
-                labels: data.labels || [],
-                datasets: [
-                    { label: "Mis aciertos", data: data.user || [], borderColor: "#38bdf8", backgroundColor: "rgba(56, 189, 248, 0.14)", borderWidth: 3, tension: 0.35, fill: true },
-                    { label: "Programa", data: data.programa || data.ia || [], borderColor: "#fbbf24", borderWidth: 2, borderDash: [5, 5], tension: 0.35, fill: false },
-                    { label: "Consenso IA", data: data.consenso || [], borderColor: "#a78bfa", borderWidth: 2, borderDash: [2, 4], tension: 0.35, fill: false }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, max: 15, grid: { color: "rgba(255,255,255,0.06)" }, ticks: { color: "#94a3b8" } },
-                    x: { grid: { display: false }, ticks: { color: "#94a3b8", maxTicksLimit: 5 } }
-                },
-                plugins: { legend: { labels: { color: "#f8fafc", boxWidth: 10, font: { weight: "bold" } } } }
-            }
-        });
-    } catch (error) {
-        console.error(error);
     }
 }
 

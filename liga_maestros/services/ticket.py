@@ -1,10 +1,10 @@
 """Ticket: close info, prediction validation, match info loading."""
-import os, re, json
+import json
+import os
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import config
-from ..utils import safe_read_json
 
 MADRID_TZ = ZoneInfo("Europe/Madrid")
 PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF = int(os.getenv("PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF", "15"))

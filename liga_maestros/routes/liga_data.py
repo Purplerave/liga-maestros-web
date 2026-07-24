@@ -13,7 +13,7 @@ from ..services.payloads.standings import build_standings_payload
 from ..services.multi_standings import build_multi_league_standings
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
-from ..utils import build_team_contract, load_team_logos
+from ..utils import load_team_logos
 
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
@@ -27,12 +27,13 @@ def get_liga_data():
         if max_jornada is None:
             return jsonify({"status": "error", "message": "No hay jornadas cargadas en resultados"}), 404
 
+        jornadas_disponibles = _resolve_available_jornadas(conn)
         jornada = requested_jornada or max_jornada
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
-        multi_league_leagues = build_multi_league_standings(standings)
+        multi_league_leagues = build_multi_league_standings(standings, team_logos)
         multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = _detect_jornada_liga(conn)
         match_info = _load_and_repair_match_info(jornada, partidos)
@@ -51,6 +52,7 @@ def get_liga_data():
             "jornada": jornada,
             "jornada_liga": jornada_liga,
             "max_jornada": max_jornada,
+            "jornadas_disponibles": jornadas_disponibles,
             "today_madrid": today_madrid(),
             "is_locked": is_locked,
             "edit_deadline": _format_dt(close_info.get("close_at")),
@@ -59,8 +61,6 @@ def get_liga_data():
             "all_league_matches": all_league_matches,
             "standings": standings,
             "multi_league_standings": multi_league_standings,
-            "team_logos": team_logos,
-            "team_contract": build_team_contract(),
             "participant_contract": participant_contract,
             "match_info": match_info,
             "predicciones_actuales": predictions_payload["predicciones_actuales"],
@@ -84,6 +84,15 @@ def _resolve_max_jornada(conn):
         return None
     return row[0]
 
+def _resolve_available_jornadas(conn):
+    rows = conn.execute("""
+        SELECT jornada, COUNT(*) AS partidos
+        FROM resultados
+        GROUP BY jornada
+        HAVING partidos > 0
+        ORDER BY jornada DESC
+    """).fetchall()
+    return [int(row["jornada"]) for row in rows if row["jornada"] is not None]
 
 def _detect_jornada_liga(conn):
     try:

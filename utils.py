@@ -2,9 +2,8 @@ import os
 import json
 import re
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
-import xml.etree.ElementTree as ET
 try:
     from .config import BASE_DIR, DATA_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
 except ImportError:

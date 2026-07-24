@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, session
 
 from ..db.connection import get_db
-from ..services.teams import canonical_contest_id, contest_aliases_for_uid, is_scored_status
+from ..services.teams import contest_aliases_for_uid, is_scored_status
 from ..services.contest import build_contest_payload
 from ..scoring import score_prediction
 from ..middleware.csrf import get_csrf_token

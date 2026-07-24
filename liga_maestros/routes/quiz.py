@@ -65,7 +65,6 @@ def quiz_submit():
     respuestas = data.get("respuestas")
     try:
         jornada = int(jornada)
-        client_tiempo_ms = int(data.get("tiempo_total_ms", 0))
     except (TypeError, ValueError):
         return jsonify({"status": "error", "message": "Datos incompletos."}), 400
     

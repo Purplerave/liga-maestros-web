@@ -1,4 +1,5 @@
-import sqlite3, os
+import os
+import sqlite3
 import config
 
 _sqlite_pragma_lock = None

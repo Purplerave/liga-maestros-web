@@ -7,7 +7,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
 from .db.migrations import run_startup_migrations
-from .db.connection import get_db
 from .routes import register_routes
 from .workers.web_collector import start_web_collector
 from .db.backups import minimize_backup_personal_data, start_backup_scheduler

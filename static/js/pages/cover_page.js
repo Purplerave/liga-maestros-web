@@ -134,30 +134,6 @@ function coverFixtureHtml(match, compact = false) {
     </div>`;
 }
 
-function coverNavHtml(liveCount) {
-    const links = [
-        ["TICKET", "Quiniela"],
-        ["LIVE", liveCount ? `Directo ${liveCount}` : "Directo"],
-        ["STANDINGS", "Ligas"],
-        ["SNAKE", "Juegos"],
-        ["CONTEST", "La Pe&ntilde;a"],
-    ];
-    return links.map(([action, label]) =>
-        `<button type="button" class="cp-nav-link" data-page-action="${action}">${label}</button>`
-    ).join("");
-}
-
-function coverAccountHtml(rankingRows) {
-    if (!state.user) return `<a class="cp-account" href="/login/google">Entrar</a>`;
-    const uid = String(state.user.id).toLowerCase();
-    const index = rankingRows.findIndex(row => String(row.uid).toLowerCase() === uid);
-    const row = index >= 0 ? rankingRows[index] : null;
-    const firstName = String(state.user.name || "Jugador").split(" ")[0];
-    return `<button type="button" class="cp-account is-user" data-open-profile>
-        <strong>${escapeHtml(firstName)}</strong><span>#${index >= 0 ? index + 1 : "-"} &middot; ${row?.total || 0} pts</span>
-    </button>`;
-}
-
 function hydrateCoverPorra(data) {
     const target = document.getElementById("cover-porra-content");
     const title = document.getElementById("cover-porra-title");
@@ -204,14 +180,6 @@ function renderNewspaperCoverPageV3() {
     const distinctReadings = disagreement?.unique || 0;
 
     return `<div class="cp">
-        <header class="cp-masthead">
-            <button type="button" class="cp-brand" data-page-action="ALL" aria-label="Portada de Liga de Maestros">
-                <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
-            </button>
-            <nav class="cp-nav" aria-label="Secciones de Liga de Maestros">${coverNavHtml(liveCount)}</nav>
-            ${coverAccountHtml(rankingRows)}
-        </header>
-
         <main class="cp-stage">
             <section class="cp-intro" aria-labelledby="cp-title">
                 <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span>${escapeHtml(statusLabel)}</span></div>

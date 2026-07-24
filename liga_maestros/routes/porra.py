@@ -29,19 +29,10 @@ def _porra_target_match(conn, jornada):
 
     open_matches = [match for match in matches if is_open(match)]
 
-    # El Pleno al 15 ya es un pronostico de marcador exacto y debe ser la
-    # porra principal mientras admita participaciones.
-    pleno = next(
-        (match for match in open_matches if int(match["partido_id"]) == 15),
-        None,
-    )
-    if pleno:
-        return pleno
-
     existing = conn.execute("""
         SELECT partido_id, MIN(created_at) AS first_entry
         FROM porra_entries
-        WHERE jornada = ?
+        WHERE jornada = ? AND partido_id BETWEEN 1 AND 14
         GROUP BY partido_id
         ORDER BY datetime(first_entry) ASC, partido_id ASC
         LIMIT 1
@@ -98,8 +89,6 @@ def _porra_target_match(conn, jornada):
 
 
 def _porra_presentation(match):
-    if int(match.get("partido_id") or 0) == 15:
-        return {"kind": "pleno15", "label": "Porra del Pleno al 15"}
     kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
     label = "Porra del dia" if kickoff and kickoff.date() == madrid_now().date() else "Proxima porra"
     return {"kind": "daily", "label": label}

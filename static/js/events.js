@@ -6,10 +6,7 @@
 
 function bindEvents() {
     qs("jornada-nav")?.addEventListener("change", event => changeJornada(event.target.value));
-    qs("warroom-btn")?.addEventListener("click", () => {
-        filterLeague(state.currentFilter === "WAR_ROOM" ? "ALL" : "WAR_ROOM");
-    });
-    qs("refresh-btn")?.addEventListener("click", refreshData);
+qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);
     qs("share-ticket-btn")?.addEventListener("click", shareTicket);
     document.querySelectorAll("[data-page-action]").forEach(button => {
@@ -17,10 +14,6 @@ function bindEvents() {
     });
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-porra-form]")) submitPorra(event);
-    });
-    qs("comment-form")?.addEventListener("submit", submitComment);
-    document.querySelector(".comments-panel-side .panel-head")?.addEventListener("click", () => {
-        setCommentsOpen(!state.commentsOpen);
     });
     qs("matches-body")?.addEventListener("click", event => {
         const pageBtn = event.target.closest("[data-page-action]");
@@ -44,13 +37,22 @@ function bindEvents() {
             renderArena();
             return;
         }
+        const contestView = event.target.closest("[data-contest-view]");
+        if (contestView) {
+            state.contestView = contestView.dataset.contestView;
+            state.currentFilter = "ALL";
+            state.newspaperPage = "CONTEST";
+            syncUrlState();
+            renderArena();
+            return;
+        }
         const btn = event.target.closest(".clickable");
         if (!btn) return;
         if (!state.user) return showToast("Entra con Google para jugar.", "error");
         if (!state.data || String(state.data.jornada) !== String(state.data.max_jornada) || state.data.is_locked) {
             return showToast("Jornada bloqueada.", "error");
         }
-        const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]").dataset.matchIdx, 10);
+        const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]")?.dataset.matchIdx, 10);
         if (Number.isNaN(idx)) return;
         if (btn.dataset.pleno) {
             openPlenoModal(idx);
@@ -84,6 +86,15 @@ function bindEvents() {
         }
         if (event.target.closest("[data-close-game]")) {
             closeActiveGame();
+            return;
+        }
+        const expandContest = event.target.closest("[data-contest-expand]");
+        if (expandContest) {
+            const target = qs(expandContest.dataset.contestExpand);
+            if (!target) return;
+            const expanded = target.classList.toggle("is-visible");
+            expandContest.setAttribute("aria-expanded", String(expanded));
+            expandContest.textContent = expanded ? "Ocultar" : "Ver todos";
             return;
         }
         const tab = event.target.closest("[data-league-tab]");
@@ -129,7 +140,6 @@ async function refreshLiveSnapshot() {
         const nextSignature = liveSignature(freshData);
         state.data = freshData;
         logoAliasIndex = null;
-        logoDataIndex = null;
         logoCache.clear();
         const hasLive = hasLiveLeagueMatches();
         if (!hadLive && !hasLive) return;
@@ -139,13 +149,11 @@ async function refreshLiveSnapshot() {
         const pageX = window.scrollX;
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
-        updateWarRoomButton();
         hydrateHero();
         renderArena();
         window.scrollTo(pageX, pageY);
         const nextTable = qs("matches-body")?.querySelector(".arena-table-wrap");
         if (nextTable) nextTable.scrollLeft = tableScroll;
-        if (shouldRefreshSideModules()) renderLiveStandings();
         loadPorra();
     } catch (error) {
         console.warn("No se pudo refrescar el directo", error);
@@ -154,25 +162,16 @@ async function refreshLiveSnapshot() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    hydrateCommentsPanel();
     bindEvents();
     refreshData();
-    let autoRefreshId = setInterval(() => {
-        refreshData({ auto: true });
-    }, 60000);
-    let liveRefreshId = setInterval(refreshLiveSnapshot, 30000);
+    let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
-            clearInterval(autoRefreshId);
             clearInterval(liveRefreshId);
-            autoRefreshId = null;
             liveRefreshId = null;
-        } else if (!autoRefreshId) {
+        } else if (!liveRefreshId) {
             refreshLiveSnapshot();
-            autoRefreshId = setInterval(() => {
-                refreshData({ auto: true });
-            }, 60000);
-            liveRefreshId = setInterval(refreshLiveSnapshot, 30000);
+            liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
         }
     });
 });

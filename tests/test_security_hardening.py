@@ -166,6 +166,9 @@ def test_public_liga_payload_never_exposes_provider_ids(tmp_path, monkeypatch):
     response = app.test_client().get("/api/liga/data?j=73")
     assert response.status_code == 200
     assert PRIVATE_ID not in response.get_data(as_text=True)
+    payload = response.get_json()
+    assert "team_contract" not in payload
+    assert "team_logos" not in payload
 
 
 def test_raw_provider_profile_url_is_rejected_but_opaque_url_works(tmp_path, monkeypatch):

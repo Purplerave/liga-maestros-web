@@ -3,30 +3,32 @@ import logging
 import os
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import requests
 
 import config
 from ..db.connection import get_db
-from ..middleware.json_lock import write_json_locked, update_json_object_locked, update_json_list_by_id_locked
+from ..middleware.json_lock import update_json_object_locked, update_json_list_by_id_locked
+from .highlightly_limits import (
+    get_highlightly_circuit,
+    get_highlightly_usage,
+    record_highlightly_failure,
+    record_highlightly_success,
+    reserve_highlightly_calls,
+)
 from .ticket import madrid_now, today_madrid
-from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, safe_read_json, signo_for_match
+from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, signo_for_match
 
 logger = logging.getLogger(__name__)
 
 HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
-HIGHLIGHTLY_DAILY_CALL_LIMIT = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_LIMIT", "7500"))
-HIGHLIGHTLY_DAILY_CALL_RESERVE = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_RESERVE", "250"))
 HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "1")))
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
     item.strip().upper()
     for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",")
     if item.strip()
 }
-HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT = int(os.getenv("HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT", "3"))
-HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS", "600"))
-HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS = int(os.getenv("HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS", "3600"))
 Q15_EXPECTED_MATCHES = 15
 
 _highlightly_refresh_lock = threading.RLock()
@@ -34,7 +36,6 @@ _highlightly_last_refresh = 0
 _highlightly_refresh_thread = None
 _highlightly_refresh_started_at = 0
 _highlightly_thread_management_lock = threading.Lock()
-_highlightly_circuit_lock = threading.RLock()
 
 def resolve_jornada(conn, jornada=None):
     raw = str(jornada or "").strip()
@@ -118,197 +119,6 @@ def compute_refresh_window(conn, jornada=None):
         "window_start": current_window_start,
         "window_end": current_window_end,
     }
-
-
-# --- Circuit Breaker ---
-
-def get_highlightly_circuit():
-    path = os.path.join(config.DATA_DIR, "HIGHLIGHTLY_CIRCUIT.json")
-    with _highlightly_circuit_lock:
-        state = safe_read_json(path, {})
-        now = time.time()
-        until = float(state.get("open_until") or 0)
-        return {
-            "path": path,
-            "failures": int(state.get("failures") or 0),
-            "reopen_failures": int(state.get("reopen_failures") or 0),
-            "cooldown_seconds": int(state.get("cooldown_seconds") or HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS),
-            "open_until": until,
-            "open": until > now,
-            "last_error": state.get("last_error", ""),
-            "last_success_at": state.get("last_success_at", ""),
-            "calls_since_last_success": int(state.get("calls_since_last_success") or 0),
-        }
-
-
-def record_highlightly_success():
-    path = os.path.join(config.DATA_DIR, "HIGHLIGHTLY_CIRCUIT.json")
-    with _highlightly_circuit_lock:
-        write_json_locked(path, {
-            "failures": 0,
-            "reopen_failures": 0,
-            "cooldown_seconds": HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS,
-            "open_until": 0,
-            "last_error": "",
-            "last_success_at": datetime.now().isoformat(timespec="seconds"),
-            "calls_since_last_success": 0,
-            "updated_at": datetime.now().isoformat(timespec="seconds"),
-        })
-
-
-def record_highlightly_failure(exc):
-    with _highlightly_circuit_lock:
-        circuit = get_highlightly_circuit()
-        failures = int(circuit.get("failures") or 0) + 1
-        reopen_failures = int(circuit.get("reopen_failures") or 0)
-        if failures >= HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT:
-            reopen_failures += 1
-        base_cooldown = int(circuit.get("cooldown_seconds") or HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS)
-        cooldown = base_cooldown
-        if reopen_failures >= 3:
-            cooldown = min(max(base_cooldown * 2, HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS), HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS)
-        open_until = 0
-        if failures >= HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT:
-            open_until = time.time() + cooldown
-        write_json_locked(circuit["path"], {
-            "failures": failures,
-            "reopen_failures": reopen_failures,
-            "cooldown_seconds": cooldown,
-            "open_until": open_until,
-            "last_error": str(exc),
-            "last_success_at": circuit.get("last_success_at", ""),
-            "calls_since_last_success": int(circuit.get("calls_since_last_success") or 0) + 1,
-            "updated_at": datetime.now().isoformat(timespec="seconds"),
-        })
-
-
-# --- Usage Tracking ---
-
-def ensure_api_usage_table(conn):
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS api_usage_daily (
-            service TEXT NOT NULL,
-            date TEXT NOT NULL,
-            calls INTEGER NOT NULL DEFAULT 0,
-            updated_at TEXT NOT NULL,
-            PRIMARY KEY (service, date)
-        )
-    """)
-
-
-def highlightly_usage_payload(date_text, calls):
-    calls = int(calls or 0)
-    remaining = max(0, HIGHLIGHTLY_DAILY_CALL_LIMIT - calls)
-    return {
-        "date": date_text,
-        "calls": calls,
-        "limit": HIGHLIGHTLY_DAILY_CALL_LIMIT,
-        "reserve": HIGHLIGHTLY_DAILY_CALL_RESERVE,
-        "remaining": remaining,
-        "usable_remaining": max(0, remaining - HIGHLIGHTLY_DAILY_CALL_RESERVE),
-    }
-
-
-def mirror_highlightly_usage_json(data):
-    path = os.path.join(config.DATA_DIR, "API_USAGE_HIGHLIGHTLY.json")
-    try:
-        write_json_locked(path, data)
-    except Exception:
-        pass
-
-
-def get_highlightly_usage():
-    today = today_madrid()
-    conn = get_db()
-    try:
-        ensure_api_usage_table(conn)
-        row = conn.execute(
-            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
-            ("highlightly", today)
-        ).fetchone()
-        if not row:
-            legacy = safe_read_json(os.path.join(config.DATA_DIR, "API_USAGE_HIGHLIGHTLY.json"), {})
-            legacy_calls = int(legacy.get("calls") or 0) if legacy.get("date") == today else 0
-            conn.execute("""
-                INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
-                VALUES (?, ?, ?, ?)
-            """, ("highlightly", today, legacy_calls, datetime.now().isoformat(timespec="seconds")))
-            conn.commit()
-            calls = legacy_calls
-        else:
-            calls = int(row["calls"] or 0)
-        data = highlightly_usage_payload(today, calls)
-        mirror_highlightly_usage_json(data)
-        return data
-    finally:
-        conn.close()
-
-
-def record_highlightly_call(count=1):
-    count = max(0, int(count or 0))
-    today = today_madrid()
-    conn = get_db()
-    try:
-        ensure_api_usage_table(conn)
-        conn.execute("BEGIN IMMEDIATE")
-        conn.execute("""
-            INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
-            VALUES (?, ?, 0, ?)
-        """, ("highlightly", today, datetime.now().isoformat(timespec="seconds")))
-        conn.execute("""
-            UPDATE api_usage_daily
-            SET calls = calls + ?, updated_at = ?
-            WHERE service = ? AND date = ?
-        """, (count, datetime.now().isoformat(timespec="seconds"), "highlightly", today))
-        row = conn.execute(
-            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
-            ("highlightly", today)
-        ).fetchone()
-        conn.commit()
-        data = highlightly_usage_payload(today, row["calls"] if row else count)
-        mirror_highlightly_usage_json(data)
-        return data
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
-
-
-def reserve_highlightly_calls(count=1):
-    count = max(1, int(count or 1))
-    today = today_madrid()
-    conn = get_db()
-    try:
-        ensure_api_usage_table(conn)
-        conn.execute("BEGIN IMMEDIATE")
-        conn.execute("""
-            INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
-            VALUES (?, ?, 0, ?)
-        """, ("highlightly", today, datetime.now().isoformat(timespec="seconds")))
-        row = conn.execute(
-            "SELECT calls FROM api_usage_daily WHERE service = ? AND date = ?",
-            ("highlightly", today)
-        ).fetchone()
-        calls = int(row["calls"] or 0) if row else 0
-        data = highlightly_usage_payload(today, calls)
-        if count > int(data.get("usable_remaining") or 0):
-            conn.rollback()
-            return None
-        conn.execute("""
-            UPDATE api_usage_daily
-            SET calls = calls + ?, updated_at = ?
-            WHERE service = ? AND date = ?
-        """, (count, datetime.now().isoformat(timespec="seconds"), "highlightly", today))
-        updated = highlightly_usage_payload(today, calls + count)
-        conn.commit()
-        mirror_highlightly_usage_json(updated)
-        return updated
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
 
 
 # --- API Calls ---
@@ -546,86 +356,9 @@ def trigger_highlightly_refresh_async(force=False, jornada=None):
             _highlightly_refresh_thread = None
 
         def _runner():
-            try:
-                refresh_current_matches_from_highlightly(force=force, jornada=jornada)
-            finally:
-                pass
+            refresh_current_matches_from_highlightly(force=force, jornada=jornada)
 
         _highlightly_refresh_started_at = now
         _highlightly_refresh_thread = threading.Thread(target=_runner, name="highlightly-refresh", daemon=True)
         _highlightly_refresh_thread.start()
         return True
-
-
-def fetch_highlightly_standings(league_id, season=None):
-    """Fetch standings for a league from Highlightly API.
-
-    Returns:
-        list of team dicts: [{n, pos, pj, pg, pe, pp, gf, gc, dg, pts}, ...]
-    """
-    if not reserve_highlightly_calls(1):
-        return []
-    headers = {"x-rapidapi-key": os.getenv("HIGHLIGHTLY_API_KEY", "")}
-    params = {"leagueId": league_id}
-    if season:
-        params["season"] = season
-    url = f"https://{config.HIGHLIGHTLY_HOST}/standings"
-    try:
-        response = requests.get(url, params=params, headers=headers, timeout=10)
-        response.raise_for_status()
-        record_highlightly_success()
-        data = response.json()
-        groups = data.get("groups", [])
-        if not groups:
-            return []
-        standings_raw = groups[0].get("standings", [])
-        teams = []
-        for idx, entry in enumerate(standings_raw, 1):
-            total = entry.get("total", {})
-            team_info = entry.get("team", {})
-            wins = total.get("wins", 0)
-            draws = total.get("draws", 0)
-            gf = total.get("scoredGoals", 0)
-            gc = total.get("receivedGoals", 0)
-            pts = wins * 3 + draws
-            teams.append({
-                "n": team_info.get("name", ""),
-                "pos": idx,
-                "pj": total.get("games", 0),
-                "pg": wins,
-                "pe": draws,
-                "pp": total.get("loses", 0),
-                "gf": gf,
-                "gc": gc,
-                "dg": gf - gc,
-                "pts": pts,
-                "logo": team_info.get("logo", ""),
-                "form": [],
-                "streak": "",
-                "last5_pts": 0,
-            })
-        return teams
-    except requests.RequestException as exc:
-        record_highlightly_failure(exc)
-        return []
-
-
-def fetch_all_standings(season=None):
-    """Fetch standings for all configured leagues.
-
-    Returns:
-        list of league dicts: [{name, teams, total_matches, source}, ...]
-    """
-    leagues = []
-    for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
-        if league_name.upper() in ("FRIENDLIES",):
-            continue
-        teams = fetch_highlightly_standings(league_id, season=season)
-        if teams:
-            leagues.append({
-                "name": league_name,
-                "teams": teams,
-                "total_matches": 0,
-                "source": "highlightly",
-            })
-    return leagues
