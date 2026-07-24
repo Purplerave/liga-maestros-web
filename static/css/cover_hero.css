@@ -94,7 +94,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     margin: 0 0 15px;
     color: #ffffff;
     font-family: "Orbitron", "Rajdhani", sans-serif;
-    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-size: clamp(1.2rem, 2.8vw, 2rem);
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: 0.05em;
