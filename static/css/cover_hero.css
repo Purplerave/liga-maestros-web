@@ -93,16 +93,17 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-intro h1 {
     margin: 0 0 15px;
     color: #ffffff;
-    font-family: "Outfit", sans-serif;
-    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-family: "Bebas Neue", "Oswald", sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     background: linear-gradient(135deg, #ffffff 30%, #f59e0b 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
-    padding: 0.15em 0;
+    padding: 0.1em 0;
 }
 
 .cp-lead {
