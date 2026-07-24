@@ -94,7 +94,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     margin: 0 0 15px;
     color: #ffffff;
     font-family: "Outfit", sans-serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -102,9 +102,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 35px rgba(245, 158, 11, 0.35);
-    padding: 0.15em 0.2em 0.15em 0.5em;
-    overflow: visible;
-    white-space: nowrap;
+    padding: 0.15em 0;
 }
 
 .cp-lead {
