@@ -198,12 +198,7 @@ function isLiveMatch(match) {
     const status = String(match.status || "").toUpperCase();
     if (isImplicitlyFinished(match)) return false;
     if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") return true;
-    const score = scoreOnly(match.score || match.marcador || "");
-    if (score && !isFinishedStatus(status)) return true;
-    const dateText = String(match.added || match.fecha_raw || "").slice(0, 10);
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    return Boolean(score && dateText === today && !isFinishedStatus(status));
+    return false;
 }
 
 function getLiveLeagueMatches() {

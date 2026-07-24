@@ -270,10 +270,11 @@
 }
 
 .primary-btn#save-quiniela-btn {
-    min-width: 0;
+    min-width: 120px;
     height: 28px;
     padding: 0 10px;
-    font-size: 0.58rem;
+    font-size: 0.65rem;
+    white-space: nowrap;
 }
 
 .primary-btn#share-ticket-btn {
