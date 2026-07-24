@@ -260,13 +260,22 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 28px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+    min-height: 30px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
     font-size: 0.72rem;
     overflow: hidden;
     position: relative;
     transition: background 0.15s ease;
-    padding: 2px 6px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.contest-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contest-row:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .contest-row.is-user {

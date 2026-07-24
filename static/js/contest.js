@@ -154,12 +154,13 @@ function renderProfileDashboard(profile) {
         const peerAverage = Number(item.pena_avg || 0);
         const diff = Math.round((points - peerAverage) * 10) / 10;
         const ticket = (item.ticket || []).join(" ");
+        const diffLabel = diff > 0 ? `+${diff} sobre media` : diff < 0 ? `${diff} bajo media` : "en la media";
         return `
             <div class="profile-result-row">
                 <strong>J${escapeHtml(item.jornada)}</strong>
                 <span class="profile-result-score">${points}<small> aciertos</small></span>
                 <span class="profile-result-position">#${escapeHtml(item.pos || "-")}</span>
-                        <span class="profile-result-diff ${profileTone(diff)}">${diff > 0 ? "+" : ""}${diff}</span>
+                <span class="profile-result-diff ${profileTone(diff)}" title="${escapeHtml(diffLabel)}">${diff > 0 ? "+" : ""}${diff}</span>
                 <span class="profile-result-meter"><i style="width:${Math.min(100, Math.max(0, points / 15 * 100))}%"></i></span>
                 <span class="profile-result-ticket" title="${escapeHtml(ticket)}">${escapeHtml(ticket)}</span>
             </div>`;
@@ -206,9 +207,9 @@ function renderProfileDashboard(profile) {
                 <section class="profile-panel profile-results-panel">
                     <div class="profile-panel-head">
                         <div><span>Evolucion</span><h3>Jornada a jornada</h3></div>
-                        <small>Aciertos · puesto · diferencia con La Pe&ntilde;a</small>
+                        <small>Aciertos · puesto · diferencia con la media de La Pe&ntilde;a</small>
                     </div>
-                    <div class="profile-result-head"><span>Jornada</span><span>Aciertos</span><span>Puesto</span><span>Vs Pena</span><span>Rendimiento</span></div>
+                    <div class="profile-result-head"><span>Jornada</span><span>Aciertos</span><span>Puesto</span><span title="Diferencia entre tus aciertos y la media de La Pena">Dif. Media</span><span>Rendimiento</span></div>
                     <div class="profile-results-list">${resultRows}</div>
                 </section>
 
@@ -241,7 +242,6 @@ function renderContestPage(view = "CONTEST_GENERAL") {
         ["CONTEST_GENERAL", "General"],
         ["CONTEST_JORNADA", "Jornada"],
         ["CONTEST_MONTHLY", "Mensual"],
-        ["CONTEST_HISTORY", "Historico"],
         ["CONTEST_AWARDS", "Galardones"],
         ["CONTEST_PROFILE", "Mi perfil"]
     ];
