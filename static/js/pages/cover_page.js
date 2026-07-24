@@ -1,5 +1,15 @@
 /* Portada competitiva de Liga de Maestros. */
 
+let _coverFontLoaded = false;
+function loadSacramentoFont() {
+    if (_coverFontLoaded) return;
+    _coverFontLoaded = true;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap";
+    document.head.appendChild(link);
+}
+
 function hydrateCoverTypewriter() {}
 
 function coverCloseLabel() {
