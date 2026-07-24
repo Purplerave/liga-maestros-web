@@ -1,0 +1,20 @@
+{
+  "name": "Liga de Maestros",
+  "short_name": "La Maestros",
+  "description": "Quiniela competitiva: La Peña contra los Maestros IA, jornada a jornada.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#06090f",
+  "theme_color": "#06090f",
+  "icons": [
+    {
+      "src": "/static/img/ligademaestroslogo_trans.png",
+      "sizes": "790x368",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

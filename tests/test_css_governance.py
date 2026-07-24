@@ -1,0 +1,89 @@
+"""Governance tests for the layered design system (2026-07 refresh).
+
+These tests lock in the CSS architecture contract:
+- zero ``!important`` anywhere in the app stylesheets
+- every app stylesheet declares its ``@layer`` and each layer is part of the
+  canonical order declared in ``templates/liga_index.html``
+- no undefined custom properties (``var(--x)``) leak into the bundle
+"""
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CSS_ROOT = ROOT / "static" / "css"
+TEMPLATE = ROOT / "templates" / "liga_index.html"
+
+# legal.css is a standalone page (legal/* templates) outside the SPA layer system.
+EXEMPT_FILES = {CSS_ROOT / "pages" / "legal.css"}
+
+CANONICAL_MATCH = re.compile(r"@layer\s+([a-z\-,\s]+);")
+
+
+def _app_css_files():
+    return [
+        p for p in sorted(CSS_ROOT.rglob("*.css"))
+        if p not in EXEMPT_FILES
+    ]
+
+
+def _canonical_layers():
+    template = TEMPLATE.read_text(encoding="utf-8")
+    match = CANONICAL_MATCH.search(template)
+    assert match, "liga_index.html must declare the canonical @layer order"
+    return {name.strip() for name in match.group(1).split(",") if name.strip()}
+
+
+def test_no_important_anywhere():
+    offenders = []
+    for path in CSS_ROOT.rglob("*.css"):
+        if "!important" in path.read_text(encoding="utf-8"):
+            offenders.append(str(path.relative_to(ROOT)))
+    assert offenders == [], f"!important re-introduced in: {offenders}"
+
+
+def test_every_app_stylesheet_is_layered():
+    canonical = _canonical_layers()
+    for path in _app_css_files():
+        text = path.read_text(encoding="utf-8")
+        first_line = text.splitlines()[0].strip()
+        assert first_line.startswith("@layer ") and first_line.endswith("{"), (
+            f"{path.relative_to(ROOT)} must open with an @layer block"
+        )
+        layer_name = first_line.split()[1]
+        assert layer_name in canonical, (
+            f"{path.relative_to(ROOT)} uses undeclared layer {layer_name!r}"
+        )
+        assert text.rstrip().endswith("}"), (
+            f"{path.relative_to(ROOT)} must close its @layer block"
+        )
+
+
+def test_template_declares_layers_before_stylesheets():
+    template = TEMPLATE.read_text(encoding="utf-8")
+    layer_pos = template.find("@layer tokens")
+    first_link_pos = template.find('rel="stylesheet" href=')
+    assert layer_pos != -1 and first_link_pos != -1
+    assert layer_pos < first_link_pos, (
+        "the @layer order declaration must precede the first stylesheet link"
+    )
+
+
+def test_no_undefined_custom_properties():
+    used = set()
+    defined = set()
+    for path in CSS_ROOT.rglob("*.css"):
+        text = path.read_text(encoding="utf-8")
+        used.update(re.findall(r"var\(\s*(--[a-zA-Z0-9_-]+)", text))
+        defined.update(re.findall(r"^\s*(--[a-zA-Z0-9_-]+)\s*:", text, flags=re.M))
+    missing = sorted(used - defined)
+    assert missing == [], f"undefined CSS custom properties: {missing}"
+
+
+def test_design_tokens_exist():
+    tokens = (CSS_ROOT / "base" / "tokens.css").read_text(encoding="utf-8")
+    for token in (
+        "--font-ui", "--font-display", "--font-data",
+        "--bg-main", "--text-main", "--accent", "--gold",
+        "--color-focus", "--text-xs", "--space-4",
+    ):
+        assert token in tokens, f"missing design token {token}"

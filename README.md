@@ -66,6 +66,24 @@ Get-ChildItem static\js\snake\*.js | ForEach-Object { node --check $_.FullName }
 - `scripts/archive/`: utilidades historicas apartadas del flujo activo.
 - `tests/`: pruebas unitarias.
 
+## Arquitectura frontend (2026-07)
+
+- **Sistema de capas CSS**: orden de cascada gobernado por `@layer` declarado
+  en `templates/liga_index.html` (`tokens, base, badges, theme, typewriter,
+  surfaces, hero, typography, layout, interactions, unification, pages`).
+  Cada archivo de `static/css/**` abre con su bloque `@layer` correspondiente;
+  los estilos de vistas diferidas viven en `pages`.
+- **Cero `!important`** en todo el CSS. Los tests de gobernanza
+  (`tests/test_css_governance.py`) bloquean su regreso y validan que no haya
+  custom properties indefinidas.
+- **Design tokens** centralizados en `static/css/base/tokens.css`
+  (tipografia, color, espaciado, radios, sombras, motion).
+- **Cache inmutable**: los assets servidos con `?v=` (huella por mtime) usan
+  `Cache-Control: immutable, max-age=1 ano`.
+- **SEO/social**: Open Graph + Twitter cards, `robots.txt`, `sitemap.xml`,
+  PWA manifest y Web Share API en el boton Compartir.
+- **Operacion**: `GET /health` para monitores de uptime.
+
 ## Seguridad practica
 
 - La quiniela se cierra por sesion, jornada, longitud de 15 signos y hora de inicio.

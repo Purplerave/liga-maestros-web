@@ -1,11 +1,12 @@
+@layer pages {
 /* Estado de la pagina Directo cuando no hay partidos en juego. */
 body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-empty-page {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     place-items: start center;
-    width: 100% !important;
-    max-width: none !important;
-    padding: clamp(36px, 8vh, 88px) 20px !important;
+    width: 100%;
+    max-width: none;
+    padding: clamp(36px, 8vh, 88px) 20px;
 }
 
 .direct-empty-state {
@@ -70,4 +71,5 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     color: #07111f;
     font-weight: 800;
     cursor: pointer;
+}
 }

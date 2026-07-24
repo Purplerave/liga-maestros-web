@@ -1,3 +1,4 @@
+@layer pages {
 /* ==========================================================================
    TICKET PAGE — Quiniela and Live Scrutiny Table
    ========================================================================== */
@@ -371,7 +372,7 @@
 .action-buttons .ia-signo.active {
     background: var(--gradient-accent);
     border-color: #7dd3fc;
-    color: #ffffff;
+    color: #06121f;
     box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4), 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
@@ -974,4 +975,5 @@ body.quiniela-focus .live-scrutiny-badge {
     .field-group select {
         min-height: 34px;
     }
+}
 }

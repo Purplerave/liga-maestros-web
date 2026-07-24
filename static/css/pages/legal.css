@@ -47,7 +47,7 @@ body.legal-page {
 .legal-content h1 { margin: 0 0 20px; font-size: clamp(2rem, 5vw, 3rem); }
 .legal-content h2 { margin-top: 32px; font-size: 1.2rem; }
 .legal-content p { max-width: 76ch; color: #c7d4e5; }
-.legal-kicker { margin: 0; color: #38d9ff !important; font-weight: 800; text-transform: uppercase; }
+.legal-kicker { margin: 0; color: #38d9ff; font-weight: 800; text-transform: uppercase; }
 
 .legal-data {
     display: grid;
