@@ -202,6 +202,16 @@ function changeAwardMonth(value) {
     renderArena();
 }
 
+function changeContestMonth(value) {
+    state.selectedContestMonth = value || "";
+    renderArena();
+}
+
+function changeContestJornada(value) {
+    state.selectedContestJornada = value || "";
+    renderArena();
+}
+
 function syncUrlState() {
     try {
         const url = new URL(window.location.href);

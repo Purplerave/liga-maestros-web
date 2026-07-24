@@ -339,8 +339,17 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     else:
         selected_jornada = 0
     jornada_rows = rows_from_scores(jornada_scores.get(selected_jornada, {}))
-    latest_month = sorted(monthly_scores.keys())[-1] if monthly_scores else ""
+    jornadas_with_data = sorted(jornada_scores.keys(), reverse=True)
+    jornada_rows_by_jornada = {
+        jornada: rows_from_scores(jornada_scores[jornada])
+        for jornada in jornadas_with_data
+        if jornada_scores[jornada]
+    }
+    scored_months = [month for month in monthly_scores.keys() if monthly_scores[month]]
+    latest_month = sorted(scored_months)[-1] if scored_months else ""
     monthly_rows = rows_from_scores(monthly_scores.get(latest_month, {}))
+    months_desc = sorted(scored_months, reverse=True)
+    monthly_rows_by_month = {month: rows_from_scores(monthly_scores[month]) for month in months_desc}
 
     galardones_jornada = []
     for jornada in sorted(jornada_scores.keys(), reverse=True):
@@ -376,8 +385,18 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
 
     return {
         "general": general,
-        "jornada": {"jornada": selected_jornada, "rows": jornada_rows},
-        "monthly": {"month": latest_month, "rows": monthly_rows},
+        "jornada": {
+            "jornada": selected_jornada,
+            "rows": jornada_rows,
+            "jornadas": [j for j in jornadas_with_data if jornada_scores[j]],
+            "data": jornada_rows_by_jornada,
+        },
+        "monthly": {
+            "month": latest_month,
+            "rows": monthly_rows,
+            "months": months_desc,
+            "data": monthly_rows_by_month,
+        },
         "moments": build_jornada_moments(selected_jornada),
         "galardones": {"jornadas": galardones_jornada, "meses": galardones_mes},
         "profile": profile,

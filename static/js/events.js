@@ -46,6 +46,16 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
             renderArena();
             return;
         }
+        const monthBtn = event.target.closest("[data-month]");
+        if (monthBtn) {
+            changeContestMonth(monthBtn.dataset.month);
+            return;
+        }
+        const jornadaBtn = event.target.closest("[data-contest-jornada]");
+        if (jornadaBtn) {
+            changeContestJornada(jornadaBtn.dataset.contestJornada);
+            return;
+        }
         const btn = event.target.closest(".clickable");
         if (!btn) return;
         if (!state.user) return showToast("Entra con Google para jugar.", "error");

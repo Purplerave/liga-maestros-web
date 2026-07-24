@@ -22,6 +22,8 @@ const state = {
     q15DirectoJornada: "",
     selectedAwardJornada: "",
     selectedAwardMonth: "",
+    selectedContestMonth: "",
+    selectedContestJornada: "",
     newspaperPage: "ALL",
     refreshErrorNotifiedAt: 0,
     snake: {

@@ -268,22 +268,47 @@ function renderContestPageContent(view = "CONTEST_GENERAL") {
 
     if (view === "CONTEST_MONTHLY") {
         const monthlyMonths = contest.monthly?.months || [];
-        const currentMonth = contest.monthly?.month || "";
+        const defaultMonth = contest.monthly?.month || "";
+        const selectedMonth = monthlyMonths.includes(state.selectedContestMonth)
+            ? state.selectedContestMonth
+            : defaultMonth;
+        const monthRows = contest.monthly?.data?.[selectedMonth] || contest.monthly?.rows || [];
         const monthSelector = monthlyMonths.length > 1 ? `
-            <div class="contest-month-selector">
-                ${monthlyMonths.map(m => `<button type="button" class="month-btn ${m === currentMonth ? "active" : ""}" data-month="${escapeHtml(m)}">${escapeHtml(formatMonthES(m))}</button>`).join("")}
+            <div class="contest-month-selector" role="tablist" aria-label="Seleccionar mes">
+                ${monthlyMonths.map(m => `<button type="button" role="tab" aria-selected="${m === selectedMonth}" class="month-btn ${m === selectedMonth ? "active" : ""}" data-month="${escapeHtml(m)}">${escapeHtml(formatMonthES(m))}</button>`).join("")}
             </div>` : "";
+        const leader = monthRows[0];
         return `<section class="contest-page single">
-            <div class="contest-card">
-                <div class="contest-title"><span>La Peña mensual</span><small>${escapeHtml(formatMonthES(currentMonth))}</small></div>
+            <div class="contest-card contest-month-hero">
+                <div class="contest-title"><span>La Peña mensual</span><small>${escapeHtml(formatMonthES(selectedMonth))}</small></div>
+                ${leader ? `<div class="contest-month-leader"><span class="cml-label">Líder del mes</span><strong>${escapeHtml(leader.name)}</strong><b>${leader.points} pts</b></div>` : ""}
                 ${monthSelector}
-                <div id="monthly-rows">${renderContestRows(contest.monthly?.rows || [], 80, { showMedals: true })}</div>
+                <div id="monthly-rows">${renderContestRows(monthRows, 80, { showMedals: true })}</div>
             </div>
         </section>`;
     }
 
     if (view === "CONTEST_JORNADA") {
-        return `<section class="contest-page single"><div class="contest-card"><div class="contest-title"><span>La Peña jornada ${contest.jornada?.jornada || ""}</span><small>jornada actual</small></div>${renderContestRows(contest.jornada?.rows || [], 80, { showMedals: true })}</div></section>`;
+        const jornadaList = (contest.jornada?.jornadas || []).map(String);
+        const defaultJornada = String(contest.jornada?.jornada || "");
+        const selectedJornada = jornadaList.includes(String(state.selectedContestJornada))
+            ? String(state.selectedContestJornada)
+            : defaultJornada;
+        const jornadaRows = contest.jornada?.data?.[selectedJornada] || contest.jornada?.rows || [];
+        const jornadaSelector = jornadaList.length > 1 ? `
+            <div class="contest-month-selector contest-jornada-selector" role="tablist" aria-label="Seleccionar jornada">
+                ${jornadaList.map(j => `<button type="button" role="tab" aria-selected="${j === selectedJornada}" class="month-btn ${j === selectedJornada ? "active" : ""}" data-contest-jornada="${escapeHtml(j)}">J${escapeHtml(j)}</button>`).join("")}
+            </div>` : "";
+        const isCurrent = selectedJornada === defaultJornada;
+        const leader = jornadaRows[0];
+        return `<section class="contest-page single">
+            <div class="contest-card contest-month-hero">
+                <div class="contest-title"><span>La Peña · Jornada ${escapeHtml(selectedJornada)}</span><small>${isCurrent ? "actual" : "histórico"}</small></div>
+                ${leader ? `<div class="contest-month-leader"><span class="cml-label">Ganador de la jornada</span><strong>${escapeHtml(leader.name)}</strong><b>${leader.points} pts</b></div>` : ""}
+                ${jornadaSelector}
+                ${renderContestRows(jornadaRows, 80, { showMedals: true })}
+            </div>
+        </section>`;
     }
 
     if (view === "CONTEST_HISTORY") {
