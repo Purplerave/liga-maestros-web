@@ -199,18 +199,20 @@ function isLiveMatch(match) {
     if (isImplicitlyFinished(match)) return false;
     if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") {
         const kickoff = parseMatchTimestamp(match);
-        const threeHoursAgo = Date.now() - (3 * 60 * 60 * 1000);
-        if (kickoff && kickoff < threeHoursAgo) return false;
+        const twoAndAHalfHoursAgo = Date.now() - (2.5 * 60 * 60 * 1000);
+        if (kickoff && kickoff < twoAndAHalfHoursAgo) return false;
         return true;
     }
     return false;
 }
 
 function getLiveLeagueMatches() {
-    const officialLive = (state.data?.partidos || []).filter(m => isLiveStatus(m.status) || isLiveMatch(m));
+    const currentJornada = String(state.data?.jornada || "");
+    const officialLive = (state.data?.partidos || [])
+        .filter(m => (isLiveStatus(m.status) || isLiveMatch(m)) && String(m.jornada || currentJornada) === currentJornada);
     const seen = new Set(officialLive.map(matchPairKey));
     const externalLive = getAllLeagueMatches()
-        .filter(m => isLiveStatus(m.status) || isLiveMatch(m))
+        .filter(m => (isLiveStatus(m.status) || isLiveMatch(m)))
         .filter(m => competitionLabel(m) !== "FRIENDLIES")
         .filter(m => {
             const key = matchPairKey(m);

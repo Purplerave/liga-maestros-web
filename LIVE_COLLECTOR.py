@@ -416,6 +416,19 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
         stuck_live = detect_stuck_live_matches(window.get("jornada") or jornada)
+        if stuck_live:
+            try:
+                conn = get_db()
+                for match in stuck_live:
+                    conn.execute(
+                        "UPDATE resultados SET status = 'FT', minuto = 'Finalizado' WHERE jornada = ? AND partido_id = ?",
+                        (window.get("jornada") or jornada, match["id"]),
+                    )
+                conn.commit()
+                conn.close()
+                log_line(f"auto_ft={len(stuck_live)} ids={','.join(str(m['id']) for m in stuck_live)}")
+            except Exception as exc:
+                log_line(f"auto_ft_error={exc}")
         write_health("idle", window=window, metrics={
             "duration_ms": int((time.time() - started_at) * 1000),
             "stuck_live_count": len(stuck_live),
