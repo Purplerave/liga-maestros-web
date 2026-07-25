@@ -47,4 +47,4 @@ jobs:
           node --check static/js/snake/index.js
 
       - name: Tests
-        run: pytest -q
+        run: python -m pytest -q
