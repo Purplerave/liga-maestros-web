@@ -13,6 +13,13 @@
   ],
   "predictions": [
     {
+      "jornada": 74,
+      "user_id": "programa",
+      "signos": ["1", "1", "1", "2", "2", "2", "1X", "1", "2", "X2", "1", "2", "1", "1", "1-1"],
+      "verified_at": "2026-07-25",
+      "source": "Quiniela final aportada por el usuario; dobles en 7 y 10"
+    },
+    {
       "jornada": 73,
       "user_id": "programa",
       "signos": ["1", "X2", "1", "X2", "2", "1", "1", "1", "1", "1X", "2", "1", "X2", "2", "2-1"],
