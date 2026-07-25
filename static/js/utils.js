@@ -321,8 +321,10 @@ function hitClass(sign, real, status, exactScore = false) {
     if (exactScore) {
         const userKey = plenoScoreKey(sign);
         const realKey = plenoScoreKey(real);
-        return userKey === realKey ? "hit-exact" : "";
+        if (!userKey || !realKey) return "";
+        return userKey === realKey ? "hit hit-exact" : "miss";
     }
+    if (!["1", "X", "2"].includes(normalizeSign(real))) return "";
     return standardSignMatches(sign, real) ? "hit" : "miss";
 }
 

@@ -322,4 +322,66 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
         padding: 0;
     }
 }
+
+/* El escrutinio debe leerse de un vistazo: partido vivo y signo acertado/fallado. */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row td {
+    height: 47px;
+    background: rgba(8, 78, 64, 0.28);
+    border-top: 1px solid rgba(52, 211, 153, 0.34);
+    border-bottom-color: rgba(52, 211, 153, 0.34);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row td:first-child {
+    box-shadow: inset 4px 0 0 #22c55e;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .match-number {
+    width: 29px;
+    height: 29px;
+    border-color: #4ade80;
+    background: rgba(34, 197, 94, 0.14);
+    color: #dcfce7;
+    line-height: 29px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .fixture-name {
+    color: #f0fdf4;
+    font-size: 0.86rem;
+    font-weight: 900;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .team-badge {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .ticket-status-cell .match-score-badge {
+    height: 31px;
+    min-height: 31px;
+    border-color: #4ade80;
+    background: #12613d;
+    color: #fff;
+    font-size: 0.76rem;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .hit {
+    border-color: #22c55e;
+    background: rgba(21, 128, 61, 0.82);
+    color: #f0fdf4;
+    box-shadow: inset 0 0 0 1px rgba(134, 239, 172, 0.22);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .miss {
+    border-color: #ef4444;
+    background: rgba(153, 27, 27, 0.82);
+    color: #fef2f2;
+    box-shadow: inset 0 0 0 1px rgba(252, 165, 165, 0.18);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick.hit .pena-breakdown-item.is-leader,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick.miss .pena-breakdown-item.is-leader {
+    color: inherit;
+}
 }

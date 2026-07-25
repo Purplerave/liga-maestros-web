@@ -26,7 +26,7 @@ const VIEW_STYLES = {
     QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
     TICKET: [
         ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-4")],
-        ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-5")],
+        ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-6")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
     ],
 };
