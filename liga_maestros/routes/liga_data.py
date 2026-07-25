@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request, session
 import config
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
-from ..services.payloads.league_matches import build_all_league_matches
+from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload
@@ -33,6 +33,7 @@ def get_liga_data():
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
+        live_matches = build_live_matches(partidos, team_logos)
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
         multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = _detect_jornada_liga(conn)
@@ -59,6 +60,7 @@ def get_liga_data():
             "kickoff_at": _format_dt(close_info.get("first_kickoff")),
             "partidos": partidos,
             "all_league_matches": all_league_matches,
+            "live_matches": live_matches,
             "standings": standings,
             "multi_league_standings": multi_league_standings,
             "participant_contract": participant_contract,

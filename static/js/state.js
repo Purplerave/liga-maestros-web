@@ -209,9 +209,18 @@ function isLiveMatch(match) {
 }
 
 function getLiveLeagueMatches() {
-    const currentJornada = String(state.data?.jornada || "");
-    return (state.data?.partidos || [])
-        .filter(m => (isLiveStatus(m.status) || isLiveMatch(m)) && String(m.jornada || currentJornada) === currentJornada);
+    const source = state.data?.live_matches || [
+        ...(state.data?.partidos || []),
+        ...getAllLeagueMatches()
+    ];
+    const matchesById = new Map();
+    source.filter(m => isLiveStatus(m.status) || isLiveMatch(m)).forEach(match => {
+        const home = String(match.local || match.home_name || match.home?.name || "").toUpperCase();
+        const away = String(match.visitante || match.away_name || match.away?.name || "").toUpperCase();
+        const key = String(match.fixture_id || match.id || `${home}|${away}`);
+        matchesById.set(key, match);
+    });
+    return [...matchesById.values()];
 }
 
 function hasLiveLeagueMatches() {

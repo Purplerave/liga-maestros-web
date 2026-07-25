@@ -131,7 +131,11 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
 async function refreshLiveSnapshot() {
     if (!state.data || document.hidden) return;
     try {
-        const liveSignature = data => [...(data?.partidos || []), ...(data?.all_league_matches || [])]
+        const liveSignature = data => [
+            ...(data?.partidos || []),
+            ...(data?.all_league_matches || []),
+            ...(data?.live_matches || [])
+        ]
             .filter(match => isLiveStatus(match.status) || isLiveMatch(match))
             .map(match => [
                 matchPairKey(match),

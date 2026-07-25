@@ -10,9 +10,6 @@ from ...utils import normalize_team_key, parse_any_match_datetime
 
 
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
-    def logo_for(team_name):
-        return team_logos.get(normalize_team_key(team_name), "")
-
     all_league_matches = _load_external_matches()
     quiniela_league_matches = _build_quiniela_league_matches(jornada, partidos, standings_db)
     quiniela_pairs = {
@@ -27,13 +24,46 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     ]
     all_league_matches = quiniela_league_matches + all_league_matches
 
-    for match in all_league_matches:
+    return _add_team_logos(all_league_matches, team_logos)
+
+
+def build_live_matches(partidos, team_logos):
+    """Return every live match from the shared Highlightly snapshot."""
+    external_live = [match for match in _load_external_matches() if _is_live_match(match)]
+    quiniela_live = [
+        match
+        for match in _build_quiniela_league_matches("", partidos, {})
+        if _is_live_match(match)
+    ]
+    matches_by_id = {}
+    for match in external_live + quiniela_live:
+        key = str(match.get("fixture_id") or match.get("id") or "").strip()
+        if not key:
+            home = normalize_team_key(match.get("local") or (match.get("home") or {}).get("name"))
+            away = normalize_team_key(match.get("visitante") or (match.get("away") or {}).get("name"))
+            key = f"{home}|{away}"
+        matches_by_id[key] = match
+    return _add_team_logos(list(matches_by_id.values()), team_logos)
+
+
+def _add_team_logos(matches, team_logos):
+    def logo_for(team_name):
+        return team_logos.get(normalize_team_key(team_name), "")
+
+    for match in matches:
         home_name = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
         away_name = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
         match["home_logo"] = match.get("home_logo") or (match.get("home") or {}).get("logo") or logo_for(home_name)
         match["away_logo"] = match.get("away_logo") or (match.get("away") or {}).get("logo") or logo_for(away_name)
+    return matches
 
-    return all_league_matches
+
+def _is_live_match(match):
+    status = str(match.get("status") or "").upper()
+    if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
+        return False
+    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
+    return not match_date or match_date == today_madrid()
 
 
 def _load_external_matches():
