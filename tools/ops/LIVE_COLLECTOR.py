@@ -1,5 +1,4 @@
 import argparse
-import json
 import shutil
 import sqlite3
 import time
@@ -7,22 +6,22 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
+
 import config
+import utils
 from liga_maestros.db.connection import get_db
 from liga_maestros.middleware.json_lock import write_json_locked
 from liga_maestros.services import (
     HIGHLIGHTLY_REFRESH_ENABLED,
-    Q15_EXPECTED_MATCHES,
     compute_refresh_window,
     get_highlightly_circuit,
     get_highlightly_usage,
     madrid_now,
     parse_madrid_datetime,
-    validate_q15_payload,
     refresh_current_matches_from_highlightly,
+    validate_q15_payload,
 )
-from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
-import utils
 
 DATA_DIR = Path(config.DATA_DIR)
 LOG_PATH = DATA_DIR / "LIVE_COLLECTOR.log"
@@ -50,11 +49,7 @@ def write_health(status, window=None, error=None, metrics=None):
     previous_q15 = previous.get("q15") if isinstance(previous, dict) else {}
     now = madrid_now()
     usage = get_highlightly_usage()
-    circuit = {
-        key: value
-        for key, value in get_highlightly_circuit().items()
-        if key != "path"
-    }
+    circuit = {key: value for key, value in get_highlightly_circuit().items() if key != "path"}
     if circuit.get("open_until"):
         try:
             circuit["open_until_iso"] = datetime.fromtimestamp(
@@ -69,11 +64,16 @@ def write_health(status, window=None, error=None, metrics=None):
     snapshot_at = now.isoformat(timespec="seconds")
     snapshot_age_seconds = 0
     operational_status = (
-        "q15_ok_api_paused" if blocked_by_circuit and q15_ok
-        else "circuit_open" if blocked_by_circuit
-        else "degraded" if stuck_live_count
-        else "degraded" if status == "error" or metrics.get("q15_status") == "error"
-        else "idle" if status == "idle"
+        "q15_ok_api_paused"
+        if blocked_by_circuit and q15_ok
+        else "circuit_open"
+        if blocked_by_circuit
+        else "degraded"
+        if stuck_live_count
+        else "degraded"
+        if status == "error" or metrics.get("q15_status") == "error"
+        else "idle"
+        if status == "idle"
         else "healthy"
     )
     payload = {
@@ -140,14 +140,16 @@ def detect_stuck_live_matches(jornada, grace_minutes=150):
     for row in rows:
         kickoff_at = parse_madrid_datetime(row["fecha"], row["hora"])
         if kickoff_at and now >= kickoff_at + timedelta(minutes=grace_minutes):
-            stuck.append({
-                "id": int(row["partido_id"]),
-                "local": row["local"],
-                "visitante": row["visitante"],
-                "status": row["status"],
-                "minuto": row["minuto"],
-                "kickoff_at": kickoff_at.isoformat(timespec="minutes"),
-            })
+            stuck.append(
+                {
+                    "id": int(row["partido_id"]),
+                    "local": row["local"],
+                    "visitante": row["visitante"],
+                    "status": row["status"],
+                    "minuto": row["minuto"],
+                    "kickoff_at": kickoff_at.isoformat(timespec="minutes"),
+                }
+            )
     return stuck
 
 
@@ -211,9 +213,7 @@ def choose_refresh_window(conn, jornada=None):
 
     jornadas = [
         row[0]
-        for row in conn.execute(
-            "SELECT DISTINCT jornada FROM resultados ORDER BY jornada DESC"
-        ).fetchall()
+        for row in conn.execute("SELECT DISTINCT jornada FROM resultados ORDER BY jornada DESC").fetchall()
         if row[0] is not None
     ]
     if not jornadas:
@@ -231,10 +231,7 @@ def choose_refresh_window(conn, jornada=None):
         )[0]
 
     now = madrid_now().replace(tzinfo=None)
-    upcoming = [
-        w for w in windows
-        if w.get("next_kickoff") and w.get("next_kickoff") >= now - timedelta(minutes=5)
-    ]
+    upcoming = [w for w in windows if w.get("next_kickoff") and w.get("next_kickoff") >= now - timedelta(minutes=5)]
     if upcoming:
         return sorted(upcoming, key=lambda w: w.get("next_kickoff"))[0]
 
@@ -407,12 +404,7 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     started_at = time.time()
     enabled, window = should_refresh(jornada)
     backup_runtime_state(window=window)
-    q15_catchup = bool(
-        q15
-        and window.get("jornada")
-        and window.get("reason") == "ventana_jornada"
-        and enabled
-    )
+    q15_catchup = bool(q15 and window.get("jornada") and window.get("reason") == "ventana_jornada" and enabled)
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
         stuck_live = detect_stuck_live_matches(window.get("jornada") or jornada)
@@ -429,11 +421,15 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
                 log_line(f"auto_ft={len(stuck_live)} ids={','.join(str(m['id']) for m in stuck_live)}")
             except Exception as exc:
                 log_line(f"auto_ft_error={exc}")
-        write_health("idle", window=window, metrics={
-            "duration_ms": int((time.time() - started_at) * 1000),
-            "stuck_live_count": len(stuck_live),
-            "stuck_live_matches": stuck_live,
-        })
+        write_health(
+            "idle",
+            window=window,
+            metrics={
+                "duration_ms": int((time.time() - started_at) * 1000),
+                "stuck_live_count": len(stuck_live),
+                "stuck_live_matches": stuck_live,
+            },
+        )
         return 0, window
 
     q15_matches = "-"
@@ -487,18 +483,22 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     stuck_live = detect_stuck_live_matches(window.get("jornada") or jornada)
     if stuck_live:
         log_line(f"stuck_live={len(stuck_live)} ids={','.join(str(item['id']) for item in stuck_live)}")
-    write_health("ok", window=window, metrics={
-        "duration_ms": int((time.time() - started_at) * 1000),
-        "highlightly_status": highlightly_status,
-        "highlightly_updates": updates,
-        "q15_status": q15_status,
-        "q15_matches": q15_matches,
-        "q15_duration_ms": q15_detail.get("duration_ms"),
-        "q15_parse_errors": q15_detail.get("parse_errors", 0),
-        "last_success_per_match": q15_detail.get("last_success_per_match", {}),
-        "stuck_live_count": len(stuck_live),
-        "stuck_live_matches": stuck_live,
-    })
+    write_health(
+        "ok",
+        window=window,
+        metrics={
+            "duration_ms": int((time.time() - started_at) * 1000),
+            "highlightly_status": highlightly_status,
+            "highlightly_updates": updates,
+            "q15_status": q15_status,
+            "q15_matches": q15_matches,
+            "q15_duration_ms": q15_detail.get("duration_ms"),
+            "q15_parse_errors": q15_detail.get("parse_errors", 0),
+            "last_success_per_match": q15_detail.get("last_success_per_match", {}),
+            "stuck_live_count": len(stuck_live),
+            "stuck_live_matches": stuck_live,
+        },
+    )
     return updates, window
 
 
@@ -506,8 +506,12 @@ def main():
     parser = argparse.ArgumentParser(description="Actualiza cache live sin depender del refresco de usuarios.")
     parser.add_argument("--once", action="store_true", help="Ejecuta una sola pasada.")
     parser.add_argument("--force", action="store_true", help="Ignora ventana horaria.")
-    parser.add_argument("--interval", type=int, default=60, help="Segundos entre pasadas cuando hay partidos en ventana.")
-    parser.add_argument("--highlightly-interval", type=int, default=60, help="Segundos minimos entre pasadas a Highlightly.")
+    parser.add_argument(
+        "--interval", type=int, default=60, help="Segundos entre pasadas cuando hay partidos en ventana."
+    )
+    parser.add_argument(
+        "--highlightly-interval", type=int, default=60, help="Segundos minimos entre pasadas a Highlightly."
+    )
     parser.add_argument("--jornada", type=int, help="Jornada concreta a vigilar.")
     parser.add_argument("--no-q15", action="store_true", help="No actualiza el cache de directo de Quiniela15.")
     parser.add_argument("--backup-now", action="store_true", help="Crea backup local de DB y JSON y sale.")
@@ -518,12 +522,19 @@ def main():
         return
 
     if args.once:
-        run_once(force=args.force, q15=not args.no_q15, jornada=args.jornada, highlightly_interval=args.highlightly_interval)
+        run_once(
+            force=args.force, q15=not args.no_q15, jornada=args.jornada, highlightly_interval=args.highlightly_interval
+        )
         return
 
     while True:
         try:
-            _, window = run_once(force=args.force, q15=not args.no_q15, jornada=args.jornada, highlightly_interval=args.highlightly_interval)
+            _, window = run_once(
+                force=args.force,
+                q15=not args.no_q15,
+                jornada=args.jornada,
+                highlightly_interval=args.highlightly_interval,
+            )
             sleep_seconds = next_sleep_seconds(window, args.interval)
         except Exception as exc:
             log_line(f"collector_error={exc}")

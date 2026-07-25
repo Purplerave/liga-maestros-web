@@ -1,6 +1,7 @@
 """Public legal pages and authenticated account deletion."""
-import os
+
 import logging
+import os
 
 from flask import Blueprint, redirect, render_template, request, session, url_for
 

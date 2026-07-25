@@ -1,5 +1,4 @@
 import sqlite3
-
 from datetime import timedelta
 
 from liga_maestros.routes.porra import _porra_is_locked, _porra_target_match
@@ -34,8 +33,12 @@ def test_porra_chooses_most_divided_upcoming_match():
     conn.executemany(
         "INSERT INTO predicciones VALUES (?, 73, ?, ?)",
         [
-            ("a", 1, "1"), ("b", 1, "1"), ("c", 1, "1"),
-            ("a", 2, "1"), ("b", 2, "X"), ("c", 2, "2"),
+            ("a", 1, "1"),
+            ("b", 1, "1"),
+            ("c", 1, "1"),
+            ("a", 2, "1"),
+            ("b", 2, "X"),
+            ("c", 2, "2"),
         ],
     )
 

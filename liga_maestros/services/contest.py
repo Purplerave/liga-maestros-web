@@ -1,10 +1,11 @@
 """Contest engine: ranking, profiles, streaks, awards."""
+
 import threading
 from datetime import datetime
 
 from ..db.connection import get_db
 from ..scoring import score_prediction
-from .teams import canonical_contest_id, public_contest_name, is_scored_status
+from .teams import canonical_contest_id, is_scored_status, public_contest_name
 
 CONTEST_DYNAMIC_START_JORNADA = 58
 Q15_EXPECTED_MATCHES = 15
@@ -25,10 +26,13 @@ def contest_month_key(date_text):
 
 def contest_cache_signature():
     conn = get_db()
-    pred = conn.execute("""
+    pred = conn.execute(
+        """
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
         FROM predicciones WHERE jornada >= ?
-    """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchone()
+    """,
+        (CONTEST_DYNAMIC_START_JORNADA,),
+    ).fetchone()
     results = conn.execute("""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
             COALESCE(SUM(COALESCE(goles_local, -99) * 31 + COALESCE(goles_visitante, -99) * 17), 0) AS goals_sig,
@@ -41,10 +45,15 @@ def contest_cache_signature():
         FROM usuarios
     """).fetchone()
     return (
-        int(pred["n"] or 0), int(pred["max_rowid"] or 0),
-        int(results["n"] or 0), int(results["max_rowid"] or 0),
-        int(results["goals_sig"] or 0), int(results["state_sig"] or 0),
-        int(users["n"] or 0), int(users["max_rowid"] or 0), int(users["points_sig"] or 0),
+        int(pred["n"] or 0),
+        int(pred["max_rowid"] or 0),
+        int(results["n"] or 0),
+        int(results["max_rowid"] or 0),
+        int(results["goals_sig"] or 0),
+        int(results["state_sig"] or 0),
+        int(users["n"] or 0),
+        int(users["max_rowid"] or 0),
+        int(users["points_sig"] or 0),
     )
 
 
@@ -95,10 +104,13 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         jornada_dates.setdefault(jornada, str(row["fecha"] or "")[:10])
         match_labels[key] = {"local": row["local"] or "", "visitante": row["visitante"] or ""}
 
-    pred_rows = conn.execute("""
+    pred_rows = conn.execute(
+        """
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
         FROM predicciones WHERE jornada >= ?
-    """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchall()
+    """,
+        (CONTEST_DYNAMIC_START_JORNADA,),
+    ).fetchall()
 
     totals = {}
     raw_hits = {}
@@ -111,10 +123,11 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     ordered_pred_rows = sorted(
         pred_rows,
         key=lambda pred: (
-            int(pred["jornada"]), int(pred["partido_id"]),
+            int(pred["jornada"]),
+            int(pred["partido_id"]),
             _prediction_source_priority(pred["user_id"]),
             -int(pred["pred_rowid"] or 0),
-        )
+        ),
     )
     for pred in ordered_pred_rows:
         uid = canonical_contest_id(pred["user_id"])
@@ -154,13 +167,15 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     def rows_from_scores(scores, limit=None):
         rows = []
         for uid, score in scores.items():
-            rows.append({
-                "id": uid,
-                "name": public_contest_name(uid, users),
-                "points": int(score or 0),
-                "played": int(played.get(uid, 0)),
-                "is_user": bool(current_user_id and uid == current_user_id),
-            })
+            rows.append(
+                {
+                    "id": uid,
+                    "name": public_contest_name(uid, users),
+                    "points": int(score or 0),
+                    "played": int(played.get(uid, 0)),
+                    "is_user": bool(current_user_id and uid == current_user_id),
+                }
+            )
         rows.sort(key=lambda item: (-item["points"], item["name"]))
         for idx, item in enumerate(rows, 1):
             item["pos"] = idx
@@ -203,13 +218,17 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     def rivalry_rows(uid, my_jornadas, limit=8):
         if not uid or not my_jornadas:
             return []
-        recent_jornadas = [int(item["jornada"]) for item in sorted(my_jornadas, key=lambda item: int(item["jornada"]))[-5:]]
-        peers = sorted({
-            peer_uid
-            for jornada in recent_jornadas
-            for peer_uid in jornada_scores.get(jornada, {}).keys()
-            if peer_uid != uid and peer_uid.lower() not in hidden_ids
-        })
+        recent_jornadas = [
+            int(item["jornada"]) for item in sorted(my_jornadas, key=lambda item: int(item["jornada"]))[-5:]
+        ]
+        peers = sorted(
+            {
+                peer_uid
+                for jornada in recent_jornadas
+                for peer_uid in jornada_scores.get(jornada, {}).keys()
+                if peer_uid != uid and peer_uid.lower() not in hidden_ids
+            }
+        )
         rows = []
         for peer_uid in peers:
             wins = losses = draws = diff = common = 0
@@ -229,10 +248,17 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
                     draws += 1
             if not common:
                 continue
-            rows.append({
-                "id": peer_uid, "name": public_contest_name(peer_uid, users),
-                "wins": wins, "losses": losses, "draws": draws, "diff": diff, "common": common,
-            })
+            rows.append(
+                {
+                    "id": peer_uid,
+                    "name": public_contest_name(peer_uid, users),
+                    "wins": wins,
+                    "losses": losses,
+                    "draws": draws,
+                    "diff": diff,
+                    "common": common,
+                }
+            )
         rows.sort(key=lambda item: (-(item["wins"] - item["losses"]), -item["diff"], item["name"]))
         return rows[:limit]
 
@@ -258,14 +284,18 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
             if rarity > 0.34 and len(hitters) > 2:
                 continue
             label = match_labels.get((jornada, partido_id), {})
-            moments.append({
-                "jornada": jornada, "partido_id": partido_id,
-                "match": f"{label.get('local') or 'Local'} - {label.get('visitante') or 'Visitante'}",
-                "real": real,
-                "hitters": [public_contest_name(hit_uid, users) for hit_uid in hitters[:4]],
-                "hit_count": len(hitters), "pool": len(picks),
-                "rarity": round(rarity * 100, 1),
-            })
+            moments.append(
+                {
+                    "jornada": jornada,
+                    "partido_id": partido_id,
+                    "match": f"{label.get('local') or 'Local'} - {label.get('visitante') or 'Visitante'}",
+                    "real": real,
+                    "hitters": [public_contest_name(hit_uid, users) for hit_uid in hitters[:4]],
+                    "hit_count": len(hitters),
+                    "pool": len(picks),
+                    "rarity": round(rarity * 100, 1),
+                }
+            )
         moments.sort(key=lambda item: (item["hit_count"], -item["pool"], item["partido_id"]))
         return moments[:limit]
 
@@ -283,10 +313,15 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
                 continue
             ballot = ballots.get((uid, jornada), {})
             ticket = [ballot.get(i, "-") for i in range(1, Q15_EXPECTED_MATCHES + 1)]
-            my_jornadas.append({
-                "jornada": jornada, "ticket": ticket, "points": found["points"],
-                "pos": found["pos"], "pena_avg": peer_average_for(jornada, uid),
-            })
+            my_jornadas.append(
+                {
+                    "jornada": jornada,
+                    "ticket": ticket,
+                    "points": found["points"],
+                    "pos": found["pos"],
+                    "pena_avg": peer_average_for(jornada, uid),
+                }
+            )
         total_predictions = int(evaluated_predictions.get(uid, 0))
         total_hits = int(raw_hits.get(uid, 0))
         total_points = int(mine["points"] if mine else 0)
@@ -300,14 +335,23 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         for jornada in sorted(jornada_scores.keys(), reverse=True):
             rows = rows_from_scores(jornada_scores[jornada])
             if rows and any(row["id"] == uid and row["points"] == rows[0]["points"] for row in rows):
-                profile_awards.append({
-                    "jornada": jornada, "winner": public_contest_name(uid, users),
-                    "points": rows[0]["points"], "date": jornada_dates.get(jornada, ""),
-                })
+                profile_awards.append(
+                    {
+                        "jornada": jornada,
+                        "winner": public_contest_name(uid, users),
+                        "points": rows[0]["points"],
+                        "date": jornada_dates.get(jornada, ""),
+                    }
+                )
         return {
-            "id": uid, "name": profile_name, "position": mine["pos"] if mine else None,
-            "played": len(my_jornadas), "predictions": total_predictions, "hits": total_hits,
-            "points": total_points, "bonus": bonus_points,
+            "id": uid,
+            "name": profile_name,
+            "position": mine["pos"] if mine else None,
+            "played": len(my_jornadas),
+            "predictions": total_predictions,
+            "hits": total_hits,
+            "points": total_points,
+            "bonus": bonus_points,
             "hit_rate": round((total_hits / total_predictions) * 100, 2) if total_predictions else 0,
             "hits_per_jornada": round(total_hits / len(my_jornadas), 2) if my_jornadas else 0,
             "best_position": min((row["pos"] for row in my_jornadas), default=None),
@@ -315,7 +359,9 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
             "vs_pena": {
                 "average_points": peer_avg_points,
                 "diff": round(total_points - peer_avg_points, 2),
-                "ahead_of": above_peers, "behind": below_peers, "pool": len(peer_rows),
+                "ahead_of": above_peers,
+                "behind": below_peers,
+                "pool": len(peer_rows),
             },
             "rivalries": rivalry_rows(uid, my_jornadas),
             "results": my_jornadas[-24:],
@@ -341,9 +387,7 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     jornada_rows = rows_from_scores(jornada_scores.get(selected_jornada, {}))
     jornadas_with_data = sorted(jornada_scores.keys(), reverse=True)
     jornada_rows_by_jornada = {
-        jornada: rows_from_scores(jornada_scores[jornada])
-        for jornada in jornadas_with_data
-        if jornada_scores[jornada]
+        jornada: rows_from_scores(jornada_scores[jornada]) for jornada in jornadas_with_data if jornada_scores[jornada]
     }
     scored_months = [month for month in monthly_scores.keys() if monthly_scores[month]]
     latest_month = sorted(scored_months)[-1] if scored_months else ""
@@ -354,11 +398,7 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     completed_jornadas = {
         jornada
         for jornada in jornada_scores
-        if sum(
-            1
-            for partido_id in range(1, Q15_EXPECTED_MATCHES + 1)
-            if (jornada, partido_id) in results
-        )
+        if sum(1 for partido_id in range(1, Q15_EXPECTED_MATCHES + 1) if (jornada, partido_id) in results)
         == Q15_EXPECTED_MATCHES
     }
     galardones_jornada = []
@@ -372,12 +412,16 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         if top_score == 0:
             continue
         winners = [row for row in rows if row["points"] == top_score]
-        galardones_jornada.append({
-            "jornada": jornada,
-            "winner": ", ".join(row["name"] for row in winners),
-            "winners": winners, "tie_count": len(winners),
-            "points": top_score, "date": jornada_dates.get(jornada, ""),
-        })
+        galardones_jornada.append(
+            {
+                "jornada": jornada,
+                "winner": ", ".join(row["name"] for row in winners),
+                "winners": winners,
+                "tie_count": len(winners),
+                "points": top_score,
+                "date": jornada_dates.get(jornada, ""),
+            }
+        )
 
     galardones_mes = []
     for month in sorted(monthly_scores.keys(), reverse=True):
@@ -387,11 +431,15 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
             if top_score == 0:
                 continue
             winners = [row for row in rows if row["points"] == top_score]
-            galardones_mes.append({
-                "month": month,
-                "winner": ", ".join(row["name"] for row in winners),
-                "winners": winners, "tie_count": len(winners), "points": top_score,
-            })
+            galardones_mes.append(
+                {
+                    "month": month,
+                    "winner": ", ".join(row["name"] for row in winners),
+                    "winners": winners,
+                    "tie_count": len(winners),
+                    "points": top_score,
+                }
+            )
 
     profile = profile_for(current_user_id) if current_user_id else None
 

@@ -30,20 +30,22 @@ def build_standings_payload(conn, partidos):
         for cat in ("primera", "segunda"):
             official_rows = []
             for item in standings_override.get(cat, []):
-                official_rows.append({
-                    "n": item.get("n"),
-                    "pj": item.get("pj", 0),
-                    "pts": item.get("pts", 0),
-                    "pos": item.get("pos", 0),
-                    "pg": item.get("pg"),
-                    "pe": item.get("pe"),
-                    "pp": item.get("pp"),
-                    "gf": item.get("gf"),
-                    "gc": item.get("gc"),
-                    "racha": item.get("racha", ""),
-                    "base_oficial": True,
-                    "source": "official",
-                })
+                official_rows.append(
+                    {
+                        "n": item.get("n"),
+                        "pj": item.get("pj", 0),
+                        "pts": item.get("pts", 0),
+                        "pos": item.get("pos", 0),
+                        "pg": item.get("pg"),
+                        "pe": item.get("pe"),
+                        "pp": item.get("pp"),
+                        "gf": item.get("gf"),
+                        "gc": item.get("gc"),
+                        "racha": item.get("racha", ""),
+                        "base_oficial": True,
+                        "source": "official",
+                    }
+                )
             if official_rows:
                 standings[cat] = official_rows
 
@@ -96,12 +98,14 @@ def _apply_finished_results(standings_data, matches):
             _add_result(away, ga, gh, 1, "pe")
 
     for rows in standings_data.values():
-        rows.sort(key=lambda row: (
-            -int(row.get("pts") or 0),
-            -(int(row.get("gf") or 0) - int(row.get("gc") or 0)),
-            -int(row.get("gf") or 0),
-            str(row.get("n") or ""),
-        ))
+        rows.sort(
+            key=lambda row: (
+                -int(row.get("pts") or 0),
+                -(int(row.get("gf") or 0) - int(row.get("gc") or 0)),
+                -int(row.get("gf") or 0),
+                str(row.get("n") or ""),
+            )
+        )
         for idx, row in enumerate(rows, start=1):
             row["pos"] = idx
 
@@ -112,4 +116,3 @@ def _add_result(row, gf, gc, points, result_key):
     row["gc"] = int(row.get("gc") or 0) + int(gc)
     row["pts"] = int(row.get("pts") or 0) + int(points)
     row[result_key] = int(row.get(result_key) or 0) + 1
-

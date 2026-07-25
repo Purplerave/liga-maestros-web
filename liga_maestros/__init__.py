@@ -1,16 +1,19 @@
 """Liga de Maestros - Flask application factory."""
+
 import os
 from datetime import timedelta
-from flask import Flask, g, jsonify, request, session
+
 from dotenv import load_dotenv
+from flask import Flask, g, jsonify, request, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
+
+from .db.backups import minimize_backup_personal_data, start_backup_scheduler
 from .db.migrations import run_startup_migrations
+from .middleware.csrf import valid_csrf_request
 from .routes import register_routes
 from .workers.web_collector import start_web_collector
-from .db.backups import minimize_backup_personal_data, start_backup_scheduler
-from .middleware.csrf import valid_csrf_request
 
 load_dotenv()
 config.ensure_runtime_data_dir()
@@ -42,10 +45,14 @@ def create_app():
         MAX_FORM_MEMORY_SIZE=int(os.getenv("MAX_FORM_MEMORY_SIZE", str(32 * 1024))),
         MAX_FORM_PARTS=int(os.getenv("MAX_FORM_PARTS", "50")),
     )
-    trusted_hosts = [item.strip() for item in os.getenv(
-        "TRUSTED_HOSTS",
-        "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
-    ).split(",") if item.strip()]
+    trusted_hosts = [
+        item.strip()
+        for item in os.getenv(
+            "TRUSTED_HOSTS",
+            "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
+        ).split(",")
+        if item.strip()
+    ]
     app.config["TRUSTED_HOSTS"] = trusted_hosts
 
     register_routes(app)

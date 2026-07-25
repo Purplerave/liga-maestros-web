@@ -7,25 +7,37 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-
 ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = ROOT.parent
 PROGRAM_DIR = PROJECT_ROOT / "PROGRAMA_QUINIELA"
 URL = "https://www.quiniela15.com/pronostico-quiniela"
 
 MONTHS = {
-    "ene": 1, "enero": 1,
-    "feb": 2, "febrero": 2,
-    "mar": 3, "marzo": 3,
-    "abr": 4, "abril": 4,
-    "may": 5, "mayo": 5,
-    "jun": 6, "junio": 6,
-    "jul": 7, "julio": 7,
-    "ago": 8, "agosto": 8,
-    "sep": 9, "sept": 9, "septiembre": 9,
-    "oct": 10, "octubre": 10,
-    "nov": 11, "noviembre": 11,
-    "dic": 12, "diciembre": 12,
+    "ene": 1,
+    "enero": 1,
+    "feb": 2,
+    "febrero": 2,
+    "mar": 3,
+    "marzo": 3,
+    "abr": 4,
+    "abril": 4,
+    "may": 5,
+    "mayo": 5,
+    "jun": 6,
+    "junio": 6,
+    "jul": 7,
+    "julio": 7,
+    "ago": 8,
+    "agosto": 8,
+    "sep": 9,
+    "sept": 9,
+    "septiembre": 9,
+    "oct": 10,
+    "octubre": 10,
+    "nov": 11,
+    "noviembre": 11,
+    "dic": 12,
+    "diciembre": 12,
 }
 
 
@@ -52,10 +64,7 @@ def extract_score_probs(text):
     if "Marcador Q15" not in text:
         return []
     tail = text.split("Marcador Q15", 1)[1]
-    return [
-        {"score": score, "pct": int(pct)}
-        for score, pct in re.findall(r"\b([0-2M]-[0-2M])\s+(\d+)%", tail)
-    ][:6]
+    return [{"score": score, "pct": int(pct)} for score, pct in re.findall(r"\b([0-2M]-[0-2M])\s+(\d+)%", tail)][:6]
 
 
 def sign_from_probs(probs):
@@ -75,11 +84,7 @@ def load_segunda_position_map():
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
             rows = data.get("segunda", data) if isinstance(data, dict) else data
-            mapping = {
-                int(row["pos"]): row["n"]
-                for row in rows
-                if str(row.get("pos", "")).isdigit() and row.get("n")
-            }
+            mapping = {int(row["pos"]): row["n"] for row in rows if str(row.get("pos", "")).isdigit() and row.get("n")}
             if mapping:
                 return mapping
         except Exception:
@@ -164,7 +169,7 @@ def scrape_quiz(url=URL):
         sistema = cells[7] or "-"
 
         detail_text = ""
-        for nxt in rows[pos + 1: pos + 4]:
+        for nxt in rows[pos + 1 : pos + 4]:
             classes = nxt.get("class") or []
             if "matchinfo" in classes:
                 detail_cells = [clean(td.get_text(" ", strip=True)) for td in nxt.find_all("td")]
@@ -251,13 +256,17 @@ def write_outputs(payload, write_program=True):
         datos_dir.mkdir(parents=True, exist_ok=True)
         salidas_dir.mkdir(parents=True, exist_ok=True)
         (datos_dir / f"QUINIELA15_J{jornada}.json").write_text(
-            json.dumps({
-                "jornada": jornada,
-                "source_url": payload["source_url"],
-                "scraped_at": payload["scraped_at"],
-                "cierre": payload["cierre"],
-                "partidos": payload["partidos"],
-            }, ensure_ascii=False, indent=2),
+            json.dumps(
+                {
+                    "jornada": jornada,
+                    "source_url": payload["source_url"],
+                    "scraped_at": payload["scraped_at"],
+                    "cierre": payload["cierre"],
+                    "partidos": payload["partidos"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
         (datos_dir / f"PROBABILIDADES_J{jornada}.json").write_text(
@@ -265,17 +274,23 @@ def write_outputs(payload, write_program=True):
             encoding="utf-8",
         )
         (salidas_dir / f"quiniela_programa_J{jornada}_q15_base.json").write_text(
-            json.dumps({
-                "jornada": jornada,
-                "fuente": "quiniela15_sistema_base",
-                "signos": payload["q15_base_signs"],
-            }, ensure_ascii=False, indent=2),
+            json.dumps(
+                {
+                    "jornada": jornada,
+                    "fuente": "quiniela15_sistema_base",
+                    "signos": payload["q15_base_signs"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Scrapea la próxima quiniela desde Quiniela15 y genera JSON de entrada.")
+    parser = argparse.ArgumentParser(
+        description="Scrapea la próxima quiniela desde Quiniela15 y genera JSON de entrada."
+    )
     parser.add_argument("--url", default=URL)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-program", action="store_true", help="No escribe en PROGRAMA_QUINIELA/DATOS.")

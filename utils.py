@@ -1,19 +1,22 @@
-import os
 import json
+import os
 import re
 import unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
 try:
-    from .config import BASE_DIR, DATA_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
+    from .config import BASE_DIR, DATA_DIR, NEWS_GENERIC_KEYWORDS, NEWS_TEAM_KEYWORDS, TEAM_LOGO_ALIASES
 except ImportError:
-    from config import BASE_DIR, DATA_DIR, TEAM_LOGO_ALIASES, NEWS_TEAM_KEYWORDS, NEWS_GENERIC_KEYWORDS
+    from config import BASE_DIR, DATA_DIR, NEWS_GENERIC_KEYWORDS, NEWS_TEAM_KEYWORDS, TEAM_LOGO_ALIASES
+
 
 def runtime_data_path(*parts):
     path = os.path.join(DATA_DIR, *parts)
     if os.path.exists(path):
         return path
     return os.path.join(BASE_DIR, "data", *parts)
+
 
 def clean_team_key(value):
     text = unicodedata.normalize("NFD", str(value or "").upper())
@@ -23,9 +26,11 @@ def clean_team_key(value):
     text = re.sub(r"\s+", " ", text)
     return text
 
+
 def normalize_team_key(value):
     text = clean_team_key(value)
     return TEAM_LOGO_ALIASES.get(text, text)
+
 
 def short_team_name(value):
     key = normalize_team_key(value)
@@ -53,10 +58,12 @@ def short_team_name(value):
     ).strip()
     return re.sub(r"\s+", " ", cleaned or key)[:18]
 
+
 def team_token(value):
     short = short_team_name(value)
     token = re.sub(r"[^A-Z0-9]", "", clean_team_key(short))
-    return (token[:2] or "--")
+    return token[:2] or "--"
+
 
 def load_team_logos():
     logos_path = runtime_data_path("TEAM_LOGOS.json")
@@ -64,11 +71,11 @@ def load_team_logos():
     logos = {}
     try:
         if os.path.exists(logos_path):
-            with open(logos_path, "r", encoding="utf-8") as fh:
+            with open(logos_path, encoding="utf-8") as fh:
                 raw = json.load(fh)
             logos.update({normalize_team_key(name): logo for name, logo in raw.items()})
         if os.path.exists(manifest_path):
-            with open(manifest_path, "r", encoding="utf-8") as fh:
+            with open(manifest_path, encoding="utf-8") as fh:
                 manifest = json.load(fh)
             for name, rel_path in manifest.items():
                 url = str(rel_path or "").replace("\\", "/").lstrip("/")
@@ -78,6 +85,7 @@ def load_team_logos():
         return logos
     except Exception:
         return logos
+
 
 def build_team_contract():
     logos = load_team_logos()
@@ -105,6 +113,7 @@ def build_team_contract():
         ],
     }
 
+
 def load_standings_override():
     path = runtime_data_path("standings_oficial.json")
     laliga_path = runtime_data_path("STANDINGS_LALIGA_BASE.json")
@@ -113,46 +122,54 @@ def load_standings_override():
         data = {"primera": [], "segunda": []}
     else:
         try:
-            with open(path, "r", encoding="utf-8") as fh:
+            with open(path, encoding="utf-8") as fh:
                 data = json.load(fh)
         except Exception:
             data = {"primera": [], "segunda": []}
     try:
         if os.path.exists(laliga_path):
-            with open(laliga_path, "r", encoding="utf-8") as fh:
+            with open(laliga_path, encoding="utf-8") as fh:
                 data["primera"] = json.load(fh)
         if os.path.exists(segunda_path):
-            with open(segunda_path, "r", encoding="utf-8") as fh:
+            with open(segunda_path, encoding="utf-8") as fh:
                 data["segunda"] = json.load(fh)
     except Exception:
         pass
     return data
 
+
 def safe_read_json(path, default):
     if not os.path.exists(path):
         return default
     try:
-        with open(path, "r", encoding="utf-8") as fh:
+        with open(path, encoding="utf-8") as fh:
             return json.load(fh)
     except Exception:
         return default
 
+
 def _lock_file(lock_fh):
     if os.name == "nt":
         import msvcrt
+
         msvcrt.locking(lock_fh.fileno(), msvcrt.LK_LOCK, 1)
     else:
         import fcntl
+
         fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
+
 
 def _unlock_file(lock_fh):
     if os.name == "nt":
         import msvcrt
+
         lock_fh.seek(0)
         msvcrt.locking(lock_fh.fileno(), msvcrt.LK_UNLCK, 1)
     else:
         import fcntl
+
         fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
+
 
 def safe_write_json(path, payload):
     try:
@@ -171,14 +188,17 @@ def safe_write_json(path, payload):
     except Exception:
         return False
 
+
 def strip_html(value):
     text = re.sub(r"<[^>]+>", " ", str(value or ""))
     return re.sub(r"\s+", " ", text).strip()
+
 
 def normalize_news_text(value):
     text = unicodedata.normalize("NFD", str(value or "").lower())
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
     return re.sub(r"\s+", " ", text).strip()
+
 
 def news_relevance_score(text):
     text_norm = normalize_news_text(text)
@@ -190,6 +210,7 @@ def news_relevance_score(text):
         if normalize_news_text(key) in text_norm:
             score += 2
     return score
+
 
 def parse_rfc822_to_iso(value):
     raw = str(value or "").strip()
@@ -205,17 +226,20 @@ def parse_rfc822_to_iso(value):
             continue
     return ""
 
+
 def sanitize_xml_payload(payload):
     text = payload.decode("utf-8", errors="replace")
     text = re.sub(r"&(?!#?\w+;)", "&amp;", text)
     text = text.replace("\x0b", " ").replace("\x0c", " ")
     return text.encode("utf-8")
 
+
 def parse_score_text(score_text):
     match = re.search(r"(\d+)\s*-\s*(\d+)", str(score_text or ""))
     if not match:
         return None, None
     return int(match.group(1)), int(match.group(2))
+
 
 def signo_for_match(partido_id, home_goals, away_goals):
     if home_goals is None or away_goals is None:
@@ -232,9 +256,17 @@ def signo_for_match(partido_id, home_goals, away_goals):
         return "2"
     return "X"
 
+
 def highlightly_status(state):
     desc = str((state or {}).get("description") or "").upper()
-    if desc in ("FINISHED", "ENDED", "FT", "MATCH FINISHED", "FINISHED AFTER PENALTIES", "FINISHED AFTER EXTRA TIME") or desc.startswith("FINISHED"):
+    if desc in (
+        "FINISHED",
+        "ENDED",
+        "FT",
+        "MATCH FINISHED",
+        "FINISHED AFTER PENALTIES",
+        "FINISHED AFTER EXTRA TIME",
+    ) or desc.startswith("FINISHED"):
         return "FT", "Finalizado"
     if desc in ("FIRST HALF", "SECOND HALF", "LIVE", "IN PLAY"):
         clock = str((state or {}).get("clock") or "").strip()
@@ -243,13 +275,14 @@ def highlightly_status(state):
         return "LIVE", "HT"
     return "NS", "NS"
 
+
 def highlightly_match_to_panel(match):
     state = match.get("state") or {}
     league = match.get("league") or {}
     country = match.get("country") or {}
     competition_name = match.get("_competition_name") or league.get("name") or "Liga"
     status, minute = highlightly_status(state)
-    score_text = ((state.get("score") or {}).get("current") or "")
+    score_text = (state.get("score") or {}).get("current") or ""
     date_str = match.get("date", "")
     try:
         dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -283,6 +316,7 @@ def highlightly_match_to_panel(match):
         "scheduled": scheduled_time,
     }
 
+
 def parse_db_match_datetime(fecha_value, hora_value):
     fecha = str(fecha_value or "").strip()[:10]
     hora = str(hora_value or "").strip()[:5]
@@ -292,6 +326,7 @@ def parse_db_match_datetime(fecha_value, hora_value):
         return datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M")
     except Exception:
         return None
+
 
 def parse_any_match_datetime(match):
     raw_date = str(match.get("fecha_raw") or "").strip()[:10]

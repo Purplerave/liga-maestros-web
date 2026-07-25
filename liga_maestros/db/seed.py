@@ -1,9 +1,9 @@
 """Public, repeatable seed import for empty production databases."""
+
 import json
 import os
 
 import config
-
 
 PUBLIC_SEED_TABLES = (
     "equipos",
@@ -29,7 +29,7 @@ def import_public_seed_if_empty(conn, seed_path=None):
     if count or not seed_path or not os.path.exists(seed_path):
         return False
 
-    with open(seed_path, "r", encoding="utf-8") as fh:
+    with open(seed_path, encoding="utf-8") as fh:
         payload = json.load(fh)
 
     tables = payload.get("tables") or {}
@@ -64,7 +64,7 @@ def apply_fixture_corrections(conn, corrections_path=None):
     if not corrections_path or not os.path.exists(corrections_path):
         return 0
 
-    with open(corrections_path, "r", encoding="utf-8") as fh:
+    with open(corrections_path, encoding="utf-8") as fh:
         payload = json.load(fh)
     corrections = payload.get("fixtures") or []
 
@@ -118,13 +118,11 @@ def apply_fixture_corrections(conn, corrections_path=None):
 
 def import_profile_history(conn, history_path=None):
     """Restore public historical tickets without storing account identifiers."""
-    history_path = history_path or os.path.join(
-        config.SEED_DATA_DIR, "bootstrap", "profile_history.json"
-    )
+    history_path = history_path or os.path.join(config.SEED_DATA_DIR, "bootstrap", "profile_history.json")
     if not history_path or not os.path.exists(history_path):
         return 0
 
-    with open(history_path, "r", encoding="utf-8") as fh:
+    with open(history_path, encoding="utf-8") as fh:
         payload = json.load(fh)
 
     changed = 0
@@ -145,9 +143,7 @@ def import_profile_history(conn, history_path=None):
         user_id = str(user[0])
         for raw_jornada, raw_signs in (profile.get("jornadas") or {}).items():
             jornada = int(raw_jornada)
-            if not conn.execute(
-                "SELECT 1 FROM resultados WHERE jornada = ? LIMIT 1", (jornada,)
-            ).fetchone():
+            if not conn.execute("SELECT 1 FROM resultados WHERE jornada = ? LIMIT 1", (jornada,)).fetchone():
                 continue
             for partido_id, raw_sign in enumerate(list(raw_signs or [])[:15], start=1):
                 sign = str(raw_sign or "-").strip().upper()

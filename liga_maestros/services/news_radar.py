@@ -1,12 +1,23 @@
 """News radar: RSS feeds, relevance scoring, cache."""
+
 import time
-from urllib.parse import urlsplit
-from defusedxml import ElementTree as ET
 from datetime import datetime
+from urllib.parse import urlsplit
+
 import requests
+from defusedxml import ElementTree as ET
 
 import config
-from ..utils import strip_html, normalize_news_text, news_relevance_score, parse_rfc822_to_iso, sanitize_xml_payload, safe_read_json, safe_write_json
+
+from ..utils import (
+    news_relevance_score,
+    normalize_news_text,
+    parse_rfc822_to_iso,
+    safe_read_json,
+    safe_write_json,
+    sanitize_xml_payload,
+    strip_html,
+)
 
 
 def fetch_feed_items(feed):
@@ -15,7 +26,10 @@ def fetch_feed_items(feed):
         raise ValueError("Fuente RSS no permitida")
     response = requests.get(
         feed["url"],
-        headers={"User-Agent": "Mozilla/5.0 LigaMaestrosRadar/1.0", "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8"},
+        headers={
+            "User-Agent": "Mozilla/5.0 LigaMaestrosRadar/1.0",
+            "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+        },
         timeout=12,
     )
     response.raise_for_status()
@@ -32,15 +46,17 @@ def fetch_feed_items(feed):
         link_parts = urlsplit(link)
         if not title or link_parts.scheme not in {"http", "https"} or not link_parts.hostname:
             continue
-        items.append({
-            "source": feed["name"],
-            "source_id": feed["id"],
-            "title": title,
-            "link": link,
-            "summary": desc[:220],
-            "published_at": pub,
-            "score": score,
-        })
+        items.append(
+            {
+                "source": feed["name"],
+                "source_id": feed["id"],
+                "title": title,
+                "link": link,
+                "summary": desc[:220],
+                "published_at": pub,
+                "score": score,
+            }
+        )
     return items
 
 

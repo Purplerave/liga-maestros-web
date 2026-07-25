@@ -1,26 +1,32 @@
 import os
 
+
 def _lock_file(lock_fh):
     if os.name == "nt":
         import msvcrt
+
         msvcrt.locking(lock_fh.fileno(), msvcrt.LK_LOCK, 1)
     else:
         import fcntl
+
         fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
 
 
 def _unlock_file(lock_fh):
     if os.name == "nt":
         import msvcrt
+
         lock_fh.seek(0)
         msvcrt.locking(lock_fh.fileno(), msvcrt.LK_UNLCK, 1)
     else:
         import fcntl
+
         fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
 
 
 def update_json_list_by_id_locked(path, new_items):
     import json
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     lock_path = f"{path}.lock"
     with open(lock_path, "a+b") as lock_fh:
@@ -28,7 +34,7 @@ def update_json_list_by_id_locked(path, new_items):
         try:
             merged = {}
             try:
-                with open(path, "r", encoding="utf-8") as fh:
+                with open(path, encoding="utf-8") as fh:
                     for item in json.load(fh) or []:
                         item_id = str(item.get("id") or "").strip()
                         if item_id:
@@ -49,6 +55,7 @@ def update_json_list_by_id_locked(path, new_items):
 
 def write_json_locked(path, payload):
     import json
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     lock_path = f"{path}.lock"
     with open(lock_path, "a+b") as lock_fh:
@@ -64,13 +71,14 @@ def write_json_locked(path, payload):
 
 def update_json_object_locked(path, updates):
     import json
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     lock_path = f"{path}.lock"
     with open(lock_path, "a+b") as lock_fh:
         _lock_file(lock_fh)
         try:
             try:
-                with open(path, "r", encoding="utf-8") as fh:
+                with open(path, encoding="utf-8") as fh:
                     current = json.load(fh)
             except Exception:
                 current = {}
@@ -87,6 +95,7 @@ def update_json_object_locked(path, updates):
 
 def append_jsonl_locked(path, payload):
     import json
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     lock_path = f"{path}.lock"
     with open(lock_path, "a+b") as lock_fh:

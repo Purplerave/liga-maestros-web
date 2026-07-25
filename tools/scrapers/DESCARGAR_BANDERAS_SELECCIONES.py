@@ -5,7 +5,6 @@ from pathlib import Path
 
 import requests
 
-
 ROOT = Path(__file__).resolve().parent
 LOGOS_DIR = ROOT / "static" / "img" / "team_logos"
 MANIFEST_PATH = LOGOS_DIR / "manifest.json"

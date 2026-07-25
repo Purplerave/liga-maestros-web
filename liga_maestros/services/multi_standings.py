@@ -5,6 +5,7 @@ import os
 import time
 
 import config
+
 from ..utils import normalize_team_key
 from .highlightly_standings import fetch_highlightly_standings
 
@@ -15,7 +16,7 @@ def _load_cache():
     if not os.path.exists(CACHE_PATH):
         return None
     try:
-        with open(CACHE_PATH, "r", encoding="utf-8") as f:
+        with open(CACHE_PATH, encoding="utf-8") as f:
             data = json.load(f)
         return data.get("leagues", [])
     except Exception:
@@ -49,19 +50,23 @@ def build_multi_league_standings(official_standings, team_logos=None):
         for row in rows:
             gf = row.get("gf", 0) or 0
             gc = row.get("gc", 0) or 0
-            teams.append({
-                "n": row.get("n", ""),
-                "pos": row.get("pos", 0),
-                "pj": row.get("pj", 0),
-                "pg": row.get("pg", 0),
-                "pe": row.get("pe", 0),
-                "pp": row.get("pp", 0),
-                "gf": gf, "gc": gc, "dg": gf - gc,
-                "pts": row.get("pts", 0),
-                "logo": team_logos.get(normalize_team_key(row.get("n", "")), ""),
-                "form": [],
-                "streak": row.get("racha", ""),
-            })
+            teams.append(
+                {
+                    "n": row.get("n", ""),
+                    "pos": row.get("pos", 0),
+                    "pj": row.get("pj", 0),
+                    "pg": row.get("pg", 0),
+                    "pe": row.get("pe", 0),
+                    "pp": row.get("pp", 0),
+                    "gf": gf,
+                    "gc": gc,
+                    "dg": gf - gc,
+                    "pts": row.get("pts", 0),
+                    "logo": team_logos.get(normalize_team_key(row.get("n", "")), ""),
+                    "form": [],
+                    "streak": row.get("racha", ""),
+                }
+            )
         leagues.append({"name": label, "teams": teams, "source": "official"})
 
     # 2. External domestic leagues from the last explicit refresh.

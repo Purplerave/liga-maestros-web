@@ -1,4 +1,5 @@
 """Ticket: close info, prediction validation, match info loading."""
+
 import json
 import os
 from datetime import datetime, timedelta
@@ -68,8 +69,7 @@ def compute_ticket_close_info(rows, source="jornada"):
             candidates.append(date_start)
     first_kickoff = min(candidates) if candidates else None
     close_at = (
-        first_kickoff - timedelta(minutes=max(0, PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF))
-        if first_kickoff else None
+        first_kickoff - timedelta(minutes=max(0, PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF)) if first_kickoff else None
     )
     return {
         "first_kickoff": first_kickoff,
@@ -115,16 +115,19 @@ def load_match_info_for_jornada(jornada):
     scrape_path = os.path.join(config.DATA_DIR, f"quiniela15_J{j_text}_scrape.json")
     if os.path.exists(scrape_path):
         try:
-            with open(scrape_path, "r", encoding="utf-8") as fh:
+            with open(scrape_path, encoding="utf-8") as fh:
                 q15_data = json.load(fh)
             for item in q15_data.get("partidos") or []:
                 pid = int(item.get("num") or item.get("id") or 0)
                 if not pid:
                     continue
                 info[pid] = {
-                    "q15": item.get("q15"), "lae": item.get("lae"), "apu": item.get("apu"),
+                    "q15": item.get("q15"),
+                    "lae": item.get("lae"),
+                    "apu": item.get("apu"),
                     "historico": item.get("historico"),
-                    "fuerza_local": item.get("fuerza_local"), "fuerza_visitante": item.get("fuerza_visitante"),
+                    "fuerza_local": item.get("fuerza_local"),
+                    "fuerza_visitante": item.get("fuerza_visitante"),
                     "detalle": repair_mojibake(item.get("detalle") or ""),
                 }
         except Exception:
@@ -141,7 +144,7 @@ def load_match_info_for_jornada(jornada):
         if not os.path.exists(path):
             continue
         try:
-            with open(path, "r", encoding="utf-8") as fh:
+            with open(path, encoding="utf-8") as fh:
                 pred_data = json.load(fh)
             for item in pred_data.get("maestra") or []:
                 pid = int(item.get("p") or item.get("id") or 0)

@@ -1,19 +1,20 @@
 """Register all route blueprints."""
+
+from .arcade import bp as arcade_bp
 from .auth import bp as auth_bp
-from .main import bp as main_bp
-from .liga_data import bp as liga_data_bp
-from .predictions import bp as predictions_bp
+from .comments import bp as comments_bp
 from .contest_routes import bp as contest_bp
-from .porra import bp as porra_bp
-from .snake import bp as snake_bp
+from .legal import bp as legal_bp
+from .liga_data import bp as liga_data_bp
 from .live import bp as live_bp
+from .main import bp as main_bp
 from .news import bp as news_bp
+from .porra import bp as porra_bp
+from .predictions import bp as predictions_bp
+from .quiz import bp as quiz_bp
+from .snake import bp as snake_bp
 from .teams_routes import bp as teams_bp
 from .user import bp as user_bp
-from .quiz import bp as quiz_bp
-from .legal import bp as legal_bp
-from .arcade import bp as arcade_bp
-from .comments import bp as comments_bp
 
 
 def register_routes(app):

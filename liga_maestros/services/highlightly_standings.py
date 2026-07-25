@@ -6,6 +6,7 @@ import os
 import requests
 
 import config
+
 from .highlightly_limits import (
     record_highlightly_failure,
     record_highlightly_success,
@@ -50,19 +51,21 @@ def fetch_highlightly_standings(league_id, season=None):
         draws = total.get("draws", 0)
         goals_for = total.get("scoredGoals", 0)
         goals_against = total.get("receivedGoals", 0)
-        teams.append({
-            "n": team.get("name", ""),
-            "pos": position,
-            "pj": total.get("games", 0),
-            "pg": wins,
-            "pe": draws,
-            "pp": total.get("loses", 0),
-            "gf": goals_for,
-            "gc": goals_against,
-            "dg": goals_for - goals_against,
-            "pts": wins * 3 + draws,
-            "logo": team.get("logo", ""),
-            "form": [],
-            "streak": "",
-        })
+        teams.append(
+            {
+                "n": team.get("name", ""),
+                "pos": position,
+                "pj": total.get("games", 0),
+                "pg": wins,
+                "pe": draws,
+                "pp": total.get("loses", 0),
+                "gf": goals_for,
+                "gc": goals_against,
+                "dg": goals_for - goals_against,
+                "pts": wins * 3 + draws,
+                "logo": team.get("logo", ""),
+                "form": [],
+                "streak": "",
+            }
+        )
     return teams

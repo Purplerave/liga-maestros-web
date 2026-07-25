@@ -4,9 +4,9 @@ import json
 import os
 
 from ... import config
-
 from ...scoring import pleno_score_key, score_prediction
 from ...services.contest import CONTEST_DYNAMIC_START_JORNADA
+from ...services.privacy import public_participant_id, publicize_mapping_keys
 from ...services.teams import (
     build_participant_contract,
     canonical_contest_id,
@@ -14,7 +14,6 @@ from ...services.teams import (
     is_scored_status,
     prediction_source_priority,
 )
-from ...services.privacy import public_participant_id, publicize_mapping_keys
 
 
 def build_predictions_payload(conn, jornada, current_user_id=None, reveal_all=False):
@@ -57,7 +56,7 @@ def _load_prediction_reasons(jornada):
     ]
     for path in dict.fromkeys(candidates):
         try:
-            with open(path, "r", encoding="utf-8") as fh:
+            with open(path, encoding="utf-8") as fh:
                 payload = json.load(fh)
         except (OSError, ValueError, TypeError):
             continue
@@ -77,9 +76,7 @@ def _load_prediction_reasons(jornada):
 def _build_pena_consensus(preds, participant_contract):
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
-        canonical_contest_id(uid)
-        for uid in participant_contract.get("pena_ids", [])
-        if canonical_contest_id(uid)
+        canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
     }
 
     pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 16)}
@@ -110,16 +107,18 @@ def _build_pena_consensus(preds, participant_contract):
         votes = pena_votes[partido_id]
         total = sum(votes.values())
         if not total:
-            consenso.append({
-                "id": partido_id,
-                "ganador": "-",
-                "p1": 0,
-                "px": 0,
-                "p2": 0,
-                "total": 0,
-                "votes": votes,
-                "fuente": "pena",
-            })
+            consenso.append(
+                {
+                    "id": partido_id,
+                    "ganador": "-",
+                    "p1": 0,
+                    "px": 0,
+                    "p2": 0,
+                    "total": 0,
+                    "votes": votes,
+                    "fuente": "pena",
+                }
+            )
             continue
 
         p1 = round(votes["1"] * 100 / total)
@@ -127,25 +126,25 @@ def _build_pena_consensus(preds, participant_contract):
         p2 = round(votes["2"] * 100 / total)
         max_votes = max(votes.values())
         tied = [sign for sign in ("1", "X", "2") if votes[sign] == max_votes]
-        consenso.append({
-            "id": partido_id,
-            "ganador": tied[0],
-            "p1": p1,
-            "px": px,
-            "p2": p2,
-            "total": total,
-            "votes": votes,
-            "fuente": "pena",
-        })
+        consenso.append(
+            {
+                "id": partido_id,
+                "ganador": tied[0],
+                "p1": p1,
+                "px": px,
+                "p2": p2,
+                "total": total,
+                "votes": votes,
+                "fuente": "pena",
+            }
+        )
     return consenso
 
 
 def _build_pena_pleno_consensus(preds, participant_contract):
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
-        canonical_contest_id(uid)
-        for uid in participant_contract.get("pena_ids", [])
-        if canonical_contest_id(uid)
+        canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
     }
     exact_counts = {}
     home_buckets = {"0": 0, "1": 0, "2": 0, "M": 0}
@@ -182,14 +181,8 @@ def _build_pena_pleno_consensus(preds, participant_contract):
 
 
 def _official_prediction_ids(participant_contract):
-    official = {
-        canonical_contest_id(column.get("id"))
-        for column in participant_contract.get("visible_ai_columns", [])
-    }
-    official.update({
-        canonical_contest_id(uid)
-        for uid in participant_contract.get("hidden_ids", [])
-    })
+    official = {canonical_contest_id(column.get("id")) for column in participant_contract.get("visible_ai_columns", [])}
+    official.update({canonical_contest_id(uid) for uid in participant_contract.get("hidden_ids", [])})
     official.update({"programa", "v260_omnisciente", "consejo_ias", "consenso"})
     return {str(uid).lower() for uid in official if uid}
 
@@ -212,11 +205,14 @@ def _filter_public_predictions(preds, participant_contract, current_user_id=None
 def _build_ranking(conn, jornada):
     final_res_map, current_res_map = _build_result_maps(conn, jornada)
     ranking = {}
-    all_preds = conn.execute("""
+    all_preds = conn.execute(
+        """
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
         FROM predicciones
         WHERE jornada >= ?
-    """, (CONTEST_DYNAMIC_START_JORNADA,)).fetchall()
+    """,
+        (CONTEST_DYNAMIC_START_JORNADA,),
+    ).fetchall()
 
     seen_ranking_predictions = set()
     ordered_preds = sorted(

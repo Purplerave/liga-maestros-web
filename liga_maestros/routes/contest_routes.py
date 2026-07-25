@@ -1,16 +1,18 @@
 """Contest routes: rankings, profiles, awards."""
-from flask import Blueprint, request, jsonify, session
-from ..services.contest import build_contest_payload
-from ..services.teams import canonical_contest_id
-from ..services.privacy import publicize_identifiers, resolve_public_participant_id
+
+from flask import Blueprint, jsonify, request, session
+
 from ..db.connection import get_db
+from ..services.contest import build_contest_payload
+from ..services.privacy import publicize_identifiers, resolve_public_participant_id
+from ..services.teams import canonical_contest_id
 
 bp = Blueprint("contest_routes", __name__)
 
 
-@bp.route('/api/concurso')
+@bp.route("/api/concurso")
 def get_contest():
-    user = session.get('user') or {}
+    user = session.get("user") or {}
     jornada = request.args.get("j") or None
     if jornada and not str(jornada).isdigit():
         jornada = None
@@ -21,7 +23,7 @@ def get_contest():
     return jsonify(publicize_identifiers(payload, user.get("id")))
 
 
-@bp.route('/api/concurso/perfil/<uid>')
+@bp.route("/api/concurso/perfil/<uid>")
 def get_contest_profile(uid):
     jornada = request.args.get("j") or None
     conn = get_db()

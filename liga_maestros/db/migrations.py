@@ -1,6 +1,8 @@
 import os
 import sqlite3
+
 import config
+
 from .connection import ClosingConnection, ensure_db_file
 
 
@@ -251,6 +253,7 @@ def run_startup_migrations():
             ensure_core_tables(conn)
             ensure_quiz_tables(conn)
             from .seed import apply_fixture_corrections, import_profile_history, import_public_seed_if_empty
+
             import_public_seed_if_empty(conn)
             apply_fixture_corrections(conn)
             ensure_predicciones_unique_index(conn)

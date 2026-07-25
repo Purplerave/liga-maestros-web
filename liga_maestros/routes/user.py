@@ -1,18 +1,19 @@
 """User routes: status, stats."""
-from flask import Blueprint, request, jsonify, session
+
+from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
-from ..services.teams import contest_aliases_for_uid, is_scored_status
-from ..services.contest import build_contest_payload
-from ..scoring import score_prediction
 from ..middleware.csrf import get_csrf_token
+from ..scoring import score_prediction
+from ..services.contest import build_contest_payload
+from ..services.teams import contest_aliases_for_uid, is_scored_status
 
 bp = Blueprint("user", __name__)
 
 
-@bp.route('/api/user/status')
+@bp.route("/api/user/status")
 def user_status():
-    session_user = session.get('user') or {}
+    session_user = session.get("user") or {}
     user = None
     if session_user:
         user = {
@@ -23,9 +24,9 @@ def user_status():
     return jsonify({"user": user, "csrf_token": get_csrf_token() if user else None})
 
 
-@bp.route('/api/user/stats')
+@bp.route("/api/user/stats")
 def get_user_stats():
-    uid = request.args.get('uid')
+    uid = request.args.get("uid")
     if not uid:
         return jsonify({})
     current_user = session.get("user") or {}
@@ -41,13 +42,16 @@ def get_user_stats():
     try:
         aliases = contest_aliases_for_uid(uid)
         placeholders = ",".join("?" for _ in aliases)
-        rows = conn.execute("""
+        rows = conn.execute(
+            f"""
             SELECT p.jornada, p.partido_id, p.signo, r.signo_actual, r.goles_local, r.goles_visitante, r.status
             FROM predicciones p
             JOIN resultados r ON p.jornada = r.jornada AND p.partido_id = r.partido_id
-            WHERE p.user_id IN ({})
+            WHERE p.user_id IN ({placeholders})
             ORDER BY p.jornada, p.partido_id
-        """.format(placeholders), aliases).fetchall()
+        """,
+            aliases,
+        ).fetchall()
     finally:
         conn.close()
 
@@ -70,13 +74,16 @@ def get_user_stats():
         profile = build_contest_payload(None, uid).get("profile")
     except Exception:
         pass
-    return jsonify({
-        "total_aciertos": total_hits,
-        "mejor_jornada": best_hits,
-        "posicion": profile.get("position") if profile else None,
-    })
+    return jsonify(
+        {
+            "total_aciertos": total_hits,
+            "mejor_jornada": best_hits,
+            "posicion": profile.get("position") if profile else None,
+        }
+    )
 
 
 def _admin_emails():
     import os
+
     return {email.strip().lower() for email in os.getenv("ADMIN_EMAILS", "").split(",") if email.strip()}

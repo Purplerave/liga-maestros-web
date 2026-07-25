@@ -1,5 +1,7 @@
 import time
+
 from flask import request
+
 from ..db.connection import get_db
 
 _rate_limit_lock = None
@@ -10,6 +12,7 @@ def _get_lock():
     global _rate_limit_lock
     if _rate_limit_lock is None:
         import threading
+
         _rate_limit_lock = threading.Lock()
     return _rate_limit_lock
 
@@ -30,17 +33,19 @@ def is_rate_limited(scope, identity, seconds):
         conn.commit()
         conn.execute("BEGIN IMMEDIATE")
         row = conn.execute(
-            "SELECT last_seen FROM api_rate_limit WHERE scope = ? AND identity = ?",
-            (scope, identity)
+            "SELECT last_seen FROM api_rate_limit WHERE scope = ? AND identity = ?", (scope, identity)
         ).fetchone()
         if row and now - float(row["last_seen"] or 0) < seconds:
             conn.rollback()
             return True
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO api_rate_limit (scope, identity, last_seen)
             VALUES (?, ?, ?)
             ON CONFLICT(scope, identity) DO UPDATE SET last_seen = excluded.last_seen
-        """, (scope, identity, now))
+        """,
+            (scope, identity, now),
+        )
         conn.execute("DELETE FROM api_rate_limit WHERE last_seen < ?", (now - 3600,))
         conn.commit()
         return False

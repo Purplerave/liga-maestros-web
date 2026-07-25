@@ -36,15 +36,15 @@ def _quiz_conn():
     conn.row_factory = sqlite3.Row
     ensure_quiz_tables(conn)
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    rows = [
-        (72, "multiple", f"Pregunta {idx}", "A", "B", "C", "A", "", 1, "test", 1, now)
-        for idx in range(1, 4)
-    ]
-    conn.executemany("""
+    rows = [(72, "multiple", f"Pregunta {idx}", "A", "B", "C", "A", "", 1, "test", 1, now) for idx in range(1, 4)]
+    conn.executemany(
+        """
         INSERT INTO quiz_preguntas
         (jornada, tipo, enunciado, opcion_a, opcion_b, opcion_c, respuesta_correcta, explicacion, dificultad, tema, activa, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, rows)
+    """,
+        rows,
+    )
     conn.commit()
     return conn
 
@@ -68,27 +68,36 @@ def test_quiz_rejects_incomplete_answers(monkeypatch):
 
 
 def test_quiz_rejects_duplicate_answers(monkeypatch):
-    result = _submit_with_conn(monkeypatch, [
-        {"pregunta_id": 1, "respuesta": "A"},
-        {"pregunta_id": 1, "respuesta": "A"},
-        {"pregunta_id": 2, "respuesta": "A"},
-    ])
+    result = _submit_with_conn(
+        monkeypatch,
+        [
+            {"pregunta_id": 1, "respuesta": "A"},
+            {"pregunta_id": 1, "respuesta": "A"},
+            {"pregunta_id": 2, "respuesta": "A"},
+        ],
+    )
     assert "duplicadas" in result["error"]
 
 
 def test_quiz_rejects_invalid_option(monkeypatch):
-    result = _submit_with_conn(monkeypatch, [
-        {"pregunta_id": 1, "respuesta": "A"},
-        {"pregunta_id": 2, "respuesta": "D"},
-        {"pregunta_id": 3, "respuesta": "A"},
-    ])
+    result = _submit_with_conn(
+        monkeypatch,
+        [
+            {"pregunta_id": 1, "respuesta": "A"},
+            {"pregunta_id": 2, "respuesta": "D"},
+            {"pregunta_id": 3, "respuesta": "A"},
+        ],
+    )
     assert "invalida" in result["error"]
 
 
 def test_quiz_rejects_other_question_ids(monkeypatch):
-    result = _submit_with_conn(monkeypatch, [
-        {"pregunta_id": 1, "respuesta": "A"},
-        {"pregunta_id": 2, "respuesta": "A"},
-        {"pregunta_id": 99, "respuesta": "A"},
-    ])
+    result = _submit_with_conn(
+        monkeypatch,
+        [
+            {"pregunta_id": 1, "respuesta": "A"},
+            {"pregunta_id": 2, "respuesta": "A"},
+            {"pregunta_id": 99, "respuesta": "A"},
+        ],
+    )
     assert "corresponden" in result["error"]

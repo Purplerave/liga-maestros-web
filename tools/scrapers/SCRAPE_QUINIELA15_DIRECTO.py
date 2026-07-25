@@ -7,6 +7,7 @@ from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+
 import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

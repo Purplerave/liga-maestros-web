@@ -4,7 +4,6 @@ from pathlib import Path
 
 import requests
 
-
 BASE_DIR = Path(__file__).resolve().parent
 TEAM_LOGOS_PATH = BASE_DIR / "data" / "TEAM_LOGOS.json"
 OUT_DIR = BASE_DIR / "static" / "img" / "team_logos"
@@ -14,8 +13,16 @@ MANIFEST_PATH = OUT_DIR / "manifest.json"
 def slugify(value: str) -> str:
     value = (value or "").upper()
     repl = {
-        "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U", "Ü": "U", "Ñ": "N",
-        "Ã": "A", "€": "", "™": "",
+        "Á": "A",
+        "É": "E",
+        "Í": "I",
+        "Ó": "O",
+        "Ú": "U",
+        "Ü": "U",
+        "Ñ": "N",
+        "Ã": "A",
+        "€": "",
+        "™": "",
     }
     for a, b in repl.items():
         value = value.replace(a, b)
@@ -30,7 +37,12 @@ def extension_for(url: str, content_type: str) -> str:
         return ".webp"
     if "svg" in content_type.lower() or url.lower().endswith(".svg"):
         return ".svg"
-    if "jpeg" in content_type.lower() or "jpg" in content_type.lower() or url.lower().endswith(".jpg") or url.lower().endswith(".jpeg"):
+    if (
+        "jpeg" in content_type.lower()
+        or "jpg" in content_type.lower()
+        or url.lower().endswith(".jpg")
+        or url.lower().endswith(".jpeg")
+    ):
         return ".jpg"
     return ".img"
 

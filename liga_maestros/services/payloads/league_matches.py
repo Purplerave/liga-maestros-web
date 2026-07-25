@@ -1,10 +1,12 @@
 """Build league/directo match payloads for the newspaper pages."""
+
 import json
 import os
 import re
 from datetime import timedelta
 
 import config
+
 from ...services.ticket import today_madrid
 from ...utils import normalize_team_key, parse_any_match_datetime
 
@@ -13,13 +15,13 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     all_league_matches = _load_external_matches()
     quiniela_league_matches = _build_quiniela_league_matches(jornada, partidos, standings_db)
     quiniela_pairs = {
-        (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante")))
-        for m in quiniela_league_matches
+        (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante"))) for m in quiniela_league_matches
     }
 
     all_league_matches = _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches)
     all_league_matches = [
-        match for match in all_league_matches
+        match
+        for match in all_league_matches
         if _is_domestic_league_match(match) and not _duplicates_quiniela_match(match, quiniela_pairs)
     ]
     all_league_matches = quiniela_league_matches + all_league_matches
@@ -30,11 +32,7 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
 def build_live_matches(partidos, team_logos):
     """Return every live match from the shared Highlightly snapshot."""
     external_live = [match for match in _load_external_matches() if _is_live_match(match)]
-    quiniela_live = [
-        match
-        for match in _build_quiniela_league_matches("", partidos, {})
-        if _is_live_match(match)
-    ]
+    quiniela_live = [match for match in _build_quiniela_league_matches("", partidos, {}) if _is_live_match(match)]
     matches_by_id = {}
     for match in external_live + quiniela_live:
         key = str(match.get("fixture_id") or match.get("id") or "").strip()
@@ -79,7 +77,7 @@ def _load_external_matches():
         if not os.path.exists(path):
             continue
         try:
-            with open(path, "r", encoding="utf-8") as fh:
+            with open(path, encoding="utf-8") as fh:
                 loaded_matches = json.load(fh)
             if loaded_matches:
                 return loaded_matches
@@ -94,26 +92,28 @@ def _build_quiniela_league_matches(jornada, partidos, standings_db):
         comp = _infer_match_competition(match, standings_db)
         fecha = match.get("fecha_raw") or ""
         hora = match.get("hora") or ""
-        quiniela_league_matches.append({
-            "id": f"quiniela-{jornada}-{match['id']}",
-            "fixture_id": f"quiniela-{jornada}-{match['id']}",
-            "competition_name": comp,
-            "competition": {"name": comp},
-            "local": match["local"],
-            "visitante": match["visitante"],
-            "home": {"name": match["local"]},
-            "away": {"name": match["visitante"]},
-            "home_logo": match.get("logo_local", ""),
-            "away_logo": match.get("logo_visitante", ""),
-            "status": match["status"],
-            "time": match.get("minuto") or "",
-            "score": match["marcador"] if match["status"] not in ("NS", "SCHEDULED") else "",
-            "marcador": match["marcador"],
-            "added": f"{fecha} {hora}".strip(),
-            "scheduled": hora,
-            "fecha_raw": fecha,
-            "hora": hora,
-        })
+        quiniela_league_matches.append(
+            {
+                "id": f"quiniela-{jornada}-{match['id']}",
+                "fixture_id": f"quiniela-{jornada}-{match['id']}",
+                "competition_name": comp,
+                "competition": {"name": comp},
+                "local": match["local"],
+                "visitante": match["visitante"],
+                "home": {"name": match["local"]},
+                "away": {"name": match["visitante"]},
+                "home_logo": match.get("logo_local", ""),
+                "away_logo": match.get("logo_visitante", ""),
+                "status": match["status"],
+                "time": match.get("minuto") or "",
+                "score": match["marcador"] if match["status"] not in ("NS", "SCHEDULED") else "",
+                "marcador": match["marcador"],
+                "added": f"{fecha} {hora}".strip(),
+                "scheduled": hora,
+                "fecha_raw": fecha,
+                "hora": hora,
+            }
+        )
     return quiniela_league_matches
 
 
@@ -136,8 +136,7 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
 
     # Verificar si hay partidos de quiniela en vivo o terminados
     quiniela_has_live = any(
-        str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED")
-        for m in quiniela_league_matches
+        str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED") for m in quiniela_league_matches
     )
 
     # Si no hay partidos en vivo/terminados en la quiniela, no mostrar externos
@@ -165,6 +164,7 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
 
     return [match for match in all_league_matches if keep_external_match(match)]
 
+
 def _is_domestic_league_match(match):
     competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()
     blocked = (
@@ -178,6 +178,7 @@ def _is_domestic_league_match(match):
         "FRIENDLY",
     )
     return not any(token in competition for token in blocked)
+
 
 def _duplicates_quiniela_match(match, quiniela_pairs):
     competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()

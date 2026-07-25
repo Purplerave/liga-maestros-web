@@ -1,5 +1,6 @@
 import os
 import shutil
+
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -8,13 +9,19 @@ load_dotenv()
 # Directorio base del proyecto
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RENDER_DATA_DIR = "/var/data"
-DEFAULT_DATA_DIR = RENDER_DATA_DIR if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR) else os.path.join(BASE_DIR, "data")
+DEFAULT_DATA_DIR = (
+    RENDER_DATA_DIR if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR) else os.path.join(BASE_DIR, "data")
+)
 DATA_DIR = os.getenv("DATA_DIR", "").strip() or DEFAULT_DATA_DIR
 SEED_DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # Base de Datos
 BOOTSTRAP_DB_PATH = os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
-DEFAULT_DB_PATH = os.path.join(DATA_DIR, "LIGA_MAESTROS_PRO.db") if os.getenv("RENDER") else os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+DEFAULT_DB_PATH = (
+    os.path.join(DATA_DIR, "LIGA_MAESTROS_PRO.db")
+    if os.getenv("RENDER")
+    else os.path.join(BASE_DIR, "DATOS", "LIGA_MAESTROS_PRO.db")
+)
 DB_PATH = os.getenv("DB_PATH", "").strip() or DEFAULT_DB_PATH
 PRODUCTION_SEED_PATH = os.getenv("PRODUCTION_SEED_PATH", "").strip() or os.path.join(
     BASE_DIR, "data", "bootstrap", "production_seed.json"
@@ -24,8 +31,10 @@ FIXTURE_CORRECTIONS_PATH = os.getenv("FIXTURE_CORRECTIONS_PATH", "").strip() or 
 )
 DB_BACKUP_DIR = os.getenv("DB_BACKUP_DIR", os.path.join(DATA_DIR, "backups"))
 
+
 def data_path(*parts):
     return os.path.join(DATA_DIR, *parts)
+
 
 def ensure_runtime_data_dir():
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -38,6 +47,7 @@ def ensure_runtime_data_dir():
         dst = os.path.join(DATA_DIR, name)
         if os.path.isfile(src) and name.lower().endswith(".json") and not os.path.exists(dst):
             shutil.copy2(src, dst)
+
 
 # Configuración Highlightly API
 HIGHLIGHTLY_HOST = "soccer.highlightly.net"
@@ -80,14 +90,64 @@ NEWS_FEEDS = [
     {"id": "marca", "name": "Marca", "url": "https://e00-marca.uecdn.es/rss/futbol.xml"},
 ]
 NEWS_TEAM_KEYWORDS = [
-    "real madrid", "barcelona", "barça", "atletico", "atlético", "athletic", "betis", "celta", "espanyol",
-    "getafe", "girona", "mallorca", "osasuna", "rayo", "sevilla", "valencia", "villarreal", "alaves", "alavés",
-    "oviedo", "malaga", "málaga", "ceuta", "huesca", "castellon", "castellón", "cordoba", "córdoba",
-    "sporting", "almeria", "almería", "racing", "santander", "eibar", "cadiz", "cádiz", "levante", "elche"
+    "real madrid",
+    "barcelona",
+    "barça",
+    "atletico",
+    "atlético",
+    "athletic",
+    "betis",
+    "celta",
+    "espanyol",
+    "getafe",
+    "girona",
+    "mallorca",
+    "osasuna",
+    "rayo",
+    "sevilla",
+    "valencia",
+    "villarreal",
+    "alaves",
+    "alavés",
+    "oviedo",
+    "malaga",
+    "málaga",
+    "ceuta",
+    "huesca",
+    "castellon",
+    "castellón",
+    "cordoba",
+    "córdoba",
+    "sporting",
+    "almeria",
+    "almería",
+    "racing",
+    "santander",
+    "eibar",
+    "cadiz",
+    "cádiz",
+    "levante",
+    "elche",
 ]
 NEWS_GENERIC_KEYWORDS = [
-    "lesion", "lesión", "baja", "convocatoria", "alineacion", "alineación", "once", "rotacion", "rotación",
-    "sancion", "sanción", "entrenador", "previa", "ultima hora", "última hora", "fichaje", "mercado", "fatiga"
+    "lesion",
+    "lesión",
+    "baja",
+    "convocatoria",
+    "alineacion",
+    "alineación",
+    "once",
+    "rotacion",
+    "rotación",
+    "sancion",
+    "sanción",
+    "entrenador",
+    "previa",
+    "ultima hora",
+    "última hora",
+    "fichaje",
+    "mercado",
+    "fatiga",
 ]
 
 # Alias de Equipos para Logos
@@ -245,5 +305,5 @@ TEAM_LOGO_ALIASES = {
 }
 
 # Configuración Google OAuth
-GOOGLE_SERVER_METADATA_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-GOOGLE_CLIENT_KWARGS = {'scope': 'openid email profile'}
+GOOGLE_SERVER_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
+GOOGLE_CLIENT_KWARGS = {"scope": "openid email profile"}

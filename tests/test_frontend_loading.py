@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "templates" / "liga_index.html"
 NAVIGATION = ROOT / "static" / "js" / "navigation.js"

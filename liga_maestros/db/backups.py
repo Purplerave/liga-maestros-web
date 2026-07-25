@@ -1,9 +1,10 @@
 """Verified SQLite backups stored outside the deployed source tree."""
-from datetime import datetime, timezone
+
 import os
 import sqlite3
 import threading
 import time
+from datetime import UTC, datetime
 
 import config
 
@@ -32,7 +33,7 @@ def create_backup(reason="manual"):
     os.makedirs(config.DB_BACKUP_DIR, mode=0o700, exist_ok=True)
     if os.name != "nt":
         os.chmod(config.DB_BACKUP_DIR, 0o700)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     safe_reason = "".join(ch for ch in reason.lower() if ch.isalnum() or ch in "-_") or "manual"
     final_path = os.path.join(config.DB_BACKUP_DIR, f"liga_maestros_{stamp}_{safe_reason}.db")
     temp_path = f"{final_path}.tmp"
@@ -71,7 +72,7 @@ def list_backups():
 
 def prune_backups(retention=None):
     retention = retention or int(os.getenv("DB_BACKUP_RETENTION", "14"))
-    for path in list_backups()[max(1, retention):]:
+    for path in list_backups()[max(1, retention) :]:
         try:
             os.remove(path)
         except OSError:

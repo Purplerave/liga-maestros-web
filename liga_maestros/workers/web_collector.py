@@ -4,10 +4,10 @@ Render persistent disks are attached to one service. For the beta deploy we run
 the collector inside the web service so live updates and the web app use the
 same SQLite database and JSON cache.
 """
+
 import os
 import threading
 import time
-
 
 _collector_started = False
 _collector_lock = threading.Lock()

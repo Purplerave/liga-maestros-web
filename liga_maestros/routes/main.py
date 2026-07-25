@@ -1,4 +1,5 @@
 """Main routes: index page, static files."""
+
 import os
 import time
 from functools import lru_cache
@@ -27,27 +28,31 @@ def _get_assets_version():
     return str(max(mtimes) if mtimes else int(time.time()))
 
 
-@bp.route('/')
+@bp.route("/")
 def index():
     from ..db.connection import get_db
-    user = session.get('user')
+
+    user = session.get("user")
     conn = get_db()
     try:
         max_j_row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
-        max_j = max_j_row[0] if max_j_row else '62'
+        max_j = max_j_row[0] if max_j_row else "62"
     finally:
         conn.close()
-    j = request.args.get('j', str(max_j))
+    j = request.args.get("j", str(max_j))
     try:
-        response = make_response(render_template('liga_index.html', jornada=j, user=user, assets_v=_get_assets_version()))
+        response = make_response(
+            render_template("liga_index.html", jornada=j, user=user, assets_v=_get_assets_version())
+        )
         response.headers["Cache-Control"] = "no-store, max-age=0"
         return response
     except Exception:
         from markupsafe import escape
+
         return f"La plantilla no se encontro. Jornada actual: {escape(j)}", 500
 
 
-@bp.route('/static/<path:filename>')
+@bp.route("/static/<path:filename>")
 def static_files(filename):
     static_root = os.path.realpath(os.path.join(config.BASE_DIR, "static"))
     normalized = filename.replace("\\", "/").lstrip("/")
@@ -71,18 +76,19 @@ def static_files(filename):
     response.headers["Cache-Control"] = cache_control
     return response
 
-@bp.route('/juegos/<path:filename>')
+
+@bp.route("/juegos/<path:filename>")
 def juegos_files(filename):
     return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
 
 
-@bp.route('/health')
+@bp.route("/health")
 def health():
     """Probe ligero para monitores de uptime (sin datos sensibles)."""
     return {"status": "ok", "service": "liga-maestros-web"}
 
 
-@bp.route('/robots.txt')
+@bp.route("/robots.txt")
 def robots_txt():
     body = (
         "User-agent: *\n"
@@ -100,12 +106,17 @@ def robots_txt():
     return response
 
 
-@bp.route('/sitemap.xml')
+@bp.route("/sitemap.xml")
 def sitemap_xml():
     root = request.url_root.rstrip("/")
     urls = "".join(
         f"  <url><loc>{root}{path}</loc><changefreq>{freq}</changefreq></url>\n"
-        for path, freq in (("/", "daily"), ("/privacidad", "yearly"), ("/cookies", "yearly"), ("/aviso-legal", "yearly"))
+        for path, freq in (
+            ("/", "daily"),
+            ("/privacidad", "yearly"),
+            ("/cookies", "yearly"),
+            ("/aviso-legal", "yearly"),
+        )
     )
     response = make_response(
         '<?xml version="1.0" encoding="UTF-8"?>\n'

@@ -1,5 +1,4 @@
-from liga_maestros.services import multi_standings
-from liga_maestros.services import highlightly_standings
+from liga_maestros.services import highlightly_standings, multi_standings
 
 
 def test_official_standings_include_only_relevant_logo_data(monkeypatch):
@@ -11,17 +10,19 @@ def test_official_standings_include_only_relevant_logo_data(monkeypatch):
     )
 
     standings = {
-        "primera": [{
-            "n": "Atletico Madrid",
-            "pos": 1,
-            "pj": 1,
-            "pg": 1,
-            "pe": 0,
-            "pp": 0,
-            "gf": 2,
-            "gc": 0,
-            "pts": 3,
-        }],
+        "primera": [
+            {
+                "n": "Atletico Madrid",
+                "pos": 1,
+                "pj": 1,
+                "pg": 1,
+                "pe": 0,
+                "pp": 0,
+                "gf": 2,
+                "gc": 0,
+                "pts": 3,
+            }
+        ],
         "segunda": [],
     }
     logos = {"ATLETICO MADRID": "/static/img/team_logos/ATLETICO_MADRID.png"}
@@ -86,17 +87,25 @@ def test_standings_client_records_success_and_normalizes_rows(monkeypatch):
             return None
 
         def json(self):
-            return {"groups": [{"standings": [{
-                "team": {"name": "Liverpool", "logo": "logo.png"},
-                "total": {
-                    "games": 3,
-                    "wins": 2,
-                    "draws": 1,
-                    "loses": 0,
-                    "scoredGoals": 7,
-                    "receivedGoals": 2,
-                },
-            }]}]}
+            return {
+                "groups": [
+                    {
+                        "standings": [
+                            {
+                                "team": {"name": "Liverpool", "logo": "logo.png"},
+                                "total": {
+                                    "games": 3,
+                                    "wins": 2,
+                                    "draws": 1,
+                                    "loses": 0,
+                                    "scoredGoals": 7,
+                                    "receivedGoals": 2,
+                                },
+                            }
+                        ]
+                    }
+                ]
+            }
 
     successes = []
     monkeypatch.setenv("HIGHLIGHTLY_API_KEY", "test-key")
@@ -107,18 +116,20 @@ def test_standings_client_records_success_and_normalizes_rows(monkeypatch):
     rows = highlightly_standings.fetch_highlightly_standings(1, season=2026)
 
     assert successes == [True]
-    assert rows == [{
-        "n": "Liverpool",
-        "pos": 1,
-        "pj": 3,
-        "pg": 2,
-        "pe": 1,
-        "pp": 0,
-        "gf": 7,
-        "gc": 2,
-        "dg": 5,
-        "pts": 7,
-        "logo": "logo.png",
-        "form": [],
-        "streak": "",
-    }]
+    assert rows == [
+        {
+            "n": "Liverpool",
+            "pos": 1,
+            "pj": 3,
+            "pg": 2,
+            "pe": 1,
+            "pp": 0,
+            "gf": 7,
+            "gc": 2,
+            "dg": 5,
+            "pts": 7,
+            "logo": "logo.png",
+            "form": [],
+            "streak": "",
+        }
+    ]

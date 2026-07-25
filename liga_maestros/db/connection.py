@@ -1,5 +1,6 @@
 import os
 import sqlite3
+
 import config
 
 _sqlite_pragma_lock = None
@@ -10,6 +11,7 @@ def _get_pragma_lock():
     global _sqlite_pragma_lock
     if _sqlite_pragma_lock is None:
         import threading
+
         _sqlite_pragma_lock = threading.Lock()
     return _sqlite_pragma_lock
 
@@ -30,8 +32,13 @@ def ensure_db_file():
             os.chmod(config.DB_PATH, 0o600)
         return
     default_path = getattr(config, "BOOTSTRAP_DB_PATH", getattr(config, "DEFAULT_DB_PATH", ""))
-    if default_path and os.path.exists(default_path) and os.path.abspath(default_path) != os.path.abspath(config.DB_PATH):
+    if (
+        default_path
+        and os.path.exists(default_path)
+        and os.path.abspath(default_path) != os.path.abspath(config.DB_PATH)
+    ):
         import shutil
+
         shutil.copy2(default_path, config.DB_PATH)
     if os.path.exists(config.DB_PATH) and os.name != "nt":
         os.chmod(config.DB_PATH, 0o600)
@@ -39,7 +46,8 @@ def ensure_db_file():
 
 def get_db():
     global _sqlite_wal_ready
-    from flask import has_request_context, g
+    from flask import g, has_request_context
+
     if has_request_context():
         if not hasattr(g, "_managed_db_conns"):
             g._managed_db_conns = []

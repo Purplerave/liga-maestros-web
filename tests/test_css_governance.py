@@ -6,6 +6,7 @@ These tests lock in the CSS architecture contract:
   canonical order declared in ``templates/liga_index.html``
 - no undefined custom properties (``var(--x)``) leak into the bundle
 """
+
 import re
 from pathlib import Path
 
@@ -20,10 +21,7 @@ CANONICAL_MATCH = re.compile(r"@layer\s+([a-z\-,\s]+);")
 
 
 def _app_css_files():
-    return [
-        p for p in sorted(CSS_ROOT.rglob("*.css"))
-        if p not in EXEMPT_FILES
-    ]
+    return [p for p in sorted(CSS_ROOT.rglob("*.css")) if p not in EXEMPT_FILES]
 
 
 def _canonical_layers():
@@ -50,12 +48,8 @@ def test_every_app_stylesheet_is_layered():
             f"{path.relative_to(ROOT)} must open with an @layer block"
         )
         layer_name = first_line.split()[1]
-        assert layer_name in canonical, (
-            f"{path.relative_to(ROOT)} uses undeclared layer {layer_name!r}"
-        )
-        assert text.rstrip().endswith("}"), (
-            f"{path.relative_to(ROOT)} must close its @layer block"
-        )
+        assert layer_name in canonical, f"{path.relative_to(ROOT)} uses undeclared layer {layer_name!r}"
+        assert text.rstrip().endswith("}"), f"{path.relative_to(ROOT)} must close its @layer block"
 
 
 def test_template_declares_layers_before_stylesheets():
@@ -63,9 +57,7 @@ def test_template_declares_layers_before_stylesheets():
     layer_pos = template.find("@layer tokens")
     first_link_pos = template.find('rel="stylesheet" href=')
     assert layer_pos != -1 and first_link_pos != -1
-    assert layer_pos < first_link_pos, (
-        "the @layer order declaration must precede the first stylesheet link"
-    )
+    assert layer_pos < first_link_pos, "the @layer order declaration must precede the first stylesheet link"
 
 
 def test_no_undefined_custom_properties():
@@ -82,8 +74,15 @@ def test_no_undefined_custom_properties():
 def test_design_tokens_exist():
     tokens = (CSS_ROOT / "base" / "tokens.css").read_text(encoding="utf-8")
     for token in (
-        "--font-ui", "--font-display", "--font-data",
-        "--bg-main", "--text-main", "--accent", "--gold",
-        "--color-focus", "--text-xs", "--space-4",
+        "--font-ui",
+        "--font-display",
+        "--font-data",
+        "--bg-main",
+        "--text-main",
+        "--accent",
+        "--gold",
+        "--color-focus",
+        "--text-xs",
+        "--space-4",
     ):
         assert token in tokens, f"missing design token {token}"

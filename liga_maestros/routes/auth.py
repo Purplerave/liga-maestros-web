@@ -1,8 +1,11 @@
 """Auth routes: Google OAuth login/authorize/logout."""
-from flask import Blueprint, redirect, url_for, session, request
+
 import os
 
+from flask import Blueprint, redirect, request, session, url_for
+
 import config
+
 from ..db.connection import get_db
 from ..middleware.rate_limit import is_rate_limited
 
@@ -10,19 +13,16 @@ bp = Blueprint("auth", __name__)
 
 
 def _admin_emails():
-    return {
-        item.strip().lower()
-        for item in os.getenv("ADMIN_EMAILS", "").split(",")
-        if item.strip()
-    }
+    return {item.strip().lower() for item in os.getenv("ADMIN_EMAILS", "").split(",") if item.strip()}
 
 
 def _get_google():
-    from flask import current_app
     from authlib.integrations.flask_client import OAuth
+    from flask import current_app
+
     oauth = OAuth(current_app)
     return oauth.register(
-        name='google',
+        name="google",
         client_id=os.getenv("GOOGLE_CLIENT_ID"),
         client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
         server_metadata_url=config.GOOGLE_SERVER_METADATA_URL,
@@ -30,47 +30,50 @@ def _get_google():
     )
 
 
-@bp.route('/login/google')
+@bp.route("/login/google")
 def login():
     if not config.GOOGLE_AUTH_ENABLED:
         return "Google OAuth no configurado en variables de entorno.", 503
     if is_rate_limited("oauth_login", request.remote_addr, 2):
         return "Espera un momento antes de volver a iniciar sesion.", 429
     google = _get_google()
-    redirect_uri = url_for('auth.authorize', _external=True)
+    redirect_uri = url_for("auth.authorize", _external=True)
     return google.authorize_redirect(redirect_uri)
 
 
-@bp.route('/authorize')
+@bp.route("/authorize")
 def authorize():
     if not config.GOOGLE_AUTH_ENABLED:
-        return redirect('/')
+        return redirect("/")
     google = _get_google()
     token = google.authorize_access_token()
-    user_info = token.get('userinfo')
+    user_info = token.get("userinfo")
     if user_info:
         conn = get_db()
         try:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO usuarios (id, nombre, email)
                 VALUES (?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=NULL
-            """, (user_info['sub'], user_info['name'], None))
+            """,
+                (user_info["sub"], user_info["name"], None),
+            )
             conn.commit()
         finally:
             conn.close()
-        email = str(user_info.get('email') or '').strip().lower()
+        email = str(user_info.get("email") or "").strip().lower()
         session.clear()
         session.permanent = True
-        session['user'] = {
-            'id': user_info['sub'],
-            'name': user_info['name'],
-            'is_admin': email in _admin_emails(),
+        session["user"] = {
+            "id": user_info["sub"],
+            "name": user_info["name"],
+            "is_admin": email in _admin_emails(),
         }
-    return redirect('/')
+    return redirect("/")
 
 
-@bp.route('/logout')
+@bp.route("/logout")
 def logout():
     session.clear()
-    return redirect('/')
+    return redirect("/")

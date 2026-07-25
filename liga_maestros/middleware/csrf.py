@@ -1,4 +1,5 @@
 """Small session-bound CSRF protection for authenticated writes."""
+
 import hmac
 import secrets
 

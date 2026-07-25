@@ -1,8 +1,8 @@
 """Public identifiers and response sanitizing for provider-backed accounts."""
+
 import hashlib
 import hmac
 import os
-
 
 PUBLIC_USER_PREFIX = "usuario_"
 
@@ -58,7 +58,4 @@ def publicize_identifiers(payload, current_user_id=None):
 
 
 def publicize_mapping_keys(mapping, current_user_id=None):
-    return {
-        public_participant_id(key, current_user_id): value
-        for key, value in (mapping or {}).items()
-    }
+    return {public_participant_id(key, current_user_id): value for key, value in (mapping or {}).items()}

@@ -1,8 +1,10 @@
 """Teams: logos, contracts, name normalization, participant ecosystem."""
+
 import os
 import re
 
 import config
+
 from ..utils import safe_read_json
 
 
@@ -19,7 +21,7 @@ def short_ai_label(name, uid):
     if canonical in labels:
         return labels[canonical]
     text = re.sub(r"[^A-Z0-9]+", "", str(name or uid or "").upper())
-    return (text[:4] or str(uid or "")[:4].upper())
+    return text[:4] or str(uid or "")[:4].upper()
 
 
 def public_contest_name(uid, users):
@@ -55,23 +57,55 @@ def canonical_contest_id(uid):
     if low in ("v260_omnisciente", "programa"):
         return "programa"
     pena_aliases = {
-        "deepseek": "chipi", "chipi": "chipi",
-        "glm5": "geli", "geli_glm5": "geli", "geli": "geli",
-        "perplexity": "pepe", "pepe": "pepe",
-        "meta": "profe", "profe_llama": "profe", "profe": "profe",
-        "mistral": "fortu", "fortu": "fortu",
-        "qwen": "oraculo", "gwen": "oraculo", "oraculo": "oraculo",
-        "ernie": "fistro", "ernie_ai": "fistro", "fistro": "fistro",
-        "kimi": "sesudo", "sesudo": "sesudo",
-        "luzia": "jimmy", "jimmy": "jimmy",
+        "deepseek": "chipi",
+        "chipi": "chipi",
+        "glm5": "geli",
+        "geli_glm5": "geli",
+        "geli": "geli",
+        "perplexity": "pepe",
+        "pepe": "pepe",
+        "meta": "profe",
+        "profe_llama": "profe",
+        "profe": "profe",
+        "mistral": "fortu",
+        "fortu": "fortu",
+        "qwen": "oraculo",
+        "gwen": "oraculo",
+        "oraculo": "oraculo",
+        "ernie": "fistro",
+        "ernie_ai": "fistro",
+        "fistro": "fistro",
+        "kimi": "sesudo",
+        "sesudo": "sesudo",
+        "luzia": "jimmy",
+        "jimmy": "jimmy",
     }
     if low in pena_aliases:
         return pena_aliases[low]
     if low in (
-        "gemini", "grok", "claude", "copilot", "chatgpt", "mrpurple", "consenso",
-        "hermes", "jenova", "momo", "manu", "manus", "qwen", "gwen", "meta",
-        "chema_cohere", "momo_molbot",
-        "tecnotron", "consejo_ias", "fistro", "sesudo", "jimmy", "falcon",
+        "gemini",
+        "grok",
+        "claude",
+        "copilot",
+        "chatgpt",
+        "mrpurple",
+        "consenso",
+        "hermes",
+        "jenova",
+        "momo",
+        "manu",
+        "manus",
+        "qwen",
+        "gwen",
+        "meta",
+        "chema_cohere",
+        "momo_molbot",
+        "tecnotron",
+        "consejo_ias",
+        "fistro",
+        "sesudo",
+        "jimmy",
+        "falcon",
     ):
         return low
     return value
@@ -120,38 +154,39 @@ def build_participant_contract():
     runtime_path = os.path.join(config.DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")
     raw = safe_read_json(seed_path, {}) or safe_read_json(runtime_path, {})
     names_raw = raw.get("nombres_publicos", {}) if isinstance(raw, dict) else {}
-    names = {
-        canonical_contest_id(uid): name
-        for uid, name in names_raw.items()
-        if canonical_contest_id(uid)
-    }
-    hidden_ids = sorted({
-        canonical_contest_id(uid)
-        for uid in (raw.get("ids_obsoletos", []) if isinstance(raw, dict) else [])
-        if canonical_contest_id(uid)
-    } | {"consenso", "v260_omnisciente", "consejo_ias"})
+    names = {canonical_contest_id(uid): name for uid, name in names_raw.items() if canonical_contest_id(uid)}
+    hidden_ids = sorted(
+        {
+            canonical_contest_id(uid)
+            for uid in (raw.get("ids_obsoletos", []) if isinstance(raw, dict) else [])
+            if canonical_contest_id(uid)
+        }
+        | {"consenso", "v260_omnisciente", "consejo_ias"}
+    )
     fallback_aliases = {
         "programa": "v260_omnisciente",
     }
     pena_ids = []
-    for uid in (raw.get("pena_aliases", []) if isinstance(raw, dict) else []):
+    for uid in raw.get("pena_aliases", []) if isinstance(raw, dict) else []:
         canonical = canonical_contest_id(uid)
         if canonical and canonical not in pena_ids:
             pena_ids.append(canonical)
     visible_ai_columns = []
-    for uid in (raw.get("maestros_oficiales", []) if isinstance(raw, dict) else []):
+    for uid in raw.get("maestros_oficiales", []) if isinstance(raw, dict) else []:
         canonical = canonical_contest_id(uid)
         if not canonical:
             continue
         if canonical in hidden_ids:
             continue
         name = names.get(canonical) or public_contest_name(canonical, {})
-        visible_ai_columns.append({
-            "id": canonical,
-            "fallback": fallback_aliases.get(canonical),
-            "label": short_ai_label(name, canonical),
-            "name": name,
-        })
+        visible_ai_columns.append(
+            {
+                "id": canonical,
+                "fallback": fallback_aliases.get(canonical),
+                "label": short_ai_label(name, canonical),
+                "name": name,
+            }
+        )
     if not visible_ai_columns:
         visible_ai_columns = [
             {"id": "programa", "fallback": "v260_omnisciente", "label": "PROG", "name": "Programa"},

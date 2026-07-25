@@ -12,7 +12,6 @@ from liga_maestros.services.privacy import (
     resolve_public_participant_id,
 )
 
-
 PRIVATE_ID = "116612345678901234567"
 OTHER_PRIVATE_ID = "111223456789012345678"
 
@@ -59,7 +58,9 @@ def test_public_id_resolver_rejects_raw_provider_ids(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
     with app.app_context():
         conn = get_db()
-        conn.execute("INSERT INTO usuarios (id, nombre, email) VALUES (?, ?, ?)", (PRIVATE_ID, "Pablo", "private@example.test"))
+        conn.execute(
+            "INSERT INTO usuarios (id, nombre, email) VALUES (?, ?, ?)", (PRIVATE_ID, "Pablo", "private@example.test")
+        )
         conn.commit()
         token = public_participant_id(PRIVATE_ID)
         assert resolve_public_participant_id(conn, PRIVATE_ID) is None
@@ -100,6 +101,7 @@ def test_security_headers_host_validation_and_request_limits(tmp_path, monkeypat
     @app.post("/_security/echo")
     def echo_body():
         from flask import request
+
         return {"size": len(request.get_data())}
 
     client = app.test_client()
@@ -234,9 +236,12 @@ def test_startup_removes_stored_emails(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
     with app.app_context():
         conn = get_db()
-        conn.execute("INSERT INTO usuarios (id, nombre, email) VALUES (?, ?, ?)", (PRIVATE_ID, "Pablo", "private@example.test"))
+        conn.execute(
+            "INSERT INTO usuarios (id, nombre, email) VALUES (?, ?, ?)", (PRIVATE_ID, "Pablo", "private@example.test")
+        )
         conn.commit()
         from liga_maestros.db.migrations import minimize_stored_personal_data
+
         minimize_stored_personal_data(conn)
         assert conn.execute("SELECT email FROM usuarios WHERE id = ?", (PRIVATE_ID,)).fetchone()[0] is None
         conn.close()

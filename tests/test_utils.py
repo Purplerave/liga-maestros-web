@@ -8,18 +8,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from utils import (
     clean_team_key,
-    normalize_team_key,
-    short_team_name,
-    team_token,
-    signo_for_match,
-    parse_score_text,
-    parse_rfc822_to_iso,
     highlightly_status,
-    safe_write_json,
-    safe_read_json,
-    strip_html,
-    normalize_news_text,
     news_relevance_score,
+    normalize_news_text,
+    normalize_team_key,
+    parse_rfc822_to_iso,
+    parse_score_text,
+    safe_read_json,
+    safe_write_json,
+    short_team_name,
+    signo_for_match,
+    strip_html,
+    team_token,
 )
 
 

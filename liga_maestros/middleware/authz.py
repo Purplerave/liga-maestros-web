@@ -1,4 +1,5 @@
 """Authorization helpers shared by routes."""
+
 import os
 
 from flask import request, session
@@ -19,4 +20,3 @@ def is_admin_request():
     # Only use real remote_addr, never X-Forwarded-For for admin bypass
     is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
     return is_local
-

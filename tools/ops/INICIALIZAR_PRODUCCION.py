@@ -1,4 +1,5 @@
 """Create or validate the persistent production database before first start."""
+
 import sqlite3
 
 import config

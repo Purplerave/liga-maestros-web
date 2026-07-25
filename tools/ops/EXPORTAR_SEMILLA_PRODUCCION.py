@@ -1,9 +1,10 @@
 """Export public competition history without accounts or private activity."""
-from datetime import datetime, timezone
+
 import argparse
 import json
 import os
 import sqlite3
+from datetime import UTC, datetime
 
 import config
 
@@ -22,7 +23,7 @@ TABLES = (
 
 def public_participant_ids():
     path = os.path.join(config.SEED_DATA_DIR, "PARTICIPANTES_MAESTROS.json")
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         participants = json.load(fh)
     ids = {str(item["id"]) for item in participants if item.get("id")}
     ids.update({"v260_omnisciente", "consenso"})
@@ -35,7 +36,7 @@ def export_seed(source, output):
     allowed_ids = public_participant_ids()
     payload = {
         "version": 1,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "privacy": "No contiene usuarios, correos, comentarios ni actividad privada.",
         "tables": {},
     }

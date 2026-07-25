@@ -13,8 +13,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 try:
     from utils import normalize_team_key
 except ImportError:
+
     def normalize_team_key(value):
         import unicodedata
+
         text = unicodedata.normalize("NFD", str(value or "").upper())
         text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
         text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
@@ -41,27 +43,13 @@ def _parse_score(match):
 def _team_name(match, side):
     """Get team name from match for 'home' or 'away'."""
     if side == "home":
-        return (
-            match.get("local")
-            or match.get("home_name")
-            or (match.get("home") or {}).get("name")
-            or ""
-        )
-    return (
-        match.get("visitante")
-        or match.get("away_name")
-        or (match.get("away") or {}).get("name")
-        or ""
-    )
+        return match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name") or ""
+    return match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name") or ""
 
 
 def _competition_name(match):
     """Get competition name from match."""
-    return (
-        match.get("competition_name")
-        or (match.get("competition") or {}).get("name")
-        or "Desconocida"
-    )
+    return match.get("competition_name") or (match.get("competition") or {}).get("name") or "Desconocida"
 
 
 def _is_finished(match):
@@ -124,10 +112,18 @@ def calculate_standings_from_matches(all_matches):
         matches.sort(key=_match_sort_key)
 
         # Calculate team stats
-        teams = defaultdict(lambda: {
-            "n": "", "pj": 0, "pg": 0, "pe": 0, "pp": 0,
-            "gf": 0, "gc": 0, "results": [],
-        })
+        teams = defaultdict(
+            lambda: {
+                "n": "",
+                "pj": 0,
+                "pg": 0,
+                "pe": 0,
+                "pp": 0,
+                "gf": 0,
+                "gc": 0,
+                "results": [],
+            }
+        )
 
         for match in matches:
             home_name = _team_name(match, "home")
@@ -196,20 +192,22 @@ def calculate_standings_from_matches(all_matches):
             # Current streak
             streak = _calc_streak(stats["results"])
 
-            team_list.append({
-                "n": name,
-                "pj": stats["pj"],
-                "pg": stats["pg"],
-                "pe": stats["pe"],
-                "pp": stats["pp"],
-                "gf": stats["gf"],
-                "gc": stats["gc"],
-                "dg": dg,
-                "pts": pts,
-                "form": form,
-                "streak": streak,
-                "last5_pts": last5_pts,
-            })
+            team_list.append(
+                {
+                    "n": name,
+                    "pj": stats["pj"],
+                    "pg": stats["pg"],
+                    "pe": stats["pe"],
+                    "pp": stats["pp"],
+                    "gf": stats["gf"],
+                    "gc": stats["gc"],
+                    "dg": dg,
+                    "pts": pts,
+                    "form": form,
+                    "streak": streak,
+                    "last5_pts": last5_pts,
+                }
+            )
 
         # Sort: points, goal diff, goals for, name
         team_list.sort(key=lambda t: (-t["pts"], -t["dg"], -t["gf"], t["n"]))
@@ -219,11 +217,13 @@ def calculate_standings_from_matches(all_matches):
             team["pos"] = idx
 
         if len(team_list) >= 3:
-            leagues.append({
-                "name": comp_name,
-                "teams": team_list,
-                "total_matches": len(matches),
-            })
+            leagues.append(
+                {
+                    "name": comp_name,
+                    "teams": team_list,
+                    "total_matches": len(matches),
+                }
+            )
 
     # Sort leagues: Spanish leagues first, then by number of teams
     def league_sort_key(league):

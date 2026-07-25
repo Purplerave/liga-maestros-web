@@ -1,4 +1,5 @@
 """Highlightly API integration: circuit breaker, usage tracking, refresh."""
+
 import logging
 import os
 import threading
@@ -8,8 +9,17 @@ from datetime import timedelta
 import requests
 
 import config
+
 from ..db.connection import get_db
-from ..middleware.json_lock import update_json_object_locked, update_json_list_by_id_locked
+from ..middleware.json_lock import update_json_list_by_id_locked, update_json_object_locked
+from ..utils import (
+    highlightly_match_to_panel,
+    highlightly_status,
+    normalize_team_key,
+    parse_db_match_datetime,
+    parse_score_text,
+    signo_for_match,
+)
 from .highlightly_limits import (
     get_highlightly_circuit,
     get_highlightly_usage,
@@ -18,16 +28,18 @@ from .highlightly_limits import (
     reserve_highlightly_calls,
 )
 from .ticket import madrid_now, today_madrid
-from ..utils import normalize_team_key, parse_score_text, highlightly_status, highlightly_match_to_panel, parse_db_match_datetime, signo_for_match
 
 logger = logging.getLogger(__name__)
 
-HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
+HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
 HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "1")))
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
-    item.strip().upper()
-    for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",")
-    if item.strip()
+    item.strip().upper() for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",") if item.strip()
 }
 Q15_EXPECTED_MATCHES = 15
 
@@ -36,6 +48,7 @@ _highlightly_last_refresh = 0
 _highlightly_refresh_thread = None
 _highlightly_refresh_started_at = 0
 _highlightly_thread_management_lock = threading.Lock()
+
 
 def resolve_jornada(conn, jornada=None):
     raw = str(jornada or "").strip()
@@ -50,17 +63,22 @@ def compute_refresh_window(conn, jornada=None):
     if not target_jornada:
         return {"enabled": False, "reason": "sin_jornada"}
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT fecha, hora, status
         FROM resultados
         WHERE jornada = ?
         ORDER BY partido_id ASC
-    """, (target_jornada,)).fetchall()
+    """,
+        (target_jornada,),
+    ).fetchall()
     if not rows:
         return {"enabled": False, "reason": "sin_partidos", "jornada": target_jornada}
 
     match_times = [dt for dt in (parse_db_match_datetime(r["fecha"], r["hora"]) for r in rows) if dt]
-    live_now = any(str(r["status"] or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO") for r in rows)
+    live_now = any(
+        str(r["status"] or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO") for r in rows
+    )
     has_pending = any(str(r["status"] or "").upper() in ("NS", "SCHEDULED", "NOT STARTED") for r in rows)
     needs_result_catchup = False
 
@@ -123,8 +141,10 @@ def compute_refresh_window(conn, jornada=None):
 
 # --- API Calls ---
 
+
 def _local_league_status_for_date(conn, jornada, date_text, league_name):
     from ..utils import normalize_team_key
+
     league = str(league_name or "").upper()
     if league not in ("LA LIGA", "SEGUNDA DIVISION"):
         return {"known": False, "all_finished": False}
@@ -147,11 +167,9 @@ def _local_league_status_for_date(conn, jornada, date_text, league_name):
         (jornada, date_text),
     ).fetchall()
     league_rows = [
-        row for row in rows
-        if (
-            normalize_team_key(row["local"]) in teams
-            and normalize_team_key(row["visitante"]) in teams
-        )
+        row
+        for row in rows
+        if (normalize_team_key(row["local"]) in teams and normalize_team_key(row["visitante"]) in teams)
     ]
     if not league_rows:
         return {"known": False, "all_finished": False}
@@ -187,11 +205,14 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
     matches = []
 
     if not HIGHLIGHTLY_ACTIVE_LEAGUES:
-        for match in _highlightly_get_matches({
-            "date": date_text,
-            "timezone": "Europe/Madrid",
-            "limit": 100,
-        }, headers):
+        for match in _highlightly_get_matches(
+            {
+                "date": date_text,
+                "timezone": "Europe/Madrid",
+                "limit": 100,
+            },
+            headers,
+        ):
             league = match.get("league") or {}
             match["_competition_name"] = league.get("name") or ""
             matches.append(match)
@@ -208,12 +229,15 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
             if local_status["known"] and local_status["all_finished"]:
                 continue
         calls_used += 1
-        for match in _highlightly_get_matches({
-            "date": date_text,
-            "leagueId": league_id,
-            "timezone": "Europe/Madrid",
-            "limit": 100,
-        }, headers):
+        for match in _highlightly_get_matches(
+            {
+                "date": date_text,
+                "leagueId": league_id,
+                "timezone": "Europe/Madrid",
+                "limit": 100,
+            },
+            headers,
+        ):
             match["_competition_name"] = league_name
             matches.append(match)
         if get_highlightly_circuit().get("open"):
@@ -227,10 +251,13 @@ def refresh_dates_for_jornada(conn, jornada=None):
     dates = {today}
     if not target_jornada:
         return sorted(dates)
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT fecha, status, goles_local, goles_visitante
         FROM resultados WHERE jornada = ?
-    """, (target_jornada,)).fetchall()
+    """,
+        (target_jornada,),
+    ).fetchall()
     for row in rows:
         fecha = str(row["fecha"] or "").strip()[:10]
         if not fecha or fecha > today:
@@ -271,12 +298,14 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 if get_highlightly_circuit().get("open"):
                     break
                 usage_before = get_highlightly_usage().get("calls", 0)
-                api_matches.extend(fetch_highlightly_matches(
-                    date_text,
-                    conn=conn,
-                    jornada=target_jornada,
-                    max_calls=calls_left,
-                ))
+                api_matches.extend(
+                    fetch_highlightly_matches(
+                        date_text,
+                        conn=conn,
+                        jornada=target_jornada,
+                        max_calls=calls_left,
+                    )
+                )
                 usage_after = get_highlightly_usage().get("calls", usage_before)
                 calls_left -= max(0, int(usage_after or 0) - int(usage_before or 0))
 
@@ -302,10 +331,13 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
                 update_json_list_by_id_locked(panel_path, panel_matches)
 
-            rows = conn.execute("""
+            rows = conn.execute(
+                """
                 SELECT partido_id, local, visitante, status, minuto, goles_local, goles_visitante
                 FROM resultados WHERE jornada = ?
-            """, (target_jornada,)).fetchall()
+            """,
+                (target_jornada,),
+            ).fetchall()
             for row in rows:
                 if str(row["minuto"] or "").upper().startswith("SUSPENDIDO LAE"):
                     continue
@@ -314,17 +346,20 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     continue
                 match, reversed_match = feed_item
                 state = match.get("state") or {}
-                score_text = ((state.get("score") or {}).get("current") or "")
+                score_text = (state.get("score") or {}).get("current") or ""
                 home_goals, away_goals = parse_score_text(score_text)
                 if reversed_match:
                     home_goals, away_goals = away_goals, home_goals
                 status, minute = highlightly_status(state)
                 signo = signo_for_match(row["partido_id"], home_goals, away_goals)
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE resultados
                     SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?
                     WHERE jornada = ? AND partido_id = ?
-                """, (home_goals, away_goals, status, minute, signo, target_jornada, row["partido_id"]))
+                """,
+                    (home_goals, away_goals, status, minute, signo, target_jornada, row["partido_id"]),
+                )
                 updates += 1
 
         if logos:

@@ -5,9 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 import config
-from scoring import pleno_score_key, score_prediction
 import utils
-
+from scoring import pleno_score_key, score_prediction
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(config.DB_PATH)
@@ -36,11 +35,36 @@ def canonical_id(uid):
     if low in aliases:
         return aliases[low]
     if low in (
-        "programa", "chipi", "gemini", "grok", "claude", "copilot", "chatgpt",
-        "kimi", "profe", "ernie", "fortu", "geli", "mrpurple", "oraculo",
-        "pepe", "hermes", "jenova", "momo", "manu", "manus", "qwen", "gwen",
-        "meta", "perplexity", "glm5", "geli_glm5", "chema_cohere",
-        "momo_molbot", "tecnotron", "consejo_ias",
+        "programa",
+        "chipi",
+        "gemini",
+        "grok",
+        "claude",
+        "copilot",
+        "chatgpt",
+        "kimi",
+        "profe",
+        "ernie",
+        "fortu",
+        "geli",
+        "mrpurple",
+        "oraculo",
+        "pepe",
+        "hermes",
+        "jenova",
+        "momo",
+        "manu",
+        "manus",
+        "qwen",
+        "gwen",
+        "meta",
+        "perplexity",
+        "glm5",
+        "geli_glm5",
+        "chema_cohere",
+        "momo_molbot",
+        "tecnotron",
+        "consejo_ias",
     ):
         return low
     return value
@@ -109,10 +133,7 @@ def build_audit(jornada):
         "SELECT partido_id, ganador, p1, px, p2 FROM consenso WHERE jornada = ? ORDER BY partido_id",
         (jornada,),
     )
-    users = {
-        row["id"]: row["nombre"]
-        for row in fetch_rows(conn, "SELECT id, nombre FROM usuarios")
-    }
+    users = {row["id"]: row["nombre"] for row in fetch_rows(conn, "SELECT id, nombre FROM usuarios")}
     conn.close()
 
     expected_ids = set(range(1, 16))
@@ -137,11 +158,16 @@ def build_audit(jornada):
             "missing": missing,
             "extra": extra,
             "role": (
-                "programa" if uid == "programa"
-                else "consejo" if uid == "consejo_ias"
-                else "pena" if uid in pena_aliases
-                else "obsoleto" if uid in obsolete_ids
-                else "maestro" if uid in official_masters
+                "programa"
+                if uid == "programa"
+                else "consejo"
+                if uid == "consejo_ias"
+                else "pena"
+                if uid in pena_aliases
+                else "obsoleto"
+                if uid in obsolete_ids
+                else "maestro"
+                if uid in official_masters
                 else "usuario"
             ),
         }
@@ -150,19 +176,16 @@ def build_audit(jornada):
     missing_results = sorted(expected_ids - result_ids)
     finished_results = [row for row in results if is_finished(row)]
     live_results = [
-        row for row in results
+        row
+        for row in results
         if str(row["status"] or "").upper() in {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"}
     ]
     scheduled_results = [
-        row for row in results
-        if str(row["status"] or "").upper() in {"NS", "SCHEDULED", "NOT STARTED", ""}
+        row for row in results if str(row["status"] or "").upper() in {"NS", "SCHEDULED", "NOT STARTED", ""}
     ]
 
     scoreboard = {}
-    real_by_match = {
-        int(row["partido_id"]): result_sign(row)
-        for row in finished_results
-    }
+    real_by_match = {int(row["partido_id"]): result_sign(row) for row in finished_results}
     for uid, signs in preds_by_user.items():
         hits = 0
         played = 0
@@ -222,9 +245,7 @@ def build_audit(jornada):
         if triples:
             pena_budget_warnings.append(f"{status['name']} tiene triples en partidos {triples}.")
         if doubles != expected_pena_doubles:
-            pena_budget_warnings.append(
-                f"{status['name']} tiene {doubles} dobles; esperado {expected_pena_doubles}."
-            )
+            pena_budget_warnings.append(f"{status['name']} tiene {doubles} dobles; esperado {expected_pena_doubles}.")
 
     critical = []
     warnings = []
@@ -280,10 +301,7 @@ def build_audit(jornada):
         "critical": critical,
         "warnings": warnings,
         "prediction_status": prediction_status,
-        "scoreboard": dict(sorted(
-            scoreboard.items(),
-            key=lambda item: (-item[1]["hits"], item[1]["name"].lower())
-        )),
+        "scoreboard": dict(sorted(scoreboard.items(), key=lambda item: (-item[1]["hits"], item[1]["name"].lower()))),
         "missing_logos": sorted(set(logo_missing)),
         "matches": results,
     }
@@ -299,38 +317,44 @@ def md_table(rows, headers):
 def render_markdown(audit):
     status_rows = []
     for uid, status in sorted(audit["prediction_status"].items(), key=lambda item: (item[1]["role"], item[1]["name"])):
-        status_rows.append({
-            "Rol": status["role"],
-            "ID": uid,
-            "Nombre": status["name"],
-            "Signos": f'{status["count"]}/15',
-            "Faltan": ", ".join(map(str, status["missing"])) or "-",
-        })
+        status_rows.append(
+            {
+                "Rol": status["role"],
+                "ID": uid,
+                "Nombre": status["name"],
+                "Signos": f"{status['count']}/15",
+                "Faltan": ", ".join(map(str, status["missing"])) or "-",
+            }
+        )
 
     score_rows = []
     for uid, score in audit["scoreboard"].items():
         if score["played"] == 0:
             continue
-        score_rows.append({
-            "ID": uid,
-            "Nombre": score["name"],
-            "Aciertos": f'{score["hits"]}/{score["played"]}',
-            "Sin signo en jugados": ", ".join(map(str, score["missing_played"])) or "-",
-        })
+        score_rows.append(
+            {
+                "ID": uid,
+                "Nombre": score["name"],
+                "Aciertos": f"{score['hits']}/{score['played']}",
+                "Sin signo en jugados": ", ".join(map(str, score["missing_played"])) or "-",
+            }
+        )
 
     match_rows = []
     for row in audit["matches"]:
         score = "-"
         if row["goles_local"] is not None and row["goles_visitante"] is not None:
-            score = f'{row["goles_local"]}-{row["goles_visitante"]}'
-        match_rows.append({
-            "#": row["partido_id"],
-            "Partido": f'{row["local"]} - {row["visitante"]}',
-            "Hora": f'{row["fecha"]} {row["hora"]}',
-            "Estado": row["status"] or "-",
-            "Resultado": score,
-            "Signo": result_sign(row),
-        })
+            score = f"{row['goles_local']}-{row['goles_visitante']}"
+        match_rows.append(
+            {
+                "#": row["partido_id"],
+                "Partido": f"{row['local']} - {row['visitante']}",
+                "Hora": f"{row['fecha']} {row['hora']}",
+                "Estado": row["status"] or "-",
+                "Resultado": score,
+                "Signo": result_sign(row),
+            }
+        )
 
     lines = [
         f"# Auditoria Jornada {audit['jornada']}",
@@ -341,14 +365,19 @@ def render_markdown(audit):
         "",
         "## Resumen",
         "",
-        md_table([{
-            "Partidos": audit["summary"]["partidos"],
-            "Finalizados": audit["summary"]["finalizados"],
-            "Directo": audit["summary"]["directo"],
-            "Pendientes": audit["summary"]["pendientes"],
-            "Participantes": audit["summary"]["participantes_con_prediccion"],
-            "Consenso": audit["summary"]["consenso_rows"],
-        }], ["Partidos", "Finalizados", "Directo", "Pendientes", "Participantes", "Consenso"]),
+        md_table(
+            [
+                {
+                    "Partidos": audit["summary"]["partidos"],
+                    "Finalizados": audit["summary"]["finalizados"],
+                    "Directo": audit["summary"]["directo"],
+                    "Pendientes": audit["summary"]["pendientes"],
+                    "Participantes": audit["summary"]["participantes_con_prediccion"],
+                    "Consenso": audit["summary"]["consenso_rows"],
+                }
+            ],
+            ["Partidos", "Finalizados", "Directo", "Pendientes", "Participantes", "Consenso"],
+        ),
         "",
         "## Critico",
         "",
@@ -364,7 +393,9 @@ def render_markdown(audit):
         "",
         "## Aciertos Con Resultados Cerrados",
         "",
-        md_table(score_rows, ["ID", "Nombre", "Aciertos", "Sin signo en jugados"]) if score_rows else "- Aun no hay partidos cerrados puntuables.",
+        md_table(score_rows, ["ID", "Nombre", "Aciertos", "Sin signo en jugados"])
+        if score_rows
+        else "- Aun no hay partidos cerrados puntuables.",
         "",
         "## Partidos",
         "",

@@ -4,13 +4,13 @@ The rich quiz bank lives in data/quiz/{generated,approved}. This validator keeps
 AI-generated batches from entering the approved bank with missing fields,
 ambiguous answers, or obvious licensing/source problems.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 QUIZ_ROOT = ROOT / "data" / "quiz"

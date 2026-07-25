@@ -1,21 +1,26 @@
 """Porra routes: match score predictions."""
+
 import os
 from datetime import datetime
-from flask import Blueprint, request, jsonify, session
+
+from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
+from ..db.migrations import ensure_porra_table
 from ..middleware.rate_limit import is_rate_limited
 from ..services.ticket import madrid_now, parse_madrid_datetime
-from ..db.migrations import ensure_porra_table
 
 bp = Blueprint("porra", __name__)
 
 
 def _porra_target_match(conn, jornada):
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante
         FROM resultados WHERE jornada = ? ORDER BY partido_id ASC
-    """, (jornada,)).fetchall()
+    """,
+        (jornada,),
+    ).fetchall()
     if not rows:
         return None
     matches = [dict(row) for row in rows]
@@ -23,20 +28,21 @@ def _porra_target_match(conn, jornada):
     def is_open(match):
         status = str(match.get("status") or "").upper()
         kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
-        return status in ("", "NS", "SCHEDULED", "NOT STARTED") and (
-            not kickoff or madrid_now() < kickoff
-        )
+        return status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or madrid_now() < kickoff)
 
     open_matches = [match for match in matches if is_open(match)]
 
-    existing = conn.execute("""
+    existing = conn.execute(
+        """
         SELECT partido_id, MIN(created_at) AS first_entry
         FROM porra_entries
         WHERE jornada = ? AND partido_id BETWEEN 1 AND 14
         GROUP BY partido_id
         ORDER BY datetime(first_entry) ASC, partido_id ASC
         LIMIT 1
-    """, (jornada,)).fetchone()
+    """,
+        (jornada,),
+    ).fetchone()
     if existing:
         target_id = int(existing["partido_id"])
         fixed_match = next(
@@ -52,23 +58,20 @@ def _porra_target_match(conn, jornada):
 
     # Una sola porra por fecha: entre los partidos del dia mas cercano se
     # elige el que tenga las opiniones mas repartidas.
-    dated_candidates = [
-        (parse_madrid_datetime(match.get("fecha"), match.get("hora")), match)
-        for match in candidates
-    ]
+    dated_candidates = [(parse_madrid_datetime(match.get("fecha"), match.get("hora")), match) for match in candidates]
     known_dates = [kickoff.date() for kickoff, _match in dated_candidates if kickoff]
     if known_dates:
         nearest_day = min(known_dates)
-        candidates = [
-            match for kickoff, match in dated_candidates
-            if kickoff and kickoff.date() == nearest_day
-        ]
+        candidates = [match for kickoff, match in dated_candidates if kickoff and kickoff.date() == nearest_day]
 
-    prediction_rows = conn.execute("""
+    prediction_rows = conn.execute(
+        """
         SELECT partido_id, signo
         FROM predicciones
         WHERE jornada = ? AND partido_id BETWEEN 1 AND 14 AND signo NOT IN ('', '-')
-    """, (jornada,)).fetchall()
+    """,
+        (jornada,),
+    ).fetchall()
     votes_by_match = {}
     for row in prediction_rows:
         counts = votes_by_match.setdefault(int(row["partido_id"]), {"1": 0, "X": 0, "2": 0})
@@ -104,7 +107,7 @@ def _porra_is_locked(match):
     return bool(kickoff and madrid_now() >= kickoff)
 
 
-@bp.route('/api/porra')
+@bp.route("/api/porra")
 def get_porra():
     user = session.get("user") or {}
     raw_j = request.args.get("j") or request.args.get("jornada") or ""
@@ -120,18 +123,27 @@ def get_porra():
         if not match:
             return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra"})
         presentation = _porra_presentation(match)
-        entries = conn.execute("""
+        entries = conn.execute(
+            """
             SELECT nombre, goles_local, goles_visitante, updated_at
             FROM porra_entries WHERE jornada = ? AND partido_id = ?
             ORDER BY datetime(updated_at) DESC LIMIT 20
-        """, (jornada, match["partido_id"])).fetchall()
-        distribution_rows = conn.execute("""
+        """,
+            (jornada, match["partido_id"]),
+        ).fetchall()
+        distribution_rows = conn.execute(
+            """
             SELECT goles_local, goles_visitante, COUNT(*) AS total
             FROM porra_entries WHERE jornada = ? AND partido_id = ?
             GROUP BY goles_local, goles_visitante
             ORDER BY total DESC, goles_local ASC, goles_visitante ASC LIMIT 6
-        """, (jornada, match["partido_id"])).fetchall()
-        total_entries = conn.execute("SELECT COUNT(*) AS total FROM porra_entries WHERE jornada = ? AND partido_id = ?", (jornada, match["partido_id"])).fetchone()
+        """,
+            (jornada, match["partido_id"]),
+        ).fetchall()
+        total_entries = conn.execute(
+            "SELECT COUNT(*) AS total FROM porra_entries WHERE jornada = ? AND partido_id = ?",
+            (jornada, match["partido_id"]),
+        ).fetchone()
         porra_total = int(total_entries["total"] or 0) if total_entries else 0
         distribution = []
         for row in distribution_rows:
@@ -141,21 +153,32 @@ def get_porra():
             distribution.append(item)
         mine = None
         if user.get("id"):
-            mine_row = conn.execute("SELECT goles_local, goles_visitante, updated_at FROM porra_entries WHERE jornada = ? AND partido_id = ? AND user_id = ?", (jornada, match["partido_id"], user.get("id"))).fetchone()
+            mine_row = conn.execute(
+                "SELECT goles_local, goles_visitante, updated_at FROM porra_entries WHERE jornada = ? AND partido_id = ? AND user_id = ?",
+                (jornada, match["partido_id"], user.get("id")),
+            ).fetchone()
             mine = dict(mine_row) if mine_row else None
-        return jsonify({
-            "status": "ok", "enabled": True, "jornada": jornada, "match": match,
-            **presentation,
-            "locked": _porra_is_locked(match),
-            "prize": os.getenv("PORRA_PRIZE_TEXT", "Premio symbolico: insignia semanal"),
-            "entries": [dict(row) for row in entries], "distribution": distribution,
-            "total_entries": porra_total, "mine": mine, "auth": bool(user.get("id")),
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "enabled": True,
+                "jornada": jornada,
+                "match": match,
+                **presentation,
+                "locked": _porra_is_locked(match),
+                "prize": os.getenv("PORRA_PRIZE_TEXT", "Premio symbolico: insignia semanal"),
+                "entries": [dict(row) for row in entries],
+                "distribution": distribution,
+                "total_entries": porra_total,
+                "mine": mine,
+                "auth": bool(user.get("id")),
+            }
+        )
     finally:
         conn.close()
 
 
-@bp.route('/api/porra', methods=['POST'])
+@bp.route("/api/porra", methods=["POST"])
 def post_porra():
     user = session.get("user")
     if not user:
@@ -181,13 +204,25 @@ def post_porra():
         if _porra_is_locked(match):
             return jsonify({"status": "error", "message": "La porra de esta jornada ya esta cerrada."}), 400
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(user_id, jornada, partido_id) DO UPDATE SET
                 nombre = excluded.nombre, goles_local = excluded.goles_local,
                 goles_visitante = excluded.goles_visitante, updated_at = excluded.updated_at
-        """, (jornada, match["partido_id"], user.get("id"), (user.get("name") or "Maestro").split(" ")[0], gl, gv, now, now))
+        """,
+            (
+                jornada,
+                match["partido_id"],
+                user.get("id"),
+                (user.get("name") or "Maestro").split(" ")[0],
+                gl,
+                gv,
+                now,
+                now,
+            ),
+        )
         conn.commit()
         return jsonify({"status": "ok", "goles_local": gl, "goles_visitante": gv})
     finally:

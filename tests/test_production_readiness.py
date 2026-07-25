@@ -1,8 +1,9 @@
 import json
 import sqlite3
 
-import config
 from flask import jsonify
+
+import config
 from liga_maestros import create_app
 from liga_maestros.db.backups import create_backup, verify_backup
 from liga_maestros.db.connection import ClosingConnection
@@ -20,19 +21,24 @@ from liga_maestros.routes.legal import delete_user_data
 def test_fresh_database_creates_core_schema_and_imports_public_seed(tmp_path, monkeypatch):
     db_path = tmp_path / "production.db"
     seed_path = tmp_path / "seed.json"
-    seed_path.write_text(json.dumps({
-        "version": 1,
-        "tables": {
-            "resultados": {
-                "columns": ["jornada", "partido_id", "local", "visitante", "status"],
-                "rows": [[99, 1, "Local", "Visitante", "SCHEDULED"]],
-            },
-            "predicciones": {
-                "columns": ["user_id", "jornada", "partido_id", "signo"],
-                "rows": [["programa", 99, 1, "1"]],
-            },
-        },
-    }), encoding="utf-8")
+    seed_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "tables": {
+                    "resultados": {
+                        "columns": ["jornada", "partido_id", "local", "visitante", "status"],
+                        "rows": [[99, 1, "Local", "Visitante", "SCHEDULED"]],
+                    },
+                    "predicciones": {
+                        "columns": ["user_id", "jornada", "partido_id", "signo"],
+                        "rows": [["programa", 99, 1, "1"]],
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
 
     monkeypatch.setattr(config, "DB_PATH", str(db_path))
     monkeypatch.setattr(config, "BOOTSTRAP_DB_PATH", str(tmp_path / "missing.db"))
@@ -51,7 +57,7 @@ def test_fresh_database_creates_core_schema_and_imports_public_seed(tmp_path, mo
 
 
 def test_repository_seed_contains_no_private_account_tables():
-    with open(config.PRODUCTION_SEED_PATH, "r", encoding="utf-8") as fh:
+    with open(config.PRODUCTION_SEED_PATH, encoding="utf-8") as fh:
         payload = json.load(fh)
     tables = payload["tables"]
     assert "usuarios" not in tables
@@ -64,14 +70,23 @@ def test_repository_seed_contains_no_private_account_tables():
 
 def test_fixture_corrections_update_only_the_expected_placeholder(tmp_path):
     corrections_path = tmp_path / "fixture_corrections.json"
-    corrections_path.write_text(json.dumps({"fixtures": [{
-        "jornada": 73,
-        "partido_id": 15,
-        "old_local": "Ganador Semifinal 1",
-        "old_visitante": "Ganador Semifinal 2",
-        "local": "España",
-        "visitante": "Argentina",
-    }]}), encoding="utf-8")
+    corrections_path.write_text(
+        json.dumps(
+            {
+                "fixtures": [
+                    {
+                        "jornada": 73,
+                        "partido_id": 15,
+                        "old_local": "Ganador Semifinal 1",
+                        "old_visitante": "Ganador Semifinal 2",
+                        "local": "España",
+                        "visitante": "Argentina",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
 
     conn = sqlite3.connect(":memory:")
     conn.execute("CREATE TABLE resultados (jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT)")
@@ -84,11 +99,20 @@ def test_fixture_corrections_update_only_the_expected_placeholder(tmp_path):
 
 def test_fixture_corrections_can_update_public_master_predictions(tmp_path):
     corrections_path = tmp_path / "fixture_corrections.json"
-    corrections_path.write_text(json.dumps({"predictions": [{
-        "jornada": 73,
-        "user_id": "copilot",
-        "signos": ["1", "X2", "-"],
-    }]}), encoding="utf-8")
+    corrections_path.write_text(
+        json.dumps(
+            {
+                "predictions": [
+                    {
+                        "jornada": 73,
+                        "user_id": "copilot",
+                        "signos": ["1", "X2", "-"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
 
     conn = sqlite3.connect(":memory:")
     conn.execute("CREATE TABLE resultados (jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT)")
@@ -106,10 +130,19 @@ def test_fixture_corrections_can_update_public_master_predictions(tmp_path):
 
 def test_profile_history_matches_public_name_and_never_overwrites(tmp_path):
     history_path = tmp_path / "profile_history.json"
-    history_path.write_text(json.dumps({"profiles": [{
-        "account_name": "Pablo Castro",
-        "jornadas": {"60": ["1", "X", "2"]},
-    }]}), encoding="utf-8")
+    history_path.write_text(
+        json.dumps(
+            {
+                "profiles": [
+                    {
+                        "account_name": "Pablo Castro",
+                        "jornadas": {"60": ["1", "X", "2"]},
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
 
     conn = sqlite3.connect(":memory:")
     ensure_core_tables(conn)
@@ -159,10 +192,16 @@ def test_account_deletion_removes_all_owned_activity():
     conn.execute("CREATE TABLE api_rate_limit (scope TEXT, identity TEXT, last_seen REAL)")
     conn.execute("INSERT INTO usuarios (id, nombre, email) VALUES ('u1', 'User', 'user@example.test')")
     conn.execute("INSERT INTO predicciones VALUES ('u1', 1, 1, '1')")
-    conn.execute("INSERT INTO comentarios_jornada (jornada, user_id, nombre, texto, etiqueta, created_at) VALUES (1, 'u1', 'User', 'Hola', 'Bar', 'now')")
-    conn.execute("INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at) VALUES (1, 1, 'u1', 'User', 1, 0, 'now', 'now')")
+    conn.execute(
+        "INSERT INTO comentarios_jornada (jornada, user_id, nombre, texto, etiqueta, created_at) VALUES (1, 'u1', 'User', 'Hola', 'Bar', 'now')"
+    )
+    conn.execute(
+        "INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at) VALUES (1, 1, 'u1', 'User', 1, 0, 'now', 'now')"
+    )
     conn.execute("INSERT INTO snake_scores (user_id, nombre, score, created_at) VALUES ('u1', 'User', 10, 'now')")
-    conn.execute("INSERT INTO quiz_participaciones (jornada, user_id, nombre, respuestas, created_at) VALUES (1, 'u1', 'User', '[]', 'now')")
+    conn.execute(
+        "INSERT INTO quiz_participaciones (jornada, user_id, nombre, respuestas, created_at) VALUES (1, 'u1', 'User', '[]', 'now')"
+    )
     conn.execute("INSERT INTO api_rate_limit VALUES ('test', 'u1', 0)")
     conn.commit()
 

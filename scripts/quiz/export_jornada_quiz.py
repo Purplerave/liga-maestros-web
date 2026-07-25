@@ -4,6 +4,7 @@ The live web already imports data/QUIZ_BANK_J{jornada}.json with 10 questions,
 3 options and answers A/B/C. This script bridges the richer long-term bank and
 the existing production format.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -12,7 +13,6 @@ import random
 import sys
 from datetime import datetime
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 APPROVED_DIR = ROOT / "data" / "quiz" / "approved"
