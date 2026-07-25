@@ -2,7 +2,7 @@
 import os
 import logging
 
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 
 from ..db.connection import get_db
 from ..middleware.csrf import get_csrf_token

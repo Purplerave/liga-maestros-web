@@ -351,8 +351,20 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     months_desc = sorted(scored_months, reverse=True)
     monthly_rows_by_month = {month: rows_from_scores(monthly_scores[month]) for month in months_desc}
 
+    completed_jornadas = {
+        jornada
+        for jornada in jornada_scores
+        if sum(
+            1
+            for partido_id in range(1, Q15_EXPECTED_MATCHES + 1)
+            if (jornada, partido_id) in results
+        )
+        == Q15_EXPECTED_MATCHES
+    }
     galardones_jornada = []
     for jornada in sorted(jornada_scores.keys(), reverse=True):
+        if jornada not in completed_jornadas:
+            continue
         rows = rows_from_scores(jornada_scores[jornada])
         if not rows:
             continue

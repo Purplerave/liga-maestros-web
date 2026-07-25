@@ -1,4 +1,26 @@
 @layer hero {
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    width: min(100%, 560px);
+    margin: 4px 0 8px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand img {
+    width: min(100%, 470px);
+    height: clamp(90px, 12vh, 132px);
+    object-fit: contain;
+    object-position: left center;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.28));
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand span {
+    color: var(--gold);
+    font: 800 0.78rem/1 var(--font-ui);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
 /* Portada competitiva. Solo se aplica a la vista ALL. */
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {

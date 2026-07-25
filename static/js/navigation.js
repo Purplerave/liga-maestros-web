@@ -10,7 +10,7 @@ function versionedAsset(path, tag) {
 
 const VIEW_STYLES = {
     CONTEST: [
-        ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-5")],
+        ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-8")],
         ["view-profile-styles", versionedAsset("/static/css/pages/profile.css", "profile-4")],
     ],
     STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-3")]],
@@ -25,20 +25,20 @@ const VIEW_STYLES = {
     SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-6")]],
     QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
     TICKET: [
-        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-3")],
+        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-4")],
         ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-5")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
     ],
 };
 
 const VIEW_SCRIPTS = {
-    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-21")]],
-    CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-5")]],
+    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-22")]],
+    CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-8")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-3")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
     QUIZ: [["view-quiz-script", versionedAsset("/static/js/quiz.js", "quiz-2")]],
     TICKET: [
-        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-3")],
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-4")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-2")],
     ],
 };

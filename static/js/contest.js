@@ -39,14 +39,17 @@ function formatMonthES(month) {
 }
 
 function renderContestRows(rows = [], limit = 5, options = {}) {
-    const { showTop = true, highlightUser = true, showMedals = true } = options;
+    const { showTop = true, highlightUser = true, showMedals = true, compactWide = false } = options;
     const limited = rows.slice(0, limit);
     if (!limited.length) return `<div class="empty-state">Sin datos cerrados todavía.</div>`;
 
     const userRow = highlightUser ? rows.find(r => r.is_user) : null;
     const userPos = userRow ? userRow.pos : null;
 
-    return `<div class="contest-rows-grid">${limited.map((item, idx) => {
+    const rankingHead = compactWide
+        ? `<div class="contest-ranking-head"><span>Puesto</span><span>Participante</span><span>Puntos</span></div>`
+        : "";
+    return `<div class="${compactWide ? "contest-ranking-table" : ""}">${rankingHead}<div class="contest-rows-grid ${compactWide ? "is-wide-compact" : ""}">${limited.map((item, idx) => {
         const rank = showMedals && idx < 3 ? ["1º", "2º", "3º"][idx] : item.pos;
         const isUser = item.is_user;
         const isNearUser = userPos && Math.abs(item.pos - userPos) <= 2 && !isUser && item.pos !== userPos;
@@ -63,7 +66,7 @@ function renderContestRows(rows = [], limit = 5, options = {}) {
         }
 
         return html;
-    }).join("")}</div>`;
+    }).join("")}</div></div>`;
 }
 
 function awardTierClass(idx) {
@@ -283,7 +286,7 @@ function renderContestPageContent(view = "CONTEST_GENERAL") {
                 <div class="contest-title"><span>La Peña mensual</span><small>${escapeHtml(formatMonthES(selectedMonth))}</small></div>
                 ${leader ? `<div class="contest-month-leader"><span class="cml-label">Líder del mes</span><strong>${escapeHtml(leader.name)}</strong><b>${leader.points} pts</b></div>` : ""}
                 ${monthSelector}
-                <div id="monthly-rows">${renderContestRows(monthRows, 80, { showMedals: true })}</div>
+                <div id="monthly-rows">${renderContestRows(monthRows, 80, { showMedals: true, compactWide: true })}</div>
             </div>
         </section>`;
     }
@@ -301,12 +304,13 @@ function renderContestPageContent(view = "CONTEST_GENERAL") {
             </div>` : "";
         const isCurrent = selectedJornada === defaultJornada;
         const leader = jornadaRows[0];
+        const hasClosedResult = Number(leader?.points || 0) > 0;
         return `<section class="contest-page single">
             <div class="contest-card contest-month-hero">
                 <div class="contest-title"><span>La Peña · Jornada ${escapeHtml(selectedJornada)}</span><small>${isCurrent ? "actual" : "histórico"}</small></div>
-                ${leader ? `<div class="contest-month-leader"><span class="cml-label">Ganador de la jornada</span><strong>${escapeHtml(leader.name)}</strong><b>${leader.points} pts</b></div>` : ""}
+                ${hasClosedResult ? `<div class="contest-month-leader"><span class="cml-label">${isCurrent ? "L&iacute;der provisional" : "Ganador de la jornada"}</span><strong>${escapeHtml(leader.name)}</strong><b>${leader.points} pts</b></div>` : `<div class="contest-pending-note">La clasificaci&oacute;n se activar&aacute; con el primer resultado cerrado.</div>`}
                 ${jornadaSelector}
-                ${renderContestRows(jornadaRows, 80, { showMedals: true })}
+                ${renderContestRows(jornadaRows, 80, { showMedals: true, compactWide: true })}
             </div>
         </section>`;
     }

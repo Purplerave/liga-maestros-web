@@ -294,7 +294,7 @@
 
 .contest-card-row {
     display: grid;
-    grid-template-columns: 36px auto auto;
+    grid-template-columns: 36px minmax(0, 1fr) 64px;
     align-items: center;
     gap: 10px;
     padding: 6px 10px;
@@ -302,6 +302,64 @@
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.04);
     transition: background 0.15s;
+}
+
+.contest-rows-grid.is-wide-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.contest-rows-grid.is-wide-compact .contest-card-row {
+    grid-template-columns: 58px minmax(0, 1fr) 78px;
+    min-height: 32px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.contest-rows-grid.is-wide-compact .ccr-name {
+    font-size: 0.74rem;
+}
+
+.contest-rows-grid.is-wide-compact .ccr-pts {
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    text-align: right;
+}
+
+.contest-ranking-table {
+    width: min(100%, 760px);
+    margin: 0 auto;
+}
+
+.contest-ranking-head {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 78px;
+    gap: 10px;
+    padding: 0 10px 5px;
+    color: #7185a1;
+    font: 800 0.56rem/1 var(--font-ui);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.contest-ranking-head span:first-child {
+    text-align: center;
+}
+
+.contest-ranking-head span:last-child {
+    text-align: right;
+}
+
+.contest-pending-note {
+    margin: 4px 0 10px;
+    padding: 10px 12px;
+    border: 1px dashed rgba(148, 163, 184, 0.18);
+    border-radius: 6px;
+    color: #8fa4c0;
+    font: 700 0.68rem/1.25 var(--font-ui);
+    text-align: center;
 }
 
 .contest-card-row:hover {

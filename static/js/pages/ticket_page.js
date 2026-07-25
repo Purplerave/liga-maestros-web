@@ -227,6 +227,110 @@ function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
         </div>`;
 }
 
+/* ---------- Comentarios de jornada ---------- */
+
+let ticketCommentsTimer = null;
+
+function ticketCommentTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderTicketCommentsPanel() {
+    const signedIn = Boolean(state.user);
+    return `
+        <aside class="ticket-comments" aria-labelledby="ticket-comments-title">
+            <header class="ticket-comments-head">
+                <div><span>EN DIRECTO</span><strong id="ticket-comments-title">Comentarios</strong></div>
+                <button type="button" data-comments-refresh title="Actualizar comentarios" aria-label="Actualizar comentarios">&#8635;</button>
+            </header>
+            <div id="ticket-comments-list" class="ticket-comments-list">
+                <div class="ticket-comments-empty">Cargando conversaci&oacute;n...</div>
+            </div>
+            ${signedIn ? `
+                <form class="ticket-comments-form" data-comments-form>
+                    <label for="ticket-comment-input">Comenta la jornada</label>
+                    <div>
+                        <input id="ticket-comment-input" name="texto" maxlength="240" autocomplete="off" placeholder="¿Qu&eacute; partido ves m&aacute;s claro?">
+                        <button type="submit">Enviar</button>
+                    </div>
+                </form>` : `
+                <div class="ticket-comments-login">Entra con Google para comentar.</div>`}
+        </aside>`;
+}
+
+function renderTicketComments(comments = []) {
+    const target = qs("ticket-comments-list");
+    if (!target) return;
+    if (!comments.length) {
+        target.innerHTML = `<div class="ticket-comments-empty">A&uacute;n no hay comentarios. Abre el debate.</div>`;
+        return;
+    }
+    target.innerHTML = comments.map(comment => `
+        <article class="ticket-comment">
+            <div><strong>${escapeHtml(comment.nombre || "Participante")}</strong><time>${escapeHtml(ticketCommentTime(comment.created_at))}</time></div>
+            <p>${escapeHtml(comment.texto || "")}</p>
+        </article>`).join("");
+    target.scrollTop = target.scrollHeight;
+}
+
+async function loadTicketComments({ quiet = false } = {}) {
+    if (state.currentFilter !== "TICKET" || !state.data?.jornada) return;
+    try {
+        const response = await fetch(`/api/comentarios?j=${encodeURIComponent(state.data.jornada)}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("No se pudieron cargar los comentarios");
+        const payload = await response.json();
+        renderTicketComments(payload.comments || []);
+    } catch (error) {
+        if (!quiet) {
+            const target = qs("ticket-comments-list");
+            if (target) target.innerHTML = `<div class="ticket-comments-empty">No se pudieron cargar los comentarios.</div>`;
+        }
+    }
+}
+
+async function submitTicketComment(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const input = form.querySelector("input[name='texto']");
+    const text = String(input?.value || "").trim();
+    if (!text) return;
+    const submit = form.querySelector("button[type='submit']");
+    if (submit) submit.disabled = true;
+    try {
+        const response = await fetch("/api/comentarios", {
+            method: "POST",
+            headers: authenticatedJsonHeaders(),
+            body: JSON.stringify({ jornada: state.data.jornada, texto: text })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || "No se pudo publicar");
+        input.value = "";
+        await loadTicketComments({ quiet: true });
+    } catch (error) {
+        showToast(error.message || "No se pudo publicar", "error");
+    } finally {
+        if (submit) submit.disabled = false;
+        input?.focus();
+    }
+}
+
+function stopTicketComments() {
+    if (ticketCommentsTimer) window.clearInterval(ticketCommentsTimer);
+    ticketCommentsTimer = null;
+}
+
+function initTicketComments() {
+    stopTicketComments();
+    loadTicketComments();
+    qs("matches-body")?.querySelector("[data-comments-form]")?.addEventListener("submit", submitTicketComment);
+    qs("matches-body")?.querySelector("[data-comments-refresh]")?.addEventListener("click", () => loadTicketComments());
+    ticketCommentsTimer = window.setInterval(() => {
+        if (!document.hidden) loadTicketComments({ quiet: true });
+    }, 30000);
+}
+
 /* ---------- Badge de escrutinio live ---------- */
 
 function renderLiveScrutinyBadge(matches) {

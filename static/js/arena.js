@@ -37,6 +37,9 @@ function lazyMatchPlaceholder(match) {
 function renderArena() {
     const container = qs("matches-body");
     if (!container || !state.data) return;
+    if (state.currentFilter !== "TICKET" && typeof stopTicketComments === "function") {
+        stopTicketComments();
+    }
     if (state.currentFilter !== "SNAKE_PAGE") {
         if (typeof leaveGamesHub === "function") leaveGamesHub();
         else document.body.classList.remove("games-snake-open", "games-arkanoid-open");
@@ -108,23 +111,29 @@ function renderArena() {
         const matches = state.data.partidos || [];
         container.className = "arena-content table-mode";
         container.innerHTML = `
-            <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
-                <div class="ticket-porra-heading">
-                    <span data-porra-label>PORRA</span>
-                    <strong id="ticket-porra-title">Marcador exacto</strong>
+            <div class="ticket-workspace">
+                <div class="ticket-main-column">
+                    <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
+                        <div class="ticket-porra-heading">
+                            <span data-porra-label>PORRA</span>
+                            <strong id="ticket-porra-title">Marcador exacto</strong>
+                        </div>
+                        <div id="ticket-porra-body" class="porra-body">
+                            <div class="empty-state">Cargando porra...</div>
+                        </div>
+                    </section>
+                    ${renderLiveScrutinyBadge(matches)}
+                    <div class="arena-table-wrap">
+                        <table class="arena-table is-tension-table">
+                            <thead id="arena-thead"></thead>
+                            <tbody id="arena-body"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div id="ticket-porra-body" class="porra-body">
-                    <div class="empty-state">Cargando porra...</div>
-                </div>
-            </section>
-            ${renderLiveScrutinyBadge(matches)}
-            <div class="arena-table-wrap">
-                <table class="arena-table is-tension-table">
-                    <thead id="arena-thead"></thead>
-                    <tbody id="arena-body"></tbody>
-                </table>
+                ${renderTicketCommentsPanel()}
             </div>`;
         renderArenaTensionBody(matches);
+        initTicketComments();
         loadPorra();
         ensureQ15Directo().then(loadedNow => {
             if (loadedNow && state.currentFilter === "TICKET" && state.expandedMatch !== null) renderArena();
