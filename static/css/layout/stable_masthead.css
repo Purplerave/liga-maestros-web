@@ -2,8 +2,8 @@
 /* Single layout contract shared by every application page. */
 
 body.newspaper-ui.quiniela-focus .app-shell {
-    grid-template-columns: 220px minmax(0, 1fr);
-    grid-template-rows: 66px 38px minmax(0, 1fr);
+    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-rows: 76px 38px minmax(0, 1fr);
     width: 100%;
     height: 100dvh;
     min-height: 100dvh;
@@ -18,17 +18,17 @@ body.newspaper-ui.quiniela-focus .header-brand-panel {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 66px;
-    min-height: 66px;
-    padding: 5px 10px;
+    height: 76px;
+    min-height: 76px;
+    padding: 6px 14px;
     overflow: hidden;
 }
 
 body.newspaper-ui.quiniela-focus .sidebar-brand-image {
     width: 100%;
     height: 100%;
-    max-width: 205px;
-    max-height: 58px;
+    max-width: 240px;
+    max-height: 68px;
     object-fit: contain;
     object-position: center;
 }
@@ -37,14 +37,14 @@ body.newspaper-ui.quiniela-focus .topbar-shell {
     display: grid;
     grid-column: 2 / -1;
     grid-row: 1;
-    grid-template-columns: minmax(220px, 1fr) auto max-content;
+    grid-template-columns: minmax(260px, 1fr) auto max-content;
     grid-template-rows: auto;
     align-items: center;
     gap: 8px;
     width: 100%;
-    height: 66px;
-    min-height: 66px;
-    padding: 6px 10px;
+    height: 76px;
+    min-height: 76px;
+    padding: 6px 14px;
     overflow: hidden;
 }
 
