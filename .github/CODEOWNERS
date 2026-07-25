@@ -1,0 +1,9 @@
+# Liga de Maestros — Code Owners
+# Cada PR que modifique estos paths requiere review del owner.
+
+* @Purplerave
+
+# Seguridad y auth — review obligatoria
+/liga_maestros/auth/ @Purplerave
+/liga_maestros/middleware/ @Purplerave
+/.github/workflows/ @Purplerave

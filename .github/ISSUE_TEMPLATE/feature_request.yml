@@ -1,0 +1,45 @@
+name: Feature request
+description: Propón una nueva funcionalidad
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cuéntanos qué te gustaría que haga Liga de Maestros.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema o necesidad
+      description: Describe el problema que tienes o la necesidad que cubriría esta feature.
+      placeholder: "Me gustaría poder..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución propuesta
+      description: Cómo imaginarías que funcionaría.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Otras formas de resolverlo que hayas pensado.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área afectada
+      options:
+        - Quiniela / Predicciones
+        - Directo / En vivo
+        - Ligas / Ranking
+        - La Peña / Perfil
+        - Juegos / Arcade
+        - Quiz
+        - Admin / Operaciones
+        - Otro
+    validations:
+      required: true

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Seguridad
+    url: https://github.com/Purplerave/liga-maestros-web/blob/main/SECURITY.md
+    about: Si encuentras una vulnerabilidad de seguridad, revisa SECURITY.md primero.

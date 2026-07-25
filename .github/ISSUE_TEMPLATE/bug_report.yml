@@ -1,0 +1,67 @@
+name: Bug report
+description: Reporta un error en Liga de Maestros
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar un bug. Por favor, incluye la mayor cantidad de detalles posible.
+  - type: input
+    id: url
+    attributes:
+      label: URL donde ocurre el problema
+      description: Si aplica, pega la URL de la página con el error.
+      placeholder: "https://ligademaestros.alwaysdata.net/..."
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe el bug
+      description: Una descripción clara y concisa del problema.
+      placeholder: "Al pulsar en JUEGOS, la barra de navegación cambia de estilo..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      description: Pasos numéricos para llegar al error.
+      placeholder: |
+        1. Ir a '...'
+        2. Pulsar en '...'
+        3. Ver error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento esperado
+      description: Qué esperabas que ocurriera.
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Dispositivo
+      options:
+        - Escritorio (Windows/Mac/Linux)
+        - Móvil (Android)
+        - Móvil (iPhone)
+        - Tablet
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Navegador y versión
+      placeholder: "Chrome 125, Firefox 130, Safari 18..."
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Capturas de pantalla
+      description: Si es posible, adjunta capturas del problema.
+    validations:
+      required: false

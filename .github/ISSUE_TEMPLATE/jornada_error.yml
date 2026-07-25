@@ -1,0 +1,35 @@
+name: Error en jornada
+description: Reporta un resultado, horario o dato incorrecto en una jornada
+labels: ["jornada", "data-error"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Si ves un dato incorrecto en la quiniela (resultado mal, horario equivocado, equipo mal escrito), reporta aquí.
+  - type: input
+    id: jornada
+    attributes:
+      label: Número de jornada
+      placeholder: "74"
+    validations:
+      required: true
+  - type: dropdown
+    id: error_type
+    attributes:
+      label: Tipo de error
+      options:
+        - Resultado incorrecto
+        - Horario incorrecto
+        - Equipo mal escrito
+        - Predicción de IA no aparece
+        - Otro dato incorrecto
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Detalles
+      description: Describe qué dato está mal y cuál debería ser.
+      placeholder: "El partido X vs Y muestra 2-0 pero el resultado real fue 1-1"
+    validations:
+      required: true
