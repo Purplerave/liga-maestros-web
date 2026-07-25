@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       SECRET_KEY: deploy-validation-secret
       ALWAYSDATA_HOST: ssh-ligademaestros.alwaysdata.net
