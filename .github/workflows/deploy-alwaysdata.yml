@@ -31,7 +31,7 @@ jobs:
             echo "Sensitive runtime material is tracked by Git."
             exit 1
           fi
-          pytest -q
+          python -m pytest -q
 
       - name: Configure SSH
         env:
