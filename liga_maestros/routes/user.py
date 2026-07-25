@@ -39,21 +39,18 @@ def get_user_stats():
         return jsonify({"status": "forbidden"}), 403
 
     conn = get_db()
-    try:
-        aliases = contest_aliases_for_uid(uid)
-        placeholders = ",".join("?" for _ in aliases)
-        rows = conn.execute(
-            f"""
-            SELECT p.jornada, p.partido_id, p.signo, r.signo_actual, r.goles_local, r.goles_visitante, r.status
-            FROM predicciones p
-            JOIN resultados r ON p.jornada = r.jornada AND p.partido_id = r.partido_id
-            WHERE p.user_id IN ({placeholders})
-            ORDER BY p.jornada, p.partido_id
-        """,
-            aliases,
-        ).fetchall()
-    finally:
-        conn.close()
+    aliases = contest_aliases_for_uid(uid)
+    placeholders = ",".join("?" for _ in aliases)
+    rows = conn.execute(
+        f"""
+        SELECT p.jornada, p.partido_id, p.signo, r.signo_actual, r.goles_local, r.goles_visitante, r.status
+        FROM predicciones p
+        JOIN resultados r ON p.jornada = r.jornada AND p.partido_id = r.partido_id
+        WHERE p.user_id IN ({placeholders})
+        ORDER BY p.jornada, p.partido_id
+    """,
+        aliases,
+    ).fetchall()
 
     total_hits = 0
     by_jornada = {}

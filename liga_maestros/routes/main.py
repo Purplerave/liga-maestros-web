@@ -34,11 +34,8 @@ def index():
 
     user = session.get("user")
     conn = get_db()
-    try:
-        max_j_row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
-        max_j = max_j_row[0] if max_j_row else "62"
-    finally:
-        conn.close()
+    max_j_row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
+    max_j = max_j_row[0] if max_j_row else "62"
     j = request.args.get("j", str(max_j))
     try:
         response = make_response(

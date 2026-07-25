@@ -150,6 +150,9 @@ def sync_status():
 
 @bp.route("/api/live/health")
 def live_health():
+    import sys
+
+    start = time.time()
     conn = get_db()
     try:
         target_jornada = resolve_jornada(conn, request.args.get("j"))
@@ -171,19 +174,45 @@ def live_health():
             build_sha = release_file.read().strip() or "unknown"
     except OSError:
         pass
+    db_ok = False
+    db_size_mb = 0.0
+    try:
+        conn2 = get_db()
+        try:
+            conn2.execute("SELECT 1")
+            db_ok = True
+            db_path = config.DB_PATH
+            if os.path.exists(db_path):
+                db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2)
+        finally:
+            conn2.close()
+    except Exception:
+        pass
+    uptime_s = int(time.time() - start) if start else None
+    try:
+        from importlib.metadata import version as get_version
+
+        flask_ver = get_version("flask")
+    except Exception:
+        flask_ver = "unknown"
     payload = {
         "status": "ok",
         "build_sha": build_sha,
-        "collector_status": (health or {}).get("status", "missing"),
-        "stale": bool(age_seconds is None or age_seconds > 300),
+        "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "flask": flask_ver,
+        "db": {"ok": db_ok, "size_mb": db_size_mb},
+        "jornada_activa": target_jornada,
     }
     if is_admin_request():
         payload.update(
             {
-                "collector": health or {"status": "missing"},
+                "collector": {
+                    "running": (health or {}).get("status") == "ok",
+                    "last_tick_s": age_seconds,
+                },
+                "collector_detail": health or {"status": "missing"},
                 "health_file": exists,
                 "age_seconds": age_seconds,
-                "jornada": target_jornada,
                 "q15_cache": _build_q15_cache_status(target_jornada),
                 "api_usage": get_highlightly_usage(),
                 "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
