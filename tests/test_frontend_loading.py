@@ -60,7 +60,7 @@ def test_masthead_is_the_only_shared_page_geometry_contract():
     assert "grid-template-columns: 176px" not in app_shell
     assert "body.quiniela-focus .app-shell" not in app_shell
     assert "grid-template-rows: 66px 38px minmax(0, 1fr)" in masthead
-    assert "grid-template-rows: 56px 52px 38px minmax(0, 1fr)" in masthead
+    assert "grid-template-rows: 56px 52px 42px minmax(0, 1fr)" in masthead
 
 
 def test_topbar_does_not_duplicate_the_live_page():
