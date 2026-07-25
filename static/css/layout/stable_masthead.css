@@ -176,9 +176,10 @@ body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb {
 @media (max-width: 899px) {
     body.newspaper-ui.quiniela-focus .app-shell {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: 56px 52px 38px minmax(0, 1fr);
+        grid-template-rows: 56px 52px 42px minmax(0, 1fr);
         width: 100%;
         overflow-x: hidden;
+        padding-top: env(safe-area-inset-top, 0);
     }
 
     body.newspaper-ui.quiniela-focus .header-brand-panel {
@@ -202,7 +203,7 @@ body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb {
         height: 52px;
         min-height: 52px;
         gap: 6px;
-        padding: 5px 8px;
+        padding: 5px 10px;
     }
 
     body.newspaper-ui.quiniela-focus:is(.newspaper-ticket-active, .newspaper-contest-active) .topbar-shell {
@@ -255,15 +256,26 @@ body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb {
         grid-row: 3;
         width: 100%;
         min-width: 0;
+        min-height: 42px;
+        height: 42px;
         overflow-x: auto;
         overflow-y: hidden;
         overscroll-behavior-x: contain;
-        scrollbar-width: thin;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav::-webkit-scrollbar {
+        display: none;
     }
 
     body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
-        flex: 0 0 104px;
-        width: 104px;
+        flex: 0 0 auto;
+        min-width: 90px;
+        min-height: 40px;
+        padding: 6px 12px;
+        font-size: 0.7rem;
     }
 
     body.newspaper-ui.quiniela-focus .main-arena {
@@ -271,6 +283,7 @@ body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb {
         grid-row: 4;
         width: 100%;
         min-width: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0);
     }
 }
 }
