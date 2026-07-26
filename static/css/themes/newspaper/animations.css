@@ -1,3 +1,4 @@
+@layer animations {
 /* ═══════════════════════════════════════════════════════════════
    ANIMATIONS — Micro-interaccioness, transiciones y animaciones
    de alto engagement para la Liga de Maestros.
@@ -38,6 +39,7 @@
 }
 
 .confetti-piece {
+    --drift-x: 0px;
     position: absolute;
     top: -20px;
     width: 10px;
@@ -61,7 +63,7 @@
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 10px solid currentColor;
-    background: transparent !important;
+    background: transparent;
 }
 
 /* ──────────────────────────────────────────
@@ -169,7 +171,7 @@
     background-size: 200% 100%;
     animation: skeleton-pulse 1.5s ease-in-out infinite;
     border-radius: 6px;
-    color: transparent !important;
+    color: transparent;
     user-select: none;
     pointer-events: none;
 }
@@ -348,12 +350,13 @@
    ────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-    .confetti-container { display: none !important; }
-    .ripple-effect { display: none !important; }
+    .confetti-container { display: none; }
+    .ripple-effect { display: none; }
     .skeleton { animation: none; background: rgba(139, 157, 195, 0.08); }
     .arena-content > * { animation: none; }
     .animated-count { animation: none; }
     .is-live-glow { animation: none; }
     .hit-reveal { animation: none; }
     .in-app-notification { animation: none; }
+}
 }

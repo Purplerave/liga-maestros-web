@@ -157,7 +157,11 @@ async function changeMainView(view) {
 
 function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
     document.querySelectorAll("[data-page-action]").forEach(button => {
-        button.classList.toggle("active", button.dataset.pageAction === activePage);
+        const isActive = button.dataset.pageAction === activePage;
+        button.classList.toggle("active", isActive);
+        // Lectores de pantalla: "active" es solo visual, aria-current es el estado real.
+        if (isActive) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
     });
 }
 

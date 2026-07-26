@@ -79,6 +79,7 @@ function bindEvents() {
     qs("jornada-nav")?.addEventListener("change", event => changeJornada(event.target.value));
 qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);
+    qs("cmdk-trigger")?.addEventListener("click", () => window.CommandPalette?.open());
     qs("share-ticket-btn")?.addEventListener("click", shareTicket);
     document.querySelectorAll("[data-page-action]").forEach(button => {
         button.addEventListener("click", () => openNewspaperPage(button.dataset.pageAction));
@@ -250,6 +251,9 @@ async function refreshLiveSnapshot() {
 document.addEventListener("DOMContentLoaded", () => {
     bindEvents();
     initMicroInteractions();
+    // Mejoras progresivas: paleta de comandos y señales de sistema.
+    try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
+    try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
     refreshData();
     let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
     document.addEventListener("visibilitychange", () => {

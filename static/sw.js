@@ -5,9 +5,9 @@
    Offline: muestra la ultima version cargada de la pagina.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v1';
-const STATIC_CACHE = 'liga-maestros-static-v1';
-const API_CACHE = 'liga-maestros-api-v1';
+const CACHE = 'liga-maestros-v2';
+const STATIC_CACHE = 'liga-maestros-static-v2';
+const API_CACHE = 'liga-maestros-api-v2';
 
 const PRECACHE_URLS = [
     '/',
@@ -31,6 +31,10 @@ const PRECACHE_URLS = [
     '/static/js/quantum_final.js',
     '/static/js/confetti.js',
     '/static/css/themes/newspaper/animations.css',
+    '/static/css/components/command_palette.css',
+    '/static/css/components/ux_signals.css',
+    '/static/js/command_palette.js',
+    '/static/js/ux_signals.js',
     '/static/img/ligademaestroslogo_trans.png'
 ];
 
