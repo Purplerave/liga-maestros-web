@@ -1,0 +1,359 @@
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — Micro-interaccioness, transiciones y animaciones
+   de alto engagement para la Liga de Maestros.
+   
+   "El diablo esta en los detalles" — cada pixel cuenta.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   1. SISTEMA DE CONFETTI
+   ────────────────────────────────────────── */
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-10vh) translateX(0px) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform:
+            translateY(110vh)
+            translateX(calc(var(--drift-x, 0px)))
+            rotate(720deg)
+            scale(0.3);
+        opacity: 0;
+    }
+}
+
+@keyframes confetti-shimmer {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.4); }
+}
+
+.confetti-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -20px;
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+    animation: confetti-fall linear forwards;
+}
+
+.confetti-piece.has-shimmer {
+    animation-name: confetti-fall, confetti-shimmer;
+    animation-duration: 3s, 1.5s;
+    animation-timing-function: linear, ease-in-out;
+    animation-iteration-count: 1, infinite;
+}
+
+.confetti-piece.square { border-radius: 2px; }
+.confetti-piece.circle { border-radius: 50%; }
+.confetti-piece.triangle {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid currentColor;
+    background: transparent !important;
+}
+
+/* ──────────────────────────────────────────
+   2. BRILLO EN BOTONES (RIPPLE)
+   ────────────────────────────────────────── */
+
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0);
+    animation: ripple-anim 0.6s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes ripple-anim {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ──────────────────────────────────────────
+   3. CONTADORES ANIMADOS
+   ────────────────────────────────────────── */
+
+@keyframes count-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.animated-count {
+    display: inline-block;
+    animation: count-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ──────────────────────────────────────────
+   4. GLOW PULSE EN ELEMENTOS VIVOS
+   ────────────────────────────────────────── */
+
+@keyframes live-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+    }
+}
+
+.is-live-glow {
+    animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* ──────────────────────────────────────────
+   5. TRANSICIONES DE PAGINA
+   ────────────────────────────────────────── */
+
+@keyframes page-enter {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.arena-content > * {
+    animation: page-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.arena-content > *:nth-child(1) { animation-delay: 0s; }
+.arena-content > *:nth-child(2) { animation-delay: 0.04s; }
+.arena-content > *:nth-child(3) { animation-delay: 0.08s; }
+.arena-content > *:nth-child(4) { animation-delay: 0.12s; }
+.arena-content > *:nth-child(5) { animation-delay: 0.16s; }
+.arena-content > *:nth-child(n+6) { animation-delay: 0.2s; }
+
+/* ──────────────────────────────────────────
+   6. SKELETON LOADING
+   ────────────────────────────────────────── */
+
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(139, 157, 195, 0.06) 25%,
+        rgba(139, 157, 195, 0.15) 50%,
+        rgba(139, 157, 195, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    border-radius: 6px;
+    color: transparent !important;
+    user-select: none;
+    pointer-events: none;
+}
+
+.skeleton-text {
+    display: inline-block;
+    height: 1em;
+    width: 100%;
+    max-width: 200px;
+}
+
+.skeleton-heading {
+    height: 1.8em;
+    width: 60%;
+    margin-bottom: 0.5em;
+}
+
+.skeleton-card {
+    height: 120px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.skeleton-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.skeleton-badge {
+    width: 48px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+/* ──────────────────────────────────────────
+   7. SHAKE EN ERRORES
+   ────────────────────────────────────────── */
+
+@keyframes shake-error {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+.shake-error {
+    animation: shake-error 0.4s ease-in-out;
+}
+
+/* ──────────────────────────────────────────
+   8. STRIKETHROUGH ANIMADO PARA ACIERTOS
+   ────────────────────────────────────────── */
+
+@keyframes hit-reveal {
+    0% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        background-position: 100% 50%;
+        transform: scale(1);
+    }
+}
+
+.hit-reveal {
+    position: relative;
+    animation: hit-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    background: linear-gradient(90deg, transparent 0%, rgba(34, 197, 94, 0.15) 50%, transparent 100%);
+    background-size: 200% 100%;
+}
+
+/* ──────────────────────────────────────────
+   9. TOOLTIP MEJORADO
+   ────────────────────────────────────────── */
+
+@keyframes tooltip-enter {
+    0% {
+        opacity: 0;
+        transform: translateY(4px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(6, 9, 15, 0.96);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #f0f4f8;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateX(-50%) translateY(4px);
+    z-index: 100;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ──────────────────────────────────────────
+   10. NOTIFICACION PUSH IN-APP
+   ────────────────────────────────────────── */
+
+@keyframes notification-slide {
+    0% {
+        transform: translateX(100%) scale(0.9);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.in-app-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 8000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 12px;
+    background: rgba(8, 18, 34, 0.97);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    color: #f0f4f8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    animation: notification-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    cursor: pointer;
+    max-width: 360px;
+}
+
+.in-app-notification .notif-icon {
+    font-size: 1.4rem;
+}
+
+.in-app-notification .notif-close {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+/* ──────────────────────────────────────────
+   11. REDUCED MOTION — Todo desactivado
+   ────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .confetti-container { display: none !important; }
+    .ripple-effect { display: none !important; }
+    .skeleton { animation: none; background: rgba(139, 157, 195, 0.08); }
+    .arena-content > * { animation: none; }
+    .animated-count { animation: none; }
+    .is-live-glow { animation: none; }
+    .hit-reveal { animation: none; }
+    .in-app-notification { animation: none; }
+}

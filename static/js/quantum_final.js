@@ -32,6 +32,17 @@ async function refreshData(options = {}) {
         logoAliasIndex = null;
         logoCache.clear();
         state.jornada = String(state.data.jornada || state.jornada);
+
+        // 🎊 Welcome-back celebration for returning users
+        if (!options.auto && state.user && hasSavedTicket() && state.draftDirty === false) {
+            const done = state.my_signs.filter(s => s !== "-").length;
+            if (done === 15 && typeof window.launchConfetti === "function") {
+                setTimeout(() => {
+                    window.launchConfetti({ count: 30, spread: 50, duration: 2000, origin: { x: 0.5, y: 0.15 } });
+                }, 400);
+            }
+        }
+
         await ensureViewAssets(currentMainView());
         const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && patchLiveArena());
         const patchedTicketView = Boolean(
@@ -199,6 +210,13 @@ async function submitPorra(event) {
         }
         if (!res.ok || data.status !== "ok") throw new Error(data.message || data.error || "No se pudo guardar la porra.");
         await loadPorra();
+        // 🎊 Mini celebracion por participar en la porra
+        if (typeof window.launchConfetti === "function") {
+            window.launchConfetti({ count: 15, spread: 30, duration: 1200 });
+        }
+        if (typeof SoundManager !== "undefined" && SoundManager.playSave) {
+            SoundManager.playSave();
+        }
         showToast("Porra guardada.");
     } catch (error) {
         if (submitButton) {
@@ -233,10 +251,29 @@ async function savePredictions() {
         clearDraft();
         state.server_signs = [...state.my_signs];
         state.editMode = false;
+
+        // 🎊 Celebrate save
+        const done = state.my_signs.filter(s => s !== "-").length;
+        if (typeof window.launchConfetti === "function") {
+            if (done === 15) {
+                window.launchBigConfetti();
+            } else if (done >= 10) {
+                window.launchMilestoneConfetti(done);
+            } else {
+                window.launchConfetti({ count: 20, spread: 40, duration: 1500 });
+            }
+        }
+        if (typeof SoundManager !== "undefined" && SoundManager.playSave) {
+            SoundManager.playSave();
+        }
+
         showToast("Quiniela guardada.");
         await refreshData();
     } catch (error) {
         showToast(error.message, "error");
+        if (typeof SoundManager !== "undefined" && SoundManager.playError) {
+            SoundManager.playError();
+        }
     }
 }
 
@@ -256,11 +293,20 @@ async function shareTicket() {
         "🔥 Compite conmigo en la Liga de Maestros"
     ];
     const text = lines.join("\n");
+
+    // 🎊 Celebracion al compartir
+    if (typeof window.launchConfetti === "function") {
+        window.launchConfetti({ count: 30, spread: 70, duration: 2000 });
+    }
+
     // En móviles con Web Share API, abrir la hoja nativa de compartir
     // (WhatsApp, Telegram, X...). Fallback: portapapeles.
     if (navigator.share) {
         try {
             await navigator.share({ title: "Liga de Maestros", text });
+            if (typeof SoundManager !== "undefined" && SoundManager.playCelebration) {
+                SoundManager.playCelebration();
+            }
             showToast("Pronostico compartido.");
             return;
         } catch (shareError) {
@@ -281,11 +327,143 @@ async function shareTicket() {
             document.execCommand("copy");
             area.remove();
         }
+        if (typeof SoundManager !== "undefined" && SoundManager.playSave) {
+            SoundManager.playSave();
+        }
         showToast("Pronostico copiado.");
     } catch (error) {
         showToast("No se pudo copiar el pronostico.", "error");
+        if (typeof SoundManager !== "undefined" && SoundManager.playError) {
+            SoundManager.playError();
+        }
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   IN-APP NOTIFICATIONS — Notificaciones nativas dentro de la web
+   ═══════════════════════════════════════════════════════════════ */
+
+const _inAppNotifs = new Set();
+
+function showInAppNotification({ icon = '⚽', title, message, duration = 5000, onClick } = {}) {
+    const id = Date.now() + Math.random();
+    if (_inAppNotifs.size >= 3) return; // Max 3 visibles
+    _inAppNotifs.add(id);
+
+    const notif = document.createElement('div');
+    notif.className = 'in-app-notification';
+    notif.id = `notif-${id}`;
+    notif.innerHTML = `
+        <span class="notif-icon">${icon}</span>
+        <div>
+            <strong>${escapeHtml(title)}</strong>
+            ${message ? `<br><small>${escapeHtml(message)}</small>` : ''}
+        </div>
+        <button class="notif-close" type="button" aria-label="Cerrar notificación">&times;</button>
+    `;
+
+    notif.addEventListener('click', (e) => {
+        if (e.target.closest('.notif-close')) {
+            notif.remove();
+            _inAppNotifs.delete(id);
+            return;
+        }
+        if (typeof onClick === 'function') onClick();
+        notif.remove();
+        _inAppNotifs.delete(id);
+    });
+
+    document.body.appendChild(notif);
+
+    if (duration > 0) {
+        setTimeout(() => {
+            if (notif.parentNode) {
+                notif.style.opacity = '0';
+                notif.style.transform = 'translateX(100%) scale(0.9)';
+                setTimeout(() => {
+                    if (notif.parentNode) notif.remove();
+                    _inAppNotifs.delete(id);
+                }, 300);
+            }
+        }, duration);
+    }
+}
+
+// Detectar cambios en directo y mostrar notificaciones
+let _lastLiveNotified = new Map();
+
+function checkLiveNotifications() {
+    if (document.hidden) return;
+    const matches = getLiveLeagueMatches();
+    const now = Date.now();
+
+    matches.forEach(match => {
+        const key = liveMatchDomKey(match);
+        const last = _lastLiveNotified.get(key);
+        const score = scoreOnly(match.marcador || match.score || match.scores?.score || '');
+
+        if (!last) {
+            // Nuevo partido en directo
+            const home = match.local || match.home_name || '';
+            const away = match.visitante || match.away_name || '';
+            if (home && away) {
+                setTimeout(() => {
+                    showInAppNotification({
+                        icon: '🔴',
+                        title: `¡${home} vs ${away} en juego!`,
+                        message: `Minuto ${match.minuto || match.time || ''}`,
+                        duration: 6000,
+                        onClick: () => {
+                            state.currentFilter = 'LIVE';
+                            syncUrlState();
+                            renderArena();
+                        }
+                    });
+                }, 800);
+            }
+        } else if (last.score !== score && score !== '-' && score !== '') {
+            // ¡GOL! Ha cambiado el marcador
+            const home = match.local || match.home_name || '';
+            const away = match.visitante || match.away_name || '';
+            setTimeout(() => {
+                showInAppNotification({
+                    icon: '⚡',
+                    title: `¡GOL! ${home} ${score} ${away}`,
+                    message: `Minuto ${match.minuto || match.time || ''}`,
+                    duration: 5000,
+                    onClick: () => {
+                        state.currentFilter = 'LIVE';
+                        syncUrlState();
+                        renderArena();
+                    }
+                });
+                if (typeof SoundManager !== "undefined" && SoundManager.playNotification) {
+                    SoundManager.playNotification();
+                }
+            }, 500);
+        }
+
+        _lastLiveNotified.set(key, { score, time: now });
+    });
+
+    // Limpiar partidos antiguos (mas de 3 horas)
+    const threeHours = 3 * 60 * 60 * 1000;
+    for (const [key, data] of _lastLiveNotified) {
+        if (now - data.time > threeHours) _lastLiveNotified.delete(key);
+    }
+}
+
+// Hook en refreshLiveSnapshot
+const _origRefreshLive = refreshLiveSnapshot;
+refreshLiveSnapshot = async function() {
+    await _origRefreshLive.call(this);
+    if (state.currentFilter === 'LIVE' || state.currentFilter === 'ALL') {
+        checkLiveNotifications();
+    }
+};
+
+// Export global para in-app notifications
+window.showInAppNotification = showInAppNotification;
 
 async function loadNewsBriefing() {
     const target = qs("cover-news-content");

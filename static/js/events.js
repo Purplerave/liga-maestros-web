@@ -4,6 +4,77 @@
    ========================================================================== */
 
 
+/* ──────────────────────────────────────────
+   MICRO-INTERACCIONES GLOBALES
+   ────────────────────────────────────────── */
+
+function rippleHandler(event) {
+    const btn = event.currentTarget;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (btn.dataset.noRipple === 'true') return;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.2;
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple-effect';
+    ripple.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+    `;
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+}
+
+function addRippleToButtons() {
+    document.querySelectorAll('.primary-btn, .icon-btn, .cp-primary, .cp-secondary, .tab-btn, [data-page-action]').forEach(btn => {
+        if (!btn.dataset.rippleAdded) {
+            btn.addEventListener('mousedown', rippleHandler);
+            btn.dataset.rippleAdded = 'true';
+        }
+    });
+}
+
+function sparkleHoverHandler(event) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (typeof window.sparkleAt !== 'function') return;
+    const target = event.currentTarget;
+    if (target.dataset.sparkleDisabled) return;
+    const rect = target.getBoundingClientRect();
+    window.sparkleAt(
+        rect.left + rect.width * 0.8,
+        rect.top + rect.height * 0.3,
+        target.dataset.sparkleColor || '#fbbf24'
+    );
+}
+
+function addSparkleToElements() {
+    document.querySelectorAll('.cp-primary, .cp-secondary, .primary-btn#save-quiniela-btn, .tension-row .clickable').forEach(el => {
+        if (!el.dataset.sparkleAdded) {
+            el.addEventListener('mouseenter', sparkleHoverHandler);
+            el.dataset.sparkleAdded = 'true';
+        }
+    });
+}
+
+function initMicroInteractions() {
+    addRippleToButtons();
+    addSparkleToElements();
+    // Re-aplicar cuando cambie el contenido del DOM
+    const observer = new MutationObserver(() => {
+        addRippleToButtons();
+        addSparkleToElements();
+    });
+    observer.observe(document.getElementById('matches-body') || document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 function bindEvents() {
     qs("jornada-nav")?.addEventListener("change", event => changeJornada(event.target.value));
 qs("refresh-btn")?.addEventListener("click", refreshData);
@@ -73,6 +144,7 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
         state.lastUserEdit = Date.now();
         state.draftDirty = true;
         persistDraft();
+        if (typeof checkQuinielaCompletion === "function") checkQuinielaCompletion();
         hydrateHero();
         renderArena();
     });
@@ -177,6 +249,7 @@ async function refreshLiveSnapshot() {
 
 document.addEventListener("DOMContentLoaded", () => {
     bindEvents();
+    initMicroInteractions();
     refreshData();
     let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
     document.addEventListener("visibilitychange", () => {

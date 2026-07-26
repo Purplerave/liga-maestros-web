@@ -212,6 +212,25 @@ function renderTensionPenaChip(content, label) {
 
 /* ---------- Celda del usuario ---------- */
 
+let _lastPredictionCompletionCheck = 0;
+
+function checkQuinielaCompletion() {
+    const done = state.my_signs.filter(s => s !== "-").length;
+    if (done === 15 && _lastPredictionCompletionCheck !== 15) {
+        _lastPredictionCompletionCheck = 15;
+        // 🎊 Quiniela completada
+        if (typeof window.launchConfetti === "function") {
+            window.launchConfetti({ count: 50, spread: 80, duration: 2500, origin: { x: 0.5, y: 0.2 } });
+        }
+        if (typeof SoundManager !== "undefined" && SoundManager.playCountComplete) {
+            SoundManager.playCountComplete();
+        }
+        showToast("🎯 ¡Quiniela completa! Ya puedes guardarla.");
+    } else if (done < 15) {
+        _lastPredictionCompletionCheck = done;
+    }
+}
+
 function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
     if (!state.user) return `<span class="empty-user-pick" title="Entra para guardar tu quiniela">-</span>`;
     if (!canEdit) return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</b>`;
