@@ -77,6 +77,50 @@ jobs:
           du -sh "$RELEASES" "$HOME_DIR/runtime" 2>/dev/null || true
           REMOTE
 
+      - name: Sync private AI configuration
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then
+            echo "Groq secret not configured; keeping current server configuration."
+            exit 0
+          fi
+          install -m 600 /dev/null ai-runtime.env
+          {
+            printf 'AI_NEWS_ENABLED=1\n'
+            printf 'AI_DAILY_CALL_LIMIT=12\n'
+            printf 'AI_NEWS_MIN_INTERVAL_SECONDS=7200\n'
+            printf 'GROQ_API_KEY=%s\n' "$GROQ_API_KEY"
+          } > ai-runtime.env
+          cat > merge-ai-env.py <<'PY'
+          from pathlib import Path
+
+          target = Path("/home/ligademaestros/runtime/app.env")
+          incoming = Path("/home/ligademaestros/runtime/ai-runtime.env")
+          updates = {}
+          for line in incoming.read_text(encoding="utf-8").splitlines():
+              key, value = line.split("=", 1)
+              updates[key] = value
+          current = target.read_text(encoding="utf-8").splitlines() if target.exists() else []
+          output = []
+          seen = set()
+          for line in current:
+              key = line.split("=", 1)[0] if "=" in line else ""
+              if key in updates:
+                  output.append(f"{key}={updates[key]}")
+                  seen.add(key)
+              else:
+                  output.append(line)
+          output.extend(f"{key}={value}" for key, value in updates.items() if key not in seen)
+          target.write_text("\n".join(output) + "\n", encoding="utf-8")
+          target.chmod(0o600)
+          incoming.unlink(missing_ok=True)
+          PY
+          scp ai-runtime.env merge-ai-env.py "$ALWAYSDATA_USER@$ALWAYSDATA_HOST:/home/ligademaestros/runtime/"
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" \
+            "python3 /home/ligademaestros/runtime/merge-ai-env.py && rm -f /home/ligademaestros/runtime/merge-ai-env.py"
+          rm -f ai-runtime.env merge-ai-env.py
+
       - name: Upload immutable release
         run: |
           git archive --format=tar -o deploy.tar HEAD

@@ -104,7 +104,7 @@ function renderArena() {
         container.innerHTML = renderNewspaperCoverPageV3();
         requestAnimationFrame(hydrateCoverTypewriter);
         loadPorra();
-        loadBajas();
+        loadNewsBriefing();
         return;
     }
 

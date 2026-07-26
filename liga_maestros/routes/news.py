@@ -1,4 +1,4 @@
-"""News routes: radar + parte de bajas IA."""
+"""News routes: radar + boletin breve generado por IA."""
 
 from flask import Blueprint, jsonify, request
 
@@ -6,14 +6,14 @@ from ..middleware.authz import is_admin_request
 from ..services.news_radar import build_news_radar
 
 
-def _build_bajas_safe(items):
-    """Intenta generar el parte de bajas. Si falla, devuelve []."""
+def _build_boletin_safe(items):
+    """Intenta generar el boletin. Si falla, no interrumpe el radar."""
     try:
-        from ..services.ai.bajas import construir_parte_bajas
+        from ..services.ai.boletin import construir_boletin
 
-        return construir_parte_bajas(items)
+        return construir_boletin(items)
     except Exception:
-        return []
+        return {"novedades": [], "bajas": []}
 
 
 bp = Blueprint("news", __name__)
@@ -28,5 +28,5 @@ def get_news_radar():
     if not is_admin_request():
         payload = dict(payload)
         payload.pop("errors", None)
-    payload["bajas"] = _build_bajas_safe(payload.get("items") or [])
+    payload.update(_build_boletin_safe(payload.get("items") or []))
     return jsonify(payload)

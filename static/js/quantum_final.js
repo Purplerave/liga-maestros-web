@@ -287,26 +287,34 @@ async function shareTicket() {
     }
 }
 
-async function loadBajas() {
-    const target = qs("cover-bajas-content");
+async function loadNewsBriefing() {
+    const target = qs("cover-news-content");
     if (!target) return;
     try {
         const res = await fetch("/api/noticias/radar");
         if (!res.ok) return;
         const data = await res.json();
-        const bajas = data.bajas || [];
-        if (!bajas.length) {
+        const novedades = Array.isArray(data.novedades) ? data.novedades : [];
+        const bajas = Array.isArray(data.bajas) ? data.bajas : [];
+        if (!novedades.length && !bajas.length) {
             target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
             return;
         }
-        target.innerHTML = bajas.map(b => {
-            const icon = b.icono || "";
-            const equipo = escapeHtml(b.equipo || "");
-            const jugador = escapeHtml(b.jugador || "");
-            const nota = escapeHtml(b.nota || "");
-            const cls = b.estado === "baja" ? "is-baja" : b.estado === "duda" ? "is-duda" : "";
-            return `<div class="cp-baja-row ${cls}"><span class="cp-baja-equipo">${equipo}</span><span class="cp-baja-jugador">${jugador}</span><span class="cp-baja-nota">${nota}</span></div>`;
+        const newsHtml = novedades.map(item => {
+            const category = escapeHtml(String(item.categoria || "noticia").toUpperCase());
+            const text = escapeHtml(item.texto || "");
+            const source = escapeHtml(item.source || "");
+            const link = escapeHtml(item.link || "#");
+            return `<a class="cp-news-row" href="${link}" target="_blank" rel="noopener noreferrer"><span class="cp-news-category">${category}</span><strong>${text}</strong><small>${source}</small></a>`;
         }).join("");
+        const injuriesHtml = bajas.slice(0, 3).map(item => {
+            const status = escapeHtml(String(item.estado || "baja").toUpperCase());
+            const player = escapeHtml(item.jugador || "");
+            const team = escapeHtml(item.equipo || "");
+            const note = escapeHtml(item.nota || "");
+            return `<div class="cp-news-row is-availability"><span class="cp-news-category">${status}</span><strong>${player} · ${team}</strong><small>${note}</small></div>`;
+        }).join("");
+        target.innerHTML = newsHtml + injuriesHtml;
     } catch (error) {
         target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
     }

@@ -230,12 +230,12 @@ function renderNewspaperCoverPageV3() {
         ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Entra en la sala de seguimiento</em></button>` : ""}
         <section class="cp-dashboard" aria-label="Estado de la jornada">
 
-            <button type="button" class="cp-data-card cp-bajas-card" id="cp-bajas-card">
-                <div class="cp-card-head"><span>PARTE DE BAJAS</span><b>Noticias IA</b></div>
-                <div id="cover-bajas-content" class="cp-bajas-content" aria-live="polite">
+            <section class="cp-data-card cp-news-card" id="cp-news-card">
+                <div class="cp-card-head"><span>NOVEDADES</span><b>Resumen de la prensa deportiva</b></div>
+                <div id="cover-news-content" class="cp-news-content" aria-live="polite">
                     <span class="cp-porra-loading">Buscando noticias...</span>
                 </div>
-            </button>
+            </section>
 
             <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
                 <div class="cp-card-head"><span>PULSO DE LA PE&Ntilde;A</span><b>El partido m&aacute;s abierto</b></div>

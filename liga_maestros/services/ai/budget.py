@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import threading
+import time
 from datetime import date
 
 import config
@@ -72,6 +73,23 @@ def can_spend():
     return get_usage()["remaining"] > 0
 
 
+def reserve_call():
+    """Reserva una llamada antes de salir a red.
+
+    Evita que varias visitas simultaneas superen el limite diario cuando
+    reciben contenido nuevo a la vez.
+    """
+    with _budget_lock:
+        usage = get_usage()
+        if usage["remaining"] <= 0:
+            return False
+        safe_write_json(
+            _usage_path(),
+            {"date": usage["date"], "calls": usage["calls"] + 1},
+        )
+        return True
+
+
 def record_call():
     """Suma una llamada al contador del dia."""
     with _budget_lock:
@@ -94,9 +112,29 @@ def cache_get(scope, signature):
         return None
 
 
+def cache_get_latest(scope, max_age_seconds):
+    """Ultimo resultado del scope si sigue dentro de la cadencia acordada."""
+    data = safe_read_json(_cache_path(scope), {})
+    generated_at = float(data.get("generated_at_ts") or 0)
+    if not generated_at or time.time() - generated_at > max_age_seconds:
+        return None
+    payload = data.get("payload")
+    try:
+        return json.loads(payload) if isinstance(payload, str) else payload
+    except Exception:
+        return None
+
+
 def cache_set(scope, signature, payload):
     """Guarda la respuesta asociada a esta firma."""
     try:
-        safe_write_json(_cache_path(scope), {"signature": signature, "payload": payload})
+        safe_write_json(
+            _cache_path(scope),
+            {
+                "signature": signature,
+                "generated_at_ts": time.time(),
+                "payload": payload,
+            },
+        )
     except Exception as exc:
         logger.warning("IA: no se pudo cachear la respuesta (%s)", exc)

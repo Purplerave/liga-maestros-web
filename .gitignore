@@ -21,6 +21,8 @@ data/HIGHLIGHTLY_CIRCUIT.json
 data/LIVE_COLLECTOR.log
 data/LIVE_COLLECTOR_HEALTH.json
 data/RADAR_NOTICIAS.json
+data/AI_USAGE.json
+data/AI_CACHE_*.json
 data/quiniela15_directo_*.json
 data/*.jsonl
 data/*.lock

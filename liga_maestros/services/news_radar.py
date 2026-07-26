@@ -1,7 +1,7 @@
 """News radar: RSS feeds, relevance scoring, cache."""
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlsplit
 
 import requests
@@ -18,6 +18,15 @@ from ..utils import (
     sanitize_xml_payload,
     strip_html,
 )
+
+
+def _is_recent(item, now=None):
+    now = now or datetime.now()
+    try:
+        published = datetime.strptime(item.get("published_at") or "", "%Y-%m-%d %H:%M")
+        return now - timedelta(days=7) <= published <= now + timedelta(hours=6)
+    except (TypeError, ValueError):
+        return False
 
 
 def fetch_feed_items(feed):
@@ -65,7 +74,9 @@ def build_news_radar(force=False):
     now = time.time()
     fetched_at = float(cache.get("fetched_at_ts") or 0)
     if not force and cache and now - fetched_at < config.NEWS_REFRESH_SECONDS:
-        return cache
+        cached = dict(cache)
+        cached["items"] = [item for item in cache.get("items") or [] if _is_recent(item)]
+        return cached
 
     merged = []
     errors = []
@@ -82,8 +93,9 @@ def build_news_radar(force=False):
         if not prev or item["score"] > prev["score"]:
             dedup[key] = item
 
-    selected = sorted(dedup.values(), key=lambda x: (x["score"], x["published_at"]), reverse=True)
-    selected = [item for item in selected if item["score"] > 0][:8]
+    selected = [item for item in dedup.values() if item["score"] > 0 and _is_recent(item)]
+    selected.sort(key=lambda x: (x["published_at"], x["score"]), reverse=True)
+    selected = selected[:10]
     payload = {
         "fetched_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "fetched_at_ts": now,
