@@ -7,6 +7,8 @@
 }
 
 .live-grouped-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
     align-content: start;
     gap: 12px;
 }
@@ -200,6 +202,10 @@
 }
 
 @media (max-width: 620px) {
+    .live-grouped-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .live-grouped-grid .match-card {
         min-height: 74px;
         padding: 10px 8px;

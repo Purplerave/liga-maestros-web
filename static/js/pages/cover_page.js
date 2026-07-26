@@ -203,9 +203,9 @@ function renderNewspaperCoverPageV3() {
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Ver clasificaci&oacute;n</button>
                 </div>
                 <div class="cp-proof" aria-label="Datos de la competici&oacute;n">
-                    <span><b data-animate-count="${rankingRows.length}" data-animate-duration="1000">0</b> participantes</span>
-                    <span><b data-animate-count="${masterNames.length}" data-animate-duration="1000">0</b> Maestros IA</span>
-                    <span><b data-animate-count="15" data-animate-duration="600">0</b> partidos</span>
+                    <span><b>${rankingRows.length}</b> participantes</span>
+                    <span><b>${masterNames.length}</b> Maestros IA</span>
+                    <span><b>15</b> partidos</span>
                 </div>
             </section>
 

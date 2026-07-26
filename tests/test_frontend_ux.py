@@ -18,6 +18,8 @@ TEMPLATES = ROOT / "templates"
 TEMPLATE = TEMPLATES / "liga_index.html"
 SW = ROOT / "static" / "sw.js"
 COMMAND_PALETTE_CSS = ROOT / "static" / "css" / "components" / "command_palette.css"
+MATCH_CARDS_CSS = ROOT / "static" / "css" / "components" / "match_cards.css"
+QUANTUM_JS = ROOT / "static" / "js" / "quantum_final.js"
 
 INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)[^>]*>", re.IGNORECASE)
 
@@ -82,3 +84,18 @@ def test_closed_palette_cannot_block_the_page():
         css,
         re.DOTALL,
     )
+
+
+def test_live_matches_keep_the_league_card_grid():
+    css = MATCH_CARDS_CSS.read_text(encoding="utf-8")
+    assert re.search(
+        r"\.live-grouped-grid\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:",
+        css,
+        re.DOTALL,
+    )
+
+
+def test_live_refresh_does_not_spawn_goal_popups():
+    js = QUANTUM_JS.read_text(encoding="utf-8")
+    assert "showInAppNotification" not in js
+    assert "checkLiveNotifications" not in js

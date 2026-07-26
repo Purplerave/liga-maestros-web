@@ -15,11 +15,11 @@ const VIEW_STYLES = {
     ],
     STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-3")]],
     LIVE: [
-        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-4")],
+        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-5")],
         ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-3")],
     ],
     LEAGUES: [
-        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-4")],
+        ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-5")],
         ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-3")],
     ],
     SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-6")]],
@@ -32,7 +32,7 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-22")]],
+    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-23")]],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-8")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-3")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],

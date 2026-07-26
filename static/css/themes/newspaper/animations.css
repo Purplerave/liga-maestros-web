@@ -294,59 +294,7 @@
 }
 
 /* ──────────────────────────────────────────
-   10. NOTIFICACION PUSH IN-APP
-   ────────────────────────────────────────── */
-
-@keyframes notification-slide {
-    0% {
-        transform: translateX(100%) scale(0.9);
-        opacity: 0;
-    }
-    100% {
-        transform: translateX(0) scale(1);
-        opacity: 1;
-    }
-}
-
-.in-app-notification {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    z-index: 8000;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 18px;
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    border-radius: 12px;
-    background: rgba(8, 18, 34, 0.97);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    color: #f0f4f8;
-    font-size: 0.85rem;
-    font-weight: 700;
-    animation: notification-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    cursor: pointer;
-    max-width: 360px;
-}
-
-.in-app-notification .notif-icon {
-    font-size: 1.4rem;
-}
-
-.in-app-notification .notif-close {
-    margin-left: auto;
-    padding: 4px 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    color: #94a3b8;
-    cursor: pointer;
-    font-size: 0.7rem;
-}
-
-/* ──────────────────────────────────────────
-   11. REDUCED MOTION — Todo desactivado
+   10. REDUCED MOTION — Todo desactivado
    ────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -357,6 +305,5 @@
     .animated-count { animation: none; }
     .is-live-glow { animation: none; }
     .hit-reveal { animation: none; }
-    .in-app-notification { animation: none; }
 }
 }
