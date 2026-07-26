@@ -380,10 +380,10 @@
 
 .sidebar-brand-image {
     display: block;
-    width: 100%;
-    max-width: 176px;
-    max-height: 64px;
-    height: auto;
+    width: auto;
+    height: 100%;
+    max-width: none;
+    max-height: none;
     object-fit: contain;
     filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.1));
     transition: filter 0.3s ease;
