@@ -89,11 +89,7 @@ def cache_get(scope, signature):
     if data.get("signature") != signature:
         return None
     try:
-        return (
-            json.loads(data["payload"])
-            if isinstance(data.get("payload"), str)
-            else data.get("payload")
-        )
+        return json.loads(data["payload"]) if isinstance(data.get("payload"), str) else data.get("payload")
     except Exception:
         return None
 
@@ -101,8 +97,6 @@ def cache_get(scope, signature):
 def cache_set(scope, signature, payload):
     """Guarda la respuesta asociada a esta firma."""
     try:
-        safe_write_json(
-            _cache_path(scope), {"signature": signature, "payload": payload}
-        )
+        safe_write_json(_cache_path(scope), {"signature": signature, "payload": payload})
     except Exception as exc:
         logger.warning("IA: no se pudo cachear la respuesta (%s)", exc)

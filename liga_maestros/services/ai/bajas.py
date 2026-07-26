@@ -50,9 +50,7 @@ Reglas estrictas:
 
 def _preparar_entrada(noticias):
     """Filtra y recorta las noticias que merece la pena enviar."""
-    candidatas = [n for n in noticias if int(n.get("score") or 0) >= MIN_SCORE][
-        :MAX_NOTICIAS
-    ]
+    candidatas = [n for n in noticias if int(n.get("score") or 0) >= MIN_SCORE][:MAX_NOTICIAS]
     if not candidatas:
         # Sin score (uso manual o pruebas): se aceptan tal cual.
         candidatas = list(noticias)[:MAX_NOTICIAS]

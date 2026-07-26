@@ -109,9 +109,7 @@ def test_cruce_con_partidos_no_consume_ia():
 
 
 def test_entrada_se_recorta_para_no_gastar_tokens():
-    muchas = [
-        {"title": f"Noticia {i}", "summary": "x" * 500, "score": 6} for i in range(30)
-    ]
+    muchas = [{"title": f"Noticia {i}", "summary": "x" * 500, "score": 6} for i in range(30)]
     entrada = bajas_mod._preparar_entrada(muchas)
     assert len(entrada) <= bajas_mod.MAX_NOTICIAS
     assert all(len(item["s"]) <= 220 for item in entrada)
