@@ -3,7 +3,7 @@ services:
     name: liga-maestros
     env: python
     buildCommand: pip install -r requirements.txt
-    initialDeployHook: python INICIALIZAR_PRODUCCION.py
+    initialDeployHook: python tools/ops/INICIALIZAR_PRODUCCION.py
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120
     healthCheckPath: /api/live/health
     autoDeployTrigger: checksPass
