@@ -774,4 +774,64 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 @media (prefers-reduced-motion: reduce) {
     .cp * { scroll-behavior: auto; transition: none; }
 }
+
+/* Parte de bajas IA */
+.cp-bajas-card {
+    grid-column: 1 / -1;
+    cursor: default;
+}
+
+.cp-bajas-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cp-baja-row {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cp-baja-row.is-baja {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.cp-baja-row.is-duda {
+    border-left: 3px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.cp-baja-equipo {
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cp-baja-jugador {
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.cp-baja-nota {
+    color: #94a3b8;
+    font-size: 0.65rem;
+}
+
+@media (max-width: 700px) {
+    .cp-baja-row {
+        grid-template-columns: 80px 1fr;
+    }
+    .cp-baja-nota {
+        grid-column: 1 / -1;
+    }
+}
 }

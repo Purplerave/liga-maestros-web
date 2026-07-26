@@ -286,3 +286,28 @@ async function shareTicket() {
         showToast("No se pudo copiar el pronostico.", "error");
     }
 }
+
+async function loadBajas() {
+    const target = qs("cover-bajas-content");
+    if (!target) return;
+    try {
+        const res = await fetch("/api/noticias/radar");
+        if (!res.ok) return;
+        const data = await res.json();
+        const bajas = data.bajas || [];
+        if (!bajas.length) {
+            target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
+            return;
+        }
+        target.innerHTML = bajas.map(b => {
+            const icon = b.icono || "";
+            const equipo = escapeHtml(b.equipo || "");
+            const jugador = escapeHtml(b.jugador || "");
+            const nota = escapeHtml(b.nota || "");
+            const cls = b.estado === "baja" ? "is-baja" : b.estado === "duda" ? "is-duda" : "";
+            return `<div class="cp-baja-row ${cls}"><span class="cp-baja-equipo">${equipo}</span><span class="cp-baja-jugador">${jugador}</span><span class="cp-baja-nota">${nota}</span></div>`;
+        }).join("");
+    } catch (error) {
+        target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
+    }
+}
