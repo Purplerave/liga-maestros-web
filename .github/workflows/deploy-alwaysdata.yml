@@ -44,6 +44,39 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      - name: Free stale release space
+        run: |
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" 'bash -s' <<'REMOTE'
+          set -eu
+          HOME_DIR=/home/ligademaestros
+          RELEASES="$HOME_DIR/releases"
+          CURRENT="$(readlink -f "$HOME_DIR/current" 2>/dev/null || true)"
+          mkdir -p "$RELEASES"
+
+          # Failed extractions never receive .release-sha and are always disposable.
+          find "$RELEASES" -mindepth 1 -maxdepth 1 -type d | while read -r release; do
+            if [ "$release" != "$CURRENT" ] && [ ! -f "$release/.release-sha" ]; then
+              rm -rf -- "$release"
+            fi
+          done
+
+          # Keep the active release plus the two newest complete rollback copies.
+          kept=0
+          find "$RELEASES" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
+            | sort -nr | cut -d' ' -f2- | while read -r release; do
+              [ "$release" = "$CURRENT" ] && continue
+              [ -f "$release/.release-sha" ] || continue
+              kept=$((kept + 1))
+              if [ "$kept" -gt 2 ]; then
+                rm -rf -- "$release"
+              fi
+            done
+
+          find "$HOME_DIR" -maxdepth 1 -type f -name 'deploy-*.tar' -delete
+          df -h "$HOME_DIR"
+          du -sh "$RELEASES" "$HOME_DIR/runtime" 2>/dev/null || true
+          REMOTE
+
       - name: Upload immutable release
         run: |
           git archive --format=tar -o deploy.tar HEAD
