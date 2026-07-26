@@ -1,14 +1,17 @@
 {
-  "name": "Liga de Maestros",
+  "name": "Liga de Maestros — Humanos vs IAs",
   "short_name": "La Maestros",
-  "description": "Quiniela competitiva: La Peña contra los Maestros IA, jornada a jornada.",
+  "description": "Quiniela competitiva: La Peña contra los Maestros IA, jornada a jornada. Predicciones, rankings, directo y juegos.",
   "lang": "es",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#06090f",
   "theme_color": "#06090f",
+  "categories": ["games", "sports", "entertainment"],
+  "screenshots": [],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/static/img/ligademaestroslogo_trans.png",

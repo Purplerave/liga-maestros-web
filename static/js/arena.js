@@ -34,9 +34,28 @@ function lazyMatchPlaceholder(match) {
 }
 
 
+function renderSkeletonLoading() {
+    return `
+        <div class="arena-content newspaper-cover-mode" style="padding: 20px; max-width: 880px; margin: 0 auto;">
+            <div class="skeleton skeleton-heading" style="width: 180px; margin-bottom: 20px;">&nbsp;</div>
+            <div class="skeleton skeleton-text" style="width: 70%; margin-bottom: 30px;">&nbsp;</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <div class="skeleton skeleton-card" style="height: 160px;">&nbsp;</div>
+                <div class="skeleton skeleton-card" style="height: 160px;">&nbsp;</div>
+            </div>
+            <div class="skeleton skeleton-card" style="height: 100px; margin-bottom: 10px;">&nbsp;</div>
+            <div class="skeleton skeleton-card" style="height: 100px; margin-bottom: 10px;">&nbsp;</div>
+            <div class="skeleton skeleton-card" style="height: 100px;">&nbsp;</div>
+        </div>`;
+}
+
 function renderArena() {
     const container = qs("matches-body");
-    if (!container || !state.data) return;
+    if (!container) return;
+    if (!state.data) {
+        container.innerHTML = renderSkeletonLoading();
+        return;
+    }
     if (state.currentFilter !== "TICKET" && typeof stopTicketComments === "function") {
         stopTicketComments();
     }
