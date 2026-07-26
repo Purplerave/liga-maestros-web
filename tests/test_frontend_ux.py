@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "templates"
 TEMPLATE = TEMPLATES / "liga_index.html"
 SW = ROOT / "static" / "sw.js"
+COMMAND_PALETTE_CSS = ROOT / "static" / "css" / "components" / "command_palette.css"
 
 INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)[^>]*>", re.IGNORECASE)
 
@@ -71,3 +72,13 @@ def test_palette_is_progressive_enhancement():
     # both guarded by try//catch so a broken module cannot block refreshData()
     init_block = events.split("DOMContentLoaded")[-1]
     assert init_block.count("try {") >= 2
+
+
+def test_closed_palette_cannot_block_the_page():
+    """The full-screen backdrop must disappear while the palette is closed."""
+    css = COMMAND_PALETTE_CSS.read_text(encoding="utf-8")
+    assert re.search(
+        r"\.cmdk-backdrop\[hidden\]\s*\{[^}]*display:\s*none",
+        css,
+        re.DOTALL,
+    )

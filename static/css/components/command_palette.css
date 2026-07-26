@@ -20,6 +20,10 @@
     transition: opacity var(--duration-fast, 120ms) ease;
 }
 
+.cmdk-backdrop[hidden] {
+    display: none;
+}
+
 .cmdk-backdrop.is-open { opacity: 1; }
 
 .cmdk-panel {
