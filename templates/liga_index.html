@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <!-- Sistema de capas CSS: gobierna la cascada (sin !important). El orden replica
          la carga historica; las vistas lazy se insertan siempre en 'pages'. -->
-    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages;</style>
+    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-1') }}">
@@ -39,7 +39,9 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_unification.css', v=assets_v ~ '-unify-2') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-2') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
     <div class="app-shell">
@@ -62,7 +64,13 @@
 
             <div class="topbar-actions">
                 <div id="user-profile-nav" class="user-panel"></div>
-                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar">Actualizar</button>
+                <button id="cmdk-trigger" class="cmdk-trigger" type="button" data-no-ripple="true"
+                        aria-haspopup="dialog" aria-label="Abrir buscador de comandos (Control o Command mas K)">
+                    <span aria-hidden="true">🔍</span>
+                    <span class="cmdk-trigger-label">Buscar</span>
+                    <kbd class="cmdk-kbd">⌘K</kbd>
+                </button>
+                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)">Actualizar</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
                 <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
             </div>
@@ -99,18 +107,9 @@
     <script defer src="{{ url_for('main.static_files', filename='js/animated_counters.js', v=assets_v ~ '-counters-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/confetti.js', v=assets_v ~ '-confetti-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/sound_manager.js', v=assets_v ~ '-sound-1') }}"></script>
-    <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            const swUrl = "{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}";
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register(swUrl).then(reg => {
-                    console.log('[SW] Registered:', reg.scope);
-                }).catch(err => {
-                    console.warn('[SW] Registration failed:', err);
-                });
-            });
-        }
-    </script>
+    <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/ux_signals.js', v=assets_v ~ '-ux-signals-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-1') }}"
+            data-sw-url="{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}"></script>
 </body>
 </html>

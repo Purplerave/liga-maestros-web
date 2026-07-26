@@ -2,6 +2,62 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-07 — Frontend from the future (26 de julio de 2026)
+
+Capa de producto sobre el design system: navegación por teclado, señales de
+sistema honestas y arreglo de dos regresiones que se colaron en la entrega
+anterior. Todo es **mejora progresiva**: si un módulo falla, la app sigue igual.
+
+### Corregido (regresiones reales)
+
+- 🔴 **El Service Worker nunca se registraba.** El registro vivía en un
+  `<script>` inline dentro de `liga_index.html`, pero la CSP del sitio es
+  `script-src 'self'` sin `'unsafe-inline'`: el navegador lo descartaba en
+  silencio, así que el modo offline y el precacheo no funcionaban en
+  producción. Extraído a `static/js/sw_register.js` (con la URL en un
+  `data-sw-url`). Nuevo test bloquea cualquier `<script>` inline en templates.
+- 🔴 **`animations.css` rompía los tests de gobernanza CSS**: llegó sin bloque
+  `@layer`, con 4 `!important` y usando `--drift-x` sin definir. Ahora está en
+  la capa `animations`, con la variable declarada en `.confetti-piece` y cero
+  `!important`. La suite vuelve a estar verde.
+- Cachés del Service Worker bumpeadas a `v2` (las tres a la vez) para que los
+  clientes existentes recojan el shell nuevo.
+
+### Añadido
+
+- **Paleta de comandos (`⌘K` / `Ctrl+K`)** — `static/js/command_palette.js`.
+  Buscador difuso sobre vistas, jornadas recientes y acciones (guardar,
+  compartir, actualizar, perfil, sonido). Navegación completa con teclado
+  (flechas, Home/End, Enter, Esc), roles ARIA `combobox`/`listbox`/`option`,
+  devolución de foco al cerrar y resaltado del término buscado. Disparador
+  visible en la topbar para que sea descubrible, no solo un atajo oculto.
+- **Atajos globales**: `P` portada, `Q` quiniela, `D` directo, `L` ligas,
+  `J` juegos, `N` La Peña, `R` actualizar, `S` guardar, `?` abre la paleta.
+  Se ignoran mientras se escribe en un campo de texto.
+- **Señales de sistema (`static/js/ux_signals.js`)**:
+  - *Skip link* «Saltar al contenido» para navegación por teclado.
+  - Barra de progreso al cargar vistas en diferido (ya no hay saltos mudos).
+  - Píldora de estado de red: avisa al perder conexión, confirma al
+    recuperarla y relanza la carga de datos.
+  - Aviso «hay una versión nueva» con botón de recarga cuando el Service
+    Worker instala una actualización.
+- **View Transitions API** en los cambios de sección, con degradación limpia
+  en navegadores que no la soportan y desactivada bajo `prefers-reduced-motion`.
+- **Prefetch por intención**: al pasar el ratón o tabular a un botón de
+  sección se precarga su CSS (idempotente, sin ejecutar lógica de vista).
+- `aria-current="page"` en la navegación principal: hasta ahora el estado
+  activo era solo visual y los lectores de pantalla no lo anunciaban.
+- `content-visibility: auto` en los bloques de la arena: el navegador se
+  ahorra pintar lo que está fuera de pantalla.
+- Tokens de movimiento que la auditoría pedía y faltaban: `--duration-fast`,
+  `--duration-normal`, `--duration-slow`, `--ease-spring`.
+
+### Tests
+
+- `tests/test_frontend_ux.py`: sin scripts inline, assets nuevos existentes y
+  referenciados en el shell, precacheo del SW, versiones de caché alineadas y
+  arranque de los módulos protegido con `try/catch`.
+
 ## 2026-07 — Design System Refresh (24 de julio de 2026)
 
 Remediación completa de la auditoría UI/UX interna (nota original: 5.2/10) más

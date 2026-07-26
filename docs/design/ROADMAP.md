@@ -44,6 +44,8 @@ solo cuando aporten una razon real para volver.
 - [x] Contrato canonico inicial para equipos, alias y escudos.
 - [x] Juegos integrados con rankings: Snake Gol, Arkanoid y Maestros Invaders.
 - [x] J73 detectada y preparada para importacion.
+- [x] Paleta de comandos (Ctrl/Cmd+K), atajos globales y señales de sistema
+  (offline, nueva version, progreso de navegacion).
 
 ## Prioridad 0: beta fiable
 
@@ -91,6 +93,8 @@ temporada.
 - [ ] Completar la separacion del CSS grande por componentes y paginas sin
   acumular nuevas capas de overrides.
 - [ ] Revisar accesibilidad: foco visible, contraste, teclado y tamanos minimos.
+  - [x] Skip link, `aria-current` en la navegacion y paleta de comandos con
+    navegacion completa por teclado (2026-07-26).
 
 ### Perfil y retorno semanal
 
