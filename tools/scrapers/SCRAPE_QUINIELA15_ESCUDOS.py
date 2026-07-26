@@ -13,18 +13,11 @@ OUT_JSON = BASE_DIR / "data" / "TEAM_LOGOS_QUINIELA15.json"
 
 
 def normalize_key(text: str) -> str:
+    import unicodedata
+
     text = (text or "").upper()
-    repl = {
-        "?": "A",
-        "?": "E",
-        "?": "I",
-        "?": "O",
-        "?": "U",
-        "?": "U",
-        "?": "N",
-    }
-    for a, b in repl.items():
-        text = text.replace(a, b)
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
     text = re.sub(r"[^A-Z0-9 ]+", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
