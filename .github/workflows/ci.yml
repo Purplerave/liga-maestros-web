@@ -50,8 +50,9 @@ jobs:
 
       - name: JavaScript syntax check
         run: |
-          node --check static/js/quantum_final.js
-          node --check static/js/snake/index.js
+          for f in static/js/*.js static/js/**/*.js; do
+            [ -f "$f" ] && node --check "$f"
+          done
 
       - name: Tests
         run: python -m pytest -q

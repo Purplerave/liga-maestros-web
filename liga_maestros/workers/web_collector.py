@@ -33,6 +33,12 @@ def start_web_collector(app):
     q15_enabled = not _truthy(os.getenv("WEB_COLLECTOR_DISABLE_Q15", "0"))
 
     def _loop():
+        import sys
+        from pathlib import Path
+
+        tools_ops = str(Path(__file__).resolve().parents[2] / "tools" / "ops")
+        if tools_ops not in sys.path:
+            sys.path.insert(0, tools_ops)
         from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
 
         log_line("web_collector=start")

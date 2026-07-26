@@ -22,10 +22,12 @@ async function refreshData(options = {}) {
             fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`)
         ]);
         if (userRes) {
+            if (!userRes.ok) throw new Error(`User API ${userRes.status}`);
             const userPayload = await userRes.json();
             state.user = userPayload.user;
             state.csrfToken = userPayload.csrf_token || "";
         }
+        if (!dataRes.ok) throw new Error(`Data API ${dataRes.status}`);
         state.data = await dataRes.json();
         logoAliasIndex = null;
         logoCache.clear();
