@@ -108,6 +108,14 @@ def _validar_bajas_con_fuente(crudas, noticias):
     return _validar_bajas(candidatas)
 
 
+def _resultado_cacheado(payload):
+    if not isinstance(payload, dict):
+        return None
+    novedades = [item for item in payload.get("novedades") or [] if isinstance(item, dict)][:6]
+    bajas = [item for item in payload.get("bajas") or [] if isinstance(item, dict)][:6]
+    return {"novedades": novedades, "bajas": bajas}
+
+
 def construir_boletin(noticias):
     """Genera novedades y bajas con una sola llamada para cada lote nuevo."""
     vacio = {"novedades": [], "bajas": []}
@@ -119,14 +127,12 @@ def construir_boletin(noticias):
         return vacio
     firma = content_signature(f"{item['id']}|{item['titulo']}|{item['sumario']}" for item in entrada)
     cacheado = cache_get(CACHE_SCOPE, firma)
-    if isinstance(cacheado, dict):
-        return {
-            "novedades": _validar_novedades(cacheado.get("novedades"), noticias),
-            "bajas": _validar_bajas_con_fuente(cacheado.get("bajas"), noticias),
-        }
-    reciente = cache_get_latest(CACHE_SCOPE, MIN_INTERVAL_SECONDS)
-    if isinstance(reciente, dict):
-        return reciente
+    resultado_cacheado = _resultado_cacheado(cacheado)
+    if resultado_cacheado is not None:
+        return resultado_cacheado
+    resultado_reciente = _resultado_cacheado(cache_get_latest(CACHE_SCOPE, MIN_INTERVAL_SECONDS))
+    if resultado_reciente is not None:
+        return resultado_reciente
 
     if not reserve_call():
         logger.warning("IA: cuota diaria agotada, se omite el boletin")

@@ -98,3 +98,26 @@ def test_reutiliza_boletin_reciente_sin_gastar(monkeypatch):
     )
 
     assert boletin.construir_boletin(NOTICIAS) == esperado
+
+
+def test_reutiliza_firma_exacta_sin_perder_novedades(monkeypatch):
+    esperado = {
+        "novedades": [
+            {
+                "texto": "El Madrid negocia el fichaje de Diomande",
+                "categoria": "fichaje",
+                "source": "Marca",
+                "link": "https://example.com/real-madrid",
+            }
+        ],
+        "bajas": [],
+    }
+    monkeypatch.setattr(boletin, "ai_enabled", lambda: True)
+    monkeypatch.setattr(boletin, "cache_get", lambda *args: esperado)
+    monkeypatch.setattr(
+        boletin,
+        "reserve_call",
+        lambda: (_ for _ in ()).throw(AssertionError("No debe reservar llamada")),
+    )
+
+    assert boletin.construir_boletin(NOTICIAS) == esperado
