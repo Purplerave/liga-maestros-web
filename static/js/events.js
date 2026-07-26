@@ -81,8 +81,15 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);
     qs("cmdk-trigger")?.addEventListener("click", () => window.CommandPalette?.open());
     qs("share-ticket-btn")?.addEventListener("click", shareTicket);
+    // Las pestañas fijas están fuera de matches-body; las acciones que se
+    // pintan dentro de las vistas se resuelven con el listener delegado.
     document.querySelectorAll("[data-page-action]").forEach(button => {
-        button.addEventListener("click", () => openNewspaperPage(button.dataset.pageAction));
+        if (!button.closest("#matches-body")) {
+            button.addEventListener("click", event => {
+                event.preventDefault();
+                openNewspaperPage(button.dataset.pageAction);
+            });
+        }
     });
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-porra-form]")) submitPorra(event);

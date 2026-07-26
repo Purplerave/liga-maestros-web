@@ -197,15 +197,14 @@ const UXSignals = {
         if (typeof window.openNewspaperPage !== "function") return;
         const original = window.openNewspaperPage;
         const self = this;
-        const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         window.openNewspaperPage = async function wrappedOpenNewspaperPage(page) {
             self.startProgress();
             const run = () => original.call(this, page);
             try {
-                // View Transitions API donde exista; fallback silencioso donde no.
-                if (typeof document.startViewTransition === "function" && !prefersReducedMotion()) {
-                    return await document.startViewTransition(run).finished.catch(() => {});
-                }
+                // Las transiciones de vista daban problemas al repintar vistas
+                // asíncronas (pestañas que parecían quedarse a medio cambiar).
+                // La navegación debe ser inmediata y estable; mantenemos solo
+                // la barra de progreso.
                 return await run();
             } finally {
                 self.endProgress();
