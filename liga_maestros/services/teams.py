@@ -42,6 +42,9 @@ def public_contest_name(uid, users):
         "fistro": "FISTRO",
         "sesudo": "SESUDO",
         "jimmy": "JIMMY",
+        "luzia": "LUZIA",
+        "luna": "LUNA",
+        "erniebot": "ERNIEBOT",
     }
     if uid in names:
         return names[uid]
@@ -105,6 +108,9 @@ def canonical_contest_id(uid):
         "fistro",
         "sesudo",
         "jimmy",
+        "luzia",
+        "luna",
+        "erniebot",
         "falcon",
     ):
         return low

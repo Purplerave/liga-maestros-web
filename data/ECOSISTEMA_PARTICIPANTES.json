@@ -43,7 +43,10 @@
     "oraculo",
     "fistro",
     "sesudo",
-    "jimmy"
+    "jimmy",
+    "luzia",
+    "luna",
+    "erniebot"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -73,6 +76,9 @@
     "oraculo": "Oraculo",
     "fistro": "Fistro",
     "sesudo": "Sesudo",
-    "jimmy": "Jimmy"
+    "jimmy": "Jimmy",
+    "luzia": "Luzia",
+    "luna": "Luna",
+    "erniebot": "ErnieBot"
   }
 }
