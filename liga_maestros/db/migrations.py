@@ -274,12 +274,11 @@ def run_startup_migrations():
 
 
 def ensure_jornada_75(conn):
-    """Garantizar que la jornada 75 existe en la BD (migracion manual)."""
-    exists = conn.execute("SELECT 1 FROM resultados WHERE jornada = 75 LIMIT 1").fetchone()
-    if exists:
+    """Import the public J75 fixture only after the preceding jornada exists."""
+    has_previous = conn.execute("SELECT 1 FROM resultados WHERE jornada = 74 LIMIT 1").fetchone()
+    if not has_previous:
         return
 
-    print("Insertando Jornada 75 en la BD...")
     j75_matches = [
         (75, 1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
         (75, 2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
@@ -298,21 +297,27 @@ def ensure_jornada_75(conn):
         (75, 15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
     ]
 
-    for m in j75_matches:
-        conn.execute("""
+    conn.executemany(
+        """
             INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora, goles_local, goles_visitante)
-            VALUES (?, ?, ?, ?, 'NS', ?, ?, NULL, NULL)
-        """, m)
+            SELECT ?, ?, ?, ?, 'NS', ?, ?, NULL, NULL
+            WHERE NOT EXISTS (
+                SELECT 1 FROM resultados WHERE jornada = ? AND partido_id = ?
+            )
+        """,
+        [match + (match[0], match[1]) for match in j75_matches],
+    )
 
-    # Predicciones base para que aparezca en el selector
+    # Publicamos solo la columna conocida del Programa. Los Maestros se
+    # incorporan cuando entregan sus pronosticos; nunca se clonan.
     j75_signs = ["2", "1", "X", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
-    users = ["programa", "consenso", "chatgpt", "claude", "grok", "copilot", "gemini"]
-
-    for user in users:
-        for i, sign in enumerate(j75_signs, start=1):
-            conn.execute("""
-                INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo)
-                VALUES (?, 75, ?, ?)
-            """, (user, i, sign))
+    conn.executemany(
+        """
+            INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+            VALUES ('programa', 75, ?, ?)
+            ON CONFLICT(user_id, jornada, partido_id) DO NOTHING
+        """,
+        enumerate(j75_signs, start=1),
+    )
 
     conn.commit()
