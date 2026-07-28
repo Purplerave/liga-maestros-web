@@ -261,6 +261,7 @@ def run_startup_migrations():
             ensure_porra_table(conn)
             ensure_snake_table(conn)
             ensure_arcade_table(conn)
+            ensure_jornada_75(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
         finally:
@@ -270,3 +271,48 @@ def run_startup_migrations():
                 except Exception:
                     pass
             _unlock_file(lock_fh)
+
+
+def ensure_jornada_75(conn):
+    """Garantizar que la jornada 75 existe en la BD (migracion manual)."""
+    exists = conn.execute("SELECT 1 FROM resultados WHERE jornada = 75 LIMIT 1").fetchone()
+    if exists:
+        return
+
+    print("Insertando Jornada 75 en la BD...")
+    j75_matches = [
+        (75, 1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
+        (75, 2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
+        (75, 3, "AC Oulu", "Ilves Tampere", "2026-08-02", "16:00"),
+        (75, 4, "FC Lahti", "FF Jaro", "2026-08-01", "17:00"),
+        (75, 5, "IF Gnistan", "KuPS Kuopio", "2026-08-01", "18:00"),
+        (75, 6, "Fredrikstad", "Sandefjord", "2026-08-01", "16:00"),
+        (75, 7, "Start", "Viking", "2026-08-01", "18:00"),
+        (75, 8, "Molde FK", "Sarpsborg", "2026-08-02", "17:00"),
+        (75, 9, "KFUM Oslo", "Kristiansund", "2026-08-02", "17:00"),
+        (75, 10, "Aalesunds FK", "Tromsø IL", "2026-08-02", "17:00"),
+        (75, 11, "Brann", "Rosenborg", "2026-08-02", "19:15"),
+        (75, 12, "Häcken", "Kalmar FF", "2026-08-01", "15:00"),
+        (75, 13, "IFK Göteborg", "Degerfors IF", "2026-08-02", "14:00"),
+        (75, 14, "Brommapojkarna", "Malmoe", "2026-08-02", "14:00"),
+        (75, 15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
+    ]
+
+    for m in j75_matches:
+        conn.execute("""
+            INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora, goles_local, goles_visitante)
+            VALUES (?, ?, ?, ?, 'NS', ?, ?, NULL, NULL)
+        """, m)
+
+    # Predicciones base para que aparezca en el selector
+    j75_signs = ["2", "1", "X", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
+    users = ["programa", "consenso", "chatgpt", "claude", "grok", "copilot", "gemini"]
+
+    for user in users:
+        for i, sign in enumerate(j75_signs, start=1):
+            conn.execute("""
+                INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo)
+                VALUES (?, 75, ?, ?)
+            """, (user, i, sign))
+
+    conn.commit()
