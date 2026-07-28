@@ -1,15 +1,15 @@
-1. Zaragoza - Ceuta
-2. Castellón - Burgos
-3. Cult.Leonesa - Córdoba
-4. Andorra - Valladolid
-5. Sporting - Cádiz
-6. Albacete - Granada
-7. Eibar - Huesca
-8. Almería - Málaga
-9. Brentford - Fulham
-10. Tottenham - Brighton
-11. Chelsea - Manchester United
-12. Nottingham Forest - Burnley
-13. Everton - Liverpool
-14. Manchester City - Arsenal
-15. Pleno al 15: Atlético Madrid - Real Sociedad
+1. VPS Vaasa - Inter Turku
+2. TPS Turku - IFK Mariehamn
+3. AC Oulu - Ilves Tampere
+4. FC Lahti - FF Jaro
+5. IF Gnistan - KuPS Kuopio
+6. Fredrikstad - Sandefjord
+7. Start - Viking
+8. Molde FK - Sarpsborg
+9. KFUM Oslo - Kristiansund
+10. Aalesunds FK - Tromsø IL
+11. Brann - Rosenborg
+12. Häcken - Kalmar FF
+13. IFK Göteborg - Degerfors IF
+14. Brommapojkarna - Malmoe
+15. Pleno al 15: AIK - Orgryte IS
