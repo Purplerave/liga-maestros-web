@@ -9,13 +9,32 @@ from liga_maestros.db.backups import create_backup, verify_backup
 from liga_maestros.db.connection import ClosingConnection
 from liga_maestros.db.migrations import (
     ensure_core_tables,
+    ensure_jornada_75,
     ensure_porra_table,
+    ensure_predicciones_unique_index,
     ensure_quiz_tables,
     ensure_snake_table,
     run_startup_migrations,
 )
 from liga_maestros.db.seed import apply_fixture_corrections, import_profile_history
 from liga_maestros.routes.legal import delete_user_data
+
+
+def test_jornada_75_seed_requires_j74_and_does_not_clone_master_predictions():
+    conn = sqlite3.connect(":memory:")
+    ensure_core_tables(conn)
+    ensure_predicciones_unique_index(conn)
+
+    ensure_jornada_75(conn)
+    assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 75").fetchone()[0] == 0
+
+    conn.execute("INSERT INTO resultados (jornada, partido_id) VALUES (74, 1)")
+    ensure_jornada_75(conn)
+    ensure_jornada_75(conn)
+
+    assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 75").fetchone()[0] == 15
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 75").fetchone()[0] == 15
+    assert conn.execute("SELECT DISTINCT user_id FROM predicciones WHERE jornada = 75").fetchall() == [("programa",)]
 
 
 def test_fresh_database_creates_core_schema_and_imports_public_seed(tmp_path, monkeypatch):
