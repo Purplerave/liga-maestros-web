@@ -1,80 +1,10 @@
 {
-  "73": {
-    "copilot": [
-      "Bodø/Glimt atraviesa un gran momento y en casa tiene mucha más pegada.",
-      "Tromsø es segundo y ofrece bastante más regularidad que HamKam.",
-      "Lillestrøm llega de ganar fuera y está mostrando mucha solidez.",
-      "Sarpsborg viene de tumbar al líder, aunque Kristiansund puede resistir en casa.",
-      "Start compite mejor como local y Rosenborg atraviesa una crisis profunda.",
-      "Molde ha ganado sus últimos cinco duelos ante Brann y se hace fuerte en casa.",
-      "Viking debe reaccionar en casa tras ver cortada su racha de nueve victorias.",
-      "Mjällby, vigente campeón, conserva ventaja como local pese al buen momento de Västerås.",
-      "AIK encadena victorias importantes y llega con más confianza que GAIS.",
-      "Göteborg está muy tocado y Brommapojkarna parece ahora el equipo más fiable.",
-      "Sirius sigue invicto y líder; Elfsborg acumula seis jornadas sin ganar.",
-      "Hammarby vuelve a crecer y lleva once duelos sin perder ante Degerfors.",
-      "Häcken concede demasiado, pero tiene más calidad ante un Halmstad debilitado.",
-      "Malmö viene de golear y Kalmar sufre frente a los equipos de mayor nivel.",
-      "Argentina puede ser más eficaz en un partido cerrado aunque España controle la posesión."
-    ],
-    "grok": [
-      "Bodø/Glimt es fuerte en casa y llega mejor situado que Fredrikstad.",
-      "Tromsø lidera la liga y muestra más solidez que un HamKam irregular.",
-      "Lillestrøm está bien posicionado y ofrece garantías como local.",
-      "Duelo equilibrado; Sarpsborg tiene argumentos para puntuar o ganar.",
-      "Rosenborg conserva más calidad y experiencia pese a sus altibajos.",
-      "Molde suele elevar su nivel en casa frente a un Brann exigente.",
-      "Viking esta cerca de la cima y resulta dominante como local.",
-      "Mjällby se muestra más sólido que Västerås en la liga sueca.",
-      "AIK llega en buen momento y cuenta con el factor campo.",
-      "Göteborg puede aprovechar en casa la irregularidad de Brommapojkarna.",
-      "Sirius lidera y está en racha, aunque esta visita admite riesgo de empate.",
-      "Hammarby está arriba y suele imponerse como local ante Degerfors.",
-      "Häcken tiene más potencial y llega mejor posicionado que Halmstad.",
-      "Malmö posee una calidad superior pese a su irregularidad reciente.",
-      "Argentina aporta más experiencia en finales y una gran capacidad para sufrir y remontar."
-    ],
-    "claude": [
-      "Bodø/Glimt presenta una diferencia de nivel notable y juega en casa.",
-      "HamKam es sólido como local, pero Tromsø llega en una gran racha.",
-      "Lillestrøm es claramente superior a un KFUM Oslo de la zona baja.",
-      "Partido muy igualado entre dos equipos sin un dominio claro.",
-      "Rosenborg llega con más pegada y experiencia ante un Start en apuros.",
-      "Molde atraviesa mejor momento que un Brann irregular fuera de casa.",
-      "Viking domina la liga y recibe a un rival del tramo medio-bajo.",
-      "Son equipos parejos, pero el factor campo inclina el duelo hacia Mjällby.",
-      "AIK ha mejorado su dinámica y juega en casa ante un GAIS irregular.",
-      "Göteborg sigue sin confianza y Brommapojkarna llega mejor posicionado.",
-      "Sirius es líder invicto y su superioridad pesa incluso como visitante.",
-      "Hammarby es un local fuerte ante un Degerfors de la zona baja.",
-      "Häcken tiene más nivel y Halmstad llega en una mala racha.",
-      "Kalmar está en la zona baja y Malmö llega en clara mejoría.",
-      "España tiene una ligera ventaja por profundidad de plantilla y solidez defensiva."
-    ],
-    "gemini": [
-      "La solvencia local de Bodø/Glimt y su contundente precedente sostienen el uno.",
-      "Tromsø llega con una gran inercia y domina los antecedentes ante HamKam.",
-      "Las numerosas bajas de KFUM reducen mucho sus opciones ante Lillestrøm.",
-      "Sarpsborg llega reforzado tras batir a Viking ante un rival en dificultades.",
-      "Start acumula una larga racha sin ganar y su historial ante Rosenborg es negativo.",
-      "Las numerosas bajas de Brann favorecen a un Molde sólido en casa.",
-      "Viking busca reaccionar en un duelo que históricamente domina como local.",
-      "Duelo parejo en la zona media; el factor campo aconseja cubrir a Mjällby.",
-      "El factor campo de AIK puede frenar el buen rendimiento visitante de GAIS.",
-      "Göteborg necesita reaccionar en casa ante un rival asequible.",
-      "Sirius sigue invicto y líder, pero su visita a Elfsborg aconseja cubrir el empate.",
-      "La fortaleza local de Hammarby debe imponerse ante un Degerfors endeble.",
-      "Halmstad carece de solidez para contener el potencial ofensivo de Häcken.",
-      "Malmö ha recuperado sensaciones y su jerarquía debe decidir el partido.",
-      "España llega más sólida y fresca; Argentina conserva suficiente amenaza para marcar."
-    ],
-    "chatgpt": [
-      "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "Final muy cerrada: la solidez defensiva de España puede decidirla por un solo gol."
-    ],
-    "programa": [
-      "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "España llega más descansada y sólida; Argentina tiene amenaza suficiente para marcar, pero el favoritismo español inclina la final hacia el 2-1."
-    ]
+  "75": {
+    "programa": ["Análisis estadístico J75", "", "", "", "", "", "", "", "", "", "", "", "", "", "Favoritismo local en el pleno al 15."],
+    "claude": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    "grok": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    "chatgpt": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    "copilot": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    "gemini": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
   }
 }
