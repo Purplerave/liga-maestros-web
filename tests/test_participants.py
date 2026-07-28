@@ -12,7 +12,7 @@ def test_fictitious_pena_aliases_hide_the_source_models():
         "qwen": "oraculo",
         "ernie": "fistro",
         "kimi": "sesudo",
-        "luzia": "jimmy",
+        "luzia": "luzia",
     }
     for source, public_alias in expected.items():
         assert canonical_contest_id(source) == public_alias

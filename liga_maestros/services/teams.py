@@ -80,7 +80,7 @@ def canonical_contest_id(uid):
         "fistro": "fistro",
         "kimi": "sesudo",
         "sesudo": "sesudo",
-        "luzia": "jimmy",
+        "luzia": "luzia",
         "jimmy": "jimmy",
     }
     if low in pena_aliases:
@@ -131,7 +131,8 @@ def contest_aliases_for_uid(uid):
         "oraculo": {"oraculo", "qwen", "gwen"},
         "fistro": {"fistro", "ernie", "ernie_ai"},
         "sesudo": {"sesudo", "kimi"},
-        "jimmy": {"jimmy", "luzia"},
+        "jimmy": {"jimmy"},
+        "luzia": {"luzia"},
     }
     aliases.update(pena_sources.get(canonical, set()))
     return sorted(alias for alias in aliases if alias)
