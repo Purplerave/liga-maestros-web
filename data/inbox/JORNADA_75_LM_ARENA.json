@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "jornada": 75,
+  "fuente": {
+    "agente": "Gemini",
+    "fecha_entrega": "2026-07-28",
+    "documento_origen": "Documento de pronósticos de Liga de Maestros"
+  },
+  "partidos": [
+    {
+      "id": 1,
+      "local": "VPS",
+      "visitante": "FC Inter"
+    },
+    {
+      "id": 2,
+      "local": "TPS",
+      "visitante": "IFK Mariehamn"
+    },
+    {
+      "id": 3,
+      "local": "AC Oulu",
+      "visitante": "Ilves"
+    },
+    {
+      "id": 4,
+      "local": "FC Lahti",
+      "visitante": "FF Jaro"
+    },
+    {
+      "id": 5,
+      "local": "IF Gnistan",
+      "visitante": "KuPS Kuopio"
+    },
+    {
+      "id": 6,
+      "local": "Fredrikstad",
+      "visitante": "Sandefjord"
+    },
+    {
+      "id": 7,
+      "local": "Start",
+      "visitante": "Viking"
+    },
+    {
+      "id": 8,
+      "local": "Molde",
+      "visitante": "Sarpsborg 08"
+    },
+    {
+      "id": 9,
+      "local": "KFUM Oslo",
+      "visitante": "Kristiansund"
+    },
+    {
+      "id": 10,
+      "local": "Aalesund",
+      "visitante": "Tromsø"
+    },
+    {
+      "id": 11,
+      "local": "Brann",
+      "visitante": "Rosenborg"
+    },
+    {
+      "id": 12,
+      "local": "Häcken",
+      "visitante": "Kalmar"
+    },
+    {
+      "id": 13,
+      "local": "Göteborg",
+      "visitante": "Degerfors"
+    },
+    {
+      "id": 14,
+      "local": "Brommapojkarna",
+      "visitante": "Malmö"
+    },
+    {
+      "id": 15,
+      "local": "AIK",
+      "visitante": "Örgryte"
+    }
+  ],
+  "pronosticos": [
+    {
+      "participante_id": "gemini",
+      "nombre_publico": "Gemini",
+      "ia_origen": "Gemini",
+      "grupo": "maestro",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección GEMINI"
+    },
+    {
+      "participante_id": "chatgpt",
+      "nombre_publico": "ChatGPT",
+      "ia_origen": "ChatGPT",
+      "grupo": "maestro",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "X",
+        "1",
+        "2",
+        "1",
+        "1",
+        "2",
+        "X",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección CHATGPT"
+    },
+    {
+      "participante_id": "grok",
+      "nombre_publico": "Grok",
+      "ia_origen": "Grok",
+      "grupo": "maestro",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección GROK"
+    },
+    {
+      "participante_id": "copilot",
+      "nombre_publico": "Copilot",
+      "ia_origen": "Copilot",
+      "grupo": "maestro",
+      "signos": [
+        "1",
+        "1",
+        "X",
+        "1",
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección COPILOT"
+    },
+    {
+      "participante_id": "claude",
+      "nombre_publico": "Claude",
+      "ia_origen": "Claude",
+      "grupo": "maestro",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "1",
+        "X",
+        "2-0"
+      ],
+      "origen": "Sección CLAUDE"
+    },
+    {
+      "participante_id": "chipi",
+      "nombre_publico": "Chipi",
+      "ia_origen": "DeepSeek",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "1",
+        "X",
+        "2-0"
+      ],
+      "origen": "Sección DEEPSEEK;"
+    },
+    {
+      "participante_id": "geli",
+      "nombre_publico": "Geli",
+      "ia_origen": "GLM-5",
+      "grupo": "pena",
+      "signos": [
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "2",
+        "1",
+        "X",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección Z.AI"
+    },
+    {
+      "participante_id": "pepe",
+      "nombre_publico": "Pepe",
+      "ia_origen": "Perplexity",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección PERPLEXITY"
+    },
+    {
+      "participante_id": "profe",
+      "nombre_publico": "Profe",
+      "ia_origen": "Meta AI",
+      "grupo": "pena",
+      "signos": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "M-0"
+      ],
+      "origen": "Sección META"
+    },
+    {
+      "participante_id": "fortu",
+      "nombre_publico": "Fortu",
+      "ia_origen": "Falcon",
+      "grupo": "pena",
+      "signos": [
+        "1",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "2",
+        "2",
+        "2-1"
+      ],
+      "origen": "Sección FALCON"
+    },
+    {
+      "participante_id": "fistro",
+      "nombre_publico": "Fistro",
+      "ia_origen": "Mistral",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección MISTRAL"
+    },
+    {
+      "participante_id": "luzia",
+      "nombre_publico": "Luzia",
+      "ia_origen": "LuzIA",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "X",
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "X",
+        "2",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección LUZIA"
+    },
+    {
+      "participante_id": "luna",
+      "nombre_publico": "Luna",
+      "ia_origen": "Kimi",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección KIMMY"
+    },
+    {
+      "participante_id": "erniebot",
+      "nombre_publico": "ErnieBot",
+      "ia_origen": "ERNIE",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "X",
+        "1",
+        "2",
+        "2",
+        "2",
+        "1",
+        "2",
+        "2",
+        "2",
+        "1",
+        "1",
+        "2",
+        "2-1"
+      ],
+      "origen": "Sección ERNIE"
+    },
+    {
+      "participante_id": "oraculo",
+      "nombre_publico": "Oráculo",
+      "ia_origen": "Qwen",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2-0"
+      ],
+      "origen": "Sección QWEN"
+    },
+    {
+      "participante_id": "jimmy",
+      "nombre_publico": "Jimmy",
+      "ia_origen": "ChatJimmy",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "X",
+        "X",
+        "X",
+        "1",
+        "1",
+        "2-0"
+      ],
+      "origen": "Sección CHATJIMMY: signos 1-14 derivados de sus marcadores; Pleno al 15 editorial porque ChatJimmy no lo indicó"
+    }
+  ],
+  "incidencias": [
+    {
+      "participante": "Jimmy (ChatJimmy)",
+      "problema": "Sus 14 marcadores se convirtieron a signos respetando el orden entregado. No indicó el Pleno al 15; se asignó 2-0 por criterio editorial."
+    },
+    {
+      "participante": "Mi Programa",
+      "problema": "No se incluyen los pronósticos explícitos de Mi Programa en el documento adjunto."
+    }
+  ]
+}

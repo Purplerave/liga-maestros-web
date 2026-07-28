@@ -123,6 +123,118 @@
       "signos": ["1", "X", "1", "X", "2", "1", "1", "X", "1", "1", "1", "1", "2", "2", "M-M"],
       "verified_at": "2026-07-16",
       "source": "j73 peña.md / Baidu; signos inferidos literalmente de sus explicaciones"
+    },
+    {
+      "jornada": 75,
+      "user_id": "gemini",
+      "signos": ["X", "1", "1", "1", "2", "X", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Gemini"
+    },
+    {
+      "jornada": 75,
+      "user_id": "chatgpt",
+      "signos": ["X", "1", "1", "1", "X", "1", "2", "1", "1", "2", "X", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / ChatGPT"
+    },
+    {
+      "jornada": 75,
+      "user_id": "grok",
+      "signos": ["X", "1", "1", "1", "2", "X", "2", "1", "X", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Grok"
+    },
+    {
+      "jornada": 75,
+      "user_id": "copilot",
+      "signos": ["1", "1", "X", "1", "2", "1", "X", "1", "X", "1", "X", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Copilot"
+    },
+    {
+      "jornada": 75,
+      "user_id": "claude",
+      "signos": ["X", "1", "1", "1", "2", "X", "2", "1", "X", "2", "X", "1", "1", "X", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Claude"
+    },
+    {
+      "jornada": 75,
+      "user_id": "chipi",
+      "signos": ["X", "1", "1", "1", "2", "X", "2", "1", "X", "2", "X", "1", "1", "X", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / DeepSeek"
+    },
+    {
+      "jornada": 75,
+      "user_id": "geli",
+      "signos": ["1", "1", "2", "X", "2", "1", "2", "1", "X", "1", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / GLM-5"
+    },
+    {
+      "jornada": 75,
+      "user_id": "pepe",
+      "signos": ["2", "1", "2", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Perplexity"
+    },
+    {
+      "jornada": 75,
+      "user_id": "profe",
+      "signos": ["1", "1", "1", "1", "2", "X", "2", "1", "1", "2", "1", "1", "1", "2", "M-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Meta AI"
+    },
+    {
+      "jornada": 75,
+      "user_id": "fortu",
+      "signos": ["1", "X", "2", "1", "X", "2", "1", "1", "X", "2", "X", "1", "2", "2", "2-1"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Falcon"
+    },
+    {
+      "jornada": 75,
+      "user_id": "fistro",
+      "signos": ["2", "1", "1", "1", "2", "X", "2", "1", "X", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Mistral"
+    },
+    {
+      "jornada": 75,
+      "user_id": "luzia",
+      "signos": ["2", "X", "2", "1", "2", "1", "2", "1", "2", "X", "2", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / LuzIA"
+    },
+    {
+      "jornada": 75,
+      "user_id": "luna",
+      "signos": ["X", "1", "1", "1", "2", "1", "2", "1", "X", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Kimi"
+    },
+    {
+      "jornada": 75,
+      "user_id": "erniebot",
+      "signos": ["2", "1", "X", "1", "2", "2", "2", "1", "2", "2", "2", "1", "1", "2", "2-1"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / ERNIE"
+    },
+    {
+      "jornada": 75,
+      "user_id": "oraculo",
+      "signos": ["X", "1", "2", "1", "2", "1", "2", "1", "X", "2", "1", "1", "1", "2", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / Qwen"
+    },
+    {
+      "jornada": 75,
+      "user_id": "jimmy",
+      "signos": ["2", "1", "1", "1", "X", "1", "X", "1", "1", "X", "X", "X", "1", "1", "2-0"],
+      "verified_at": "2026-07-28",
+      "source": "JORNADA_75_LM_ARENA.json / ChatJimmy"
     }
   ]
 }
