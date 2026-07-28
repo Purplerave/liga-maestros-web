@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "jornada": 75,
+  "fuente": {
+    "agente": "LM Arena",
+    "fecha_entrega": "2026-07-28",
+    "documento_origen": "No disponible en el workspace"
+  },
+  "partidos": [
+    {"id": 1, "local": "VPS Vaasa", "visitante": "Inter Turku"},
+    {"id": 2, "local": "TPS Turku", "visitante": "IFK Mariehamn"},
+    {"id": 3, "local": "AC Oulu", "visitante": "Ilves Tampere"},
+    {"id": 4, "local": "FC Lahti", "visitante": "FF Jaro"},
+    {"id": 5, "local": "IF Gnistan", "visitante": "KuPS Kuopio"},
+    {"id": 6, "local": "Fredrikstad", "visitante": "Sandefjord"},
+    {"id": 7, "local": "Start", "visitante": "Viking"},
+    {"id": 8, "local": "Molde FK", "visitante": "Sarpsborg"},
+    {"id": 9, "local": "KFUM Oslo", "visitante": "Kristiansund"},
+    {"id": 10, "local": "Aalesunds FK", "visitante": "Tromsø IL"},
+    {"id": 11, "local": "Brann", "visitante": "Rosenborg"},
+    {"id": 12, "local": "Häcken", "visitante": "Kalmar FF"},
+    {"id": 13, "local": "IFK Göteborg", "visitante": "Degerfors IF"},
+    {"id": 14, "local": "Brommapojkarna", "visitante": "Malmoe"},
+    {"id": 15, "local": "AIK", "visitante": "Orgryte IS"}
+  ],
+  "pronosticos": [
+    {
+      "participante_id": "programa",
+      "grupo": "programa",
+      "signos": [
+        "2", "1", "X", "1", "2",
+        "1", "2", "1", "1", "2",
+        "1", "1", "1", "2", "2-0"
+      ],
+      "origen": "PREDICCIONES_ACTUALES.json (q15_base_signs)"
+    }
+  ],
+  "notas": [
+    "Documento adjunto no disponible en el workspace; se omiten los participantes de Maestros IA (chatgpt, claude, gemini, grok, copilot) y de La Peña (mrpurple, chipi, geli, pepe, profe, fortu, oraculo, fistro, sesudo, jimmy) por ausencia de pronósticos completos para la jornada 75."
+  ]
+}
