@@ -1,13 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    SERVICE WORKER — Liga de Maestros
    
-   Estrategia: Cache-First para estaticos, Network-First para API.
+   Estrategia: Cache-First para estaticos, red directa para API.
    Offline: muestra la ultima version cargada de la pagina.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v2';
-const STATIC_CACHE = 'liga-maestros-static-v2';
-const API_CACHE = 'liga-maestros-api-v2';
+const CACHE = 'liga-maestros-v3';
+const STATIC_CACHE = 'liga-maestros-static-v3';
 
 const PRECACHE_URLS = [
     '/',
@@ -54,7 +53,7 @@ self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
-                keys.filter(key => key !== CACHE && key !== STATIC_CACHE && key !== API_CACHE)
+                keys.filter(key => key !== CACHE && key !== STATIC_CACHE)
                     .map(key => caches.delete(key))
             );
         }).then(() => self.clients.claim())
@@ -71,9 +70,13 @@ self.addEventListener('fetch', event => {
 
     const path = url.pathname;
 
-    // API — Network First con fallback a cache
+    // La API contiene datos dinámicos y privados. Nunca se almacena en Cache Storage.
     if (path.startsWith('/api/')) {
-        event.respondWith(networkFirstWithTimeout(request, 4000));
+        if (request.method !== 'GET') {
+            event.respondWith(fetch(request));
+            return;
+        }
+        event.respondWith(networkWithTimeout(request, 4000));
         return;
     }
 
@@ -142,23 +145,19 @@ async function networkFirst(request) {
     }
 }
 
-async function networkFirstWithTimeout(request, timeoutMs = 4000) {
+async function networkWithTimeout(request, timeoutMs = 4000) {
     const timeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout')), timeoutMs)
     );
     try {
-        const response = await Promise.race([fetch(request), timeout]);
-        if (response.ok) {
-            const cache = await caches.open(API_CACHE);
-            cache.put(request, response.clone());
-        }
-        return response;
+        return await Promise.race([fetch(request), timeout]);
     } catch {
-        const cached = await caches.match(request);
-        if (cached) return cached;
         return new Response(JSON.stringify({ status: 'error', message: 'Offline' }), {
             status: 503,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store'
+            }
         });
     }
 }
