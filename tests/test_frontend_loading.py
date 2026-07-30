@@ -92,3 +92,9 @@ def test_page_styles_do_not_contain_removed_cross_page_components():
     assert ".pulse-page" not in quiz
     assert ".world-cup-quiz-card" not in quiz
     assert not (ROOT / "static" / "css" / "pages" / "porra.css").exists()
+
+
+def test_awards_page_accepts_empty_jornada_and_month_lists():
+    contest = (ROOT / "static" / "js" / "contest.js").read_text(encoding="utf-8")
+    assert "jornadaItems[0]?.jornada" in contest
+    assert "monthItems[0]?.month" in contest

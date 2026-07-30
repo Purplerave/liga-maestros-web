@@ -335,8 +335,8 @@ function renderContestPageContent(view = "CONTEST_GENERAL") {
     if (view === "CONTEST_AWARDS") {
         const jornadaItems = contest.galardones?.jornadas || [];
         const monthItems = contest.galardones?.meses || [];
-        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0].jornada || "");
-        const selectedMonth = String(state.selectedAwardMonth || monthItems[0].month || "");
+        const selectedJornada = String(state.selectedAwardJornada || jornadaItems[0]?.jornada || "");
+        const selectedMonth = String(state.selectedAwardMonth || monthItems[0]?.month || "");
         const jornadaPick = jornadaItems.find(item => String(item.jornada) === selectedJornada) || jornadaItems[0];
         const monthPick = monthItems.find(item => String(item.month) === selectedMonth) || monthItems[0];
         const renderAwardChip = (item, idx, type = "jornada") => `
