@@ -1,6 +1,22 @@
 {
   "75": {
-    "programa": ["Análisis estadístico J75", "", "", "", "", "", "", "", "", "", "", "", "", "", "Favoritismo local en el pleno al 15."],
+    "programa": [
+      "Cuotas planas: ambos desenlaces ganadores superan claramente al empate.",
+      "TPS: 2,11 PPG local; Mariehamn: 0,13 PPG visitante.",
+      "Mercado abierto; Oulu domina local e Ilves conserva superioridad ELO.",
+      "Lahti suma siete puntos locales recientes; Jaro pierde sus cuatro salidas.",
+      "KuPS lidera, aventaja 101 ELO y suma diez puntos visitantes.",
+      "ELO idéntico; Fredrikstad produce 1,67 PPG como local.",
+      "Viking aventaja 243 ELO y registra 2,43 PPG; Start, 0,67.",
+      "Molde suma 15 puntos locales; Sarpsborg solamente siete fuera.",
+      "Kristiansund suma cuatro puntos visitantes y apenas marca fuera.",
+      "Tromsø registra 2,07 PPG; Aalesund ha recibido 29 goles.",
+      "Mercado favorece Brann; Rosenborg solamente produce 0,67 PPG visitante.",
+      "Kalmar lleva cero puntos visitante; Häcken posee 93 ELO adicionales.",
+      "Degerfors suma dos puntos recientes; Göteborg conserva 54 ELO adicionales.",
+      "Malmö supera 68 ELO y registra 1,57 PPG visitante.",
+      "Örgryte marca 0,43 por salida; 2-0 lidera el modelo Q15."
+    ],
     "claude": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
     "grok": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
     "chatgpt": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],

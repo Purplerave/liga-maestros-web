@@ -310,12 +310,13 @@ def ensure_jornada_75(conn):
 
     # Publicamos solo la columna conocida del Programa. Los Maestros se
     # incorporan cuando entregan sus pronosticos; nunca se clonan.
-    j75_signs = ["2", "1", "X", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
+    j75_signs = ["12", "1", "12", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
     conn.executemany(
         """
             INSERT INTO predicciones (user_id, jornada, partido_id, signo)
             VALUES ('programa', 75, ?, ?)
-            ON CONFLICT(user_id, jornada, partido_id) DO NOTHING
+            ON CONFLICT(user_id, jornada, partido_id)
+            DO UPDATE SET signo = excluded.signo
         """,
         enumerate(j75_signs, start=1),
     )
