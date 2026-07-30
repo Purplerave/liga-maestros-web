@@ -248,12 +248,18 @@ async function savePredictions() {
         });
         const result = await res.json();
         if (!res.ok || result.status !== "ok") throw new Error(result.message || "No se pudo guardar");
+        const savedSigns = Array.isArray(result.signos) && result.signos.length === 15
+            ? result.signos.map(sign => sign || "-")
+            : [...state.my_signs];
         clearDraft();
-        state.server_signs = [...state.my_signs];
+        state.my_signs = [...savedSigns];
+        state.server_signs = [...savedSigns];
         state.editMode = false;
+        hydrateHero();
+        renderArena();
 
         // 🎊 Celebrate save
-        const done = state.my_signs.filter(s => s !== "-").length;
+        const done = savedSigns.filter(s => s !== "-").length;
         if (typeof window.launchConfetti === "function") {
             if (done === 15) {
                 window.launchBigConfetti();
