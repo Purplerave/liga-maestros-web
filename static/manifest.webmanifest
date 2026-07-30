@@ -10,7 +10,14 @@
   "background_color": "#06090f",
   "theme_color": "#06090f",
   "categories": ["games", "sports", "entertainment"],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/static/img/ligademaestroslogo.png",
+      "sizes": "790x368",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -18,6 +25,12 @@
       "sizes": "790x368",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/static/img/ligademaestroslogo.png",
+      "sizes": "790x368",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

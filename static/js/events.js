@@ -258,18 +258,88 @@ async function refreshLiveSnapshot() {
 document.addEventListener("DOMContentLoaded", () => {
     bindEvents();
     initMicroInteractions();
-    // Mejoras progresivas: paleta de comandos y señales de sistema.
     try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
     try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
     refreshData();
-    let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
+    startLiveSSE();
+    showWelcomeOnboarding();
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
-            clearInterval(liveRefreshId);
-            liveRefreshId = null;
-        } else if (!liveRefreshId) {
-            refreshLiveSnapshot();
-            liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
+            stopLiveSSE();
+        } else {
+            startLiveSSE();
         }
     });
 });
+
+let liveSSE = null;
+
+function startLiveSSE() {
+    if (liveSSE) return;
+    const jornada = state.data?.jornada || "";
+    if (!jornada) return;
+    const url = `/api/live/stream?j=${encodeURIComponent(jornada)}`;
+    try {
+        liveSSE = new EventSource(url);
+        liveSSE.addEventListener("message", (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === "live_update" && data.matches) {
+                    const hadLive = hasLiveLeagueMatches();
+                    state.data = { ...state.data, partidos: mergeLiveData(state.data.partidos, data.matches) };
+                    logoAliasIndex = null;
+                    logoCache.clear();
+                    const hasLive = hasLiveLeagueMatches();
+                    if (!hadLive && !hasLive) return;
+                    if (state.currentFilter === "LIVE" && patchLiveArena()) return;
+                    if (state.currentFilter === "TICKET" && patchTicketArena()) return;
+                    hydrateHero();
+                    renderArena();
+                    loadPorra();
+                }
+            } catch {
+                // Ignore parse errors
+            }
+        });
+        liveSSE.onerror = () => {
+            stopLiveSSE();
+            setTimeout(startLiveSSE, 5000);
+        };
+    } catch {
+        // SSE not supported, fall back to polling
+        let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                clearInterval(liveRefreshId);
+                liveRefreshId = null;
+            } else if (!liveRefreshId) {
+                refreshLiveSnapshot();
+                liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
+            }
+        });
+    }
+}
+
+function stopLiveSSE() {
+    if (liveSSE) {
+        liveSSE.close();
+        liveSSE = null;
+    }
+}
+
+function mergeLiveData(partidos, liveMatches) {
+    if (!partidos || !liveMatches) return partidos || [];
+    const liveMap = new Map();
+    liveMatches.forEach((m) => {
+        const key = `${m.local}|${m.visitante}`;
+        liveMap.set(key, m);
+    });
+    return partidos.map((p) => {
+        const key = `${p.local || ""}|${p.visitante || ""}`;
+        const live = liveMap.get(key);
+        if (live) {
+            return { ...p, status: live.status, minuto: live.minuto };
+        }
+        return p;
+    });
+}

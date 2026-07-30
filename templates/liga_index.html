@@ -19,10 +19,12 @@
     <link rel="manifest" href="{{ url_for('main.static_files', filename='manifest.webmanifest', v=assets_v) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <!-- Sistema de capas CSS: gobierna la cascada (sin !important). El orden replica
          la carga historica; las vistas lazy se insertan siempre en 'pages'. -->
-    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays;</style>
+    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-1') }}">
@@ -42,11 +44,13 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_responsive.css', v=assets_v ~ '-mobile-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/onboarding.css', v=assets_v ~ '-onboarding-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
     <div class="app-shell">
         <section class="panel header-brand-panel">
-            <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Pe&ntilde;a vs IA">
+            <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Pe&ntilde;a vs IA" loading="lazy">
         </section>
 
         <header class="topbar-shell">

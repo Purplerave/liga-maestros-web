@@ -1,11 +1,11 @@
-"""Live routes: ticker, Q15 directo, sync status, health, refresh, probe."""
+"""Live routes: ticker, Q15 directo, sync status, health, refresh, probe, SSE."""
 
 import json
 import os
 import time
 from datetime import datetime
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, jsonify, request
 
 import config
 
@@ -314,4 +314,68 @@ def live_probe():
             },
             "api_usage": get_highlightly_usage(),
         }
+    )
+
+
+@bp.route("/api/live/stream")
+def live_stream():
+    """SSE endpoint for live match updates."""
+    jornada = request.args.get("j", "")
+
+    def generate():
+        last_signature = None
+        while True:
+            try:
+                conn = get_db()
+                rows = conn.execute(
+                    """
+                    SELECT jornada, partido_id, local, visitante, signo_actual,
+                           goles_local, goles_visitante, status, minuto
+                    FROM resultados
+                    WHERE jornada = ?
+                    ORDER BY partido_id
+                    """,
+                    (jornada,),
+                ).fetchall()
+                conn.close()
+
+                matches = []
+                for row in rows:
+                    matches.append(
+                        {
+                            "partido_id": int(row["partido_id"]),
+                            "local": row["local"] or "",
+                            "visitante": row["visitante"] or "",
+                            "signo_actual": row["signo_actual"] or "-",
+                            "goles_local": row["goles_local"],
+                            "goles_visitante": row["goles_visitante"],
+                            "status": row["status"] or "",
+                            "minuto": row["minuto"],
+                        }
+                    )
+
+                signature = json.dumps(matches, sort_keys=True)
+                if signature == last_signature:
+                    time.sleep(5)
+                    continue
+
+                last_signature = signature
+                payload = json.dumps(
+                    {"type": "live_update", "jornada": jornada, "matches": matches},
+                    ensure_ascii=False,
+                )
+                yield f"data: {payload}\n\n"
+                time.sleep(5)
+            except Exception:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'connection lost'})}\n\n"
+                time.sleep(10)
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )

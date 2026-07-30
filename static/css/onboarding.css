@@ -1,0 +1,62 @@
+@layer pages {
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 9, 15, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+}
+
+.onboarding-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-main);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 480px;
+    width: 100%;
+    color: var(--text-main);
+}
+
+.onboarding-modal h2 {
+    font-size: 1.4rem;
+    margin: 0 0 12px;
+    color: var(--accent);
+}
+
+.onboarding-modal p {
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.onboarding-modal ol {
+    margin: 0 0 20px;
+    padding-left: 20px;
+}
+
+.onboarding-modal li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.onboarding-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.onboarding-skip {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+}
+
+.onboarding-skip:hover {
+    color: var(--text-main);
+}
+}
