@@ -1165,4 +1165,216 @@ body.quiniela-focus .arena-table.is-tension-table td:nth-child(3) {
         min-height: 34px;
     }
 }
+
+/* ---------- Barras compactas de consenso y botón de explicación IA ---------- */
+
+.match-consensus-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    max-width: 340px;
+    margin: 6px auto 2px auto;
+    padding: 0 4px;
+}
+
+.ticket-compact-bar-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    line-height: 1;
+}
+
+.ticket-compact-bar-label {
+    font-weight: 700;
+    color: var(--text-secondary, #94a3b8);
+    text-transform: uppercase;
+    font-size: 0.64rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.ticket-compact-bar-track {
+    display: flex;
+    width: 100%;
+    height: 6px;
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ticket-compact-bar-track i {
+    display: block;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.ticket-compact-bar-track .bar-1 {
+    background: #38bdf8;
+}
+
+.ticket-compact-bar-track .bar-x {
+    background: #fbbf24;
+}
+
+.ticket-compact-bar-track .bar-2 {
+    background: #f43f5e;
+}
+
+.ticket-compact-bar-values {
+    font-size: 0.64rem;
+    color: var(--text-muted, #64748b);
+    white-space: nowrap;
+}
+
+.ticket-compact-bar-values b {
+    color: var(--text-main, #e2e8f0);
+    font-weight: 700;
+}
+
+.tension-chip-sign-group {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.ai-reason-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 50%;
+    background: rgba(30, 41, 59, 0.7);
+    color: var(--text-main, #e2e8f0);
+    font-size: 0.58rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.ai-reason-btn:hover,
+.ai-reason-btn:focus-visible {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+    outline: none;
+    transform: scale(1.1);
+}
+
+.ai-reason-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    background: rgba(6, 18, 31, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: aiModalFadeIn 0.2s ease-out;
+}
+
+.ai-reason-modal {
+    width: 100%;
+    max-width: 440px;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15);
+    overflow: hidden;
+    color: var(--text-main, #e2e8f0);
+}
+
+.ai-reason-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: rgba(30, 41, 59, 0.5);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.ai-reason-modal-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #38bdf8;
+}
+
+.ai-reason-modal-subtitle {
+    margin: 3px 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted, #94a3b8);
+}
+
+.ai-reason-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #94a3b8);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.ai-reason-modal-close:hover {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.ai-reason-modal-body {
+    padding: 18px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #e2e8f0;
+}
+
+.ai-reason-text {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ai-reason-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 18px;
+    background: rgba(30, 41, 59, 0.3);
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.ai-reason-modal-ok {
+    padding: 7px 18px;
+    background: #38bdf8;
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-reason-modal-ok:hover,
+.ai-reason-modal-ok:focus-visible {
+    background: #7dd3fc;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+@keyframes aiModalFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
 }
