@@ -519,3 +519,4 @@ function patchTicketArena() {
     return true;
 }
 /* cambio mínimo */
+// Barras consenso Peña + IA y botón motivos (datos existentes)
