@@ -297,4 +297,104 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
     width: 28px;
     height: 28px;
 }
+
+@media (max-width: 700px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table-wrap {
+        width: 100%;
+        min-width: 0;
+        overflow-x: visible;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        table-layout: auto;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table thead {
+        display: none;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table tbody {
+        display: grid;
+        width: 100%;
+        gap: 6px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .tension-row {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        grid-template-rows: auto auto;
+        gap: 4px 3px;
+        padding: 7px 5px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .tension-row > td {
+        width: auto;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .match-index-cell {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .tension-row > td.tension-fixture-cell:nth-child(2) {
+        grid-column: 2 / 7;
+        grid-row: 1;
+        width: auto;
+        min-width: 100%;
+        overflow: hidden;
+        justify-self: stretch;
+        align-self: center;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .tension-row > td.ticket-status-cell:nth-child(3) {
+        grid-column: 7 / 9;
+        grid-row: 1;
+        width: auto;
+        justify-self: stretch;
+        align-self: center;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pick-cell {
+        grid-row: 2;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        column-gap: 4px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
+        overflow: hidden;
+        font-size: 0.61rem;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-crest-pair {
+        grid-template-columns: 22px 7px 22px;
+        gap: 3px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
+        width: 22px;
+        height: 22px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .match-number {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+        line-height: 28px;
+    }
+}
 }

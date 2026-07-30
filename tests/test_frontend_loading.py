@@ -98,3 +98,13 @@ def test_awards_page_accepts_empty_jornada_and_month_lists():
     contest = (ROOT / "static" / "js" / "contest.js").read_text(encoding="utf-8")
     assert "jornadaItems[0]?.jornada" in contest
     assert "monthItems[0]?.month" in contest
+
+
+def test_ticket_mobile_layout_does_not_keep_desktop_min_width():
+    compact = (
+        ROOT / "static" / "css" / "themes" / "newspaper" / "ticket_compact.css"
+    ).read_text(encoding="utf-8")
+    mobile = compact.split("@media (max-width: 700px)", 1)[1]
+    assert ".arena-table.is-tension-table" in mobile
+    assert "min-width: 0" in mobile
+    assert "grid-template-columns: repeat(8, minmax(0, 1fr))" in mobile
