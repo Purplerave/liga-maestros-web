@@ -20,21 +20,21 @@ from liga_maestros.db.seed import apply_fixture_corrections, import_profile_hist
 from liga_maestros.routes.legal import delete_user_data
 
 
-def test_jornada_75_seed_requires_j74_and_does_not_clone_master_predictions():
+def test_jornada_75_seed_imports_fixture_and_pronosticos():
     conn = sqlite3.connect(":memory:")
     ensure_core_tables(conn)
     ensure_predicciones_unique_index(conn)
 
     ensure_jornada_75(conn)
-    assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 75").fetchone()[0] == 0
-
-    conn.execute("INSERT INTO resultados (jornada, partido_id) VALUES (74, 1)")
-    ensure_jornada_75(conn)
-    ensure_jornada_75(conn)
-
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 75").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 75").fetchone()[0] == 15
-    assert conn.execute("SELECT DISTINCT user_id FROM predicciones WHERE jornada = 75").fetchall() == [("programa",)]
+
+    pred_count = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 75").fetchone()[0]
+    assert pred_count >= 15
+    user_ids = {r[0] for r in conn.execute("SELECT DISTINCT user_id FROM predicciones WHERE jornada = 75").fetchall()}
+    assert "programa" in user_ids
+
+    ensure_jornada_75(conn)
+    assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 75").fetchone()[0] == 15
 
 
 def test_fresh_database_creates_core_schema_and_imports_public_seed(tmp_path, monkeypatch):
@@ -69,7 +69,7 @@ def test_fresh_database_creates_core_schema_and_imports_public_seed(tmp_path, mo
         assert conn.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0] == 0
         assert conn.execute("SELECT COUNT(*) FROM comentarios_jornada").fetchone()[0] == 0
         assert conn.execute("SELECT local FROM resultados").fetchone()[0] == "Local"
-        assert conn.execute("SELECT user_id FROM predicciones").fetchone()[0] == "programa"
+        assert conn.execute("SELECT user_id FROM predicciones WHERE jornada = 99").fetchone()[0] == "programa"
         assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
     finally:
         conn.close()
