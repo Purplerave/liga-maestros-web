@@ -209,10 +209,10 @@ function isLiveMatch(match) {
 }
 
 function getLiveLeagueMatches() {
-    const source = state.data?.live_matches || [
-        ...(state.data?.partidos || []),
-        ...getAllLeagueMatches()
-    ];
+    const lm = state.data?.live_matches;
+    const source = (lm && lm.length > 0)
+        ? lm
+        : [...(state.data?.partidos || []), ...getAllLeagueMatches()];
     const matchesById = new Map();
     source.filter(m => isLiveStatus(m.status) || isLiveMatch(m)).forEach(match => {
         const home = String(match.local || match.home_name || match.home?.name || "").toUpperCase();

@@ -84,3 +84,5 @@ COMPROBAR_JORNADA.bat
 PUBLICAR_WEB.bat
 data/LIVE_ALL_MATCHES*.json
 data/LIVE_TICKER.json
+data/RESULTADOS_LIVE.json
+liga_maestros.db
