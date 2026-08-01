@@ -29,10 +29,29 @@ function startCoverCountdown() {
         node.classList.toggle("is-urgent", diff < 3_600_000);
     }, 1000);
 }
+
+function startCoverScorebar() {
+    const fill = document.querySelector("#cp-scorebar-fill");
+    const humanEl = document.querySelector("#cp-scorebar-human");
+    const aiEl = document.querySelector("#cp-scorebar-ai");
+    if (!fill || !humanEl || !aiEl) return;
+    const tick = () => {
+        const scores = coverBandoScores();
+        const total = scores.human + scores.ai;
+        const pct = total > 0 ? (scores.human / total) * 100 : 50;
+        fill.style.width = pct + "%";
+        humanEl.textContent = scores.human;
+        aiEl.textContent = scores.ai;
+    };
+    tick();
+    setInterval(tick, 5000);
+}
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startCoverCountdown);
+    document.addEventListener("DOMContentLoaded", startCoverScorebar);
 } else {
     startCoverCountdown();
+    startCoverScorebar();
 }
 
 function hydrateCoverTypewriter() {}
@@ -88,6 +107,21 @@ function coverRankingRows() {
             jornada: Number(values?.jornada_live ?? values?.jornada ?? 0),
         }))
         .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.name.localeCompare(b.name, "es"));
+}
+
+function coverBandoScores() {
+    const rows = coverRankingRows();
+    const aiIds = new Set(coverMasterColumns().map(col => String(col.id || "").toLowerCase()));
+    const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
+    return rows.reduce(
+        (acc, row) => {
+            const uid = String(row.uid).toLowerCase();
+            if (aiIds.has(uid)) acc.ai += row.jornada;
+            else if (penaIds.has(uid)) acc.human += row.jornada;
+            return acc;
+        },
+        { human: 0, ai: 0 }
+    );
 }
 
 function coverPredictionSigns(entry) {
@@ -213,8 +247,19 @@ function renderNewspaperCoverPageV3() {
         : (saved ? "Revisar mi quiniela" : "Guardar quiniela");
     const statusLabel = closed ? "Jornada cerrada" : `Cierre en ${coverCloseLabel()}`;
     const distinctReadings = disagreement?.unique || 0;
+    const bandoScores = coverBandoScores();
+    const totalBando = bandoScores.human + bandoScores.ai;
+    const humanPct = totalBando > 0 ? (bandoScores.human / totalBando) * 100 : 50;
 
     return `<div class="cp">
+        <div class="cp-scorebar" aria-label="Marcador global humanos vs m&aacute;quinas">
+            <i id="cp-scorebar-fill" class="cp-scorebar-fill" style="width:${humanPct}%"></i>
+            <div class="cp-scorebar-content">
+                <span class="cp-scorebar-side is-pena">HUMANOS <b id="cp-scorebar-human">${bandoScores.human}</b></span>
+                <span class="cp-scorebar-vs" aria-hidden="true"></span>
+                <span class="cp-scorebar-side is-ai">M&Aacute;QUINAS <b id="cp-scorebar-ai">${bandoScores.ai}</b></span>
+            </div>
+        </div>
         <main class="cp-stage">
             <section class="cp-intro" aria-labelledby="cp-title">
                 <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span id="cp-deadline">${escapeHtml(statusLabel)}</span></div>

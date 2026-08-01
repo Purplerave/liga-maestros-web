@@ -1,4 +1,4 @@
-@layer overlays, animations {
+@layer animations {
 /* ── Animated gradient background ── */
 body.newspaper-ui {
     background: linear-gradient(135deg, #06090f 0%, #0a0e1a 25%, #0f1628 50%, #0a0e1a 75%, #06090f 100%);
@@ -168,14 +168,15 @@ body.newspaper-ui {
     border-radius: 4px;
 }
 
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        transition-duration: 0.01ms;
     }
-}
 }
