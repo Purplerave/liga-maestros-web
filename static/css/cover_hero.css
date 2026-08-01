@@ -755,7 +755,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand img {
-        height: clamp(62px, 9vh, 78px);
+        height: clamp(90px, 12vh, 132px);
     }
 
     .cp-kicker {
