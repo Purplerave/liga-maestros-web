@@ -1,10 +1,20 @@
 import argparse
 import shutil
 import sqlite3
+import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+_tools_root = str(Path(__file__).resolve().parent.parent)
+if _tools_root not in sys.path:
+    sys.path.insert(0, _tools_root)
+_scrapers_dir = str(Path(__file__).resolve().parent.parent / "scrapers")
+if _scrapers_dir not in sys.path:
+    sys.path.insert(0, _scrapers_dir)
+if str(Path(__file__).resolve().parent.parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
 
