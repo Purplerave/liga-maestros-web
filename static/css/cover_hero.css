@@ -9,7 +9,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand {
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand img {
     width: min(100%, 470px);
-    height: clamp(90px, 12vh, 132px);
+    height: clamp(40px, 5vh, 60px);
     object-fit: contain;
     object-position: left center;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.28));
@@ -944,3 +944,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     }
 }
 }
+
+/* CHISPA AUTOINSTALADA — countdown + VS + jerarquía */
+#cp-deadline { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--gold); font-weight: 700; }
+#cp-deadline.is-urgent { color: #f87171; animation: urgentPulse 1s ease-in-out infinite; }
+@keyframes urgentPulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { #cp-deadline.is-urgent { animation: none; } }
+
+.cp-side { animation: cornerIn .55s cubic-bezier(.16,1,.3,1) both; }
+.cp-side.is-ai { animation-name: cornerInR; animation-delay: .15s; }
+.cp-vs { animation: vsBeat 2.2s ease-in-out infinite; }
+.cp-duel:hover .cp-side.is-pena { transform: translateX(6px); }
+.cp-duel:hover .cp-side.is-ai  { transform: translateX(-6px); }
+.cp-side { transition: transform 200ms cubic-bezier(.16,1,.3,1); }
+
+@keyframes cornerIn  { from { transform: translateX(-36px); opacity: 0; } to { opacity: 1; } }
+@keyframes cornerInR { from { transform: translateX(36px);  opacity: 0; } to { opacity: 1; } }
+@keyframes vsBeat    { 0%,100% { transform: scale(1); box-shadow: 0 0 0 rgba(239,68,68,.45); } 50% { transform: scale(1.08); box-shadow: 0 0 22px rgba(239,68,68,.65); } }
