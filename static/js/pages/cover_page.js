@@ -10,6 +10,31 @@ function loadSacramentoFont() {
     document.head.appendChild(link);
 }
 
+function startCoverCountdown() {
+    const node = document.querySelector("#cp-deadline");
+    if (!node) return;
+    setInterval(() => {
+        const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
+        if (!raw) { node.textContent = "CIERRE EN ..."; return; }
+        const target = new Date(String(raw).replace(" ", "T"));
+        const diff = target.getTime() - Date.now();
+        if (diff <= 0 || (state && state.data && state.data.is_locked)) {
+            node.textContent = "CERRADA";
+            node.classList.add("is-urgent");
+            return;
+        }
+        const s = Math.max(0, Math.floor(diff / 1000));
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+        node.textContent = `${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+        node.classList.toggle("is-urgent", diff < 3_600_000);
+    }, 1000);
+}
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startCoverCountdown);
+} else {
+    startCoverCountdown();
+}
+
 function hydrateCoverTypewriter() {}
 
 function coverCloseLabel() {
@@ -185,19 +210,19 @@ function renderNewspaperCoverPageV3() {
     const next = coverNextMatch(matches);
     const ctaLabel = closed
         ? (saved ? "Ver mi quiniela" : "Ver resultados")
-        : (saved ? "Revisar mi quiniela" : "Hacer mi quiniela");
+        : (saved ? "Revisar mi quiniela" : "Guardar quiniela");
     const statusLabel = closed ? "Jornada cerrada" : `Cierre en ${coverCloseLabel()}`;
     const distinctReadings = disagreement?.unique || 0;
 
     return `<div class="cp">
         <main class="cp-stage">
             <section class="cp-intro" aria-labelledby="cp-title">
-                <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span>${escapeHtml(statusLabel)}</span></div>
+                <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span id="cp-deadline">${escapeHtml(statusLabel)}</span></div>
                 <div class="cp-cover-brand" id="cp-title">
                     <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
                     <span>La competici&oacute;n de la quiniela</span>
                 </div>
-                <p class="cp-lead">Compite contra nuestro Programa, los Maestros IA y toda La Pe&ntilde;a. Suma aciertos, escala en el ranking y conquista la jornada.<strong class="cp-challenge">&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
+                <p class="cp-lead"><strong>Grok 144. Claude 141. ChatGPT 139.</strong> 75 jornadas. Tres semanas ganando. Una para meterla.<strong class="cp-challenge">&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Ver clasificaci&oacute;n</button>
