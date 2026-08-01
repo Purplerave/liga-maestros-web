@@ -122,6 +122,8 @@ function renderArena() {
         container.className = "arena-content newspaper-cover-mode";
         container.innerHTML = renderNewspaperCoverPageV3();
         requestAnimationFrame(hydrateCoverTypewriter);
+        if (typeof startCoverCountdown === "function") startCoverCountdown();
+        if (typeof startCoverScorebar === "function") startCoverScorebar();
         loadPorra();
         loadNewsBriefing();
         return;

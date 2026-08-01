@@ -10,9 +10,14 @@ function loadSacramentoFont() {
     document.head.appendChild(link);
 }
 
+let _countdownStarted = false;
+let _scorebarStarted = false;
+
 function startCoverCountdown() {
+    if (_countdownStarted) return;
     const node = document.querySelector("#cp-deadline");
     if (!node) return;
+    _countdownStarted = true;
     setInterval(() => {
         const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
         if (!raw) { node.textContent = "CIERRE EN ..."; return; }
@@ -31,10 +36,12 @@ function startCoverCountdown() {
 }
 
 function startCoverScorebar() {
+    if (_scorebarStarted) return;
     const fill = document.querySelector("#cp-scorebar-fill");
     const humanEl = document.querySelector("#cp-scorebar-human");
     const aiEl = document.querySelector("#cp-scorebar-ai");
     if (!fill || !humanEl || !aiEl) return;
+    _scorebarStarted = true;
     const tick = () => {
         const scores = coverBandoScores();
         const total = scores.human + scores.ai;

@@ -1,3 +1,4 @@
+import json
 import os
 import sqlite3
 
@@ -273,10 +274,38 @@ def run_startup_migrations():
             _unlock_file(lock_fh)
 
 
+def _import_j75_pronosticos(conn):
+    """Import pronosticos from the J75 arena data file into predicciones."""
+    arena_path = os.path.join(config.SEED_DATA_DIR, "inbox", "JORNADA_75_LM_ARENA.json")
+    if not os.path.exists(arena_path):
+        return
+    try:
+        with open(arena_path, encoding="utf-8") as fh:
+            arena = json.load(fh)
+    except (OSError, ValueError, TypeError):
+        return
+    for entry in arena.get("pronosticos", []):
+        uid = entry.get("participante_id")
+        if not uid:
+            continue
+        signos = entry.get("signos", [])
+        for partido_id, raw_sign in enumerate(signos, start=1):
+            sign = str(raw_sign or "-").strip().upper()
+            if partido_id > 15:
+                continue
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo)
+                VALUES (?, 75, ?, ?)
+                """,
+                (uid, partido_id, sign),
+            )
+
+
 def ensure_jornada_75(conn):
-    """Import the public J75 fixture only after the preceding jornada exists."""
-    has_previous = conn.execute("SELECT 1 FROM resultados WHERE jornada = 74 LIMIT 1").fetchone()
-    if not has_previous:
+    """Import the public J75 fixture and pronosticos from arena data."""
+    existing = conn.execute("SELECT 1 FROM resultados WHERE jornada = 75 LIMIT 1").fetchone()
+    if existing:
         return
 
     j75_matches = [
@@ -320,5 +349,7 @@ def ensure_jornada_75(conn):
         """,
         enumerate(j75_signs, start=1),
     )
+
+    _import_j75_pronosticos(conn)
 
     conn.commit()
