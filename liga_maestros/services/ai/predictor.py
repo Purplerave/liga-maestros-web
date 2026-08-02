@@ -16,9 +16,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np  # noqa: F401 — used by MOTOR_QUINIELA_MAESTRO runtime
-import pandas as pd  # noqa: F401 — used by MOTOR_QUINIELA_MAESTRO runtime
-
 logger = logging.getLogger(__name__)
 
 MOTOR_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent / "QUINIELA_MOTOR"

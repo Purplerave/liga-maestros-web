@@ -4,9 +4,6 @@
 .match-card-container {
     display: flex;
     flex-direction: column;
-    height: auto;
-    max-height: none;
-    overflow: visible;
 }
 
 .live-grouped-grid {
@@ -14,21 +11,10 @@
     grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
     align-content: start;
     gap: 10px;
-    height: auto;
-    max-height: none;
-}
-
-body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content,
-body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.live-grouped-grid {
-    height: auto;
-    max-height: none;
-    overflow: visible;
 }
 
 .league-match-group {
     overflow: visible;
-    height: auto;
-    max-height: none;
     border: 1px solid var(--border-main);
     border-radius: 8px;
     background: rgba(7, 12, 22, 0.76);
