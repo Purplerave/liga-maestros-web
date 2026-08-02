@@ -14,7 +14,7 @@
 }
 
 .league-match-group {
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid var(--border-main);
     border-radius: 8px;
     background: rgba(7, 12, 22, 0.76);

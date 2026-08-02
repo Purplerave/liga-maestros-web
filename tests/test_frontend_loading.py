@@ -101,9 +101,7 @@ def test_awards_page_accepts_empty_jornada_and_month_lists():
 
 
 def test_ticket_mobile_layout_does_not_keep_desktop_min_width():
-    compact = (
-        ROOT / "static" / "css" / "themes" / "newspaper" / "ticket_compact.css"
-    ).read_text(encoding="utf-8")
+    compact = (ROOT / "static" / "css" / "themes" / "newspaper" / "ticket_compact.css").read_text(encoding="utf-8")
     mobile = compact.split("@media (max-width: 700px)", 1)[1]
     assert ".arena-table.is-tension-table" in mobile
     assert "min-width: 0" in mobile

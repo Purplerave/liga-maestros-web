@@ -2,9 +2,7 @@
 
 from flask import Blueprint, jsonify, request, session
 
-from ..db.connection import get_db
 from ..services.ai import get_cached_predictions, get_prediction_stats, refresh_predictions_for_active_jornada
-from ..services.highlightly import Q15_EXPECTED_MATCHES
 
 bp = Blueprint("ai_predictions", __name__)
 
