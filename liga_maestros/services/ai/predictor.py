@@ -16,8 +16,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
+import numpy as np  # noqa: F401 — used by MOTOR_QUINIELA_MAESTRO runtime
+import pandas as pd  # noqa: F401 — used by MOTOR_QUINIELA_MAESTRO runtime
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +61,9 @@ def _load_jornada_data(jornada):
 
 def _compute_predictions(jornada, partidos, history):
     from MOTOR_QUINIELA_MAESTRO import (
-        compute_features_for_upcoming,
-        build_logit_model,
         build_hgb_model,
+        build_logit_model,
+        compute_features_for_upcoming,
     )
 
     features = compute_features_for_upcoming(partidos, history, datetime.now().date())
@@ -74,7 +74,8 @@ def _compute_predictions(jornada, partidos, history):
     hgb = build_hgb_model()
 
     feature_cols = [
-        c for c in features.columns
+        c
+        for c in features.columns
         if c not in ("date", "home", "away", "division", "division_code", "season", "source_file", "result")
     ]
     X = features[feature_cols].fillna(0).values

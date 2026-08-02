@@ -266,7 +266,7 @@ function showWelcomeOnboarding() {
     });
 }
 
-function savePredictions() {
+async function savePredictions() {
     if (!state.user) return showToast("Entra con Google para guardar.", "error");
     if (!state.data || String(state.data.jornada) !== String(state.data.max_jornada) || state.data.is_locked) {
         return showToast("Esta jornada ya esta cerrada.", "error");
@@ -395,7 +395,7 @@ function shareTicket() {
     }
 }
 
-function loadNewsBriefing() {
+async function loadNewsBriefing() {
     const target = qs("cover-news-content");
     if (!target) return;
     try {

@@ -16,13 +16,13 @@ if _scrapers_dir not in sys.path:
 if str(Path(__file__).resolve().parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
+from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo  # noqa: E402
 
-import config
-import utils
-from liga_maestros.db.connection import get_db
-from liga_maestros.middleware.json_lock import write_json_locked
-from liga_maestros.services import (
+import config  # noqa: E402
+import utils  # noqa: E402
+from liga_maestros.db.connection import get_db  # noqa: E402
+from liga_maestros.middleware.json_lock import write_json_locked  # noqa: E402
+from liga_maestros.services import (  # noqa: E402
     HIGHLIGHTLY_REFRESH_ENABLED,
     compute_refresh_window,
     get_highlightly_circuit,

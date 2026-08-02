@@ -69,16 +69,12 @@ def test_service_worker_cache_names_are_bumped_together():
 def test_service_worker_never_caches_api_or_post_requests():
     """Dynamic/private API data and writes must bypass Cache Storage."""
     sw = SW.read_text(encoding="utf-8")
-    api_block = sw.split("if (path.startsWith('/api/'))", 1)[1].split(
-        "// Archivos estaticos", 1
-    )[0]
+    api_block = sw.split("if (path.startsWith('/api/'))", 1)[1].split("// Archivos estaticos", 1)[0]
     assert "request.method !== 'GET'" in api_block
     assert "fetch(request)" in api_block
     assert "networkWithTimeout(request" in api_block
     assert "API_CACHE" not in sw
-    assert "caches.open" not in sw.split(
-        "async function networkWithTimeout", 1
-    )[1]
+    assert "caches.open" not in sw.split("async function networkWithTimeout", 1)[1]
 
 
 def test_palette_is_progressive_enhancement():
