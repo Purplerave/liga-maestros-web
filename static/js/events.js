@@ -272,58 +272,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-let liveSSE = null;
+let liveRefreshId = null;
+let currentPollInterval = null;
 
 function startLiveSSE() {
-    if (liveSSE) return;
     const jornada = state.data?.jornada || "";
     if (!jornada) return;
-    const url = `/api/live/stream?j=${encodeURIComponent(jornada)}`;
-    try {
-        liveSSE = new EventSource(url);
-        liveSSE.addEventListener("message", (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === "live_update" && data.matches) {
-                    const hadLive = hasLiveLeagueMatches();
-                    state.data = { ...state.data, partidos: mergeLiveData(state.data.partidos, data.matches) };
-                    logoAliasIndex = null;
-                    logoCache.clear();
-                    const hasLive = hasLiveLeagueMatches();
-                    if (!hadLive && !hasLive) return;
-                    if (state.currentFilter === "LIVE" && patchLiveArena()) return;
-                    if (state.currentFilter === "TICKET" && patchTicketArena()) return;
-                    hydrateHero();
-                    renderArena();
-                    loadPorra();
-                }
-            } catch {
-                // Ignore parse errors
-            }
-        });
-        liveSSE.onerror = () => {
-            stopLiveSSE();
-            setTimeout(startLiveSSE, 5000);
-        };
-    } catch {
-        // SSE not supported, fall back to polling
-        let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                clearInterval(liveRefreshId);
-                liveRefreshId = null;
-            } else if (!liveRefreshId) {
-                refreshLiveSnapshot();
-                liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
-            }
-        });
+
+    const hasLive = hasLiveLeagueMatches();
+    const desiredInterval = hasLive ? 20000 : 60000; // 20s if live, 60s if not
+
+    if (liveRefreshId && currentPollInterval === desiredInterval) {
+        return; // Already running with correct interval
     }
+
+    if (liveRefreshId) {
+        clearInterval(liveRefreshId);
+    }
+
+    currentPollInterval = desiredInterval;
+    liveRefreshId = setInterval(refreshLiveSnapshot, desiredInterval);
 }
 
 function stopLiveSSE() {
-    if (liveSSE) {
-        liveSSE.close();
-        liveSSE = null;
+    if (liveRefreshId) {
+        clearInterval(liveRefreshId);
+        liveRefreshId = null;
+        currentPollInterval = null;
     }
 }
 
