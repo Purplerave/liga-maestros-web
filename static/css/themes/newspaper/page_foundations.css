@@ -8,6 +8,12 @@ body.newspaper-ui.quiniela-focus .newspaper-cover-mode {
     padding: 0;
 }
 
+/* Modo Directo + navegacion por ligas: la arena debe crecer con el contenido
+   para que .main-arena (overflow:auto) pueda hacer scroll real. */
+body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content {
+    height: auto;
+}
+
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mode {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
