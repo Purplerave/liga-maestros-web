@@ -5,9 +5,9 @@ o si el proveedor falla, las funciones devuelven un valor vacio y la web sigue
 funcionando exactamente igual. Nunca lanzan excepciones hacia arriba.
 """
 
-from .predictor import (
-    get_cached_predictions as get_cached_predictions,
-    get_prediction_stats as get_prediction_stats,
-    motor_enabled as motor_enabled,
-    refresh_predictions_for_active_jornada as refresh_predictions_for_active_jornada,
+from .predictor import (  # noqa: F401
+    get_cached_predictions,
+    get_prediction_stats,
+    motor_enabled,
+    refresh_predictions_for_active_jornada,
 )
