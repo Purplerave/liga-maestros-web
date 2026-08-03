@@ -1,0 +1,793 @@
+From 0cbc5fbbe1a9c816e77e820fc82b554da3e27b32 Mon Sep 17 00:00:00 2001
+From: Arena Fix Bot <arena-fix@local>
+Date: Mon, 3 Aug 2026 20:44:13 +0000
+Subject: [PATCH] fix(quiniela): jornada incompleta se autorepara a 15 partidos
+ (J75)
+
+ensure_jornada_75() se saltaba todo si existia cualquier fila de la
+jornada: una importacion a medias dejaba la pestana Quiniela rota para
+siempre (partidos ausentes, huecos '-', duplicados).
+
+- Nueva ensure_jornada_completa(): lee data/quiniela15_J{N}_scrape.json
+  y completa la jornada (inserta ausentes, rellena vacios, deduplica
+  conservando la fila mas completa). Nunca toca goles/estado/minuto de
+  partidos jugados o en directo. Corre en cada arranque.
+- build_jornada_matches(): autocompleta huecos desde el scrape para que
+  el boleto siempre muestre los 15 partidos.
+- Nuevo tools/ops/REPARAR_JORNADA_QUINIELA.py: reparacion manual
+  standalone con --check (diagnostico) y backup automatico de la BD.
+- Tests de regresion (7 nuevos, suite completa 140 en verde).
+---
+ CHANGELOG.md                               |  29 +++
+ liga_maestros/db/migrations.py             | 244 +++++++++++++++++----
+ liga_maestros/services/payloads/matches.py |  52 +++++
+ tests/test_ensure_jornada_completa.py      | 147 +++++++++++++
+ tools/ops/REPARAR_JORNADA_QUINIELA.py      | 227 +++++++++++++++++++
+ 5 files changed, 658 insertions(+), 41 deletions(-)
+ create mode 100644 tests/test_ensure_jornada_completa.py
+ create mode 100644 tools/ops/REPARAR_JORNADA_QUINIELA.py
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 7d930ef..310b33b 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2,6 +2,35 @@
+ 
+ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
+ 
++## 2026-08-03 — Quiniela J75 autoreparable
++
++### Corregido
++
++- 🔴 **La pestaña Quiniela mostraba la última jornada a medias.** La migración
++  `ensure_jornada_75()` se saltaba todo el trabajo si existía **cualquier** fila
++  de la jornada en `resultados`. Si una importación quedó a medias (partidos
++  ausentes, filas vacías `-/-` o duplicadas), la jornada se quedaba rota para
++  siempre y el boleto renderizaba `Pendiente / -` en los huecos.
++  - Nueva `ensure_jornada_completa()` (en `liga_maestros/db/migrations.py`)
++    lee el boleto oficial `data/quiniela15_J{N}_scrape.json` (ya va en el repo)
++    e **inserta los partidos que falten, rellena filas vacías y elimina
++    duplicados** quedándose con la fila más completa. Nunca toca goles,
++    estados ni minutos de partidos jugados o en directo, así que es segura a
++    mitad de jornada. Corre sola en cada arranque de la app.
++  - `build_jornada_matches()` autocompleta desde el scrape los huecos antes
++    de responder: aunque una BD esté incompleta, la pestaña siempre muestra el
++    boleto de 15 partidos.
++
++### Añadido
++
++- **`tools/ops/REPARAR_JORNADA_QUINIELA.py`** — reparación manual en un comando:
++  `python tools/ops/REPARAR_JORNADA_QUINIELA.py --jornada 75` (con `--check` solo
++  diagnostica: ausentes, vacíos y duplicados). Hace backup de la BD antes de
++  escribir y es standalone (no depende del resto del código).
++- Tests de regresión: jornada parcial se completa, filas vacías se rellenan,
++  duplicados se eliminan, resultados en directo no se tocan, payload siempre
++  devuelve 15 partidos.
++
+ ## 2026-07 — Frontend from the future (26 de julio de 2026)
+ 
+ Capa de producto sobre el design system: navegación por teclado, señales de
+diff --git a/liga_maestros/db/migrations.py b/liga_maestros/db/migrations.py
+index 765902d..703d213 100644
+--- a/liga_maestros/db/migrations.py
++++ b/liga_maestros/db/migrations.py
+@@ -302,53 +302,215 @@ def _import_j75_pronosticos(conn):
+             )
+ 
+ 
+-def ensure_jornada_75(conn):
+-    """Import the public J75 fixture and pronosticos from arena data."""
+-    existing = conn.execute("SELECT 1 FROM resultados WHERE jornada = 75 LIMIT 1").fetchone()
+-    if existing:
+-        return
+-
+-    j75_matches = [
+-        (75, 1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
+-        (75, 2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
+-        (75, 3, "AC Oulu", "Ilves Tampere", "2026-08-02", "16:00"),
+-        (75, 4, "FC Lahti", "FF Jaro", "2026-08-01", "17:00"),
+-        (75, 5, "IF Gnistan", "KuPS Kuopio", "2026-08-01", "18:00"),
+-        (75, 6, "Fredrikstad", "Sandefjord", "2026-08-01", "16:00"),
+-        (75, 7, "Start", "Viking", "2026-08-01", "18:00"),
+-        (75, 8, "Molde FK", "Sarpsborg", "2026-08-02", "17:00"),
+-        (75, 9, "KFUM Oslo", "Kristiansund", "2026-08-02", "17:00"),
+-        (75, 10, "Aalesunds FK", "Tromsø IL", "2026-08-02", "17:00"),
+-        (75, 11, "Brann", "Rosenborg", "2026-08-02", "19:15"),
+-        (75, 12, "Häcken", "Kalmar FF", "2026-08-01", "15:00"),
+-        (75, 13, "IFK Göteborg", "Degerfors IF", "2026-08-02", "14:00"),
+-        (75, 14, "Brommapojkarna", "Malmoe", "2026-08-02", "14:00"),
+-        (75, 15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
+-    ]
+-
+-    conn.executemany(
++# Boleto publico J75 (fallback si falta el JSON del scrape en data/).
++J75_FALLBACK_MATCHES = [
++    (1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
++    (2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
++    (3, "AC Oulu", "Ilves Tampere", "2026-08-02", "16:00"),
++    (4, "FC Lahti", "FF Jaro", "2026-08-01", "17:00"),
++    (5, "IF Gnistan", "KuPS Kuopio", "2026-08-01", "18:00"),
++    (6, "Fredrikstad", "Sandefjord", "2026-08-01", "16:00"),
++    (7, "Start", "Viking", "2026-08-01", "18:00"),
++    (8, "Molde FK", "Sarpsborg", "2026-08-02", "17:00"),
++    (9, "KFUM Oslo", "Kristiansund", "2026-08-02", "17:00"),
++    (10, "Aalesunds FK", "Tromsø IL", "2026-08-02", "17:00"),
++    (11, "Brann", "Rosenborg", "2026-08-02", "19:15"),
++    (12, "Häcken", "Kalmar FF", "2026-08-01", "15:00"),
++    (13, "IFK Göteborg", "Degerfors IF", "2026-08-02", "14:00"),
++    (14, "Brommapojkarna", "Malmoe", "2026-08-02", "14:00"),
++    (15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
++]
++
++
++def load_scrape_matches(jornada):
++    """Read the public quiniela15 scrape for a jornada.
++
++    Returns a list of (partido_id, local, visitante, fecha, hora) or None when
++    no complete scrape file is available. The scrape files shipped in data/
++    are the source of truth for the 15-match fixture.
++    """
++    candidates = []
++    for base_dir in (
++        getattr(config, "SEED_DATA_DIR", ""),
++        getattr(config, "DATA_DIR", ""),
++        os.path.join(config.BASE_DIR, "data"),
++    ):
++        if base_dir:
++            candidates.append(os.path.join(base_dir, f"quiniela15_J{jornada}_scrape.json"))
++    for path in candidates:
++        if not os.path.exists(path):
++            continue
++        try:
++            with open(path, encoding="utf-8") as fh:
++                data = json.load(fh)
++        except (OSError, ValueError, TypeError):
++            continue
++        try:
++            if int(data.get("jornada") or 0) != int(jornada):
++                continue
++        except (TypeError, ValueError):
++            continue
++        partidos = data.get("partidos") or []
++        if len(partidos) < 15:
++            continue
++        horarios = data.get("horarios") or {}
++        matches = []
++        for item in partidos[:15]:
++            try:
++                num = int(item.get("num") or item.get("id") or 0)
++            except (TypeError, ValueError):
++                continue
++            local = str(item.get("local") or "").strip()
++            visitante = str(item.get("visitante") or "").strip()
++            if not num or not local or not visitante:
++                continue
++            horario = horarios.get(str(num)) or {}
++            fecha = str(horario.get("fecha") or item.get("fecha") or "").strip()[:10]
++            hora = str(horario.get("hora") or item.get("hora") or "").strip()[:5]
++            matches.append((num, local, visitante, fecha, hora))
++        if len(matches) == 15 and {m[0] for m in matches} == set(range(1, 16)):
++            return matches
++    return None
++
++
++def _match_row_quality(row):
++    """Score a resultados row: result > live status > identity completeness."""
++    score = 0
++    if row[6] is not None or row[7] is not None:
++        score += 4
++    if str(row[5] or "").upper() not in ("", "NS", "SCHEDULED"):
++        score += 2
++    if str(row[1] or "").strip() not in ("", "-"):
++        score += 1
++    return score
++
++
++def ensure_jornada_completa(conn, jornada, fallback_matches=None):
++    """Guarantee the 15 matches of a jornada exist with real fixture data.
++
++    Repairs partial imports: inserts missing matches and backfills identity
++    fields (local/visitante/fecha/hora) on rows that are empty or outdated.
++    Never touches goals/status/minute and never renames matches that already
++    have a result or are live, so running it mid-jornada is safe.
++
++    Returns the number of rows inserted or updated.
++    """
++    jornada = int(jornada)
++    matches = load_scrape_matches(jornada) or list(fallback_matches or [])
++    if len(matches) != 15:
++        return 0
++
++    existing = {}
++    duplicates = []
++    for row in conn.execute(
+         """
+-            INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora, goles_local, goles_visitante)
+-            SELECT ?, ?, ?, ?, 'NS', ?, ?, NULL, NULL
+-            WHERE NOT EXISTS (
+-                SELECT 1 FROM resultados WHERE jornada = ? AND partido_id = ?
+-            )
++        SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante, rowid
++        FROM resultados
++        WHERE jornada = ?
+         """,
+-        [match + (match[0], match[1]) for match in j75_matches],
+-    )
++        (jornada,),
++    ).fetchall():
++        try:
++            pid = int(row[0])
++        except (TypeError, ValueError):
++            continue
++        if pid in existing:
++            # Filas duplicadas (importaciones a medias del pasado): nos quedamos
++            # con la mas completa (resultado > estado > nombre) y borramos el resto.
++            candidates = [existing[pid], row]
++            keep = max(candidates, key=_match_row_quality)
++            drop = candidates[0] if keep is candidates[1] else candidates[1]
++            duplicates.append(drop[8])
++            existing[pid] = keep
++        else:
++            existing[pid] = row
++    for rowid in duplicates:
++        conn.execute("DELETE FROM resultados WHERE rowid = ?", (rowid,))
++
++    changed = len(duplicates)
++    for num, local, visitante, fecha, hora in matches:
++        row = existing.get(num)
++        if row is None:
++            conn.execute(
++                """
++                INSERT INTO resultados (
++                    jornada, partido_id, local, visitante, status, fecha, hora,
++                    goles_local, goles_visitante, minuto, signo_actual
++                )
++                VALUES (?, ?, ?, ?, 'NS', ?, ?, NULL, NULL, '', '-')
++                """,
++                (jornada, num, local, visitante, fecha, hora),
++            )
++            changed += 1
++            continue
++
++        status = str(row[5] or "").upper()
++        has_result = row[6] is not None or row[7] is not None
++        in_play = status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "FT", "FINISHED", "TERMINADO")
++        if in_play and has_result:
++            continue
++
++        current_identity = (
++            str(row[1] or "").strip(),
++            str(row[2] or "").strip(),
++            str(row[3] or "").strip()[:10],
++            str(row[4] or "").strip()[:5],
++        )
++        # Solo corregimos identidad cuando falta algo o el partido aun no arranco.
++        incomplete = (
++            not current_identity[0]
++            or current_identity[0] == "-"
++            or not current_identity[1]
++            or current_identity[1] == "-"
++            or not current_identity[2]
++        )
++        identity_differs = (current_identity[0], current_identity[1]) != (local, visitante)
++        schedule_differs = bool(fecha) and (current_identity[2], current_identity[3]) != (fecha, hora)
++        if not incomplete and not (not in_play and (identity_differs or schedule_differs)):
++            continue
++        if in_play and not incomplete:
++            continue
++        conn.execute(
++            """
++            UPDATE resultados
++            SET local = ?, visitante = ?, fecha = ?, hora = ?
++            WHERE jornada = ? AND partido_id = ?
++            """,
++            (local, visitante, fecha or current_identity[2], hora or current_identity[3], jornada, num),
++        )
++        changed += 1
++
++    conn.commit()
++    return changed
++
++
++def ensure_jornada_75(conn):
++    """Import the public J75 fixture and pronosticos from arena data.
++
++    Idempotent and self-healing: a partial J75 (previous bug left the jornada
++    with fewer than 15 matches whenever any row already existed) is completed
++    from the scrape file shipped in data/.
++    """
++    ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES)
+ 
+     # Publicamos solo la columna conocida del Programa. Los Maestros se
+     # incorporan cuando entregan sus pronosticos; nunca se clonan.
+     j75_signs = ["12", "1", "12", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
+-    conn.executemany(
+-        """
+-            INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+-            VALUES ('programa', 75, ?, ?)
+-            ON CONFLICT(user_id, jornada, partido_id)
+-            DO UPDATE SET signo = excluded.signo
+-        """,
+-        enumerate(j75_signs, start=1),
+-    )
++    try:
++        conn.executemany(
++            """
++                INSERT INTO predicciones (user_id, jornada, partido_id, signo)
++                VALUES ('programa', 75, ?, ?)
++                ON CONFLICT(user_id, jornada, partido_id)
++                DO UPDATE SET signo = excluded.signo
++            """,
++            enumerate(j75_signs, start=1),
++        )
++        conn.commit()
++    except sqlite3.OperationalError:
++        # Indice unico todavia no creado (llamada directa fuera de
++        # run_startup_migrations): los signos se aplicaran en el proximo arranque.
++        pass
+ 
+     _import_j75_pronosticos(conn)
+ 
+diff --git a/liga_maestros/services/payloads/matches.py b/liga_maestros/services/payloads/matches.py
+index 74ff88d..e04ac2d 100644
+--- a/liga_maestros/services/payloads/matches.py
++++ b/liga_maestros/services/payloads/matches.py
+@@ -1,10 +1,50 @@
+ """Build the 15-match jornada payload."""
+ 
++import logging
+ from datetime import datetime
+ 
+ from ...services.ticket import today_madrid
+ from ...utils import normalize_team_key
+ 
++logger = logging.getLogger(__name__)
++
++
++def _scrape_backfill_rows(jornada, present_ids):
++    """Fill missing jornada matches from the public quiniela15 scrape.
++
++    A partial jornada in `resultados` used to render as '-'/'Pendiente'
++    placeholders on the ticket. When the scrape file for the jornada ships in
++    data/, we synthesize NS rows for the missing match ids so the ticket always
++    shows the complete 15-match fixture. Returns a list of row dicts.
++    """
++    try:
++        from ...db.migrations import load_scrape_matches
++    except Exception:  # pragma: no cover - defensive import guard
++        return []
++    try:
++        matches = load_scrape_matches(jornada)
++    except Exception:  # pragma: no cover
++        logger.exception("No se pudo leer el scrape de la jornada %s", jornada)
++        return []
++    rows = []
++    for num, local, visitante, fecha, hora in matches or []:
++        if num in present_ids:
++            continue
++        rows.append(
++            {
++                "id": num,
++                "local": local,
++                "visitante": visitante,
++                "goles_local": None,
++                "goles_visitante": None,
++                "status": "NS",
++                "fecha": fecha,
++                "hora": hora,
++                "minuto": "",
++            }
++        )
++    return rows
++
+ 
+ def build_jornada_matches(conn, jornada, team_logos):
+     def logo_for(team_name):
+@@ -20,6 +60,18 @@ def build_jornada_matches(conn, jornada, team_logos):
+     """,
+         (jornada,),
+     ).fetchall()
++    rows = [dict(row) for row in rows]
++
++    present_ids = set()
++    for row in rows:
++        try:
++            present_ids.add(int(row.get("id")))
++        except (TypeError, ValueError):
++            continue
++    missing_ids = [i for i in range(1, 16) if i not in present_ids]
++    if missing_ids:
++        rows.extend(_scrape_backfill_rows(jornada, set(present_ids)))
++        rows.sort(key=lambda row: int(row.get("id") or 99))
+ 
+     partidos = []
+     for row in rows:
+diff --git a/tests/test_ensure_jornada_completa.py b/tests/test_ensure_jornada_completa.py
+new file mode 100644
+index 0000000..ce7a135
+--- /dev/null
++++ b/tests/test_ensure_jornada_completa.py
+@@ -0,0 +1,147 @@
++"""Regression tests: a partial jornada must self-heal to 15 matches.
++
++Bug: ensure_jornada_75() skipped all work when ANY row of the jornada already
++existed in `resultados`, so a partially imported jornada stayed incomplete
++forever and the "Quiniela" tab rendered '-'/'Pendiente' placeholders.
++"""
++
++import sqlite3
++
++from liga_maestros.db import migrations
++from liga_maestros.services.payloads import matches as matches_payload
++
++
++def _fresh_conn():
++    conn = sqlite3.connect(":memory:")
++    conn.row_factory = sqlite3.Row
++    migrations.ensure_core_tables(conn)
++    return conn
++
++
++def _insert_match(conn, partido_id, local="-", visitante="-", fecha="", hora="", status="NS"):
++    conn.execute(
++        """
++        INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora)
++        VALUES (75, ?, ?, ?, ?, ?, ?)
++        """,
++        (partido_id, local, visitante, status, fecha, hora),
++    )
++    conn.commit()
++
++
++def _j75_rows(conn):
++    return conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
++
++
++def test_empty_db_imports_full_j75():
++    conn = _fresh_conn()
++    migrations.ensure_jornada_75(conn)
++    rows = _j75_rows(conn)
++    assert len(rows) == 15
++    assert rows[0]["local"] == "VPS Vaasa"
++    assert rows[0]["visitante"] == "Inter Turku"
++    assert rows[0]["fecha"] == "2026-08-02"
++    assert rows[14]["local"] == "AIK"
++
++
++def test_partial_jornada_is_completed():
++    conn = _fresh_conn()
++    for pid in range(1, 6):
++        _insert_match(conn, pid, local="VPS Vaasa" if pid == 1 else f"Equipo {pid}", visitante="Rival")
++
++    changed = migrations.ensure_jornada_completa(conn, 75, fallback_matches=migrations.J75_FALLBACK_MATCHES)
++    rows = _j75_rows(conn)
++
++    assert changed >= 10
++    assert len(rows) == 15
++    assert {int(r["partido_id"]) for r in rows} == set(range(1, 16))
++    assert rows[9]["local"] == "Aalesunds FK"
++    assert rows[14]["visitante"] == "Orgryte IS"
++
++
++def test_empty_placeholder_rows_are_backfilled():
++    conn = _fresh_conn()
++    for pid in range(1, 16):
++        _insert_match(conn, pid)
++
++    migrations.ensure_jornada_completa(conn, 75, fallback_matches=migrations.J75_FALLBACK_MATCHES)
++    rows = _j75_rows(conn)
++
++    assert len(rows) == 15
++    assert all(r["local"] and r["local"] != "-" for r in rows)
++    assert all(r["fecha"] for r in rows)
++
++
++def test_duplicate_rows_are_deduplicated_keeping_results():
++    conn = _fresh_conn()
++    # Duplicado: fila vacia + fila con resultado real
++    _insert_match(conn, 5)
++    conn.execute(
++        """
++        INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora, goles_local, goles_visitante)
++        VALUES (75, 5, 'IF Gnistan', 'KuPS Kuopio', 'FT', '2026-08-01', '18:00', 1, 2)
++        """
++    )
++    conn.commit()
++
++    migrations.ensure_jornada_completa(conn, 75, fallback_matches=migrations.J75_FALLBACK_MATCHES)
++    rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 AND partido_id = 5").fetchall()
++
++    assert len(rows) == 1
++    assert rows[0]["local"] == "IF Gnistan"
++    assert rows[0]["goles_local"] == 1
++    assert rows[0]["status"] == "FT"
++    assert len(_j75_rows(conn)) == 15
++
++
++def test_finished_matches_are_never_touched():
++    conn = _fresh_conn()
++    for pid in range(1, 16):
++        _insert_match(conn, pid, local=f"Local {pid}", visitante=f"Visita {pid}", fecha="2026-08-01", hora="14:00")
++    conn.execute(
++        "UPDATE resultados SET goles_local = 2, goles_visitante = 1, status = 'FT' WHERE jornada = 75 AND partido_id = 3"
++    )
++    conn.commit()
++
++    migrations.ensure_jornada_completa(conn, 75, fallback_matches=migrations.J75_FALLBACK_MATCHES)
++    row = conn.execute("SELECT * FROM resultados WHERE jornada = 75 AND partido_id = 3").fetchone()
++
++    assert row["local"] == "Local 3"
++    assert row["visitante"] == "Visita 3"
++    assert row["goles_local"] == 2
++    assert row["status"] == "FT"
++
++
++def test_ticket_payload_backfills_missing_matches_from_scrape():
++    conn = _fresh_conn()
++    for pid in range(1, 6):
++        conn.execute(
++            """
++            INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora)
++            VALUES (75, ?, ?, ?, 'NS', ?, ?)
++            """,
++            (pid, f"Local {pid}", f"Visita {pid}", "2026-08-01", "14:00"),
++        )
++    conn.commit()
++
++    partidos = matches_payload.build_jornada_matches(conn, 75, {})
++
++    assert len(partidos) == 15
++    assert partidos[9]["local"] == "Aalesunds FK"
++    assert partidos[14]["local"] == "AIK"
++    assert all(p["local"] != "-" for p in partidos)
++
++
++def test_ticket_payload_without_scrape_keeps_placeholders(monkeypatch):
++    conn = _fresh_conn()
++    conn.execute(
++        "INSERT INTO resultados (jornada, partido_id, local, visitante, status) VALUES (99, 1, 'A', 'B', 'NS')"
++    )
++    conn.commit()
++
++    partidos = matches_payload.build_jornada_matches(conn, 99, {})
++
++    assert len(partidos) == 15
++    assert partidos[0]["local"] == "A"
++    assert partidos[1]["local"] == "-"
++    assert partidos[1]["marcador"] == "Pendiente"
+diff --git a/tools/ops/REPARAR_JORNADA_QUINIELA.py b/tools/ops/REPARAR_JORNADA_QUINIELA.py
+new file mode 100644
+index 0000000..143627d
+--- /dev/null
++++ b/tools/ops/REPARAR_JORNADA_QUINIELA.py
+@@ -0,0 +1,227 @@
++#!/usr/bin/env python3
++"""Repara una jornada de la quiniela que no muestra los 15 partidos.
++
++Diagnostico y reparacion en un solo comando:
++
++    python tools/ops/REPARAR_JORNADA_QUINIELA.py --jornada 75
++
++Solo diagnostico (no escribe nada):
++
++    python tools/ops/REPARAR_JORNADA_QUINIELA.py --jornada 75 --check
++
++Que hace:
++  1. Localiza la base de datos (DB_PATH, DATA_DIR o DATOS/LIGA_MAESTROS_PRO.db).
++  2. Lee el boleto oficial data/quiniela15_J{N}_scrape.json (ya esta en el repo).
++  3. Inserta los partidos que falten y rellena filas vacias ('-') o sin fecha.
++  4. NUNCA toca goles, estados ni minutos de partidos jugados o en directo.
++  5. Hace una copia de seguridad de la BD antes de escribir.
++
++Es standalone a proposito: funciona aunque el resto del codigo este desactualizado.
++"""
++
++import argparse
++import json
++import os
++import shutil
++import sqlite3
++import sys
++from datetime import datetime
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++DATA_DIR = ROOT / "data"
++EXPECTED_IDS = set(range(1, 16))
++
++
++def find_db_path(explicit=None):
++    candidates = []
++    if explicit:
++        candidates.append(Path(explicit))
++    env_db = os.getenv("DB_PATH", "").strip()
++    if env_db:
++        candidates.append(Path(env_db))
++    env_data = os.getenv("DATA_DIR", "").strip()
++    if env_data:
++        candidates.append(Path(env_data) / "LIGA_MAESTROS_PRO.db")
++    candidates.append(ROOT / "DATOS" / "LIGA_MAESTROS_PRO.db")
++    candidates.append(Path("/var/data/LIGA_MAESTROS_PRO.db"))
++    for path in candidates:
++        if path.exists():
++            return path
++    return candidates[-1] if candidates else None
++
++
++def load_scrape_matches(jornada):
++    """Devuelve [(num, local, visitante, fecha, hora)] desde el scrape del repo."""
++    path = DATA_DIR / f"quiniela15_J{jornada}_scrape.json"
++    if not path.exists():
++        raise FileNotFoundError(
++            f"No encuentro {path}. Ejecuta antes tools/scrapers/SCRAPE_QUINIELA15_PROXIMA.py "
++            f"para generar el boleto de la J{jornada}."
++        )
++    data = json.loads(path.read_text(encoding="utf-8"))
++    if int(data.get("jornada") or 0) != int(jornada):
++        raise ValueError(f"{path.name} es de la J{data.get('jornada')}, no de la J{jornada}.")
++    partidos = data.get("partidos") or []
++    if len(partidos) != 15:
++        raise ValueError(f"{path.name} trae {len(partidos)} partidos, esperaba 15.")
++    horarios = data.get("horarios") or {}
++    matches = []
++    for item in partidos:
++        num = int(item.get("num") or item.get("id") or 0)
++        local = str(item.get("local") or "").strip()
++        visitante = str(item.get("visitante") or "").strip()
++        horario = horarios.get(str(num)) or {}
++        fecha = str(horario.get("fecha") or item.get("fecha") or "").strip()[:10]
++        hora = str(horario.get("hora") or item.get("hora") or "").strip()[:5]
++        matches.append((num, local, visitante, fecha, hora))
++    if {m[0] for m in matches} != EXPECTED_IDS:
++        raise ValueError(f"{path.name} no cubre los partidos 1-15.")
++    return sorted(matches, key=lambda m: m[0])
++
++
++def _row_quality(r):
++    score = 0
++    if r[6] is not None or r[7] is not None:
++        score += 4
++    if str(r[5] or "").upper() not in ("", "NS", "SCHEDULED"):
++        score += 2
++    if str(r[1] or "").strip() not in ("", "-"):
++        score += 1
++    return score
++
++
++def diagnose(conn, jornada):
++    """Devuelve (by_id, missing, broken, duplicate_rowids) para la jornada."""
++    rows = conn.execute(
++        """
++        SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante, rowid
++        FROM resultados WHERE jornada = ? ORDER BY partido_id
++        """,
++        (jornada,),
++    ).fetchall()
++    by_id = {}
++    duplicates = []
++    for r in rows:
++        pid = int(r[0])
++        if pid in by_id:
++            candidates = [by_id[pid], r]
++            keep = max(candidates, key=_row_quality)
++            drop = candidates[0] if keep is candidates[1] else candidates[1]
++            duplicates.append(drop[8])
++            by_id[pid] = keep
++        else:
++            by_id[pid] = r
++    missing = sorted(EXPECTED_IDS - set(by_id))
++    broken = []
++    for num, r in sorted(by_id.items()):
++        local, visitante, fecha = str(r[1] or "").strip(), str(r[2] or "").strip(), str(r[3] or "").strip()
++        if not local or local == "-" or not visitante or visitante == "-" or not fecha:
++            broken.append(num)
++    return by_id, missing, broken, duplicates
++
++
++def fix_jornada(conn, jornada, matches, by_id):
++    changed = 0
++    for num, local, visitante, fecha, hora in matches:
++        row = by_id.get(num)
++        if row is None:
++            conn.execute(
++                """
++                INSERT INTO resultados (
++                    jornada, partido_id, local, visitante, status, fecha, hora,
++                    goles_local, goles_visitante, minuto, signo_actual
++                ) VALUES (?, ?, ?, ?, 'NS', ?, ?, NULL, NULL, '', '-')
++                """,
++                (jornada, num, local, visitante, fecha, hora),
++            )
++            print(f"  + insertado #{num:>2}: {local} - {visitante} ({fecha} {hora})")
++            changed += 1
++            continue
++
++        status = str(row[5] or "").upper()
++        has_result = row[6] is not None or row[7] is not None
++        in_play = status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "FT", "FINISHED", "TERMINADO")
++        cur_local, cur_visitante = str(row[1] or "").strip(), str(row[2] or "").strip()
++        cur_fecha, cur_hora = str(row[3] or "").strip()[:10], str(row[4] or "").strip()[:5]
++        incomplete = not cur_local or cur_local == "-" or not cur_visitante or cur_visitante == "-" or not cur_fecha
++        identity_differs = (cur_local, cur_visitante) != (local, visitante)
++        schedule_differs = bool(fecha) and (cur_fecha, cur_hora) != (fecha, hora)
++        if in_play and has_result:
++            continue
++        if not incomplete and not (not in_play and (identity_differs or schedule_differs)):
++            continue
++        conn.execute(
++            """
++            UPDATE resultados SET local = ?, visitante = ?, fecha = ?, hora = ?
++            WHERE jornada = ? AND partido_id = ?
++            """,
++            (local, visitante, fecha or cur_fecha, hora or cur_hora, jornada, num),
++        )
++        print(f"  ~ corregido #{num:>2}: {cur_local or '-'} - {cur_visitante or '-'} -> {local} - {visitante}")
++        changed += 1
++    return changed
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    parser.add_argument("--jornada", type=int, required=True, help="Jornada a reparar (p. ej. 75).")
++    parser.add_argument("--db", default="", help="Ruta explicita a la base de datos.")
++    parser.add_argument("--check", action="store_true", help="Solo diagnostica, no escribe.")
++    args = parser.parse_args()
++
++    db_path = find_db_path(args.db or None)
++    if not db_path or not db_path.exists():
++        print(f"ERROR: no encuentro la base de datos (probe {db_path}). Usa --db o DB_PATH.")
++        return 1
++
++    matches = load_scrape_matches(args.jornada)
++    conn = sqlite3.connect(db_path)
++    try:
++        by_id, missing, broken, duplicates = diagnose(conn, args.jornada)
++        ok = sorted(set(by_id) - set(broken))
++        print(f"BD: {db_path}")
++        print(f"J{args.jornada} en BD: {len(by_id)}/15 partidos")
++        print(f"  - correctos:   {len(ok)}" + (f" (ids {ok})" if len(ok) != 15 else ""))
++        print(f"  - ausentes:    {len(missing)}" + (f" (ids {missing})" if missing else ""))
++        print(f"  - vacios '-':  {len(broken)}" + (f" (ids {broken})" if broken else ""))
++        print(f"  - duplicados:  {len(duplicates)}")
++
++        if not missing and not broken and not duplicates:
++            print("\nOK: la jornada esta completa, no hay nada que reparar.")
++            return 0
++        if args.check:
++            print("\nModo --check: no he escrito nada. Ejecuta sin --check para reparar.")
++            return 2
++
++        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
++        backup = db_path.with_suffix(f".bak_fix_jornada_{stamp}.db")
++        shutil.copy2(db_path, backup)
++        print(f"\nBackup: {backup}")
++
++        for rowid in duplicates:
++            conn.execute("DELETE FROM resultados WHERE rowid = ?", (rowid,))
++        if duplicates:
++            print(f"  - eliminadas {len(duplicates)} filas duplicadas")
++        changed = fix_jornada(conn, args.jornada, matches, by_id)
++        conn.commit()
++
++        by_id_after, missing_after, broken_after, dupes_after = diagnose(conn, args.jornada)
++        print(f"\nReparacion aplicada: {changed} filas insertadas/corregidas, {len(duplicates)} duplicados eliminados.")
++        print(
++            f"Estado final J{args.jornada}: {len(by_id_after)}/15 partidos"
++            + (f", ausentes {missing_after}" if missing_after else "")
++            + (f", vacios {broken_after}" if broken_after else "")
++            + (f", duplicados {len(dupes_after)}" if dupes_after else "")
++        )
++        if missing_after or broken_after or len(by_id_after) != 15:
++            print("AVISO: sigue sin estar completa; revisa el scrape de la jornada.")
++            return 3
++        print("OK: jornada completa 15/15. Recarga la web para verla.")
++        return 0
++    finally:
++        conn.close()
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+-- 
+2.47.3
+

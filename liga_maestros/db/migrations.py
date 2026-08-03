@@ -302,53 +302,215 @@ def _import_j75_pronosticos(conn):
             )
 
 
-def ensure_jornada_75(conn):
-    """Import the public J75 fixture and pronosticos from arena data."""
-    existing = conn.execute("SELECT 1 FROM resultados WHERE jornada = 75 LIMIT 1").fetchone()
-    if existing:
-        return
+# Boleto publico J75 (fallback si falta el JSON del scrape en data/).
+J75_FALLBACK_MATCHES = [
+    (1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
+    (2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
+    (3, "AC Oulu", "Ilves Tampere", "2026-08-02", "16:00"),
+    (4, "FC Lahti", "FF Jaro", "2026-08-01", "17:00"),
+    (5, "IF Gnistan", "KuPS Kuopio", "2026-08-01", "18:00"),
+    (6, "Fredrikstad", "Sandefjord", "2026-08-01", "16:00"),
+    (7, "Start", "Viking", "2026-08-01", "18:00"),
+    (8, "Molde FK", "Sarpsborg", "2026-08-02", "17:00"),
+    (9, "KFUM Oslo", "Kristiansund", "2026-08-02", "17:00"),
+    (10, "Aalesunds FK", "Tromsø IL", "2026-08-02", "17:00"),
+    (11, "Brann", "Rosenborg", "2026-08-02", "19:15"),
+    (12, "Häcken", "Kalmar FF", "2026-08-01", "15:00"),
+    (13, "IFK Göteborg", "Degerfors IF", "2026-08-02", "14:00"),
+    (14, "Brommapojkarna", "Malmoe", "2026-08-02", "14:00"),
+    (15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
+]
 
-    j75_matches = [
-        (75, 1, "VPS Vaasa", "Inter Turku", "2026-08-02", "14:00"),
-        (75, 2, "TPS Turku", "IFK Mariehamn", "2026-08-01", "14:00"),
-        (75, 3, "AC Oulu", "Ilves Tampere", "2026-08-02", "16:00"),
-        (75, 4, "FC Lahti", "FF Jaro", "2026-08-01", "17:00"),
-        (75, 5, "IF Gnistan", "KuPS Kuopio", "2026-08-01", "18:00"),
-        (75, 6, "Fredrikstad", "Sandefjord", "2026-08-01", "16:00"),
-        (75, 7, "Start", "Viking", "2026-08-01", "18:00"),
-        (75, 8, "Molde FK", "Sarpsborg", "2026-08-02", "17:00"),
-        (75, 9, "KFUM Oslo", "Kristiansund", "2026-08-02", "17:00"),
-        (75, 10, "Aalesunds FK", "Tromsø IL", "2026-08-02", "17:00"),
-        (75, 11, "Brann", "Rosenborg", "2026-08-02", "19:15"),
-        (75, 12, "Häcken", "Kalmar FF", "2026-08-01", "15:00"),
-        (75, 13, "IFK Göteborg", "Degerfors IF", "2026-08-02", "14:00"),
-        (75, 14, "Brommapojkarna", "Malmoe", "2026-08-02", "14:00"),
-        (75, 15, "AIK", "Orgryte IS", "2026-08-02", "16:30"),
-    ]
 
-    conn.executemany(
+def load_scrape_matches(jornada):
+    """Read the public quiniela15 scrape for a jornada.
+
+    Returns a list of (partido_id, local, visitante, fecha, hora) or None when
+    no complete scrape file is available. The scrape files shipped in data/
+    are the source of truth for the 15-match fixture.
+    """
+    candidates = []
+    for base_dir in (
+        getattr(config, "SEED_DATA_DIR", ""),
+        getattr(config, "DATA_DIR", ""),
+        os.path.join(config.BASE_DIR, "data"),
+    ):
+        if base_dir:
+            candidates.append(os.path.join(base_dir, f"quiniela15_J{jornada}_scrape.json"))
+    for path in candidates:
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        try:
+            if int(data.get("jornada") or 0) != int(jornada):
+                continue
+        except (TypeError, ValueError):
+            continue
+        partidos = data.get("partidos") or []
+        if len(partidos) < 15:
+            continue
+        horarios = data.get("horarios") or {}
+        matches = []
+        for item in partidos[:15]:
+            try:
+                num = int(item.get("num") or item.get("id") or 0)
+            except (TypeError, ValueError):
+                continue
+            local = str(item.get("local") or "").strip()
+            visitante = str(item.get("visitante") or "").strip()
+            if not num or not local or not visitante:
+                continue
+            horario = horarios.get(str(num)) or {}
+            fecha = str(horario.get("fecha") or item.get("fecha") or "").strip()[:10]
+            hora = str(horario.get("hora") or item.get("hora") or "").strip()[:5]
+            matches.append((num, local, visitante, fecha, hora))
+        if len(matches) == 15 and {m[0] for m in matches} == set(range(1, 16)):
+            return matches
+    return None
+
+
+def _match_row_quality(row):
+    """Score a resultados row: result > live status > identity completeness."""
+    score = 0
+    if row[6] is not None or row[7] is not None:
+        score += 4
+    if str(row[5] or "").upper() not in ("", "NS", "SCHEDULED"):
+        score += 2
+    if str(row[1] or "").strip() not in ("", "-"):
+        score += 1
+    return score
+
+
+def ensure_jornada_completa(conn, jornada, fallback_matches=None):
+    """Guarantee the 15 matches of a jornada exist with real fixture data.
+
+    Repairs partial imports: inserts missing matches and backfills identity
+    fields (local/visitante/fecha/hora) on rows that are empty or outdated.
+    Never touches goals/status/minute and never renames matches that already
+    have a result or are live, so running it mid-jornada is safe.
+
+    Returns the number of rows inserted or updated.
+    """
+    jornada = int(jornada)
+    matches = load_scrape_matches(jornada) or list(fallback_matches or [])
+    if len(matches) != 15:
+        return 0
+
+    existing = {}
+    duplicates = []
+    for row in conn.execute(
         """
-            INSERT INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora, goles_local, goles_visitante)
-            SELECT ?, ?, ?, ?, 'NS', ?, ?, NULL, NULL
-            WHERE NOT EXISTS (
-                SELECT 1 FROM resultados WHERE jornada = ? AND partido_id = ?
-            )
+        SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante, rowid
+        FROM resultados
+        WHERE jornada = ?
         """,
-        [match + (match[0], match[1]) for match in j75_matches],
-    )
+        (jornada,),
+    ).fetchall():
+        try:
+            pid = int(row[0])
+        except (TypeError, ValueError):
+            continue
+        if pid in existing:
+            # Filas duplicadas (importaciones a medias del pasado): nos quedamos
+            # con la mas completa (resultado > estado > nombre) y borramos el resto.
+            candidates = [existing[pid], row]
+            keep = max(candidates, key=_match_row_quality)
+            drop = candidates[0] if keep is candidates[1] else candidates[1]
+            duplicates.append(drop[8])
+            existing[pid] = keep
+        else:
+            existing[pid] = row
+    for rowid in duplicates:
+        conn.execute("DELETE FROM resultados WHERE rowid = ?", (rowid,))
+
+    changed = len(duplicates)
+    for num, local, visitante, fecha, hora in matches:
+        row = existing.get(num)
+        if row is None:
+            conn.execute(
+                """
+                INSERT INTO resultados (
+                    jornada, partido_id, local, visitante, status, fecha, hora,
+                    goles_local, goles_visitante, minuto, signo_actual
+                )
+                VALUES (?, ?, ?, ?, 'NS', ?, ?, NULL, NULL, '', '-')
+                """,
+                (jornada, num, local, visitante, fecha, hora),
+            )
+            changed += 1
+            continue
+
+        status = str(row[5] or "").upper()
+        has_result = row[6] is not None or row[7] is not None
+        in_play = status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "FT", "FINISHED", "TERMINADO")
+        if in_play and has_result:
+            continue
+
+        current_identity = (
+            str(row[1] or "").strip(),
+            str(row[2] or "").strip(),
+            str(row[3] or "").strip()[:10],
+            str(row[4] or "").strip()[:5],
+        )
+        # Solo corregimos identidad cuando falta algo o el partido aun no arranco.
+        incomplete = (
+            not current_identity[0]
+            or current_identity[0] == "-"
+            or not current_identity[1]
+            or current_identity[1] == "-"
+            or not current_identity[2]
+        )
+        identity_differs = (current_identity[0], current_identity[1]) != (local, visitante)
+        schedule_differs = bool(fecha) and (current_identity[2], current_identity[3]) != (fecha, hora)
+        if not incomplete and not (not in_play and (identity_differs or schedule_differs)):
+            continue
+        if in_play and not incomplete:
+            continue
+        conn.execute(
+            """
+            UPDATE resultados
+            SET local = ?, visitante = ?, fecha = ?, hora = ?
+            WHERE jornada = ? AND partido_id = ?
+            """,
+            (local, visitante, fecha or current_identity[2], hora or current_identity[3], jornada, num),
+        )
+        changed += 1
+
+    conn.commit()
+    return changed
+
+
+def ensure_jornada_75(conn):
+    """Import the public J75 fixture and pronosticos from arena data.
+
+    Idempotent and self-healing: a partial J75 (previous bug left the jornada
+    with fewer than 15 matches whenever any row already existed) is completed
+    from the scrape file shipped in data/.
+    """
+    ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES)
 
     # Publicamos solo la columna conocida del Programa. Los Maestros se
     # incorporan cuando entregan sus pronosticos; nunca se clonan.
     j75_signs = ["12", "1", "12", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2-0"]
-    conn.executemany(
-        """
-            INSERT INTO predicciones (user_id, jornada, partido_id, signo)
-            VALUES ('programa', 75, ?, ?)
-            ON CONFLICT(user_id, jornada, partido_id)
-            DO UPDATE SET signo = excluded.signo
-        """,
-        enumerate(j75_signs, start=1),
-    )
+    try:
+        conn.executemany(
+            """
+                INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+                VALUES ('programa', 75, ?, ?)
+                ON CONFLICT(user_id, jornada, partido_id)
+                DO UPDATE SET signo = excluded.signo
+            """,
+            enumerate(j75_signs, start=1),
+        )
+        conn.commit()
+    except sqlite3.OperationalError:
+        # Indice unico todavia no creado (llamada directa fuera de
+        # run_startup_migrations): los signos se aplicaran en el proximo arranque.
+        pass
 
     _import_j75_pronosticos(conn)
 

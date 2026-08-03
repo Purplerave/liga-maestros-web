@@ -2,6 +2,35 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-03 — Quiniela J75 autoreparable
+
+### Corregido
+
+- 🔴 **La pestaña Quiniela mostraba la última jornada a medias.** La migración
+  `ensure_jornada_75()` se saltaba todo el trabajo si existía **cualquier** fila
+  de la jornada en `resultados`. Si una importación quedó a medias (partidos
+  ausentes, filas vacías `-/-` o duplicadas), la jornada se quedaba rota para
+  siempre y el boleto renderizaba `Pendiente / -` en los huecos.
+  - Nueva `ensure_jornada_completa()` (en `liga_maestros/db/migrations.py`)
+    lee el boleto oficial `data/quiniela15_J{N}_scrape.json` (ya va en el repo)
+    e **inserta los partidos que falten, rellena filas vacías y elimina
+    duplicados** quedándose con la fila más completa. Nunca toca goles,
+    estados ni minutos de partidos jugados o en directo, así que es segura a
+    mitad de jornada. Corre sola en cada arranque de la app.
+  - `build_jornada_matches()` autocompleta desde el scrape los huecos antes
+    de responder: aunque una BD esté incompleta, la pestaña siempre muestra el
+    boleto de 15 partidos.
+
+### Añadido
+
+- **`tools/ops/REPARAR_JORNADA_QUINIELA.py`** — reparación manual en un comando:
+  `python tools/ops/REPARAR_JORNADA_QUINIELA.py --jornada 75` (con `--check` solo
+  diagnostica: ausentes, vacíos y duplicados). Hace backup de la BD antes de
+  escribir y es standalone (no depende del resto del código).
+- Tests de regresión: jornada parcial se completa, filas vacías se rellenan,
+  duplicados se eliminan, resultados en directo no se tocan, payload siempre
+  devuelve 15 partidos.
+
 ## 2026-07 — Frontend from the future (26 de julio de 2026)
 
 Capa de producto sobre el design system: navegación por teclado, señales de

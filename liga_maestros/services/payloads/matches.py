@@ -1,9 +1,49 @@
 """Build the 15-match jornada payload."""
 
+import logging
 from datetime import datetime
 
 from ...services.ticket import today_madrid
 from ...utils import normalize_team_key
+
+logger = logging.getLogger(__name__)
+
+
+def _scrape_backfill_rows(jornada, present_ids):
+    """Fill missing jornada matches from the public quiniela15 scrape.
+
+    A partial jornada in `resultados` used to render as '-'/'Pendiente'
+    placeholders on the ticket. When the scrape file for the jornada ships in
+    data/, we synthesize NS rows for the missing match ids so the ticket always
+    shows the complete 15-match fixture. Returns a list of row dicts.
+    """
+    try:
+        from ...db.migrations import load_scrape_matches
+    except Exception:  # pragma: no cover - defensive import guard
+        return []
+    try:
+        matches = load_scrape_matches(jornada)
+    except Exception:  # pragma: no cover
+        logger.exception("No se pudo leer el scrape de la jornada %s", jornada)
+        return []
+    rows = []
+    for num, local, visitante, fecha, hora in matches or []:
+        if num in present_ids:
+            continue
+        rows.append(
+            {
+                "id": num,
+                "local": local,
+                "visitante": visitante,
+                "goles_local": None,
+                "goles_visitante": None,
+                "status": "NS",
+                "fecha": fecha,
+                "hora": hora,
+                "minuto": "",
+            }
+        )
+    return rows
 
 
 def build_jornada_matches(conn, jornada, team_logos):
@@ -20,6 +60,18 @@ def build_jornada_matches(conn, jornada, team_logos):
     """,
         (jornada,),
     ).fetchall()
+    rows = [dict(row) for row in rows]
+
+    present_ids = set()
+    for row in rows:
+        try:
+            present_ids.add(int(row.get("id")))
+        except (TypeError, ValueError):
+            continue
+    missing_ids = [i for i in range(1, 16) if i not in present_ids]
+    if missing_ids:
+        rows.extend(_scrape_backfill_rows(jornada, set(present_ids)))
+        rows.sort(key=lambda row: int(row.get("id") or 99))
 
     partidos = []
     for row in rows:
