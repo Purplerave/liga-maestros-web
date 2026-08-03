@@ -484,6 +484,62 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None):
     return changed
 
 
+def _import_j75_resultados(conn):
+    """Backfill verified final results of J75 shipped in data/.
+
+    The live collector covers most matches, but a completed jornada can leave
+    uncovered matches (page moved on, transient scrape errors). This file is
+    the deterministic last resort: it only fills rows still without a result
+    (NS/NULL) and never overwrites existing scores.
+    """
+    candidates = [
+        os.path.join(getattr(config, "SEED_DATA_DIR", "") or "", "quiniela15_J75_resultados.json"),
+        os.path.join(getattr(config, "DATA_DIR", "") or "", "quiniela15_J75_resultados.json"),
+    ]
+    for path in candidates:
+        if not path or not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        try:
+            if int(data.get("jornada") or 0) != 75:
+                continue
+        except (TypeError, ValueError):
+            continue
+        resultados = data.get("resultados") or []
+        if len(resultados) != 15:
+            continue
+        applied = 0
+        for item in resultados:
+            try:
+                pid = int(item["id"])
+                gh = int(item["goles_local"])
+                ga = int(item["goles_visitante"])
+            except (TypeError, ValueError, KeyError):
+                continue
+            signo = str(item.get("signo") or "").strip() or (
+                f"{gh}-{ga}" if pid == 15 else ("1" if gh > ga else ("2" if gh < ga else "X"))
+            )
+            cursor = conn.execute(
+                """
+                UPDATE resultados
+                SET goles_local = ?, goles_visitante = ?, status = 'FT',
+                    minuto = 'Finalizado', signo_actual = ?
+                WHERE jornada = 75 AND partido_id = ?
+                  AND (goles_local IS NULL OR goles_visitante IS NULL)
+                  AND (status IS NULL OR status IN ('NS', 'SCHEDULED', ''))
+                """,
+                (gh, ga, signo, pid),
+            )
+            applied += cursor.rowcount
+        if applied:
+            conn.commit()
+        return
+
+
 def ensure_jornada_75(conn):
     """Import the public J75 fixture and pronosticos from arena data.
 
@@ -492,6 +548,7 @@ def ensure_jornada_75(conn):
     from the scrape file shipped in data/.
     """
     ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES)
+    _import_j75_resultados(conn)
 
     # Publicamos solo la columna conocida del Programa. Los Maestros se
     # incorporan cuando entregan sus pronosticos; nunca se clonan.

@@ -72,6 +72,32 @@ def test_empty_placeholder_rows_are_backfilled():
     assert all(r["fecha"] for r in rows)
 
 
+def test_results_backfill_covers_uncovered_finished_matches():
+    """Production case: VPS/TPS rows stuck NS after the jornada ended."""
+    conn = _fresh_conn()
+    for pid in range(1, 16):
+        _insert_match(conn, pid, local=f"Local {pid}", visitante=f"Visita {pid}", fecha="2026-08-01", hora="14:00")
+    for pid in range(3, 16):  # el directo cubrio 3-15
+        conn.execute(
+            "UPDATE resultados SET goles_local = 1, goles_visitante = 0, status = 'FT' WHERE jornada = 75 AND partido_id = ?",
+            (pid,),
+        )
+    conn.commit()
+
+    migrations.ensure_jornada_75(conn)
+    uncovered = conn.execute(
+        "SELECT goles_local, goles_visitante, status, signo_actual FROM resultados WHERE jornada = 75 AND partido_id IN (1, 2)"
+    ).fetchall()
+
+    assert tuple(uncovered[0]) == (0, 1, "FT", "2")
+    assert tuple(uncovered[1]) == (3, 0, "FT", "1")
+    # los que ya estaban cubiertos NO se tocan
+    row3 = conn.execute(
+        "SELECT goles_local, goles_visitante FROM resultados WHERE jornada = 75 AND partido_id = 3"
+    ).fetchone()
+    assert tuple(row3) == (1, 0)
+
+
 def test_duplicate_rows_are_deduplicated_keeping_results():
     conn = _fresh_conn()
     # Duplicado: fila vacia + fila con resultado real

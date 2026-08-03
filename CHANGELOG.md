@@ -6,6 +6,13 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Corregido
 
+- 🔴 **Dos partidos de la J75 se quedaron sin resultado (VPS y TPS).** En
+  produccion los partidos 1 (VPS Vaasa–Inter Turku) y 2 (TPS Turku–IFK
+  Mariehamn) quedaron como `NS` tras acabar la jornada. La migracion
+  `ensure_jornada_75()` aplica ahora los resultados oficiales verificados de
+  `data/quiniela15_J75_resultados.json` **solo en filas que sigan sin
+  marcador** (nunca pisa un resultado existente): al desplegar/arrancar, la
+  jornada queda completa de forma determinista aunque el directo no cubra algo.
 - 🔴 **La pestaña Quiniela mostraba la última jornada a medias.** La migración
   `ensure_jornada_75()` se saltaba todo el trabajo si existía **cualquier** fila
   de la jornada en `resultados`. Si una importación quedó a medias (partidos
