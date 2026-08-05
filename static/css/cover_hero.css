@@ -116,7 +116,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-hero-logo-col {
     display: grid;
     place-items: center;
-    align-self: stretch;
+    align-self: start;
     min-width: 0;
     padding: 8px 4px;
 }
