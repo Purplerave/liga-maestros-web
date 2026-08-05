@@ -5,8 +5,8 @@
    Offline: muestra la ultima version cargada de la pagina.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v3';
-const STATIC_CACHE = 'liga-maestros-static-v3';
+const CACHE = 'liga-maestros-v4';
+const STATIC_CACHE = 'liga-maestros-static-v4';
 
 const PRECACHE_URLS = [
     '/',

@@ -1,4 +1,7 @@
-/* Portada Liga de Maestros v4 - Panel control compacto, español natural */
+/* Portada Liga de Maestros v4 - Panel control compacto, español natural
+   Encima del rediseño de main: escudo grande a la izquierda del titular,
+   nombres directos (El duelo, El partido en disputa, Así vota la Peña,
+   Última hora, La porra) y quitado el comentario IA fijo de ejemplo. */
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
@@ -139,7 +142,7 @@ function hydrateCoverPorra(data) {
         return;
     }
     const match = data.match;
-    if (title) title.textContent = data.label || "Porra";
+    if (title) title.textContent = data.label ? String(data.label).replace(/^porra( de la jornada)?$/i, "La porra") : "La porra";
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const totalEntries = Number(data.total_entries || 0);
@@ -217,7 +220,7 @@ function renderNewspaperCoverPageV3() {
                     ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
                 </div>
                 <div class="cp-hero-main">
-                    <img class="cp-hero-logo" src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
+                    <img class="cp-hero-logo" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="Escudo de Liga de Maestros 1X2">
                     <div class="cp-hero-titles">
                         <h1 id="cp-main-title">
                             <span class="cp-title-thin">LA PEÑA</span>
@@ -232,15 +235,15 @@ function renderNewspaperCoverPageV3() {
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
                 <div class="cp-quicklinks">
-                    <button type="button" data-page-action="LIVE"><span>● Directo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos ahora" : "Marcadores en vivo"}</small></button>
+                    <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos ahora" : "Marcadores en vivo"}</small></button>
                     <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Cómo va la tabla</small></button>
                     <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Tu puntuación</small></button>
                 </div>
             </section>
 
             <div class="cp-right-stack">
-                <section class="cp-duel">
-                    <div class="cp-duel-kicker">ASÍ VAMOS · MEDIA DE ACIERTOS</div>
+                <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
+                    <div class="cp-duel-kicker">El duelo · Media de aciertos</div>
                     <div class="cp-versus">
                         <div class="cp-side is-pena"><span>La Peña</span><b>${humanAvgStr}</b><small>${bando.humanTotal} aciertos / ${bando.humanCount} peñistas</small></div>
                         <div class="cp-vs">—</div>
@@ -251,7 +254,7 @@ function renderNewspaperCoverPageV3() {
                 </section>
 
                 <section class="cp-data-card cp-leaders">
-                    <div class="cp-card-head"><span>${isFirstOfficial ? "CLASIFICACIÓN · PRÓXIMAMENTE" : "CLASIFICACIÓN · JORNADA " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "Pruebas" : "Top 5"}</b></div>
+                    <div class="cp-card-head"><span>${isFirstOfficial ? "Clasificación · Próximamente" : "Clasificación · Jornada " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "Pruebas" : "Top 5"}</b></div>
                     ${clasifHtml}
                 </section>
             </div>
@@ -261,25 +264,25 @@ function renderNewspaperCoverPageV3() {
 
         <section class="cp-dashboard">
             <button type="button" class="cp-data-card cp-focus" data-page-action="TICKET">
-                <div class="cp-card-head"><span>EL PARTIDO CLAVE</span><b>${disagreement ? disagreement.unique + " opiniones" : ""}</b></div>
-                ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">Aún sin datos</span>`}
+                <div class="cp-card-head"><span>El partido en disputa</span><b>${disagreement ? disagreement.unique + " signos distintos" : ""}</b></div>
+                ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">De momento todos coinciden</span>`}
             </button>
 
             <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
-                <div class="cp-card-head"><span>EL MÁS DIVIDIDO</span><b>Donde más dudamos</b></div>
+                <div class="cp-card-head"><span>Así vota la Peña</span><b>El más abierto</b></div>
                 ${penaPulse ? `${coverFixtureHtml(penaPulse.match, true)}
                     <div class="cp-pulse-bars"><i class="is-one" style="width:${penaPulse.row.p1}%"></i><i class="is-draw" style="width:${penaPulse.row.px}%"></i><i class="is-two" style="width:${penaPulse.row.p2}%"></i></div>
                     <div class="cp-pulse-labels"><span>1 · ${penaPulse.row.p1}%</span><span>X · ${penaPulse.row.px}%</span><span>2 · ${penaPulse.row.p2}%</span></div>` : `<span class="cp-empty">Aún no hay votos</span>`}
             </button>
 
             <div class="cp-data-card cp-news-card" id="cp-news-card">
-                <div class="cp-card-head"><span>QUÉ SE COMENTA</span><b>Resumen IA</b></div>
+                <div class="cp-card-head"><span>Última hora</span><b>Resumen de prensa por IA</b></div>
                 <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                <div class="cp-news-comment">Grok comenta: “La Peña va con el 1 en el derbi, pero los datos dan X. Partido trampa.”</div>
+                <div class="cp-news-foot">La IA resume la prensa deportiva · toca una noticia para leer la fuente</div>
             </div>
 
             <button type="button" class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span id="cover-porra-title">PORRA</span><b>Marcador exacto</b></div>
+                <div class="cp-card-head"><span id="cover-porra-title">La porra</span><b>Marcador exacto</b></div>
                 <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
             </button>
         </section>
