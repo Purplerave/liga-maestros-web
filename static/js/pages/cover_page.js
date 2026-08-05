@@ -4,6 +4,11 @@
    - Sin 7 columnas, responsive vuelve a 900px
 */
 
+// Stubs requeridos por arena.js (evita ReferenceError si se llama desde renderArena)
+function loadSacramentoFont() {}
+function hydrateCoverTypewriter() {}
+function startCoverScorebar() {}
+
 let _countdownStarted = false;
 
 function startCoverCountdown() {

@@ -213,12 +213,36 @@ function getLiveLeagueMatches() {
     const source = (lm && lm.length > 0)
         ? lm
         : [...(state.data?.partidos || []), ...getAllLeagueMatches()];
+    const MAX_LIVE_AGE_MS = 3 * 60 * 60 * 1000; // 3h - evita partidos atascados en LIVE/HT/SUSPENDED
     const matchesById = new Map();
-    source.filter(m => isLiveStatus(m.status) || isLiveMatch(m)).forEach(match => {
+    source.filter(m => {
+        const status = String(m.status || "").toUpperCase();
+        // Si está marcado LIVE/HT etc, comprueba que no sea viejo
+        if (isLiveStatus(status)) {
+            // SUSPENDED que lleva más de 60 min no se muestra como live
+            if (status === "SUSPENDED") {
+                const ts = parseMatchTimestamp(m);
+                if (ts && Date.now() - ts > 60 * 60 * 1000) return false;
+            }
+            const ts = parseMatchTimestamp(m);
+            if (ts && Date.now() - ts > MAX_LIVE_AGE_MS) return false;
+            return true;
+        }
+        return isLiveMatch(m);
+    }).forEach(match => {
         const home = String(match.local || match.home_name || match.home?.name || "").toUpperCase();
         const away = String(match.visitante || match.away_name || match.away?.name || "").toUpperCase();
         const key = String(match.fixture_id || match.id || `${home}|${away}`);
-        matchesById.set(key, match);
+        // Si ya existe y el nuevo es más fresco (tiene gol o minuto), sobrescribe
+        if (!matchesById.has(key)) {
+            matchesById.set(key, match);
+        } else {
+            const prev = matchesById.get(key);
+            // prioriza el que tenga marcador o minuto más reciente
+            if ((match.marcador || match.score) && !(prev.marcador || prev.score)) {
+                matchesById.set(key, match);
+            }
+        }
     });
     return [...matchesById.values()];
 }
