@@ -37,8 +37,8 @@ body.newspaper-ui.quiniela-focus .header-brand-panel::after {
 }
 
 body.newspaper-ui.quiniela-focus .sidebar-brand-image {
-    width: auto;
-    height: 100%;
+    width: 96px;
+    height: auto;
     max-width: none;
     max-height: none;
     object-fit: contain;
