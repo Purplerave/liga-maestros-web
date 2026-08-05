@@ -134,6 +134,29 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 #cp-deadline.is-urgent { color:#f87171; animation: cpUrgent 1s ease-in-out infinite; }
 @keyframes cpUrgent { 0%,100%{opacity:1} 50%{opacity:.55} }
 
+/* Nuevo brand hero con logo */
+.cp-hero-brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.cp-hero-logo {
+    width: auto;
+    height: 42px;
+    max-width: 180px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 18px rgba(0,0,0,0.32));
+}
+.cp-hero-brand-text {
+    color: var(--cp-gold);
+    font: 800 0.68rem/1 var(--cp-font-ui);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
 .cp-intro h1 {
     position: relative;
     margin: 0 0 14px;
@@ -145,6 +168,40 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     letter-spacing: -0.02em;
     text-transform: uppercase;
     text-wrap: balance;
+}
+/* Titular moderno fino/premium */
+.cp-title-thin {
+    display: block;
+    font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+    font-weight: 200;
+    font-size: 0.92em;
+    letter-spacing: 0.12em;
+    line-height: 0.9;
+    color: #e6eaf2;
+    text-transform: uppercase;
+}
+.cp-title-mid {
+    display: block;
+    font-family: "Plus Jakarta Sans", var(--cp-font-ui);
+    font-weight: 400;
+    font-size: 0.68em;
+    letter-spacing: 0.22em;
+    line-height: 1.1;
+    color: #9fb0cb;
+    margin: 2px 0 4px;
+    text-transform: uppercase;
+}
+.cp-title-bold {
+    display: block;
+    font-family: var(--cp-font-display);
+    font-weight: 800;
+    font-size: 1.05em;
+    line-height: 0.88;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff 18%, #f5b53f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 28px rgba(245,181,63,0.28);
 }
 
 .cp-lead {
@@ -166,6 +223,67 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     font-weight: 800;
     font-size: 1.03em;
     letter-spacing: -0.01em;
+}
+.cp-lead-explique {
+    max-width: 620px;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #c8d4e8;
+}
+.cp-lead-explique b {
+    color: #eef3fb;
+    font-weight: 700;
+}
+.cp-lead-extra {
+    display: block;
+    margin-top: 10px;
+    color: #9fb0cb;
+    font-size: 0.86em;
+    line-height: 1.5;
+}
+.cp-lead-extra b {
+    color: var(--cp-gold);
+    font-weight: 700;
+}
+
+/* Quicklinks panel control */
+.cp-quicklinks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 8px;
+    margin-top: 18px;
+}
+.cp-quicklinks button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.04);
+    color: var(--cp-text);
+    text-align: left;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+.cp-quicklinks button:hover {
+    border-color: rgba(245,181,63,0.28);
+    background: rgba(245,181,63,0.08);
+    transform: translateY(-1px);
+}
+.cp-quicklinks button b {
+    font-size: 0.84rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+}
+.cp-quicklinks button small {
+    font-size: 0.64rem;
+    color: var(--cp-muted);
+}
+.cp-quicklinks button span {
+    font-size: 0.7rem;
+    color: #22c55e;
 }
 
 /* Acciones pequeñas */
@@ -607,6 +725,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp-duel { width:100%; }
     .cp-picks { gap:5px; }
     .cp-news-row { grid-template-columns: 62px minmax(0,1fr) 52px; }
+    .cp-quicklinks { grid-template-columns: 1fr; }
+    .cp-hero-logo { height: 36px; }
+    .cp-title-thin { font-size: 0.88em; letter-spacing: 0.1em; }
 }
 
 @media (max-width: 420px) {

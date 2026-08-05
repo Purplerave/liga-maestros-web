@@ -274,6 +274,9 @@ function renderNewspaperCoverPageV3() {
         ? `Pretemporada: M&aacute;quinas 1-0 Pe&ntilde;a. Ahora todos parten de cero · ${bando.humanCount} humanos vs ${bando.aiCount} IAs`
         : `${bando.humanTotal} aciertos totales Pe&ntilde;a (${bando.humanCount} boletos) · ${bando.aiTotal} aciertos IAs (${bando.aiCount} modelos) · Media justa arriba`;
 
+    // Texto que explica QUE ES ESTO - pedido usuario
+    const explicaQueEs = `Liga de Maestros es una competici&oacute;n abierta que usa <b>La Quiniela oficial</b> (J${escapeHtml(String(jornada))}) para ver qui&eacute;n es m&aacute;s listo. Cada jornada compiten con el <b>mismo boleto de 15 partidos</b>: <b>t&uacute;, el resto de La Pe&ntilde;a, nuestro Programa y cinco IAs</b> (ChatGPT, Grok, Gemini, Claude y Copilot). Al final de temporada sabremos si arriba queda la intuici&oacute;n humana o el c&aacute;lculo.<br><span class="cp-lead-extra">Sigue los resultados en <b>Directo</b>, consulta la tabla completa en <b>Ligas</b> y deja tu r&eacute;cord en <b>Juegos</b>. El boleto colectivo de La Pe&ntilde;a (signo m&aacute;s votado) compite 1-vs-1 contra cada IA, no 15-vs-6.</span>`;
+
     return `<div class="cp">
         <main class="cp-stage" aria-labelledby="cp-main-title">
             <section class="cp-intro">
@@ -283,17 +286,27 @@ function renderNewspaperCoverPageV3() {
                     <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
                     ${liveCount ? `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
                 </div>
-                <div style="position:relative;display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;">
-                    <span style="font:700 0.62rem/1 var(--cp-font-ui);letter-spacing:0.08em;text-transform:uppercase;color:var(--cp-dim);border:1px solid var(--cp-line);padding:4px 8px;border-radius:999px;">TEMPORADA 1 · OFICIAL</span>
-                    <span style="font:600 0.62rem/1 var(--cp-font-ui);color:var(--cp-muted);">basada en la Quiniela ${escapeHtml(String(jornada))}</span>
+                <div class="cp-hero-brand">
+                    <img class="cp-hero-logo" src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros 1X2" loading="eager">
+                    <span class="cp-hero-brand-text">LA PE&Ntilde;A VS IA · 1X2</span>
+                    <span style="margin-left:auto;font:700 0.62rem/1 var(--cp-font-ui);letter-spacing:0.08em;text-transform:uppercase;color:var(--cp-dim);border:1px solid var(--cp-line);padding:4px 8px;border-radius:999px;">TEMPORADA 1 · OFICIAL</span>
                 </div>
-                <h1 id="cp-main-title">LA PE&Ntilde;A<br>CONTRA LAS<br>M&Aacute;QUINAS</h1>
-                <p class="cp-lead">${leadText}<span class="cp-challenge">¿Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</span></p>
+                <h1 id="cp-main-title">
+                    <span class="cp-title-thin">LA PEÑA</span>
+                    <span class="cp-title-mid">CONTRA LAS</span>
+                    <span class="cp-title-bold">MÁQUINAS</span>
+                </h1>
+                <p class="cp-lead cp-lead-explique">${explicaQueEs}<span class="cp-challenge">¿Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</span></p>
+                ${!isFirstOfficial ? `<p class="cp-lead" style="margin-top:10px;font-size:0.82rem;color:var(--cp-muted);">${leadText}</p>` : `<p class="cp-lead" style="margin-top:8px;font-size:0.82rem;color:var(--cp-dim);">En las jornadas de prueba las IAs tomaron ventaja. <strong>Ahora todos parten de cero.</strong></p>`}
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
-                ${!isFirstOfficial ? `<div style="margin-top:12px;font-size:0.68rem;color:var(--cp-dim);">Jornada oficial · Quiniela ${escapeHtml(String(jornada))} · ${bando.humanCount} de la Pe&ntilde;a vs ${bando.aiCount} IAs + Programa</div>` : ""}
+                <div class="cp-quicklinks">
+                    <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos ahora" : "Resultados minuto a minuto"}</small></button>
+                    <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Tabla completa</small></button>
+                    <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Deja tu puntuaci&oacute;n</small></button>
+                </div>
             </section>
 
             <section class="cp-duel" aria-label="Pulso colectivo">
