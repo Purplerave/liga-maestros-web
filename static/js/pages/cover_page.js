@@ -230,36 +230,42 @@ function renderNewspaperCoverPageV3() {
 
     return `<div class="cp">
         <main class="cp-stage">
-            <section class="cp-intro">
-                <div class="cp-kicker">
-                    <span>Quiniela ${escapeHtml(String(jornada))}</span>
-                    <i class="cp-kicker-dot"></i>
-                    <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
-                    ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
-                </div>
-                <img class="cp-hero-logo-icon" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="LM">
-                <div class="cp-hero-tagline"><b>1X2</b> · La Peña vs IA</div>
-                <div class="cp-hero-titles">
-                    <h1 id="cp-main-title">
-                        <span class="cp-title-main"><span class="cp-title-white">LIGA </span><span class="cp-title-white">DE </span><span class="cp-title-gold">MAESTROS</span></span>
-                        <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
-                    </h1>
-                </div>
-                <p class="cp-lead">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
-                <div class="cp-actions">
-                    <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
-                </div>
-                <div class="cp-quicklinks">
-                    <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
-                    <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Tabla</small></button>
-                    <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Puntos</small></button>
-                </div>
-            </section>
+            <div class="cp-hero-left">
+                <section class="cp-intro">
+                    <div class="cp-kicker">
+                        <span>Quiniela ${escapeHtml(String(jornada))}</span>
+                        <i class="cp-kicker-dot"></i>
+                        <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                        ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
+                    </div>
+                    <img class="cp-hero-logo-icon" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="LM">
+                    <div class="cp-hero-tagline"><b>1X2</b> · La Peña vs IA</div>
+                    <div class="cp-hero-titles">
+                        <h1 id="cp-main-title">
+                            <span class="cp-title-main"><span class="cp-title-white">LIGA </span><span class="cp-title-white">DE </span><span class="cp-title-gold">MAESTROS</span></span>
+                            <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
+                        </h1>
+                    </div>
+                    <p class="cp-lead">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
+                    <div class="cp-actions">
+                        <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+                        <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
+                    </div>
+                    <div class="cp-quicklinks">
+                        <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
+                        <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Tabla</small></button>
+                        <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Puntos</small></button>
+                    </div>
+                </section>
+            </div>
 
-            ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
+            <div class="cp-hero-right">
+                <section class="cp-leaders">
+                    <div class="cp-card-head"><span>${isFirstOfficial ? "CLASIFICACIÓN · PRÓXIMAMENTE" : "CLASIFICACIÓN · JORNADA " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "PRUEBAS" : "TOP 5"}</b></div>
+                    ${clasifHtml}
+                    <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
+                </section>
 
-            <div class="cp-two-col">
                 <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
                     <div class="cp-duel-kicker">EL DUELO · MEDIA DE ACIERTOS</div>
                     <div class="cp-versus">
@@ -270,16 +276,12 @@ function renderNewspaperCoverPageV3() {
                     <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
                     <div class="cp-duel-foot">Basado en las últimas 10 jornadas. ¿Te atreves a superarlos?</div>
                 </section>
-
-                <section class="cp-leaders">
-                    <div class="cp-card-head"><span>${isFirstOfficial ? "CLASIFICACIÓN · PRÓXIMAMENTE" : "CLASIFICACIÓN · JORNADA " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "PRUEBAS" : "TOP 5"}</b></div>
-                    ${clasifHtml}
-                    <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
-                </section>
             </div>
         </main>
 
-        <section class="cp-dashboard">
+        ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
+
+        <section class="cp-bottom">
             <button type="button" class="cp-data-card cp-focus" data-page-action="TICKET">
                 <div class="cp-card-head"><span>PARTIDOS EN DIRECTO</span><b>${liveCount ? liveCount + " en juego" : ""}</b></div>
                 ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">De momento todos coinciden</span>`}
