@@ -196,18 +196,36 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    // Clasificación derecha - próximamente o actual
+    // Clasificación - columnas: POS, PARTICIPANTE, ACIERTOS, P15
     let clasifHtml = "";
     if (isFirstOfficial) {
         clasifHtml = `
-            <ol>${top3Pruebas.map((r,i) => `<li><i>${i+1}</i><strong>${escapeHtml(r.name)}</strong><span>${r.total}</span></li>`).join("")}</ol>
-            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--cp-line);font-size:0.66rem;color:var(--cp-muted);">
-                <div style="font-weight:700;color:var(--cp-text);margin-bottom:4px;">Mejores de la Peña en pruebas:</div>
-                ${bestPenaPruebas.length ? bestPenaPruebas.map((r,i) => `${i+1}. ${escapeHtml(r.name)} - ${r.total} pts`).join("<br>") : "Aún sin datos"}
-                <div style="margin-top:8px;color:var(--cp-gold);font-weight:700;">Jornada 1 de la nueva temporada empieza ${escapeHtml(statusLabel)} · <span id="cp-deadline-inline">${escapeHtml(statusLabel)}</span></div>
+            <div style="margin-top:12px;padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.66rem;color:var(--cp-muted);text-align:center;">
+                <div style="font-weight:700;color:var(--cp-text);margin-bottom:6px;">Mejores de la Peña en pruebas:</div>
+                ${bestPenaPruebas.length ? bestPenaPruebas.map((r,i) => `<div style="margin:3px 0;"><span style="color:var(--cp-gold);font-weight:800;">${i+1}.</span> ${escapeHtml(r.name)} - <span style="color:var(--cp-gold);">${r.total} pts</span></div>`).join("") : "Aún sin datos"}
             </div>`;
     } else {
-        clasifHtml = `<ol>${rankingForCover.slice(0,5).map((r,i) => `<li><i>${i+1}</i><strong>${escapeHtml(r.name)}</strong><span>${r.jornada}</span></li>`).join("")}</ol>`;
+        clasifHtml = `
+            <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+                <thead>
+                    <tr style="color:var(--cp-dim);font-size:0.54rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">
+                        <th style="text-align:left;padding:4px 6px;">POS</th>
+                        <th style="text-align:left;padding:4px 6px;">PARTICIPANTE</th>
+                        <th style="text-align:right;padding:4px 6px;">ACIERTOS</th>
+                        <th style="text-align:right;padding:4px 6px;">P15</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rankingForCover.slice(0,5).map((r,i) => `
+                        <tr style="border-top:1px solid rgba(255,255,255,0.04);${i === 0 ? 'background:rgba(245,181,63,0.06);' : ''}">
+                            <td style="padding:5px 6px;font-size:0.62rem;color:${i === 0 ? 'var(--cp-gold)' : 'var(--cp-muted)'};font-weight:700;">${i + 1}</td>
+                            <td style="padding:5px 6px;font-size:0.68rem;color:var(--cp-text);font-weight:600;">${escapeHtml(r.name)}</td>
+                            <td style="padding:5px 6px;font-size:0.68rem;color:var(--cp-gold);font-weight:800;text-align:right;font-variant-numeric:tabular-nums;">${r.jornada}</td>
+                            <td style="padding:5px 6px;font-size:0.62rem;color:var(--cp-dim);text-align:right;font-variant-numeric:tabular-nums;">${r.total}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>`;
     }
 
     return `<div class="cp">
@@ -219,10 +237,11 @@ function renderNewspaperCoverPageV3() {
                     <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
                     ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
                 </div>
-                <img class="cp-hero-logo" src="/static/img/ligademaestroslogo_trans.png?v=logo-hero-1" alt="Liga de Maestros">
+                <img class="cp-hero-logo-icon" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="LM">
+                <div class="cp-hero-tagline"><b>1X2</b> · La Peña vs IA</div>
                 <div class="cp-hero-titles">
                     <h1 id="cp-main-title">
-                        <span class="cp-title-main">LIGA DE MAESTROS</span>
+                        <span class="cp-title-main"><span class="cp-title-white">LIGA </span><span class="cp-title-white">DE </span><span class="cp-title-gold">MAESTROS</span></span>
                         <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
                     </h1>
                 </div>
@@ -240,48 +259,49 @@ function renderNewspaperCoverPageV3() {
 
             ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
 
-            <div class="cp-right-stack">
+            <div class="cp-two-col">
                 <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
-                    <div class="cp-duel-kicker">El duelo · Media de aciertos</div>
+                    <div class="cp-duel-kicker">EL DUELO · MEDIA DE ACIERTOS</div>
                     <div class="cp-versus">
-                        <div class="cp-side is-pena"><span>La Peña</span><b>${humanAvgStr}</b><small>${bando.humanTotal} aciertos / ${bando.humanCount} peñistas</small></div>
-                        <div class="cp-vs">—</div>
-                        <div class="cp-side is-ai"><span>Las IAs</span><b>${aiAvgStr}</b><small>${bando.aiTotal} aciertos / ${bando.aiCount} IAs</small></div>
+                        <div class="cp-side is-pena"><span>LA PEÑA</span><b>${humanAvgStr}</b><small>aciertos por jornada</small></div>
+                        <div class="cp-vs">VS</div>
+                        <div class="cp-side is-ai"><span>MAESTROS IA</span><b>${aiAvgStr}</b><small>aciertos por jornada</small></div>
                     </div>
                     <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
-                    <div class="cp-duel-foot">Misma quiniela para todos. Sin trucos. Solo cuenta la media.</div>
+                    <div class="cp-duel-foot">Basado en las últimas 10 jornadas. ¿Te atreves a superarlos?</div>
                 </section>
 
-                <section class="cp-data-card cp-leaders">
-                    <div class="cp-card-head"><span>${isFirstOfficial ? "Clasificación · Próximamente" : "Clasificación · Jornada " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "Pruebas" : "Top 5"}</b></div>
+                <section class="cp-leaders">
+                    <div class="cp-card-head"><span>${isFirstOfficial ? "CLASIFICACIÓN · PRÓXIMAMENTE" : "CLASIFICACIÓN · JORNADA " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "PRUEBAS" : "TOP 5"}</b></div>
                     ${clasifHtml}
+                    <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
                 </section>
             </div>
         </main>
 
         <section class="cp-dashboard">
             <button type="button" class="cp-data-card cp-focus" data-page-action="TICKET">
-                <div class="cp-card-head"><span>El partido en disputa</span><b>${disagreement ? disagreement.unique + " signos distintos" : ""}</b></div>
+                <div class="cp-card-head"><span>PARTIDOS EN DIRECTO</span><b>${liveCount ? liveCount + " en juego" : ""}</b></div>
                 ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">De momento todos coinciden</span>`}
             </button>
 
             <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
-                <div class="cp-card-head"><span>Así vota la Peña</span><b>El más abierto</b></div>
+                <div class="cp-card-head"><span>¿CÓMO VAN LOS ACIERTOS?</span><b>Gráfico</b></div>
                 ${penaPulse ? `${coverFixtureHtml(penaPulse.match, true)}
                     <div class="cp-pulse-bars"><i class="is-one" style="width:${penaPulse.row.p1}%"></i><i class="is-draw" style="width:${penaPulse.row.px}%"></i><i class="is-two" style="width:${penaPulse.row.p2}%"></i></div>
                     <div class="cp-pulse-labels"><span>1 · ${penaPulse.row.p1}%</span><span>X · ${penaPulse.row.px}%</span><span>2 · ${penaPulse.row.p2}%</span></div>` : `<span class="cp-empty">Aún no hay votos</span>`}
             </button>
 
             <div class="cp-data-card cp-news-card" id="cp-news-card">
-                <div class="cp-card-head"><span>Última hora</span><b>Resumen de prensa por IA</b></div>
+                <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
                 <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                <div class="cp-news-foot">La IA resume la prensa deportiva · toca una noticia para leer la fuente</div>
+                <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas las noticias →</a></div>
             </div>
 
-            <button type="button" class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span id="cover-porra-title">La porra</span><b>Marcador exacto</b></div>
+            <div class="cp-data-card cp-porra" data-page-action="TICKET">
+                <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>Marcador exacto</b></div>
                 <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
-            </button>
+            </div>
         </section>
     </div>`;
 }
