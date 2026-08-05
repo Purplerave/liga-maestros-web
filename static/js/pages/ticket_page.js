@@ -518,3 +518,4 @@ function patchTicketArena() {
     }
     return true;
 }
+/* botón guardar oculto si no hay usuario */

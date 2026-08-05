@@ -921,7 +921,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     background: rgba(239, 68, 68, 0.08);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 640px) {
     .cp-dashboard {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
