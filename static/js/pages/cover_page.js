@@ -252,9 +252,9 @@ function renderNewspaperCoverPageV3() {
                         <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                     </div>
                     <div class="cp-quicklinks">
-                        <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
-                        <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Tabla</small></button>
-                        <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Puntos</small></button>
+                        <button type="button" data-page-action="LIVE"><span>⚽</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
+                        <button type="button" data-page-action="STANDINGS"><span>🏆</span><b>Ligas</b><small>Tabla</small></button>
+                        <button type="button" data-page-action="SNAKE"><span>🎮</span><b>Juegos</b><small>Puntos</small></button>
                     </div>
                 </section>
             </div>
@@ -266,44 +266,34 @@ function renderNewspaperCoverPageV3() {
                     <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
                 </section>
 
-                <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
-                    <div class="cp-duel-kicker">EL DUELO · MEDIA DE ACIERTOS</div>
-                    <div class="cp-versus">
-                        <div class="cp-side is-pena"><span>LA PEÑA</span><b>${humanAvgStr}</b><small>aciertos por jornada</small></div>
-                        <div class="cp-vs">VS</div>
-                        <div class="cp-side is-ai"><span>MAESTROS IA</span><b>${aiAvgStr}</b><small>aciertos por jornada</small></div>
+                <div class="cp-right-bottom">
+                    <div class="cp-right-bottom-left">
+                        <div class="cp-data-card cp-news-card" id="cp-news-card">
+                            <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
+                            <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
+                            <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas →</a></div>
+                        </div>
+
+                        <div class="cp-data-card cp-porra" data-page-action="TICKET">
+                            <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>Marcador exacto</b></div>
+                            <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
+                        </div>
                     </div>
-                    <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
-                    <div class="cp-duel-foot">Basado en las últimas 10 jornadas. ¿Te atreves a superarlos?</div>
-                </section>
+
+                    <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
+                        <div class="cp-duel-kicker">EL DUELO</div>
+                        <div class="cp-versus">
+                            <div class="cp-side is-pena"><span>PEÑA</span><b>${humanAvgStr}</b></div>
+                            <div class="cp-vs">VS</div>
+                            <div class="cp-side is-ai"><span>IA</span><b>${aiAvgStr}</b></div>
+                        </div>
+                        <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
+                        <div class="cp-duel-foot">Media de aciertos por jornada</div>
+                    </section>
+                </div>
             </div>
         </main>
 
         ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
-
-        <section class="cp-bottom">
-            <button type="button" class="cp-data-card cp-focus" data-page-action="TICKET">
-                <div class="cp-card-head"><span>PARTIDOS EN DIRECTO</span><b>${liveCount ? liveCount + " en juego" : ""}</b></div>
-                ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">De momento todos coinciden</span>`}
-            </button>
-
-            <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
-                <div class="cp-card-head"><span>¿CÓMO VAN LOS ACIERTOS?</span><b>Gráfico</b></div>
-                ${penaPulse ? `${coverFixtureHtml(penaPulse.match, true)}
-                    <div class="cp-pulse-bars"><i class="is-one" style="width:${penaPulse.row.p1}%"></i><i class="is-draw" style="width:${penaPulse.row.px}%"></i><i class="is-two" style="width:${penaPulse.row.p2}%"></i></div>
-                    <div class="cp-pulse-labels"><span>1 · ${penaPulse.row.p1}%</span><span>X · ${penaPulse.row.px}%</span><span>2 · ${penaPulse.row.p2}%</span></div>` : `<span class="cp-empty">Aún no hay votos</span>`}
-            </button>
-
-            <div class="cp-data-card cp-news-card" id="cp-news-card">
-                <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
-                <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas las noticias →</a></div>
-            </div>
-
-            <div class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>Marcador exacto</b></div>
-                <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
-            </div>
-        </section>
     </div>`;
 }

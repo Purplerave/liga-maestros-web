@@ -51,6 +51,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
+    height: calc(100vh - 80px);
     margin: 0 auto;
 }
 
@@ -60,15 +61,18 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    height: 100%;
 }
 
 /* Panel hero con efecto estadio */
 .cp-intro {
     width: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 20px 14px;
+    justify-content: center;
+    padding: 20px 24px 18px;
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 14px;
     background:
@@ -215,27 +219,43 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 /* Quicklinks */
 .cp-quicklinks {
     display: flex;
-    gap: 6px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 14px;
     width: 100%;
     z-index: 1;
 }
 .cp-quicklinks button {
     flex: 1 1 0;
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-    padding: 8px 6px; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 12px 10px; border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.08);
     background: rgba(255,255,255,0.04);
     color: var(--cp-text); text-align: center; cursor: pointer;
     transition: all 140ms ease;
 }
-.cp-quicklinks button:hover { border-color: rgba(245,181,63,0.28); background: rgba(245,181,63,0.08); }
-.cp-quicklinks button b { font-size: 0.72rem; font-weight: 800; }
-.cp-quicklinks button small { font-size: 0.54rem; color: var(--cp-muted); }
-.cp-quicklinks button span { font-size: 0.56rem; color: #22c55e; }
+.cp-quicklinks button:hover { border-color: rgba(245,181,63,0.28); background: rgba(245,181,63,0.08); transform: translateY(-2px); }
+.cp-quicklinks button span { font-size: 1.2rem; }
+.cp-quicklinks button b { font-size: 0.82rem; font-weight: 800; }
+.cp-quicklinks button small { font-size: 0.58rem; color: var(--cp-muted); }
 
 /* ===== COLUMNA DERECHA: Clasificación + Duelo ===== */
 .cp-hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    height: 100%;
+}
+
+/* Parte inferior derecha: noticias + porra + duelo */
+.cp-right-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+}
+.cp-right-bottom-left {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -277,29 +297,28 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-leaders-foot a { color: var(--cp-cyan); font-size: 0.60rem; font-weight: 600; text-decoration: none; }
 .cp-leaders-foot a:hover { text-decoration: underline; }
 
-/* Duelo */
+/* Duelo - compacto */
 .cp-duel {
     position: relative; display: flex; flex-direction: column; justify-content: center;
-    min-width: 0; padding: 12px 14px 10px;
+    min-width: 0; padding: 14px 16px 12px;
     border: 1px solid var(--cp-line); border-radius: 14px;
     background: rgba(16,24,44,0.90); box-shadow: 0 8px 24px rgba(0,0,0,0.28);
 }
 .cp-duel-kicker {
-    color: var(--cp-dim); font-size: 0.56rem; font-weight: 800; text-transform: uppercase;
-    letter-spacing: 0.08em; text-align: center; margin-bottom: 6px;
+    color: var(--cp-dim); font-size: 0.58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.08em; text-align: center; margin-bottom: 10px;
 }
-.cp-versus { display: grid; grid-template-columns: 1fr 42px 1fr; align-items: end; gap: 4px; }
+.cp-versus { display: grid; grid-template-columns: 1fr 36px 1fr; align-items: center; gap: 6px; }
 .cp-side { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
-.cp-side span { color: var(--cp-muted); font-size: 0.54rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-.cp-side strong { margin-top: 2px; font-size: 0.78rem; font-weight: 800; }
-.cp-side b { display: block; margin-top: 1px; font-family: var(--cp-font-display); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; line-height: 0.9; font-variant-numeric: tabular-nums; }
+.cp-side span { color: var(--cp-muted); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.cp-side b { display: block; margin-top: 4px; font-family: var(--cp-font-display); font-size: clamp(1.6rem, 2.5vw, 2rem); font-weight: 800; line-height: 0.9; font-variant-numeric: tabular-nums; }
 .cp-side.is-pena b { color: var(--cp-gold); }
 .cp-side.is-ai b { color: var(--cp-cyan); }
-.cp-side small { margin-top: 3px; color: var(--cp-dim); font-size: 0.54rem; font-weight: 600; }
-.cp-vs { display: grid; place-items: center; align-self: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--cp-muted); font-weight: 800; font-size: 0.78rem; }
-.cp-scorebar-inline-track { margin-top: 8px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; position: relative; }
+.cp-side small { margin-top: 4px; color: var(--cp-dim); font-size: 0.56rem; font-weight: 600; }
+.cp-vs { display: grid; place-items: center; align-self: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--cp-muted); font-weight: 800; font-size: 0.7rem; }
+.cp-scorebar-inline-track { margin-top: 10px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; position: relative; }
 .cp-scorebar-inline-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--cp-gold), var(--cp-cyan)); }
-.cp-duel-foot { margin-top: 6px; color: var(--cp-dim); font-size: 0.54rem; font-weight: 600; text-align: center; }
+.cp-duel-foot { margin-top: 8px; color: var(--cp-dim); font-size: 0.58rem; font-weight: 600; text-align: center; }
 
 /* ===== LIVE ===== */
 .cp-live {
@@ -310,19 +329,15 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 }
 .cp-live > span { width: 5px; height: 5px; border-radius: 50%; background: #10b981; }
 
-/* ===== PANEL INFERIOR - 4 columnas ===== */
-.cp-bottom {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0,1fr));
-    gap: 10px;
-    width: 100%;
-    margin-top: 10px;
-}
+/* ===== TARJETAS DATOS ===== */
 .cp-data-card {
-    min-width: 0; min-height: 110px; padding: 10px 10px 8px;
+    min-width: 0; min-height: 100px; padding: 10px 10px 8px;
     border: 1px solid var(--cp-line); border-radius: 12px;
     background: rgba(15,22,38,0.88); color: inherit; text-align: left; cursor: pointer;
     transition: border-color 140ms ease, transform 140ms ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 .cp-data-card:hover { transform: translateY(-1px); border-color: var(--cp-line-strong); background: rgba(19,28,48,0.94); }
 
@@ -380,25 +395,25 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-empty { display:block; margin-top:8px; color: var(--cp-muted); font-size:0.60rem; }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1100px) {
-    .cp-bottom { grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
 @media (max-width: 900px) {
     .cp { padding: 8px 10px 14px; }
-    .cp-stage { grid-template-columns: 1fr; }
-    .cp-bottom { grid-template-columns: 1fr; }
+    .cp-stage { grid-template-columns: 1fr; height: auto; }
+    .cp-right-bottom { grid-template-columns: 1fr; }
+    .cp-right-bottom-left { flex-direction: row; }
+    .cp-data-card { min-height: 120px; }
 }
 @media (max-width: 640px) {
     .cp-hero-logo-icon { width: 44px; height: 44px; }
     .cp-title-main { font-size: 1.5rem; }
     .cp-quicklinks { flex-wrap: wrap; }
-    .cp-quicklinks button { min-width: calc(50% - 3px); }
+    .cp-quicklinks button { min-width: calc(50% - 4px); }
+    .cp-right-bottom-left { flex-direction: column; }
 }
 @media (max-height: 820px) and (min-width: 901px) {
     .cp { padding-top: 4px; padding-bottom: 8px; }
     .cp-intro { padding: 10px 16px 8px; }
     .cp-hero-logo-icon { width: 42px; height: 42px; }
-    .cp-data-card { min-height: 90px; padding: 8px; }
+    .cp-data-card { min-height: 80px; padding: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .cp *, .cp *::before, .cp *::after { animation: none; transition: none; }
