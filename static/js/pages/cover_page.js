@@ -213,31 +213,35 @@ function renderNewspaperCoverPageV3() {
     return `<div class="cp">
         <main class="cp-stage">
             <section class="cp-intro">
-                <div class="cp-kicker">
-                    <span>Quiniela ${escapeHtml(String(jornada))}</span>
-                    <i class="cp-kicker-dot"></i>
-                    <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
-                    ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
-                </div>
-                <div class="cp-hero-main">
-                    <img class="cp-hero-logo" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="Escudo de Liga de Maestros 1X2">
-                    <div class="cp-hero-titles">
-                        <h1 id="cp-main-title">
-                            <span class="cp-title-thin">LA PEÑA</span>
-                            <span class="cp-title-mid">CONTRA LAS</span>
-                            <span class="cp-title-bold">MÁQUINAS</span>
-                        </h1>
+                <div class="cp-hero-cols">
+                    <div class="cp-hero-content">
+                        <div class="cp-kicker">
+                            <span>Quiniela ${escapeHtml(String(jornada))}</span>
+                            <i class="cp-kicker-dot"></i>
+                            <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                            ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
+                        </div>
+                        <div class="cp-hero-titles">
+                            <h1 id="cp-main-title">
+                                <span class="cp-title-thin">LA PEÑA</span>
+                                <span class="cp-title-mid">CONTRA LAS</span>
+                                <span class="cp-title-bold">MÁQUINAS</span>
+                            </h1>
+                        </div>
+                        <p class="cp-lead cp-lead-explique">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
+                        <div class="cp-actions">
+                            <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+                            <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
+                        </div>
+                        <div class="cp-quicklinks">
+                            <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos ahora" : "Marcadores en vivo"}</small></button>
+                            <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Cómo va la tabla</small></button>
+                            <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Tu puntuación</small></button>
+                        </div>
                     </div>
-                </div>
-                <p class="cp-lead cp-lead-explique">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
-                <div class="cp-actions">
-                    <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
-                </div>
-                <div class="cp-quicklinks">
-                    <button type="button" data-page-action="LIVE"><span>● En vivo</span><b>Directo</b><small>${liveCount ? liveCount + " partidos ahora" : "Marcadores en vivo"}</small></button>
-                    <button type="button" data-page-action="STANDINGS"><b>Ligas</b><small>Cómo va la tabla</small></button>
-                    <button type="button" data-page-action="SNAKE"><b>Juegos</b><small>Tu puntuación</small></button>
+                    <div class="cp-hero-logo-col">
+                        <img class="cp-hero-logo" src="/static/img/ligademaestroslogo_trans.png?v=logo-hero-1" alt="Liga de Maestros">
+                    </div>
                 </div>
             </section>
 

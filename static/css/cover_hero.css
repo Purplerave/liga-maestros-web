@@ -97,19 +97,33 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 @keyframes cpUrgent { 0%,100%{opacity:1} 50%{opacity:.55} }
 
 /* Logo grande + titulo lado a lado - evita hueco enorme */
-.cp-hero-main {
+/* Hero en 2 columnas: contenido a la izquierda, logo completo GRANDE a la derecha.
+   El logo es una imagen independiente: sin fondo, sin borde, sin recuadro,
+   sin radius, sin sombra de tarjeta y sin efecto boton/capsula. */
+.cp-hero-cols {
     position: relative;
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: clamp(16px, 2vw, 26px);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    margin-bottom: 12px;
+    gap: clamp(22px, 3vw, 44px);
+}
+.cp-hero-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.cp-hero-logo-col {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    min-width: 0;
+    padding: 8px 4px;
 }
 .cp-hero-logo {
-    width: auto;
-    height: clamp(160px, 15vw, 220px);
+    width: clamp(300px, 24vw, 420px);
+    height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 14px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 30px rgba(56,217,255,0.18));
 }
 .cp-hero-titles {
     min-width: 0;
@@ -319,14 +333,15 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp { padding: 10px 10px 20px; }
     .cp-stage { width: min(720px, calc(100% - 20px)); gap: 12px; }
     .cp-intro { padding: 16px 14px 14px; }
-    .cp-hero-main { grid-template-columns: auto 1fr; gap: 14px; }
-    .cp-hero-logo { height: clamp(130px, 22vw, 170px); }
+    .cp-hero-cols { grid-template-columns: 1fr; gap: 20px; }
+    .cp-hero-logo-col { align-self: auto; padding: 2px 0 4px; }
+    .cp-hero-logo { width: 80%; max-width: 420px; margin: 0 auto; }
     .cp-dashboard { grid-template-columns: 1fr; width: min(720px, calc(100% - 20px)); }
 }
 @media (max-width: 640px) {
     .cp-stage { width: min(480px, calc(100% - 20px)); }
-    .cp-hero-main { grid-template-columns: auto 1fr; gap: 12px; }
-    .cp-hero-logo { height: clamp(104px, 30vw, 130px); }
+    .cp-hero-cols { gap: 16px; }
+    .cp-hero-logo { width: 76%; max-width: 320px; }
     .cp-title-thin { font-size: 1.6rem; }
     .cp-title-bold { font-size: 2.2rem; }
     .cp-quicklinks { grid-template-columns: repeat(3, minmax(0,1fr)); }
@@ -336,6 +351,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp { padding-top: 6px; padding-bottom: 10px; }
     .cp-stage { gap: 12px; }
     .cp-intro { padding: 14px 16px 12px; }
+    .cp-hero-logo { width: clamp(280px, 22vw, 340px); }
     .cp-data-card { min-height: 128px; padding: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
