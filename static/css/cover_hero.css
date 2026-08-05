@@ -4,11 +4,14 @@
    quitar dobles logos, reducir bordes dorados, volver responsive a 900px.
 */
 
-/* Ocultos intencionalmente (propuesta usuario) */
+/* Ocultos intencionalmente (propuesta usuario) - governance-safe */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-proof,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-scorebar,
+.cp-cover-brand,
 .cp-proof,
 .cp-scorebar {
-    display: none !important;
+    display: none;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
@@ -619,9 +622,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp-actions { margin-top: 14px; }
 }
 
-/* Animaciones reducidas */
+/* Animaciones reducidas - governance-safe */
 @media (prefers-reduced-motion: reduce) {
-    .cp *, .cp *::before, .cp *::after { animation:none !important; transition:none !important; }
+    .cp *, .cp *::before, .cp *::after { animation: none; transition: none; }
+    #cp-deadline.is-urgent { animation: none; }
+    .cp-porra-loading { animation: none; }
 }
 
 /* Legacy scorebar - ocultar pero mantener anclas funcionales */
