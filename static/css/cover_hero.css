@@ -247,19 +247,18 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     height: 100%;
 }
 
-/* Parte inferior derecha: noticias + porra + duelo */
+/* Parte inferior derecha: porra+duelo arriba, noticias abajo */
 .cp-right-bottom {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     flex: 1;
     min-height: 0;
 }
-.cp-right-bottom-left {
-    display: flex;
-    flex-direction: column;
+.cp-right-bottom-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    min-width: 0;
 }
 
 /* Clasificación */
@@ -398,8 +397,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 @media (max-width: 900px) {
     .cp { padding: 8px 10px 14px; }
     .cp-stage { grid-template-columns: 1fr; height: auto; }
-    .cp-right-bottom { grid-template-columns: 1fr; }
-    .cp-right-bottom-left { flex-direction: row; }
+    .cp-right-bottom-top { grid-template-columns: 1fr; }
     .cp-data-card { min-height: 120px; }
 }
 @media (max-width: 640px) {
@@ -407,7 +405,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp-title-main { font-size: 1.5rem; }
     .cp-quicklinks { flex-wrap: wrap; }
     .cp-quicklinks button { min-width: calc(50% - 4px); }
-    .cp-right-bottom-left { flex-direction: column; }
 }
 @media (max-height: 820px) and (min-width: 901px) {
     .cp { padding-top: 4px; padding-bottom: 8px; }

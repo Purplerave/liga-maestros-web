@@ -267,29 +267,29 @@ function renderNewspaperCoverPageV3() {
                 </section>
 
                 <div class="cp-right-bottom">
-                    <div class="cp-right-bottom-left">
-                        <div class="cp-data-card cp-news-card" id="cp-news-card">
-                            <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
-                            <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                            <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas →</a></div>
-                        </div>
-
+                    <div class="cp-right-bottom-top">
                         <div class="cp-data-card cp-porra" data-page-action="TICKET">
                             <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>Marcador exacto</b></div>
                             <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
                         </div>
+
+                        <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
+                            <div class="cp-duel-kicker">EL DUELO</div>
+                            <div class="cp-versus">
+                                <div class="cp-side is-pena"><span>PEÑA</span><b>${humanAvgStr}</b></div>
+                                <div class="cp-vs">VS</div>
+                                <div class="cp-side is-ai"><span>IA</span><b>${aiAvgStr}</b></div>
+                            </div>
+                            <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
+                            <div class="cp-duel-foot">Media de aciertos</div>
+                        </section>
                     </div>
 
-                    <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
-                        <div class="cp-duel-kicker">EL DUELO</div>
-                        <div class="cp-versus">
-                            <div class="cp-side is-pena"><span>PEÑA</span><b>${humanAvgStr}</b></div>
-                            <div class="cp-vs">VS</div>
-                            <div class="cp-side is-ai"><span>IA</span><b>${aiAvgStr}</b></div>
-                        </div>
-                        <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
-                        <div class="cp-duel-foot">Media de aciertos por jornada</div>
-                    </section>
+                    <div class="cp-data-card cp-news-card" id="cp-news-card">
+                        <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
+                        <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
+                        <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas →</a></div>
+                    </div>
                 </div>
             </div>
         </main>
