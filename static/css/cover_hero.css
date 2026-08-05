@@ -513,6 +513,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     text-overflow:ellipsis; white-space:nowrap;
 }
 .cp-leaders li span { color: var(--cp-gold); font-size:0.74rem; font-weight:800; font-variant-numeric: tabular-nums; }
+.cp-leaders li.is-collective { background: rgba(239,90,139,0.08); border-color: rgba(239,90,139,0.22); }
+.cp-leaders li.is-collective i { background: var(--cp-pink); color: #fff; }
+.cp-leaders li.is-collective span { color: var(--cp-pink); }
 
 /* ========== SECUNDARIO: noticias + porra ========== */
 .cp-secondary-grid {
