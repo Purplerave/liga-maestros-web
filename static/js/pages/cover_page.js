@@ -1,27 +1,27 @@
-/* Portada competitiva de Liga de Maestros. */
-
-let _coverFontLoaded = false;
-function loadSacramentoFont() {
-    if (_coverFontLoaded) return;
-    _coverFontLoaded = true;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap";
-    document.head.appendChild(link);
-}
+/* Portada Liga de Maestros — Rediseño limpio v2
+   - Hero ancho potente, sin logo duplicado
+   - 3 módulos iguales, 2 secundarios
+   - Sin 7 columnas, responsive vuelve a 900px
+*/
 
 let _countdownStarted = false;
-let _scorebarStarted = false;
 
 function startCoverCountdown() {
     if (_countdownStarted) return;
     const node = document.querySelector("#cp-deadline");
     if (!node) return;
     _countdownStarted = true;
-    setInterval(() => {
+    const tick = () => {
         const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
-        if (!raw) { node.textContent = "CIERRE EN ..."; return; }
+        if (!raw) {
+            node.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA";
+            return;
+        }
         const target = new Date(String(raw).replace(" ", "T"));
+        if (Number.isNaN(target.getTime())) {
+            node.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA";
+            return;
+        }
         const diff = target.getTime() - Date.now();
         if (diff <= 0 || (state && state.data && state.data.is_locked)) {
             node.textContent = "CERRADA";
@@ -30,39 +30,19 @@ function startCoverCountdown() {
         }
         const s = Math.max(0, Math.floor(diff / 1000));
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-        node.textContent = `${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+        node.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
         node.classList.toggle("is-urgent", diff < 3_600_000);
-    }, 1000);
-}
-
-function startCoverScorebar() {
-    if (_scorebarStarted) return;
-    const fill = document.querySelector("#cp-scorebar-fill");
-    const humanEl = document.querySelector("#cp-scorebar-human");
-    const aiEl = document.querySelector("#cp-scorebar-ai");
-    if (!fill || !humanEl || !aiEl) return;
-    _scorebarStarted = true;
-    const tick = () => {
-        const scores = coverBandoScores();
-        const total = scores.human + scores.ai;
-        const pct = total > 0 ? (scores.human / total) * 100 : 50;
-        fill.style.width = pct + "%";
-        humanEl.textContent = scores.human;
-        aiEl.textContent = scores.ai;
     };
     tick();
-    setInterval(tick, 5000);
+    setInterval(tick, 1000);
 }
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startCoverCountdown);
-    document.addEventListener("DOMContentLoaded", startCoverScorebar);
 } else {
     startCoverCountdown();
-    startCoverScorebar();
 }
 
-function hydrateCoverTypewriter() {}
-
+/* Helpers sin cambios funcionales */
 function coverCloseLabel() {
     const raw = state.data.edit_deadline || state.data.kickoff_at || "";
     if (!raw) return state.data.is_locked ? "cerrada" : "abierta";
@@ -77,31 +57,26 @@ function coverCloseLabel() {
     if (hours > 0) return `${hours}h ${String(mins).padStart(2, "0")}m`;
     return `${Math.max(1, mins)}m`;
 }
-
 function coverIsClosed() {
     return Boolean(state.data.is_locked) || coverCloseLabel() === "cerrada";
 }
-
 function coverMasterColumns() {
     return (state.data?.participant_contract?.visible_ai_columns || []).map(col => ({
         id: Array.isArray(col) ? col[0] : col.id,
         label: Array.isArray(col) ? (col[2] || col[0]) : (col.name || col.label || col.id),
     })).filter(col => col.id);
 }
-
 function coverMasterNames() {
     return coverMasterColumns()
         .filter(col => String(col.id).toLowerCase() !== "programa")
         .map(col => col.label);
 }
-
 function coverDisplayName(uid) {
     const names = state.data?.participant_contract?.names || {};
     const id = String(uid || "").toLowerCase();
     if (state.user && String(state.user.id).toLowerCase() === id) return state.user.name || "Tu";
     return names[id] || names[uid] || String(uid || "").split("@")[0];
 }
-
 function coverRankingRows() {
     const ranking = state.data?.ranking_maestros || {};
     const hidden = new Set((state.data?.participant_contract?.hidden_ids || []).map(id => String(id).toLowerCase()));
@@ -115,27 +90,21 @@ function coverRankingRows() {
         }))
         .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.name.localeCompare(b.name, "es"));
 }
-
 function coverBandoScores() {
     const rows = coverRankingRows();
     const aiIds = new Set(coverMasterColumns().map(col => String(col.id || "").toLowerCase()));
     const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
-    return rows.reduce(
-        (acc, row) => {
-            const uid = String(row.uid).toLowerCase();
-            if (aiIds.has(uid)) acc.ai += row.jornada;
-            else if (penaIds.has(uid)) acc.human += row.jornada;
-            return acc;
-        },
-        { human: 0, ai: 0 }
-    );
+    return rows.reduce((acc, row) => {
+        const uid = String(row.uid).toLowerCase();
+        if (aiIds.has(uid)) acc.ai += row.jornada;
+        else if (penaIds.has(uid)) acc.human += row.jornada;
+        return acc;
+    }, { human: 0, ai: 0 });
 }
-
 function coverPredictionSigns(entry) {
     if (Array.isArray(entry)) return entry;
     return Array.isArray(entry?.signos) ? entry.signos : [];
 }
-
 function coverPenaReading(row) {
     if (!row || !Number(row.total || 0)) return null;
     const readings = [
@@ -150,7 +119,6 @@ function coverPenaReading(row) {
         total: Number(row.total || 0),
     };
 }
-
 function coverDisagreementMatch(matches) {
     const columns = coverMasterColumns();
     const predictions = state.data?.predicciones_actuales || {};
@@ -171,7 +139,6 @@ function coverDisagreementMatch(matches) {
     });
     return best;
 }
-
 function coverTightPenaMatch(matches) {
     const rows = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
     let best = null;
@@ -183,24 +150,6 @@ function coverTightPenaMatch(matches) {
     });
     return best;
 }
-
-function coverMatchTimestamp(match) {
-    const rawDate = String(match?.fecha_raw || match?.fecha || "").split(" ")[0];
-    const rawHour = String(match?.hora || "00:00").slice(0, 5);
-    const stamp = Date.parse(`${rawDate}T${rawHour}:00`);
-    return Number.isNaN(stamp) ? Number.MAX_SAFE_INTEGER : stamp;
-}
-
-function coverNextMatch(matches) {
-    const live = matches.find(match => isLiveStatus(match.status) || isLiveMatch(match));
-    if (live) return { match: live, live: true };
-    const pending = matches
-        .filter(match => !(isFinishedStatus(match.status) || isImplicitlyFinished(match)) && coverMatchTimestamp(match) >= Date.now() - 3600000)
-        .slice()
-        .sort((a, b) => coverMatchTimestamp(a) - coverMatchTimestamp(b));
-    return { match: pending[0] || matches[0] || null, live: false };
-}
-
 function coverFixtureHtml(match, compact = false) {
     if (!match) return `<span class="cp-empty">Horario pendiente</span>`;
     return `<div class="cp-fixture ${compact ? "is-compact" : ""}">
@@ -209,7 +158,6 @@ function coverFixtureHtml(match, compact = false) {
         <span class="cp-team cp-team-away">${logoBadge(match.visitante, teamLogo(match, "away"))}<strong>${escapeHtml(getShortName(match.visitante))}</strong></span>
     </div>`;
 }
-
 function hydrateCoverPorra(data) {
     const target = document.getElementById("cover-porra-content");
     const title = document.getElementById("cover-porra-title");
@@ -236,6 +184,7 @@ function hydrateCoverPorra(data) {
         </div>`;
 }
 
+/* ====== RENDER NUEVO ====== */
 function renderNewspaperCoverPageV3() {
     const matches = state.data?.partidos || [];
     const closed = coverIsClosed();
@@ -243,95 +192,117 @@ function renderNewspaperCoverPageV3() {
     const jornada = state.data?.jornada || state.jornada || "";
     const liveCount = matches.filter(match => isLiveStatus(match.status) || isLiveMatch(match)).length;
     const masterNames = coverMasterNames();
-    const masterColumns = coverMasterColumns();
-    const penaVotes = Math.max(0, ...(state.data?.consenso_pena || []).map(row => Number(row.total || 0)));
     const rankingRows = coverRankingRows();
     const disagreement = coverDisagreementMatch(matches);
     const penaPulse = coverTightPenaMatch(matches);
-    const next = coverNextMatch(matches);
-    const ctaLabel = closed
-        ? (saved ? "Ver mi quiniela" : "Ver resultados")
-        : (saved ? "Revisar mi quiniela" : "Guardar quiniela");
-    const statusLabel = closed ? "Jornada cerrada" : `Cierre en ${coverCloseLabel()}`;
-    const distinctReadings = disagreement?.unique || 0;
     const bandoScores = coverBandoScores();
     const totalBando = bandoScores.human + bandoScores.ai;
     const humanPct = totalBando > 0 ? (bandoScores.human / totalBando) * 100 : 50;
+    const penaVotes = Math.max(0, ...(state.data?.consenso_pena || []).map(row => Number(row.total || 0)));
+
+    const ctaLabel = closed
+        ? (saved ? "Ver mi quiniela" : "Ver resultados")
+        : (saved ? "Revisar quiniela" : "Jugar quiniela");
+
+    const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
+
+    // Texto líder dinámico
+    let leadTitle = "Grok lidera con 144 puntos. Claude y ChatGPT siguen la persecución.";
+    if (rankingRows.length >= 3) {
+        leadTitle = `${escapeHtml(rankingRows[0].name)} lidera con ${rankingRows[0].total} puntos. ${escapeHtml(rankingRows[1].name)} y ${escapeHtml(rankingRows[2].name)} siguen la persecución.`;
+    } else if (rankingRows.length === 2) {
+        leadTitle = `${escapeHtml(rankingRows[0].name)} lidera con ${rankingRows[0].total} puntos. ${escapeHtml(rankingRows[1].name)} a ${rankingRows[0].total - rankingRows[1].total} puntos.`;
+    } else if (rankingRows.length === 1) {
+        leadTitle = `${escapeHtml(rankingRows[0].name)} lidera con ${rankingRows[0].total} puntos.`;
+    }
+
+    // Picks limitados: Peña + max 3 IA
+    let picksHtml = "";
+    if (disagreement) {
+        const limited = disagreement.picks.slice(0, 3);
+        const extra = disagreement.picks.length > 3 ? disagreement.picks.length - 3 : 0;
+        picksHtml = `
+            ${disagreement.pena ? `<span class="is-pena" title="${disagreement.pena.total} pronósticos"><small>Peña</small><b>${escapeHtml(disagreement.pena.sign)}</b></span>` : ""}
+            ${limited.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label).slice(0,10)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}
+            ${extra ? `<span title="${extra} más"><small>+${extra}</small></span>` : ""}
+        `;
+    }
 
     return `<div class="cp">
-        <div class="cp-scorebar" aria-label="Marcador global humanos vs m&aacute;quinas">
-            <i id="cp-scorebar-fill" class="cp-scorebar-fill" style="width:${humanPct}%"></i>
-            <div class="cp-scorebar-content">
-                <span class="cp-scorebar-side is-pena">HUMANOS <b id="cp-scorebar-human">${bandoScores.human}</b></span>
-                <span class="cp-scorebar-vs" aria-hidden="true"></span>
-                <span class="cp-scorebar-side is-ai">M&Aacute;QUINAS <b id="cp-scorebar-ai">${bandoScores.ai}</b></span>
-            </div>
-        </div>
-        <main class="cp-stage">
-            <section class="cp-intro" aria-labelledby="cp-title">
-                <div class="cp-kicker"><span>Jornada ${escapeHtml(jornada)}</span><i></i><span id="cp-deadline">${escapeHtml(statusLabel)}</span></div>
-                <div class="cp-cover-brand" id="cp-title">
-                    <img src="/static/img/ligademaestroslogo_trans.png" alt="Liga de Maestros">
-                    <span>La competici&oacute;n de la quiniela</span>
+        <main class="cp-stage" aria-labelledby="cp-main-title">
+            <section class="cp-intro">
+                <div class="cp-kicker">
+                    <span>Jornada ${escapeHtml(String(jornada))}</span>
+                    <i class="cp-kicker-dot" aria-hidden="true"></i>
+                    <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                    ${liveCount ? `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
                 </div>
-                <p class="cp-lead"><strong>Grok 144. Claude 141. ChatGPT 139.</strong> 75 jornadas. Tres semanas ganando. Una para meterla.<strong class="cp-challenge">&iquest;Qui&eacute;n sabe m&aacute;s de f&uacute;tbol?</strong></p>
+                <h1 id="cp-main-title">LA PEÑA<br>CONTRA LAS<br>MÁQUINAS</h1>
+                <p class="cp-lead">${leadTitle}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Ver clasificaci&oacute;n</button>
-                </div>
-                <div class="cp-proof" aria-label="Datos de la competici&oacute;n">
-                    <span><b>${rankingRows.length}</b> participantes</span>
-                    <span><b>${masterNames.length}</b> Maestros IA</span>
-                    <span><b>15</b> partidos</span>
+                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
             </section>
 
-            <section class="cp-duel" aria-label="La Pe&ntilde;a contra los Maestros IA">
-                <div class="cp-duel-kicker">EL DUELO DE LA JORNADA</div>
+            <section class="cp-duel" aria-label="Marcador humanos contra máquinas">
+                <div class="cp-duel-kicker">Pulso colectivo · Jornada ${escapeHtml(String(jornada))}</div>
                 <div class="cp-versus">
-                    <div class="cp-side is-pena"><span>HUMANOS</span><strong>LA PE&Ntilde;A</strong><small>${penaVotes || rankingRows.length} pron&oacute;sticos</small></div>
-                    <div class="cp-vs">VS</div>
-                    <div class="cp-side is-ai"><span>RIVALES</span><strong>MAESTROS IA</strong><small>${masterNames.length} IAs + Programa</small></div>
-                </div>
-                ${disagreement ? `<div class="cp-focus">
-                    <div class="cp-focus-head"><span>PARTIDO BAJO LUPA</span><b>${distinctReadings} posturas distintas</b></div>
-                    ${coverFixtureHtml(disagreement.match, true)}
-                    <div class="cp-picks" aria-label="Pron&oacute;sticos de La Pe&ntilde;a, el Programa y los Maestros">
-                        ${disagreement.pena ? `<span class="is-pena" title="Consenso de ${disagreement.pena.total} pron&oacute;sticos"><small>La Pe&ntilde;a</small><b>${escapeHtml(disagreement.pena.sign)}</b><em>${disagreement.pena.percent}%</em></span>` : ""}
-                        ${disagreement.picks.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}
+                    <div class="cp-side is-pena">
+                        <span>Humanos</span>
+                        <b>${bandoScores.human}</b>
+                        <small>La Peña</small>
                     </div>
-                </div>` : ""}
+                    <div class="cp-vs">—</div>
+                    <div class="cp-side is-ai">
+                        <span>Máquinas</span>
+                        <b>${bandoScores.ai}</b>
+                        <small>Maestros IA</small>
+                    </div>
+                </div>
+                <div class="cp-scorebar-inline-track" aria-hidden="true">
+                    <div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div>
+                </div>
+                <div class="cp-duel-foot">${penaVotes || rankingRows.length} pronósticos · ${masterNames.length} IAs en juego · ${closed ? "jornada cerrada" : "jornada abierta"}</div>
             </section>
         </main>
 
-        ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Entra en la sala de seguimiento</em></button>` : ""}
-        <section class="cp-dashboard" aria-label="Estado de la jornada">
+        ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Entra al seguimiento</em></button>` : ""}
 
-            <section class="cp-data-card cp-news-card" id="cp-news-card">
-                <div class="cp-card-head"><span>NOVEDADES</span><b>Resumen de la prensa deportiva</b></div>
-                <div id="cover-news-content" class="cp-news-content" aria-live="polite">
-                    <span class="cp-porra-loading">Buscando noticias...</span>
-                </div>
-            </section>
+        <section class="cp-dashboard" aria-label="Estado de la jornada">
+            <button type="button" class="cp-data-card cp-focus" data-page-action="TICKET">
+                <div class="cp-card-head"><span>Partido bajo lupa</span><b>${disagreement ? `${disagreement.unique} posturas` : "Análisis"}</b></div>
+                ${disagreement ? `${coverFixtureHtml(disagreement.match, true)}<div class="cp-picks">${picksHtml}</div>` : `<span class="cp-empty">Aún sin cruces destacados</span>`}
+            </button>
 
             <button type="button" class="cp-data-card cp-pulse" data-page-action="TICKET">
-                <div class="cp-card-head"><span>PULSO DE LA PE&Ntilde;A</span><b>El partido m&aacute;s abierto</b></div>
+                <div class="cp-card-head"><span>Pulso de la Peña</span><b>${penaPulse ? "Más abierto" : "Consenso"}</b></div>
                 ${penaPulse ? `${coverFixtureHtml(penaPulse.match, true)}
                     <div class="cp-pulse-bars" aria-label="1 ${penaPulse.row.p1}%, X ${penaPulse.row.px}%, 2 ${penaPulse.row.p2}%">
                         <i class="is-one" style="width:${penaPulse.row.p1}%"></i><i class="is-draw" style="width:${penaPulse.row.px}%"></i><i class="is-two" style="width:${penaPulse.row.p2}%"></i>
                     </div>
-                    <div class="cp-pulse-labels"><span>1 &middot; ${penaPulse.row.p1}%</span><span>X &middot; ${penaPulse.row.px}%</span><span>2 &middot; ${penaPulse.row.p2}%</span></div>` : `<span class="cp-empty">A&uacute;n no hay pron&oacute;sticos</span>`}
+                    <div class="cp-pulse-labels"><span>1 · ${penaPulse.row.p1}%</span><span>X · ${penaPulse.row.px}%</span><span>2 · ${penaPulse.row.p2}%</span></div>
+                ` : `<span class="cp-empty">Aún no hay pronósticos</span>`}
             </button>
 
             <button type="button" class="cp-data-card cp-leaders" data-page-action="CONTEST">
-                <div class="cp-card-head"><span>CLASIFICACI&Oacute;N GENERAL</span><b>La pelea por el liderato</b></div>
-                <ol>${rankingRows.slice(0, 3).map((row, index) => `<li><i>${index + 1}</i><strong>${escapeHtml(row.name)}</strong><span>${row.total} pts</span></li>`).join("")}</ol>
+                <div class="cp-card-head"><span>Clasificación general</span><b>Top ${Math.min(5, rankingRows.length)}</b></div>
+                <ol>${rankingRows.slice(0, 5).map((row, index) => `<li><i>${index + 1}</i><strong>${escapeHtml(row.name)}</strong><span>${row.total}</span></li>`).join("") || `<li><i>—</i><strong>Sin datos</strong><span>0</span></li>`}</ol>
             </button>
+        </section>
+
+        <section class="cp-secondary-grid" aria-label="Contenido secundario">
+            <div class="cp-data-card cp-news-card" id="cp-news-card">
+                <div class="cp-card-head"><span>Novedades</span><b>Prensa deportiva</b></div>
+                <div id="cover-news-content" class="cp-news-content" aria-live="polite">
+                    <span class="cp-porra-loading">Cargando...</span>
+                </div>
+            </div>
 
             <button type="button" class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span id="cover-porra-title">PORRA DE LA JORNADA</span><b>Marcador exacto</b></div>
+                <div class="cp-card-head"><span id="cover-porra-title">Porra de la jornada</span><b>Marcador exacto</b></div>
                 <div id="cover-porra-content" class="cp-porra-content" aria-live="polite">
-                    <span class="cp-porra-loading">Buscando el partido m&aacute;s abierto</span>
+                    <span class="cp-porra-loading">Buscando partido</span>
                 </div>
             </button>
         </section>
