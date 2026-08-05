@@ -97,23 +97,33 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 @keyframes cpUrgent { 0%,100%{opacity:1} 50%{opacity:.55} }
 
 /* Logo grande + titulo lado a lado - evita hueco enorme */
-.cp-hero-main {
+/* Hero en 2 columnas: contenido a la izquierda, logo completo GRANDE a la derecha.
+   El logo es una imagen independiente: sin fondo, sin borde, sin recuadro,
+   sin radius, sin sombra de tarjeta y sin efecto boton/capsula. */
+.cp-hero-cols {
     position: relative;
     display: grid;
-    grid-template-columns: 88px 1fr;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    margin-bottom: 12px;
+    gap: clamp(22px, 3vw, 44px);
+}
+.cp-hero-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.cp-hero-logo-col {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    min-width: 0;
+    padding: 8px 4px;
 }
 .cp-hero-logo {
-    width: 88px;
-    height: 88px;
+    width: clamp(300px, 24vw, 420px);
+    height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35));
-    border-radius: 14px;
-    background: rgba(255,255,255,0.03);
-    padding: 6px;
-    border: 1px solid rgba(255,255,255,0.06);
 }
 .cp-hero-titles {
     min-width: 0;
@@ -302,7 +312,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-news-category { color: var(--cp-gold); font-size: 0.58rem; font-weight: 800; text-transform: uppercase; }
 .cp-news-row strong { color:#e9eef6; font-size:0.70rem; line-height:1.2; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .cp-news-row small { display:none; }
-.cp-news-comment { margin-top:6px; padding:8px 9px; border-radius:8px; background:rgba(56,217,255,0.07); border:1px solid rgba(56,217,255,0.14); color:#cfe8f5; font-size:0.68rem; line-height:1.4; }
+.cp-news-foot { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); color: var(--cp-dim); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.02em; }
 
 .cp-porra-content { min-height: 72px; }
 .cp-porra .cp-fixture.is-compact { grid-template-columns: minmax(0,1fr) 20px minmax(0,1fr); gap:6px; margin-top:10px; }
@@ -323,22 +333,25 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     .cp { padding: 10px 10px 20px; }
     .cp-stage { width: min(720px, calc(100% - 20px)); gap: 12px; }
     .cp-intro { padding: 16px 14px 14px; }
-    .cp-hero-main { grid-template-columns: 72px 1fr; gap: 12px; }
-    .cp-hero-logo { width: 72px; height: 72px; }
+    .cp-hero-cols { grid-template-columns: 1fr; gap: 20px; }
+    .cp-hero-logo-col { align-self: auto; padding: 2px 0 4px; }
+    .cp-hero-logo { width: 80%; max-width: 420px; margin: 0 auto; }
     .cp-dashboard { grid-template-columns: 1fr; width: min(720px, calc(100% - 20px)); }
 }
 @media (max-width: 640px) {
     .cp-stage { width: min(480px, calc(100% - 20px)); }
-    .cp-hero-main { grid-template-columns: 56px 1fr; gap: 10px; }
-    .cp-hero-logo { width: 56px; height: 56px; }
+    .cp-hero-cols { gap: 16px; }
+    .cp-hero-logo { width: 76%; max-width: 320px; }
     .cp-title-thin { font-size: 1.6rem; }
     .cp-title-bold { font-size: 2.2rem; }
-    .cp-quicklinks { grid-template-columns: 1fr; }
+    .cp-quicklinks { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .cp-quicklinks button small { display: none; }
 }
 @media (max-height: 820px) and (min-width: 901px) {
     .cp { padding-top: 6px; padding-bottom: 10px; }
     .cp-stage { gap: 12px; }
     .cp-intro { padding: 14px 16px 12px; }
+    .cp-hero-logo { width: clamp(280px, 22vw, 340px); }
     .cp-data-card { min-height: 128px; padding: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
