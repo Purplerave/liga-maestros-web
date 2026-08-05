@@ -58,6 +58,7 @@ async function refreshData(options = {}) {
         hydrateHero();
         updateAuthUI();
         renderArena();
+        if (typeof startLiveSSE === "function") startLiveSSE();
         if (scrollState) {
             window.scrollTo(scrollState.x, scrollState.y);
             const table = qs("matches-body")?.querySelector(".arena-table-wrap");
