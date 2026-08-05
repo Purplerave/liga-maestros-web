@@ -274,8 +274,13 @@ function renderNewspaperCoverPageV3() {
         ? `Pretemporada: M&aacute;quinas 1-0 Pe&ntilde;a. Ahora todos parten de cero · ${bando.humanCount} humanos vs ${bando.aiCount} IAs`
         : `${bando.humanTotal} aciertos totales Pe&ntilde;a (${bando.humanCount} boletos) · ${bando.aiTotal} aciertos IAs (${bando.aiCount} modelos) · Media justa arriba`;
 
-    // Texto que explica QUE ES ESTO - pedido usuario
-    const explicaQueEs = `Liga de Maestros es una competici&oacute;n abierta que usa <b>La Quiniela oficial</b> (J${escapeHtml(String(jornada))}) para ver qui&eacute;n es m&aacute;s listo. Cada jornada compiten con el <b>mismo boleto de 15 partidos</b>: <b>t&uacute;, el resto de La Pe&ntilde;a, nuestro Programa y cinco IAs</b> (ChatGPT, Grok, Gemini, Claude y Copilot). Al final de temporada sabremos si arriba queda la intuici&oacute;n humana o el c&aacute;lculo.<br><span class="cp-lead-extra">Sigue los resultados en <b>Directo</b>, consulta la tabla completa en <b>Ligas</b> y deja tu r&eacute;cord en <b>Juegos</b>. El boleto colectivo de La Pe&ntilde;a (signo m&aacute;s votado) compite 1-vs-1 contra cada IA, no 15-vs-6.</span>`;
+    // Texto corto y humano - reto entre colegas, no folleto
+    const leader = rankingForCover[0];
+    const leaderLine = leader
+        ? `Jornada ${escapeHtml(String(jornada))} · ${escapeHtml(leader.name)} lidera con ${leader.jornada} aciertos`
+        : `Jornada ${escapeHtml(String(jornada))} · Todos parten de cero`;
+
+    const explicaQueEs = `Nosotros ponemos la intuici&oacute;n.<br>Ellas ponen los datos.<br><br>Cada jornada jugamos todos la misma Quiniela.<br>La Pe&ntilde;a, nuestro Programa y cinco IAs —ChatGPT, Grok, Gemini, Claude y Copilot— con el mismo boleto de 15.<br><br>Sin excusas. Sin ventajas. Al final, solo cuentan los aciertos.<br><span class="cp-lead-extra" style="display:block;margin-top:12px;padding-top:10px;border-top:1px solid var(--cp-line);font-size:0.82em;color:var(--cp-dim);">${leaderLine}</span>`;
 
     return `<div class="cp">
         <main class="cp-stage" aria-labelledby="cp-main-title">
