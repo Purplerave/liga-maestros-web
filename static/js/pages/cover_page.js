@@ -271,22 +271,21 @@ function renderNewspaperCoverPageV3() {
                             <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
                         </h1>
                     </div>
-                    <p class="cp-lead">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
+                    <p class="cp-lead">${explica}</p>
                     ${countdownHtml}
                     <div class="cp-actions">
                         <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                         <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                     </div>
+                    <div class="cp-quicklinks">
+                        <button type="button" data-page-action="LIVE"><span>⚽</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
+                        <button type="button" data-page-action="STANDINGS"><span>🏆</span><b>Ligas</b><small>Tabla</small></button>
+                        <button type="button" data-page-action="SNAKE"><span>🎮</span><b>Juegos</b><small>Puntos</small></button>
+                    </div>
                 </section>
             </div>
 
             <div class="cp-hero-right">
-                <div class="cp-quicklinks">
-                    <button type="button" data-page-action="LIVE"><span>⚽</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
-                    <button type="button" data-page-action="STANDINGS"><span>🏆</span><b>Ligas</b><small>Tabla</small></button>
-                    <button type="button" data-page-action="SNAKE"><span>🎮</span><b>Juegos</b><small>Puntos</small></button>
-                </div>
-
                 <section class="cp-leaders">
                     <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>TEMPORADA 26/27</b></div>
                     ${clasifHtml}
@@ -300,24 +299,13 @@ function renderNewspaperCoverPageV3() {
                             <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
                         </div>
 
-                        <section class="cp-duel" aria-label="El duelo: La Peña contra las IAs">
-                            <div class="cp-duel-kicker">EL DUELO</div>
-                            <div class="cp-versus">
-                                <div class="cp-side is-pena"><span>PEÑA</span><b>${humanAvgStr}</b></div>
-                                <div class="cp-vs">VS</div>
-                                <div class="cp-side is-ai"><span>IA</span><b>${aiAvgStr}</b></div>
+                        <div class="cp-data-card cp-news-card" id="cp-news-card">
+                            <div class="cp-news-header">
+                                <span>ÚLTIMAS NOTICIAS</span>
+                                <a href="#" data-page-action="NEWS">Ver todas →</a>
                             </div>
-                            <div class="cp-scorebar-inline-track"><div class="cp-scorebar-inline-fill" style="width:${humanPct}%"></div></div>
-                            <div class="cp-duel-foot">Media de aciertos</div>
-                        </section>
-                    </div>
-
-                    <div class="cp-data-card cp-news-card" id="cp-news-card">
-                        <div class="cp-news-header">
-                            <span>ÚLTIMAS NOTICIAS</span>
-                            <a href="#" data-page-action="NEWS">Ver todas →</a>
+                            <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
                         </div>
-                        <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
                     </div>
                 </div>
             </div>
