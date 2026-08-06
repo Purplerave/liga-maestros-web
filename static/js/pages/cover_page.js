@@ -210,7 +210,7 @@ function renderNewspaperCoverPageV3() {
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
     // Texto de bienvenida temporada
-    const explica = `En las pruebas previas, las IAs sumaron una media de <b>8.2 puntos</b> por jornada, mientras que La Peña logró <b>6.9 puntos</b>.<br><br>Las máquinas ganaron esta batalla. Pero la temporada real empieza ahora.<br><br>¿Quién sabe más de fútbol? Demuéstralo en la Jornada 1.`;
+    const explica = `En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento.<br><br>Pero ahora empieza la competición de verdad.<br><br>Haz tus pronósticos cada jornada, suma un punto por cada acierto y pelea por lo más alto de la clasificación. Compite contra La Peña, nuestro Programa y algunas de las IAs más conocidas.<br><br>¿Te fías más de tus resultados, de los del Programa o de los de una IA?<br><br>Elige tus pronósticos, completa tu Quiniela y comprueba quién sabe más de fútbol.<br><br>Y si crees que tienes una combinación ganadora, también puedes echarla de verdad.<br><br><span class="cp-challenge">Tu Pleno al 15 puede estar aquí.</span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');
