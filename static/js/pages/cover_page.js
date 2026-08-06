@@ -209,8 +209,8 @@ function renderNewspaperCoverPageV3() {
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto bienvenida - copy ChatGPT optimizado
-    const explica = `Liga de Maestros es una competición de La Quiniela.<br><br>Haz tus pronósticos cada jornada, suma puntos por cada acierto y sube en la clasificación. Competirás contra el resto de jugadores, el pronóstico colectivo de La Peña, nuestro Programa y varias de las IAs más conocidas.<br><br>En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Pero ahora todos vuelven a cero.<br><br><span class="cp-challenge">¿Quién sabe más de fútbol?</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
+    // Texto bienvenida - con titular gancho
+    const explica = `<span class="cp-headline">Tu Quiniela contra las IAs</span><br><span class="cp-subhead">Cada jornada, 15 partidos. Tú, La Peña y las máquinas con el mismo boleto.</span><br><br>Haz tus pronósticos cada jornada, suma puntos por cada acierto y sube en la clasificación. Competirás contra el resto de jugadores, el pronóstico colectivo de La Peña, nuestro Programa y varias de las IAs más conocidas.<br><br>En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Pero ahora todos vuelven a cero.<br><br><span class="cp-challenge">¿Quién sabe más de fútbol?</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');

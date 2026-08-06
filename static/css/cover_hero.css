@@ -203,6 +203,23 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     z-index: 1;
 }
 .cp-lead b { color: #eef3fb; font-weight: 700; }
+.cp-lead .cp-headline {
+    display: block;
+    color: var(--cp-gold);
+    font-family: var(--cp-font-display);
+    font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.cp-lead .cp-subhead {
+    display: block;
+    color: #e8ecf4;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
 .cp-lead .cp-challenge {
     display: block;
     margin-top: 6px;
