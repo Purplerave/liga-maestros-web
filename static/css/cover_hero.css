@@ -131,17 +131,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 #cp-deadline.is-urgent { color:#f87171; animation: cpUrgent 1s ease-in-out infinite; }
 @keyframes cpUrgent { 0%,100%{opacity:1} 50%{opacity:.55} }
 
-/* Logo escudo pequeño */
-.cp-hero-logo-icon {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-    margin: 0 auto 2px;
-    display: block;
-    filter: drop-shadow(0 4px 12px rgba(56,217,255,0.3));
-    z-index: 1;
-}
-
 /* Tagline 1X2 */
 .cp-hero-tagline {
     position: relative;
@@ -178,25 +167,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
-    filter: drop-shadow(0 2px 8px rgba(245,181,63,0.4));
+    filter: drop-shadow(0 2px 12px rgba(245,181,63,0.5));
     animation: titleGlow 3s ease-in-out infinite alternate;
 }
 @keyframes titleGlow {
-    0% { filter: drop-shadow(0 2px 8px rgba(245,181,63,0.3)); }
-    100% { filter: drop-shadow(0 4px 16px rgba(245,181,63,0.6)); }
-}
-.cp-title-main::after {
-    content: "LIGA DE MAESTROS";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(245,181,63,0.6) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    z-index: -1;
-    filter: blur(10px);
-    opacity: 0.4;
+    0% { filter: drop-shadow(0 2px 10px rgba(245,181,63,0.3)); }
+    100% { filter: drop-shadow(0 4px 20px rgba(245,181,63,0.7)); }
 }
 .cp-title-main .cp-title-white { color: #ffffff; }
 .cp-title-main .cp-title-gold {

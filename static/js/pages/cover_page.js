@@ -238,7 +238,6 @@ function renderNewspaperCoverPageV3() {
                         <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
                         ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
                     </div>
-                    <img class="cp-hero-logo-icon" src="/static/img/ligademaestros_escudo.png?v=escudo-1" alt="LM">
                     <div class="cp-hero-tagline"><b>1X2</b> · La Peña vs IA</div>
                     <div class="cp-hero-titles">
                         <h1 id="cp-main-title">
