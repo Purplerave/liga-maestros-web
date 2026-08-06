@@ -286,9 +286,11 @@ function renderNewspaperCoverPageV3() {
                     </div>
 
                     <div class="cp-data-card cp-news-card" id="cp-news-card">
-                        <div class="cp-card-head"><span>ÚLTIMAS NOTICIAS</span><b>Prensa</b></div>
+                        <div class="cp-news-header">
+                            <span>ÚLTIMAS NOTICIAS</span>
+                            <a href="#" data-page-action="NEWS">Ver todas →</a>
+                        </div>
                         <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                        <div class="cp-news-foot"><a href="#" data-page-action="NEWS">Ver todas →</a></div>
                     </div>
                 </div>
             </div>
