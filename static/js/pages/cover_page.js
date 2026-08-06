@@ -209,8 +209,8 @@ function renderNewspaperCoverPageV3() {
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto de bienvenida temporada (corto, sin scroll)
-    const explica = `En las pruebas, las IAs lograron <b>8,2 aciertos</b> de media. La Peña: <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Ahora empieza la competición de verdad.<br><br>Haz tu Quiniela cada jornada, compite contra La Peña, el Programa y las IAs, y demuestra quién sabe más de fútbol.<br><br><span class="cp-challenge">Tu Pleno al 15 puede estar aquí.</span><br><span class="cp-loteria">¿Y si pruebas suerte en la vida real? <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">Tu lotería online →</a></span>`;
+    // Texto bienvenida - copy ChatGPT optimizado
+    const explica = `Liga de Maestros es una competición de La Quiniela.<br><br>Haz tus pronósticos cada jornada, suma puntos por cada acierto y sube en la clasificación. Competirás contra el resto de jugadores, el pronóstico colectivo de La Peña, nuestro Programa y varias de las IAs más conocidas.<br><br>En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Pero ahora todos vuelven a cero.<br><br><span class="cp-challenge">¿Quién sabe más de fútbol?</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');
