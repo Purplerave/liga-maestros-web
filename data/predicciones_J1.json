@@ -1,0 +1,61 @@
+{
+  "jornada": 1,
+  "temporada": "2026-2027",
+  "generado_en": "2026-08-06T10:00:00",
+  "nota": "Predicciones de las IAs para la Jornada 1. Las IAs actúan como La Peña inicialmente.",
+  "programa": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "nombre": "PROGRAMA",
+    "puntos_jornada": 0
+  },
+  "grok": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "nombre": "GROK",
+    "puntos_jornada": 0
+  },
+  "claude": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-0"],
+    "nombre": "CLAUDE",
+    "puntos_jornada": 0
+  },
+  "chatgpt": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "nombre": "CHATGPT",
+    "puntos_jornada": 0
+  },
+  "copilot": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-1"],
+    "nombre": "COPILOT",
+    "puntos_jornada": 0
+  },
+  "gemini": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "nombre": "GEMINI",
+    "puntos_jornada": 0
+  },
+  "pepe": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-0"],
+    "nombre": "PEPE",
+    "puntos_jornada": 0
+  },
+  "chipi": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "nombre": "CHIPI",
+    "puntos_jornada": 0
+  },
+  "profe": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-1"],
+    "nombre": "PROFE",
+    "puntos_jornada": 0
+  },
+  "fortu": {
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "nombre": "FORTU",
+    "puntos_jornada": 0
+  },
+  "consenso": {
+    "nombre": "CONSENSO TOTAL",
+    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "puntos_jornada": 0
+  }
+}
