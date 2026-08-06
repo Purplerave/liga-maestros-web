@@ -32,16 +32,19 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    min-height: 100%;
-    width: 100%;
-    overflow-x: clip;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
         radial-gradient(900px 520px at 12% -8%, rgba(245,181,63,0.10), transparent 60%),
         radial-gradient(700px 480px at 92% 10%, rgba(56,217,255,0.08), transparent 60%);
-    padding: 6px 12px 8px;
+    padding: 10px 16px;
     font-family: var(--cp-font-ui);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 .cp button, .cp a { font: inherit; }
 
@@ -49,9 +52,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
 .cp-stage {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    height: calc(100vh - 50px);
+    height: 100%;
     margin: 0 auto;
 }
 
