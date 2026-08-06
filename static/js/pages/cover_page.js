@@ -27,8 +27,35 @@ function startCoverCountdown() {
     };
     tick(); setInterval(tick, 1000);
 }
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startCoverCountdown);
-else startCoverCountdown();
+
+function startSeasonCountdown() {
+    const timer = document.getElementById('cp-countdown-timer');
+    if (!timer) return;
+    const seasonStart = new Date('2026-08-15T19:30:00');
+    const update = () => {
+        const diff = seasonStart.getTime() - Date.now();
+        if (diff <= 0) {
+            timer.textContent = '¡La Liga ha empezado!';
+            return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        timer.textContent = `${days}d ${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m ${String(secs).padStart(2,'0')}s`;
+    };
+    update();
+    setInterval(update, 1000);
+}
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+        startCoverCountdown();
+        startSeasonCountdown();
+    });
+} else {
+    startCoverCountdown();
+    startSeasonCountdown();
+}
 
 function coverCloseLabel() {
     const raw = state.data.edit_deadline || state.data.kickoff_at || "";
@@ -182,8 +209,16 @@ function renderNewspaperCoverPageV3() {
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto corto natural - reto entre colegas
-    const explica = `Nosotros ponemos la intuici&oacute;n.<br>Ellas ponen los datos.<br><br>Cada semana jugamos la misma Quiniela. La Pe&ntilde;a, nuestro Programa y cinco IAs con el mismo boleto de 15 partidos. Sin ventajas.<br><br>Al final, solo valen los aciertos.`;
+    // Texto de bienvenida temporada
+    const explica = `En las pruebas previas, las IAs sumaron una media de <b>8.2 puntos</b> por jornada, mientras que La Peña logró <b>6.9 puntos</b>.<br><br>Las máquinas ganaron esta batalla. Pero la temporada real empieza ahora.<br><br>¿Quién sabe más de fútbol? Demuéstralo en la Jornada 1.`;
+
+    // Countdown a la primera jornada
+    const seasonStart = new Date('2026-08-15T19:30:00');
+    const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
+        <div class="cp-countdown-label">La Liga empieza en</div>
+        <div class="cp-countdown-timer" id="cp-countdown-timer">--</div>
+        <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
+    </div>`;
 
     let picksHtml = "";
     if (disagreement) {
@@ -196,37 +231,27 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    // Clasificación - columnas: POS, PARTICIPANTE, ACIERTOS, P15
-    let clasifHtml = "";
-    if (isFirstOfficial) {
-        clasifHtml = `
-            <div style="margin-top:12px;padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.66rem;color:var(--cp-muted);text-align:center;">
-                <div style="font-weight:700;color:var(--cp-text);margin-bottom:6px;">Mejores de la Peña en pruebas:</div>
-                ${bestPenaPruebas.length ? bestPenaPruebas.map((r,i) => `<div style="margin:3px 0;"><span style="color:var(--cp-gold);font-weight:800;">${i+1}.</span> ${escapeHtml(r.name)} - <span style="color:var(--cp-gold);">${r.total} pts</span></div>`).join("") : "Aún sin datos"}
-            </div>`;
-    } else {
-        clasifHtml = `
-            <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-                <thead>
-                    <tr style="color:var(--cp-dim);font-size:0.54rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">
-                        <th style="text-align:left;padding:4px 6px;">POS</th>
-                        <th style="text-align:left;padding:4px 6px;">PARTICIPANTE</th>
-                        <th style="text-align:right;padding:4px 6px;">ACIERTOS</th>
-                        <th style="text-align:right;padding:4px 6px;">P15</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rankingForCover.slice(0,5).map((r,i) => `
-                        <tr style="border-top:1px solid rgba(255,255,255,0.04);${i === 0 ? 'background:rgba(245,181,63,0.06);' : ''}">
-                            <td style="padding:5px 6px;font-size:0.62rem;color:${i === 0 ? 'var(--cp-gold)' : 'var(--cp-muted)'};font-weight:700;">${i + 1}</td>
-                            <td style="padding:5px 6px;font-size:0.68rem;color:var(--cp-text);font-weight:600;">${escapeHtml(r.name)}</td>
-                            <td style="padding:5px 6px;font-size:0.68rem;color:var(--cp-gold);font-weight:800;text-align:right;font-variant-numeric:tabular-nums;">${r.jornada}</td>
-                            <td style="padding:5px 6px;font-size:0.62rem;color:var(--cp-dim);text-align:right;font-variant-numeric:tabular-nums;">${r.total}</td>
-                        </tr>
-                    `).join("")}
-                </tbody>
-            </table>`;
-    }
+    // Clasificación - mostrar resultados de pruebas
+    let clasifHtml = `
+        <div style="margin-top:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="text-align:center;flex:1;">
+                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">LA PEÑA</div>
+                    <div style="color:var(--cp-gold);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">6.9</div>
+                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
+                </div>
+                <div style="color:var(--cp-dim);font-size:0.58rem;font-weight:800;">VS</div>
+                <div style="text-align:center;flex:1;">
+                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">IAs</div>
+                    <div style="color:var(--cp-cyan);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">8.2</div>
+                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
+                </div>
+            </div>
+            <div style="text-align:center;padding:6px 0;border-top:1px solid var(--cp-line);">
+                <div style="color:var(--cp-gold);font-size:0.58rem;font-weight:700;">Las IAs ganaron las pruebas</div>
+                <div style="color:var(--cp-dim);font-size:0.50rem;margin-top:2px;">Pero la temporada empieza ahora</div>
+            </div>
+        </div>`;
 
     return `<div class="cp">
         <main class="cp-stage">
@@ -247,6 +272,7 @@ function renderNewspaperCoverPageV3() {
                         </h1>
                     </div>
                     <p class="cp-lead">${explica}<span class="cp-challenge">¿Quién sabe más de fútbol?</span></p>
+                    ${countdownHtml}
                     <div class="cp-actions">
                         <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                         <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
@@ -261,7 +287,7 @@ function renderNewspaperCoverPageV3() {
 
             <div class="cp-hero-right">
                 <section class="cp-leaders">
-                    <div class="cp-card-head"><span>${isFirstOfficial ? "CLASIFICACIÓN · PRÓXIMAMENTE" : "CLASIFICACIÓN · JORNADA " + escapeHtml(String(jornada))}</span><b>${isFirstOfficial ? "PRUEBAS" : "TOP 5"}</b></div>
+                    <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>TEMPORADA 26/27</b></div>
                     ${clasifHtml}
                     <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
                 </section>

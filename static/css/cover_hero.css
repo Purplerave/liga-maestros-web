@@ -241,6 +241,40 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 .cp-secondary { border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color: #e6eaf0; }
 .cp-secondary:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
 
+/* Countdown */
+.cp-countdown {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin: 8px auto;
+    padding: 8px 16px;
+    border: 1px solid rgba(245,181,63,0.3);
+    border-radius: 10px;
+    background: rgba(245,181,63,0.05);
+}
+.cp-countdown-label {
+    color: var(--cp-muted);
+    font-size: 0.56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+}
+.cp-countdown-timer {
+    color: var(--cp-gold);
+    font-family: var(--cp-font-display);
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+.cp-countdown-date {
+    color: var(--cp-dim);
+    font-size: 0.52rem;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
 /* Quicklinks */
 .cp-quicklinks {
     display: flex;
