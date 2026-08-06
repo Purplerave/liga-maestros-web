@@ -307,15 +307,15 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     transition: all 140ms ease;
 }
 .cp-quicklinks button:hover { border-color: rgba(245,181,63,0.28); background: rgba(245,181,63,0.08); transform: translateY(-1px); }
-.cp-quicklinks button span { font-size: 1rem; }
-.cp-quicklinks button b { font-size: 0.72rem; font-weight: 800; }
-.cp-quicklinks button small { font-size: 0.52rem; color: var(--cp-muted); }
+.cp-quicklinks button span { font-size: 0.9rem; }
+.cp-quicklinks button b { font-size: 0.68rem; font-weight: 800; }
+.cp-quicklinks button small { font-size: 0.48rem; color: var(--cp-muted); }
 
-/* ===== COLUMNA DERECHA: Clasificación + Duelo ===== */
+/* ===== COLUMNA DERECHA: Quicklinks + Clasificación + Duelo ===== */
 .cp-hero-right {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
     height: 100%;
 }

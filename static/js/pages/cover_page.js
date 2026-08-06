@@ -277,15 +277,16 @@ function renderNewspaperCoverPageV3() {
                         <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                         <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                     </div>
-                    <div class="cp-quicklinks">
-                        <button type="button" data-page-action="LIVE"><span>⚽</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
-                        <button type="button" data-page-action="STANDINGS"><span>🏆</span><b>Ligas</b><small>Tabla</small></button>
-                        <button type="button" data-page-action="SNAKE"><span>🎮</span><b>Juegos</b><small>Puntos</small></button>
-                    </div>
                 </section>
             </div>
 
             <div class="cp-hero-right">
+                <div class="cp-quicklinks">
+                    <button type="button" data-page-action="LIVE"><span>⚽</span><b>Directo</b><small>${liveCount ? liveCount + " partidos" : "Marcadores"}</small></button>
+                    <button type="button" data-page-action="STANDINGS"><span>🏆</span><b>Ligas</b><small>Tabla</small></button>
+                    <button type="button" data-page-action="SNAKE"><span>🎮</span><b>Juegos</b><small>Puntos</small></button>
+                </div>
+
                 <section class="cp-leaders">
                     <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>TEMPORADA 26/27</b></div>
                     ${clasifHtml}
