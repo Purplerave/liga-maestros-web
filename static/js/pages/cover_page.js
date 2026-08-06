@@ -209,8 +209,8 @@ function renderNewspaperCoverPageV3() {
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto de bienvenida temporada
-    const explica = `En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento.<br><br>Pero ahora empieza la competición de verdad.<br><br>Haz tus pronósticos cada jornada, suma un punto por cada acierto y pelea por lo más alto de la clasificación. Compite contra La Peña, nuestro Programa y algunas de las IAs más conocidas.<br><br>¿Te fías más de tus resultados, de los del Programa o de los de una IA?<br><br>Elige tus pronósticos, completa tu Quiniela y comprueba quién sabe más de fútbol.<br><br>Y si crees que tienes una combinación ganadora, también puedes echarla de verdad.<br><br><span class="cp-challenge">Tu Pleno al 15 puede estar aquí.</span>`;
+    // Texto de bienvenida temporada (corto, sin scroll)
+    const explica = `En las pruebas, las IAs lograron <b>8,2 aciertos</b> de media. La Peña: <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Ahora empieza la competición de verdad.<br><br>Haz tu Quiniela cada jornada, compite contra La Peña, el Programa y las IAs, y demuestra quién sabe más de fútbol.<br><br><span class="cp-challenge">Tu Pleno al 15 puede estar aquí.</span><br><span class="cp-loteria">¿Y si pruebas suerte en la vida real? <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">Tu lotería online →</a></span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');

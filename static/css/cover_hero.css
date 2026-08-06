@@ -201,8 +201,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     line-height: 1.5;
     text-align: center;
     z-index: 1;
-    overflow-y: auto;
-    max-height: 120px;
 }
 .cp-lead b { color: #eef3fb; font-weight: 700; }
 .cp-lead .cp-challenge {
@@ -211,6 +209,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     color: var(--cp-gold);
     font-weight: 800;
     font-size: 1.05em;
+}
+.cp-lead .cp-loteria {
+    display: block;
+    margin-top: 6px;
+    color: var(--cp-dim);
+    font-size: 0.62rem;
+}
+.cp-lead .cp-loteria a {
+    color: var(--cp-cyan);
+    text-decoration: none;
+    font-weight: 600;
+}
+.cp-lead .cp-loteria a:hover {
+    text-decoration: underline;
 }
 
 /* Accent line under title */
