@@ -243,6 +243,7 @@ function renderNewspaperCoverPageV3() {
                     <div class="cp-hero-titles">
                         <h1 id="cp-main-title">
                             <span class="cp-title-main"><span class="cp-title-white">LIGA </span><span class="cp-title-white">DE </span><span class="cp-title-gold">MAESTROS</span></span>
+                            <span class="cp-title-accent"></span>
                             <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
                         </h1>
                     </div>

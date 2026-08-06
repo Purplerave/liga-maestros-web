@@ -164,15 +164,39 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 .cp-hero-titles h1 {
     margin: 0;
     font-family: var(--cp-font-display);
-    line-height: 0.95;
+    line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
 .cp-title-main {
     display: block;
-    font-weight: 800;
-    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
-    letter-spacing: 0.04em;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    letter-spacing: 0.08em;
+    position: relative;
+    background: linear-gradient(180deg, #fff 0%, #f5b53f 40%, #d4880c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 8px rgba(245,181,63,0.4));
+    animation: titleGlow 3s ease-in-out infinite alternate;
+}
+@keyframes titleGlow {
+    0% { filter: drop-shadow(0 2px 8px rgba(245,181,63,0.3)); }
+    100% { filter: drop-shadow(0 4px 16px rgba(245,181,63,0.6)); }
+}
+.cp-title-main::after {
+    content: "LIGA DE MAESTROS";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(245,181,63,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.4;
 }
 .cp-title-main .cp-title-white { color: #ffffff; }
 .cp-title-main .cp-title-gold {
@@ -183,11 +207,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 .cp-title-sub {
     display: block;
     font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: clamp(0.56rem, 0.8vw, 0.7rem);
-    letter-spacing: 0.20em;
+    letter-spacing: 0.25em;
     color: #8ea2c0;
-    margin: 3px 0 0;
+    margin: 4px 0 0;
+    text-shadow: 0 0 20px rgba(56,217,255,0.3);
 }
 
 /* Lead */
@@ -208,6 +233,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     color: var(--cp-gold);
     font-weight: 800;
     font-size: 1em;
+}
+
+/* Accent line under title */
+.cp-title-accent {
+    display: block;
+    width: 60px;
+    height: 2px;
+    margin: 6px auto 0;
+    background: linear-gradient(90deg, transparent, var(--cp-gold), transparent);
+    border-radius: 1px;
 }
 
 /* Acciones */
