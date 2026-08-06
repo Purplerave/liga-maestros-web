@@ -1,4 +1,4 @@
-"""Porra routes: match score predictions."""
+"""Porra routes: match score predictions with user-selected matches."""
 
 import os
 from datetime import datetime
@@ -13,7 +13,41 @@ from ..services.ticket import madrid_now, parse_madrid_datetime
 bp = Blueprint("porra", __name__)
 
 
-def _porra_target_match(conn, jornada):
+def _porra_available_matches(conn, jornada):
+    """Return all open matches for a jornada that can be used for porra."""
+    rows = conn.execute(
+        """
+        SELECT partido_id, local, visitante, fecha, hora, status
+        FROM resultados WHERE jornada = ? ORDER BY partido_id ASC
+    """,
+        (jornada,),
+    ).fetchall()
+    if not rows:
+        return []
+
+    def is_open(match):
+        status = str(match.get("status") or "").upper()
+        kickoff = parse_madrid_datetime(match.get("fecha"), match.get("hora"))
+        return status in ("", "NS", "SCHEDULED", "NOT STARTED") and (not kickoff or madrid_now() < kickoff)
+
+    return [dict(row) for row in rows if is_open(dict(row))]
+
+
+def _porra_target_match(conn, jornada, partido_id=None):
+    """Get a specific match or auto-select the most interesting one."""
+    if partido_id:
+        row = conn.execute(
+            """
+            SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante
+            FROM resultados WHERE jornada = ? AND partido_id = ?
+        """,
+            (jornada, partido_id),
+        ).fetchone()
+        if row:
+            return dict(row)
+        return None
+
+    # Fallback: auto-select (original behavior)
     rows = conn.execute(
         """
         SELECT partido_id, local, visitante, fecha, hora, status, goles_local, goles_visitante
@@ -56,8 +90,6 @@ def _porra_target_match(conn, jornada):
     if not candidates:
         return None
 
-    # Una sola porra por fecha: entre los partidos del dia mas cercano se
-    # elige el que tenga las opiniones mas repartidas.
     dated_candidates = [(parse_madrid_datetime(match.get("fecha"), match.get("hora")), match) for match in candidates]
     known_dates = [kickoff.date() for kickoff, _match in dated_candidates if kickoff]
     if known_dates:
@@ -111,17 +143,31 @@ def _porra_is_locked(match):
 def get_porra():
     user = session.get("user") or {}
     raw_j = request.args.get("j") or request.args.get("jornada") or ""
+    raw_pid = request.args.get("pid") or request.args.get("partido_id") or ""
     try:
         jornada = int(raw_j)
     except (TypeError, ValueError):
         return jsonify({"status": "error", "message": "Jornada invalida"}), 400
 
+    partido_id = None
+    if raw_pid:
+        try:
+            partido_id = int(raw_pid)
+        except (TypeError, ValueError):
+            pass
+
     conn = get_db()
     try:
         ensure_porra_table(conn)
-        match = _porra_target_match(conn, jornada)
+
+        # Get all available matches for the dropdown
+        available = _porra_available_matches(conn, jornada)
+
+        # Get the selected match (or auto-select)
+        match = _porra_target_match(conn, jornada, partido_id)
         if not match:
-            return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra"})
+            return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra", "available": available})
+
         presentation = _porra_presentation(match)
         entries = conn.execute(
             """
@@ -154,8 +200,8 @@ def get_porra():
         mine = None
         if user.get("id"):
             mine_row = conn.execute(
-                "SELECT goles_local, goles_visitante, updated_at FROM porra_entries WHERE jornada = ? AND partido_id = ? AND user_id = ?",
-                (jornada, match["partido_id"], user.get("id")),
+                "SELECT partido_id, goles_local, goles_visitante, updated_at FROM porra_entries WHERE jornada = ? AND user_id = ?",
+                (jornada, user.get("id")),
             ).fetchone()
             mine = dict(mine_row) if mine_row else None
         return jsonify(
@@ -164,6 +210,7 @@ def get_porra():
                 "enabled": True,
                 "jornada": jornada,
                 "match": match,
+                "available": available,
                 **presentation,
                 "locked": _porra_is_locked(match),
                 "prize": os.getenv("PORRA_PRIZE_TEXT", "Premio symbolico: insignia semanal"),
@@ -192,13 +239,21 @@ def post_porra():
         gv = int(data.get("goles_visitante"))
     except (TypeError, ValueError):
         return jsonify({"status": "error", "message": "Marcador invalido."}), 400
+
+    partido_id = data.get("partido_id")
+    if partido_id:
+        try:
+            partido_id = int(partido_id)
+        except (TypeError, ValueError):
+            return jsonify({"status": "error", "message": "Partido invalido."}), 400
+
     if gl < 0 or gv < 0 or gl > 15 or gv > 15:
         return jsonify({"status": "error", "message": "Marcador fuera de rango."}), 400
 
     conn = get_db()
     try:
         ensure_porra_table(conn)
-        match = _porra_target_match(conn, jornada)
+        match = _porra_target_match(conn, jornada, partido_id)
         if not match:
             return jsonify({"status": "error", "message": "No hay partido de porra."}), 404
         if _porra_is_locked(match):
@@ -224,6 +279,6 @@ def post_porra():
             ),
         )
         conn.commit()
-        return jsonify({"status": "ok", "goles_local": gl, "goles_visitante": gv})
+        return jsonify({"status": "ok", "partido_id": match["partido_id"], "goles_local": gl, "goles_visitante": gv})
     finally:
         conn.close()
