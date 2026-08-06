@@ -14,9 +14,19 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     height: 100%;
     max-width: none;
     padding: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-color: rgba(148,163,184,0.25) rgba(3,8,18,0.8);
+    overflow: hidden;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav {
+    margin-bottom: 0;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .header-brand-panel {
+    display: none;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
+    box-shadow: none;
 }
 .cp, .cp * { box-sizing: border-box; }
 .cp {
@@ -32,8 +42,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
     color: var(--cp-text);
     background-color: var(--cp-bg);
