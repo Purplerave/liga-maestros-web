@@ -385,13 +385,15 @@ def _match_row_quality(row):
     return score
 
 
-def ensure_jornada_completa(conn, jornada, fallback_matches=None):
+def ensure_jornada_completa(conn, jornada, fallback_matches=None, force=False):
     """Guarantee the 15 matches of a jornada exist with real fixture data.
 
     Repairs partial imports: inserts missing matches and backfills identity
     fields (local/visitante/fecha/hora) on rows that are empty or outdated.
     Never touches goals/status/minute and never renames matches that already
     have a result or are live, so running it mid-jornada is safe.
+
+    If force=True, updates all matches even if they already have a complete identity.
 
     Returns the number of rows inserted or updated.
     """
@@ -466,9 +468,9 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None):
         )
         identity_differs = (current_identity[0], current_identity[1]) != (local, visitante)
         schedule_differs = bool(fecha) and (current_identity[2], current_identity[3]) != (fecha, hora)
-        if not incomplete and not (not in_play and (identity_differs or schedule_differs)):
+        if not force and not incomplete and not (not in_play and (identity_differs or schedule_differs)):
             continue
-        if in_play and not incomplete:
+        if in_play and not incomplete and not force:
             continue
         conn.execute(
             """
@@ -547,7 +549,7 @@ def ensure_jornada_75(conn):
     with fewer than 15 matches whenever any row already existed) is completed
     from the scrape file shipped in data/.
     """
-    ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES)
+    ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES, force=True)
     _import_j75_resultados(conn)
 
     # Publicamos solo la columna conocida del Programa. Los Maestros se
