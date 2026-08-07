@@ -539,3 +539,32 @@ def debug_files():
                 result[f"error_{path}"] = str(e)
 
     return jsonify(result)
+
+
+@bp.route("/api/admin/sync-scrape", methods=["POST"])
+def sync_scrape():
+    """Sync scrape files from SEED_DATA_DIR to DATA_DIR."""
+    # Check admin authentication
+    if not is_admin_request():
+        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
+        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
+        if not secret or secret != admin_secret:
+            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+
+    import config
+    import shutil
+
+    results = []
+    for jornada in [75, 76]:
+        src = os.path.join(config.SEED_DATA_DIR, f"quiniela15_J{jornada}_scrape.json")
+        dst = os.path.join(config.DATA_DIR, f"quiniela15_J{jornada}_scrape.json")
+        if os.path.exists(src):
+            try:
+                shutil.copy2(src, dst)
+                results.append(f"J{jornada}: copiado OK")
+            except Exception as e:
+                results.append(f"J{jornada}: error - {e}")
+        else:
+            results.append(f"J{jornada}: origen no existe")
+
+    return jsonify({"status": "ok", "results": results})
