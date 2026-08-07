@@ -127,9 +127,15 @@ def ensure_porra_table(conn):
             updated_at TEXT NOT NULL
         )
     """)
+    # Migrate old constraint: drop old 3-column index, create new 2-column
+    try:
+        conn.execute("DROP INDEX IF EXISTS ux_porra_user_match")
+    except Exception:
+        pass
+    # Unique constraint: 1 porra per user per jornada (not per match)
     conn.execute("""
-        CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_match
-        ON porra_entries(user_id, jornada, partido_id)
+        CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_jornada
+        ON porra_entries(user_id, jornada)
     """)
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_porra_jornada_match

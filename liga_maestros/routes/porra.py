@@ -347,12 +347,20 @@ def post_porra():
             return jsonify({"status": "error", "message": "No hay partido de porra."}), 404
         if _porra_is_locked(match):
             return jsonify({"status": "error", "message": "La porra de esta jornada ya esta cerrada."}), 400
+
+        # Check if user already has a porra for this jornada
+        existing_entry = conn.execute(
+            "SELECT partido_id FROM porra_entries WHERE jornada = ? AND user_id = ?",
+            (jornada, user.get("id")),
+        ).fetchone()
+
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         conn.execute(
             """
             INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(user_id, jornada, partido_id) DO UPDATE SET
+            ON CONFLICT(user_id, jornada) DO UPDATE SET
+                partido_id = excluded.partido_id,
                 nombre = excluded.nombre, goles_local = excluded.goles_local,
                 goles_visitante = excluded.goles_visitante, updated_at = excluded.updated_at
         """,
@@ -368,7 +376,23 @@ def post_porra():
             ),
         )
         conn.commit()
-        return jsonify({"status": "ok", "partido_id": match["partido_id"], "goles_local": gl, "goles_visitante": gv})
+
+        if existing_entry:
+            return jsonify({
+                "status": "ok",
+                "partido_id": match["partido_id"],
+                "goles_local": gl,
+                "goles_visitante": gv,
+                "message": "Porra actualizada para este partido."
+            })
+        else:
+            return jsonify({
+                "status": "ok",
+                "partido_id": match["partido_id"],
+                "goles_local": gl,
+                "goles_visitante": gv,
+                "message": "Porra guardada correctamente."
+            })
     finally:
         conn.close()
 
