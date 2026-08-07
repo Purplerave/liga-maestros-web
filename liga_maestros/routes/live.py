@@ -379,3 +379,42 @@ def live_stream():
             "X-Accel-Buffering": "no",
         },
     )
+
+
+@bp.route("/api/admin/reset-j75", methods=["POST"])
+def reset_j75():
+    """Force reset J75 data with Nordic matches."""
+    if not is_admin_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+
+    from ..db.migrations import J75_FALLBACK_MATCHES, ensure_jornada_completa
+
+    conn = get_db()
+    try:
+        # Delete existing J75 data
+        conn.execute("DELETE FROM resultados WHERE jornada = 75")
+        conn.commit()
+
+        # Insert new Nordic matches
+        for num, local, visitante, fecha, hora in J75_FALLBACK_MATCHES:
+            conn.execute(
+                """
+                INSERT INTO resultados (
+                    jornada, partido_id, local, visitante, goles_local, goles_visitante,
+                    status, fecha, hora, minuto, signo_actual
+                )
+                VALUES (?, ?, ?, ?, NULL, NULL, 'NS', ?, ?, '', '-')
+                """,
+                (75, num, local, visitante, fecha, hora),
+            )
+        conn.commit()
+
+        # Verify
+        rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
+        return jsonify({
+            "status": "ok",
+            "message": f"J75 reset con {len(rows)} partidos nórdicos",
+            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows]
+        })
+    finally:
+        conn.close()
