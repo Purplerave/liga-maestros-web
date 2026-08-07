@@ -392,19 +392,33 @@ def reset_j75():
         if not secret or secret != admin_secret:
             return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    from ..db.migrations import J75_FALLBACK_MATCHES, ensure_jornada_completa
+    from ..db.migrations import J75_FALLBACK_MATCHES
 
     conn = get_db()
     try:
-        # Use force=True to update all matches
-        changed = ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES, force=True)
+        # Delete existing J75 data
+        conn.execute("DELETE FROM resultados WHERE jornada = 75")
+        conn.commit()
+
+        # Insert new Nordic matches
+        for num, local, visitante, fecha, hora in J75_FALLBACK_MATCHES:
+            conn.execute(
+                """
+                INSERT INTO resultados (
+                    jornada, partido_id, local, visitante, goles_local, goles_visitante,
+                    status, fecha, hora, minuto, signo_actual
+                )
+                VALUES (?, ?, ?, ?, NULL, NULL, 'NS', ?, ?, '', '-')
+                """,
+                (75, num, local, visitante, fecha, hora),
+            )
+        conn.commit()
 
         # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
         return jsonify({
             "status": "ok",
-            "message": f"J75 actualizado: {changed} partidos modificados",
-            "changed": changed,
+            "message": f"J75 reset con {len(rows)} partidos nórdicos",
             "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows]
         })
     finally:
