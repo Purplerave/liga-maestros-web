@@ -132,6 +132,15 @@ def ensure_porra_table(conn):
         conn.execute("DROP INDEX IF EXISTS ux_porra_user_match")
     except Exception:
         pass
+    # Clean up duplicate entries: keep only the latest entry per user per jornada
+    conn.execute("""
+        DELETE FROM porra_entries
+        WHERE id NOT IN (
+            SELECT MAX(id)
+            FROM porra_entries
+            GROUP BY user_id, jornada
+        )
+    """)
     # Unique constraint: 1 porra per user per jornada (not per match)
     conn.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_jornada
