@@ -502,3 +502,36 @@ def setup_j76():
         })
     finally:
         conn.close()
+
+
+@bp.route("/api/admin/debug-files")
+def debug_files():
+    """Debug endpoint to check file paths."""
+    import config
+    from ..services.ticket import load_match_info_for_jornada
+
+    scrape_path_data = os.path.join(config.DATA_DIR, "quiniela15_J76_scrape.json")
+    scrape_path_seed = os.path.join(config.SEED_DATA_DIR, "quiniela15_J76_scrape.json")
+    scrape_path_base = os.path.join(config.BASE_DIR, "data", "quiniela15_J76_scrape.json")
+
+    result = {
+        "BASE_DIR": config.BASE_DIR,
+        "DATA_DIR": config.DATA_DIR,
+        "SEED_DATA_DIR": config.SEED_DATA_DIR,
+        "scrape_in_DATA_DIR": os.path.exists(scrape_path_data),
+        "scrape_in_SEED_DATA_DIR": os.path.exists(scrape_path_seed),
+        "scrape_in_BASE_DIR_data": os.path.exists(scrape_path_base),
+        "scrape_path_data": scrape_path_data,
+        "scrape_path_seed": scrape_path_seed,
+        "scrape_path_base": scrape_path_base,
+    }
+
+    # Try to load match info
+    try:
+        match_info = load_match_info_for_jornada(76)
+        result["match_info_keys"] = list(match_info.keys())[:3]
+        result["match_info_1_q15"] = match_info.get("1", {}).get("q15")
+    except Exception as e:
+        result["error"] = str(e)
+
+    return jsonify(result)
