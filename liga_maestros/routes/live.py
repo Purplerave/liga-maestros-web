@@ -412,7 +412,7 @@ def reset_j75():
 
 @bp.route("/api/admin/setup-j76", methods=["POST"])
 def setup_j76():
-    """Setup J76 data with Nordic matches."""
+    """Setup J76 data with Nordic matches and predictions."""
     # Check admin authentication
     if not is_admin_request():
         # Also accept secret key in header
@@ -421,12 +421,13 @@ def setup_j76():
         if not secret or secret != admin_secret:
             return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    from ..db.migrations import J76_FALLBACK_MATCHES, ensure_jornada_76
+    from ..db.migrations import J76_FALLBACK_MATCHES
 
     conn = get_db()
     try:
         # Delete existing J76 data
         conn.execute("DELETE FROM resultados WHERE jornada = 76")
+        conn.execute("DELETE FROM predicciones WHERE jornada = 76")
         conn.commit()
 
         # Insert J76 matches
@@ -441,13 +442,62 @@ def setup_j76():
                 """,
                 (76, num, local, visitante, fecha, hora),
             )
+
+        # Load and insert predictions
+        import json
+        pred_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'predicciones_J76.json')
+        if os.path.exists(pred_path):
+            with open(pred_path, encoding='utf-8') as f:
+                pred_data = json.load(f)
+
+            # Insert Programa
+            programa = pred_data['programa']
+            for i, signo in enumerate(programa['signos'], start=1):
+                conn.execute(
+                    """
+                    INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(user_id, jornada, partido_id)
+                    DO UPDATE SET signo = excluded.signo
+                    """,
+                    (programa['user_id'], 76, i, signo),
+                )
+
+            # Insert La Peña
+            pena = pred_data['pena']
+            for i, signo in enumerate(pena['signos'], start=1):
+                conn.execute(
+                    """
+                    INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(user_id, jornada, partido_id)
+                    DO UPDATE SET signo = excluded.signo
+                    """,
+                    (pena['user_id'], 76, i, signo),
+                )
+
+            # Insert Maestros
+            maestros = pred_data['maestros']
+            for maestro_id, maestro in maestros.items():
+                for i, signo in enumerate(maestro['signos'], start=1):
+                    conn.execute(
+                        """
+                        INSERT INTO predicciones (user_id, jornada, partido_id, signo)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(user_id, jornada, partido_id)
+                        DO UPDATE SET signo = excluded.signo
+                        """,
+                        (maestro['user_id'], 76, i, signo),
+                    )
+
         conn.commit()
 
         # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 76 ORDER BY partido_id").fetchall()
+        pred_count = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 76").fetchone()[0]
         return jsonify({
             "status": "ok",
-            "message": f"J76 creada con {len(rows)} partidos nórdicos",
+            "message": f"J76 creada con {len(rows)} partidos y {pred_count} predicciones",
             "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"], "fecha": r["fecha"], "hora": r["hora"]} for r in rows]
         })
     finally:
