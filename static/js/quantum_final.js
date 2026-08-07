@@ -92,14 +92,19 @@ async function ensureQ15Directo() {
 }
 
 // --- Porra ---
-async function loadPorra() {
+// The selected match belongs to the user: never let the API's automatic
+// fallback decide where an exact-score prediction is saved.
+let porraSelectedMatchId = null;
+
+async function loadPorra(partidoId = porraSelectedMatchId) {
     const bodies = [qs("porra-body"), qs("ticket-porra-body")].filter(Boolean);
     const summary = qs("porra-summary");
     const labels = document.querySelectorAll("[data-porra-label]");
     if (!state.data) return;
     if (!bodies.length && !qs("cover-porra-content")) return;
     try {
-        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}`);
+        const requestedMatch = partidoId ? `&pid=${encodeURIComponent(partidoId)}` : "";
+        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}${requestedMatch}`);
         const data = await res.json();
         if (typeof hydrateCoverPorra === "function") hydrateCoverPorra(data);
         if (!bodies.length) return;
@@ -110,6 +115,7 @@ async function loadPorra() {
             return;
         }
         const match = data.match || {};
+        porraSelectedMatchId = Number(match.partido_id) || null;
         labels.forEach(label => { label.textContent = data.label || "Porra"; });
         const mine = data.mine || {};
         const homeValue = mine.goles_local ?? "";
@@ -133,9 +139,20 @@ async function loadPorra() {
                     ${porraShare}
                </div>`
             : "";
+        const matchOptions = (data.available || []).map(item => {
+            const id = Number(item.partido_id);
+            const selected = id === Number(match.partido_id) ? " selected" : "";
+            return `<option value="${id}"${selected}>${id}. ${escapeHtml(getShortName(item.local || "Local"))} - ${escapeHtml(getShortName(item.visitante || "Visitante"))}</option>`;
+        }).join("");
+        const selector = matchOptions
+            ? `<label class="porra-selector-label">Elige partido
+                    <select class="porra-selector" data-porra-match aria-label="Elige el partido para tu porra">${matchOptions}</select>
+               </label>`
+            : "";
         const renderBody = (body, index) => {
             const suffix = index ? "-ticket" : "";
             body.innerHTML = `
+            ${selector}
             <div class="porra-match">
                 <strong>${escapeHtml(getShortName(match.local || "Local"))}</strong>
                 <em>vs</em>
@@ -150,7 +167,7 @@ async function loadPorra() {
                     ? `<div class="porra-saved porra-closed">
                             <span>Porra cerrada</span>
                        </div>`
-                : `<form id="porra-form${suffix}" class="porra-form" data-porra-form>
+                : `<form id="porra-form${suffix}" class="porra-form" data-porra-form data-partido-id="${Number(match.partido_id)}">
                         <input id="porra-home${suffix}" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${escapeHtml(homeValue)}">
                         <span>-</span>
                         <input id="porra-away${suffix}" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${escapeHtml(awayValue)}">
@@ -189,6 +206,7 @@ async function submitPorra(event) {
     try {
         const payload = {
                 jornada: state.data.jornada || state.jornada,
+                partido_id: form?.dataset.partidoId || porraSelectedMatchId,
                 goles_local: homeInput.value,
                 goles_visitante: awayInput.value
         };
