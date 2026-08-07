@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import config
+import config  # noqa: E402  # El proyecto se incorpora a sys.path justo arriba.
 
 DB_PATH = Path(config.DB_PATH)
 
@@ -18,9 +18,7 @@ def main():
         conn.row_factory = sqlite3.Row
 
         # Check porra tables exist
-        tables = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%porra%'"
-        ).fetchall()
+        tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%porra%'").fetchall()
         print("Porra tables:", [t["name"] for t in tables])
 
         # Check porra entries

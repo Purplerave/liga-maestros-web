@@ -1,6 +1,5 @@
 """Porra routes: exact-score predictions on any open match chosen by the user."""
 
-import os
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, session
@@ -238,15 +237,18 @@ def get_porra():
         # single journal-wide entry silently forced by the server.
         user_entries = []
         if user.get("id"):
-            user_entries = [dict(row) for row in conn.execute(
-                """
+            user_entries = [
+                dict(row)
+                for row in conn.execute(
+                    """
                 SELECT partido_id, goles_local, goles_visitante
                 FROM porra_entries
                 WHERE jornada = ? AND user_id = ?
                 ORDER BY datetime(updated_at) DESC, partido_id ASC
                 """,
-                (jornada, user.get("id")),
-            ).fetchall()]
+                    (jornada, user.get("id")),
+                ).fetchall()
+            ]
             # On first load, show the user's most recently saved porra. The
             # selector still exposes every currently open match.
             if partido_id is None and user_entries:
@@ -255,7 +257,9 @@ def get_porra():
         # Get the selected match (or a useful default for anonymous visitors).
         match = _porra_target_match(conn, jornada, partido_id)
         if not match:
-            return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra", "available": available})
+            return jsonify(
+                {"status": "ok", "enabled": False, "message": "Sin partido de porra", "available": available}
+            )
 
         presentation = _porra_presentation(match)
         entries = conn.execute(
@@ -378,6 +382,7 @@ def check_porra_points():
 
     # Check if user is admin
     from ..middleware.authz import is_admin_request
+
     if not is_admin_request():
         return jsonify({"status": "error", "message": "Solo admin puede verificar puntos de porra."}), 403
 
@@ -395,11 +400,13 @@ def check_porra_points():
     try:
         ensure_porra_table(conn)
         awarded = check_and_award_porra_points(conn, jornada)
-        return jsonify({
-            "status": "ok",
-            "jornada": jornada,
-            "puntos_otorgados": awarded,
-            "message": f"Se otorgaron {awarded} puntos de porra."
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "jornada": jornada,
+                "puntos_otorgados": awarded,
+                "message": f"Se otorgaron {awarded} puntos de porra.",
+            }
+        )
     finally:
         conn.close()
