@@ -384,8 +384,13 @@ def live_stream():
 @bp.route("/api/admin/reset-j75", methods=["POST"])
 def reset_j75():
     """Force reset J75 data with Nordic matches."""
+    # Check admin authentication
     if not is_admin_request():
-        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+        # Also accept secret key in header
+        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
+        admin_secret = os.getenv("ADMIN_SECRET", "")
+        if not secret or not admin_secret or secret != admin_secret:
+            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     from ..db.migrations import J75_FALLBACK_MATCHES, ensure_jornada_completa
 
