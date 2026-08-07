@@ -151,12 +151,23 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
             : "";
         const renderBody = (body, index) => {
             const suffix = index ? "-ticket" : "";
+            const matchLabel = `${escapeHtml(getShortName(match.local || "Local"))} vs ${escapeHtml(getShortName(match.visitante || "Visitante"))}`;
+
+            // Show change status
+            let changeStatus = "";
+            if (hasMine && !data.jornada_locked) {
+                const changes = data.my_changes || 0;
+                if (changes === 0) {
+                    changeStatus = `<small class="porra-change-info">Puedes cambiar 1 vez</small>`;
+                } else {
+                    changeStatus = `<small class="porra-change-info locked">Ya no puedes cambiar</small>`;
+                }
+            }
+
             body.innerHTML = `
-            ${selector}
-            <div class="porra-match">
-                <strong>${escapeHtml(getShortName(match.local || "Local"))}</strong>
-                <em>vs</em>
-                <strong>${escapeHtml(getShortName(match.visitante || "Visitante"))}</strong>
+            <div class="porra-match-header">
+                <strong>${matchLabel}</strong>
+                ${selector}
             </div>
             ${hasMine
                 ? `<div class="porra-saved">
@@ -174,6 +185,7 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
                         <button type="button" data-porra-submit>${data.auth ? "OK" : "Entrar"}</button>
                         <small class="porra-form-status" data-porra-status aria-live="polite"></small>
                    </form>`}
+            ${changeStatus}
             ${shareBlock}`;
         };
         bodies.forEach(renderBody);

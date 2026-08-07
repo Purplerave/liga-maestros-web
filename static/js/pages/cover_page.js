@@ -174,11 +174,25 @@ function hydrateCoverPorra(data) {
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const totalEntries = Number(data.total_entries || 0);
     const leaders = (data.distribution || []).slice(0, 3);
-    const status = hasMine ? `Llevas ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Pon tu marcador";
+    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu marcador";
+    const changes = data.my_changes || 0;
+    const canChange = data.can_change !== false;
+    const jornadaLocked = data.jornada_locked || false;
+
+    let changeInfo = "";
+    if (hasMine && !jornadaLocked) {
+        if (changes === 0) {
+            changeInfo = `<span class="cp-porra-change">Puedes cambiarla 1 vez</span>`;
+        } else {
+            changeInfo = `<span class="cp-porra-change locked">Ya no puedes cambiar</span>`;
+        }
+    }
+
     target.innerHTML = `${coverFixtureHtml(match, true)}
         <div class="cp-porra-foot"><strong>${escapeHtml(status)}</strong>
-            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" · ")}</span>` : `<span>Anímate</span>`}
-        </div>`;
+            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" · ")}</span>` : `<span>Sé el primero</span>`}
+        </div>
+        ${changeInfo}`;
 }
 
 function renderNewspaperCoverPageV3() {

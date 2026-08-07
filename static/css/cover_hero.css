@@ -542,6 +542,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 .cp-porra-foot { display:flex; justify-content:space-between; gap:4px; margin-top:3px; padding-top:3px; border-top:1px solid rgba(255,255,255,0.07); }
 .cp-porra-foot strong { color: var(--cp-gold); font-size:0.50rem; }
 .cp-porra-foot span { color: var(--cp-muted); font-size:0.46rem; }
+.cp-porra-change { display:block; margin-top:2px; font-size:0.46rem; color:var(--cp-dim); }
+.cp-porra-change.locked { color:var(--cp-pink); }
 
 /* Loading / empty */
 .cp-porra-loading { display:block; width:60%; height:5px; margin-top:12px; border-radius:3px; background: linear-gradient(90deg, rgba(148,163,184,.08), rgba(148,163,184,.22), rgba(148,163,184,.08)); background-size:200% 100%; animation: cpPorraLoad 1.25s linear infinite; }
