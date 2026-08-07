@@ -135,6 +135,17 @@ def ensure_porra_table(conn):
         CREATE INDEX IF NOT EXISTS idx_porra_jornada_match
         ON porra_entries(jornada, partido_id)
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS porra_puntos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            jornada INTEGER NOT NULL,
+            partido_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            puntos INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(jornada, partido_id, user_id)
+        )
+    """)
     conn.commit()
 
 

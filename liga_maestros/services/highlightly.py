@@ -365,6 +365,15 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
         if logos:
             logo_path = os.path.join(config.DATA_DIR, "TEAM_LOGOS.json")
             update_json_object_locked(logo_path, logos)
+
+        # Check and award porra points after updating results
+        if updates > 0:
+            try:
+                from ..routes.porra import check_and_award_porra_points
+                check_and_award_porra_points(conn, target_jornada)
+            except Exception:
+                logger.exception("Error verificando puntos de porra")
+
         return updates
     except Exception:
         logger.exception("Error refrescando resultados desde Highlightly")

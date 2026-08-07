@@ -13,6 +13,76 @@ from ..services.ticket import madrid_now, parse_madrid_datetime
 bp = Blueprint("porra", __name__)
 
 
+def check_and_award_porra_points(conn, jornada):
+    """Check if any porra predictions were correct and award 1 point to the user.
+
+    This should be called after match results are updated.
+    """
+    # Get all finished matches for this jornada
+    finished_matches = conn.execute(
+        """
+        SELECT partido_id, goles_local, goles_visitante
+        FROM resultados
+        WHERE jornada = ? AND status IN ('FT', 'FINISHED', 'TERMINADO')
+        AND goles_local IS NOT NULL AND goles_visitante IS NOT NULL
+        """,
+        (jornada,),
+    ).fetchall()
+
+    if not finished_matches:
+        return 0
+
+    awarded = 0
+    for match in finished_matches:
+        partido_id = match["partido_id"]
+        gl = match["goles_local"]
+        gv = match["goles_visitante"]
+
+        # Find all porra entries for this match that predicted the exact score
+        correct_entries = conn.execute(
+            """
+            SELECT user_id FROM porra_entries
+            WHERE jornada = ? AND partido_id = ? AND goles_local = ? AND goles_visitante = ?
+            """,
+            (jornada, partido_id, gl, gv),
+        ).fetchall()
+
+        for entry in correct_entries:
+            user_id = entry["user_id"]
+            # Check if we already awarded points for this porra
+            already_awarded = conn.execute(
+                """
+                SELECT 1 FROM porra_puntos
+                WHERE jornada = ? AND partido_id = ? AND user_id = ?
+                """,
+                (jornada, partido_id, user_id),
+            ).fetchone()
+
+            if not already_awarded:
+                # Award 1 point to the user
+                conn.execute(
+                    """
+                    UPDATE usuarios SET puntos_acumulados = puntos_acumulados + 1
+                    WHERE id = ?
+                    """,
+                    (user_id,),
+                )
+                # Record that we awarded points
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO porra_puntos (jornada, partido_id, user_id, puntos)
+                    VALUES (?, ?, ?, 1)
+                    """,
+                    (jornada, partido_id, user_id),
+                )
+                awarded += 1
+
+    if awarded:
+        conn.commit()
+
+    return awarded
+
+
 def _porra_available_matches(conn, jornada):
     """Return all open matches for a jornada that can be used for porra."""
     rows = conn.execute(
@@ -163,6 +233,19 @@ def get_porra():
         # Get all available matches for the dropdown
         available = _porra_available_matches(conn, jornada)
 
+        # Get user's current porra entry (if any)
+        user_entry = None
+        if user.get("id"):
+            user_entry_row = conn.execute(
+                "SELECT partido_id, goles_local, goles_visitante FROM porra_entries WHERE jornada = ? AND user_id = ?",
+                (jornada, user.get("id")),
+            ).fetchone()
+            if user_entry_row:
+                user_entry = dict(user_entry_row)
+                # If no partido_id specified, use user's saved choice
+                if partido_id is None:
+                    partido_id = user_entry["partido_id"]
+
         # Get the selected match (or auto-select)
         match = _porra_target_match(conn, jornada, partido_id)
         if not match:
@@ -197,13 +280,7 @@ def get_porra():
             total = int(item.get("total") or 0)
             item["percent"] = round((total * 100 / porra_total), 1) if porra_total else 0
             distribution.append(item)
-        mine = None
-        if user.get("id"):
-            mine_row = conn.execute(
-                "SELECT partido_id, goles_local, goles_visitante, updated_at FROM porra_entries WHERE jornada = ? AND user_id = ?",
-                (jornada, user.get("id")),
-            ).fetchone()
-            mine = dict(mine_row) if mine_row else None
+        mine = user_entry
         return jsonify(
             {
                 "status": "ok",
@@ -213,7 +290,7 @@ def get_porra():
                 "available": available,
                 **presentation,
                 "locked": _porra_is_locked(match),
-                "prize": os.getenv("PORRA_PRIZE_TEXT", "Premio symbolico: insignia semanal"),
+                "prize": "1 punto extra si aciertas el marcador exacto",
                 "entries": [dict(row) for row in entries],
                 "distribution": distribution,
                 "total_entries": porra_total,
@@ -280,5 +357,41 @@ def post_porra():
         )
         conn.commit()
         return jsonify({"status": "ok", "partido_id": match["partido_id"], "goles_local": gl, "goles_visitante": gv})
+    finally:
+        conn.close()
+
+
+@bp.route("/api/porra/check-points", methods=["POST"])
+def check_porra_points():
+    """Check and award porra points for a jornada. Admin only."""
+    user = session.get("user")
+    if not user:
+        return jsonify({"status": "error", "message": "No autorizado."}), 401
+
+    # Check if user is admin
+    from ..middleware.authz import is_admin_request
+    if not is_admin_request():
+        return jsonify({"status": "error", "message": "Solo admin puede verificar puntos de porra."}), 403
+
+    data = request.get_json(silent=True) or {}
+    jornada = data.get("jornada")
+    if not jornada:
+        return jsonify({"status": "error", "message": "Jornada requerida."}), 400
+
+    try:
+        jornada = int(jornada)
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Jornada invalida."}), 400
+
+    conn = get_db()
+    try:
+        ensure_porra_table(conn)
+        awarded = check_and_award_porra_points(conn, jornada)
+        return jsonify({
+            "status": "ok",
+            "jornada": jornada,
+            "puntos_otorgados": awarded,
+            "message": f"Se otorgaron {awarded} puntos de porra."
+        })
     finally:
         conn.close()
