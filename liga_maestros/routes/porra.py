@@ -1,6 +1,5 @@
-"""Porra routes: match score predictions with user-selected matches."""
+"""Porra routes: exact-score predictions on any open match chosen by the user."""
 
-import os
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, session
@@ -233,23 +232,34 @@ def get_porra():
         # Get all available matches for the dropdown
         available = _porra_available_matches(conn, jornada)
 
-        # Get user's current porra entry (if any)
-        user_entry = None
+        # A registered user can make a porra for any match which has not started.
+        # Keep all their entries: one exact-score prediction per match, not a
+        # single journal-wide entry silently forced by the server.
+        user_entries = []
         if user.get("id"):
-            user_entry_row = conn.execute(
-                "SELECT partido_id, goles_local, goles_visitante FROM porra_entries WHERE jornada = ? AND user_id = ?",
-                (jornada, user.get("id")),
-            ).fetchone()
-            if user_entry_row:
-                user_entry = dict(user_entry_row)
-                # If no partido_id specified, use user's saved choice
-                if partido_id is None:
-                    partido_id = user_entry["partido_id"]
+            user_entries = [
+                dict(row)
+                for row in conn.execute(
+                    """
+                SELECT partido_id, goles_local, goles_visitante
+                FROM porra_entries
+                WHERE jornada = ? AND user_id = ?
+                ORDER BY datetime(updated_at) DESC, partido_id ASC
+                """,
+                    (jornada, user.get("id")),
+                ).fetchall()
+            ]
+            # On first load, show the user's most recently saved porra. The
+            # selector still exposes every currently open match.
+            if partido_id is None and user_entries:
+                partido_id = user_entries[0]["partido_id"]
 
-        # Get the selected match (or auto-select)
+        # Get the selected match (or a useful default for anonymous visitors).
         match = _porra_target_match(conn, jornada, partido_id)
         if not match:
-            return jsonify({"status": "ok", "enabled": False, "message": "Sin partido de porra", "available": available})
+            return jsonify(
+                {"status": "ok", "enabled": False, "message": "Sin partido de porra", "available": available}
+            )
 
         presentation = _porra_presentation(match)
         entries = conn.execute(
@@ -280,7 +290,10 @@ def get_porra():
             total = int(item.get("total") or 0)
             item["percent"] = round((total * 100 / porra_total), 1) if porra_total else 0
             distribution.append(item)
-        mine = user_entry
+        mine = next(
+            (entry for entry in user_entries if int(entry["partido_id"]) == int(match["partido_id"])),
+            None,
+        )
         return jsonify(
             {
                 "status": "ok",
@@ -295,6 +308,7 @@ def get_porra():
                 "distribution": distribution,
                 "total_entries": porra_total,
                 "mine": mine,
+                "my_entries": user_entries,
                 "auth": bool(user.get("id")),
             }
         )
@@ -317,12 +331,10 @@ def post_porra():
     except (TypeError, ValueError):
         return jsonify({"status": "error", "message": "Marcador invalido."}), 400
 
-    partido_id = data.get("partido_id")
-    if partido_id:
-        try:
-            partido_id = int(partido_id)
-        except (TypeError, ValueError):
-            return jsonify({"status": "error", "message": "Partido invalido."}), 400
+    try:
+        partido_id = int(data.get("partido_id"))
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Elige un partido para tu porra."}), 400
 
     if gl < 0 or gv < 0 or gl > 15 or gv > 15:
         return jsonify({"status": "error", "message": "Marcador fuera de rango."}), 400
@@ -370,6 +382,7 @@ def check_porra_points():
 
     # Check if user is admin
     from ..middleware.authz import is_admin_request
+
     if not is_admin_request():
         return jsonify({"status": "error", "message": "Solo admin puede verificar puntos de porra."}), 403
 
@@ -387,11 +400,13 @@ def check_porra_points():
     try:
         ensure_porra_table(conn)
         awarded = check_and_award_porra_points(conn, jornada)
-        return jsonify({
-            "status": "ok",
-            "jornada": jornada,
-            "puntos_otorgados": awarded,
-            "message": f"Se otorgaron {awarded} puntos de porra."
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "jornada": jornada,
+                "puntos_otorgados": awarded,
+                "message": f"Se otorgaron {awarded} puntos de porra.",
+            }
+        )
     finally:
         conn.close()

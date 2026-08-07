@@ -164,6 +164,11 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
             qs(button.dataset.standings).classList.add("active");
         });
     });
+    document.addEventListener("change", event => {
+        const selector = event.target.closest("[data-porra-match]");
+        if (!selector || typeof loadPorra !== "function") return;
+        loadPorra(selector.value);
+    });
     document.addEventListener("click", event => {
         const porraSubmit = event.target.closest("[data-porra-submit]");
         if (porraSubmit) {

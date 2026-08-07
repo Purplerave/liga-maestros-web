@@ -370,6 +370,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
         if updates > 0:
             try:
                 from ..routes.porra import check_and_award_porra_points
+
                 check_and_award_porra_points(conn, target_jornada)
             except Exception:
                 logger.exception("Error verificando puntos de porra")

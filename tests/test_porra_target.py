@@ -1,7 +1,11 @@
 import sqlite3
 from datetime import timedelta
 
-from liga_maestros.routes.porra import _porra_is_locked, _porra_target_match
+from liga_maestros.routes.porra import (
+    _porra_is_locked,
+    _porra_target_match,
+    check_and_award_porra_points,
+)
 from liga_maestros.services.ticket import madrid_now
 
 
@@ -77,6 +81,38 @@ def test_porra_does_not_keep_finished_match_with_entries():
     )
 
     assert _porra_target_match(conn, 73)["partido_id"] == 2
+    conn.close()
+
+
+def test_user_can_select_any_open_match_including_pleno():
+    conn = porra_connection()
+    conn.execute(
+        "INSERT INTO resultados VALUES (73, 15, 'Espana', 'Argentina', '2099-07-19', '21:00', 'NS', NULL, NULL)"
+    )
+
+    selected = _porra_target_match(conn, 73, partido_id=15)
+
+    assert selected["partido_id"] == 15
+    assert _porra_is_locked(selected) is False
+    conn.close()
+
+
+def test_exact_score_awards_one_extra_point_once():
+    conn = porra_connection()
+    conn.execute("CREATE TABLE usuarios (id TEXT PRIMARY KEY, puntos_acumulados INTEGER DEFAULT 0)")
+    conn.execute(
+        "CREATE TABLE porra_puntos (jornada INTEGER, partido_id INTEGER, user_id TEXT, puntos INTEGER, UNIQUE(jornada, partido_id, user_id))"
+    )
+    conn.execute("INSERT INTO usuarios VALUES ('u1', 7)")
+    conn.execute(
+        "INSERT INTO porra_entries VALUES (73, 1, 'u1', 'Pablo', 2, 1, '2099-07-17 10:00:00', '2099-07-17 10:00:00')"
+    )
+    conn.execute("UPDATE resultados SET status = 'FT', goles_local = 2, goles_visitante = 1 WHERE partido_id = 1")
+
+    assert check_and_award_porra_points(conn, 73) == 1
+    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 8
+    assert check_and_award_porra_points(conn, 73) == 0
+    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 8
     conn.close()
 
 

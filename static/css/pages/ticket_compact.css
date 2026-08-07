@@ -35,12 +35,13 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
 
 .ticket-porra-strip .porra-body {
     display: grid;
-    grid-template-columns: minmax(170px, 0.8fr) minmax(140px, auto) minmax(0, 1fr);
+    grid-template-columns: minmax(150px, 0.9fr) minmax(170px, 0.8fr) minmax(140px, auto) minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     min-height: 34px;
 }
 
+.ticket-porra-strip .porra-selector-label,
 .ticket-porra-strip .porra-match,
 .ticket-porra-strip .porra-saved,
 .ticket-porra-strip .porra-share {
@@ -52,6 +53,26 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
     padding: 4px 8px;
     border: 1px solid rgba(148, 163, 184, 0.16);
     border-radius: 7px;
+}
+
+.ticket-porra-strip .porra-selector-label {
+    display: grid;
+    gap: 2px;
+    color: #9fb1c8;
+    font-size: 0.55rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.ticket-porra-strip .porra-selector {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 5px;
+    background: #07111f;
+    color: #f8fafc;
+    font: 700 0.65rem var(--font-data);
+    padding: 3px 5px;
 }
 
 .ticket-porra-strip .porra-match {

@@ -401,11 +401,13 @@ def reset_j75():
 
         # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
-        return jsonify({
-            "status": "ok",
-            "message": f"J75 restaurada con {len(rows)} partidos originales",
-            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows]
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "message": f"J75 restaurada con {len(rows)} partidos originales",
+                "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows],
+            }
+        )
     finally:
         conn.close()
 
@@ -445,14 +447,15 @@ def setup_j76():
 
         # Load and insert predictions
         import json
-        pred_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'predicciones_J76.json')
+
+        pred_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "predicciones_J76.json")
         if os.path.exists(pred_path):
-            with open(pred_path, encoding='utf-8') as f:
+            with open(pred_path, encoding="utf-8") as f:
                 pred_data = json.load(f)
 
             # Insert Programa
-            programa = pred_data['programa']
-            for i, signo in enumerate(programa['signos'], start=1):
+            programa = pred_data["programa"]
+            for i, signo in enumerate(programa["signos"], start=1):
                 conn.execute(
                     """
                     INSERT INTO predicciones (user_id, jornada, partido_id, signo)
@@ -460,12 +463,12 @@ def setup_j76():
                     ON CONFLICT(user_id, jornada, partido_id)
                     DO UPDATE SET signo = excluded.signo
                     """,
-                    (programa['user_id'], 76, i, signo),
+                    (programa["user_id"], 76, i, signo),
                 )
 
             # Insert La Peña
-            pena = pred_data['pena']
-            for i, signo in enumerate(pena['signos'], start=1):
+            pena = pred_data["pena"]
+            for i, signo in enumerate(pena["signos"], start=1):
                 conn.execute(
                     """
                     INSERT INTO predicciones (user_id, jornada, partido_id, signo)
@@ -473,13 +476,13 @@ def setup_j76():
                     ON CONFLICT(user_id, jornada, partido_id)
                     DO UPDATE SET signo = excluded.signo
                     """,
-                    (pena['user_id'], 76, i, signo),
+                    (pena["user_id"], 76, i, signo),
                 )
 
             # Insert Maestros
-            maestros = pred_data['maestros']
+            maestros = pred_data["maestros"]
             for maestro_id, maestro in maestros.items():
-                for i, signo in enumerate(maestro['signos'], start=1):
+                for i, signo in enumerate(maestro["signos"], start=1):
                     conn.execute(
                         """
                         INSERT INTO predicciones (user_id, jornada, partido_id, signo)
@@ -487,7 +490,7 @@ def setup_j76():
                         ON CONFLICT(user_id, jornada, partido_id)
                         DO UPDATE SET signo = excluded.signo
                         """,
-                        (maestro['user_id'], 76, i, signo),
+                        (maestro["user_id"], 76, i, signo),
                     )
 
         conn.commit()
@@ -495,11 +498,22 @@ def setup_j76():
         # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 76 ORDER BY partido_id").fetchall()
         pred_count = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 76").fetchone()[0]
-        return jsonify({
-            "status": "ok",
-            "message": f"J76 creada con {len(rows)} partidos y {pred_count} predicciones",
-            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"], "fecha": r["fecha"], "hora": r["hora"]} for r in rows]
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "message": f"J76 creada con {len(rows)} partidos y {pred_count} predicciones",
+                "matches": [
+                    {
+                        "id": r["partido_id"],
+                        "local": r["local"],
+                        "visitante": r["visitante"],
+                        "fecha": r["fecha"],
+                        "hora": r["hora"],
+                    }
+                    for r in rows
+                ],
+            }
+        )
     finally:
         conn.close()
 
@@ -507,8 +521,9 @@ def setup_j76():
 @bp.route("/api/admin/debug-files")
 def debug_files():
     """Debug endpoint to check file paths."""
-    import config
     import json as json_mod
+
+    import config
 
     scrape_path_data = os.path.join(config.DATA_DIR, "quiniela15_J76_scrape.json")
     scrape_path_seed = os.path.join(config.SEED_DATA_DIR, "quiniela15_J76_scrape.json")
@@ -551,8 +566,9 @@ def sync_scrape():
         if not secret or secret != admin_secret:
             return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    import config
     import shutil
+
+    import config
 
     results = []
     for jornada in [75, 76]:
