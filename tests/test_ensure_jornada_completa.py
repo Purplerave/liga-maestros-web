@@ -38,16 +38,16 @@ def test_empty_db_imports_full_j75():
     migrations.ensure_jornada_75(conn)
     rows = _j75_rows(conn)
     assert len(rows) == 15
-    assert rows[0]["local"] == "VPS Vaasa"
-    assert rows[0]["visitante"] == "Inter Turku"
-    assert rows[0]["fecha"] == "2026-08-02"
-    assert rows[14]["local"] == "AIK"
+    assert rows[0]["local"] == "Sandefjord"
+    assert rows[0]["visitante"] == "KFUM Oslo"
+    assert rows[0]["fecha"] == "2026-08-09"
+    assert rows[14]["local"] == "Vasteras SK FK"
 
 
 def test_partial_jornada_is_completed():
     conn = _fresh_conn()
     for pid in range(1, 6):
-        _insert_match(conn, pid, local="VPS Vaasa" if pid == 1 else f"Equipo {pid}", visitante="Rival")
+        _insert_match(conn, pid, local="Sandefjord" if pid == 1 else f"Equipo {pid}", visitante="Rival")
 
     changed = migrations.ensure_jornada_completa(conn, 75, fallback_matches=migrations.J75_FALLBACK_MATCHES)
     rows = _j75_rows(conn)
@@ -55,8 +55,8 @@ def test_partial_jornada_is_completed():
     assert changed >= 10
     assert len(rows) == 15
     assert {int(r["partido_id"]) for r in rows} == set(range(1, 16))
-    assert rows[9]["local"] == "Aalesunds FK"
-    assert rows[14]["visitante"] == "Orgryte IS"
+    assert rows[9]["local"] == "Hammarby"
+    assert rows[14]["visitante"] == "Djurgardens"
 
 
 def test_empty_placeholder_rows_are_backfilled():
@@ -153,8 +153,8 @@ def test_ticket_payload_backfills_missing_matches_from_scrape():
     partidos = matches_payload.build_jornada_matches(conn, 75, {})
 
     assert len(partidos) == 15
-    assert partidos[9]["local"] == "Aalesunds FK"
-    assert partidos[14]["local"] == "AIK"
+    assert partidos[9]["local"] == "Hammarby"
+    assert partidos[14]["local"] == "Vasteras SK FK"
     assert all(p["local"] != "-" for p in partidos)
 
 
