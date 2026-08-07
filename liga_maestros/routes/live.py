@@ -383,7 +383,7 @@ def live_stream():
 
 @bp.route("/api/admin/reset-j75", methods=["POST"])
 def reset_j75():
-    """Force reset J75 data with Nordic matches."""
+    """Force reset J75 data with original matches."""
     # Check admin authentication
     if not is_admin_request():
         # Also accept secret key in header
@@ -392,16 +392,45 @@ def reset_j75():
         if not secret or secret != admin_secret:
             return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    from ..db.migrations import J75_FALLBACK_MATCHES
+    from ..db.migrations import ensure_jornada_75
 
     conn = get_db()
     try:
-        # Delete existing J75 data
-        conn.execute("DELETE FROM resultados WHERE jornada = 75")
+        # Use ensure_jornada_75 to restore original data
+        ensure_jornada_75(conn)
+
+        # Verify
+        rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
+        return jsonify({
+            "status": "ok",
+            "message": f"J75 restaurada con {len(rows)} partidos originales",
+            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows]
+        })
+    finally:
+        conn.close()
+
+
+@bp.route("/api/admin/setup-j76", methods=["POST"])
+def setup_j76():
+    """Setup J76 data with Nordic matches."""
+    # Check admin authentication
+    if not is_admin_request():
+        # Also accept secret key in header
+        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
+        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
+        if not secret or secret != admin_secret:
+            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+
+    from ..db.migrations import J76_FALLBACK_MATCHES, ensure_jornada_76
+
+    conn = get_db()
+    try:
+        # Delete existing J76 data
+        conn.execute("DELETE FROM resultados WHERE jornada = 76")
         conn.commit()
 
-        # Insert new Nordic matches
-        for num, local, visitante, fecha, hora in J75_FALLBACK_MATCHES:
+        # Insert J76 matches
+        for num, local, visitante, fecha, hora in J76_FALLBACK_MATCHES:
             conn.execute(
                 """
                 INSERT INTO resultados (
@@ -410,16 +439,16 @@ def reset_j75():
                 )
                 VALUES (?, ?, ?, ?, NULL, NULL, 'NS', ?, ?, '', '-')
                 """,
-                (75, num, local, visitante, fecha, hora),
+                (76, num, local, visitante, fecha, hora),
             )
         conn.commit()
 
         # Verify
-        rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
+        rows = conn.execute("SELECT * FROM resultados WHERE jornada = 76 ORDER BY partido_id").fetchall()
         return jsonify({
             "status": "ok",
-            "message": f"J75 reset con {len(rows)} partidos nórdicos",
-            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows]
+            "message": f"J76 creada con {len(rows)} partidos nórdicos",
+            "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"], "fecha": r["fecha"], "hora": r["hora"]} for r in rows]
         })
     finally:
         conn.close()

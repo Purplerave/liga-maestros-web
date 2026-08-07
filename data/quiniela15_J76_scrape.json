@@ -1,0 +1,113 @@
+{
+  "jornada": 76,
+  "source_url": "https://www.quiniela15.com/pronostico-quiniela",
+  "scraped_at": "2026-08-07T10:00:00",
+  "cierre": "viernes 07 de agosto a las 19:00",
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Sandefjord",
+      "visitante": "KFUM Oslo",
+      "fecha": "2026-08-07",
+      "hora": "19:00"
+    },
+    {
+      "num": 2,
+      "local": "Valerenga",
+      "visitante": "Bodo-Glimt",
+      "fecha": "2026-08-08",
+      "hora": "14:00"
+    },
+    {
+      "num": 3,
+      "local": "Viking",
+      "visitante": "Sarpsborg",
+      "fecha": "2026-08-08",
+      "hora": "16:00"
+    },
+    {
+      "num": 4,
+      "local": "Start",
+      "visitante": "Fredrikstad",
+      "fecha": "2026-08-08",
+      "hora": "18:00"
+    },
+    {
+      "num": 5,
+      "local": "Lillestrom SK",
+      "visitante": "Rosenborg",
+      "fecha": "2026-08-09",
+      "hora": "14:30"
+    },
+    {
+      "num": 6,
+      "local": "Ham-Kam",
+      "visitante": "Aalesunds FK",
+      "fecha": "2026-08-09",
+      "hora": "17:00"
+    },
+    {
+      "num": 7,
+      "local": "Kristiansund",
+      "visitante": "Molde FK",
+      "fecha": "2026-08-09",
+      "hora": "19:15"
+    },
+    {
+      "num": 8,
+      "local": "Orgryte IS",
+      "visitante": "AIK",
+      "fecha": "2026-08-08",
+      "hora": "15:00"
+    },
+    {
+      "num": 9,
+      "local": "Mjallby",
+      "visitante": "Elfsborg",
+      "fecha": "2026-08-08",
+      "hora": "17:30"
+    },
+    {
+      "num": 10,
+      "local": "Hammarby",
+      "visitante": "Hacken",
+      "fecha": "2026-08-09",
+      "hora": "14:00"
+    },
+    {
+      "num": 11,
+      "local": "Malmoe",
+      "visitante": "Degerfors IF",
+      "fecha": "2026-08-09",
+      "hora": "14:00"
+    },
+    {
+      "num": 12,
+      "local": "Halmstad",
+      "visitante": "GAIS Goteborg",
+      "fecha": "2026-08-09",
+      "hora": "16:30"
+    },
+    {
+      "num": 13,
+      "local": "IFK Goteborg",
+      "visitante": "Kalmar FF",
+      "fecha": "2026-08-09",
+      "hora": "16:30"
+    },
+    {
+      "num": 14,
+      "local": "Sirius",
+      "visitante": "Brommapojkarna",
+      "fecha": "2026-08-10",
+      "hora": "19:00"
+    },
+    {
+      "num": 15,
+      "local": "Vasteras SK FK",
+      "visitante": "Djurgardens",
+      "fecha": "2026-08-10",
+      "hora": "19:00"
+    }
+  ]
+}
