@@ -112,8 +112,15 @@ def repair_mojibake(text):
 def load_match_info_for_jornada(jornada):
     info = {}
     j_text = str(jornada)
-    scrape_path = os.path.join(config.DATA_DIR, f"quiniela15_J{j_text}_scrape.json")
-    if os.path.exists(scrape_path):
+
+    # Search for scrape file in multiple locations
+    scrape_candidates = [
+        os.path.join(config.DATA_DIR, f"quiniela15_J{j_text}_scrape.json"),
+        os.path.join(config.SEED_DATA_DIR, f"quiniela15_J{j_text}_scrape.json"),
+    ]
+    for scrape_path in scrape_candidates:
+        if not os.path.exists(scrape_path):
+            continue
         try:
             with open(scrape_path, encoding="utf-8") as fh:
                 q15_data = json.load(fh)
@@ -130,6 +137,7 @@ def load_match_info_for_jornada(jornada):
                     "fuerza_visitante": item.get("fuerza_visitante"),
                     "detalle": repair_mojibake(item.get("detalle") or ""),
                 }
+            break  # Found the file, stop searching
         except Exception:
             pass
 
@@ -139,6 +147,8 @@ def load_match_info_for_jornada(jornada):
         os.path.join(parent_dir, f"PREDICCIONES_J{j_text}_FINAL.json"),
         os.path.join(config.DATA_DIR, f"PREDICCIONES_J{j_text}_DEFINITIVO.json"),
         os.path.join(config.DATA_DIR, f"PREDICCIONES_J{j_text}_FINAL.json"),
+        os.path.join(config.SEED_DATA_DIR, f"PREDICCIONES_J{j_text}_DEFINITIVO.json"),
+        os.path.join(config.SEED_DATA_DIR, f"PREDICCIONES_J{j_text}_FINAL.json"),
     ]
     for path in prediction_candidates:
         if not os.path.exists(path):
