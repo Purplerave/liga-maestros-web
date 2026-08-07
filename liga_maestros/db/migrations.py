@@ -124,7 +124,8 @@ def ensure_porra_table(conn):
             goles_local INTEGER NOT NULL,
             goles_visitante INTEGER NOT NULL,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            changes INTEGER NOT NULL DEFAULT 0
         )
     """)
     # Migrate old constraint: drop old 3-column index, create new 2-column
@@ -141,6 +142,11 @@ def ensure_porra_table(conn):
             GROUP BY user_id, jornada
         )
     """)
+    # Add changes column if it doesn't exist
+    try:
+        conn.execute("ALTER TABLE porra_entries ADD COLUMN changes INTEGER NOT NULL DEFAULT 0")
+    except Exception:
+        pass  # Column already exists
     # Unique constraint: 1 porra per user per jornada (not per match)
     conn.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_jornada

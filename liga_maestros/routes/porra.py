@@ -208,6 +208,26 @@ def _porra_is_locked(match):
     return bool(kickoff and madrid_now() >= kickoff)
 
 
+def _jornada_is_locked(conn, jornada):
+    """Check if ANY match in the jornada has started - locks everything."""
+    first_match = conn.execute(
+        """
+        SELECT fecha, hora, status FROM resultados
+        WHERE jornada = ?
+        ORDER BY fecha ASC, hora ASC
+        LIMIT 1
+        """,
+        (jornada,),
+    ).fetchone()
+    if not first_match:
+        return True
+    status = str(first_match["status"] or "").upper()
+    if status not in ("", "NS", "SCHEDULED", "NOT STARTED"):
+        return True
+    kickoff = parse_madrid_datetime(first_match["fecha"], first_match["hora"])
+    return bool(kickoff and madrid_now() >= kickoff)
+
+
 @bp.route("/api/porra")
 def get_porra():
     user = session.get("user") or {}
@@ -236,12 +256,13 @@ def get_porra():
         # Keep all their entries: one exact-score prediction per match, not a
         # single journal-wide entry silently forced by the server.
         user_entries = []
+        user_entry = None
         if user.get("id"):
             user_entries = [
                 dict(row)
                 for row in conn.execute(
                     """
-                SELECT partido_id, goles_local, goles_visitante
+                SELECT partido_id, goles_local, goles_visitante, changes
                 FROM porra_entries
                 WHERE jornada = ? AND user_id = ?
                 ORDER BY datetime(updated_at) DESC, partido_id ASC
@@ -249,6 +270,8 @@ def get_porra():
                     (jornada, user.get("id")),
                 ).fetchall()
             ]
+            if user_entries:
+                user_entry = user_entries[0]
             # On first load, show the user's most recently saved porra. The
             # selector still exposes every currently open match.
             if partido_id is None and user_entries:
@@ -294,6 +317,7 @@ def get_porra():
             (entry for entry in user_entries if int(entry["partido_id"]) == int(match["partido_id"])),
             None,
         )
+        jornada_locked = _jornada_is_locked(conn, jornada)
         return jsonify(
             {
                 "status": "ok",
@@ -302,13 +326,16 @@ def get_porra():
                 "match": match,
                 "available": available,
                 **presentation,
-                "locked": _porra_is_locked(match),
+                "locked": jornada_locked or _porra_is_locked(match),
+                "jornada_locked": jornada_locked,
                 "prize": "1 punto extra si aciertas el marcador exacto",
                 "entries": [dict(row) for row in entries],
                 "distribution": distribution,
                 "total_entries": porra_total,
                 "mine": mine,
                 "my_entries": user_entries,
+                "my_changes": user_entry.get("changes", 0) if user_entry else 0,
+                "can_change": (user_entry.get("changes", 0) < 1) if user_entry else True,
                 "auth": bool(user.get("id")),
             }
         )
@@ -342,6 +369,11 @@ def post_porra():
     conn = get_db()
     try:
         ensure_porra_table(conn)
+
+        # Check if jornada is locked (first match started)
+        if _jornada_is_locked(conn, jornada):
+            return jsonify({"status": "error", "message": "La jornada ya ha empezado. No se puede modificar la porra."}), 400
+
         match = _porra_target_match(conn, jornada, partido_id)
         if not match:
             return jsonify({"status": "error", "message": "No hay partido de porra."}), 404
@@ -350,19 +382,26 @@ def post_porra():
 
         # Check if user already has a porra for this jornada
         existing_entry = conn.execute(
-            "SELECT partido_id FROM porra_entries WHERE jornada = ? AND user_id = ?",
+            "SELECT partido_id, changes FROM porra_entries WHERE jornada = ? AND user_id = ?",
             (jornada, user.get("id")),
         ).fetchone()
 
+        # If user has already changed once, don't allow another change
+        if existing_entry and existing_entry["changes"] >= 1:
+            return jsonify({"status": "error", "message": "Ya cambiaste tu porra una vez. No puedes cambiarla más."}), 400
+
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        changes = 1 if existing_entry else 0
+
         conn.execute(
             """
-            INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO porra_entries (jornada, partido_id, user_id, nombre, goles_local, goles_visitante, created_at, updated_at, changes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(user_id, jornada) DO UPDATE SET
                 partido_id = excluded.partido_id,
                 nombre = excluded.nombre, goles_local = excluded.goles_local,
-                goles_visitante = excluded.goles_visitante, updated_at = excluded.updated_at
+                goles_visitante = excluded.goles_visitante, updated_at = excluded.updated_at,
+                changes = porra_entries.changes + 1
         """,
             (
                 jornada,
@@ -373,6 +412,7 @@ def post_porra():
                 gv,
                 now,
                 now,
+                changes,
             ),
         )
         conn.commit()
@@ -383,7 +423,7 @@ def post_porra():
                 "partido_id": match["partido_id"],
                 "goles_local": gl,
                 "goles_visitante": gv,
-                "message": "Porra actualizada para este partido."
+                "message": "Porra actualizada. Ya no podrás cambiarla más."
             })
         else:
             return jsonify({
@@ -391,7 +431,7 @@ def post_porra():
                 "partido_id": match["partido_id"],
                 "goles_local": gl,
                 "goles_visitante": gv,
-                "message": "Porra guardada correctamente."
+                "message": "Porra guardada. Podrás cambiarla una vez más."
             })
     finally:
         conn.close()
