@@ -179,18 +179,126 @@ function renderPenaPlenoDetail(idx = 14) {
         <small>${escapeHtml(`Marcadores: ${exactTop}${summary.invalid ? ` | sin valido ${summary.invalid}` : ""}`)}</small>`;
 }
 
+/* ---------- Barras compactas de consenso (Peña e IA) ---------- */
+
+function getSignCandidates(rawSign, isPleno = false) {
+    const sign = String(rawSign || "").trim().toUpperCase();
+    if (!sign || sign === "-") return [];
+    if (isPleno) {
+        const m = sign.match(/^([0-9M]+)\s*[-–]\s*([0-9M]+)$/);
+        if (m) {
+            const hVal = m[1] === "M" ? 3 : Number(m[1]);
+            const aVal = m[2] === "M" ? 3 : Number(m[2]);
+            if (!Number.isNaN(hVal) && !Number.isNaN(aVal)) {
+                if (hVal > aVal) return ["1"];
+                if (hVal === aVal) return ["X"];
+                return ["2"];
+            }
+        }
+    }
+    return ["1", "X", "2"].filter(char => sign.includes(char));
+}
+
+function getPena1X2Consensus(c, idx, preds, isPleno = false) {
+    if (!isPleno && c && (Number(c.p1) > 0 || Number(c.px) > 0 || Number(c.p2) > 0)) {
+        return {
+            p1: Math.round(Number(c.p1 || 0)),
+            px: Math.round(Number(c.px || 0)),
+            p2: Math.round(Number(c.p2 || 0))
+        };
+    }
+    let v1 = 0, vx = 0, v2 = 0;
+    const penaIds = getPenaHiddenUserIds();
+    penaIds.forEach(uid => {
+        const sign = normalizeSign(preds?.[uid]?.signos?.[idx] || "-");
+        const candidates = getSignCandidates(sign, isPleno);
+        if (candidates.length > 0) {
+            const weight = 1 / candidates.length;
+            candidates.forEach(cand => {
+                if (cand === "1") v1 += weight;
+                else if (cand === "X") vx += weight;
+                else if (cand === "2") v2 += weight;
+            });
+        }
+    });
+    const total = v1 + vx + v2;
+    if (total === 0) return { p1: 0, px: 0, p2: 0 };
+    const p1 = Math.round((v1 / total) * 100);
+    const px = Math.round((vx / total) * 100);
+    const p2 = Math.max(0, 100 - p1 - px);
+    return { p1, px, p2 };
+}
+
+function getAi1X2Consensus(preds, idx, predictorColumns, isPleno = false) {
+    let v1 = 0, vx = 0, v2 = 0;
+    predictorColumns.forEach(([primary, fallback]) => {
+        const sign = getSign(preds, idx, primary, fallback);
+        const candidates = getSignCandidates(sign, isPleno);
+        if (candidates.length > 0) {
+            const weight = 1 / candidates.length;
+            candidates.forEach(cand => {
+                if (cand === "1") v1 += weight;
+                else if (cand === "X") vx += weight;
+                else if (cand === "2") v2 += weight;
+            });
+        }
+    });
+    const total = v1 + vx + v2;
+    if (total === 0) return { p1: 0, px: 0, p2: 0 };
+    const p1 = Math.round((v1 / total) * 100);
+    const px = Math.round((vx / total) * 100);
+    const p2 = Math.max(0, 100 - p1 - px);
+    return { p1, px, p2 };
+}
+
+function renderCompact1X2Bar(label, data, extraClass = "") {
+    const p1 = Number(data?.p1 || 0);
+    const px = Number(data?.px || 0);
+    const p2 = Number(data?.p2 || 0);
+    const title = `${label}: 1 (${p1}%) | X (${px}%) | 2 (${p2}%)`;
+    return `
+        <div class="ticket-compact-bar-row ${escapeHtml(extraClass)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
+            <span class="ticket-compact-bar-label">${escapeHtml(label)}</span>
+            <div class="ticket-compact-bar-track">
+                <i class="bar-1" style="width: ${p1}%"></i>
+                <i class="bar-x" style="width: ${px}%"></i>
+                <i class="bar-2" style="width: ${p2}%"></i>
+            </div>
+            <span class="ticket-compact-bar-values">1:<b>${p1}%</b> X:<b>${px}%</b> 2:<b>${p2}%</b></span>
+        </div>`;
+}
+
+function renderMatchConsensusBarsContent(m, idx, c, preds, predictorColumns, isPleno = false) {
+    const penaData = getPena1X2Consensus(c, idx, preds, isPleno);
+    const aiData = getAi1X2Consensus(preds, idx, predictorColumns, isPleno);
+    return `
+        ${renderCompact1X2Bar("Peña", penaData, "is-pena-bar")}
+        ${renderCompact1X2Bar("IA", aiData, "is-ai-bar")}`;
+}
+
+function renderMatchConsensusBars(m, idx, c, preds, predictorColumns, isPleno = false) {
+    return `
+        <div class="match-consensus-bars" data-match-idx="${idx}">
+            ${renderMatchConsensusBarsContent(m, idx, c, preds, predictorColumns, isPleno)}
+        </div>`;
+}
+
 /* ---------- Chips de tensión ---------- */
 
-function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "", reason = "") {
+function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "", reason = "", primary = "", fallback = "", matchIdx = null) {
     const clean = sign && sign !== "-" ? sign : "-";
     const fullLabel = repairMojibakeText(label);
     const compactLabel = compactTensionLabel(fullLabel);
     const cleanReason = repairMojibakeText(reason || "").trim();
     const explanation = cleanReason ? `${fullLabel}: ${cleanReason}` : fullLabel;
+    const hasAiButton = Boolean(primary && matchIdx !== null && matchIdx !== undefined);
     return `
         <div class="tension-chip ${escapeHtml(extraClass)}">
             <span title="${escapeHtml(fullLabel)}">${escapeHtml(compactLabel)}</span>
-            <b class="ia-signo ${cleanReason ? "has-analysis" : ""} ${hitClass(clean, real, status, exactScore)}" title="${escapeHtml(explanation)}">${escapeHtml(clean)}</b>
+            <div class="tension-chip-sign-group">
+                <b class="ia-signo ${cleanReason ? "has-analysis" : ""} ${hitClass(clean, real, status, exactScore)}" title="${escapeHtml(explanation)}">${escapeHtml(clean)}</b>
+                ${hasAiButton ? `<button type="button" class="ai-reason-btn" title="Ver explicación de ${escapeHtml(fullLabel)}" aria-label="Ver explicación de ${escapeHtml(fullLabel)}" data-ai-id="${escapeHtml(primary)}" data-fallback-id="${escapeHtml(fallback || "")}" data-match-idx="${Number(matchIdx)}" data-ai-label="${escapeHtml(fullLabel)}">ⓘ</button>` : ""}
+            </div>
         </div>`;
 }
 
@@ -198,6 +306,89 @@ function getPredictionReason(preds, idx, primary, fallback) {
     const first = preds?.[primary]?.motivos?.[idx];
     if (first) return first;
     return fallback ? (preds?.[fallback]?.motivos?.[idx] || "") : "";
+}
+
+function getAiMotivoText(aiId, fallbackId, idx) {
+    const preds = state.data?.predicciones_actuales || {};
+    let motivo = preds?.[aiId]?.motivos?.[idx];
+    if ((!motivo || !String(motivo).trim()) && fallbackId) {
+        motivo = preds?.[fallbackId]?.motivos?.[idx];
+    }
+    const cleanMotivo = repairMojibakeText(motivo || "").trim();
+    return cleanMotivo ? cleanMotivo : "Sin explicación disponible";
+}
+
+let _aiReasonListenerAttached = false;
+function ensureAiReasonListener() {
+    if (_aiReasonListenerAttached) return;
+    _aiReasonListenerAttached = true;
+    document.addEventListener("click", event => {
+        const btn = event.target.closest(".ai-reason-btn");
+        if (!btn) return;
+        event.stopPropagation();
+        const aiId = btn.dataset.aiId;
+        const fallbackId = btn.dataset.fallbackId || null;
+        const idx = Number.parseInt(btn.dataset.matchIdx, 10);
+        const aiLabel = btn.dataset.aiLabel;
+        if (Number.isNaN(idx)) return;
+        showAiReasonModal(aiId, fallbackId, idx, aiLabel);
+    });
+}
+
+function showAiReasonModal(aiId, fallbackId, idx, aiLabel) {
+    const existing = document.getElementById("ai-reason-modal-overlay");
+    if (existing) existing.remove();
+
+    const m = state.data?.partidos?.[idx];
+    const matchTitle = m
+        ? `Partido ${idx + 1}: ${getShortName(m.local)} - ${getShortName(m.visitante)}`
+        : `Partido ${idx + 1}`;
+    const reasonText = getAiMotivoText(aiId, fallbackId, idx);
+
+    const overlay = document.createElement("div");
+    overlay.id = "ai-reason-modal-overlay";
+    overlay.className = "ai-reason-modal-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "ai-reason-modal-title");
+
+    overlay.innerHTML = `
+        <div class="ai-reason-modal">
+            <header class="ai-reason-modal-header">
+                <div>
+                    <h3 id="ai-reason-modal-title">${escapeHtml(aiLabel || "Maestro IA")}</h3>
+                    <p class="ai-reason-modal-subtitle">${escapeHtml(matchTitle)}</p>
+                </div>
+                <button type="button" class="ai-reason-modal-close" aria-label="Cerrar modal">&times;</button>
+            </header>
+            <div class="ai-reason-modal-body">
+                <p class="ai-reason-text">${escapeHtml(reasonText)}</p>
+            </div>
+            <footer class="ai-reason-modal-footer">
+                <button type="button" class="ai-reason-modal-ok">Cerrar</button>
+            </footer>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const closeBtn = overlay.querySelector(".ai-reason-modal-close");
+    const okBtn = overlay.querySelector(".ai-reason-modal-ok");
+    const closeModal = () => {
+        overlay.remove();
+        document.removeEventListener("keydown", onKeyDown);
+    };
+    const onKeyDown = (e) => {
+        if (e.key === "Escape") closeModal();
+    };
+
+    closeBtn?.addEventListener("click", closeModal);
+    okBtn?.addEventListener("click", closeModal);
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", onKeyDown);
+
+    okBtn?.focus();
 }
 
 function renderTensionPenaChip(content, label) {
@@ -370,6 +561,8 @@ function renderArenaTensionBody(matches) {
     const thead = qs("arena-thead");
     if (!tbody || !thead) return;
 
+    ensureAiReasonListener();
+
     const councilStyle = isCouncilStyleJornada();
     const predictorColumns = councilStyle
         ? [["programa", "v260_omnisciente", "Programa"], ["consejo_ias", "consenso", "Consejo IA"]]
@@ -418,7 +611,7 @@ function renderArenaTensionBody(matches) {
         const predictorCells = predictorColumns.map(([primary, fallback, label]) => {
             const sign = getSign(preds, idx, primary, fallback);
             const reason = getPredictionReason(preds, idx, primary, fallback);
-            return `<td class="ticket-pick-cell">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno, "", reason)}</td>`;
+            return `<td class="ticket-pick-cell">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno, "", reason, primary, fallback, idx)}</td>`;
         }).join("");
 
         return `
@@ -430,6 +623,7 @@ function renderArenaTensionBody(matches) {
                     <div class="tension-fixture-main">
                         ${fixtureInline(m.local, m.visitante, teamLogo(m, "home"), teamLogo(m, "away"))}
                     </div>
+                    ${renderMatchConsensusBars(m, idx, c, preds, predictorColumns, isPleno)}
                 </td>
                 <td class="ticket-status-cell" data-ticket-status>
                     ${scoreBadge}
@@ -453,6 +647,8 @@ function patchTicketArena() {
     const matches = state.data?.partidos || [];
     const rows = [...document.querySelectorAll("#arena-body tr.tension-row[data-ticket-row]")];
     if (!matches.length || rows.length !== matches.length) return false;
+
+    ensureAiReasonListener();
 
     const councilStyle = isCouncilStyleJornada();
     const predictorColumns = councilStyle
@@ -492,6 +688,11 @@ function patchTicketArena() {
             splitMatch ? "is-split-row" : ""
         ].filter(Boolean).join(" ");
 
+        const consensusBarsEl = row.querySelector(".match-consensus-bars");
+        if (consensusBarsEl) {
+            consensusBarsEl.innerHTML = renderMatchConsensusBarsContent(match, idx, consensus, preds, predictorColumns, isPleno);
+        }
+
         predictorColumns.forEach(([primary, fallback, label], columnIdx) => {
             const sign = getSign(preds, idx, primary, fallback);
             const reason = getPredictionReason(preds, idx, primary, fallback);
@@ -502,7 +703,10 @@ function patchTicketArena() {
                 match.status,
                 isPleno,
                 "",
-                reason
+                reason,
+                primary,
+                fallback,
+                idx
             );
         });
 
