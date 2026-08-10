@@ -1,0 +1,20 @@
+{
+    "jornada": 76,
+    "resultados": [
+        {"id": 1, "local": "Sandefjord", "visitante": "KFUM Oslo", "goles_local": 0, "goles_visitante": 1, "signo": "2"},
+        {"id": 2, "local": "Valerenga", "visitante": "Bodo-Glimt", "goles_local": 1, "goles_visitante": 2, "signo": "2"},
+        {"id": 3, "local": "Viking", "visitante": "Sarpsborg", "goles_local": 2, "goles_visitante": 1, "signo": "1"},
+        {"id": 4, "local": "Start", "visitante": "Fredrikstad", "goles_local": 0, "goles_visitante": 1, "signo": "2"},
+        {"id": 5, "local": "Lillestrom SK", "visitante": "Rosenborg", "goles_local": 0, "goles_visitante": 2, "signo": "2"},
+        {"id": 6, "local": "Ham-Kam", "visitante": "Aalesunds FK", "goles_local": 1, "goles_visitante": 1, "signo": "X"},
+        {"id": 7, "local": "Kristiansund", "visitante": "Molde FK", "goles_local": 2, "goles_visitante": 1, "signo": "1"},
+        {"id": 8, "local": "Orgryte IS", "visitante": "AIK", "goles_local": 3, "goles_visitante": 4, "signo": "2"},
+        {"id": 9, "local": "Mjallby", "visitante": "Elfsborg", "goles_local": 0, "goles_visitante": 1, "signo": "2"},
+        {"id": 10, "local": "Hammarby", "visitante": "Hacken", "goles_local": 3, "goles_visitante": 0, "signo": "1"},
+        {"id": 11, "local": "Malmoe", "visitante": "Degerfors IF", "goles_local": 1, "goles_visitante": 2, "signo": "2"},
+        {"id": 12, "local": "Halmstad", "visitante": "GAIS Goteborg", "goles_local": 0, "goles_visitante": 2, "signo": "2"},
+        {"id": 13, "local": "IFK Goteborg", "visitante": "Kalmar FF", "goles_local": 3, "goles_visitante": 2, "signo": "1"},
+        {"id": 14, "local": "Sirius", "visitante": "Brommapojkarna", "goles_local": null, "goles_visitante": null, "signo": "-"},
+        {"id": 15, "local": "Vasteras SK FK", "visitante": "Djurgardens", "goles_local": null, "goles_visitante": null, "signo": "-"}
+    ]
+}
