@@ -1,6 +1,8 @@
 """Generate OG image and favicons from existing logos."""
-from PIL import Image, ImageDraw, ImageFont
+
 import os
+
+from PIL import Image, ImageDraw, ImageFont
 
 base = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "img")
 
@@ -66,7 +68,7 @@ draw.text(((og_w - tw2) // 2, logo_y + logo_h + 75), sub, fill=(139, 157, 195, 2
 # Save as PNG
 og_path = os.path.join(base, "og-image.png")
 og.convert("RGB").save(og_path, quality=95)
-print(f"Created og-image.png (1200x630)")
+print("Created og-image.png (1200x630)")
 
 # Also create favicon.ico (multi-size 16+32)
 ico_sizes = [16, 32]

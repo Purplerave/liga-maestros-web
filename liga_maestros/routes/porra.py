@@ -372,7 +372,9 @@ def post_porra():
 
         # Check if jornada is locked (first match started)
         if _jornada_is_locked(conn, jornada):
-            return jsonify({"status": "error", "message": "La jornada ya ha empezado. No se puede modificar la porra."}), 400
+            return jsonify(
+                {"status": "error", "message": "La jornada ya ha empezado. No se puede modificar la porra."}
+            ), 400
 
         match = _porra_target_match(conn, jornada, partido_id)
         if not match:
@@ -388,7 +390,9 @@ def post_porra():
 
         # If user has already changed once, don't allow another change
         if existing_entry and existing_entry["changes"] >= 1:
-            return jsonify({"status": "error", "message": "Ya cambiaste tu porra una vez. No puedes cambiarla más."}), 400
+            return jsonify(
+                {"status": "error", "message": "Ya cambiaste tu porra una vez. No puedes cambiarla más."}
+            ), 400
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         changes = 1 if existing_entry else 0
@@ -418,21 +422,25 @@ def post_porra():
         conn.commit()
 
         if existing_entry:
-            return jsonify({
-                "status": "ok",
-                "partido_id": match["partido_id"],
-                "goles_local": gl,
-                "goles_visitante": gv,
-                "message": "Porra actualizada. Ya no podrás cambiarla más."
-            })
+            return jsonify(
+                {
+                    "status": "ok",
+                    "partido_id": match["partido_id"],
+                    "goles_local": gl,
+                    "goles_visitante": gv,
+                    "message": "Porra actualizada. Ya no podrás cambiarla más.",
+                }
+            )
         else:
-            return jsonify({
-                "status": "ok",
-                "partido_id": match["partido_id"],
-                "goles_local": gl,
-                "goles_visitante": gv,
-                "message": "Porra guardada. Podrás cambiarla una vez más."
-            })
+            return jsonify(
+                {
+                    "status": "ok",
+                    "partido_id": match["partido_id"],
+                    "goles_local": gl,
+                    "goles_visitante": gv,
+                    "message": "Porra guardada. Podrás cambiarla una vez más.",
+                }
+            )
     finally:
         conn.close()
 

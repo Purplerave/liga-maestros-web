@@ -4,7 +4,7 @@ import os
 import time
 from functools import lru_cache
 
-from flask import Blueprint, abort, make_response, render_template, request, send_from_directory, session
+from flask import Blueprint, abort, jsonify, make_response, render_template, request, send_from_directory, session
 
 import config
 

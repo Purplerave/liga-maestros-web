@@ -144,7 +144,7 @@ def prune_s3_backups():
     try:
         resp = s3.list_objects_v2(Bucket=bucket, Prefix=prefix.rstrip("/") + "/")
         objects = sorted(resp.get("Contents", []), key=lambda o: o["LastModified"], reverse=True)
-        for obj in objects[max(1, retention):]:
+        for obj in objects[max(1, retention) :]:
             s3.delete_object(Bucket=bucket, Key=obj["Key"])
             logger.info("Pruned S3 backup: %s", obj["Key"])
     except Exception:

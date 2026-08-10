@@ -25,17 +25,11 @@ def save_season_summary(conn):
         LIMIT 10
     """).fetchall()
 
-    total_participants = conn.execute(
-        "SELECT COUNT(*) FROM usuarios WHERE puntos_acumulados > 0"
-    ).fetchone()[0]
+    total_participants = conn.execute("SELECT COUNT(*) FROM usuarios WHERE puntos_acumulados > 0").fetchone()[0]
 
-    total_jornadas = conn.execute(
-        "SELECT COUNT(DISTINCT jornada) FROM resultados"
-    ).fetchone()[0]
+    total_jornadas = conn.execute("SELECT COUNT(DISTINCT jornada) FROM resultados").fetchone()[0]
 
-    total_partidos = conn.execute(
-        "SELECT COUNT(*) FROM resultados WHERE status IN ('FT', 'FINISHED')"
-    ).fetchone()[0]
+    total_partidos = conn.execute("SELECT COUNT(*) FROM resultados WHERE status IN ('FT', 'FINISHED')").fetchone()[0]
 
     summary = {
         "season": "2025-2026 (Pruebas)",
