@@ -64,9 +64,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
-    height: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    align-items: start;
 }
 
 /* ===== COLUMNA IZQUIERDA: Hero ===== */
@@ -75,13 +75,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 10px;
     min-width: 0;
-    height: 100%;
 }
 
 /* Panel hero con efecto estadio */
 .cp-intro {
     width: 100%;
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -334,7 +332,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-width: 0;
-    height: 100%;
 }
 
 /* Parte inferior derecha: porra+duelo arriba, noticias abajo */
