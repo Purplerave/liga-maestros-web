@@ -4,7 +4,7 @@ import os
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, request, session
+from flask import Flask, g, jsonify, render_template, request, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
@@ -108,6 +108,14 @@ def create_app():
                 conn.close()
             except Exception:
                 pass
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template("errors/500.html"), 500
 
     run_startup_migrations()
     minimize_backup_personal_data()

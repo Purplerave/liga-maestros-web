@@ -10,12 +10,37 @@
     <meta property="og:site_name" content="Liga de Maestros" />
     <meta property="og:title" content="Liga de Maestros - La Peña contra los Maestros IA" />
     <meta property="og:description" content="Quiniela competitiva donde La Peña y los Maestros IA se enfrentan jornada a jornada. Predicciones, rankings, directo y juegos." />
-    <meta property="og:image" content="{{ url_for('main.static_files', filename='img/ligademaestroslogo.png', v=assets_v, _external=True) }}" />
-    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="{{ url_for('main.index', _external=True) }}" />
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Liga de Maestros",
+        "description": "Quiniela competitiva donde La Peña y los Maestros IA se enfrentan jornada a jornada. Predicciones, rankings, directo y juegos.",
+        "url": "{{ url_for('main.index', _external=True) }}",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "es",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "genre": "sports",
+        "screenshot": "{{ url_for('main.static_files', filename='img/og-image.png', v=assets_v, _external=True) }}"
+    }
+    </script>
+    <meta property="og:image" content="{{ url_for('main.static_files', filename='img/og-image.png', v=assets_v, _external=True) }}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Liga de Maestros - La Peña contra los Maestros IA" />
     <meta name="twitter:description" content="Quiniela competitiva: humanos vs IAs, jornada a jornada." />
-    <meta name="twitter:image" content="{{ url_for('main.static_files', filename='img/ligademaestroslogo.png', v=assets_v, _external=True) }}" />
-    <link rel="icon" type="image/png" href="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}">
+    <meta name="twitter:image" content="{{ url_for('main.static_files', filename='img/og-image.png', v=assets_v, _external=True) }}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('main.static_files', filename='img/favicon-32.png', v=assets_v) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('main.static_files', filename='img/favicon-16.png', v=assets_v) }}">
+    <link rel="icon" href="{{ url_for('main.static_files', filename='img/favicon.ico', v=assets_v) }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('main.static_files', filename='img/apple-touch-icon.png', v=assets_v) }}">
     <link rel="manifest" href="{{ url_for('main.static_files', filename='manifest.webmanifest', v=assets_v) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,6 +139,7 @@
     <script defer src="{{ url_for('main.static_files', filename='js/sound_manager.js', v=assets_v ~ '-sound-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/ux_signals.js', v=assets_v ~ '-ux-signals-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/onboarding.js', v=assets_v ~ '-onboarding-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-1') }}"
             data-sw-url="{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}"></script>
 </body>
