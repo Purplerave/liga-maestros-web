@@ -159,6 +159,22 @@ jobs:
           ln -sfn "$RELEASE" "$HOME_DIR/current"
           cd "$HOME_DIR/current"
           PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
+
+          # Reset for new season (only if Jornada 1 has no NS rows yet)
+          J1_COUNT=$(PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" -c "
+          import sqlite3, config
+          conn = sqlite3.connect(config.DB_PATH)
+          r = conn.execute('SELECT COUNT(*) FROM resultados WHERE jornada=1').fetchone()
+          print(r[0] if r else 0)
+          conn.close()
+          " 2>/dev/null || echo "0")
+          if [ "$J1_COUNT" = "0" ]; then
+            echo "No Jornada 1 data found — running RESET_TEMPORADA..."
+            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/RESET_TEMPORADA.py
+          else
+            echo "Jornada 1 already has $J1_COUNT matches — skipping reset."
+          fi
+
           chmod 600 "$HOME_DIR/runtime/app.env"
           if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ]; then
             chmod 600 "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db"
