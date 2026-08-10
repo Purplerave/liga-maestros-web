@@ -57,6 +57,34 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
+function loadSeasonSummary() {
+    var target = document.getElementById("cp-season-summary");
+    if (!target) return;
+    fetch("/api/season-summary")
+        .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
+        .then(function (data) {
+            var top3 = data.top_3 || [];
+            var medals = ["🥇", "🥈", "🥉"];
+            var rowsHtml = top3.map(function (p, i) {
+                return '<div class="cp-leader-row">' +
+                    '<span class="cp-leader-pos">' + (medals[i] || (i + 1)) + '</span>' +
+                    '<span class="cp-leader-name">' + escapeHtml(p.name) + '</span>' +
+                    '<span class="cp-leader-pts">' + p.points + ' pts</span>' +
+                    '</div>';
+            }).join("");
+            var statsHtml = '<div class="cp-season-stats">' +
+                '<span>' + (data.total_participants || 0) + ' participantes</span>' +
+                '<span>' + (data.total_jornadas || 0) + ' jornadas</span>' +
+                '</div>';
+            target.innerHTML =
+                '<div class="cp-season-label">Resultados ' + escapeHtml(data.season || "Pruebas") + '</div>' +
+                rowsHtml + statsHtml;
+        })
+        .catch(function () {
+            target.innerHTML = '<span class="cp-empty">Próximamente: clasificación de la temporada</span>';
+        });
+}
+
 function coverCloseLabel() {
     const raw = state.data.edit_deadline || state.data.kickoff_at || "";
     if (!raw) return state.data.is_locked ? "cerrada" : "abierta";
@@ -230,7 +258,7 @@ function renderNewspaperCoverPageV3() {
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');
     const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
-        <div class="cp-countdown-label">La Liga empieza en</div>
+        <div class="cp-countdown-label">Jornada 1 empieza en</div>
         <div class="cp-countdown-timer" id="cp-countdown-timer">--</div>
         <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
     </div>`;
@@ -246,27 +274,8 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    // Clasificación - mostrar resultados de pruebas
-    let clasifHtml = `
-        <div style="margin-top:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <div style="text-align:center;flex:1;">
-                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">LA PEÑA</div>
-                    <div style="color:var(--cp-gold);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">6.9</div>
-                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
-                </div>
-                <div style="color:var(--cp-dim);font-size:0.58rem;font-weight:800;">VS</div>
-                <div style="text-align:center;flex:1;">
-                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">IAs</div>
-                    <div style="color:var(--cp-cyan);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">8.2</div>
-                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
-                </div>
-            </div>
-            <div style="text-align:center;padding:6px 0;border-top:1px solid var(--cp-line);">
-                <div style="color:var(--cp-gold);font-size:0.58rem;font-weight:700;">Las IAs ganaron las pruebas</div>
-                <div style="color:var(--cp-dim);font-size:0.50rem;margin-top:2px;">Pero la temporada empieza ahora</div>
-            </div>
-        </div>`;
+    // Clasificación - se carga dinámicamente desde season summary
+    let clasifHtml = `<div id="cp-season-summary" class="cp-season-summary"><span class="cp-porra-loading">Cargando</span></div>`;
 
     return `<div class="cp">
         <main class="cp-stage">
@@ -302,9 +311,8 @@ function renderNewspaperCoverPageV3() {
 
             <div class="cp-hero-right">
                 <section class="cp-leaders">
-                    <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>TEMPORADA 26/27</b></div>
+                    <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>CALIENTAMIENTO</b></div>
                     ${clasifHtml}
-                    <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
                 </section>
 
                 <div class="cp-right-bottom">

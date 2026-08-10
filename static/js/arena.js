@@ -124,6 +124,7 @@ function renderArena() {
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
         if (typeof startSeasonCountdown === "function") startSeasonCountdown();
+        if (typeof loadSeasonSummary === "function") loadSeasonSummary();
         if (typeof startCoverScorebar === "function") startCoverScorebar();
         loadPorra();
         loadNewsBriefing();

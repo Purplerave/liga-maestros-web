@@ -531,6 +531,17 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 
 /* Porra */
 .cp-porra-content { min-height: 30px; }
+/* Season summary */
+.cp-season-summary { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.cp-season-label { color:var(--cp-muted); font-size:0.50rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; text-align:center; }
+.cp-leader-row { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:6px; background:rgba(255,255,255,0.03); }
+.cp-leader-row:nth-child(2) { background:rgba(245,181,63,0.08); }
+.cp-leader-pos { font-size:0.8rem; width:24px; text-align:center; flex-shrink:0; }
+.cp-leader-name { flex:1; color:var(--cp-text); font-size:0.58rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cp-leader-pts { color:var(--cp-gold); font-size:0.54rem; font-weight:800; font-family:var(--cp-font-display); flex-shrink:0; }
+.cp-season-stats { display:flex; justify-content:center; gap:12px; margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); }
+.cp-season-stats span { color:var(--cp-dim); font-size:0.48rem; font-weight:600; }
+
 .cp-porra-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:12px 8px; text-align:center; }
 .cp-porra-empty-icon { font-size:1.2rem; opacity:0.6; }
 .cp-porra-empty-text { color:var(--cp-muted); font-size:0.52rem; line-height:1.4; }
