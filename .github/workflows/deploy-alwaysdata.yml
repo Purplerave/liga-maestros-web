@@ -160,19 +160,15 @@ jobs:
           cd "$HOME_DIR/current"
           PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
 
-          # Reset for new season (only if Jornada 1 has no NS rows yet)
-          J1_COUNT=$(PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" -c "
-          import sqlite3, config
-          conn = sqlite3.connect(config.DB_PATH)
-          r = conn.execute('SELECT COUNT(*) FROM resultados WHERE jornada=1').fetchone()
-          print(r[0] if r else 0)
-          conn.close()
-          " 2>/dev/null || echo "0")
-          if [ "$J1_COUNT" = "0" ]; then
-            echo "No Jornada 1 data found — running RESET_TEMPORADA..."
+          # Reset for new season 2026-2027 (skip if already done)
+          RESET_MARKER="$HOME_DIR/runtime/.season_reset_2026_done"
+          if [ ! -f "$RESET_MARKER" ]; then
+            echo "Running RESET_TEMPORADA for new season..."
             PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/RESET_TEMPORADA.py
+            touch "$RESET_MARKER"
+            echo "Reset complete. Marker created."
           else
-            echo "Jornada 1 already has $J1_COUNT matches — skipping reset."
+            echo "Season reset already done — skipping."
           fi
 
           chmod 600 "$HOME_DIR/runtime/app.env"
