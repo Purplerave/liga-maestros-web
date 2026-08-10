@@ -342,9 +342,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex: 1;
     min-height: 0;
-    overflow: hidden;
 }
 .cp-right-bottom-top {
     display: grid;
