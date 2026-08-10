@@ -104,7 +104,10 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
     if (!bodies.length && !qs("cover-porra-content")) return;
     try {
         const requestedMatch = partidoId ? `&pid=${encodeURIComponent(partidoId)}` : "";
-        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}${requestedMatch}`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}${requestedMatch}`, { signal: controller.signal });
+        clearTimeout(timeout);
         const data = await res.json();
         if (typeof hydrateCoverPorra === "function") hydrateCoverPorra(data);
         if (!bodies.length) return;
@@ -429,8 +432,11 @@ async function loadNewsBriefing() {
     const target = qs("cover-news-content");
     if (!target) return;
     try {
-        const res = await fetch("/api/noticias/radar");
-        if (!res.ok) return;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch("/api/noticias/radar", { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) { target.innerHTML = '<span class="cp-empty">Sin novedades</span>'; return; }
         const data = await res.json();
         const novedades = Array.isArray(data.novedades) ? data.novedades : [];
         const bajas = Array.isArray(data.bajas) ? data.bajas : [];

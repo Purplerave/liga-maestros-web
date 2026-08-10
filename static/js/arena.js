@@ -123,6 +123,7 @@ function renderArena() {
         container.innerHTML = renderNewspaperCoverPageV3();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
+        if (typeof startSeasonCountdown === "function") startSeasonCountdown();
         if (typeof startCoverScorebar === "function") startCoverScorebar();
         loadPorra();
         loadNewsBriefing();

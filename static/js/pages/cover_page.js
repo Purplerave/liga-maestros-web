@@ -165,7 +165,8 @@ function hydrateCoverPorra(data) {
     const title = document.getElementById("cover-porra-title");
     if (!target) return;
     if (!data?.enabled || !data.match) {
-        target.innerHTML = `<span class="cp-empty">${escapeHtml(data?.message || "Sin porra")}</span>`;
+        const msg = data?.message || "Porra no disponible para esta jornada";
+        target.innerHTML = `<div class="cp-porra-empty"><span class="cp-porra-empty-icon">🎯</span><span class="cp-porra-empty-text">${escapeHtml(msg)}</span></div>`;
         return;
     }
     const match = data.match;

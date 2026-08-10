@@ -536,6 +536,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 
 /* Porra */
 .cp-porra-content { min-height: 30px; }
+.cp-porra-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:12px 8px; text-align:center; }
+.cp-porra-empty-icon { font-size:1.2rem; opacity:0.6; }
+.cp-porra-empty-text { color:var(--cp-muted); font-size:0.52rem; line-height:1.4; }
 .cp-porra .cp-fixture.is-compact { grid-template-columns: minmax(0,1fr) 14px minmax(0,1fr); gap:3px; margin-top:3px; }
 .cp-porra .cp-fixture.is-compact .team-badge { width:14px; height:14px; }
 .cp-porra .cp-fixture.is-compact .cp-team strong { font-size:0.52rem; }
