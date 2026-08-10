@@ -1,0 +1,87 @@
+{
+ "jornada": 76,
+ "fuente": "https://www.quiniela15.com/resultados-quiniela/76",
+ "verificado_en": "2026-08-10",
+ "nota": "Resultados oficiales finales de la J76 (partidos 1-13, todos FT; 14 y 15 se juegan el 10/08 a las 19:00 y quedan pendientes). Los usa la migracion ensure_jornada_76 como respaldo si el directo no cubrio algun partido.",
+ "pendientes": [14, 15],
+ "resultados": [
+  {
+   "id": 1,
+   "goles_local": 0,
+   "goles_visitante": 1,
+   "signo": "2"
+  },
+  {
+   "id": 2,
+   "goles_local": 1,
+   "goles_visitante": 2,
+   "signo": "2"
+  },
+  {
+   "id": 3,
+   "goles_local": 2,
+   "goles_visitante": 1,
+   "signo": "1"
+  },
+  {
+   "id": 4,
+   "goles_local": 0,
+   "goles_visitante": 1,
+   "signo": "2"
+  },
+  {
+   "id": 5,
+   "goles_local": 0,
+   "goles_visitante": 2,
+   "signo": "2"
+  },
+  {
+   "id": 6,
+   "goles_local": 1,
+   "goles_visitante": 1,
+   "signo": "X"
+  },
+  {
+   "id": 7,
+   "goles_local": 2,
+   "goles_visitante": 1,
+   "signo": "1"
+  },
+  {
+   "id": 8,
+   "goles_local": 3,
+   "goles_visitante": 4,
+   "signo": "2"
+  },
+  {
+   "id": 9,
+   "goles_local": 0,
+   "goles_visitante": 1,
+   "signo": "2"
+  },
+  {
+   "id": 10,
+   "goles_local": 3,
+   "goles_visitante": 0,
+   "signo": "1"
+  },
+  {
+   "id": 11,
+   "goles_local": 1,
+   "goles_visitante": 2,
+   "signo": "2"
+  },
+  {
+   "id": 12,
+   "goles_local": 0,
+   "goles_visitante": 2,
+   "signo": "2"
+  },
+  {
+   "id": 13,
+   "goles_local": 3,
+   "goles_visitante": 2,
+   "signo": "1"
+  }
+ ]
+}

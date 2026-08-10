@@ -39,6 +39,21 @@ class TestCleanTeamKey:
         assert clean_team_key("") == ""
         assert clean_team_key(None) == ""
 
+    def test_transliterates_non_decomposable_latin_letters(self):
+        # NFD no descompone ø/æ/ß: sin transliteracion, "LILLESTRØM SK" se
+        # convertia en "LILLESTR M SK" y el partido no casaba con la BD.
+        assert clean_team_key("LILLESTRØM SK") == "LILLESTROM SK"
+        assert clean_team_key("BODØ/GLIMT") == "BODO GLIMT"
+        assert clean_team_key("BRANN Æ") == "BRANN AE"
+        assert clean_team_key("STRAßE") == "STRASSE"
+        assert clean_team_key("DJURGÅRDENS") == "DJURGARDENS"
+
+    def test_transliteration_keeps_accents_working(self):
+        # Los acentos que NFD si descompone siguen limpiandose igual.
+        assert clean_team_key("MJÄLLBY") == "MJALLBY"
+        assert clean_team_key("HÄCKEN") == "HACKEN"
+        assert clean_team_key("GAIS GÖTEBORG") == "GAIS GOTEBORG"
+
 
 class TestNormalizeTeamKey:
     def test_known_alias(self):
@@ -47,6 +62,15 @@ class TestNormalizeTeamKey:
 
     def test_passthrough(self):
         assert normalize_team_key("OSASUNA") == "OSASUNA"
+
+    def test_equivalence_db_vs_q15_directo_names(self):
+        # Regresion: el directo de Quiniela15 usa "Lillestrøm SK" (con ø) y la
+        # BD guarda "Lillestrom SK". Ambos deben normalizar a la misma clave o
+        # el resultado del partido se descarta silenciosamente.
+        assert normalize_team_key("Lillestrom SK") == normalize_team_key("Lillestrøm SK")
+        assert normalize_team_key("Bodo-Glimt") == normalize_team_key("Bodø/Glimt")
+        assert normalize_team_key("Djurgardens") == normalize_team_key("Djurgårdens")
+        assert normalize_team_key("Vasteras SK FK") == normalize_team_key("Västerås SK FK")
 
 
 class TestShortTeamName:

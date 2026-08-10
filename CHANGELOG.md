@@ -2,6 +2,33 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-10 — Quiniela J76: resultado del Lillestrom-Rosenborg y nombres nordicos
+
+### Corregido
+
+- 🔴 **El partido 5 de la J76 (Lillestrom SK–Rosenborg, jugado el 09/08) no
+  mostraba resultado en la pestaña Quiniela.** El directo de Quiniela15
+  escribe el equipo con `ø` ("Lillestrøm SK") y la BD lo guarda sin ella
+  ("Lillestrom SK"). `normalize_team_key()` no transliteraba la `ø` (NFD no la
+  descompone) y el saneo la convertía en espacio: `"LILLESTR M SK"` nunca
+  casaba con `"LILLESTROM SK"`, así que el control de coherencia de nombres
+  descartaba el partido **en las dos rutas de resultados** (directo Q15 y
+  Highlightly) y el 0-2 final nunca se aplicaba.
+  - `clean_team_key()` (en `utils.py`) ahora translitera las letras latinas
+    que NFD no descompone (`ø→o`, `æ→ae`, `ß→ss`, `ð`, `þ`, `ł`, `œ`, `ħ`...)
+    antes de limpiar el texto. Un mismo equipo con o sin diacríticos
+    normaliza a la misma clave, sea cual sea la fuente (BD, Quiniela15,
+    Highlightly).
+  - Nueva `_import_j76_resultados()` (en `liga_maestros/db/migrations.py`):
+    respalda los resultados oficiales verificados de
+    `data/quiniela15_J76_resultados.json` (partidos 1–13, FT; 14 y 15 siguen
+    pendientes) **solo en filas que sigan sin marcador**, nunca pisa un
+    resultado existente. Al desplegar/arrancar, el Lillestrom–Rosenborg queda
+    con su 0-2 de forma determinista aunque el directo no lo cubra.
+- Tests de regresión: equivalencia de claves BD vs directo Q15 con
+  diacríticos, backfill idempotente de la J76 y no-sobrescritura de resultados
+  existentes (suite completa en verde).
+
 ## 2026-08-03 — Quiniela J75 autoreparable
 
 ### Corregido

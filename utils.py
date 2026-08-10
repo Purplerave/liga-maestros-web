@@ -18,9 +18,32 @@ def runtime_data_path(*parts):
     return os.path.join(BASE_DIR, "data", *parts)
 
 
+# Letras latinas que NFD no descompone (sin marca combinante): hay que
+# transliterarlas a mano o el saneo [^A-Z0-9] las convertia en espacios,
+# rompiendo la comparacion de nombres de equipo (p.ej. "Lillestrom SK" de la
+# BD vs "Lillestrøm SK" del directo de Quiniela15).
+_LATIN_TRANSLITERATION = {
+    "Ø": "O",
+    "Æ": "AE",
+    "Ð": "D",
+    "Þ": "TH",
+    "Ł": "L",
+    "Œ": "OE",
+    "Ħ": "H",
+    "ĸ": "K",
+    "Ŋ": "N",
+    "Ə": "E",
+    "Ʒ": "Z",
+    "Ȣ": "OU",
+    "ß": "SS",
+    "ı": "I",
+}
+
+
 def clean_team_key(value):
     text = unicodedata.normalize("NFD", str(value or "").upper())
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = "".join(_LATIN_TRANSLITERATION.get(ch, ch) for ch in text)
     text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
     text = re.sub(r"\b(F C|FC|C F|CF|S A D|SAD|R C D|RCD|C D|CD|U D|UD|S D|SD)\b", "", text).strip()
     text = re.sub(r"\s+", " ", text)
