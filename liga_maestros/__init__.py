@@ -1,5 +1,6 @@
 """Liga de Maestros - Flask application factory."""
 
+import logging
 import os
 from datetime import timedelta
 
@@ -9,6 +10,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
 
+logger = logging.getLogger(__name__)
+
 from .db.backups import minimize_backup_personal_data, start_backup_scheduler
 from .db.migrations import run_startup_migrations
 from .middleware.csrf import valid_csrf_request
@@ -17,6 +20,31 @@ from .workers.web_collector import start_web_collector
 
 load_dotenv()
 config.ensure_runtime_data_dir()
+
+# Sentry error tracking (optional, only if SENTRY_DSN is set)
+_sentry_dsn = os.getenv("SENTRY_DSN", "").strip()
+if _sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        environment=os.getenv("FLASK_ENV", "production"),
+        release=os.getenv("BUILD_SHA", "dev"),
+    )
+
+
+def _configure_logging(app):
+    """Set up structured logging for production."""
+    level = logging.DEBUG if os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true") else logging.INFO
+    fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    logging.basicConfig(level=level, format=fmt, force=True)
+    # Suppress noisy libraries
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+    app.logger.setLevel(level)
 
 
 def create_app():
@@ -55,6 +83,7 @@ def create_app():
     ]
     app.config["TRUSTED_HOSTS"] = trusted_hosts
 
+    _configure_logging(app)
     register_routes(app)
 
     @app.before_request

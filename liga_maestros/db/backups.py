@@ -1,5 +1,6 @@
 """Verified SQLite backups stored outside the deployed source tree."""
 
+import logging
 import os
 import sqlite3
 import threading
@@ -7,6 +8,8 @@ import time
 from datetime import UTC, datetime
 
 import config
+
+logger = logging.getLogger(__name__)
 
 _backup_thread = None
 _backup_lock = threading.Lock()
@@ -79,6 +82,75 @@ def prune_backups(retention=None):
             pass
 
 
+def _s3_configured():
+    return bool(os.getenv("BACKUP_S3_BUCKET"))
+
+
+def upload_backup_to_s3(local_path):
+    """Upload a backup file to S3-compatible storage. Returns True on success."""
+    if not _s3_configured():
+        return False
+    try:
+        import boto3
+    except ImportError:
+        logger.warning("boto3 not installed, skipping S3 upload")
+        return False
+
+    bucket = os.getenv("BACKUP_S3_BUCKET")
+    prefix = os.getenv("BACKUP_S3_PREFIX", "liga-maestros-backups/")
+    endpoint = os.getenv("BACKUP_S3_ENDPOINT")  # For B2/Spaces/MinIO
+
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        aws_access_key_id=os.getenv("BACKUP_S3_KEY_ID"),
+        aws_secret_access_key=os.getenv("BACKUP_S3_SECRET"),
+        region_name=os.getenv("BACKUP_S3_REGION", "us-east-1"),
+    )
+
+    filename = os.path.basename(local_path)
+    key = f"{prefix.rstrip('/')}/{filename}"
+    try:
+        s3.upload_file(local_path, bucket, key)
+        logger.info("Backup uploaded to s3://%s/%s", bucket, key)
+        return True
+    except Exception:
+        logger.exception("Failed to upload backup to S3")
+        return False
+
+
+def prune_s3_backups():
+    """Remove old backups from S3 beyond retention limit."""
+    if not _s3_configured():
+        return
+    try:
+        import boto3
+    except ImportError:
+        return
+
+    bucket = os.getenv("BACKUP_S3_BUCKET")
+    prefix = os.getenv("BACKUP_S3_PREFIX", "liga-maestros-backups/")
+    endpoint = os.getenv("BACKUP_S3_ENDPOINT")
+    retention = int(os.getenv("DB_BACKUP_RETENTION", "14"))
+
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        aws_access_key_id=os.getenv("BACKUP_S3_KEY_ID"),
+        aws_secret_access_key=os.getenv("BACKUP_S3_SECRET"),
+        region_name=os.getenv("BACKUP_S3_REGION", "us-east-1"),
+    )
+
+    try:
+        resp = s3.list_objects_v2(Bucket=bucket, Prefix=prefix.rstrip("/") + "/")
+        objects = sorted(resp.get("Contents", []), key=lambda o: o["LastModified"], reverse=True)
+        for obj in objects[max(1, retention):]:
+            s3.delete_object(Bucket=bucket, Key=obj["Key"])
+            logger.info("Pruned S3 backup: %s", obj["Key"])
+    except Exception:
+        logger.exception("Failed to prune S3 backups")
+
+
 def minimize_backup_personal_data():
     """Remove legacy stored emails from retained SQLite backups."""
     cleaned = 0
@@ -113,10 +185,11 @@ def start_backup_scheduler(app=None):
         time.sleep(5)
         while True:
             try:
-                create_backup("scheduled")
+                path = create_backup("scheduled")
+                upload_backup_to_s3(path)
+                prune_s3_backups()
             except Exception:
-                if app:
-                    app.logger.exception("Automatic database backup failed")
+                logger.exception("Automatic database backup failed")
             time.sleep(interval)
 
     _backup_thread = threading.Thread(target=worker, name="db-backup", daemon=True)

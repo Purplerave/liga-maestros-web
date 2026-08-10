@@ -82,6 +82,46 @@ body.legal-page {
 .legal-action { display: inline-block; padding: 10px 14px; border: 1px solid #38d9ff; text-decoration: none; }
 .legal-bottom { padding: 20px; text-align: center; border-top: 1px solid #233149; }
 
+/* FAQ accordion */
+.faq-item {
+    border: 1px solid #233149;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #0b1220;
+    overflow: hidden;
+}
+.faq-item summary {
+    padding: 16px 20px;
+    cursor: pointer;
+    color: #edf5ff;
+    font-size: 1rem;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::before {
+    content: "+";
+    color: #38d9ff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+.faq-item[open] summary::before {
+    content: "−";
+}
+.faq-item summary:hover { background: rgba(56, 217, 255, 0.05); }
+.faq-item p {
+    padding: 0 20px 16px 48px;
+    margin: 0;
+    color: #c7d4e5;
+    line-height: 1.65;
+}
+
 .site-legal-links {
     position: fixed;
     z-index: 80;

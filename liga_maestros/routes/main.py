@@ -79,6 +79,11 @@ def juegos_files(filename):
     return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
 
 
+@bp.route("/ayuda")
+def help_page():
+    return render_template("legal/help.html", user=session.get("user"))
+
+
 @bp.route("/health")
 def health():
     """Probe ligero para monitores de uptime (sin datos sensibles)."""
@@ -113,6 +118,7 @@ def sitemap_xml():
             ("/privacidad", "yearly"),
             ("/cookies", "yearly"),
             ("/aviso-legal", "yearly"),
+            ("/ayuda", "monthly"),
         )
     )
     response = make_response(
