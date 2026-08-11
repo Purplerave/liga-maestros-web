@@ -273,7 +273,11 @@ def run_startup_migrations():
             ensure_porra_table(conn)
             ensure_snake_table(conn)
             ensure_arcade_table(conn)
-            ensure_jornada_75(conn)
+            try:
+                ensure_jornada_75(conn)
+            except Exception as e:
+                import sys
+                print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
             ensure_jornada_76(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
