@@ -188,6 +188,15 @@ function coverFixtureHtml(match, compact = false) {
         <span class="cp-team cp-team-away">${logoBadge(match.visitante, teamLogo(match, "away"))}<strong>${escapeHtml(getShortName(match.visitante))}</strong></span>
     </div>`;
 }
+function updateCoverPorraStep(label, stateName = "") {
+    const step = document.getElementById("cover-porra-step");
+    const status = document.getElementById("cover-porra-step-status");
+    if (!step || !status) return;
+    status.textContent = label;
+    step.classList.toggle("is-done", stateName === "done");
+    step.classList.toggle("is-muted", stateName === "unavailable");
+}
+
 function hydrateCoverPorra(data) {
     const target = document.getElementById("cover-porra-content");
     const title = document.getElementById("cover-porra-title");
@@ -195,18 +204,21 @@ function hydrateCoverPorra(data) {
     if (!data?.enabled || !data.match) {
         const msg = data?.message || "Porra no disponible para esta jornada";
         target.innerHTML = `<div class="cp-porra-empty"><span class="cp-porra-empty-icon">🎯</span><span class="cp-porra-empty-text">${escapeHtml(msg)}</span></div>`;
+        updateCoverPorraStep("No disponible", "unavailable");
         return;
     }
     const match = data.match;
     if (title) title.textContent = "La porra — +2 pts";
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
-    const totalEntries = Number(data.total_entries || 0);
     const leaders = (data.distribution || []).slice(0, 3);
-    const hint = data.hint || "Elige el partido que quieras. Si aciertas el marcador exacto te llevas +2 puntos extra para la general.";
+    const hint = data.hint || "Marcador exacto: +2 puntos.";
     const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu partido — +2 pts si aciertas";
     const changes = data.my_changes || 0;
     const jornadaLocked = data.jornada_locked || false;
+
+    if (hasMine) updateCoverPorraStep(`${Number(mine.goles_local)}-${Number(mine.goles_visitante)} guardado`, "done");
+    else updateCoverPorraStep(data.locked ? "Cerrada" : "Elige marcador");
 
     let changeInfo = "";
     if (hasMine && !jornadaLocked) {
@@ -216,8 +228,7 @@ function hydrateCoverPorra(data) {
             changeInfo = `<span class="cp-porra-change locked">Ya no puedes cambiar</span>`;
         }
     }
-    // Mensaje invitando a elegir partido para cubrir el hueco y explicar el bonus
-    const porraHintHtml = !hasMine && !data.locked ? `<div class="cp-porra-hint" style="margin-top:4px;color:#94a3b8;font-size:0.48rem;line-height:1.35;text-align:center;">${escapeHtml(hint)}</div>` : "";
+    const porraHintHtml = !hasMine && !data.locked ? `<div class="cp-porra-hint">${escapeHtml(hint)}</div>` : "";
 
     target.innerHTML = `${coverFixtureHtml(match, true)}
         <div class="cp-porra-foot"><strong>${escapeHtml(status)}</strong>
@@ -253,6 +264,8 @@ function renderNewspaperCoverPageV3() {
 
     const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar quiniela" : "Jugar quiniela");
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
+    const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
+    const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
     // Texto bienvenida - nueva temporada a punto de arrancar
@@ -333,6 +346,31 @@ function renderNewspaperCoverPageV3() {
                             <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
                         </div>
                     </div>
+
+                    <section class="cp-journey-card" aria-labelledby="cp-journey-title">
+                        <div class="cp-card-head">
+                            <span id="cp-journey-title">TU JORNADA</span>
+                            <b>3 pasos</b>
+                        </div>
+                        <p>Haz tu jugada, busca el +2 y sigue los marcadores.</p>
+                        <div class="cp-journey-steps">
+                            <button type="button" class="cp-journey-step${saved ? " is-done" : ""}" data-page-action="TICKET">
+                                <span class="cp-journey-number" aria-hidden="true">1</span>
+                                <span><b>Quiniela</b><small>${escapeHtml(ticketStepLabel)}</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                            <button type="button" class="cp-journey-step" id="cover-porra-step" data-page-action="TICKET">
+                                <span class="cp-journey-number" aria-hidden="true">2</span>
+                                <span><b>Porra</b><small id="cover-porra-step-status">Cargando...</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                            <button type="button" class="cp-journey-step${liveCount ? " is-live" : ""}" data-page-action="LIVE">
+                                <span class="cp-journey-number" aria-hidden="true">3</span>
+                                <span><b>Directo</b><small>${escapeHtml(liveStepLabel)}</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                        </div>
+                    </section>
                 </div>
             </div>
         </main>
