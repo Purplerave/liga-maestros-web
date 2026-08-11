@@ -48,7 +48,7 @@ def import_public_seed_if_empty(conn, seed_path=None):
             quoted = ", ".join(f'"{column}"' for column in columns)
             placeholders = ", ".join("?" for _ in columns)
             conn.executemany(
-                f'INSERT INTO "{table}" ({quoted}) VALUES ({placeholders})',
+                f'INSERT OR REPLACE INTO "{table}" ({quoted}) VALUES ({placeholders})',
                 rows,
             )
         conn.commit()
