@@ -330,7 +330,7 @@ def get_porra():
                 "jornada_locked": jornada_locked,
                 "prize": "2 puntos extra si aciertas el marcador exacto",
                 "prize_short": "+2 puntos por marcador exacto",
-                "hint": "Elige el partido que quieras para tu porra. Si aciertas el marcador exacto, te llevas +2 puntos extra para la general.",
+                "hint": "Marcador exacto: +2 puntos.",
                 "entries": [dict(row) for row in entries],
                 "distribution": distribution,
                 "total_entries": porra_total,
