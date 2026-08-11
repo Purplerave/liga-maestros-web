@@ -98,6 +98,9 @@ def create_app():
 
     @app.after_request
     def set_security_headers(response):
+        _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
+        _allow_frame_embed = _is_dev or os.getenv("ALLOW_IFRAME_EMBED", "0").strip().lower() in ("1", "true", "yes", "on")
+
         if request.path.startswith("/juegos/"):
             response.headers["X-Frame-Options"] = "SAMEORIGIN"
             response.headers["Content-Security-Policy"] = (
@@ -107,6 +110,18 @@ def create_app():
                 "img-src 'self' data: https://highlightly.net; connect-src 'self'; "
                 "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
             )
+        elif _allow_frame_embed:
+            # En desarrollo / previews: permitir embedding para que funcione el proxy de preview
+            response.headers["X-Frame-Options"] = "ALLOWALL"
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; "
+                "connect-src 'self' https:; object-src 'none'; base-uri 'self'; "
+                "form-action 'self'; frame-ancestors *"
+            )
+            response.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
+            response.headers["Cross-Origin-Resource-Policy"] = "cross-origin"
         else:
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["Content-Security-Policy"] = (
@@ -116,12 +131,13 @@ def create_app():
                 "connect-src 'self'; object-src 'none'; base-uri 'self'; "
                 "form-action 'self'; frame-ancestors 'none'"
             )
+        if not _allow_frame_embed:
+            response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+            response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         if request.is_secure:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if request.path in {"/api/user/status", "/api/user/stats", "/cuenta"} or (
