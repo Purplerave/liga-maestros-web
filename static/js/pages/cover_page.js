@@ -198,14 +198,14 @@ function hydrateCoverPorra(data) {
         return;
     }
     const match = data.match;
-    if (title) title.textContent = data.label ? String(data.label).replace(/^porra( de la jornada)?$/i, "La porra") : "La porra";
+    if (title) title.textContent = "La porra — +2 pts";
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const totalEntries = Number(data.total_entries || 0);
     const leaders = (data.distribution || []).slice(0, 3);
-    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu marcador";
+    const hint = data.hint || "Elige el partido que quieras. Si aciertas el marcador exacto te llevas +2 puntos extra para la general.";
+    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu partido — +2 pts si aciertas";
     const changes = data.my_changes || 0;
-    const canChange = data.can_change !== false;
     const jornadaLocked = data.jornada_locked || false;
 
     let changeInfo = "";
@@ -216,11 +216,14 @@ function hydrateCoverPorra(data) {
             changeInfo = `<span class="cp-porra-change locked">Ya no puedes cambiar</span>`;
         }
     }
+    // Mensaje invitando a elegir partido para cubrir el hueco y explicar el bonus
+    const porraHintHtml = !hasMine && !data.locked ? `<div class="cp-porra-hint" style="margin-top:4px;color:#94a3b8;font-size:0.48rem;line-height:1.35;text-align:center;">${escapeHtml(hint)}</div>` : "";
 
     target.innerHTML = `${coverFixtureHtml(match, true)}
         <div class="cp-porra-foot"><strong>${escapeHtml(status)}</strong>
             ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" · ")}</span>` : `<span>Sé el primero</span>`}
         </div>
+        ${porraHintHtml}
         ${changeInfo}`;
 }
 
@@ -252,8 +255,8 @@ function renderNewspaperCoverPageV3() {
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto bienvenida - con titular gancho
-    const explica = `<span class="cp-headline">Tu Quiniela contra las IAs</span><br><span class="cp-subhead">Cada jornada, 15 partidos. Tú, La Peña y las máquinas con el mismo boleto.</span><br><br>Haz tus pronósticos cada jornada, suma puntos por cada acierto y sube en la clasificación. Competirás contra el resto de jugadores, el pronóstico colectivo de La Peña, nuestro Programa y varias de las IAs más conocidas.<br><br>En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Pero ahora todos vuelven a cero.<br><br><span class="cp-challenge">¿Quién sabe más de fútbol?</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
+    // Texto bienvenida - nueva temporada a punto de arrancar
+    const explica = `<span class="cp-headline">Las pruebas han terminado</span><br><span class="cp-subhead">Fue solo el calentamiento. Ahora empieza la temporada de verdad.</span><br><br>Hemos cerrado la fase de pruebas con la clasificación final del calentamiento (ver podio a la derecha). Las máquinas se llevaron esta primera batalla — <b>8,2 aciertos de media</b> frente a <b>6,9</b> de La Peña — pero ahora <b>todos volvemos a cero</b>.<br><br>En breve arranca la nueva temporada y cada jornada volverá a contar: 15 partidos, tu quiniela 1X2 y el duelo directo contra el resto de jugadores, La Peña y los Maestros IA. Suma aciertos, escala en la general y demuestra quién entiende de verdad este juego.<br><br><span class="cp-challenge">¿Te apuntas? La nueva Liga te está esperando.</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');
@@ -311,7 +314,7 @@ function renderNewspaperCoverPageV3() {
 
             <div class="cp-hero-right">
                 <section class="cp-leaders">
-                    <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>CALIENTAMIENTO</b></div>
+                    <div class="cp-card-head"><span>PODIO PRUEBAS 25/26</span><b>TOP 3</b></div>
                     ${clasifHtml}
                 </section>
 

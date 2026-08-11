@@ -148,8 +148,9 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
             return `<option value="${id}"${selected}>${id}. ${escapeHtml(getShortName(item.local || "Local"))} - ${escapeHtml(getShortName(item.visitante || "Visitante"))}</option>`;
         }).join("");
         const selector = matchOptions
-            ? `<label class="porra-selector-label">Elige partido
-                    <select class="porra-selector" data-porra-match aria-label="Elige el partido para tu porra">${matchOptions}</select>
+            ? `<label class="porra-selector-label">Elige partido <small style="color:#f5b53f;font-weight:800;">+2 pts si aciertas</small>
+                    <select class="porra-selector" data-porra-match aria-label="Elige el partido para tu porra — +2 puntos extra si aciertas el marcador exacto">${matchOptions}</select>
+                    <small class="porra-hint" style="display:block;color:#94a3b8;font-size:0.56rem;margin-top:3px;line-height:1.3;">Tú eliges el partido para tu porra. Si aciertas el marcador exacto te llevas <b style="color:#f5b53f;">+2 puntos extra</b> para la general.</small>
                </label>`
             : "";
         const renderBody = (body, index) => {

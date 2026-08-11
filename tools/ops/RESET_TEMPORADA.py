@@ -88,6 +88,15 @@ def load_jornada_1(conn):
     conn.commit()
 
 
+def reload_clasificacion_zero(conn):
+    """Repone la clasificación a cero con los equipos correctos tras el reset."""
+    from liga_maestros.db.migrations import ensure_clasificacion_zero
+
+    ensure_clasificacion_zero(conn)
+    cnt = conn.execute("SELECT COUNT(*) FROM clasificacion").fetchone()[0]
+    print(f"  Clasificación repoblada a cero: {cnt} equipos (20 Primera + 22 Segunda)")
+
+
 def main():
     print("=== RESET TEMPORADA 2026-2027 ===")
     print()
@@ -108,6 +117,9 @@ def main():
 
         print("3. Loading Jornada 1...")
         load_jornada_1(conn)
+        print()
+        print("4. Repoblando clasificación a cero...")
+        reload_clasificacion_zero(conn)
         print()
 
         print("=== RESET COMPLETE ===")

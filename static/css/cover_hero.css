@@ -42,9 +42,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    height: 100%;
+    min-height: 100%;
+    height: auto;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
@@ -66,7 +67,9 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
-    align-items: start;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
 }
 
 /* ===== COLUMNA IZQUIERDA: Hero ===== */
@@ -332,6 +335,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-width: 0;
+    height: 100%;
+    justify-content: space-between;
 }
 
 /* Parte inferior derecha: porra+duelo arriba, noticias abajo */
@@ -340,6 +345,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-height: 0;
+    flex: 1;
 }
 .cp-right-bottom-top {
     display: grid;

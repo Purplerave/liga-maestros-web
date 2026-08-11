@@ -296,6 +296,9 @@ def run_startup_migrations():
             ensure_arcade_table(conn)
             ensure_jornada_75(conn)
             ensure_jornada_76(conn)
+            ensure_jornada_1(conn)
+            ensure_clasificacion_zero(conn)
+            ensure_porra_points_upgrade(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
         finally:
@@ -650,6 +653,84 @@ def _import_j76_resultados(conn):
         if applied:
             conn.commit()
         return
+
+
+def ensure_jornada_1(conn):
+    """Garantiza la Jornada 1 de la nueva temporada 2026/27."""
+    # El boleto oficial está en data/quiniela15_J1_scrape.json; si no está, no hacemos nada.
+    updated = ensure_jornada_completa(conn, 1)
+    if updated:
+        conn.commit()
+
+
+def ensure_clasificacion_zero(conn):
+    """Para la nueva temporada las ligas deben salir a cero puntos.
+    Si la tabla existe pero todavía tiene puntos de la temporada anterior, la resetea a 0.
+    Si está vacía (tras RESET_TEMPORADA), la repuebla desde los JSON base ya a cero.
+    """
+    try:
+        count = conn.execute("SELECT COUNT(*) FROM clasificacion").fetchone()[0]
+    except Exception:
+        return
+    has_points = False
+    try:
+        row = conn.execute("SELECT SUM(pts) as s FROM clasificacion").fetchone()
+        has_points = row and row[0] not in (0, None)
+    except Exception:
+        pass
+    if count == 0:
+        # Repoblar desde los JSON base (ya a cero tras el fix)
+        import json
+        import os
+
+        import config
+
+        # Carga directa de los ficheros base
+        laliga_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_LALIGA_BASE.json")
+        segunda_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_SEGUNDA_BASE.json")
+        imported = 0
+        for fpath, division in [(laliga_path, 1), (segunda_path, 2)]:
+            if not os.path.exists(fpath):
+                continue
+            try:
+                with open(fpath, encoding="utf-8") as fh:
+                    teams = json.load(fh)
+            except Exception:
+                continue
+            for idx, team in enumerate(teams, start=1):
+                try:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO clasificacion (equipo, pj, pts, division, pos, pg, pe, pp, gf, gc, racha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            team.get("n", f"Equipo {idx}"),
+                            int(team.get("pj", 0) or 0),
+                            int(team.get("pts", 0) or 0),
+                            division,
+                            int(team.get("pos", idx) or idx),
+                            int(team.get("pg", 0) or 0),
+                            int(team.get("pe", 0) or 0),
+                            int(team.get("pp", 0) or 0),
+                            int(team.get("gf", 0) or 0),
+                            int(team.get("gc", 0) or 0),
+                            team.get("racha"),
+                        ),
+                    )
+                    imported += 1
+                except Exception:
+                    continue
+        if imported:
+            conn.commit()
+        return
+    if has_points:
+        conn.execute("UPDATE clasificacion SET pj=0, pts=0, pg=0, pe=0, pp=0, gf=0, gc=0, racha=NULL")
+        conn.commit()
+
+
+def ensure_porra_points_upgrade(conn):
+    """Asegura que la porra pasa de 1 a 2 puntos. No toca registros existentes, solo el default aplicativo."""
+    # Los puntos se asignan en porra.py; este helper es solo para documentar el cambio de política.
+    # No necesita migración de datos porque los puntos ya otorgados (1) quedan históricos.
+    return
 
 
 def ensure_jornada_75(conn):

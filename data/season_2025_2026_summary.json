@@ -1,9 +1,76 @@
 {
   "season": "2025-2026 (Pruebas)",
   "saved_at": "2026-08-10T12:00:00+00:00",
-  "total_participants": 0,
-  "total_jornadas": 0,
-  "total_partidos_jugados": 0,
-  "top_3": [],
-  "top_10": []
+  "total_participants": 18,
+  "total_jornadas": 16,
+  "total_partidos_jugados": 240,
+  "top_3": [
+    {
+      "position": 1,
+      "name": "Programa",
+      "points": 92
+    },
+    {
+      "position": 2,
+      "name": "Grok",
+      "points": 89
+    },
+    {
+      "position": 3,
+      "name": "Chipi",
+      "points": 87
+    }
+  ],
+  "top_10": [
+    {
+      "position": 1,
+      "name": "Programa",
+      "points": 92
+    },
+    {
+      "position": 2,
+      "name": "Grok",
+      "points": 89
+    },
+    {
+      "position": 3,
+      "name": "Chipi",
+      "points": 87
+    },
+    {
+      "position": 4,
+      "name": "Gemini",
+      "points": 85
+    },
+    {
+      "position": 5,
+      "name": "Claude",
+      "points": 84
+    },
+    {
+      "position": 6,
+      "name": "Pepe",
+      "points": 83
+    },
+    {
+      "position": 7,
+      "name": "Geli",
+      "points": 81
+    },
+    {
+      "position": 8,
+      "name": "Fortu",
+      "points": 78
+    },
+    {
+      "position": 9,
+      "name": "Profe",
+      "points": 77
+    },
+    {
+      "position": 10,
+      "name": "ChatGPT",
+      "points": 76
+    }
+  ]
 }
