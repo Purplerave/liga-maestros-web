@@ -109,17 +109,19 @@ def refresh_spanish_standings(season=2026):
             continue
         base_teams = []
         for i, t in enumerate(teams, 1):
-            base_teams.append({
-                "pos": i,
-                "n": t.get("n", ""),
-                "pj": t.get("pj", 0),
-                "pg": t.get("pg", 0),
-                "pe": t.get("pe", 0),
-                "pp": t.get("pp", 0),
-                "gf": t.get("gf", 0),
-                "gc": t.get("gc", 0),
-                "pts": t.get("pts", 0),
-            })
+            base_teams.append(
+                {
+                    "pos": i,
+                    "n": t.get("n", ""),
+                    "pj": t.get("pj", 0),
+                    "pg": t.get("pg", 0),
+                    "pe": t.get("pe", 0),
+                    "pp": t.get("pp", 0),
+                    "gf": t.get("gf", 0),
+                    "gc": t.get("gc", 0),
+                    "pts": t.get("pts", 0),
+                }
+            )
         path = os.path.join(config.DATA_DIR, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
