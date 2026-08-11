@@ -63,25 +63,36 @@ def create_app():
         raise RuntimeError("SECRET_KEY no configurada.")
     app.secret_key = SECRET_KEY
 
+    _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or \
+              os.getenv("FLASK_ENV", "").strip().lower() in ("development", "dev")
+
+    # En desarrollo: permitir cualquier host (necesario para proxies de preview)
+    # En produccion: restringir a hosts conocidos
+    if _is_dev:
+        preferred_scheme = os.getenv("PREFERRED_URL_SCHEME", "http")
+        app.config["TRUSTED_HOSTS"] = None  # None = aceptar cualquier host
+    else:
+        preferred_scheme = os.getenv("PREFERRED_URL_SCHEME", "https")
+        trusted_hosts = [
+            item.strip()
+            for item in os.getenv(
+                "TRUSTED_HOSTS",
+                "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
+            ).split(",")
+            if item.strip()
+        ]
+        app.config["TRUSTED_HOSTS"] = trusted_hosts if trusted_hosts else None
+
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE=os.getenv("SESSION_COOKIE_SAMESITE", "Lax"),
         SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() in ("1", "true", "yes", "on"),
         PERMANENT_SESSION_LIFETIME=timedelta(hours=int(os.getenv("SESSION_LIFETIME_HOURS", "12"))),
-        PREFERRED_URL_SCHEME=os.getenv("PREFERRED_URL_SCHEME", "https"),
+        PREFERRED_URL_SCHEME=preferred_scheme,
         MAX_CONTENT_LENGTH=int(os.getenv("MAX_CONTENT_LENGTH", str(64 * 1024))),
         MAX_FORM_MEMORY_SIZE=int(os.getenv("MAX_FORM_MEMORY_SIZE", str(32 * 1024))),
         MAX_FORM_PARTS=int(os.getenv("MAX_FORM_PARTS", "50")),
     )
-    trusted_hosts = [
-        item.strip()
-        for item in os.getenv(
-            "TRUSTED_HOSTS",
-            "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
-        ).split(",")
-        if item.strip()
-    ]
-    app.config["TRUSTED_HOSTS"] = trusted_hosts
 
     _configure_logging(app)
     register_routes(app)
