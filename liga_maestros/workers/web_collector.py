@@ -5,9 +5,12 @@ the collector inside the web service so live updates and the web app use the
 same SQLite database and JSON cache.
 """
 
+import logging
 import os
 import threading
 import time
+
+logger = logging.getLogger(__name__)
 
 _collector_started = False
 _collector_lock = threading.Lock()
@@ -62,3 +65,20 @@ def start_web_collector(app):
     thread = threading.Thread(target=_loop, name="liga-web-collector", daemon=True)
     thread.start()
     app.extensions["web_collector_thread"] = thread
+
+    # Background Spanish standings refresh (every 6 hours)
+    def _standings_loop():
+        from ..services.multi_standings import refresh_spanish_standings
+
+        time.sleep(30)  # Wait for app to start
+        while True:
+            try:
+                updated = refresh_spanish_standings(season=2026)
+                if updated:
+                    logger.info("Spanish standings refreshed: %s", updated)
+            except Exception:
+                logger.exception("Spanish standings refresh failed")
+            time.sleep(6 * 3600)  # Every 6 hours
+
+    standings_thread = threading.Thread(target=_standings_loop, name="liga-standings-refresh", daemon=True)
+    standings_thread.start()

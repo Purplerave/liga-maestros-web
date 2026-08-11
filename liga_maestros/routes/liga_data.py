@@ -192,3 +192,13 @@ def _load_and_repair_match_info(jornada, partidos):
         )
         info["detalle"] = detail
     return match_info
+
+
+@bp.post("/api/admin/refresh-standings")
+def refresh_standings():
+    if not is_admin_request():
+        return jsonify({"status": "forbidden"}), 403
+    from ..services.multi_standings import refresh_spanish_standings
+
+    updated = refresh_spanish_standings(season=2026)
+    return jsonify({"status": "ok", "updated": updated})
