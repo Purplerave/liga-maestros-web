@@ -76,8 +76,66 @@ function awardTierClass(idx) {
     return "";
 }
 
+let _seasonSummaryCache = null;
+async function fetchSeasonSummaryForPena() {
+    if (_seasonSummaryCache) return _seasonSummaryCache;
+    try {
+        const res = await fetch("/api/season-summary", { cache: "no-store" });
+        if (!res.ok) throw new Error();
+        _seasonSummaryCache = await res.json();
+        return _seasonSummaryCache;
+    } catch { return null; }
+}
+function renderNewSeasonPenaPlaceholder() {
+    // Podio de pruebas guardado en season_2025_2026_summary.json
+    // Mientras no haya resultados de la nueva temporada, mostramos solo el podio + mensaje чulo
+    const placeholder = `<section class="contest-page new-season-page">
+        <div class="contest-card new-season-hero" style="text-align:center; padding:22px 18px; background: radial-gradient(600px 240px at 50% -20%, rgba(245,181,63,0.12), transparent 60%), linear-gradient(180deg, #0e1526 0%, #080e1c 100%); border:1px solid rgba(255,255,255,0.08);">
+            <div style="display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border:1px solid rgba(245,181,63,0.25); border-radius:999px; background:rgba(245,181,63,0.08); color:#f5b53f; font-size:0.62rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase;">🏁 Pruebas finalizadas — Temporada 2025/26</div>
+            <h2 style="margin:10px 0 6px; font-family: Rajdhani, Outfit, sans-serif; font-size:1.55rem; font-weight:900; color:#fff; letter-spacing:0.02em;">Podio del calentamiento</h2>
+            <p style="margin:0 auto; max-width:560px; color:#c8d4e8; font-size:0.78rem; line-height:1.5;">Estas fueron las pruebas. Los tres mejores del calentamiento ya tienen su sitio en la historia. <b style="color:#f5b53f;">Ahora todo vuelve a cero</b> y la nueva temporada arranca en breve.</p>
+            <div id="pena-season-podium" style="margin-top:16px; display:grid; gap:8px; max-width:420px; margin-left:auto; margin-right:auto;"><div class="cp-porra-loading" style="height:56px; margin:0 auto;"></div></div>
+            <div style="margin-top:14px; padding:10px 14px; border-radius:10px; background:rgba(56,217,255,0.06); border:1px solid rgba(56,217,255,0.12); color:#8ea2c0; font-size:0.74rem; line-height:1.45;">
+                📊 Las estadísticas se irán actualizando <b style="color:#eef3fb;">jornada a jornada</b> en cuanto empiece la nueva temporada.<br>
+                Mientras tanto, <a href="#" data-page-action="TICKET" style="color:#38d9ff; font-weight:800; text-decoration:none;">haz tu primera quiniela</a> y asegúrate un sitio en la salida.
+            </div>
+            <div style="margin-top:14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="cp-primary" data-page-action="TICKET" style="min-height:32px; padding:0 18px; border-radius:999px; border:1px solid rgba(245,181,63,0.9); background:#f5b53f; color:#111827; font-weight:800; cursor:pointer;">Jugar la Quiniela J1</button>
+                <button type="button" class="cp-secondary" onclick="window.location.href='/login/google'" style="min-height:32px; padding:0 18px; border-radius:999px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:#e6eaf0; font-weight:700; cursor:pointer;">Entrar con Google</button>
+            </div>
+            <small style="display:block; margin-top:10px; color:#6b7a93; font-size:0.62rem;">¿Aún no estás registrado? Entra y deja tu quiniela lista antes del pitido inicial. La Peña te está esperando.</small>
+        </div>
+    </section>`;
+    // Carga asíncrona del podio real
+    setTimeout(async () => {
+        const target = document.getElementById("pena-season-podium");
+        if (!target) return;
+        const summary = await fetchSeasonSummaryForPena();
+        const top3 = summary?.top_3 || [];
+        if (!top3.length) {
+            target.innerHTML = `<div class="empty-state">Pronto verás aquí el podio de la nueva temporada.</div>`;
+            return;
+        }
+        const medals = ["🥇","🥈","🥉"];
+        target.innerHTML = top3.map((p,i) => `
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:${i===0?'rgba(245,181,63,0.10)':'rgba(255,255,255,0.04)'};">
+                <span style="font-size:1.1rem; width:28px; text-align:center;">${medals[i]||(i+1)}</span>
+                <span style="flex:1; text-align:left; color:#eef3fb; font-weight:700; font-size:0.84rem;">${escapeHtml(p.name)}</span>
+                <span style="color:#f5b53f; font-weight:900; font-family:Rajdhani, sans-serif;">${p.points} pts</span>
+            </div>
+        `).join("") + `<small style="color:#6b7a93; font-size:0.62rem; margin-top:4px; display:block;">${summary.total_participants||0} participantes · ${summary.total_jornadas||0} jornadas de pruebas</small>`;
+    }, 50);
+    return placeholder;
+}
+
 function renderContestOverview(contest) {
     const generalRows = contest.general || [];
+    // Nueva temporada: si estamos en J1 (única jornada visible) mostramos solo el podio de pruebas
+    const isNewSeasonJ1 = String(state.data?.jornada || "") === "1" && Array.isArray(state.data?.jornadas_disponibles) && state.data.jornadas_disponibles.length === 1 && Number(state.data.jornadas_disponibles[0]) === 1;
+    const isEmptyGeneral = !generalRows.length || generalRows.every(r => Number(r.points||0)===0);
+    if (isNewSeasonJ1 || isEmptyGeneral) {
+        return renderNewSeasonPenaPlaceholder();
+    }
     const top10 = generalRows.slice(0, 10);
     const hasMore = generalRows.length > 10;
     const recentAwards = (contest.galardones?.jornadas || []).slice(0, 5);
@@ -258,6 +316,11 @@ function renderContestPage(view = "CONTEST_GENERAL") {
 function renderContestPageContent(view = "CONTEST_GENERAL") {
     const contest = state.contest;
     if (!contest) return `<div class="empty-state">No se pudo cargar La Peña.</div>`;
+    const isNewSeasonJ1 = String(state.data?.jornada || "") === "1" && Array.isArray(state.data?.jornadas_disponibles) && state.data.jornadas_disponibles.length === 1 && Number(state.data.jornadas_disponibles[0]) === 1;
+    // En la nueva temporada solo mostramos el podio de pruebas + mensaje hasta que haya resultados
+    if (isNewSeasonJ1 && view !== "CONTEST_PROFILE") {
+        return renderNewSeasonPenaPlaceholder();
+    }
     const profile = contest.profile;
 
     if (view === "CONTEST_PROFILE") {

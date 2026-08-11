@@ -140,7 +140,7 @@ function renderArena() {
                     <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
                         <div class="ticket-porra-heading">
                             <span data-porra-label>PORRA</span>
-                            <strong id="ticket-porra-title">+1 punto por marcador exacto</strong>
+                            <strong id="ticket-porra-title">+2 puntos por marcador exacto</strong>
                         </div>
                         <div id="ticket-porra-body" class="porra-body">
                             <div class="empty-state">Cargando porra...</div>

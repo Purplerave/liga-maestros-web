@@ -13,7 +13,7 @@ bp = Blueprint("porra", __name__)
 
 
 def check_and_award_porra_points(conn, jornada):
-    """Check if any porra predictions were correct and award 1 point to the user.
+    """Check if any porra predictions were correct and award 2 points to the user.
 
     This should be called after match results are updated.
     """
@@ -58,10 +58,10 @@ def check_and_award_porra_points(conn, jornada):
             ).fetchone()
 
             if not already_awarded:
-                # Award 1 point to the user
+                # Award 2 points to the user (+2 bonus for exact score)
                 conn.execute(
                     """
-                    UPDATE usuarios SET puntos_acumulados = puntos_acumulados + 1
+                    UPDATE usuarios SET puntos_acumulados = puntos_acumulados + 2
                     WHERE id = ?
                     """,
                     (user_id,),
@@ -70,7 +70,7 @@ def check_and_award_porra_points(conn, jornada):
                 conn.execute(
                     """
                     INSERT OR IGNORE INTO porra_puntos (jornada, partido_id, user_id, puntos)
-                    VALUES (?, ?, ?, 1)
+                    VALUES (?, ?, ?, 2)
                     """,
                     (jornada, partido_id, user_id),
                 )
@@ -328,7 +328,9 @@ def get_porra():
                 **presentation,
                 "locked": jornada_locked or _porra_is_locked(match),
                 "jornada_locked": jornada_locked,
-                "prize": "1 punto extra si aciertas el marcador exacto",
+                "prize": "2 puntos extra si aciertas el marcador exacto",
+                "prize_short": "+2 puntos por marcador exacto",
+                "hint": "Elige el partido que quieras para tu porra. Si aciertas el marcador exacto, te llevas +2 puntos extra para la general.",
                 "entries": [dict(row) for row in entries],
                 "distribution": distribution,
                 "total_entries": porra_total,
