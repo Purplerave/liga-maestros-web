@@ -1,4 +1,5 @@
 import argparse
+import json
 import shutil
 import sqlite3
 import sys
@@ -409,6 +410,72 @@ def next_sleep_seconds(window, base_interval):
     return max(60, min(int(base_interval or 120), 120))
 
 
+LAST_STANDINGS_UPDATE = 0
+
+
+def _update_spanish_standings_from_matches():
+    """Calculate La Liga and Segunda standings from all collected matches."""
+    global LAST_STANDINGS_UPDATE
+    now = time.time()
+    # Only update every 30 minutes
+    if now - LAST_STANDINGS_UPDATE < 1800:
+        return
+    LAST_STANDINGS_UPDATE = now
+
+    matches_path = DATA_DIR / "LIVE_ALL_MATCHES_V3.json"
+    if not matches_path.exists():
+        return
+    try:
+        with matches_path.open(encoding="utf-8") as f:
+            all_matches = json.load(f)
+    except Exception:
+        return
+    if not all_matches:
+        return
+
+    from liga_maestros.services.standings_calculator import calculate_standings_from_matches
+
+    result = calculate_standings_from_matches(all_matches)
+    leagues = result.get("leagues", [])
+
+    for league in leagues:
+        name = league.get("name", "").upper()
+        teams = league.get("teams", [])
+        if not teams:
+            continue
+
+        if "LA LIGA" in name:
+            filename = "STANDINGS_LALIGA_BASE.json"
+        elif "SEGUNDA" in name:
+            filename = "STANDINGS_SEGUNDA_BASE.json"
+        else:
+            continue
+
+        base_teams = []
+        for t in teams:
+            base_teams.append(
+                {
+                    "pos": t.get("pos", 0),
+                    "n": t.get("n", ""),
+                    "pj": t.get("pj", 0),
+                    "pg": t.get("pg", 0),
+                    "pe": t.get("pe", 0),
+                    "pp": t.get("pp", 0),
+                    "gf": t.get("gf", 0),
+                    "gc": t.get("gc", 0),
+                    "pts": t.get("pts", 0),
+                }
+            )
+
+        path = DATA_DIR / filename
+        try:
+            with path.open("w", encoding="utf-8") as f:
+                json.dump(base_teams, f, ensure_ascii=False, indent=2)
+            log_line(f"standings_updated={name} teams={len(base_teams)}")
+        except Exception as exc:
+            log_line(f"standings_write_error={filename} err={exc}")
+
+
 def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     global LAST_HIGHLIGHTLY_RUN
     started_at = time.time()
@@ -482,6 +549,13 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     else:
         highlightly_status = "window_closed"
         log_line("highlightly_skip=window_closed")
+
+    # Update Spanish league standings from all collected matches
+    if updates > 0 or highlightly_status == "refresh_api":
+        try:
+            _update_spanish_standings_from_matches()
+        except Exception as exc:
+            log_line(f"standings_update_error={exc}")
 
     usage = get_highlightly_usage()
     log_line(
