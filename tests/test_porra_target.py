@@ -110,9 +110,10 @@ def test_exact_score_awards_one_extra_point_once():
     conn.execute("UPDATE resultados SET status = 'FT', goles_local = 2, goles_visitante = 1 WHERE partido_id = 1")
 
     assert check_and_award_porra_points(conn, 73) == 1
-    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 8
+    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 9
+    assert conn.execute("SELECT puntos FROM porra_puntos WHERE user_id='u1'").fetchone()[0] == 2
     assert check_and_award_porra_points(conn, 73) == 0
-    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 8
+    assert conn.execute("SELECT puntos_acumulados FROM usuarios WHERE id = 'u1'").fetchone()[0] == 9
     conn.close()
 
 

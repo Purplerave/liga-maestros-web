@@ -159,6 +159,23 @@ jobs:
           ln -sfn "$RELEASE" "$HOME_DIR/current"
           cd "$HOME_DIR/current"
           PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
+
+          # Force-update standings JSON files for new season
+          cp -f "$RELEASE/data/STANDINGS_LALIGA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_LALIGA_BASE.json"
+          cp -f "$RELEASE/data/STANDINGS_SEGUNDA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_SEGUNDA_BASE.json"
+          echo "Standings BASE files updated."
+
+          # Reset for new season 2026-2027 (skip if already done)
+          RESET_MARKER="$HOME_DIR/runtime/.season_reset_2026_done"
+          if [ ! -f "$RESET_MARKER" ]; then
+            echo "Running RESET_TEMPORADA for new season..."
+            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/RESET_TEMPORADA.py
+            touch "$RESET_MARKER"
+            echo "Reset complete. Marker created."
+          else
+            echo "Season reset already done — skipping."
+          fi
+
           chmod 600 "$HOME_DIR/runtime/app.env"
           if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ]; then
             chmod 600 "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db"

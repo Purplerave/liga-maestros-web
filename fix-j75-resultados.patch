@@ -1,0 +1,257 @@
+From 67196ee78ffb5d1a3d0f42e19f7daa2486cb0799 Mon Sep 17 00:00:00 2001
+From: Arena Fix Bot <arena-fix@local>
+Date: Mon, 3 Aug 2026 21:40:47 +0000
+Subject: [PATCH] fix(quiniela): resultados oficiales J75 en la migracion
+ (rescata VPS y TPS)
+
+Los partidos 1 (VPS Vaasa-Inter Turku) y 2 (TPS Turku-IFK Mariehamn)
+quedaron NS en produccion tras cerrarse la J75. La migracion
+ensure_jornada_75() aplica ahora los resultados oficiales verificados
+(data/quiniela15_J75_resultados.json, fuente quiniela15.com) solo en
+filas que sigan sin marcador; nunca pisa un resultado existente. Tras el
+deploy, la J75 queda completa 15/15 de forma determinista.
+---
+ CHANGELOG.md                          |  7 ++
+ data/quiniela15_J75_resultados.json   | 98 +++++++++++++++++++++++++++
+ liga_maestros/db/migrations.py        | 57 ++++++++++++++++
+ tests/test_ensure_jornada_completa.py | 26 +++++++
+ 4 files changed, 188 insertions(+)
+ create mode 100644 data/quiniela15_J75_resultados.json
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 310b33b..1b86075 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -6,6 +6,13 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
+ 
+ ### Corregido
+ 
++- 🔴 **Dos partidos de la J75 se quedaron sin resultado (VPS y TPS).** En
++  produccion los partidos 1 (VPS Vaasa–Inter Turku) y 2 (TPS Turku–IFK
++  Mariehamn) quedaron como `NS` tras acabar la jornada. La migracion
++  `ensure_jornada_75()` aplica ahora los resultados oficiales verificados de
++  `data/quiniela15_J75_resultados.json` **solo en filas que sigan sin
++  marcador** (nunca pisa un resultado existente): al desplegar/arrancar, la
++  jornada queda completa de forma determinista aunque el directo no cubra algo.
+ - 🔴 **La pestaña Quiniela mostraba la última jornada a medias.** La migración
+   `ensure_jornada_75()` se saltaba todo el trabajo si existía **cualquier** fila
+   de la jornada en `resultados`. Si una importación quedó a medias (partidos
+diff --git a/data/quiniela15_J75_resultados.json b/data/quiniela15_J75_resultados.json
+new file mode 100644
+index 0000000..ec3d449
+--- /dev/null
++++ b/data/quiniela15_J75_resultados.json
+@@ -0,0 +1,98 @@
++{
++ "jornada": 75,
++ "fuente": "https://www.quiniela15.com/resultados-quiniela/75",
++ "verificado_en": "2026-08-03",
++ "nota": "Resultados oficiales finales de la J75 (todos FT). Los usa la migracion ensure_jornada_75 como respaldo si el directo no cubrio algun partido.",
++ "resultados": [
++  {
++   "id": 1,
++   "goles_local": 0,
++   "goles_visitante": 1,
++   "signo": "2"
++  },
++  {
++   "id": 2,
++   "goles_local": 3,
++   "goles_visitante": 0,
++   "signo": "1"
++  },
++  {
++   "id": 3,
++   "goles_local": 1,
++   "goles_visitante": 0,
++   "signo": "1"
++  },
++  {
++   "id": 4,
++   "goles_local": 2,
++   "goles_visitante": 0,
++   "signo": "1"
++  },
++  {
++   "id": 5,
++   "goles_local": 0,
++   "goles_visitante": 1,
++   "signo": "2"
++  },
++  {
++   "id": 6,
++   "goles_local": 1,
++   "goles_visitante": 0,
++   "signo": "1"
++  },
++  {
++   "id": 7,
++   "goles_local": 0,
++   "goles_visitante": 3,
++   "signo": "2"
++  },
++  {
++   "id": 8,
++   "goles_local": 3,
++   "goles_visitante": 3,
++   "signo": "X"
++  },
++  {
++   "id": 9,
++   "goles_local": 2,
++   "goles_visitante": 1,
++   "signo": "1"
++  },
++  {
++   "id": 10,
++   "goles_local": 2,
++   "goles_visitante": 6,
++   "signo": "2"
++  },
++  {
++   "id": 11,
++   "goles_local": 3,
++   "goles_visitante": 2,
++   "signo": "1"
++  },
++  {
++   "id": 12,
++   "goles_local": 1,
++   "goles_visitante": 1,
++   "signo": "X"
++  },
++  {
++   "id": 13,
++   "goles_local": 2,
++   "goles_visitante": 0,
++   "signo": "1"
++  },
++  {
++   "id": 14,
++   "goles_local": 1,
++   "goles_visitante": 2,
++   "signo": "2"
++  },
++  {
++   "id": 15,
++   "goles_local": 0,
++   "goles_visitante": 3,
++   "signo": "0-3"
++  }
++ ]
++}
+diff --git a/liga_maestros/db/migrations.py b/liga_maestros/db/migrations.py
+index 703d213..6ba8c86 100644
+--- a/liga_maestros/db/migrations.py
++++ b/liga_maestros/db/migrations.py
+@@ -484,6 +484,62 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None):
+     return changed
+ 
+ 
++def _import_j75_resultados(conn):
++    """Backfill verified final results of J75 shipped in data/.
++
++    The live collector covers most matches, but a completed jornada can leave
++    uncovered matches (page moved on, transient scrape errors). This file is
++    the deterministic last resort: it only fills rows still without a result
++    (NS/NULL) and never overwrites existing scores.
++    """
++    candidates = [
++        os.path.join(getattr(config, "SEED_DATA_DIR", "") or "", "quiniela15_J75_resultados.json"),
++        os.path.join(getattr(config, "DATA_DIR", "") or "", "quiniela15_J75_resultados.json"),
++    ]
++    for path in candidates:
++        if not path or not os.path.exists(path):
++            continue
++        try:
++            with open(path, encoding="utf-8") as fh:
++                data = json.load(fh)
++        except (OSError, ValueError, TypeError):
++            continue
++        try:
++            if int(data.get("jornada") or 0) != 75:
++                continue
++        except (TypeError, ValueError):
++            continue
++        resultados = data.get("resultados") or []
++        if len(resultados) != 15:
++            continue
++        applied = 0
++        for item in resultados:
++            try:
++                pid = int(item["id"])
++                gh = int(item["goles_local"])
++                ga = int(item["goles_visitante"])
++            except (TypeError, ValueError, KeyError):
++                continue
++            signo = str(item.get("signo") or "").strip() or (
++                f"{gh}-{ga}" if pid == 15 else ("1" if gh > ga else ("2" if gh < ga else "X"))
++            )
++            cursor = conn.execute(
++                """
++                UPDATE resultados
++                SET goles_local = ?, goles_visitante = ?, status = 'FT',
++                    minuto = 'Finalizado', signo_actual = ?
++                WHERE jornada = 75 AND partido_id = ?
++                  AND (goles_local IS NULL OR goles_visitante IS NULL)
++                  AND (status IS NULL OR status IN ('NS', 'SCHEDULED', ''))
++                """,
++                (gh, ga, signo, pid),
++            )
++            applied += cursor.rowcount
++        if applied:
++            conn.commit()
++        return
++
++
+ def ensure_jornada_75(conn):
+     """Import the public J75 fixture and pronosticos from arena data.
+ 
+@@ -492,6 +548,7 @@ def ensure_jornada_75(conn):
+     from the scrape file shipped in data/.
+     """
+     ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES)
++    _import_j75_resultados(conn)
+ 
+     # Publicamos solo la columna conocida del Programa. Los Maestros se
+     # incorporan cuando entregan sus pronosticos; nunca se clonan.
+diff --git a/tests/test_ensure_jornada_completa.py b/tests/test_ensure_jornada_completa.py
+index ce7a135..35df847 100644
+--- a/tests/test_ensure_jornada_completa.py
++++ b/tests/test_ensure_jornada_completa.py
+@@ -72,6 +72,32 @@ def test_empty_placeholder_rows_are_backfilled():
+     assert all(r["fecha"] for r in rows)
+ 
+ 
++def test_results_backfill_covers_uncovered_finished_matches():
++    """Production case: VPS/TPS rows stuck NS after the jornada ended."""
++    conn = _fresh_conn()
++    for pid in range(1, 16):
++        _insert_match(conn, pid, local=f"Local {pid}", visitante=f"Visita {pid}", fecha="2026-08-01", hora="14:00")
++    for pid in range(3, 16):  # el directo cubrio 3-15
++        conn.execute(
++            "UPDATE resultados SET goles_local = 1, goles_visitante = 0, status = 'FT' WHERE jornada = 75 AND partido_id = ?",
++            (pid,),
++        )
++    conn.commit()
++
++    migrations.ensure_jornada_75(conn)
++    uncovered = conn.execute(
++        "SELECT goles_local, goles_visitante, status, signo_actual FROM resultados WHERE jornada = 75 AND partido_id IN (1, 2)"
++    ).fetchall()
++
++    assert tuple(uncovered[0]) == (0, 1, "FT", "2")
++    assert tuple(uncovered[1]) == (3, 0, "FT", "1")
++    # los que ya estaban cubiertos NO se tocan
++    row3 = conn.execute(
++        "SELECT goles_local, goles_visitante FROM resultados WHERE jornada = 75 AND partido_id = 3"
++    ).fetchone()
++    assert tuple(row3) == (1, 0)
++
++
+ def test_duplicate_rows_are_deduplicated_keeping_results():
+     conn = _fresh_conn()
+     # Duplicado: fila vacia + fila con resultado real
+-- 
+2.47.3
+

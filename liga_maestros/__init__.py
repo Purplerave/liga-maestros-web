@@ -1,13 +1,16 @@
 """Liga de Maestros - Flask application factory."""
 
+import logging
 import os
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, request, session
+from flask import Flask, g, jsonify, render_template, request, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
+
+logger = logging.getLogger(__name__)
 
 from .db.backups import minimize_backup_personal_data, start_backup_scheduler
 from .db.migrations import run_startup_migrations
@@ -17,6 +20,31 @@ from .workers.web_collector import start_web_collector
 
 load_dotenv()
 config.ensure_runtime_data_dir()
+
+# Sentry error tracking (optional, only if SENTRY_DSN is set)
+_sentry_dsn = os.getenv("SENTRY_DSN", "").strip()
+if _sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        environment=os.getenv("FLASK_ENV", "production"),
+        release=os.getenv("BUILD_SHA", "dev"),
+    )
+
+
+def _configure_logging(app):
+    """Set up structured logging for production."""
+    level = logging.DEBUG if os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true") else logging.INFO
+    fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    logging.basicConfig(level=level, format=fmt, force=True)
+    # Suppress noisy libraries
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+    app.logger.setLevel(level)
 
 
 def create_app():
@@ -35,26 +63,38 @@ def create_app():
         raise RuntimeError("SECRET_KEY no configurada.")
     app.secret_key = SECRET_KEY
 
+    _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or \
+              os.getenv("FLASK_ENV", "").strip().lower() in ("development", "dev")
+
+    # En desarrollo: permitir cualquier host (necesario para proxies de preview)
+    # En produccion: restringir a hosts conocidos
+    if _is_dev:
+        preferred_scheme = os.getenv("PREFERRED_URL_SCHEME", "http")
+        app.config["TRUSTED_HOSTS"] = None  # None = aceptar cualquier host
+    else:
+        preferred_scheme = os.getenv("PREFERRED_URL_SCHEME", "https")
+        trusted_hosts = [
+            item.strip()
+            for item in os.getenv(
+                "TRUSTED_HOSTS",
+                "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
+            ).split(",")
+            if item.strip()
+        ]
+        app.config["TRUSTED_HOSTS"] = trusted_hosts if trusted_hosts else None
+
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE=os.getenv("SESSION_COOKIE_SAMESITE", "Lax"),
         SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() in ("1", "true", "yes", "on"),
         PERMANENT_SESSION_LIFETIME=timedelta(hours=int(os.getenv("SESSION_LIFETIME_HOURS", "12"))),
-        PREFERRED_URL_SCHEME=os.getenv("PREFERRED_URL_SCHEME", "https"),
+        PREFERRED_URL_SCHEME=preferred_scheme,
         MAX_CONTENT_LENGTH=int(os.getenv("MAX_CONTENT_LENGTH", str(64 * 1024))),
         MAX_FORM_MEMORY_SIZE=int(os.getenv("MAX_FORM_MEMORY_SIZE", str(32 * 1024))),
         MAX_FORM_PARTS=int(os.getenv("MAX_FORM_PARTS", "50")),
     )
-    trusted_hosts = [
-        item.strip()
-        for item in os.getenv(
-            "TRUSTED_HOSTS",
-            "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
-        ).split(",")
-        if item.strip()
-    ]
-    app.config["TRUSTED_HOSTS"] = trusted_hosts
 
+    _configure_logging(app)
     register_routes(app)
 
     @app.before_request
@@ -69,6 +109,9 @@ def create_app():
 
     @app.after_request
     def set_security_headers(response):
+        _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
+        _allow_frame_embed = _is_dev or os.getenv("ALLOW_IFRAME_EMBED", "0").strip().lower() in ("1", "true", "yes", "on")
+
         if request.path.startswith("/juegos/"):
             response.headers["X-Frame-Options"] = "SAMEORIGIN"
             response.headers["Content-Security-Policy"] = (
@@ -78,6 +121,18 @@ def create_app():
                 "img-src 'self' data: https://highlightly.net; connect-src 'self'; "
                 "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
             )
+        elif _allow_frame_embed:
+            # En desarrollo / previews: permitir embedding para que funcione el proxy de preview
+            response.headers["X-Frame-Options"] = "ALLOWALL"
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; "
+                "connect-src 'self' https:; object-src 'none'; base-uri 'self'; "
+                "form-action 'self'; frame-ancestors *"
+            )
+            response.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
+            response.headers["Cross-Origin-Resource-Policy"] = "cross-origin"
         else:
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["Content-Security-Policy"] = (
@@ -87,12 +142,13 @@ def create_app():
                 "connect-src 'self'; object-src 'none'; base-uri 'self'; "
                 "form-action 'self'; frame-ancestors 'none'"
             )
+        if not _allow_frame_embed:
+            response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+            response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         if request.is_secure:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if request.path in {"/api/user/status", "/api/user/stats", "/cuenta"} or (
@@ -108,6 +164,14 @@ def create_app():
                 conn.close()
             except Exception:
                 pass
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template("errors/500.html"), 500
 
     run_startup_migrations()
     minimize_backup_personal_data()

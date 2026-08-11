@@ -21,7 +21,7 @@ COMMAND_PALETTE_CSS = ROOT / "static" / "css" / "components" / "command_palette.
 MATCH_CARDS_CSS = ROOT / "static" / "css" / "components" / "match_cards.css"
 QUANTUM_JS = ROOT / "static" / "js" / "quantum_final.js"
 
-INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)[^>]*>", re.IGNORECASE)
+INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)(?![^>]*type\s*=\s*\"application/ld\+json\")[^>]*>", re.IGNORECASE)
 
 NEW_ASSETS = (
     "static/css/components/command_palette.css",

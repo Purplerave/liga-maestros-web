@@ -8,4 +8,6 @@ if __name__ == "__main__":
     import os
 
     debug = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
-    app.run(debug=debug, port=5000, use_reloader=debug)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "5000"))
+    app.run(debug=debug, host=host, port=port, use_reloader=debug)

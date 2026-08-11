@@ -104,7 +104,10 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
     if (!bodies.length && !qs("cover-porra-content")) return;
     try {
         const requestedMatch = partidoId ? `&pid=${encodeURIComponent(partidoId)}` : "";
-        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}${requestedMatch}`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(`/api/porra?j=${encodeURIComponent(state.data.jornada)}${requestedMatch}`, { signal: controller.signal });
+        clearTimeout(timeout);
         const data = await res.json();
         if (typeof hydrateCoverPorra === "function") hydrateCoverPorra(data);
         if (!bodies.length) return;
@@ -145,18 +148,30 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
             return `<option value="${id}"${selected}>${id}. ${escapeHtml(getShortName(item.local || "Local"))} - ${escapeHtml(getShortName(item.visitante || "Visitante"))}</option>`;
         }).join("");
         const selector = matchOptions
-            ? `<label class="porra-selector-label">Elige partido
-                    <select class="porra-selector" data-porra-match aria-label="Elige el partido para tu porra">${matchOptions}</select>
+            ? `<label class="porra-selector-label">
+                    <select class="porra-selector" data-porra-match aria-label="Elige el partido para tu porra — +2 puntos extra si aciertas el marcador exacto">${matchOptions}</select>
+                    <small class="porra-hint" style="display:block;color:#94a3b8;font-size:0.56rem;margin-top:3px;line-height:1.3;">Marcador exacto: <b style="color:#f5b53f;">+2 puntos</b>.</small>
                </label>`
             : "";
         const renderBody = (body, index) => {
             const suffix = index ? "-ticket" : "";
+            const matchLabel = `${escapeHtml(getShortName(match.local || "Local"))} vs ${escapeHtml(getShortName(match.visitante || "Visitante"))}`;
+
+            // Show change status
+            let changeStatus = "";
+            if (hasMine && !data.jornada_locked) {
+                const changes = data.my_changes || 0;
+                if (changes === 0) {
+                    changeStatus = `<small class="porra-change-info">Puedes cambiar 1 vez</small>`;
+                } else {
+                    changeStatus = `<small class="porra-change-info locked">Ya no puedes cambiar</small>`;
+                }
+            }
+
             body.innerHTML = `
-            ${selector}
-            <div class="porra-match">
-                <strong>${escapeHtml(getShortName(match.local || "Local"))}</strong>
-                <em>vs</em>
-                <strong>${escapeHtml(getShortName(match.visitante || "Visitante"))}</strong>
+            <div class="porra-match-header">
+                <strong>${matchLabel}</strong>
+                ${selector}
             </div>
             ${hasMine
                 ? `<div class="porra-saved">
@@ -174,6 +189,7 @@ async function loadPorra(partidoId = porraSelectedMatchId) {
                         <button type="button" data-porra-submit>${data.auth ? "OK" : "Entrar"}</button>
                         <small class="porra-form-status" data-porra-status aria-live="polite"></small>
                    </form>`}
+            ${changeStatus}
             ${shareBlock}`;
         };
         bodies.forEach(renderBody);
@@ -417,8 +433,11 @@ async function loadNewsBriefing() {
     const target = qs("cover-news-content");
     if (!target) return;
     try {
-        const res = await fetch("/api/noticias/radar");
-        if (!res.ok) return;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch("/api/noticias/radar", { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) { target.innerHTML = '<span class="cp-empty">Sin novedades</span>'; return; }
         const data = await res.json();
         const novedades = Array.isArray(data.novedades) ? data.novedades : [];
         const bajas = Array.isArray(data.bajas) ? data.bajas : [];

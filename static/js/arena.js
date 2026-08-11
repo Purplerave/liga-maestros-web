@@ -123,6 +123,8 @@ function renderArena() {
         container.innerHTML = renderNewspaperCoverPageV3();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
+        if (typeof startSeasonCountdown === "function") startSeasonCountdown();
+        if (typeof loadSeasonSummary === "function") loadSeasonSummary();
         if (typeof startCoverScorebar === "function") startCoverScorebar();
         loadPorra();
         loadNewsBriefing();
@@ -138,7 +140,7 @@ function renderArena() {
                     <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
                         <div class="ticket-porra-heading">
                             <span data-porra-label>PORRA</span>
-                            <strong id="ticket-porra-title">+1 punto por marcador exacto</strong>
+                            <strong id="ticket-porra-title">+2 puntos por marcador exacto</strong>
                         </div>
                         <div id="ticket-porra-body" class="porra-body">
                             <div class="empty-state">Cargando porra...</div>

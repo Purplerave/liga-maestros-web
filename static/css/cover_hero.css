@@ -42,9 +42,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    height: 100%;
+    min-height: 100%;
+    height: auto;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
@@ -64,9 +65,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
-    height: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
 }
 
 /* ===== COLUMNA IZQUIERDA: Hero ===== */
@@ -75,13 +78,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 10px;
     min-width: 0;
-    height: 100%;
 }
 
 /* Panel hero con efecto estadio */
 .cp-intro {
     width: 100%;
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -335,22 +336,119 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     gap: 8px;
     min-width: 0;
     height: 100%;
+    justify-content: space-between;
 }
 
-/* Parte inferior derecha: porra+duelo arriba, noticias abajo */
+/* Parte inferior derecha: porra y noticias, más una guía útil que ocupa el espacio restante */
 .cp-right-bottom {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex: 1;
     min-height: 0;
-    overflow: hidden;
+    flex: 1;
 }
 .cp-right-bottom-top {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
+
+/* Tu jornada: evita un hueco vacío y da un siguiente paso claro */
+.cp-journey-card {
+    display: flex;
+    flex: 1;
+    min-height: 112px;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 12px;
+    border: 1px solid var(--cp-line);
+    border-radius: 10px;
+    background:
+        radial-gradient(420px 130px at 50% 120%, rgba(56,217,255,0.08), transparent 70%),
+        rgba(15,22,38,0.88);
+}
+.cp-journey-card > p {
+    margin: 5px 0 0;
+    color: var(--cp-muted);
+    font-size: 0.54rem;
+    line-height: 1.35;
+}
+.cp-journey-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+}
+.cp-journey-step {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    min-height: 46px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.035);
+    color: var(--cp-text);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+.cp-journey-step:hover {
+    transform: translateY(-1px);
+    border-color: rgba(245,181,63,0.30);
+    background: rgba(245,181,63,0.07);
+}
+.cp-journey-number {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(56,217,255,0.12);
+    color: var(--cp-cyan);
+    font-family: var(--cp-font-display);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+.cp-journey-step > span:nth-child(2) {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+}
+.cp-journey-step b {
+    color: var(--cp-text);
+    font-size: 0.60rem;
+    font-style: normal;
+    font-weight: 800;
+}
+.cp-journey-step small {
+    overflow: hidden;
+    color: var(--cp-muted);
+    font-size: 0.48rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cp-journey-step > i {
+    color: var(--cp-dim);
+    font-size: 0.66rem;
+    font-style: normal;
+}
+.cp-journey-step.is-done {
+    border-color: rgba(34,197,94,0.22);
+    background: rgba(34,197,94,0.06);
+}
+.cp-journey-step.is-done .cp-journey-number {
+    background: rgba(34,197,94,0.14);
+    color: #6ee7b7;
+}
+.cp-journey-step.is-live .cp-journey-number {
+    background: rgba(239,90,139,0.14);
+    color: var(--cp-pink);
+}
+.cp-journey-step.is-muted { opacity: 0.62; }
 
 /* Clasificación */
 .cp-leaders {
@@ -536,12 +634,29 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 
 /* Porra */
 .cp-porra-content { min-height: 30px; }
+/* Season summary */
+.cp-season-summary { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.cp-season-label { color:var(--cp-muted); font-size:0.50rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; text-align:center; }
+.cp-leader-row { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:6px; background:rgba(255,255,255,0.03); }
+.cp-leader-row:nth-child(2) { background:rgba(245,181,63,0.08); }
+.cp-leader-pos { font-size:0.8rem; width:24px; text-align:center; flex-shrink:0; }
+.cp-leader-name { flex:1; color:var(--cp-text); font-size:0.58rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cp-leader-pts { color:var(--cp-gold); font-size:0.54rem; font-weight:800; font-family:var(--cp-font-display); flex-shrink:0; }
+.cp-season-stats { display:flex; justify-content:center; gap:12px; margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); }
+.cp-season-stats span { color:var(--cp-dim); font-size:0.48rem; font-weight:600; }
+
+.cp-porra-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:12px 8px; text-align:center; }
+.cp-porra-empty-icon { font-size:1.2rem; opacity:0.6; }
+.cp-porra-empty-text { color:var(--cp-muted); font-size:0.52rem; line-height:1.4; }
 .cp-porra .cp-fixture.is-compact { grid-template-columns: minmax(0,1fr) 14px minmax(0,1fr); gap:3px; margin-top:3px; }
 .cp-porra .cp-fixture.is-compact .team-badge { width:14px; height:14px; }
 .cp-porra .cp-fixture.is-compact .cp-team strong { font-size:0.52rem; }
 .cp-porra-foot { display:flex; justify-content:space-between; gap:4px; margin-top:3px; padding-top:3px; border-top:1px solid rgba(255,255,255,0.07); }
 .cp-porra-foot strong { color: var(--cp-gold); font-size:0.50rem; }
 .cp-porra-foot span { color: var(--cp-muted); font-size:0.46rem; }
+.cp-porra-hint { margin-top:4px; color:var(--cp-muted); font-size:0.48rem; line-height:1.35; text-align:center; }
+.cp-porra-change { display:block; margin-top:2px; font-size:0.46rem; color:var(--cp-dim); }
+.cp-porra-change.locked { color:var(--cp-pink); }
 
 /* Loading / empty */
 .cp-porra-loading { display:block; width:60%; height:5px; margin-top:12px; border-radius:3px; background: linear-gradient(90deg, rgba(148,163,184,.08), rgba(148,163,184,.22), rgba(148,163,184,.08)); background-size:200% 100%; animation: cpPorraLoad 1.25s linear infinite; }
@@ -560,6 +675,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     .cp-title-main { font-size: 1.5rem; }
     .cp-quicklinks { flex-wrap: wrap; }
     .cp-quicklinks button { min-width: calc(50% - 4px); }
+    .cp-journey-steps { grid-template-columns: 1fr; }
+    .cp-journey-step { min-height: 40px; }
 }
 @media (max-height: 820px) and (min-width: 901px) {
     .cp { padding-top: 4px; padding-bottom: 8px; }

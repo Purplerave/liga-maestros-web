@@ -124,12 +124,33 @@ def ensure_porra_table(conn):
             goles_local INTEGER NOT NULL,
             goles_visitante INTEGER NOT NULL,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            changes INTEGER NOT NULL DEFAULT 0
         )
     """)
+    # Migrate old constraint: drop old 3-column index, create new 2-column
+    try:
+        conn.execute("DROP INDEX IF EXISTS ux_porra_user_match")
+    except Exception:
+        pass
+    # Clean up duplicate entries: keep only the latest entry per user per jornada
     conn.execute("""
-        CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_match
-        ON porra_entries(user_id, jornada, partido_id)
+        DELETE FROM porra_entries
+        WHERE id NOT IN (
+            SELECT MAX(id)
+            FROM porra_entries
+            GROUP BY user_id, jornada
+        )
+    """)
+    # Add changes column if it doesn't exist
+    try:
+        conn.execute("ALTER TABLE porra_entries ADD COLUMN changes INTEGER NOT NULL DEFAULT 0")
+    except Exception:
+        pass  # Column already exists
+    # Unique constraint: 1 porra per user per jornada (not per match)
+    conn.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS ux_porra_user_jornada
+        ON porra_entries(user_id, jornada)
     """)
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_porra_jornada_match
@@ -279,6 +300,9 @@ def run_startup_migrations():
                 import sys
                 print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
             ensure_jornada_76(conn)
+            ensure_jornada_1(conn)
+            ensure_clasificacion_zero(conn)
+            ensure_porra_points_upgrade(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
         finally:
@@ -577,6 +601,142 @@ def _import_j75_resultados(conn):
         return
 
 
+def _import_j76_resultados(conn):
+    """Backfill verified final results of J76 shipped in data/.
+
+    Same logic as _import_j75_resultados: only fills rows still without a
+    result (NS/NULL) and never overwrites existing scores.
+    """
+    candidates = [
+        os.path.join(getattr(config, "SEED_DATA_DIR", "") or "", "quiniela15_J76_resultados.json"),
+        os.path.join(getattr(config, "DATA_DIR", "") or "", "quiniela15_J76_resultados.json"),
+    ]
+    for path in candidates:
+        if not path or not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        try:
+            if int(data.get("jornada") or 0) != 76:
+                continue
+        except (TypeError, ValueError):
+            continue
+        resultados = data.get("resultados") or []
+        if len(resultados) != 15:
+            continue
+        applied = 0
+        for item in resultados:
+            try:
+                pid = int(item["id"])
+                gh = item["goles_local"]
+                ga = item["goles_visitante"]
+                if gh is None or ga is None:
+                    continue
+                gh = int(gh)
+                ga = int(ga)
+            except (TypeError, ValueError, KeyError):
+                continue
+            signo = str(item.get("signo") or "").strip() or (
+                f"{gh}-{ga}" if pid == 15 else ("1" if gh > ga else ("2" if gh < ga else "X"))
+            )
+            cursor = conn.execute(
+                """
+                UPDATE resultados
+                SET goles_local = ?, goles_visitante = ?, status = 'FT',
+                    minuto = 'Finalizado', signo_actual = ?
+                WHERE jornada = 76 AND partido_id = ?
+                  AND (goles_local IS NULL OR goles_visitante IS NULL)
+                  AND (status IS NULL OR status IN ('NS', 'SCHEDULED', ''))
+                """,
+                (gh, ga, signo, pid),
+            )
+            applied += cursor.rowcount
+        if applied:
+            conn.commit()
+        return
+
+
+def ensure_jornada_1(conn):
+    """Garantiza la Jornada 1 de la nueva temporada 2026/27."""
+    # El boleto oficial está en data/quiniela15_J1_scrape.json; si no está, no hacemos nada.
+    updated = ensure_jornada_completa(conn, 1)
+    if updated:
+        conn.commit()
+
+
+def ensure_clasificacion_zero(conn):
+    """Para la nueva temporada las ligas deben salir a cero puntos.
+    Si la tabla existe pero todavía tiene puntos de la temporada anterior, la resetea a 0.
+    Si está vacía (tras RESET_TEMPORADA), la repuebla desde los JSON base ya a cero.
+    """
+    try:
+        count = conn.execute("SELECT COUNT(*) FROM clasificacion").fetchone()[0]
+    except Exception:
+        return
+    has_points = False
+    try:
+        row = conn.execute("SELECT SUM(pts) as s FROM clasificacion").fetchone()
+        has_points = row and row[0] not in (0, None)
+    except Exception:
+        pass
+    if count == 0:
+        # Repoblar desde los JSON base (ya a cero tras el fix)
+        import json
+        import os
+
+        import config
+
+        # Carga directa de los ficheros base
+        laliga_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_LALIGA_BASE.json")
+        segunda_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_SEGUNDA_BASE.json")
+        imported = 0
+        for fpath, division in [(laliga_path, 1), (segunda_path, 2)]:
+            if not os.path.exists(fpath):
+                continue
+            try:
+                with open(fpath, encoding="utf-8") as fh:
+                    teams = json.load(fh)
+            except Exception:
+                continue
+            for idx, team in enumerate(teams, start=1):
+                try:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO clasificacion (equipo, pj, pts, division, pos, pg, pe, pp, gf, gc, racha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            team.get("n", f"Equipo {idx}"),
+                            int(team.get("pj", 0) or 0),
+                            int(team.get("pts", 0) or 0),
+                            division,
+                            int(team.get("pos", idx) or idx),
+                            int(team.get("pg", 0) or 0),
+                            int(team.get("pe", 0) or 0),
+                            int(team.get("pp", 0) or 0),
+                            int(team.get("gf", 0) or 0),
+                            int(team.get("gc", 0) or 0),
+                            team.get("racha"),
+                        ),
+                    )
+                    imported += 1
+                except Exception:
+                    continue
+        if imported:
+            conn.commit()
+        return
+    if has_points:
+        conn.execute("UPDATE clasificacion SET pj=0, pts=0, pg=0, pe=0, pp=0, gf=0, gc=0, racha=NULL")
+        conn.commit()
+
+
+def ensure_porra_points_upgrade(conn):
+    """Asegura que la porra pasa de 1 a 2 puntos. No toca registros existentes, solo el default aplicativo."""
+    # Los puntos se asignan en porra.py; este helper es solo para documentar el cambio de política.
+    # No necesita migración de datos porque los puntos ya otorgados (1) quedan históricos.
+    return
+
+
 def ensure_jornada_75(conn):
     """Import the public J75 fixture and pronosticos from arena data.
 
@@ -618,4 +778,5 @@ def ensure_jornada_76(conn):
     file shipped in data/.
     """
     ensure_jornada_completa(conn, 76, fallback_matches=J76_FALLBACK_MATCHES)
+    _import_j76_resultados(conn)
     conn.commit()

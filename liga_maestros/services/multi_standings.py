@@ -90,3 +90,44 @@ def refresh_external_standings(season=2025):
     if external:
         _save_cache(external)
     return external
+
+
+def refresh_spanish_standings(season=2026):
+    """Fetch La Liga and Segunda standings from Highlightly and update BASE files."""
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    spanish_leagues = {
+        "primera": (config.HIGHLIGHTLY_LEAGUES.get("LA LIGA", 119924), "STANDINGS_LALIGA_BASE.json"),
+        "segunda": (config.HIGHLIGHTLY_LEAGUES.get("SEGUNDA DIVISION", 120775), "STANDINGS_SEGUNDA_BASE.json"),
+    }
+    updated = []
+    for cat, (league_id, filename) in spanish_leagues.items():
+        teams = fetch_highlightly_standings(league_id, season=season)
+        if not teams:
+            continue
+        base_teams = []
+        for i, t in enumerate(teams, 1):
+            base_teams.append(
+                {
+                    "pos": i,
+                    "n": t.get("n", ""),
+                    "pj": t.get("pj", 0),
+                    "pg": t.get("pg", 0),
+                    "pe": t.get("pe", 0),
+                    "pp": t.get("pp", 0),
+                    "gf": t.get("gf", 0),
+                    "gc": t.get("gc", 0),
+                    "pts": t.get("pts", 0),
+                }
+            )
+        path = os.path.join(config.DATA_DIR, filename)
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(base_teams, f, ensure_ascii=False, indent=2)
+            logger.info("Updated %s standings: %d teams", cat, len(base_teams))
+            updated.append(cat)
+        except Exception:
+            logger.exception("Failed to write %s", filename)
+    return updated

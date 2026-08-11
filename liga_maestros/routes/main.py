@@ -4,7 +4,7 @@ import os
 import time
 from functools import lru_cache
 
-from flask import Blueprint, abort, make_response, render_template, request, send_from_directory, session
+from flask import Blueprint, abort, jsonify, make_response, render_template, request, send_from_directory, session
 
 import config
 
@@ -79,6 +79,26 @@ def juegos_files(filename):
     return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
 
 
+@bp.route("/api/season-summary")
+def season_summary():
+    import json as _json
+
+    summary_path = os.path.join(config.DATA_DIR, "season_2025_2026_summary.json")
+    if not os.path.isfile(summary_path):
+        return jsonify({"status": "not_found"}), 404
+    try:
+        with open(summary_path, encoding="utf-8") as f:
+            data = _json.load(f)
+        return jsonify(data)
+    except Exception:
+        return jsonify({"status": "error"}), 500
+
+
+@bp.route("/ayuda")
+def help_page():
+    return render_template("legal/help.html", user=session.get("user"))
+
+
 @bp.route("/health")
 def health():
     """Probe ligero para monitores de uptime (sin datos sensibles)."""
@@ -113,6 +133,7 @@ def sitemap_xml():
             ("/privacidad", "yearly"),
             ("/cookies", "yearly"),
             ("/aviso-legal", "yearly"),
+            ("/ayuda", "monthly"),
         )
     )
     response = make_response(

@@ -1,8 +1,122 @@
 [
-    {"pos": 1, "equipo": "Barcelona", "pts": 78, "racha": "V-V-V-E-V"},
-    {"pos": 2, "equipo": "Real Madrid", "pts": 75, "racha": "V-V-E-V-V"},
-    {"pos": 3, "equipo": "Athletic", "pts": 68, "racha": "E-V-D-V-V"},
-    {"pos": 4, "equipo": "At. Madrid", "pts": 65, "racha": "V-E-V-D-V"},
-    {"pos": 5, "equipo": "Villarreal", "pts": 62, "racha": "V-D-V-V-E"},
-    {"pos": 6, "equipo": "Real Sociedad", "pts": 58, "racha": "D-V-E-E-V"}
+  {
+    "pos": 1,
+    "equipo": "FC Barcelona",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 2,
+    "equipo": "Real Madrid",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 3,
+    "equipo": "Villarreal CF",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 4,
+    "equipo": "Atlético de Madrid",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 5,
+    "equipo": "Real Betis",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 6,
+    "equipo": "Celta",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 7,
+    "equipo": "Getafe CF",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 8,
+    "equipo": "Rayo Vallecano",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 9,
+    "equipo": "Valencia CF",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 10,
+    "equipo": "Real Sociedad",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 11,
+    "equipo": "RCD Espanyol de Barcelona",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 12,
+    "equipo": "Athletic Club",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 13,
+    "equipo": "Sevilla FC",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 14,
+    "equipo": "Deportivo Alavés",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 15,
+    "equipo": "Elche CF",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 16,
+    "equipo": "Levante UD",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 17,
+    "equipo": "CA Osasuna",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 18,
+    "equipo": "RCD Mallorca",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 19,
+    "equipo": "Girona FC",
+    "pts": 0,
+    "racha": "-"
+  },
+  {
+    "pos": 20,
+    "equipo": "Real Oviedo",
+    "pts": 0,
+    "racha": "-"
+  }
 ]

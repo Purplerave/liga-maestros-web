@@ -18,8 +18,33 @@ def runtime_data_path(*parts):
     return os.path.join(BASE_DIR, "data", *parts)
 
 
+LATIN_TRANSLIT = {
+    "Ø": "O",
+    "ø": "o",
+    "Æ": "AE",
+    "æ": "ae",
+    "ß": "SS",
+    "Ð": "D",
+    "ð": "d",
+    "Þ": "TH",
+    "þ": "th",
+    "Ł": "L",
+    "ł": "l",
+    "Đ": "D",
+    "đ": "d",
+    "Ŋ": "N",
+    "ŋ": "n",
+    "Œ": "OE",
+    "œ": "oe",
+}
+
+
 def clean_team_key(value):
-    text = unicodedata.normalize("NFD", str(value or "").upper())
+    text = str(value or "").upper()
+    # Transliterate Latin letters that NFD does NOT decompose (ø, æ, ß, ð, þ, ł...)
+    text = "".join(LATIN_TRANSLIT.get(ch, ch) for ch in text)
+    # Now NFD handles the rest (á→a, é→e, ñ→n, ü→u, etc.)
+    text = unicodedata.normalize("NFD", text)
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
     text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
     text = re.sub(r"\b(F C|FC|C F|CF|S A D|SAD|R C D|RCD|C D|CD|U D|UD|S D|SD)\b", "", text).strip()

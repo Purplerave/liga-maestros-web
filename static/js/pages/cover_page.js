@@ -57,6 +57,34 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
+function loadSeasonSummary() {
+    var target = document.getElementById("cp-season-summary");
+    if (!target) return;
+    fetch("/api/season-summary")
+        .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
+        .then(function (data) {
+            var top3 = data.top_3 || [];
+            var medals = ["🥇", "🥈", "🥉"];
+            var rowsHtml = top3.map(function (p, i) {
+                return '<div class="cp-leader-row">' +
+                    '<span class="cp-leader-pos">' + (medals[i] || (i + 1)) + '</span>' +
+                    '<span class="cp-leader-name">' + escapeHtml(p.name) + '</span>' +
+                    '<span class="cp-leader-pts">' + p.points + ' pts</span>' +
+                    '</div>';
+            }).join("");
+            var statsHtml = '<div class="cp-season-stats">' +
+                '<span>' + (data.total_participants || 0) + ' participantes</span>' +
+                '<span>' + (data.total_jornadas || 0) + ' jornadas</span>' +
+                '</div>';
+            target.innerHTML =
+                '<div class="cp-season-label">Resultados ' + escapeHtml(data.season || "Pruebas") + '</div>' +
+                rowsHtml + statsHtml;
+        })
+        .catch(function () {
+            target.innerHTML = '<span class="cp-empty">Próximamente: clasificación de la temporada</span>';
+        });
+}
+
 function coverCloseLabel() {
     const raw = state.data.edit_deadline || state.data.kickoff_at || "";
     if (!raw) return state.data.is_locked ? "cerrada" : "abierta";
@@ -160,25 +188,54 @@ function coverFixtureHtml(match, compact = false) {
         <span class="cp-team cp-team-away">${logoBadge(match.visitante, teamLogo(match, "away"))}<strong>${escapeHtml(getShortName(match.visitante))}</strong></span>
     </div>`;
 }
+function updateCoverPorraStep(label, stateName = "") {
+    const step = document.getElementById("cover-porra-step");
+    const status = document.getElementById("cover-porra-step-status");
+    if (!step || !status) return;
+    status.textContent = label;
+    step.classList.toggle("is-done", stateName === "done");
+    step.classList.toggle("is-muted", stateName === "unavailable");
+}
+
 function hydrateCoverPorra(data) {
     const target = document.getElementById("cover-porra-content");
     const title = document.getElementById("cover-porra-title");
     if (!target) return;
     if (!data?.enabled || !data.match) {
-        target.innerHTML = `<span class="cp-empty">${escapeHtml(data?.message || "Sin porra")}</span>`;
+        const msg = data?.message || "Porra no disponible para esta jornada";
+        target.innerHTML = `<div class="cp-porra-empty"><span class="cp-porra-empty-icon">🎯</span><span class="cp-porra-empty-text">${escapeHtml(msg)}</span></div>`;
+        updateCoverPorraStep("No disponible", "unavailable");
         return;
     }
     const match = data.match;
-    if (title) title.textContent = data.label ? String(data.label).replace(/^porra( de la jornada)?$/i, "La porra") : "La porra";
+    if (title) title.textContent = "La porra — +2 pts";
     const mine = data.mine || {};
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
-    const totalEntries = Number(data.total_entries || 0);
     const leaders = (data.distribution || []).slice(0, 3);
-    const status = hasMine ? `Llevas ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Pon tu marcador";
+    const hint = data.hint || "Marcador exacto: +2 puntos.";
+    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu partido — +2 pts si aciertas";
+    const changes = data.my_changes || 0;
+    const jornadaLocked = data.jornada_locked || false;
+
+    if (hasMine) updateCoverPorraStep(`${Number(mine.goles_local)}-${Number(mine.goles_visitante)} guardado`, "done");
+    else updateCoverPorraStep(data.locked ? "Cerrada" : "Elige marcador");
+
+    let changeInfo = "";
+    if (hasMine && !jornadaLocked) {
+        if (changes === 0) {
+            changeInfo = `<span class="cp-porra-change">Puedes cambiarla 1 vez</span>`;
+        } else {
+            changeInfo = `<span class="cp-porra-change locked">Ya no puedes cambiar</span>`;
+        }
+    }
+    const porraHintHtml = !hasMine && !data.locked ? `<div class="cp-porra-hint">${escapeHtml(hint)}</div>` : "";
+
     target.innerHTML = `${coverFixtureHtml(match, true)}
         <div class="cp-porra-foot"><strong>${escapeHtml(status)}</strong>
-            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" · ")}</span>` : `<span>Anímate</span>`}
-        </div>`;
+            ${leaders.length ? `<span>${leaders.map(item => `${Number(item.goles_local)}-${Number(item.goles_visitante)} <small>${Number(item.percent || 0).toLocaleString("es-ES", { maximumFractionDigits: 0 })}%</small>`).join(" · ")}</span>` : `<span>Sé el primero</span>`}
+        </div>
+        ${porraHintHtml}
+        ${changeInfo}`;
 }
 
 function renderNewspaperCoverPageV3() {
@@ -207,15 +264,17 @@ function renderNewspaperCoverPageV3() {
 
     const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar quiniela" : "Jugar quiniela");
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
+    const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
+    const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto bienvenida - con titular gancho
-    const explica = `<span class="cp-headline">Tu Quiniela contra las IAs</span><br><span class="cp-subhead">Cada jornada, 15 partidos. Tú, La Peña y las máquinas con el mismo boleto.</span><br><br>Haz tus pronósticos cada jornada, suma puntos por cada acierto y sube en la clasificación. Competirás contra el resto de jugadores, el pronóstico colectivo de La Peña, nuestro Programa y varias de las IAs más conocidas.<br><br>En las jornadas de prueba, las IAs consiguieron <b>8,2 aciertos de media</b>. La Peña se quedó en <b>6,9</b>.<br><br>Las máquinas ganaron el calentamiento. Pero ahora todos vuelven a cero.<br><br><span class="cp-challenge">¿Quién sabe más de fútbol?</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
+    // Texto bienvenida - nueva temporada a punto de arrancar
+    const explica = `<span class="cp-headline">Las pruebas han terminado</span><br><span class="cp-subhead">Fue solo el calentamiento. Ahora empieza la temporada de verdad.</span><br><br>Hemos cerrado la fase de pruebas con la clasificación final del calentamiento (ver podio a la derecha). Las máquinas se llevaron esta primera batalla — <b>8,2 aciertos de media</b> frente a <b>6,9</b> de La Peña — pero ahora <b>todos volvemos a cero</b>.<br><br>En breve arranca la nueva temporada y cada jornada volverá a contar: 15 partidos, tu quiniela 1X2 y el duelo directo contra el resto de jugadores, La Peña y los Maestros IA. Suma aciertos, escala en la general y demuestra quién entiende de verdad este juego.<br><br><span class="cp-challenge">¿Te apuntas? La nueva Liga te está esperando.</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
 
     // Countdown a la primera jornada
     const seasonStart = new Date('2026-08-15T19:30:00');
     const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
-        <div class="cp-countdown-label">La Liga empieza en</div>
+        <div class="cp-countdown-label">Jornada 1 empieza en</div>
         <div class="cp-countdown-timer" id="cp-countdown-timer">--</div>
         <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
     </div>`;
@@ -231,27 +290,8 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    // Clasificación - mostrar resultados de pruebas
-    let clasifHtml = `
-        <div style="margin-top:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <div style="text-align:center;flex:1;">
-                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">LA PEÑA</div>
-                    <div style="color:var(--cp-gold);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">6.9</div>
-                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
-                </div>
-                <div style="color:var(--cp-dim);font-size:0.58rem;font-weight:800;">VS</div>
-                <div style="text-align:center;flex:1;">
-                    <div style="color:var(--cp-muted);font-size:0.52rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">IAs</div>
-                    <div style="color:var(--cp-cyan);font-size:clamp(1.4rem,2vw,1.8rem);font-weight:800;font-family:var(--cp-font-display);">8.2</div>
-                    <div style="color:var(--cp-dim);font-size:0.48rem;">puntos/partido</div>
-                </div>
-            </div>
-            <div style="text-align:center;padding:6px 0;border-top:1px solid var(--cp-line);">
-                <div style="color:var(--cp-gold);font-size:0.58rem;font-weight:700;">Las IAs ganaron las pruebas</div>
-                <div style="color:var(--cp-dim);font-size:0.50rem;margin-top:2px;">Pero la temporada empieza ahora</div>
-            </div>
-        </div>`;
+    // Clasificación - se carga dinámicamente desde season summary
+    let clasifHtml = `<div id="cp-season-summary" class="cp-season-summary"><span class="cp-porra-loading">Cargando</span></div>`;
 
     return `<div class="cp">
         <main class="cp-stage">
@@ -287,9 +327,8 @@ function renderNewspaperCoverPageV3() {
 
             <div class="cp-hero-right">
                 <section class="cp-leaders">
-                    <div class="cp-card-head"><span>PRUEBAS FINALIZADAS</span><b>TEMPORADA 26/27</b></div>
+                    <div class="cp-card-head"><span>PODIO PRUEBAS 25/26</span><b>TOP 3</b></div>
                     ${clasifHtml}
-                    <div class="cp-leaders-foot"><a href="#" data-page-action="CONTEST">Ver clasificación completa →</a></div>
                 </section>
 
                 <div class="cp-right-bottom">
@@ -307,6 +346,31 @@ function renderNewspaperCoverPageV3() {
                             <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
                         </div>
                     </div>
+
+                    <section class="cp-journey-card" aria-labelledby="cp-journey-title">
+                        <div class="cp-card-head">
+                            <span id="cp-journey-title">TU JORNADA</span>
+                            <b>3 pasos</b>
+                        </div>
+                        <p>Haz tu jugada, busca el +2 y sigue los marcadores.</p>
+                        <div class="cp-journey-steps">
+                            <button type="button" class="cp-journey-step${saved ? " is-done" : ""}" data-page-action="TICKET">
+                                <span class="cp-journey-number" aria-hidden="true">1</span>
+                                <span><b>Quiniela</b><small>${escapeHtml(ticketStepLabel)}</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                            <button type="button" class="cp-journey-step" id="cover-porra-step" data-page-action="TICKET">
+                                <span class="cp-journey-number" aria-hidden="true">2</span>
+                                <span><b>Porra</b><small id="cover-porra-step-status">Cargando...</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                            <button type="button" class="cp-journey-step${liveCount ? " is-live" : ""}" data-page-action="LIVE">
+                                <span class="cp-journey-number" aria-hidden="true">3</span>
+                                <span><b>Directo</b><small>${escapeHtml(liveStepLabel)}</small></span>
+                                <i aria-hidden="true">→</i>
+                            </button>
+                        </div>
+                    </section>
                 </div>
             </div>
         </main>
