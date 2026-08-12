@@ -9,6 +9,7 @@ from ..middleware.rate_limit import is_rate_limited
 from ..scoring import normalize_prediction_sign
 from ..services.highlightly import Q15_EXPECTED_MATCHES
 from ..services.teams import is_live_scored_status, is_scored_status
+from ..services.jornada import resolve_active_jornada
 from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
@@ -54,8 +55,8 @@ def save_predictions():
     conn = get_db()
     transaction_started = False
     try:
-        max_jornada = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()[0]
-        if max_jornada is None or int(max_jornada) != target_jornada:
+        active_jornada = resolve_active_jornada(conn)
+        if active_jornada is None or int(active_jornada) != target_jornada:
             return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
         rows = conn.execute(
             "SELECT partido_id, fecha, hora, status FROM resultados WHERE jornada = ? ORDER BY partido_id",

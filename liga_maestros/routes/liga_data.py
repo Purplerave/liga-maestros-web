@@ -89,34 +89,10 @@ def get_liga_data():
 
 
 def _resolve_max_jornada(conn):
-    # Nueva temporada 2026/27: la web oficial arranca en Jornada 1.
-    try:
-        has_j1 = conn.execute("SELECT 1 FROM resultados WHERE jornada = 1 LIMIT 1").fetchone()
-        if has_j1:
-            return 1
-    except Exception:
-        pass
-    rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*)>0").fetchall()
-    jornadas = [int(r[0]) for r in rows if r[0] is not None]
-    if not jornadas:
-        # BD vacía pero hay boleto de J1 en disco -> mostrar J1
-        import os as _os
+    # La web y el guardado comparten exactamente esta jornada activa.
+    from ..services.jornada import resolve_active_jornada
 
-        import config as _cfg
-
-        for base in (_cfg.SEED_DATA_DIR, _cfg.DATA_DIR, _os.path.join(_cfg.BASE_DIR, "data")):
-            if base and _os.path.exists(_os.path.join(base, "quiniela15_J1_scrape.json")):
-                return 1
-        return "1"
-    # Si hay J1 entre las jornadas, devolver 1; si solo hay pruebas antiguas, devolver la más reciente válida (sin 75/76 en prod)
-    if 1 in jornadas:
-        return 1
-    # Ocultar 75/76 cuando J1 existe en producción no aplica aquí; para tests devolver el max real
-    filtered = [j for j in jornadas if j not in (75, 76)]
-    if filtered:
-        # En producción con J1 ya migrada nunca llegamos aquí
-        return max(filtered)
-    return max(jornadas)
+    return resolve_active_jornada(conn)
 
 
 def _resolve_available_jornadas(conn):
