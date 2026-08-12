@@ -19,8 +19,18 @@ from liga_maestros.db.migrations import ensure_core_tables, ensure_jornada_1, en
 COPILOT_SIGNOS = ["X", "1", "1", "1", "1", "X", "X", "1", "1", "1", "1", "1", "X", "1", "1-0"]
 
 PENA_12 = {
-    "chipi", "geli", "pepe", "profe", "fortu", "oraculo",
-    "fistro", "sesudo", "jimmy", "luzia", "luna", "erniebot",
+    "chipi",
+    "geli",
+    "pepe",
+    "profe",
+    "fortu",
+    "oraculo",
+    "fistro",
+    "sesudo",
+    "jimmy",
+    "luzia",
+    "luna",
+    "erniebot",
 }
 MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot"}
 
@@ -66,7 +76,9 @@ def test_ensure_jornada_1_imports_boletos_from_arena_file():
     ensure_jornada_1(conn)
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 1").fetchone()[0] == 15
 
-    rows = conn.execute("SELECT user_id, signo FROM predicciones WHERE jornada = 1 ORDER BY user_id, partido_id").fetchall()
+    rows = conn.execute(
+        "SELECT user_id, signo FROM predicciones WHERE jornada = 1 ORDER BY user_id, partido_id"
+    ).fetchall()
     by_user = {}
     for row in rows:
         by_user.setdefault(row["user_id"], []).append(row["signo"])
