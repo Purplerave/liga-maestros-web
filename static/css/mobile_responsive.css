@@ -113,10 +113,11 @@
     .command-palette input {
         font-size: 16px;
     }
-    .toast-container {
-        bottom: 8px;
+    #toast-container {
+        top: 8px;
         right: 8px;
         left: 8px;
+        width: auto;
     }
     .toast {
         font-size: 13px;

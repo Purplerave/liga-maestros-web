@@ -185,7 +185,17 @@ body::after {
 
 /* Ensure all content sits above atmospheric layers */
 .app-shell { position: relative; z-index: 1; }
-#toast-container { z-index: var(--z-toast, 9000); }
+#toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: var(--z-toast, 9000);
+    display: flex;
+    width: min(380px, calc(100vw - 32px));
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
 
 /* ==========================================================================
    MEDALLAS DE PERFIL ("cartoon pills")
