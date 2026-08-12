@@ -8,17 +8,17 @@ PORRA_ROUTE = ROOT / "liga_maestros" / "routes" / "porra.py"
 
 
 def test_cover_fills_lower_panel_with_useful_journey_actions():
-    """Portada: journey visible y columnas 2x2; sin estirar huecos vacíos."""
+    """Portada: journey rellena la derecha; atajos en franja inferior a ancho completo."""
     cover = COVER_JS.read_text(encoding="utf-8")
     css = COVER_CSS.read_text(encoding="utf-8")
 
     assert 'class="cp-journey-card"' in cover
     assert 'id="cover-porra-step-status"' in cover
+    assert "cp-quicklinks-footer" in cover
     assert ".cp-journey-card" in css
-    # Layout compacto: columnas top-aligned (evita el hueco de la derecha)
-    assert "align-items: start" in css
+    assert "flex: 1" in css.split(".cp-journey-card", 1)[1].split("}", 1)[0]
     assert "grid-template-columns: 1fr 1fr" in css
-    assert ".cp-right-bottom" in css
+    assert ".cp-quicklinks-footer" in css
 
 
 def test_porra_bonus_copy_is_short_and_consistent():
