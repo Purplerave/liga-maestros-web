@@ -268,107 +268,189 @@ function renderNewspaperCoverPageV3() {
     const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
     const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
-    // Texto bienvenida - nueva temporada a punto de arrancar
-    const explica = `<span class="cp-headline">Las pruebas han terminado</span><br><span class="cp-subhead">Fue solo el calentamiento. Ahora empieza la temporada de verdad.</span><br><br>Hemos cerrado la fase de pruebas con la clasificación final del calentamiento (ver podio a la derecha). Las máquinas se llevaron esta primera batalla — <b>8,2 aciertos de media</b> frente a <b>6,9</b> de La Peña — pero ahora <b>todos volvemos a cero</b>.<br><br>En breve arranca la nueva temporada y cada jornada volverá a contar: 15 partidos, tu quiniela 1X2 y el duelo directo contra el resto de jugadores, La Peña y los Maestros IA. Suma aciertos, escala en la general y demuestra quién entiende de verdad este juego.<br><br><span class="cp-challenge">¿Te apuntas? La nueva Liga te está esperando.</span><br><span class="cp-loteria">¿Confías de verdad en tus pronósticos? También puedes <a href="https://www.labarcadeoro.com/" target="_blank" rel="noopener">echar tu Quiniela online →</a></span>`;
+    // Portada v12 — narrativa corta + duelo + partido + operativa
+    const seasonLabel = "Temporada 26/27";
+    const featured = disagreement || (matches[0] ? { match: matches[0], picks: [], pena: null } : null);
+    let featuredMeta = "";
+    if (featured && featured.match) {
+        const m = featured.match;
+        const when = m.hora || m.kickoff || m.fecha || "";
+        featuredMeta = when ? escapeHtml(String(when)) : "Jornada " + escapeHtml(String(jornada || "1"));
+    }
 
-    // Countdown a la primera jornada
-    const seasonStart = new Date('2026-08-15T19:30:00');
+    // Mini 1X2 de la Peña sobre el partido destacado
+    let featuredPulse = "";
+    if (featured && featured.match) {
+        const row = consenso.find(r => Number(r.id) === Number(featured.match.id));
+        if (row && Number(row.total || 0) > 0) {
+            const p1 = Number(row.p1 || 0), px = Number(row.px || 0), p2 = Number(row.p2 || 0);
+            const t = p1 + px + p2 || 1;
+            featuredPulse = `
+                <div class="cp-featured-pulse" aria-label="Voto de La Peña">
+                    <div class="cp-featured-pulse-bars">
+                        <i class="is-one" style="width:${(p1/t*100).toFixed(1)}%"></i>
+                        <i class="is-draw" style="width:${(px/t*100).toFixed(1)}%"></i>
+                        <i class="is-two" style="width:${(p2/t*100).toFixed(1)}%"></i>
+                    </div>
+                    <div class="cp-featured-pulse-labels">
+                        <span>1 ${(p1/t*100).toFixed(0)}%</span>
+                        <span>X ${(px/t*100).toFixed(0)}%</span>
+                        <span>2 ${(p2/t*100).toFixed(0)}%</span>
+                    </div>
+                    <div class="cp-featured-pulse-foot">${Number(row.total)} votos de La Peña</div>
+                </div>`;
+        } else if (featured.pena) {
+            featuredPulse = `<div class="cp-featured-pulse-foot">La Peña se inclina por <b>${escapeHtml(featured.pena.sign)}</b></div>`;
+        }
+    }
+
+    // Picks IA del partido destacado
+    let featuredPicks = "";
+    if (featured && featured.picks && featured.picks.length) {
+        const limited = featured.picks.slice(0, 4);
+        featuredPicks = `<div class="cp-featured-picks">${limited.map(item =>
+            `<span title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label).slice(0, 10)}</small><b>${escapeHtml(item.sign)}</b></span>`
+        ).join("")}</div>`;
+    }
+
+    // Duelo Peña vs IA
+    let duelBody = "";
+    if (isFirstOfficial) {
+        duelBody = `
+            <div class="cp-duel-zero">
+                <div class="cp-duel-zero-badge">${escapeHtml(seasonLabel)}</div>
+                <div class="cp-duel-zero-title">TODO A CERO</div>
+                <p class="cp-duel-zero-text">Las pruebas acabaron. Empieza la liga de verdad.</p>
+            </div>
+            <div class="cp-duel-scores is-reset">
+                <div class="cp-duel-side is-pena">
+                    <span class="cp-duel-side-label">La Peña</span>
+                    <strong class="cp-duel-side-value">0</strong>
+                    <small>media pruebas 6,9</small>
+                </div>
+                <div class="cp-duel-vs" aria-hidden="true">VS</div>
+                <div class="cp-duel-side is-ia">
+                    <span class="cp-duel-side-label">Maestros IA</span>
+                    <strong class="cp-duel-side-value">0</strong>
+                    <small>media pruebas 8,2</small>
+                </div>
+            </div>`;
+    } else {
+        const diff = (bando.aiAvg - bando.humanAvg);
+        const diffStr = (diff >= 0 ? "+" : "") + diff.toFixed(1).replace(".", ",");
+        const leader = diff > 0.05 ? "Las máquinas van por delante" : diff < -0.05 ? "La Peña va por delante" : "Empate técnico";
+        duelBody = `
+            <div class="cp-duel-scores">
+                <div class="cp-duel-side is-pena">
+                    <span class="cp-duel-side-label">La Peña</span>
+                    <strong class="cp-duel-side-value">${escapeHtml(humanAvgStr)}</strong>
+                    <small>media aciertos</small>
+                </div>
+                <div class="cp-duel-vs" aria-hidden="true">VS</div>
+                <div class="cp-duel-side is-ia">
+                    <span class="cp-duel-side-label">Maestros IA</span>
+                    <strong class="cp-duel-side-value">${escapeHtml(aiAvgStr)}</strong>
+                    <small>media aciertos</small>
+                </div>
+            </div>
+            <div class="cp-duel-bar" role="img" aria-label="Reparto del duelo">
+                <i class="is-pena" style="width:${Math.max(8, Math.min(92, humanPct)).toFixed(1)}%"></i>
+                <i class="is-ia" style="width:${Math.max(8, Math.min(92, 100 - humanPct)).toFixed(1)}%"></i>
+            </div>
+            <div class="cp-duel-foot"><b>${escapeHtml(leader)}</b> · diff ${escapeHtml(diffStr)}</div>`;
+    }
+
     const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
-        <div class="cp-countdown-label">Jornada 1 empieza en</div>
+        <div class="cp-countdown-label">Jornada 1 · arranque</div>
         <div class="cp-countdown-timer" id="cp-countdown-timer">--</div>
         <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
     </div>`;
 
-    let picksHtml = "";
-    if (disagreement) {
-        const limited = disagreement.picks.slice(0, 3);
-        const extra = disagreement.picks.length > 3 ? disagreement.picks.length - 3 : 0;
-        picksHtml = `
-            ${disagreement.pena ? `<span class="is-pena" title="${disagreement.pena.total} pronósticos"><small>Peña</small><b>${escapeHtml(disagreement.pena.sign)}</b></span>` : ""}
-            ${limited.map(item => `<span class="${String(item.id).toLowerCase() === "programa" ? "is-program" : ""}" title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label).slice(0,8)}</small><b>${escapeHtml(item.sign)}</b></span>`).join("")}
-            ${extra ? `<span><small>+${extra}</small></span>` : ""}
-        `;
-    }
-
-    // Clasificación - se carga dinámicamente desde season summary
-    let clasifHtml = `<div id="cp-season-summary" class="cp-season-summary"><span class="cp-porra-loading">Cargando</span></div>`;
+    const featuredHtml = featured && featured.match ? `
+        <article class="cp-featured" data-page-action="TICKET">
+            <div class="cp-card-head">
+                <span>PARTIDO DE LA JORNADA</span>
+                <b>${featuredMeta || "Jornada " + escapeHtml(String(jornada || ""))}</b>
+            </div>
+            ${coverFixtureHtml(featured.match, false)}
+            ${featuredPulse}
+            ${featuredPicks}
+            <button type="button" class="cp-featured-cta" data-page-action="TICKET">Pronosticar →</button>
+        </article>` : `
+        <article class="cp-featured is-empty">
+            <div class="cp-card-head"><span>PARTIDO DE LA JORNADA</span></div>
+            <p class="cp-empty">Los partidos se publicarán con el cierre de la jornada anterior.</p>
+        </article>`;
 
     return `<div class="cp">
-        <main class="cp-stage">
-            <div class="cp-hero-left">
-                <section class="cp-intro">
-                    <div class="cp-kicker">
-                        <span>Quiniela ${escapeHtml(String(jornada))}</span>
-                        <i class="cp-kicker-dot"></i>
-                        <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
-                        ${liveCount ? `<span style="margin-left:6px;color:#6ee7b7;">● ${liveCount} en directo</span>` : ""}
-                    </div>
-                    <div class="cp-hero-tagline"><b>1X2</b> · La Peña vs IA</div>
-                    <div class="cp-hero-titles">
-                        <h1 id="cp-main-title">
-                            <span class="cp-title-main"><span class="cp-title-white">LIGA </span><span class="cp-title-white">DE </span><span class="cp-title-gold">MAESTROS</span></span>
-                            <span class="cp-title-accent"></span>
-                            <span class="cp-title-sub">LA PEÑA CONTRA LAS MÁQUINAS</span>
-                        </h1>
-                    </div>
-                    <p class="cp-lead">${explica}</p>
-                    ${countdownHtml}
-                    <div class="cp-actions">
-                        <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                        <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
-                    </div>
-                </section>
+        <header class="cp-hero">
+            <div class="cp-kicker">
+                <span>Quiniela ${escapeHtml(String(jornada || "1"))}</span>
+                <i class="cp-kicker-dot"></i>
+                <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
             </div>
-
-            <div class="cp-hero-right">
-                <section class="cp-leaders">
-                    <div class="cp-card-head"><span>PODIO PRUEBAS 25/26</span><b>TOP 3</b></div>
-                    ${clasifHtml}
-                </section>
-
-                <div class="cp-right-bottom">
-                    <div class="cp-right-bottom-top">
-                        <div class="cp-data-card cp-porra" data-page-action="TICKET">
-                            <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>Marcador exacto</b></div>
-                            <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
-                        </div>
-
-                        <div class="cp-data-card cp-news-card" id="cp-news-card">
-                            <div class="cp-news-header">
-                                <span>ÚLTIMAS NOTICIAS</span>
-                                <a href="#" data-page-action="NEWS">Ver todas →</a>
-                            </div>
-                            <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-                        </div>
-                    </div>
-
-                    <section class="cp-journey-card" aria-labelledby="cp-journey-title">
-                        <div class="cp-card-head">
-                            <span id="cp-journey-title">TU JORNADA</span>
-                            <b>3 pasos</b>
-                        </div>
-                        <p>Haz tu jugada, busca el +2 y sigue los marcadores.</p>
-                        <div class="cp-journey-steps">
-                            <button type="button" class="cp-journey-step${saved ? " is-done" : ""}" data-page-action="TICKET">
-                                <span class="cp-journey-number" aria-hidden="true">1</span>
-                                <span><b>Quiniela</b><small>${escapeHtml(ticketStepLabel)}</small></span>
-                                <i aria-hidden="true">→</i>
-                            </button>
-                            <button type="button" class="cp-journey-step" id="cover-porra-step" data-page-action="TICKET">
-                                <span class="cp-journey-number" aria-hidden="true">2</span>
-                                <span><b>Porra</b><small id="cover-porra-step-status">Cargando...</small></span>
-                                <i aria-hidden="true">→</i>
-                            </button>
-                            <button type="button" class="cp-journey-step${liveCount ? " is-live" : ""}" data-page-action="LIVE">
-                                <span class="cp-journey-number" aria-hidden="true">3</span>
-                                <span><b>Directo</b><small>${escapeHtml(liveStepLabel)}</small></span>
-                                <i aria-hidden="true">→</i>
-                            </button>
-                        </div>
-                    </section>
+            <div class="cp-hero-tagline"><b>1X2</b> · La Peña contra las máquinas</div>
+            <h1 class="cp-hero-title">
+                <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
+            </h1>
+            <p class="cp-hero-pitch">Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.</p>
+            <div class="cp-hero-row">
+                ${countdownHtml}
+                <div class="cp-actions">
+                    <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
             </div>
-        </main>
+        </header>
+
+        <section class="cp-arena" aria-label="El duelo">
+            <article class="cp-duel">
+                <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
+                ${duelBody}
+            </article>
+            ${featuredHtml}
+        </section>
+
+        <section class="cp-ops" aria-label="Tu jornada">
+            <div class="cp-data-card cp-porra" data-page-action="TICKET">
+                <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>+2 pts</b></div>
+                <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
+            </div>
+
+            <section class="cp-journey-card" aria-labelledby="cp-journey-title">
+                <div class="cp-card-head">
+                    <span id="cp-journey-title">TU JORNADA</span>
+                    <b>3 pasos</b>
+                </div>
+                <div class="cp-journey-steps">
+                    <button type="button" class="cp-journey-step${saved ? " is-done" : ""}" data-page-action="TICKET">
+                        <span class="cp-journey-number" aria-hidden="true">1</span>
+                        <span><b>Quiniela</b><small>${escapeHtml(ticketStepLabel)}</small></span>
+                        <i aria-hidden="true">→</i>
+                    </button>
+                    <button type="button" class="cp-journey-step" id="cover-porra-step" data-page-action="TICKET">
+                        <span class="cp-journey-number" aria-hidden="true">2</span>
+                        <span><b>Porra</b><small id="cover-porra-step-status">Cargando...</small></span>
+                        <i aria-hidden="true">→</i>
+                    </button>
+                    <button type="button" class="cp-journey-step${liveCount ? " is-live" : ""}" data-page-action="LIVE">
+                        <span class="cp-journey-number" aria-hidden="true">3</span>
+                        <span><b>Directo</b><small>${escapeHtml(liveStepLabel)}</small></span>
+                        <i aria-hidden="true">→</i>
+                    </button>
+                </div>
+            </section>
+
+            <div class="cp-data-card cp-news-card" id="cp-news-card">
+                <div class="cp-news-header">
+                    <span>ÚLTIMA HORA</span>
+                    <a href="#" data-page-action="NEWS">Ver todas →</a>
+                </div>
+                <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
+            </div>
+        </section>
+
         ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
     </div>`;
 }
