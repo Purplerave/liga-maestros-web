@@ -1,0 +1,403 @@
+﻿gemini
+
+
+Alavés - Getafe | 1 | La lesión de rotura de ligamento de Uche desarticula al Getafe frente a un Alavés reforzado en defensa con Valentini.
+Sevilla - Rayo Vallecano | 1 | El Sevilla dispone de todos sus fichajes inscritos mientras el Rayo acusa la inestabilidad por los traspasos inminentes de Mendy y Chavarría.
+Racing de Santander - Villarreal | 2 | La jerarquía técnica y la profundidad de banquillo del Villarreal terminan imponiéndose al ímpetu del recién ascendido Racing de Santander.
+Espanyol - Levante | 1 | La sanción arrastrada de Brugué merma la delantera del Levante equilibrando las ausencias por lesión de Puado y Kike García en el Espanyol.
+Celta - Osasuna | 1 | Osasuna afronta el debut con plantilla mermada tras vender a Víctor Muñoz al Liverpool y perder por lesión a Rosier frente al Celta.
+Andorra - Ceuta | 1 | La AD Ceuta viaja con nueve bajas confirmadas y solo dieciséis convocados ante un Andorra que habilitó la inscripción de sus once fichajes.
+Cádiz - Celta Fortuna | 1 | El Celta Fortuna compite con un bloque juvenil sin fichajes sénior al carecer de opción legal de ascenso frente al veterano Cádiz.
+R. Oviedo - Granada | 1 | El Real Oviedo llega rodado tras vencer al Le Havre mientras el Granada afronta el choque con cuatro futbolistas aún sin inscribir.
+Mallorca - R. Valladolid | X | La fase de reconstrucción del Mallorca tras el descenso se equilibra con la solvencia goleadora exhibida por el Valladolid en la pretemporada.
+Eibar - Tenerife | 1 | El ritmo de presión alta del Eibar en Ipurua decanta el choque ante un Tenerife recién ascendido desde Primera RFEF.
+Burgos - Córdoba | X | La solidez defensiva del Burgos en El Plantío y el rigor táctico del Córdoba generan un duelo igualado bajo intenso calor veraniego.
+Girona - Leganés | 1 | El Girona impone su condición de principal favorito al ascenso y el caudal de su plantilla para superar al Leganés en Montilivi.
+Las Palmas - Albacete | 1 | El Albacete acumula cinco titulares lesionados y viaja a Canarias debilitado tras una pretemporada repleta de bajas ante Las Palmas.
+Sporting - Sabadell | 1 | El empuje de El Molinón y la pegada de Otero superan la falta de rodaje en la categoría del recién ascendido Sabadell.
+Deportivo - Elche | 1-1 | El equilibrio entre el empuje de Riazor y el momento del Elche tras golear al Toulouse deriva en tablas competitivas.
+GEMINIt | 1=11  X=2  2=1 | pleno=1-1
+
+
+CLAUDE:
+
+
+Alavés - Getafe | X | Garcés sancionado por FIFA en el Alavés y Getafe sin Juanmi Jiménez; dos estilos físicos de Bordalás y Coudet que igualan el arranque.
+Sevilla - Rayo Vallecano | 1 | Debut de Luis García Plaza en el Pizjuán tras perder la pretemporada ante el Leverkusen; el Rayo estrena a Beñat San José sin Íñigo Pérez.
+Racing de Santander - Villarreal | X | Ascendido que debuta en el Sardinero ante un Villarreal que también estrena a Iñigo Pérez en el banquillo y con bajas en defensa.
+Espanyol - Levante | X | Espanyol sin Javi Puado y Kike García, plantilla corta "a la espera de fichajes" tras caer 3-1 ante el Coventry en la previa.
+Celta - Osasuna | 2 | Rafa Benítez debuta sin Borja Iglesias, que llega tarde del Mundial; Osasuna repite bloque casi íntegro salvo la duda de Rosier.
+Andorra - Ceuta | 1 | El Ceuta afronta uno de sus desplazamientos más largos de la temporada al Principado; el Andorra quiere firmar su mejor curso histórico.
+Cádiz - Celta Fortuna | 1 | Debut absoluto del filial celeste en fútbol profesional en el Nuevo Mirandilla ante un Cádiz que busca resarcirse del descenso a la categoría.
+R. Oviedo - Granada | 1 | El Oviedo estrena el Tartiere como recién descendido de Primera, con el aliento de su afición ante un Granada de mitad de tabla.
+Mallorca - R. Valladolid | X | El Mallorca pierde a Kumbulla, Muriqi, Maffeo, Larin y Luvumbo tras el descenso; llega muy renovado y sin rodaje ante un Valladolid asentado.
+Eibar - Tenerife | 1 | El Tenerife debuta en profesional tras su ascenso desde 1ª RFEF con récord histórico de puntos; Eibar es plantilla rodada de playoff.
+Burgos - Córdoba | 1 | El Burgos llega de golear 4-0 al Córdoba en el precedente reciente en El Plantío, feudo donde apenas pierde ante este rival.
+Girona - Leganés | X | Dos recién descendidos de Primera se miden en Montilivi todavía en plena reconstrucción de plantilla tras bajar ambos la pasada campaña.
+Las Palmas - Albacete | 1 | Las Palmas llega de pelear el playoff la pasada Segunda y juega en casa; el Albacete acabó 15º rozando el descenso.
+Sporting - Sabadell | 1 | El Sporting estrena a Larcamon en el banquillo y ficha a Alex Forés del Villarreal; el Sabadell llega como recién ascendido a Segunda.
+Deportivo - Elche | 1-0 | El Dépor vuelve a Primera ocho años después con Riazor lleno y sin bajas; el Elche cambia de entrenador con Anselmi recién llegado.
+FIRMA: Claude Sonnet 5 | 1=8 X=5 2=1 | pleno=1-0
+
+
+
+
+GROK
+
+
+Alavés - Getafe | X | Boyé duda por aductor tras amistoso y Getafe con Uche de baja larga tras pretemporada lesionada.
+Sevilla - Rayo Vallecano | 1 | Sevilla cierra pretemporada con victoria en Leverkusen y todos inscritos pese a plantilla corta.
+Racing de Santander - Villarreal | X | Ascendido local con Canales y Sardinero lleno ante Villarreal aún a medio gas post-Mundial.
+Espanyol - Levante | 1 | Espanyol local sin bajas graves confirmadas frente a Levante de pretemporada irregular.
+Celta - Osasuna | 1 | Celta invicto en amistosos y con nuevas caras rodadas pese a duda de césped en Balaídos.
+Andorra - Ceuta | 1 | Andorra local sin bajas confirmadas ante Ceuta de largo viaje y menor rodaje.
+Cádiz - Celta Fortuna | 1 | Cádiz local rodado frente a filial sin opción de ascenso y menos minutos titulares.
+R. Oviedo - Granada | X | Ambos recién descendidos con resaca y pretemporadas cortas igualan en casa.
+Mallorca - R. Valladolid | 1 | Mallorca local de reciente descenso con más estructura ante Valladolid aún verde.
+Eibar - Tenerife | 1 | Eibar local rodado frente a Tenerife recién ascendido de 1ª RFEF con viaje.
+Burgos - Córdoba | X | Ambos de media tabla con onces nuevos y sin bajas confirmadas equilibran.
+Girona - Leganés | 1 | Girona local de reciente descenso con más calidad residual ante Leganés.
+Las Palmas - Albacete | 1 | Las Palmas local pese a calor canario y mejor pretemporada que Albacete.
+Sporting - Sabadell | 1 | Sporting local rodado frente a Sabadell recién ascendido con menor experiencia.
+Deportivo - Elche | 1-0 | Deportivo local de ilusión de ascenso y Elche con bajas en defensa y portería. FIRMA: Grok | 1=10 X=4 2=0 | pleno=1-0
+
+
+CHATGPT
+
+
+Alavés - Getafe | X | Alavés acabó con 3-0 al Castellón y Getafe ganó 1-0 al Reading; ambos llegan rodados y sin ventaja clara.
+Sevilla - Rayo Vallecano | 1 | Sevilla mantiene a Luis García Plaza, pero llega con plantilla incompleta; el factor Sánchez-Pizjuán pesa ante un Rayo también renovado.
+Racing de Santander - Villarreal | X | Racing estrena una plantilla muy renovada y Villarreal cambió de técnico; la localía compensa la mayor experiencia visitante.
+Espanyol - Levante | 1 | Espanyol cerró una pretemporada de dos victorias, tres empates y una derrota, con su once bastante perfilado en defensa.
+Celta - Osasuna | 1 | Celta destacó con un 4-1 al Sassuolo; Osasuna estrena a Ramis y llega con plantilla corta y Rosier lesionado.
+Andorra - Ceuta | X | Andorra llega tras caer 0-4 ante Huesca, mientras Ceuta venció 2-1 al Málaga; el viaje visitante equilibra el mal cierre tricolor.
+Cádiz - Celta Fortuna | 2 | Cádiz despidió a Idiakez cuatro días antes y afronta el estreno con Celades recién llegado, mientras el filial viene de buenos amistosos.
+R. Oviedo - Granada | 1 | Oviedo goleó 4-0 al Ponferradina y 3-2 al Le Havre; Granada llega fuerte, pero la localía inclina un duelo equilibrado.
+Mallorca - R. Valladolid | 1 | Mallorca ganó 3-0 al PSG y presenta una pretemporada sólida; Valladolid alternó goleadas con derrotas y llega como descendido.
+Eibar - Tenerife | 1 | Eibar cerró una pretemporada invicto y recuperó a Guruzeta, mientras Tenerife mantiene varias piezas condicionadas aunque goleó ampliamente en verano.
+Burgos - Córdoba | X | Burgos llega con malos resultados finales y Córdoba recuperó efectivos, pero Carracedo sigue siendo duda; el Plantío favorece el empate.
+Girona - Leganés | X | Girona solo ganó uno de sus últimos amistosos y encadenó 2-2 ante Sabadell y 1-1 ante Nàstic; Leganés tampoco ha convencido.
+Las Palmas - Albacete | 1 | Las Palmas juega en Gran Canaria, mientras Albacete pierde a Higinio, Puertas, Agus Medina y Víctor Valverde por lesión.
+Sporting - Sabadell | 1 | Sporting goleó 5-0 a la Gimnástica y 4-1 al Racing, aunque Gaspar es duda; Sabadell llega ascendido y tras un buen cierre.
+Deportivo - Elche | 1-0 | Deportivo llega invicto en su gira europea, ganó al Genoa y recuperó a Asp Jensen y Altimira; Yeremay sigue bajo prevención.
+FIRMA: GPT-5.6 Luna | 1=8 X=5 2=1 | pleno=1-0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LA PEÑA:
+
+
+DEEPSEEK
+
+
+Alavés - Getafe | X | Calor en Vitoria y dos equipos rocosos sin gol; pretemporada sin rodaje ofensivo en ambos.
+Sevilla - Rayo Vallecano | 1 | Sevilla estrena proyecto con fichajes de nivel y el Sánchez-Pizjuán aprieta; Rayo, sin refuerzos contrastados, sufre atrás.
+Racing de Santander - Villarreal | X | El Sardinero celebra el regreso a Primera; Villarreal, con bajas de pretemporada por compromisos internacionales, no carbura.
+Espanyol - Levante | X | Espanyol y Levante igualan en un partido de pretemporada irregular y falta de puntería.
+Celta - Osasuna | 1 | Celta aprovecha el factor Balaídos y la pretemporada más completa; Osasuna acusa la gira asiática y el cansancio del viaje.
+Andorra - Ceuta | 1 | Viaje agotador de Ceuta al Principado y debut en Segunda sin rodaje; el Andorra se hace fuerte en casa.
+Cádiz - Celta Fortuna | 1 | El filial celeste, limitado por su condición, visita un Carranza con calor y un Cádiz ambicioso en su estreno.
+R. Oviedo - Granada | X | Oviedo necesita lavar la imagen del descenso y se topa con un Granada sólido que apenas perdió piezas.
+Mallorca - R. Valladolid | 1 | Mallorca conserva el bloque de Primera y el Iberostar dicta sentencia ante un Valladolid en reconstrucción.
+Eibar - Tenerife | 1 | Eibar, con Ipurúa como fortín, recibe a un Tenerife recién ascendido que acusa el largo desplazamiento.
+Burgos - Córdoba | 1 | Burgos impone su orden defensivo y el calor de El Plantío ante un Córdoba que aún acopla fichajes.
+Girona - Leganés | 1 | Girona mantiene la base y Montilivi dictamina en un duelo ante un Leganés que perdió gol en verano.
+Las Palmas - Albacete | 1 | El calor canario y el viaje lastran a un Albacete sin banquillo; Las Palmas, con plantilla larga, gana.
+Sporting - Sabadell | 1 | Sporting, con el Molinón lleno en el estreno, supera a un Sabadell recién ascendido que acusa la categoría.
+Deportivo - Elche | 1-0 | Riazor empuja el regreso a Segunda y un Deportivo sólido atrás seca a un Elche sin referencia ofensiva.
+FIRMA: DeepSeek
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GLM
+
+
+
+
+1. Alavés - Getafe | X | Duelo de equipos con once nuevo y pretemporada justa en Mendizorroza, el roce previo apunta a reparto.
+2. Sevilla - Rayo Vallecano | 1 | El Sánchez-Pizjuán estrena proyecto con hambre tras un verano movido y un Rayo con bajas en defensa.
+3. Racing de Santander - Villarreal | 2 | El submarino amarillo llega rodado de Europa y el ascendido Racing acusa el salto de categoría en J1.
+4. Espanyol - Levante | 1 | Los pericos aprietan en casa con su afición y el Levante arrastra el cansancio del viaje y nuevas incorporaciones.
+5. Celta - Osasuna | 1 | Vigo es fortín en arranques de liga y Osasuna llega con varias piezas clave aún no inscritas por el mercado.
+6. Andorra - Ceuta | X | El conjunto local estrena proyecto con retraso de internacionales y el Ceuta trae un bloque defensivo ya cerrado.
+7. Cádiz - Celta Fortuna | 1 | El filial gallego no puede ascender y el Cádiz aprovecha la noche amarilla para estrenarse con victoria.
+8. R. Oviedo - Granada | X | Resaca de descenso local frente a un Granada en reconstrucción, partido cerrado y de pocas ocasiones.
+9. Mallorca - R. Valladolid | 1 | El Son Moix respira ilusión por lo nuevo y un Valladolid tocado en la zona mediática cae en la isla.
+10. Eibar - Tenerife | 1 | Ipurua premia al equipo que mejor ha cerrado la pretemporada y el Tenerife recién ascendido acusa el desplazamiento.
+11. Burgos - Córdoba | 1 | El Burgos aprieta en El Plantío con un once ya definido y el Córdoba estrena entrenador sin pulir tácticas.
+12. Girona - Leganés | 1 | El descenso no rompe el bloque gerundense, que sale fuerte en Montilivi ante un Leganés con pocas altas reales.
+13. Las Palmas - Albacete | 1 | El viaje a Canarias y el calor de agosto pasan factura al Albacete, que no encuentra su sistema defensivo.
+14. Sporting - Sabadell | 1 | El Molinón hierve con el inicio y el Sabadell recién ascendido llega muy corto de rotaciones en el centro del campo.
+Deportivo - Elche | 1-0 | El Dépor hace valer su defensa en Riazor y el Elche, con un ataque recién formado, choca contra el muro local.
+15. FIRMA: GLM
+
+
+
+
+
+
+
+
+PERPLEXITY
+
+
+1. Alavés - Getafe | X | Pretemporada muy pareja (1-1 Eibar, 1-1 Racing) y Getafe con once aún en ajuste tras stage en Girona.
+2. Sevilla – Rayo Vallecano | 1 | Sevilla llega más rodado tras amistosos de nivel (incluido Ceuta) y Rayo con once en transición post-Feyenoord.
+3. Racing de Santander – Villarreal | 2 | Villarreal viene de ganar 1-0 al Levante en pretemporada; Racing, recién ascendido, empató 1-1 con Alavés.
+4. Espanyol – Levante | 1 | Espanyol con stage en UK y seis amistosos (Burnley, Middlesbrough, Coventry); Levante con pretemporada más corta y menos rivales.
+5. Celta – Osasuna | X | Celta con varios tests (Braga, Stuttgart, Sassuolo, Nápoles) y Osasuna con derrota 0-2 ante Al Ain en El Sadar.
+6. Andorra – Ceuta | 1 | Andorra en casa tras stage en Girona y refuerzos (Vicario, Achhiba); Ceuta con amistoso ante Málaga y sin bajas confirmadas.
+7. Cádiz – Celta Fortuna | 1 | Cádiz con Trofeo Carranza (vs Las Palmas) y plantilla de Primera; Celta Fortuna, filial, con once en formación y sin presión de ascenso.
+8. R. Oviedo – Granada | X | Oviedo con nuevo técnico (Calero) y altas (Pablo Sáenz, Youness); Granada descendido y con once aún en ajuste.
+9. Mallorca – R. Valladolid | 1 | Mallorca, recién descendido, con Leo Román (9M€) y stage sólido; Valladolid con 0-0 ante Getafe en pretemporada.
+10. Eibar – Tenerife | 1 | Eibar con pretemporada completa (incluido 1-1 con Alavés); Tenerife, recién ascendido de 1ª RFEF, con viaje largo y once por definir.
+11. Burgos – Córdoba | 1 | Burgos con continuidad y Oier Luengo desde Oviedo; Córdoba con mercado activo (Jacobo, Del Moral) pero once aún en磨合.
+12. Girona – Leganés | 1 | Girona, recién descendido, con stage en Girona y plantilla de Primera; Leganés con pretemporada discreta y sin bajas confirmadas.
+13. Las Palmas – Albacete | 1 | Las Palmas en casa tras amistoso en Cádiz y con Edward Cedeño desde Albacete; Albacete con viaje largo y sin bajas confirmadas.
+14. Sporting – Sabadell | 1 | Sporting con Dubasin (1,5M€) y Gelabert (2M€) y stage en casa; Sabadell, recién ascendido, con pretemporada más modesta.
+15. Deportivo – Elche | 1-0 | Depor, recién ascendido, con Teresa Herrera (vs Real Madrid) y moral alta; Elche con dos jugadores sin minutos por problemas físicos (Bigas, Yago).
+FIRMA: Perplexity | 1=9 X=4 2=2 | pleno=1-0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MISTRAL
+1. Alavés - Getafe | 1 | Alavés con buena pretemporada y localía ante Getafe irregular.
+2. Sevilla - Rayo Vallecano | 1 | Sevilla en casa supera a Rayo tras derrota 0-3 vs Ipswich.
+3. Racing de Santander - Villarreal | 2 | Villarreal con mejor plantel vence al recién ascendido Racing.
+4. Espanyol - Levante | X | Levante llega más afinado y puede empatar en Cornellà.
+5. Celta - Osasuna | 1 | Celta con mejor pretemporada y localía ante Osasuna irregular.
+6. Andorra - Ceuta | 1 | Andorra con ventaja de altura y localía ante Ceuta en viaje.
+7. Cádiz - Celta Fortuna | 1 | Cádiz supera a Celta Fortuna en su debut como filial en Segunda.
+8. R. Oviedo - Granada | X | Oviedo y Granada con resaca de categoría, empate en Tartiere.
+9. Mallorca - R. Valladolid | X | Mallorca con resaca de descenso y Valladolid estable, empate.
+10. Eibar - Tenerife | 1 | Eibar con experiencia supera a Tenerife recién ascendido.
+11. Burgos - Córdoba | X | Burgos y Córdoba sin claros favoritos, empate en El Plantío.
+12. Girona - Leganés | 1 | Girona con resaca pero localía supera a Leganés.
+13. Las Palmas - Albacete | 1 | Las Palmas con localía y viaje para Albacete, victoria canaria.
+14. Sporting - Sabadell | 1 | Sporting con experiencia supera a Sabadell recién ascendido.
+15. Deportivo - Elche | 1-0 | Deportivo con ilusión de ascenso supera 1-0 a Elche.
+FIRMA: Mistral Medium | 1=9 X=4 2=1 | pleno=1-0
+
+
+QWEN
+
+
+1. Alavés – Getafe X Empate en un enfrentamiento histórico muy igualado, con un Getafe que llega con una baja importante en el mediocampo . 2. Sevilla – Rayo Vallecano 1 Superioridad del Sevilla en estado de forma (pretemporada impecable) y calidad de plantilla, con un Rayo más irregular . 3. Racing de Santander – Villarreal 2 Abismal diferencia de calidad y experiencia entre un equipo recién ascendido y un equipo de élite como el Villarreal . 4. Espanyol – Levante 1 El Espanyol llega con mejor estado de forma (tres victorias seguidas) y con la incorporación de un refuerzo clave como Unai Nuñez . 5. Celta – Osasuna 1/X Incertidumbre mutua; el Celta muestra fragilidad defensiva en amistosos, mientras que Osasuna es un equipo más funcional . 6. Andorra – Ceuta X Factor local del Andorra compensando la diferencia de categoría frente a un Ceuta recién ascendido . 7. Cádiz – Celta Fortuna 1 Diferencia de nivel innegable, con el Cádiz CF enfrentándose a un equipo filial (Celta Fortuna) sin opciones de competir en igualdad . 8. Real Oviedo – Granada 2 El Granada CF, equipo veterano y de gran calidad, supera a un Oviedo ilusionado pero de plantilla inferior . 9. Mallorca – Real Valladolid 1 El Mallorca juega en casa y llega con la ilusión de un nuevo ascenso, lo que puede ser clave contra un Valladolid que no mostró un gran final de pretemporada . 10. Eibar – Tenerife 1 El Eibar cierra su pretemporada invicto y con gran confianza, superando a un Tenerife que cerró con un empate sin goles . 11. Burgos – Córdoba 1/X Falta de datos claros sobre las pretemporadas de ambos equipos, lo que hace del empate el resultado más prudente para un partido inicial . 12. Girona – Leganés 2 El Leganés, equipo veterano y consolidado en la categoría, tiene la experiencia y la preparación necesarias para superar a un Girona recién descendido . 13. Las Palmas – Albacete 1 La superioridad cualitativa y cuantitativa del Las Palmas frente a un Albacete recién ascendido, sumado a la localía, favorece al equipo canario . 14. Sporting – Sabadell 1 El Sporting juega en casa y llega con el ímpetu de una victoria en pretemporada, lo que le da ventaja sobre un Sabadell recién ascendido . 15. Deportivo – Elche 1-0 Predicción de un marcador bajo típico de la primera jornada, donde la ilusión del Deportivo en casa podría decidir un partido muy reñido . 
+
+
+LUNA
+
+
+Alavés - Getafe | X | Alavés sin cambios en pretemporada y Getafe mantiene mismo bloque defensivo del curso anterior sin altas relevantes.
+Sevilla - Rayo Vallecano | 1 | Sevilla completó pretemporada con titulares rodados y tres fichajes ofensivos confirmados en agosto de 2026.
+Racing de Santander - Villarreal | 2 | Racing recién ascendido con plantilla corta y Villarreal llega con cinco fichajes nuevos y pretemporada completa.
+Espanyol - Levante | 1 | Espanyol confirmó nuevo entrenador con sistema ofensivo y Levante perdió a su capitán por lesión confirmada el 12 de agosto.
+Celta - Osasuna | X | Celta con dudas en defensa tras amistosos irregulares y Osasuna mantiene estabilidad pero sin refuerzos destacados este verano.
+Andorra - Ceuta | 1 | Andorra entrenó en altitud toda la pretemporada y Ceuta llegó con solo seis fichas nuevas y pocos amistosos disputados.
+Cádiz - Celta Fortuna | 1 | Cádiz con pretemporada seria y Celta Fortuna como filial no puede ascender y usa canteranos sin experiencia profesional.
+R. Oviedo - Granada | X | Oviedo recién descendido con moral baja y Granada con nuevos fichajes pero también inestabilidad institucional en agosto.
+Mallorca - R. Valladolid | 1 | Mallorca recién descendido pero con plantilla de Primera y Valladolid perdió a su goleador por traspaso confirmado en agosto.
+Eibar - Tenerife | X | Eibar sin movimientos en mercado y Tenerife recién ascendido con plantilla nueva y sin cohesión tras pocos amistosos.
+Burgos - Córdoba | 1 | Burgos estrena entrenador con 3-5-2 ya ensayado y Córdoba con tres bajas por lesión confirmadas esta semana.
+Girona - Leganés | 2 | Girona recién descendido y sin su goleador lesionado el 11 de agosto mientras Leganés cerró pretemporada invicto.
+Las Palmas - Albacete | 1 | Las Palmas con plantilla consolidada y Albacete no inscribió a su portero titular por problemas de ficha hasta el 12 de agosto.
+Sporting - Sabadell | 1 | Sporting con núcleo intacto tras pretemporada completa y Sabadell recién ascendido con mayoría de juveniles sin rodaje.
+Deportivo - Elche | 1-0 | Deportivo recién ascendido motivado y marcó solo un gol en cinco amistosos; Elche perdió a su delantero referencia por lesión.
+FIRMA: LUNA (LUNA AI)| 1=7 X=4 2=3
+
+
+
+
+META:
+
+
+Alavés - Getafe | X | Alavés invicto con 0-1 en Girona y 0-3 en Castellón, Getafe con Bordalás décima temporada y partido inaugural con calor en Mendizorroza.
+Sevilla - Rayo Vallecano | 1 | Sevilla estrena en Sánchez-Pizjuán a las 21:30 sábado, Rayo afronta sexta temporada consecutiva en Primera y normativa Mundial deja aplazamientos en el aire.
+Racing de Santander - Villarreal | X | Racing vuelve a Primera tras 14 años con Sardinero a las 17:00 domingo, pretemporada 1-1 ante Alavés y 4-1 al Sporting tras tres derrotas iniciales.
+Espanyol - Levante | 1 | Espanyol debuta domingo 19:00 en RCDE Stadium tras stage en Navata, Levante visitante pero Kike García baja por bíceps femoral y pretemporada positiva trunca.
+Celta - Osasuna | 1 | Celta invicto cierra con 1-1 ante Nápoles y 1-4 en Sassuolo con Giráldez renovado hasta 2028, Osasuna cierra con doble amistoso viernes y previa Conference.
+Andorra - Ceuta | 2 | Ceuta ganó 0-2 en Encamp la pasada temporada y llega con victorias 0-1 ante Granada y 1-3 en Cádiz, viaje largo a Andorra pero dinámica ascendente.
+Cádiz - Celta Fortuna | 1 | Cádiz recibe a filial que no puede ascender en Nuevo Mirandilla 19:00, Fortuna debuta histórico en Segunda tras seis amistosos y Cádiz cerró 2-0 ante Granada.
+R. Oviedo - Granada | X | Oviedo recién descendido con sobrecargas generalizadas última semana y dudas por lesiones, Granada visitante abre en Tartiere a las 19:00 sábado.
+Mallorca - R. Valladolid | 1 | Mallorca recién descendido vence 3-0 al PSG en Ciutat de Palma y empata 2-2 con Valladolid en Marbella, estrena técnico Luis García en Son Moix 21:30.
+Eibar - Tenerife | 1 | Eibar cierra pretemporada invencible según AS y recibe domingo 17:00 en Ipurua a Tenerife recién ascendido de 1ª RFEF con viaje peninsular largo.
+Burgos - Córdoba | X | Burgos estrena entrenador Sergio Francisco 16 junio y solo 3-0-2 en pretemporada con 0-2 ante Mallorca y 0-1 ante Cultural, Córdoba llega tras pretemporada irregular.
+Girona - Leganés | 2 | Girona cierra pretemporada con solo una victoria y no acaba de carburar según AS, recién descendido con Quique Álvarez y Leganés abre con dos salidas seguidas.
+Las Palmas - Albacete | 1 | Las Palmas con Rubén de la Barrera y 8 fichajes recibe 20:30 domingo, Albacete con bajas Higinio, Puertas, Agus Medina y Valverde sin ritmo según SER.
+Sporting - Sabadell | 1 | Sporting con Larcamón argentino recién llegado a Gijón recibe lunes 18:00 a Sabadell recién ascendido con balance 0V en tres amistosos y gol 1-3.
+Deportivo - Elche | 1-0 | Deportivo invicto llega al Teresa Herrera 12 agosto ante Real Madrid y debuta lunes 21:00 en Riazor tras 8 años, Elche cierra con 3-0 a Toulouse.
+FIRMA: Meta AI | 1=8 X=4 2=2 | pleno=1-0
+
+
+
+
+
+
+
+
+
+
+
+
+JIMMY
+
+
+Alavés - Getafe | X | Pretemporada de Alavés: altas con Simeone, pero bajas con lesiones en el defensa.
+
+
+Sevilla - Rayo Vallecano | 1 | Rayo Vallecano: sigue con entrenador en el banquillo.
+
+
+Racing de Santander - Villarreal | 2 | Villarreal: altas con Pena, pero bajas con el descenso a 1ª, que pesa en el partido.
+
+
+Espanyol - Levante | M | Levante: bajas con bajas importantes, incluyendo al titular, con ascendido de la filial Celta Fortuna.
+
+
+Celta - Osasuna | 1 | Osasuna: sigue con entrenador, pero bajas con.petición de un titular.
+
+
+Andorra - Ceuta | x | Andorra: sigue con entrenador, pero bajas con falta de minutos para los jóvenes.
+
+
+Cádiz - Celta Fortuna | X | Celta Fortuna: filial sin ascenso, con bajas en defensa.
+
+
+R. Oviedo - Granada | 2 | Granada: bajas con lesiones en el mediavalo, que pesa en el partido.
+
+
+Mallorca - R. Valladolid | 1 | R. Valladolid: bajas con falta de minutos para los jóvenes.
+
+
+Eibar - Tenerife | 1 | Tenerife: sigue con entrenador, pero bajas con lesiones en el mediavalo.
+
+
+Burgos - Córdoba | X | Córdoba: sigue con entrenador, pero bajas con falta de minutos para los titulares.
+
+
+Girona - Leganés | 1 | Leganés: sigue con entrenador, pero bajas con bajas en defensa.
+
+
+Las Palmas - Albacete | X | Albacete: filial sin ascenso, con bajas en ataque.
+
+
+Sporting - Sabadell | 1 | Sabadell: sigue con entrenador, pero bajas con falta de minutos para los titulares.
+
+
+Deportivo - Elche | 1-0 | Elche: sigue con entrenador, pero bajas con lesiones en el mediavalo.
+
+
+LUZIA
+
+
+Alavés - Getafe | X | Ambos equipos muestran falta de ritmo competitivo en esta primera jornada y priorizan no cometer errores defensivos en sus planteamientos iniciales.
+Sevilla - Rayo Vallecano | 1 | El Sánchez-Pizjuán presiona desde el inicio y el bloque local parece mucho más físico y rodado tras una pretemporada exigente.
+Racing de Santander - Villarreal | 2 | El Racing regresa a Primera con ilusión, pero el Villarreal cuenta con mayor profundidad de plantilla y automatismos tácticos más definidos.
+Espanyol - Levante | 1 | El factor Cornellà marca la diferencia en el estreno, aprovechando la inercia positiva de la afición ante un Levante aún en fase de construcción.
+Celta - Osasuna | X | Duelo táctico entre dos proyectos que se están conociendo, con muchas precauciones ante el calor extremo esperado durante el encuentro.
+Andorra - Ceuta | 1 | El Andorra mantiene su sistema de posesión y aprovecha el largo desplazamiento del Ceuta para imponer su ritmo en casa.
+Cádiz - Celta Fortuna | 1 | La veteranía de la plantilla gaditana es superior a la frescura de un filial que todavía busca adaptarse al nivel de Segunda.
+R. Oviedo - Granada | X | Encuentro muy igualado entre dos candidatos al ascenso que prefieren no arriesgar en este primer contacto con la temporada oficial.
+Mallorca - R. Valladolid | 1 | El descenso de categoría obliga al Mallorca a sumar tres puntos desde el inicio con un bloque consolidado en Primera.
+Eibar - Tenerife | 1 | Ipurúa sigue siendo un fortín y el Eibar tiene automatismos mucho más marcados que un Tenerife que aún encaja nuevas piezas.
+Burgos - Córdoba | X | Partido de estilos cerrados en El Plantío, donde la solidez defensiva burgalesa neutraliza el ímpetu del Córdoba recién ascendido.
+Girona - Leganés | 1 | El Girona conserva gran parte de su bloque de la temporada pasada, lo cual le otorga una ventaja competitiva ante un Leganés defensivo.
+Las Palmas - Albacete | 1 | La humedad y el largo viaje penalizan físicamente al Albacete, permitiendo que Las Palmas controle la posesión y el resultado con paciencia.
+Sporting - Sabadell | 1 | El Molinón empuja a un Sporting reforzado que busca ilusionar a su grada desde la primera jornada ante un rival inferior.
+Deportivo - Elche | 1-0 | Riazor es clave en el regreso a casa, decidiendo un choque muy cerrado mediante la efectividad en el juego aéreo.
+FIRMA: Analista Quiniela | 1=10 X=4 2=1 | pleno=1-0
+
+
+ERNIE
+
+
+Alavés - Getafe | 1 | El Getafe llega con problemas de inscripción y solo catorce fichas del primer equipo disponibles para el debut liguero de Quique Sánchez Flores.
+Sevilla - Rayo Vallecano | 1 | El debut del guardameta Odysseas Vlachodimos bajo palos refuerza la portería sevillista ante un Rayo que mantiene el bloque continuista de Íñigo Pérez.
+Racing de Santander - Villarreal | 1 | El Racing regresa a Primera tras rechazar catorce millones por su estrella y confía en el ambiente festivo de El Sardinero para dar la sorpresa.
+Espanyol - Levante | 1 | La incorporación del delantero Riedel dota al Espanyol de mayor pegada ofensiva frente a un Levante que todavía busca su identidad en este inicio.
+Celta - Osasuna | X | El mal estado del césped de Balaídos y la baja por lesión de Javi Galán condicionarán el juego creativo de ambos conjuntos en esta primera jornada.
+Andorra - Ceuta | 1 | El largo desplazamiento hasta el Principado y la altitud del Estadi Nacional pesarán en las piernas de los jugadores del Ceuta durante el tramo final.
+Cádiz - Celta Fortuna | 1 | La inexperiencia del filial vigués en la categoría de plata será determinante frente a un Cádiz que mantiene su estructura defensiva del curso pasado.
+R. Oviedo - Granada | X | El Oviedo afronta su primer encuentro tras el descenso con dudas en la creación, mientras el Granada se muestra sólido tras una pretemporada sin derrotas.
+Mallorca - R. Valladolid | 1 | La llegada de Alex Sala aporta equilibrio al centro del campo de un Mallorca que busca olvidar el descenso con una victoria inmediata en Son Moix.
+Eibar - Tenerife | 1 | El fortín de Ipurua pondrá a prueba el nuevo sistema defensivo del Tenerife, que debuta con el lateral Zoilo como principal novedad en su once inicial.
+Burgos - Córdoba | 1 | El Plantío recibirá a un Córdoba que regresa al fútbol profesional tras años de ausencia, acusando la falta de rodaje ante la intensidad defensiva burgalesa.
+Girona - Leganés | X | La resaca del descenso todavía afecta a la planificación de un Girona que se mide a un Leganés muy ordenado tácticamente durante toda la pretemporada.
+Las Palmas - Albacete | 1 | El factor insular y el desgaste del viaje afectarán al Albacete en un encuentro donde Las Palmas impondrá su ritmo de posesión desde el inicio.
+Sporting - Sabadell | 1 | El Molinón dictará sentencia ante un Sabadell recién ascendido que, pese a su buena pretemporada, sufrirá ante la presión alta del conjunto asturiano.
+Deportivo - Elche | 1-1 | Riazor vivirá un duelo igualado entre dos históricos de la categoría que llegan con falta de acierto goleador tras sus últimos amistosos veraniegos. FIRMA: Manus | 1=11 X=3 2=0 | pleno=1-1
+
+
+
+
+MANUEL:
+
+
+Alavés - Getafe | 1 | El Getafe llega con problemas de inscripción y solo catorce fichas del primer equipo disponibles para el debut liguero de Quique Sánchez Flores.
+Sevilla - Rayo Vallecano | 1 | El debut del guardameta Odysseas Vlachodimos bajo palos refuerza la portería sevillista ante un Rayo que mantiene el bloque continuista de Íñigo Pérez.
+Racing de Santander - Villarreal | 1 | El Racing regresa a Primera tras rechazar catorce millones por su estrella y confía en el ambiente festivo de El Sardinero para dar la sorpresa.
+Espanyol - Levante | 1 | La incorporación del delantero Riedel dota al Espanyol de mayor pegada ofensiva frente a un Levante que todavía busca su identidad en este inicio.
+Celta - Osasuna | X | El mal estado del césped de Balaídos y la baja por lesión de Javi Galán condicionarán el juego creativo de ambos conjuntos en esta primera jornada.
+Andorra - Ceuta | 1 | El largo desplazamiento hasta el Principado y la altitud del Estadi Nacional pesarán en las piernas de los jugadores del Ceuta durante el tramo final.
+Cádiz - Celta Fortuna | 1 | La inexperiencia del filial vigués en la categoría de plata será determinante frente a un Cádiz que mantiene su estructura defensiva del curso pasado.
+R. Oviedo - Granada | X | El Oviedo afronta su primer encuentro tras el descenso con dudas en la creación, mientras el Granada se muestra sólido tras una pretemporada sin derrotas.
+Mallorca - R. Valladolid | 1 | La llegada de Alex Sala aporta equilibrio al centro del campo de un Mallorca que busca olvidar el descenso con una victoria inmediata en Son Moix.
+Eibar - Tenerife | 1 | El fortín de Ipurua pondrá a prueba el nuevo sistema defensivo del Tenerife, que debuta con el lateral Zoilo como principal novedad en su once inicial.
+Burgos - Córdoba | 1 | El Plantío recibirá a un Córdoba que regresa al fútbol profesional tras años de ausencia, acusando la falta de rodaje ante la intensidad defensiva burgalesa.
+Girona - Leganés | X | La resaca del descenso todavía afecta a la planificación de un Girona que se mide a un Leganés muy ordenado tácticamente durante toda la pretemporada.
+Las Palmas - Albacete | 1 | El factor insular y el desgaste del viaje afectarán al Albacete en un encuentro donde Las Palmas impondrá su ritmo de posesión desde el inicio.
+Sporting - Sabadell | 1 | El Molinón dictará sentencia ante un Sabadell recién ascendido que, pese a su buena pretemporada, sufrirá ante la presión alta del conjunto asturiano.
+Deportivo - Elche | 1-1 | Riazor vivirá un duelo igualado entre dos históricos de la categoría que llegan con falta de acierto goleador tras sus últimos amistosos veraniegos. FIRMA: Manus | 1=11 X=3 2=0 | pleno=1-1
