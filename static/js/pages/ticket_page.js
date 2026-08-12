@@ -238,7 +238,8 @@ function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
         return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</b>`;
     }
     if (idx === 14) {
-        return `<button class="pleno-main-btn clickable" data-match-idx="${idx}" data-pleno="1">${escapeHtml(mySign === "-" ? "0-0" : mySign)}</button>`;
+        const plenoLabel = mySign === "-" ? "Elegir" : mySign;
+        return `<button class="pleno-main-btn clickable ${mySign === "-" ? "is-empty" : ""}" data-match-idx="${idx}" data-pleno="1" type="button" aria-label="${mySign === "-" ? "Elegir resultado del Pleno al 15" : `Pleno al 15: ${escapeHtml(mySign)}`}">${escapeHtml(plenoLabel)}</button>`;
     }
     return `
         <div class="action-buttons" data-match-idx="${idx}">

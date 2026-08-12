@@ -311,17 +311,57 @@ async function savePredictions() {
         renderArena();
         return showToast(`Puedes editar hasta ${state.data.edit_deadline || "el inicio del primer partido"}.`);
     }
-    try {
-        const res = await fetch("/api/predicciones/save", {
+
+    const signs = Array.isArray(state.my_signs) ? state.my_signs.slice(0, 15) : [];
+    const missingMatches = Array.from({ length: 15 }, (_, index) => index)
+        .filter(index => !signs[index] || signs[index] === "-");
+    if (missingMatches.length) {
+        const missingLabel = missingMatches.map(index => index + 1).join(", ");
+        return showToast(`Completa la quiniela. Falta${missingMatches.length === 1 ? "" : "n"}: ${missingLabel}.`, "error");
+    }
+
+    const saveButton = qs("save-quiniela-btn");
+    if (saveButton?.disabled) return;
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.setAttribute("aria-busy", "true");
+        saveButton.textContent = "Guardando...";
+    }
+
+    const payload = { user_id: state.user.id, jornada: state.data.jornada, signos: signs };
+    const sendPredictions = async () => {
+        const response = await fetch("/api/predicciones/save", {
             method: "POST",
             headers: authenticatedJsonHeaders(),
-            body: JSON.stringify({ user_id: state.user.id, jornada: state.data.jornada, signos: state.my_signs })
+            body: JSON.stringify(payload)
         });
-        const result = await res.json();
-        if (!res.ok || result.status !== "ok") throw new Error(result.message || "No se pudo guardar");
+        const contentType = response.headers.get("content-type") || "";
+        const result = contentType.includes("application/json") ? await response.json() : {};
+        return { response, result };
+    };
+
+    try {
+        let { response: res, result } = await sendPredictions();
+        const securityExpired = res.status === 403
+            && String(result.error || result.message || "").toLowerCase().includes("seguridad");
+        if (securityExpired) {
+            const statusResponse = await fetch("/api/user/status", { cache: "no-store" });
+            if (!statusResponse.ok) throw new Error("La sesion ha caducado. Recarga la pagina e inicia sesion de nuevo.");
+            const statusPayload = await statusResponse.json();
+            if (!statusPayload.user || !statusPayload.csrf_token) {
+                throw new Error("La sesion ha caducado. Inicia sesion de nuevo.");
+            }
+            state.user = statusPayload.user;
+            state.csrfToken = statusPayload.csrf_token;
+            payload.user_id = state.user.id;
+            ({ response: res, result } = await sendPredictions());
+        }
+        if (!res.ok || result.status !== "ok") {
+            throw new Error(result.message || result.error || `No se pudo guardar (error ${res.status}).`);
+        }
         const savedSigns = Array.isArray(result.signos) && result.signos.length === 15
             ? result.signos.map(sign => sign || "-")
-            : [...state.my_signs];
+            : signs;
         clearDraft();
         state.my_signs = [...savedSigns];
         state.server_signs = [...savedSigns];
@@ -329,27 +369,28 @@ async function savePredictions() {
         hydrateHero();
         renderArena();
 
-        // 🎊 Celebrate save
-        const done = savedSigns.filter(s => s !== "-").length;
-        if (typeof window.launchConfetti === "function") {
-            if (done === 15) {
+        showToast("Quiniela guardada correctamente.");
+        try {
+            if (typeof window.launchBigConfetti === "function") {
                 window.launchBigConfetti();
-            } else if (done >= 10) {
-                window.launchMilestoneConfetti(done);
-            } else {
-                window.launchConfetti({ count: 20, spread: 40, duration: 1500 });
+            } else if (typeof window.launchConfetti === "function") {
+                window.launchConfetti({ count: 50, spread: 80, duration: 2500 });
             }
+            if (typeof SoundManager !== "undefined" && SoundManager.playSave) SoundManager.playSave();
+        } catch (effectError) {
+            console.warn("No se pudo mostrar la celebracion del guardado", effectError);
         }
-        if (typeof SoundManager !== "undefined" && SoundManager.playSave) {
-            SoundManager.playSave();
-        }
-
-        showToast("Quiniela guardada.");
         await refreshData();
     } catch (error) {
-        showToast(error.message, "error");
-        if (typeof SoundManager !== "undefined" && SoundManager.playError) {
-            SoundManager.playError();
+        const message = error instanceof Error && error.message
+            ? error.message
+            : "No se pudo guardar la quiniela. Comprueba tu conexion e intentalo de nuevo.";
+        showToast(message, "error");
+        if (typeof SoundManager !== "undefined" && SoundManager.playError) SoundManager.playError();
+    } finally {
+        if (saveButton) {
+            saveButton.removeAttribute("aria-busy");
+            hydrateHero();
         }
     }
 }
