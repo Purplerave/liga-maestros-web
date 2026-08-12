@@ -406,12 +406,14 @@ def reset_standings():
         conn.execute("DELETE FROM consenso")
 
         conn.commit()
-        return jsonify({
-            "status": "ok",
-            "message": "Ligas reseteadas a 0",
-            "users_reset": users,
-            "teams_reset": teams,
-        })
+        return jsonify(
+            {
+                "status": "ok",
+                "message": "Ligas reseteadas a 0",
+                "users_reset": users,
+                "teams_reset": teams,
+            }
+        )
     except Exception as e:
         conn.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -620,4 +622,3 @@ def sync_scrape():
             results.append(f"J{jornada}: origen no existe")
 
     return jsonify({"status": "ok", "results": results})
-

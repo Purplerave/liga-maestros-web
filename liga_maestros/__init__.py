@@ -63,8 +63,9 @@ def create_app():
         raise RuntimeError("SECRET_KEY no configurada.")
     app.secret_key = SECRET_KEY
 
-    _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or \
-              os.getenv("FLASK_ENV", "").strip().lower() in ("development", "dev")
+    _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or os.getenv(
+        "FLASK_ENV", ""
+    ).strip().lower() in ("development", "dev")
 
     # En desarrollo: permitir cualquier host (necesario para proxies de preview)
     # En produccion: restringir a hosts conocidos
@@ -110,7 +111,12 @@ def create_app():
     @app.after_request
     def set_security_headers(response):
         _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
-        _allow_frame_embed = _is_dev or os.getenv("ALLOW_IFRAME_EMBED", "0").strip().lower() in ("1", "true", "yes", "on")
+        _allow_frame_embed = _is_dev or os.getenv("ALLOW_IFRAME_EMBED", "0").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+            "on",
+        )
 
         if request.path.startswith("/juegos/"):
             response.headers["X-Frame-Options"] = "SAMEORIGIN"
