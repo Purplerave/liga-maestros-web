@@ -1,6 +1,5 @@
 @layer hero {
-/* PORTADA v8 - 2 columnas: hero izq + panel der, sin huecos
-   Fix: .cp altura 100%, sin space-between en derecha, journey rellena el resto */
+/* PORTADA v9 - columnas top-aligned, sin estirar ni huecos artificiales */
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-proof,
@@ -43,10 +42,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    height: 100%;
+    height: auto;
     min-height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
@@ -66,11 +66,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
-    height: 100%;
+    height: auto;
     margin: 0 auto;
     box-sizing: border-box;
-    align-items: stretch;
-    flex: 1;
+    align-items: start; /* no estirar columnas: evita el hueco de la derecha */
+    flex: 0 0 auto;
     min-height: 0;
 }
 
@@ -80,14 +80,14 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 10px;
     min-width: 0;
-    height: 100%;
+    height: auto;
     min-height: 0;
 }
 
 /* Panel hero con efecto estadio */
 .cp-intro {
     width: 100%;
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
@@ -341,9 +341,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-width: 0;
-    height: 100%;
+    height: auto;
     min-height: 0;
-    /* Sin space-between: el hueco se rellena con flex:1 en .cp-right-bottom */
 }
 
 /* Parte inferior derecha: porra y noticias, más una guía útil que ocupa el espacio restante */
@@ -352,7 +351,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-height: 0;
-    flex: 1;
+    flex: 0 0 auto;
 }
 .cp-right-bottom-top {
     display: grid;
@@ -364,10 +363,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 /* Tu jornada: rellena el espacio restante sin dejar huecos vacíos */
 .cp-journey-card {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 0;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 10px 12px;
     border: 1px solid var(--cp-line);
     border-radius: 10px;
@@ -460,7 +459,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 
 /* Clasificación */
 .cp-leaders {
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; flex-shrink: 0;
     padding: 10px 12px 8px;
     border: 1px solid var(--cp-line); border-radius: 12px;
     background: rgba(16,24,44,0.90); box-shadow: 0 8px 24px rgba(0,0,0,0.28);
