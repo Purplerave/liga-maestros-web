@@ -5,7 +5,7 @@
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .news-brand-lockup,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .news-paper-logo {
-    display: none !important;
+    display: none;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
