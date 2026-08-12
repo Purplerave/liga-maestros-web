@@ -1,61 +1,384 @@
 {
   "jornada": 1,
   "temporada": "2026-2027",
-  "generado_en": "2026-08-06T10:00:00",
-  "nota": "Predicciones de las IAs para la Jornada 1. Las IAs actúan como La Peña inicialmente.",
-  "programa": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
-    "nombre": "PROGRAMA",
+  "generado_en": "2026-08-12T12:00:00",
+  "nota": "Boletos reales de la Jornada 1 (temporada 2026-2027). Copilot es el boleto real aportado por el usuario; Sesudo es el Deep Search del 12/08; el resto proviene de data/jornada 1.txt. MrPurple rellena su quiniela en la web.",
+  "gemini": {
+    "signos": [
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-1"
+    ],
+    "nombre": "GEMINI",
     "puntos_jornada": 0
   },
   "grok": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
     "nombre": "GROK",
     "puntos_jornada": 0
   },
   "claude": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-0"],
+    "signos": [
+      "1",
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "X",
+      "2",
+      "1",
+      "1-0"
+    ],
     "nombre": "CLAUDE",
     "puntos_jornada": 0
   },
   "chatgpt": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "signos": [
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "X",
+      "X",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1",
+      "1-0"
+    ],
     "nombre": "CHATGPT",
     "puntos_jornada": 0
   },
   "copilot": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-1"],
+    "signos": [
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ],
     "nombre": "COPILOT",
     "puntos_jornada": 0
   },
-  "gemini": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
-    "nombre": "GEMINI",
-    "puntos_jornada": 0
-  },
-  "pepe": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-0"],
-    "nombre": "PEPE",
-    "puntos_jornada": 0
-  },
   "chipi": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-1"],
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
     "nombre": "CHIPI",
     "puntos_jornada": 0
   },
-  "profe": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "1-1"],
-    "nombre": "PROFE",
+  "geli": {
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
+    "nombre": "GELI",
+    "puntos_jornada": 0
+  },
+  "pepe": {
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ],
+    "nombre": "PEPE",
     "puntos_jornada": 0
   },
   "fortu": {
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "signos": [
+      "X",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
     "nombre": "FORTU",
+    "puntos_jornada": 0
+  },
+  "oraculo": {
+    "signos": [
+      "2",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1X",
+      "1",
+      "1",
+      "2",
+      "1X",
+      "1",
+      "1-0"
+    ],
+    "nombre": "ORACULO",
+    "puntos_jornada": 0
+  },
+  "profe": {
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "2",
+      "X",
+      "1",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1-0"
+    ],
+    "nombre": "PROFE",
+    "puntos_jornada": 0
+  },
+  "jimmy": {
+    "signos": [
+      "2",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "X",
+      "X",
+      "X",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1-0"
+    ],
+    "nombre": "JIMMY",
+    "puntos_jornada": 0
+  },
+  "luzia": {
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ],
+    "nombre": "LUZIA",
+    "puntos_jornada": 0
+  },
+  "fistro": {
+    "signos": [
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "X",
+      "1",
+      "1-1"
+    ],
+    "nombre": "FISTRO",
+    "puntos_jornada": 0
+  },
+  "luna": {
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "X",
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1-0"
+    ],
+    "nombre": "LUNA",
+    "puntos_jornada": 0
+  },
+  "sesudo": {
+    "signos": [
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
+    "nombre": "SESUDO",
+    "puntos_jornada": 0
+  },
+  "erniebot": {
+    "signos": [
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "X",
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1-1"
+    ],
+    "nombre": "ERNIEBOT",
     "puntos_jornada": 0
   },
   "consenso": {
     "nombre": "CONSENSO TOTAL",
-    "signos": ["1", "1", "X", "2", "1", "1", "X", "2", "1", "1", "2", "1", "1", "2", "2-0"],
+    "signos": [
+      "X",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-0"
+    ],
     "puntos_jornada": 0
   }
 }

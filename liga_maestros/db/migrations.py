@@ -674,6 +674,51 @@ def ensure_jornada_1(conn):
     updated = ensure_jornada_completa(conn, 1)
     if updated:
         conn.commit()
+    # Boletos de Maestros y de La Peña aportados para la J1 (12 peñistas + 5 maestros).
+    _import_j1_pronosticos(conn)
+    conn.commit()
+
+
+def _import_j1_pronosticos(conn):
+    """Import J1 boletos from the arena data file into predicciones.
+
+    Idempotent (INSERT OR REPLACE): puede ejecutarse en cada arranque. La
+    Jornada 1 de la temporada 2026/27 arranca sin predicciones en la semilla
+    pública, así que esta es la vía canónica de publicación (mismo patrón que
+    _import_j75_pronosticos). Copilot lleva su boleto real; Sesudo y ErnieBot
+    son cobertura editorial del 12/08; MrPurple rellena su quiniela en la web.
+    """
+    candidates = [
+        os.path.join(config.SEED_DATA_DIR, "inbox", "JORNADA_1_LM_ARENA.json"),
+        os.path.join(config.DATA_DIR, "inbox", "JORNADA_1_LM_ARENA.json"),
+    ]
+    for arena_path in candidates:
+        if not arena_path or not os.path.exists(arena_path):
+            continue
+        try:
+            with open(arena_path, encoding="utf-8") as fh:
+                arena = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        if int(arena.get("jornada") or 0) != 1:
+            continue
+        for entry in arena.get("pronosticos", []):
+            uid = str(entry.get("participante_id") or "").strip()
+            if not uid:
+                continue
+            signos = list(entry.get("signos") or [])[:15]
+            for partido_id, raw_sign in enumerate(signos, start=1):
+                sign = str(raw_sign or "-").strip().upper()
+                if not sign:
+                    continue
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo)
+                    VALUES (?, 1, ?, ?)
+                    """,
+                    (uid, partido_id, sign),
+                )
+        return
 
 
 def ensure_clasificacion_zero(conn):
