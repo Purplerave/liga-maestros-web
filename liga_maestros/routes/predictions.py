@@ -8,8 +8,8 @@ from ..db.connection import get_db
 from ..middleware.rate_limit import is_rate_limited
 from ..scoring import normalize_prediction_sign
 from ..services.highlightly import Q15_EXPECTED_MATCHES
-from ..services.teams import is_live_scored_status, is_scored_status
 from ..services.jornada import resolve_active_jornada
+from ..services.teams import is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
