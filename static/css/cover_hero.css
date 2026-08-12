@@ -1,5 +1,5 @@
 @layer hero {
-/* PORTADA v10 - columnas equilibradas + atajos a ancho completo debajo */
+/* PORTADA v11 - compacto, sin cortar, sin botones duplicados del menú */
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-proof,
@@ -14,7 +14,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content {
     height: 100%;
     max-width: none;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav {
@@ -42,10 +43,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     --cp-gold: #f5b53f;
     --cp-cyan: #38d9ff;
     --cp-pink: #ef5a8b;
-    height: 100%;
+    height: auto;
     min-height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
@@ -65,11 +67,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     margin: 0 auto;
     box-sizing: border-box;
-    align-items: stretch;
+    align-items: start;
 }
 
 /* ===== COLUMNA IZQUIERDA: Hero ===== */
@@ -79,13 +81,13 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     gap: 10px;
     min-width: 0;
     min-height: 0;
-    height: 100%;
+    height: auto;
 }
 
 /* Panel hero con efecto estadio */
 .cp-intro {
     width: 100%;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
@@ -203,7 +205,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     margin: 6px auto 0;
     color: #c8d4e8;
     font-size: 0.72rem;
-    line-height: 1.5;
+    line-height: 1.45;
     text-align: center;
     z-index: 1;
 }
@@ -340,7 +342,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     gap: 8px;
     min-width: 0;
     min-height: 0;
-    height: 100%;
+    height: auto;
 }
 
 /* Parte inferior derecha: porra y noticias, más una guía útil que ocupa el espacio restante */
@@ -349,7 +351,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     flex-direction: column;
     gap: 8px;
     min-height: 0;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
 }
 .cp-right-bottom-top {
     display: grid;
@@ -361,7 +363,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 /* Tu jornada: rellena el espacio restante sin dejar huecos vacíos */
 .cp-journey-card {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 0;
     flex-direction: column;
     justify-content: flex-start;
@@ -669,17 +671,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
 .cp-empty { display:block; margin-top:8px; color: var(--cp-muted); font-size:0.60rem; }
 
 
-/* Atajos a ancho completo bajo las 2 columnas */
-.cp-quicklinks-footer {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    width: 100%;
-    flex-shrink: 0;
-}
-.cp-quicklinks-footer button {
-    flex: 1 1 0;
-}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
@@ -711,7 +702,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
     .cp-journey-card { flex: none; }
     .cp-right-bottom-top { grid-template-columns: 1fr; }
     .cp-data-card { min-height: 120px; }
-    .cp-quicklinks-footer { flex-wrap: wrap; }
 }
 @media (max-width: 640px) {
     .cp-hero-logo-icon { width: 44px; height: 44px; }
