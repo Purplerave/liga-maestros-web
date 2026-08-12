@@ -2,6 +2,13 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-12 — Ligas 2026-27: planteles oficiales y extranjeras a cero
+
+### Corregido
+
+- 🔴 **Primera y Segunda seguían con los equipos de 2025-26.** Mallorca, Girona y Oviedo ya no están en Primera; Racing de Santander, Deportivo y Málaga ascienden. En Segunda entran Mallorca, Girona, Oviedo, Tenerife, Eldense, Sabadell y Celta Fortuna, y salen Racing, Deportivo, Málaga, Mirandés, Huesca, Cultural Leonesa y Zaragoza. La migración de arranque sustituye `clasificacion` si el plantel no coincide, sin borrar puntos de una temporada ya empezada.
+- 🔴 **Las ligas extranjeras de la pestaña Ligas seguían con la clasificación cerrada de 2025-26.** Premier, Bundesliga y Ligue 1 se reinician a 0 puntos con los planteles 2026-27 (Coventry/Ipswich/Hull, Schalke/Elversberg/Paderborn, Troyes/Le Mans). El deploy copia también `MULTI_STANDINGS.json` al runtime para que producción no conserve el cache viejo.
+
 ## 2026-08-03 — Quiniela J75 autoreparable
 
 ### Corregido

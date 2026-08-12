@@ -1,7 +1,7 @@
 [
   {
     "pos": 1,
-    "n": "R. Racing Club",
+    "n": "RCD Mallorca",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -12,7 +12,7 @@
   },
   {
     "pos": 2,
-    "n": "RC Deportivo",
+    "n": "Girona FC",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -23,7 +23,7 @@
   },
   {
     "pos": 3,
-    "n": "UD Almería",
+    "n": "Real Oviedo",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -34,7 +34,7 @@
   },
   {
     "pos": 4,
-    "n": "Málaga CF",
+    "n": "UD Almería",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -199,7 +199,7 @@
   },
   {
     "pos": 19,
-    "n": "CD Mirandés",
+    "n": "CD Tenerife",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -210,7 +210,7 @@
   },
   {
     "pos": 20,
-    "n": "SD Huesca",
+    "n": "CD Eldense",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -221,7 +221,7 @@
   },
   {
     "pos": 21,
-    "n": "Cultural y Deportiva Leonesa",
+    "n": "CE Sabadell",
     "pj": 0,
     "pg": 0,
     "pe": 0,
@@ -232,7 +232,7 @@
   },
   {
     "pos": 22,
-    "n": "Real Zaragoza",
+    "n": "Celta Fortuna",
     "pj": 0,
     "pg": 0,
     "pe": 0,

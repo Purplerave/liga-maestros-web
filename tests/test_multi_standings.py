@@ -45,6 +45,8 @@ def test_external_standings_refresh_is_explicit(monkeypatch):
 
     result = multi_standings.refresh_external_standings(season=2026)
 
+    assert result[0].get("season") == "2026-27"
+
     assert result[0]["name"] == "PREMIER LEAGUE"
     assert saved == [result]
 

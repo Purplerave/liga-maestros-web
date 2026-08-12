@@ -27,7 +27,11 @@ def _save_cache(leagues):
     try:
         os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
         with open(CACHE_PATH, "w", encoding="utf-8") as f:
-            json.dump({"leagues": leagues, "updated_at": time.time()}, f, ensure_ascii=False)
+            json.dump(
+                {"season": "2026-27", "leagues": leagues, "updated_at": time.time()},
+                f,
+                ensure_ascii=False,
+            )
     except Exception:
         pass
 
@@ -80,13 +84,13 @@ def build_multi_league_standings(official_standings, team_logos=None):
     return leagues
 
 
-def refresh_external_standings(season=2025):
+def refresh_external_standings(season=2026):
     """Refresh the external cache only when called by an operator or worker."""
     external = []
     for name, lid in config.STANDINGS_LEAGUES.items():
         teams = fetch_highlightly_standings(lid, season=season)
         if teams:
-            external.append({"name": name, "teams": teams, "source": "highlightly"})
+            external.append({"name": name, "teams": teams, "source": "highlightly", "season": "2026-27"})
     if external:
         _save_cache(external)
     return external
@@ -107,6 +111,16 @@ def refresh_spanish_standings(season=2026):
         teams = fetch_highlightly_standings(league_id, season=season)
         if not teams:
             continue
+        from .season_rosters import official_name_set, official_names
+
+        category = "primera" if cat == "primera" else "segunda"
+        incoming = {str(t.get("n") or "").strip() for t in teams}
+        if incoming - official_name_set(category):
+            logger.warning("Skip %s standings refresh: roster is not 2026-27", cat)
+            continue
+        official = official_names(category)
+        by_name = {str(t.get("n") or "").strip(): t for t in teams}
+        teams = [by_name.get(name, {"n": name}) for name in official]
         base_teams = []
         for i, t in enumerate(teams, 1):
             base_teams.append(

@@ -98,27 +98,27 @@
         [
           18,
           "MALLORCA",
-          1
+          2
         ],
         [
           19,
           "GIRONA",
-          1
+          2
         ],
         [
           20,
           "REAL OVIEDO",
-          1
+          2
         ],
         [
           21,
           "REAL RACING CLUB",
-          2
+          1
         ],
         [
           22,
           "DEPORTIVO DE LA CORUNA",
-          2
+          1
         ],
         [
           23,
@@ -128,7 +128,7 @@
         [
           24,
           "MALAGA",
-          2
+          1
         ],
         [
           25,
@@ -202,22 +202,22 @@
         ],
         [
           39,
-          "MIRANDES",
+          "TENERIFE",
           2
         ],
         [
           40,
-          "HUESCA",
+          "ELDENSE",
           2
         ],
         [
           41,
-          "CULTURAL LEONESA",
+          "SABADELL",
           2
         ],
         [
           42,
-          "REAL ZARAGOZA",
+          "CELTA FORTUNA",
           2
         ]
       ]
@@ -651,7 +651,7 @@
           null
         ],
         [
-          "RCD Mallorca",
+          "R. Racing Club",
           0,
           0,
           1,
@@ -664,7 +664,7 @@
           null
         ],
         [
-          "Girona FC",
+          "RC Deportivo",
           0,
           0,
           1,
@@ -677,7 +677,7 @@
           null
         ],
         [
-          "Real Oviedo",
+          "Málaga CF",
           0,
           0,
           1,
@@ -690,7 +690,7 @@
           null
         ],
         [
-          "R. Racing Club",
+          "RCD Mallorca",
           0,
           0,
           2,
@@ -703,7 +703,7 @@
           null
         ],
         [
-          "RC Deportivo",
+          "Girona FC",
           0,
           0,
           2,
@@ -716,7 +716,7 @@
           null
         ],
         [
-          "UD Almería",
+          "Real Oviedo",
           0,
           0,
           2,
@@ -729,7 +729,7 @@
           null
         ],
         [
-          "Málaga CF",
+          "UD Almería",
           0,
           0,
           2,
@@ -924,7 +924,7 @@
           null
         ],
         [
-          "CD Mirandés",
+          "CD Tenerife",
           0,
           0,
           2,
@@ -937,7 +937,7 @@
           null
         ],
         [
-          "SD Huesca",
+          "CD Eldense",
           0,
           0,
           2,
@@ -950,7 +950,7 @@
           null
         ],
         [
-          "Cultural y Deportiva Leonesa",
+          "CE Sabadell",
           0,
           0,
           2,
@@ -963,7 +963,7 @@
           null
         ],
         [
-          "Real Zaragoza",
+          "Celta Fortuna",
           0,
           0,
           2,
