@@ -446,26 +446,20 @@ def _update_spanish_standings_from_matches():
 
         if "LA LIGA" in name:
             filename = "STANDINGS_LALIGA_BASE.json"
+            category = "primera"
         elif "SEGUNDA" in name:
             filename = "STANDINGS_SEGUNDA_BASE.json"
+            category = "segunda"
         else:
             continue
 
-        base_teams = []
-        for t in teams:
-            base_teams.append(
-                {
-                    "pos": t.get("pos", 0),
-                    "n": t.get("n", ""),
-                    "pj": t.get("pj", 0),
-                    "pg": t.get("pg", 0),
-                    "pe": t.get("pe", 0),
-                    "pp": t.get("pp", 0),
-                    "gf": t.get("gf", 0),
-                    "gc": t.get("gc", 0),
-                    "pts": t.get("pts", 0),
-                }
-            )
+        from liga_maestros.services.season_rosters import merge_official_stats, official_name_set, official_names
+
+        incoming = {str(t.get("n") or "").strip() for t in teams}
+        if incoming - official_name_set(category):
+            log_line(f"standings_skip={name} reason=roster_not_2026_27")
+            continue
+        base_teams = merge_official_stats(official_names(category), teams)
 
         path = DATA_DIR / filename
         try:

@@ -298,9 +298,18 @@ def run_startup_migrations():
                 ensure_jornada_75(conn)
             except Exception as e:
                 import sys
+
                 print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
             ensure_jornada_76(conn)
             ensure_jornada_1(conn)
+            from ..services.season_rosters import sync_runtime_standings_files
+
+            try:
+                sync_runtime_standings_files()
+            except Exception as e:
+                import sys
+
+                print(f"[migration] sync_runtime_standings_files failed (non-fatal): {e}", file=sys.stderr)
             ensure_clasificacion_zero(conn)
             ensure_porra_points_upgrade(conn)
             ensure_missing_indexes(conn)
@@ -668,64 +677,34 @@ def ensure_jornada_1(conn):
 
 
 def ensure_clasificacion_zero(conn):
-    """Para la nueva temporada las ligas deben salir a cero puntos.
-    Si la tabla existe pero todavía tiene puntos de la temporada anterior, la resetea a 0.
-    Si está vacía (tras RESET_TEMPORADA), la repuebla desde los JSON base ya a cero.
+    """Alinea la tabla clasificacion con los 20+22 equipos oficiales 2026-27.
+
+    Si el plantel no coincide (todavía está la temporada anterior), lo reemplaza
+    desde el roster oficial a cero. Si el plantel ya es el correcto, no toca
+    puntos de una temporada ya empezada.
     """
     try:
         count = conn.execute("SELECT COUNT(*) FROM clasificacion").fetchone()[0]
     except Exception:
         return
-    has_points = False
-    try:
-        row = conn.execute("SELECT SUM(pts) as s FROM clasificacion").fetchone()
-        has_points = row and row[0] not in (0, None)
-    except Exception:
-        pass
-    if count == 0:
-        # Repoblar desde los JSON base (ya a cero tras el fix)
-        import json
-        import os
 
-        import config
+    from ..services.season_rosters import replace_clasificacion_from_roster
 
-        # Carga directa de los ficheros base
-        laliga_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_LALIGA_BASE.json")
-        segunda_path = os.path.join(config.SEED_DATA_DIR, "STANDINGS_SEGUNDA_BASE.json")
-        imported = 0
-        for fpath, division in [(laliga_path, 1), (segunda_path, 2)]:
-            if not os.path.exists(fpath):
-                continue
-            try:
-                with open(fpath, encoding="utf-8") as fh:
-                    teams = json.load(fh)
-            except Exception:
-                continue
-            for idx, team in enumerate(teams, start=1):
-                try:
-                    conn.execute(
-                        "INSERT OR IGNORE INTO clasificacion (equipo, pj, pts, division, pos, pg, pe, pp, gf, gc, racha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            team.get("n", f"Equipo {idx}"),
-                            int(team.get("pj", 0) or 0),
-                            int(team.get("pts", 0) or 0),
-                            division,
-                            int(team.get("pos", idx) or idx),
-                            int(team.get("pg", 0) or 0),
-                            int(team.get("pe", 0) or 0),
-                            int(team.get("pp", 0) or 0),
-                            int(team.get("gf", 0) or 0),
-                            int(team.get("gc", 0) or 0),
-                            team.get("racha"),
-                        ),
-                    )
-                    imported += 1
-                except Exception:
-                    continue
-        if imported:
-            conn.commit()
+    if replace_clasificacion_from_roster(conn):
         return
-    if has_points:
+
+    if count == 0:
+        replace_clasificacion_from_roster(conn)
+        return
+
+    # Plantel correcto. Solo resetea puntos si todavía arrastra una temporada
+    # completa anterior (38/42 partidos) y no una jornada viva de 2026-27.
+    try:
+        row = conn.execute("SELECT MAX(pj) as m FROM clasificacion").fetchone()
+        max_pj = int(row[0] or 0) if row else 0
+    except Exception:
+        max_pj = 0
+    if max_pj >= 30:
         conn.execute("UPDATE clasificacion SET pj=0, pts=0, pg=0, pe=0, pp=0, gf=0, gc=0, racha=NULL")
         conn.commit()
 
