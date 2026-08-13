@@ -852,6 +852,47 @@
         "Duelo igualado en Riazor; ambos históricos con falta de acierto goleador. 1-1."
       ],
       "origen": "Boleto editorial de cobertura (12/08)"
+    },
+    {
+      "participante_id": "sonia",
+      "nombre_publico": "Sonia",
+      "ia_origen": "Participante humano de La Peña",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "2",
+        "2",
+        "1",
+        "1",
+        "X",
+        "1",
+        "1",
+        "X",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2-1"
+      ],
+      "razones": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "origen": "Boleto aportado por el usuario el 13/08"
     }
   ],
   "incidencias": [
@@ -877,11 +918,15 @@
     },
     {
       "participante": "ErnieBot",
-      "problema": "No aportó boleto en data/jornada 1.txt; se sube boleto editorial de cobertura (12/08) para completar los 12 peñistas del consenso."
+      "problema": "No aportó boleto en data/jornada 1.txt; se sube boleto editorial de cobertura (12/08) para completar los 13 peñistas del consenso."
     },
     {
       "participante": "MrPurple",
       "problema": "Participante humano (propietario); su quiniela la rellena él directamente en la web. No se sube boleto."
+    },
+    {
+      "participante": "Sonia",
+      "problema": "Boleto humano aportado por el usuario; no se proporcionaron razones partido a partido."
     }
   ]
 }

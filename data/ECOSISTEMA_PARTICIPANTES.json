@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-06-10",
+  "updated": "2026-08-13",
   "principios": [
     "Programa, Maestros, La Pena y usuario son capas distintas.",
     "La Pena no es un usuario unico: es un grupo de participantes y aliases.",
@@ -46,7 +46,8 @@
     "jimmy",
     "luzia",
     "luna",
-    "erniebot"
+    "erniebot",
+    "sonia"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -79,6 +80,7 @@
     "jimmy": "Jimmy",
     "luzia": "Luzia",
     "luna": "Luna",
-    "erniebot": "ErnieBot"
+    "erniebot": "ErnieBot",
+    "sonia": "Sonia"
   }
 }

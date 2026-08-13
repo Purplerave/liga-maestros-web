@@ -45,6 +45,7 @@ def public_contest_name(uid, users):
         "luzia": "LUZIA",
         "luna": "LUNA",
         "erniebot": "ERNIEBOT",
+        "sonia": "SONIA",
     }
     if uid in names:
         return names[uid]
@@ -111,6 +112,7 @@ def canonical_contest_id(uid):
         "luzia",
         "luna",
         "erniebot",
+        "sonia",
         "falcon",
     ):
         return low

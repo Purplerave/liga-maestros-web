@@ -1,13 +1,13 @@
 """Acceptance: J1 boletos publicados para la temporada 2026-2027.
 
-Contrato (aportado por el usuario el 12/08):
+Contrato (aportado por el usuario el 13/08):
 - Copilot publica su boleto REAL en el orden oficial del boleto de la J1:
   1,1,X,1,X,1,1,X,1,X,1,1,1,1,1-0.
-- La Peña (12 peñistas: chipi, geli, pepe, profe, fortu, oraculo, fistro,
-  sesudo, jimmy, luzia, luna, erniebot) entrega sus boletos; MrPurple es el
-  usuario humano y rellena su quiniela en la web.
+- La Peña (13 peñistas: chipi, geli, pepe, profe, fortu, oraculo, fistro,
+  sesudo, jimmy, luzia, luna, erniebot y sonia) entrega sus boletos; MrPurple
+  es el usuario humano y rellena su quiniela en la web.
 - /api/liga/data?j=1 devuelve copilot con esos signos y consenso_pena con
-  total 12 votos por partido.
+  total 13 votos por partido.
 """
 
 import json
@@ -23,8 +23,9 @@ from liga_maestros.db.migrations import (
 )
 
 COPILOT_SIGNOS = ["1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "1", "1", "1", "1", "1-0"]
+SONIA_SIGNOS = ["X", "2", "2", "1", "1", "X", "1", "1", "X", "1", "2", "1", "1", "1", "2-1"]
 
-PENA_12 = {
+PENA_13 = {
     "chipi",
     "geli",
     "pepe",
@@ -37,6 +38,7 @@ PENA_12 = {
     "luzia",
     "luna",
     "erniebot",
+    "sonia",
 }
 MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot", "programa"}
 
@@ -54,7 +56,7 @@ def _test_app(tmp_path, monkeypatch):
     return create_app()
 
 
-def test_arena_file_has_copilot_real_ticket_and_12_pena_members():
+def test_arena_file_has_copilot_real_ticket_and_13_pena_members():
     with open("data/inbox/JORNADA_1_LM_ARENA.json", encoding="utf-8") as fh:
         arena = json.load(fh)
     assert arena["jornada"] == 1
@@ -62,10 +64,12 @@ def test_arena_file_has_copilot_real_ticket_and_12_pena_members():
 
     assert pronosticos["copilot"]["signos"] == COPILOT_SIGNOS
     assert pronosticos["copilot"]["grupo"] == "maestro"
+    assert pronosticos["sonia"]["signos"] == SONIA_SIGNOS
+    assert pronosticos["sonia"]["grupo"] == "pena"
 
     pena = {uid for uid, p in pronosticos.items() if p["grupo"] == "pena"}
     maestros = {uid for uid, p in pronosticos.items() if p["grupo"] == "maestro"}
-    assert pena == PENA_12
+    assert pena == PENA_13
     assert maestros == MAESTROS
     assert "mrpurple" not in pronosticos  # el usuario rellena su quiniela en la web
     for p in pronosticos.values():
@@ -89,7 +93,8 @@ def test_ensure_jornada_1_imports_boletos_from_arena_file():
     for row in rows:
         by_user.setdefault(row["user_id"], []).append(row["signo"])
     assert by_user["copilot"] == COPILOT_SIGNOS
-    assert set(by_user) == MAESTROS | PENA_12
+    assert by_user["sonia"] == SONIA_SIGNOS
+    assert set(by_user) == MAESTROS | PENA_13
 
     # Idempotente: re-ejecutar no duplica ni cambia los boletos
     ensure_jornada_1(conn)
@@ -171,7 +176,7 @@ def test_rekey_j1_keeps_results_attached_to_their_match():
     assert _rekey_j1_partido_ids(conn) == 0
 
 
-def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, monkeypatch):
+def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_13(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
     response = app.test_client().get("/api/liga/data?j=1")
     assert response.status_code == 200
@@ -188,10 +193,10 @@ def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, 
 
     consenso = payload["consenso_pena"]
     assert len(consenso) == 14
-    assert all(item["total"] == 12 for item in consenso)
+    assert all(item["total"] == 13 for item in consenso)
     assert all(item["fuente"] == "pena" for item in consenso)
 
     # Los maestros son públicos antes del cierre; La Peña no se filtra (privacidad)
     predicciones = payload["predicciones_actuales"]
     assert {"copilot", "gemini", "claude", "grok", "chatgpt"} <= set(predicciones)
-    assert PENA_12.isdisjoint(predicciones)
+    assert PENA_13.isdisjoint(predicciones)

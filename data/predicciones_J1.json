@@ -360,6 +360,27 @@
     "nombre": "ERNIEBOT",
     "puntos_jornada": 0
   },
+  "sonia": {
+    "signos": [
+      "X",
+      "2",
+      "2",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1",
+      "2-1"
+    ],
+    "nombre": "SONIA",
+    "puntos_jornada": 0
+  },
   "consenso": {
     "nombre": "CONSENSO TOTAL",
     "signos": [

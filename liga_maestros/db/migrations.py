@@ -749,7 +749,7 @@ def ensure_jornada_1(conn):
     updated = ensure_jornada_completa(conn, 1)
     if updated:
         conn.commit()
-    # Boletos de Maestros y de La Peña aportados para la J1 (12 peñistas + 5 maestros).
+    # Boletos de Maestros y de La Peña aportados para la J1 (13 peñistas + 6 maestros).
     _import_j1_pronosticos(conn)
     conn.commit()
 
@@ -761,7 +761,8 @@ def _import_j1_pronosticos(conn):
     Jornada 1 de la temporada 2026/27 arranca sin predicciones en la semilla
     pública, así que esta es la vía canónica de publicación (mismo patrón que
     _import_j75_pronosticos). Copilot lleva su boleto real; Sesudo y ErnieBot
-    son cobertura editorial del 12/08; MrPurple rellena su quiniela en la web.
+    son cobertura editorial del 12/08; Sonia aporta su boleto humano; MrPurple
+    rellena su quiniela en la web.
     """
     candidates = [
         os.path.join(config.SEED_DATA_DIR, "inbox", "JORNADA_1_LM_ARENA.json"),
