@@ -326,9 +326,9 @@ function renderNewspaperCoverPageV3() {
                         <i class="is-two" style="width:${(p2/t*100).toFixed(1)}%"></i>
                     </div>
                     <div class="cp-featured-pulse-labels">
-                        <span>1 ${(p1/t*100).toFixed(0)}%</span>
-                        <span>X ${(px/t*100).toFixed(0)}%</span>
-                        <span>2 ${(p2/t*100).toFixed(0)}%</span>
+                        <span>1 · ${(p1/t*100).toFixed(0)}%</span>
+                        <span>X · ${(px/t*100).toFixed(0)}%</span>
+                        <span>2 · ${(p2/t*100).toFixed(0)}%</span>
                     </div>
                     <div class="cp-featured-pulse-foot">${Number(row.total)} votos de La Peña</div>
                 </div>`;
