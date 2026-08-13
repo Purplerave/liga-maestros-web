@@ -1,6 +1,5 @@
 @layer hero {
-/* PORTADA v13 — viewport fit: hero izq + duelo/partido der + ops abajo
-   Objetivo: 1920x1080 sin scroll vertical en desktop */
+/* PORTADA v13.1 — hero centrado + título Outfit; viewport fit desktop */
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .news-brand-lockup,
@@ -67,17 +66,17 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 .cp-hero {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    text-align: left;
+    text-align: center;
     gap: 8px;
     min-height: 0;
     height: 100%;
-    padding: 16px 18px;
+    padding: 18px 22px;
     border: 1px solid var(--cp-line);
     border-radius: 14px;
     background:
-        radial-gradient(500px 220px at 0% 0%, rgba(245,181,63,0.12), transparent 70%),
+        radial-gradient(520px 240px at 50% 0%, rgba(245,181,63,0.12), transparent 70%),
         rgba(14,21,38,0.92);
 }
 .cp-kicker {
@@ -110,11 +109,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 }
 .cp-hero-title {
     margin: 0;
-    font-family: var(--cp-font-display);
-    font-size: clamp(1.7rem, 3.2vw, 2.6rem);
-    font-weight: 700;
+    font-family: var(--cp-font-ui), "Outfit", sans-serif;
+    font-size: clamp(1.75rem, 3.1vw, 2.55rem);
+    font-weight: 800;
     line-height: 1.05;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
+    text-wrap: balance;
 }
 .cp-title-white { color: #f8fafc; }
 .cp-title-gold {
@@ -124,8 +124,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
     color: transparent;
 }
 .cp-hero-pitch {
-    margin: 0;
-    max-width: 28rem;
+    margin: 0 auto;
+    max-width: 26rem;
     color: var(--cp-muted);
     font-size: 0.78rem;
     line-height: 1.45;
@@ -134,10 +134,10 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 .cp-countdown {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 2px;
-    margin-top: 4px;
-    padding: 10px 14px;
+    margin-top: 6px;
+    padding: 10px 18px;
     border-radius: 12px;
     border: 1px solid rgba(245,181,63,0.28);
     background: rgba(245,181,63,0.06);
@@ -166,7 +166,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 6px;
+    justify-content: center;
 }
 .cp-primary, .cp-secondary {
     border-radius: 999px;
