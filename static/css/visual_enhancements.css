@@ -144,6 +144,19 @@ body.newspaper-ui {
     background-clip: text;
 }
 
+/* Portada: el degradado recortado pierde contraste sobre el estadio */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-title {
+    background: none;
+    -webkit-text-fill-color: #ffffff;
+    color: #ffffff;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button {
+    color: #d7e2ef;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button.active {
+    color: #ffe08a;
+}
+
 /* ── Improved contrast for secondary text ── */
 .text-secondary,
 .match-detail,
