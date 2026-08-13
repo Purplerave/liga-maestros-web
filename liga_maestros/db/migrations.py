@@ -4,6 +4,7 @@ import sqlite3
 
 import config
 
+from ..utils import clean_team_key
 from .connection import ClosingConnection, ensure_db_file
 
 
@@ -668,8 +669,82 @@ def _import_j76_resultados(conn):
         return
 
 
+# Orden oficial del boleto de la Jornada 1 (temporada 2026/27). Mapea el
+# partido_id del orden de scrape antiguo (por horario) al orden oficial de la
+# quiniela que se publica en la pestaña Quiniela.
+J1_OFFICIAL_ORDER_BY_OLD = {
+    1: 8,
+    2: 1,
+    3: 9,
+    4: 14,
+    5: 2,
+    6: 10,
+    7: 3,
+    8: 6,
+    9: 11,
+    10: 4,
+    11: 7,
+    12: 12,
+    13: 5,
+    14: 13,
+    15: 15,
+}
+
+
+def _rekey_j1_partido_ids(conn):
+    """Reordena los partido_id de la Jornada 1 al orden oficial de la quiniela.
+
+    El scrape con el que se estrenó la temporada venía ordenado por horario, no
+    por el orden del boleto. Idempotente: solo actúa cuando la J1 todavía está
+    en el orden antiguo (partido 1 = Real Oviedo - Granada) y renumera a la vez
+    `resultados` y `predicciones` para que boletos y partidos sigan alineados.
+    """
+    row = conn.execute("SELECT local, visitante FROM resultados WHERE jornada = 1 AND partido_id = 1").fetchone()
+    if row is None:
+        return 0
+    local = clean_team_key(row[0] or "")
+    visitante = clean_team_key(row[1] or "")
+    if (local, visitante) == ("ALAVES", "GETAFE"):
+        return 0  # ya en orden oficial
+    if (local, visitante) != ("REAL OVIEDO", "GRANADA"):
+        return 0  # estado desconocido: no tocar
+
+    changed = 0
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        # 1) Pasar a ids temporales para no colisionar con el índice único.
+        for old_id, new_id in J1_OFFICIAL_ORDER_BY_OLD.items():
+            if old_id == new_id:
+                continue
+            temp_id = -(old_id + 1000)
+            for table in ("resultados", "predicciones"):
+                cursor = conn.execute(
+                    f'UPDATE "{table}" SET partido_id = ? WHERE jornada = 1 AND partido_id = ?',
+                    (temp_id, old_id),
+                )
+                changed += cursor.rowcount
+        # 2) Mover de los ids temporales al id oficial.
+        for old_id, new_id in J1_OFFICIAL_ORDER_BY_OLD.items():
+            if old_id == new_id:
+                continue
+            temp_id = -(old_id + 1000)
+            for table in ("resultados", "predicciones"):
+                cursor = conn.execute(
+                    f'UPDATE "{table}" SET partido_id = ? WHERE jornada = 1 AND partido_id = ?',
+                    (new_id, temp_id),
+                )
+                changed += cursor.rowcount
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return changed
+
+
 def ensure_jornada_1(conn):
     """Garantiza la Jornada 1 de la nueva temporada 2026/27."""
+    # Reordena la J1 importada con el orden de scrape antiguo al orden oficial.
+    _rekey_j1_partido_ids(conn)
     # El boleto oficial está en data/quiniela15_J1_scrape.json; si no está, no hacemos nada.
     updated = ensure_jornada_completa(conn, 1)
     if updated:
