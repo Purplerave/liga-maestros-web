@@ -1,0 +1,83 @@
+{
+  "jornada": 1,
+  "temporada": "2026-2027",
+  "generado_en": "2026-08-13T08:13:15",
+  "version_config": "motor_quinielistico_v4",
+  "nota": "Mejor boleto J1 2026/27 con 3 dobles (contrato P0: 8 columnas, 6,00 EUR) construido sobre las probabilidades del motor maestro y ajustado por pretemporada 2026 (lesiones, fichajes, amistosos). Ver GENERAR_BOLETO_J1.py para los ajustes y sus fuentes.",
+  "signos": [
+    "1X",
+    "1",
+    "2",
+    "1X",
+    "1",
+    "1",
+    "1",
+    "1X",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1"
+  ],
+  "pleno15": {
+    "signo": "1",
+    "marcador_predicho": "1-0",
+    "top_marcadores": [
+      {
+        "score": "1-0",
+        "prob": 0.1296
+      },
+      {
+        "score": "1-1",
+        "prob": 0.1277
+      },
+      {
+        "score": "2-0",
+        "prob": 0.1017
+      }
+    ],
+    "goles_local": {
+      "0": 0.2285,
+      "1": 0.3339,
+      "2": 0.2501,
+      "M": 0.1875
+    },
+    "goles_visitante": {
+      "0": 0.4041,
+      "1": 0.3681,
+      "2": 0.1648,
+      "M": 0.0629
+    },
+    "seleccion": {
+      "local": "1",
+      "visitante": "0",
+      "alternativa_local": "2",
+      "alternativa_visitante": "1",
+      "confianza": 0.1349,
+      "nota": "Alternativa sugerida si el segundo bucket está a menos de 0.10 del primero."
+    },
+    "buckets": [
+      "0",
+      "1",
+      "2",
+      "M"
+    ]
+  },
+  "contrato": {
+    "contract_version": "2026-08-04",
+    "doubles": 3,
+    "columns_per_ticket": 8,
+    "price_per_column": 0.75,
+    "max_cost": 6.0
+  },
+  "aciertos_esperados": 7.630000000000001,
+  "probabilidades_exactas": {
+    "p_ge_10": 0.15151857629802395,
+    "p_ge_11": 0.05433168726284968,
+    "p_ge_12": 0.013701901540008901,
+    "p_ge_13": 0.002156553923118245,
+    "p_ge_14": 0.00015890222561519904
+  }
+}

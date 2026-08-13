@@ -32,7 +32,7 @@ PENA_12 = {
     "luna",
     "erniebot",
 }
-MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot"}
+MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot", "programa"}
 
 
 def _test_app(tmp_path, monkeypatch):

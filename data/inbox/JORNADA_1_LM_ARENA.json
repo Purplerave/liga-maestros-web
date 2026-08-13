@@ -116,6 +116,47 @@
   ],
   "pronosticos": [
     {
+      "participante_id": "programa",
+      "nombre_publico": "Programa",
+      "ia_origen": "Motor estadístico propio de Liga de Maestros (PROGRAMAQUINIELA), ajustado con pretemporada 2026",
+      "grupo": "maestro",
+      "signos": [
+        "1X",
+        "1X",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1X",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1-0"
+      ],
+      "razones": [
+        "Oviedo recién descendido con 12 fichajes y varias bajas (Nacho Vidal, Aisar, Dani Calvo, Carlos Fernández) y Granada muy mermado (sin Boyé, Rebbach, Neva, Ruiz); partido más abierto, se cubre con 1X.",
+        "Alavés con refuerzos (Boyé duda, Aleñá, Denis Suárez) y Getafe pierde a Uche (lesión de rodilla, toda la temporada); X con peso, se cubre 1X.",
+        "Mallorca descendido con buen bloque de Primera y favorito claro en casa ante Valladolid rearmado; single 1.",
+        "Sporting en casa favorito claro (cuota 1.84) ante el recién ascendido Sabadell pese a la reconstrucción; single 1.",
+        "Sevilla estable sin sobresaltos; Rayo con pretemporada mala (3 derrotas de 4, 9 goles encajados) y sin laterales izquierdos; single 1.",
+        "Eibar moderado favorito en casa; Tenerife rearmado; sin señal fuerte de pretemporada, single 1.",
+        "Racing ascendido en construcción pese a Canales; Villarreal con plantilla completa y sin bajas (Mikautadze, Ayoze, Pépé); single 2.",
+        "Andorra favorito en casa pero con mucha renovación; Ceuta con plantilla corta y viaje largo; single 1.",
+        "Burgos vs Córdoba muy igualado (1 .43 / X .28 / 2 .28), sin señales fuertes; se cubre con single 1 del favorito.",
+        "Espanyol sin sus dos delanteros (Puado y Kike García lesionados) pierde gol; sube la X, se cubre 1X.",
+        "Cádiz claramente superior ante el filial del Celta (plantilla corta); single 1.",
+        "Girona favorito por cuota (1.65) pero con renovación masiva (salen Krejčí, Lemar, Blind, Witsel) y posibles salidas de Arnau y Álex Moreno; single 1 algo más frágil.",
+        "Celta más sólido; Osasuna vendió a su estrella Víctor Muñoz al Liverpool (40M€) y apenas fichó, Ramis estrena proyecto debilitado; single 1.",
+        "Las Palmas fuerte en casa (cuota 1.62) ante Albacete rearmado; single 1 de los más seguros.",
+        "Pleno al 15 Deportivo-Elche: marcador predicho 1-0 (lambdas local 1.485 / visitante 0.90, Dixon-Coles); buckets local 1 / visitante 0."
+      ],
+      "origen": "Generado por GENERAR_BOLETO_J1.py (motor + pretemporada), 13/08/2026"
+    },
+    {
       "participante_id": "gemini",
       "nombre_publico": "Gemini",
       "ia_origen": "Gemini",
