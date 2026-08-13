@@ -8,7 +8,7 @@ PORRA_ROUTE = ROOT / "liga_maestros" / "routes" / "porra.py"
 
 
 def test_cover_fills_lower_panel_with_useful_journey_actions():
-    """Portada v12: duelo + partido + journey/porra/news operativos."""
+    """Portada v13: hero izq + duelo/partido der + ops; sin scroll en desktop."""
     cover = COVER_JS.read_text(encoding="utf-8")
     css = COVER_CSS.read_text(encoding="utf-8")
 
@@ -16,12 +16,13 @@ def test_cover_fills_lower_panel_with_useful_journey_actions():
     assert 'id="cover-porra-step-status"' in cover
     assert "cp-duel" in cover
     assert "cp-featured" in cover
+    assert "cp-main" in cover
     assert "cp-ops" in cover
     assert "cp-quicklinks-footer" not in cover
     assert ".cp-journey-card" in css
+    assert ".cp-main" in css
     assert ".cp-arena" in css
-    assert ".cp-duel" in css
-    assert "grid-template-columns: 1fr 1fr" in css
+    assert "grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr)" in css
 
 
 def test_porra_bonus_copy_is_short_and_consistent():
