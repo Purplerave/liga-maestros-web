@@ -21,7 +21,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 
 .cp, .cp * { box-sizing: border-box; }
 .cp {
-    --cp-font-display: "Syne", "Outfit", sans-serif;
+    --cp-font-display: "Bebas Neue", "Syne", "Outfit", sans-serif;
     --cp-font-ui: "Outfit", "Plus Jakarta Sans", sans-serif;
     --cp-bg: #060a14;
     --cp-panel: #0e1526;
@@ -109,13 +109,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 }
 /* Gana a typewriter_system body…:where(h1){font-family:var(--font-ui)} */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp h1.cp-hero-title,
-body.newspaper-ui.quiniela-focus .cp .cp-hero-title {
+body.newspaper-ui.quiniela-focus .cp .cp-hero-title,
+body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-white,
+body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     margin: 0;
-    font-family: "Syne", var(--cp-font-display), sans-serif;
-    font-size: clamp(1.85rem, 3.4vw, 2.85rem);
-    font-weight: 800;
-    line-height: 1.02;
-    letter-spacing: 0.02em;
+    font-family: "Bebas Neue", "Syne", Impact, sans-serif;
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     text-wrap: balance;
 }
 .cp-title-white { color: #f8fafc; }
