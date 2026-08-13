@@ -46,7 +46,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <!-- Sistema de capas CSS: gobierna la cascada (sin !important). El orden replica
          la carga historica; las vistas lazy se insertan siempre en 'pages'. -->
     <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
@@ -61,7 +61,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/ticket_compact.css', v=assets_v ~ '-ticket-mobile-cards-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/typewriter_system.css', v=assets_v ~ '-typewriter-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/surface_shape.css', v=assets_v ~ '-surface-shape-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-53') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-60') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/typography.css', v=assets_v ~ '-typography-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
@@ -141,7 +141,7 @@
     <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/ux_signals.js', v=assets_v ~ '-ux-signals-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/onboarding.js', v=assets_v ~ '-onboarding-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-1') }}"
+    <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-2') }}"
             data-sw-url="{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}"></script>
 </body>
 </html>
