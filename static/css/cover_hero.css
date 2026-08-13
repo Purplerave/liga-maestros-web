@@ -305,16 +305,17 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
 /* ===== ARENA DERECHA: duelo + partido apilados ===== */
 .cp-arena {
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
     min-height: 0;
     height: 100%;
+    align-content: stretch;
 }
 
 .cp-duel, .cp-featured {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     padding: 12px 14px;
     border: 1px solid var(--cp-line);
     border-radius: 16px;
@@ -324,7 +325,7 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     -webkit-backdrop-filter: blur(10px);
     min-width: 0;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 .cp-featured { cursor: pointer; }
 .cp-featured:hover { border-color: rgba(56,217,255,0.28); }
@@ -376,11 +377,11 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
 
 .cp-duel-scores {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
     align-items: center;
-    flex: 1;
-    min-height: 0;
+    flex: 1 1 auto;
+    min-height: 72px;
 }
 .cp-duel-avatar {
     display: grid;
@@ -403,11 +404,13 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 8px 6px;
+    gap: 3px;
+    padding: 10px 8px;
     border-radius: 12px;
     background: rgba(255,255,255,0.03);
-    height: 100%;
+    min-height: 72px;
+    height: auto;
+    overflow: visible;
 }
 .cp-duel-side.is-pena { border: 1px solid rgba(124,198,255,0.18); }
 .cp-duel-side.is-ia { border: 1px solid rgba(239,90,139,0.18); }
@@ -419,11 +422,12 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     text-transform: uppercase;
 }
 .cp-duel-side-value {
-    font-family: var(--cp-font-display);
-    font-size: clamp(1.4rem, 2.4vw, 1.85rem);
-    font-weight: 700;
-    line-height: 1;
+    font-family: var(--cp-font-ui), "Outfit", sans-serif;
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    font-weight: 800;
+    line-height: 1.1;
     color: var(--cp-text);
+    flex-shrink: 0;
 }
 .cp-duel-side.is-pena .cp-duel-side-value { color: var(--cp-pena); }
 .cp-duel-side.is-ia .cp-duel-side-value { color: var(--cp-ia); }
@@ -434,17 +438,20 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
 .cp-duel-vs {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid rgba(245,181,63,0.35);
     background: rgba(245,181,63,0.12);
-    font-family: var(--cp-font-display);
-    font-size: 0.78rem;
-    font-weight: 700;
+    font-family: var(--cp-font-ui), "Outfit", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
     color: var(--cp-gold);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
+    line-height: 1;
     box-shadow: 0 0 18px rgba(245,181,63,0.18);
+    overflow: visible;
 }
 .cp-duel-bar {
     display: flex;
@@ -510,11 +517,19 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
 .cp-featured-pulse-labels {
     display: flex;
     justify-content: space-between;
+    gap: 6px;
     margin-top: 4px;
     color: var(--cp-muted);
-    font-size: 0.58rem;
+    font-size: 0.6rem;
     font-weight: 700;
+    white-space: nowrap;
 }
+.cp-featured-pulse-labels span {
+    flex: 1;
+    text-align: center;
+}
+.cp-featured-pulse-labels span:first-child { text-align: left; }
+.cp-featured-pulse-labels span:last-child { text-align: right; }
 .cp-featured-pulse-foot {
     margin-top: 4px;
     color: var(--cp-dim);
