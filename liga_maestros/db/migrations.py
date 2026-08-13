@@ -673,8 +673,21 @@ def _import_j76_resultados(conn):
 # partido_id del orden de scrape antiguo (por horario) al orden oficial de la
 # quiniela que se publica en la pestaña Quiniela.
 J1_OFFICIAL_ORDER_BY_OLD = {
-    1: 8, 2: 1, 3: 9, 4: 14, 5: 2, 6: 10, 7: 3, 8: 6,
-    9: 11, 10: 4, 11: 7, 12: 12, 13: 5, 14: 13, 15: 15,
+    1: 8,
+    2: 1,
+    3: 9,
+    4: 14,
+    5: 2,
+    6: 10,
+    7: 3,
+    8: 6,
+    9: 11,
+    10: 4,
+    11: 7,
+    12: 12,
+    13: 5,
+    14: 13,
+    15: 15,
 }
 
 
@@ -686,9 +699,7 @@ def _rekey_j1_partido_ids(conn):
     en el orden antiguo (partido 1 = Real Oviedo - Granada) y renumera a la vez
     `resultados` y `predicciones` para que boletos y partidos sigan alineados.
     """
-    row = conn.execute(
-        "SELECT local, visitante FROM resultados WHERE jornada = 1 AND partido_id = 1"
-    ).fetchone()
+    row = conn.execute("SELECT local, visitante FROM resultados WHERE jornada = 1 AND partido_id = 1").fetchone()
     if row is None:
         return 0
     local = clean_team_key(row[0] or "")
