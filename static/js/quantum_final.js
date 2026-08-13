@@ -263,41 +263,8 @@ async function submitPorra(event) {
 }
 
 // --- Guardar y compartir quiniela ---
-async 
 function showWelcomeOnboarding() {
-    if (state.user && localStorage.getItem("liga_maestros_onboarded") === "true") return;
-    if (!state.data) return;
-
-    const overlay = document.createElement("div");
-    overlay.className = "onboarding-overlay";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", "Bienvenido a Liga de Maestros");
-    overlay.innerHTML =
-        '<div class="onboarding-modal">' +
-        "<h2>Bienvenido a Liga de Maestros</h2>" +
-        "<p>Compite contra La Peña y los Maestros IA en la quiniela semanal.</p>" +
-        "<ol>" +
-        "<li>Elige 1X2 para cada uno de los 15 partidos</li>" +
-        "<li>Guarda tu quiniela antes del cierre</li>" +
-        "<li>Compara tus resultados con La Peña y los Maestros IA</li>" +
-        "<li>Sigue el directo en tiempo real</li>" +
-        "</ol>" +
-        '<div class="onboarding-actions">' +
-        '<button class="primary-btn" id="onboarding-start">Empezar</button>' +
-        "</div>" +
-        '<button class="onboarding-skip" id="onboarding-skip">No, gracias</button>' +
-        "</div>";
-    document.body.appendChild(overlay);
-
-    document.getElementById("onboarding-start").addEventListener("click", function () {
-        overlay.remove();
-        localStorage.setItem("liga_maestros_onboarded", "true");
-    });
-    document.getElementById("onboarding-skip").addEventListener("click", function () {
-        overlay.remove();
-        localStorage.setItem("liga_maestros_onboarded", "true");
-    });
+    // El onboarding multi-paso vive en onboarding.js para no duplicar el modal.
 }
 
 async function savePredictions() {
@@ -395,12 +362,12 @@ async function savePredictions() {
     }
 }
 
-function shareTicket() {
-    if (!state.user) return showToast("Entra con Google para compartir.", "error");
-    const matches = state.data.partidos || [];
-    if (!matches.length) return showToast("No hay jornada cargada para compartir.", "error");
-    const lines = [
-        "\u{1F3C6} LIGA DE MAESTROS | Mis pronosticos J" + state.data.jornada,
+function buildShareText() {
+    const matches = state.data?.partidos || [];
+    const done = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
+    return [
+        "🏆 LIGA DE MAESTROS | Mis pronosticos J" + (state.data?.jornada || ""),
+        done + "/15 marcados · Humanos vs IA",
         ...matches.slice(0, 15).map((match, idx) => {
             const sign = state.my_signs[idx] && state.my_signs[idx] !== "-" ? state.my_signs[idx] : "sin marcar";
             const local = match.local || "Local";
@@ -408,66 +375,99 @@ function shareTicket() {
             const label = idx === 14 ? "Pleno al 15" : local + " - " + away;
             return (idx + 1) + ". " + label + " -> " + sign;
         }),
-        "\u{1F525} Compite conmigo en la Liga de Maestros",
-    ];
-    const text = lines.join("\n");
-    const shareUrl = window.location.href;
+        "🔥 ¿Puedes ganar a la IA? ligademaestros",
+    ].join("\n");
+}
 
+function sharePageUrl() {
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("contest");
+        return url.toString();
+    } catch {
+        return window.location.origin + "/";
+    }
+}
+
+function closeShareSheet() {
+    const sheet = qs("share-sheet");
+    if (!sheet) return;
+    sheet.hidden = true;
+    sheet.classList.remove("is-open");
+}
+
+function openShareSheet() {
+    const sheet = qs("share-sheet");
+    const preview = qs("share-sheet-preview");
+    if (!sheet || !preview) return false;
+    preview.textContent = buildShareText();
+    const nativeBtn = sheet.querySelector("[data-share-action='native']");
+    if (nativeBtn) nativeBtn.hidden = !navigator.share;
+    sheet.hidden = false;
+    requestAnimationFrame(() => sheet.classList.add("is-open"));
+    sheet.querySelector(".share-sheet-close")?.focus();
+    return true;
+}
+
+function copyShareText(text) {
+    if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.left = "-9999px";
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    return Promise.resolve();
+}
+
+function runShareAction(action) {
+    const text = qs("share-sheet-preview")?.textContent || buildShareText();
+    const shareUrl = sharePageUrl();
+    const payload = text + "\n" + shareUrl;
+    if (action === "copy") {
+        copyShareText(payload).then(() => {
+            showToast("Pronostico copiado.");
+            if (typeof SoundManager !== "undefined" && SoundManager.playSave) SoundManager.playSave();
+            closeShareSheet();
+        }).catch(() => showToast("No se pudo copiar el pronostico.", "error"));
+        return;
+    }
+    if (action === "twitter") {
+        window.open(
+            "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(shareUrl),
+            "_blank",
+            "noopener,noreferrer"
+        );
+        showToast("Abriendo X...");
+        return;
+    }
+    if (action === "whatsapp") {
+        window.open("https://wa.me/?text=" + encodeURIComponent(payload), "_blank", "noopener,noreferrer");
+        showToast("Abriendo WhatsApp...");
+        return;
+    }
+    if (action === "native" && navigator.share) {
+        navigator.share({ title: "Liga de Maestros", text, url: shareUrl }).catch(error => {
+            if (error && error.name === "AbortError") return;
+            showToast("No se pudo abrir el panel nativo.", "error");
+        });
+    }
+}
+
+function shareTicket() {
+    if (!state.user) return showToast("Entra con Google para compartir.", "error");
+    const matches = state.data.partidos || [];
+    if (!matches.length) return showToast("No hay jornada cargada para compartir.", "error");
     if (typeof window.launchConfetti === "function") {
         window.launchConfetti({ count: 30, spread: 70, duration: 2000 });
     }
-
-    if (navigator.share) {
-        try {
-            navigator.share({ title: "Liga de Maestros", text, url: shareUrl });
-            if (typeof SoundManager !== "undefined" && SoundManager.playCelebration) {
-                SoundManager.playCelebration();
-            }
-            showToast("Pronostico compartido.");
-            return;
-        } catch (shareError) {
-            if (shareError && shareError.name === "AbortError") return;
-        }
-    }
-
-    const platform = prompt(
-        "Compartir pronostico:\n1. Copiar al portapapeles\n2. Twitter/X\n3. WhatsApp",
-        "1"
-    );
-    if (platform === "2") {
-        const twitterUrl = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(shareUrl);
-        window.open(twitterUrl, "_blank", "noopener,noreferrer");
-        showToast("Abriendo Twitter...");
-    } else if (platform === "3") {
-        const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(text + "\n" + shareUrl);
-        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-        showToast("Abriendo WhatsApp...");
-    } else {
-        try {
-            if (navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text + "\n" + shareUrl);
-            } else {
-                const area = document.createElement("textarea");
-                area.value = text + "\n" + shareUrl;
-                area.setAttribute("readonly", "");
-                area.style.position = "fixed";
-                area.style.left = "-9999px";
-                document.body.appendChild(area);
-                area.select();
-                document.execCommand("copy");
-                area.remove();
-            }
-            if (typeof SoundManager !== "undefined" && SoundManager.playSave) {
-                SoundManager.playSave();
-            }
-            showToast("Pronostico copiado.");
-        } catch (error) {
-            showToast("No se pudo copiar el pronostico.", "error");
-            if (typeof SoundManager !== "undefined" && SoundManager.playError) {
-                SoundManager.playError();
-            }
-        }
-    }
+    if (openShareSheet()) return;
+    copyShareText(buildShareText() + "\n" + sharePageUrl()).then(() => {
+        showToast("Pronostico copiado.");
+    }).catch(() => showToast("No se pudo copiar el pronostico.", "error"));
 }
 
 async function loadNewsBriefing() {

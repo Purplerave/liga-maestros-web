@@ -275,11 +275,21 @@ function draftKey() {
 function updatePicksProgress() {
     const done = state.my_signs.filter(sign => String(sign || "-").trim() !== "-").length;
     const total = 15;
+    const percent = `${(done / total) * 100}%`;
     const doneNode = qs("picks-done");
     const captionNode = qs("picks-caption");
     const barNode = qs("picks-progress-bar");
+    const wrap = qs("picks-progress-wrap");
+    const ticketDone = qs("ticket-picks-done");
+    const ticketBar = qs("ticket-picks-bar");
     if (doneNode) doneNode.textContent = `${done}/${total}`;
-    if (barNode) barNode.style.width = `${(done / total) * 100}%`;
+    if (barNode) barNode.style.width = percent;
+    if (wrap) {
+        wrap.hidden = currentMainView() !== "TICKET";
+        wrap.classList.toggle("is-complete", done === total);
+    }
+    if (ticketDone) ticketDone.textContent = `${done}/${total}`;
+    if (ticketBar) ticketBar.style.width = percent;
     if (captionNode) {
         captionNode.textContent = done === 0
             ? "Todavia no has marcado ningun partido."

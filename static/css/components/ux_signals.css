@@ -153,4 +153,116 @@ body.is-offline .topbar-shell {
 @keyframes vt-fade-in {
     from { opacity: 0; transform: translateY(8px); }
 }
+
+/* --------------------------------------------------------------------------
+   7. Share sheet
+   -------------------------------------------------------------------------- */
+.share-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: grid;
+    place-items: end center;
+    padding: var(--space-4);
+}
+.share-sheet[hidden] { display: none; }
+.share-sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(3, 6, 12, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.share-sheet-panel {
+    position: relative;
+    z-index: 1;
+    width: min(520px, 100%);
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 18px 18px 14px 14px;
+    background: linear-gradient(180deg, rgba(16, 25, 42, 0.98), rgba(8, 13, 24, 0.98));
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+    transform: translateY(16px);
+    opacity: 0;
+    transition: transform var(--duration-normal) var(--ease-out), opacity var(--duration-normal) var(--ease-out);
+}
+.share-sheet.is-open .share-sheet-panel {
+    transform: translateY(0);
+    opacity: 1;
+}
+.share-sheet-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.share-sheet-head span {
+    color: var(--gold);
+    font-size: var(--text-2xs);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.share-sheet-head h2 {
+    margin: 4px 0 0;
+    color: var(--text-main);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+}
+.share-sheet-close {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+.share-sheet-preview {
+    margin: 0;
+    max-height: 36vh;
+    overflow: auto;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.28);
+    color: var(--text-muted);
+    font-family: var(--font-data);
+    font-size: 0.72rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+}
+.share-sheet-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.share-sheet-actions button {
+    min-height: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.share-sheet-actions button:hover {
+    border-color: rgba(56,189,248,0.4);
+    background: rgba(56,189,248,0.12);
+}
+.share-sheet-actions [data-share-action="copy"] {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-color: transparent;
+    color: #16120a;
+}
+@media (min-width: 720px) {
+    .share-sheet { place-items: center; }
+    .share-sheet-panel { border-radius: 16px; }
+}
 }

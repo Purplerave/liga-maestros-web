@@ -137,6 +137,11 @@ function renderArena() {
         container.innerHTML = `
             <div class="ticket-workspace">
                 <div class="ticket-main-column">
+                    <div class="ticket-progress-strip" aria-live="polite">
+                        <span>Tu quiniela</span>
+                        <strong id="ticket-picks-done">0/15</strong>
+                        <div class="picks-track" aria-hidden="true"><i id="ticket-picks-bar"></i></div>
+                    </div>
                     <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
                         <div class="ticket-porra-heading">
                             <span data-porra-label>PORRA</span>
@@ -157,6 +162,7 @@ function renderArena() {
                 ${renderTicketCommentsPanel()}
             </div>`;
         renderArenaTensionBody(matches);
+        if (typeof updatePicksProgress === "function") updatePicksProgress();
         initTicketComments();
         loadPorra();
         ensureQ15Directo().then(loadedNow => {

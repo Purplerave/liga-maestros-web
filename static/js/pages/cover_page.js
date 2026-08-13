@@ -8,43 +8,76 @@ function hydrateCoverTypewriter() {}
 function startCoverScorebar() {}
 
 let _countdownStarted = false;
+let _seasonCountdownStarted = false;
+const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
+
+function formatCountdownDigits(diff) {
+    const safe = Math.max(0, diff);
+    const days = Math.floor(safe / 86400000);
+    const hours = Math.floor((safe % 86400000) / 3600000);
+    const mins = Math.floor((safe % 3600000) / 60000);
+    const secs = Math.floor((safe % 60000) / 1000);
+    const cell = (value, unit) =>
+        `<span class="cp-digit"><b>${String(value).padStart(2, "0")}</b><small>${unit}</small></span>`;
+    return `${cell(days, "días")}<i aria-hidden="true">:</i>${cell(hours, "hrs")}<i aria-hidden="true">:</i>${cell(mins, "min")}<i aria-hidden="true">:</i>${cell(secs, "seg")}`;
+}
+
 function startCoverCountdown() {
     if (_countdownStarted) return;
     const node = document.querySelector("#cp-deadline");
     if (!node) return;
     _countdownStarted = true;
     const tick = () => {
+        const deadline = document.querySelector("#cp-deadline");
+        if (!deadline) return;
         const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
-        if (!raw) { node.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
+        if (!raw) { deadline.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
         const target = new Date(String(raw).replace(" ", "T"));
-        if (Number.isNaN(target.getTime())) { node.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
+        if (Number.isNaN(target.getTime())) { deadline.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
         const diff = target.getTime() - Date.now();
-        if (diff <= 0 || state.data.is_locked) { node.textContent = "CERRADA"; node.classList.add("is-urgent"); return; }
+        if (diff <= 0 || state.data.is_locked) { deadline.textContent = "CERRADA"; deadline.classList.add("is-urgent"); return; }
         const s = Math.max(0, Math.floor(diff / 1000));
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-        node.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
-        node.classList.toggle("is-urgent", diff < 3_600_000);
+        deadline.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+        deadline.classList.toggle("is-urgent", diff < 3_600_000);
     };
     tick(); setInterval(tick, 1000);
 }
 
 function startSeasonCountdown() {
-    const timer = document.getElementById('cp-countdown-timer');
-    if (!timer) return;
-    const seasonStart = new Date('2026-08-15T19:30:00');
     const update = () => {
-        const diff = seasonStart.getTime() - Date.now();
+        const timer = document.getElementById("cp-countdown-timer");
+        if (!timer) return;
+        const label = document.querySelector(".cp-countdown-label");
+        const now = Date.now();
+        let target = SEASON_KICKOFF.getTime();
+        let usingJornada = false;
+        const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
+        if (now >= target && raw) {
+            const deadline = new Date(String(raw).replace(" ", "T"));
+            if (!Number.isNaN(deadline.getTime()) && deadline.getTime() > now) {
+                target = deadline.getTime();
+                usingJornada = true;
+            }
+        }
+        const diff = target - Date.now();
+        if (label) {
+            label.textContent = usingJornada
+                ? "Cierre de jornada"
+                : diff <= 0
+                    ? "Temporada 26/27"
+                    : "Jornada 1 · arranque";
+        }
         if (diff <= 0) {
-            timer.textContent = '¡La Liga ha empezado!';
+            timer.innerHTML = `<span class="cp-countdown-live">La Liga está en juego</span>`;
             return;
         }
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
-        timer.textContent = `${days}d ${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m ${String(secs).padStart(2,'0')}s`;
+        timer.innerHTML = formatCountdownDigits(diff);
+        timer.classList.toggle("is-urgent", diff < 3_600_000);
     };
     update();
+    if (_seasonCountdownStarted) return;
+    _seasonCountdownStarted = true;
     setInterval(update, 1000);
 }
 if (document.readyState === "loading") {
@@ -324,12 +357,14 @@ function renderNewspaperCoverPageV3() {
             </div>
             <div class="cp-duel-scores is-reset">
                 <div class="cp-duel-side is-pena">
+                    <span class="cp-duel-avatar" aria-hidden="true">👥</span>
                     <span class="cp-duel-side-label">La Peña</span>
                     <strong class="cp-duel-side-value">0</strong>
                     <small>media pruebas 6,9</small>
                 </div>
                 <div class="cp-duel-vs" aria-hidden="true">VS</div>
                 <div class="cp-duel-side is-ia">
+                    <span class="cp-duel-avatar" aria-hidden="true">✦</span>
                     <span class="cp-duel-side-label">Maestros IA</span>
                     <strong class="cp-duel-side-value">0</strong>
                     <small>media pruebas 8,2</small>
@@ -360,9 +395,23 @@ function renderNewspaperCoverPageV3() {
             <div class="cp-duel-foot"><b>${escapeHtml(leader)}</b> · diff ${escapeHtml(diffStr)}</div>`;
     }
 
+    const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
+    const userProgressHtml = state.user ? `
+        <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
+            <span>Tu quiniela</span>
+            <strong>${userDone}/15</strong>
+            <div class="cp-user-track" aria-hidden="true"><i style="width:${((userDone / 15) * 100).toFixed(1)}%"></i></div>
+        </div>` : "";
+    const masterPills = coverMasterNames().slice(0, 6);
+    const mastersHtml = masterPills.length
+        ? `<div class="cp-ai-pills" aria-label="Maestros IA">${masterPills.map(name => `<span>${escapeHtml(name)}</span>`).join("")}</div>`
+        : "";
+    const assetsV = document.body?.dataset?.assetsV || "";
+    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
+
     const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
         <div class="cp-countdown-label">Jornada 1 · arranque</div>
-        <div class="cp-countdown-timer" id="cp-countdown-timer">--</div>
+        <div class="cp-countdown-timer" id="cp-countdown-timer"></div>
         <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
     </div>`;
 
@@ -385,6 +434,7 @@ function renderNewspaperCoverPageV3() {
     return `<div class="cp">
         <div class="cp-main">
             <header class="cp-hero">
+                <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72">
                 <div class="cp-kicker">
                     <span>Quiniela ${escapeHtml(String(jornada || "1"))}</span>
                     <i class="cp-kicker-dot"></i>
@@ -397,10 +447,12 @@ function renderNewspaperCoverPageV3() {
                 </h1>
                 <p class="cp-hero-pitch">Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.</p>
                 ${countdownHtml}
+                ${userProgressHtml}
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
+                ${mastersHtml}
             </header>
 
             <section class="cp-arena" aria-label="El duelo">

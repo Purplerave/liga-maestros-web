@@ -6,10 +6,10 @@
    ========================================================================== */
 :root {
     /* ---------- Typography ---------- */
-    --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    --font-ui: "Outfit", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     --font-display: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
     --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-    --font-headline: "Rajdhani", "Outfit", sans-serif;
+    --font-headline: "Bebas Neue", "Outfit", sans-serif;
     --font-main: var(--font-ui); /* alias legacy */
     --fu: var(--font-ui);        /* alias legacy */
 
@@ -185,6 +185,18 @@ body::after {
 
 /* Ensure all content sits above atmospheric layers */
 .app-shell { position: relative; z-index: 1; }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
 #toast-container {
     position: fixed;
     top: 16px;

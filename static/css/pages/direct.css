@@ -16,8 +16,10 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     margin-inline: auto;
     padding: clamp(28px, 5vw, 48px);
     border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 10px;
-    background: rgba(10, 17, 30, 0.82);
+    border-radius: 18px;
+    background:
+        radial-gradient(420px 160px at 50% 0%, rgba(56, 217, 255, 0.1), transparent 70%),
+        rgba(10, 17, 30, 0.86);
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
     text-align: center;
 }

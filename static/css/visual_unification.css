@@ -118,6 +118,10 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav {
 }
 
 body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     border: none;
     border-right: none;
     border-radius: 7px;
@@ -142,6 +146,8 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav button b {
 }
 
 body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
+    display: inline;
+    margin: 0;
     font-size: 0.78rem;
     font-weight: 700;
     color: inherit;
@@ -429,12 +435,19 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
    11. LEGAL LINKS — Footer discreto pero legible
    ────────────────────────────────────────── */
 .site-legal-links {
+    position: fixed;
+    left: 12px;
+    bottom: 10px;
+    z-index: 50;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 6px;
+    border-radius: 999px;
     background: rgba(6, 9, 15, 0.9);
     backdrop-filter: blur(12px);
-    padding: 4px 10px;
-    gap: 12px;
+    padding: 6px 14px;
+    gap: 14px;
 }
 
 .site-legal-links a {
@@ -510,6 +523,14 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
     body.newspaper-ui.quiniela-focus .icon-btn {
         width: 30px;
         height: 30px;
+    }
+
+    .site-legal-links {
+        left: 8px;
+        bottom: 8px;
+        padding: 4px 10px;
+        gap: 8px;
+        opacity: 0.7;
     }
 }
 
