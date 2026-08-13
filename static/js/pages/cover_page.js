@@ -383,34 +383,34 @@ function renderNewspaperCoverPageV3() {
         </article>`;
 
     return `<div class="cp">
-        <header class="cp-hero">
-            <div class="cp-kicker">
-                <span>Quiniela ${escapeHtml(String(jornada || "1"))}</span>
-                <i class="cp-kicker-dot"></i>
-                <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
-                ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
-            </div>
-            <div class="cp-hero-tagline"><b>1X2</b> · La Peña contra las máquinas</div>
-            <h1 class="cp-hero-title">
-                <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
-            </h1>
-            <p class="cp-hero-pitch">Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.</p>
-            <div class="cp-hero-row">
+        <div class="cp-main">
+            <header class="cp-hero">
+                <div class="cp-kicker">
+                    <span>Quiniela ${escapeHtml(String(jornada || "1"))}</span>
+                    <i class="cp-kicker-dot"></i>
+                    <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                    ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
+                </div>
+                <div class="cp-hero-tagline"><b>1X2</b> · La Peña contra las máquinas</div>
+                <h1 class="cp-hero-title">
+                    <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
+                </h1>
+                <p class="cp-hero-pitch">Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.</p>
                 ${countdownHtml}
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <section class="cp-arena" aria-label="El duelo">
-            <article class="cp-duel">
-                <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
-                ${duelBody}
-            </article>
-            ${featuredHtml}
-        </section>
+            <section class="cp-arena" aria-label="El duelo">
+                <article class="cp-duel">
+                    <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
+                    ${duelBody}
+                </article>
+                ${featuredHtml}
+            </section>
+        </div>
 
         <section class="cp-ops" aria-label="Tu jornada">
             <div class="cp-data-card cp-porra" data-page-action="TICKET">
