@@ -168,9 +168,96 @@ body.newspaper-ui {
     border-radius: 4px;
 }
 
+/* ── Nav icons + progress + ticket strip ── */
+.newspaper-page-nav .nav-ico {
+    display: none;
+    margin-right: 6px;
+    color: inherit;
+    font-style: normal;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+@media (min-width: 900px) {
+    .newspaper-page-nav .nav-ico { display: inline; }
+}
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button[data-page-action="LIVE"] .nav-ico {
+    color: #34d399;
+}
+.topbar-progress {
+    display: inline-grid;
+    grid-template-columns: auto 72px;
+    align-items: center;
+    gap: 6px;
+    min-width: 108px;
+    padding: 4px 8px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 999px;
+    background: rgba(6, 9, 15, 0.55);
+    color: var(--accent, #38bdf8);
+    font-size: 0.64rem;
+    font-weight: 800;
+}
+.topbar-progress.is-complete {
+    border-color: rgba(34, 197, 94, 0.35);
+    color: #86efac;
+}
+.picks-track {
+    height: 5px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+}
+.picks-track i,
+#picks-progress-bar,
+#ticket-picks-bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #38bdf8, #fbbf24);
+    transition: width 0.25s ease;
+}
+.ticket-progress-strip {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px 6px;
+    padding: 7px 12px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    background: rgba(8, 17, 31, 0.88);
+    color: #9fb7d5;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.ticket-progress-strip strong {
+    color: #7dd3fc;
+    font-family: var(--font-data, monospace);
+}
+.cover-skeleton {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 10px;
+    height: 100%;
+    padding: 12px;
+}
+.cover-skeleton-hero { min-height: 280px; }
+.cover-skeleton-side {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+}
+.cover-skeleton .skeleton-card:nth-child(n+3) {
+    grid-column: span 1;
+    min-height: 88px;
+}
+@media (max-width: 900px) {
+    .cover-skeleton { grid-template-columns: 1fr; }
+    .topbar-progress { display: none; }
 }
 
-/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

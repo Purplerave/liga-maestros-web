@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="Liga de Maestros - Quiniela competitiva donde La Pe&ntilde;a y los Maestros IA se enfrentan jornada a jornada. Predicciones, rankings, directo y juegos." />
+    <meta name="description" content="Liga de Maestros: la quiniela donde La Peña compite contra GPT, Claude, Gemini y Grok. 15 partidos, ranking en vivo y porra del pleno." />
     <meta name="theme-color" content="#06090f" />
-    <title>Liga de Maestros - Humanos vs IAs</title>
+    <title>Liga de Maestros — ¿Puedes ganar a la IA?</title>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Liga de Maestros" />
-    <meta property="og:title" content="Liga de Maestros - La Peña contra los Maestros IA" />
-    <meta property="og:description" content="Quiniela competitiva donde La Peña y los Maestros IA se enfrentan jornada a jornada. Predicciones, rankings, directo y juegos." />
+    <meta property="og:title" content="Liga de Maestros — La Peña contra los Maestros IA" />
+    <meta property="og:description" content="15 partidos. Humanos vs GPT, Claude, Gemini y Grok. Firma tu quiniela y demuestra quién acierta más." />
     <link rel="canonical" href="{{ url_for('main.index', _external=True) }}" />
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Liga de Maestros",
-        "description": "Quiniela competitiva donde La Peña y los Maestros IA se enfrentan jornada a jornada. Predicciones, rankings, directo y juegos.",
+        "description": "Quiniela competitiva: La Peña contra GPT, Claude, Gemini y Grok. Predicciones, rankings, directo y juegos.",
         "url": "{{ url_for('main.index', _external=True) }}",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Web",
@@ -34,8 +34,8 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Liga de Maestros - La Peña contra los Maestros IA" />
-    <meta name="twitter:description" content="Quiniela competitiva: humanos vs IAs, jornada a jornada." />
+    <meta name="twitter:title" content="Liga de Maestros — ¿Puedes ganar a la IA?" />
+    <meta name="twitter:description" content="15 partidos. Humanos vs GPT, Claude, Gemini y Grok. Firma tu quiniela." />
     <meta name="twitter:image" content="{{ url_for('main.static_files', filename='img/og-image.png', v=assets_v, _external=True) }}" />
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('main.static_files', filename='img/favicon-32.png', v=assets_v) }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('main.static_files', filename='img/favicon-16.png', v=assets_v) }}">
@@ -46,12 +46,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <!-- Sistema de capas CSS: gobierna la cascada (sin !important). El orden replica
          la carga historica; las vistas lazy se insertan siempre en 'pages'. -->
     <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-2') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/shell.css', v=assets_v ~ '-newspaper-split-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/page_foundations.css', v=assets_v ~ '-newspaper-split-1') }}">
@@ -61,14 +61,14 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/ticket_compact.css', v=assets_v ~ '-ticket-mobile-cards-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/typewriter_system.css', v=assets_v ~ '-typewriter-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/surface_shape.css', v=assets_v ~ '-surface-shape-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-60') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-61') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/typography.css', v=assets_v ~ '-typography-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-3') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_unification.css', v=assets_v ~ '-unify-2') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_unification.css', v=assets_v ~ '-unify-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/match_cards.css', v=assets_v ~ '-match-cards-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_responsive.css', v=assets_v ~ '-mobile-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/onboarding.css', v=assets_v ~ '-onboarding-1') }}">
@@ -94,6 +94,11 @@
             </div>
 
             <div class="topbar-actions">
+                <div id="picks-progress-wrap" class="topbar-progress" hidden>
+                    <span id="picks-done">0/15</span>
+                    <div class="picks-track" aria-hidden="true"><i id="picks-progress-bar"></i></div>
+                    <small id="picks-caption" class="sr-only">Todavia no has marcado ningun partido.</small>
+                </div>
                 <div id="user-profile-nav" class="user-panel"></div>
                 <button id="cmdk-trigger" class="cmdk-trigger" type="button" data-no-ripple="true"
                         aria-haspopup="dialog" aria-label="Abrir buscador de comandos (Control o Command mas K)">
@@ -101,7 +106,7 @@
                     <span class="cmdk-trigger-label">Buscar</span>
                     <kbd class="cmdk-kbd">⌘K</kbd>
                 </button>
-                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)">Actualizar</button>
+                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)" aria-label="Actualizar">↻</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
                 <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
             </div>
@@ -109,12 +114,12 @@
         </header>
 
         <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
-            <button class="active" type="button" data-page-action="ALL"><span>Portada</span></button>
-            <button type="button" data-page-action="TICKET"><span>Quiniela</span></button>
-            <button type="button" data-page-action="LIVE"><span>Directo</span></button>
-            <button type="button" data-page-action="STANDINGS"><span>Ligas</span></button>
-            <button type="button" data-page-action="SNAKE"><span>Juegos</span></button>
-            <button type="button" data-page-action="CONTEST"><span>La Pe&ntilde;a</span></button>
+            <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">⌂</i><span>Portada</span></button>
+            <button type="button" data-page-action="TICKET"><i class="nav-ico" aria-hidden="true">1X2</i><span>Quiniela</span></button>
+            <button type="button" data-page-action="LIVE"><i class="nav-ico" aria-hidden="true">●</i><span>Directo</span></button>
+            <button type="button" data-page-action="STANDINGS"><i class="nav-ico" aria-hidden="true">☰</i><span>Ligas</span></button>
+            <button type="button" data-page-action="SNAKE"><i class="nav-ico" aria-hidden="true">▶</i><span>Juegos</span></button>
+            <button type="button" data-page-action="CONTEST"><i class="nav-ico" aria-hidden="true">★</i><span>La Pe&ntilde;a</span></button>
         </nav>
 
         <main class="main-arena">
@@ -127,15 +132,34 @@
         <a href="/cookies">Cookies</a>
         <a href="/aviso-legal">Aviso legal</a>
     </nav>
+    <div id="share-sheet" class="share-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="share-sheet-title">
+        <button class="share-sheet-backdrop" type="button" data-share-close aria-label="Cerrar compartir"></button>
+        <div class="share-sheet-panel">
+            <header class="share-sheet-head">
+                <div>
+                    <span>Tu boleto</span>
+                    <h2 id="share-sheet-title">Comparte la quiniela</h2>
+                </div>
+                <button type="button" class="share-sheet-close" data-share-close aria-label="Cerrar">×</button>
+            </header>
+            <pre id="share-sheet-preview" class="share-sheet-preview"></pre>
+            <div class="share-sheet-actions">
+                <button type="button" data-share-action="copy">Copiar</button>
+                <button type="button" data-share-action="whatsapp">WhatsApp</button>
+                <button type="button" data-share-action="twitter">X / Twitter</button>
+                <button type="button" data-share-action="native">Más</button>
+            </div>
+        </div>
+    </div>
     <div id="toast-container"></div>
     <script defer src="{{ url_for('main.static_files', filename='js/utils.js', v=assets_v ~ '-utils-6') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/state.js', v=assets_v ~ '-state-7') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/state.js', v=assets_v ~ '-state-8') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/logos.js', v=assets_v ~ '-logos-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/navigation.js', v=assets_v ~ '-navigation-8') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/live.js', v=assets_v ~ '-live-2') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/arena.js', v=assets_v ~ '-arena-10') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-10') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-38') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-11') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-39') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/confetti.js', v=assets_v ~ '-confetti-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/sound_manager.js', v=assets_v ~ '-sound-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-1') }}"></script>

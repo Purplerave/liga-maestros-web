@@ -42,8 +42,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
     color: var(--cp-text);
     background-color: var(--cp-bg);
     background-image:
-        radial-gradient(900px 520px at 12% -8%, rgba(245,181,63,0.10), transparent 60%),
-        radial-gradient(700px 480px at 92% 10%, rgba(56,217,255,0.08), transparent 60%);
+        linear-gradient(180deg, rgba(6, 10, 20, 0.72) 0%, rgba(6, 10, 20, 0.88) 55%, rgba(6, 10, 20, 0.96) 100%),
+        radial-gradient(900px 520px at 12% -8%, rgba(245,181,63,0.16), transparent 60%),
+        radial-gradient(700px 480px at 92% 10%, rgba(56,217,255,0.12), transparent 60%),
+        url("../img/cover-atmosphere.jpg");
+    background-size: cover, auto, auto, cover;
+    background-position: center, center, center, center;
     padding: 10px 14px 12px;
     font-family: var(--cp-font-ui);
     display: grid;
@@ -74,10 +78,19 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
     height: 100%;
     padding: 18px 22px;
     border: 1px solid var(--cp-line);
-    border-radius: 14px;
+    border-radius: 18px;
     background:
-        radial-gradient(520px 240px at 50% 0%, rgba(245,181,63,0.12), transparent 70%),
-        rgba(14,21,38,0.92);
+        radial-gradient(520px 240px at 50% 0%, rgba(245,181,63,0.16), transparent 70%),
+        linear-gradient(180deg, rgba(14,21,38,0.78), rgba(8,13,24,0.9));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.cp-hero-crest {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 18px rgba(56, 217, 255, 0.28));
 }
 .cp-kicker {
     display: inline-flex;
@@ -114,7 +127,7 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-white,
 body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     margin: 0;
     font-family: "Bebas Neue", "Syne", Impact, sans-serif;
-    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+    font-size: clamp(2.4rem, 4.6vw, 3.8rem);
     font-weight: 400;
     line-height: 0.95;
     letter-spacing: 0.06em;
@@ -140,12 +153,13 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
     margin-top: 6px;
-    padding: 10px 18px;
-    border-radius: 12px;
+    padding: 10px 14px 12px;
+    border-radius: 14px;
     border: 1px solid rgba(245,181,63,0.28);
-    background: rgba(245,181,63,0.06);
+    background: linear-gradient(180deg, rgba(245,181,63,0.1), rgba(245,181,63,0.04));
+    width: min(100%, 360px);
 }
 .cp-countdown-label {
     color: var(--cp-dim);
@@ -155,16 +169,107 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     text-transform: uppercase;
 }
 .cp-countdown-timer {
-    font-family: var(--cp-font-display);
-    font-size: clamp(1.2rem, 2.2vw, 1.55rem);
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     color: var(--cp-gold);
-    letter-spacing: 0.02em;
-    line-height: 1.1;
+    line-height: 1;
+}
+.cp-countdown-timer > i {
+    color: rgba(245,181,63,0.55);
+    font-style: normal;
+    font-family: var(--cp-font-display);
+    font-size: 1.15rem;
+    padding-bottom: 10px;
+}
+.cp-digit {
+    display: grid;
+    gap: 3px;
+    min-width: 52px;
+    padding: 6px 8px 5px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(6,10,20,0.55);
+}
+.cp-digit b {
+    font-family: var(--cp-font-display);
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #ffe7a4;
+}
+.cp-digit small {
+    color: var(--cp-dim);
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.cp-countdown-timer.is-urgent .cp-digit {
+    border-color: rgba(248,113,113,0.35);
+    background: rgba(127,29,29,0.28);
+}
+.cp-countdown-live {
+    color: var(--cp-gold);
+    font-family: var(--cp-font-display);
+    font-size: 1.15rem;
+    letter-spacing: 0.06em;
 }
 .cp-countdown-date {
     color: var(--cp-muted);
     font-size: 0.58rem;
+}
+.cp-user-progress {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 280px);
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(56,217,255,0.2);
+    background: rgba(56,217,255,0.06);
+    color: var(--cp-muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.cp-user-progress strong { color: var(--cp-cyan); font-size: 0.78rem; }
+.cp-user-progress.is-done {
+    border-color: rgba(52,211,153,0.35);
+    background: rgba(52,211,153,0.08);
+}
+.cp-user-progress.is-done strong { color: #6ee7b7; }
+.cp-user-track {
+    height: 5px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+}
+.cp-user-track i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #38d9ff, #f5b53f);
+}
+.cp-ai-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+.cp-ai-pills span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(239,90,139,0.22);
+    background: rgba(239,90,139,0.08);
+    color: #f9a8d4;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .cp-actions {
@@ -186,9 +291,10 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
 .cp-primary {
     background: linear-gradient(180deg, #ffd56a, #f5b53f 55%, #d99920);
     color: #1a1205;
-    box-shadow: 0 6px 18px rgba(245,181,63,0.25);
+    box-shadow: 0 8px 22px rgba(245,181,63,0.32);
+    min-width: 160px;
 }
-.cp-primary:hover { transform: translateY(-1px); }
+.cp-primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
 .cp-secondary {
     background: rgba(255,255,255,0.04);
     color: var(--cp-text);
@@ -211,12 +317,17 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     gap: 8px;
     padding: 12px 14px;
     border: 1px solid var(--cp-line);
-    border-radius: 12px;
-    background: rgba(14,21,38,0.92);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(14,21,38,0.86), rgba(10,16,28,0.92));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px rgba(0,0,0,0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     min-width: 0;
     min-height: 0;
     overflow: hidden;
 }
+.cp-featured { cursor: pointer; }
+.cp-featured:hover { border-color: rgba(56,217,255,0.28); }
 
 .cp-card-head {
     display: flex;
@@ -271,6 +382,22 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     flex: 1;
     min-height: 0;
 }
+.cp-duel-avatar {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    font-size: 0.85rem;
+}
+.cp-duel-side.is-pena .cp-duel-avatar {
+    background: rgba(124,198,255,0.14);
+}
+.cp-duel-side.is-ia .cp-duel-avatar {
+    background: rgba(239,90,139,0.14);
+    color: #f9a8d4;
+}
 .cp-duel-side {
     display: flex;
     flex-direction: column;
@@ -278,7 +405,7 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     justify-content: center;
     gap: 2px;
     padding: 8px 6px;
-    border-radius: 10px;
+    border-radius: 12px;
     background: rgba(255,255,255,0.03);
     height: 100%;
 }
@@ -305,11 +432,19 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     font-size: 0.55rem;
 }
 .cp-duel-vs {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(245,181,63,0.35);
+    background: rgba(245,181,63,0.12);
     font-family: var(--cp-font-display);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--cp-gold);
     letter-spacing: 0.06em;
+    box-shadow: 0 0 18px rgba(245,181,63,0.18);
 }
 .cp-duel-bar {
     display: flex;

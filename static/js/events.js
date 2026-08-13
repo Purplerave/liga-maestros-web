@@ -81,6 +81,17 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);
     qs("cmdk-trigger")?.addEventListener("click", () => window.CommandPalette?.open());
     qs("share-ticket-btn")?.addEventListener("click", shareTicket);
+    qs("share-sheet")?.addEventListener("click", event => {
+        if (event.target.closest("[data-share-close]")) {
+            closeShareSheet();
+            return;
+        }
+        const action = event.target.closest("[data-share-action]");
+        if (action) runShareAction(action.dataset.shareAction);
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeShareSheet();
+    });
     // Las pestañas fijas están fuera de matches-body; las acciones que se
     // pintan dentro de las vistas se resuelven con el listener delegado.
     document.querySelectorAll("[data-page-action]").forEach(button => {

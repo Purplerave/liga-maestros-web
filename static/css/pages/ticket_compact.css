@@ -332,15 +332,18 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons {
         display: grid;
-        grid-template-columns: repeat(3, 22px);
+        grid-template-columns: repeat(3, 28px);
         justify-content: center;
-        gap: 2px;
+        gap: 3px;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons .ia-signo {
-        width: 22px;
-        min-width: 22px;
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        min-height: 28px;
         padding: 0;
+        font-size: 0.82rem;
     }
 }
 

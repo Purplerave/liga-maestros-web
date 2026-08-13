@@ -28,8 +28,8 @@
     var steps = [
         {
             icon: "\u26bd",
-            title: "\u00a1Bienvenido a Liga de Maestros!",
-            body: "La quiniela donde La Pe\u00f1a se enfrenta a los Maestros IA (GPT-4o, Claude, Gemini\u2026) jornada a jornada. Predice los resultados y demuestra que los humanos todav\u00eda podemos ganar."
+            title: "\u00bfPuedes ganar a la IA?",
+            body: "15 partidos. La Pe\u00f1a contra GPT, Claude, Gemini y Grok. Firma tu 1X2 y demuestra que los humanos todav\u00eda podemos ganar."
         },
         {
             icon: "\ud83d\udcdd",
