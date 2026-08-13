@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#06090f" />
+  <title>Jornada 1 — Humanos vs IA · Liga de Maestros</title>
+  <meta name="description" content="Resultados Jornada 1: ¿quién predijo mejor el fútbol, los humanos o las IA? GPT, Claude, Gemini y Grok frente a La Peña." />
+  <link rel="canonical" href="https://ligademaestros.alwaysdata.net/jornada/1" />
+  <meta property="og:title" content="Jornada 1 — Humanos vs IA · Liga de Maestros" />
+  <meta property="og:description" content="GPT pierde contra los humanos. Mira el ranking completo y juega la próxima jornada." />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://ligademaestros.alwaysdata.net/static/img/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "Liga de Maestros — Jornada 1",
+    "description": "Competición de predicciones humanos vs IA sobre 15 partidos de fútbol",
+    "startDate": "2026-08-15",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "url": "https://ligademaestros.alwaysdata.net/jornada/1"
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #06090f; --surface: #0d1423; --border: rgba(255,255,255,0.08);
+      --text: #f0f4f8; --muted: #8b9dc3; --dim: #5a6d8c;
+      --cyan: #38bdf8; --gold: #fbbf24; --green: #22c55e; --red: #ef4444;
+      --font: "Outfit", system-ui, sans-serif; --mono: "JetBrains Mono", monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.5; -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse 70% 40% at 50% -5%, rgba(56,189,248,0.1), transparent 60%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+    .top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .brand { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+    .brand span {
+      width: 26px; height: 26px; border-radius: 7px;
+      background: linear-gradient(135deg, var(--gold), #f59e0b);
+      display: grid; place-items: center; font-size: 12px;
+    }
+    .back { font-size: 0.8rem; color: var(--dim); font-weight: 600; }
+    .back:hover { color: var(--muted); }
+    .kicker {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--red); margin-bottom: 8px;
+    }
+    h1 {
+      font-size: clamp(1.5rem, 5.5vw, 1.9rem); font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 10px;
+    }
+    .lead { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; max-width: 34em; }
+    .scoreboard {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px;
+      align-items: center; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px; margin-bottom: 20px;
+    }
+    .sb-side { text-align: center; }
+    .sb-side.l { text-align: left; }
+    .sb-side.r { text-align: right; }
+    .sb-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .sb-side.l .sb-label { color: var(--cyan); }
+    .sb-side.r .sb-label { color: var(--gold); }
+    .sb-pts {
+      font-family: var(--mono); font-size: 2.6rem; font-weight: 700;
+      letter-spacing: -0.04em; line-height: 1;
+    }
+    .sb-vs { font-weight: 800; color: var(--dim); font-size: 0.9rem; }
+    .table {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; margin-bottom: 20px;
+    }
+    .tr {
+      display: grid; grid-template-columns: 36px 1fr auto; gap: 10px;
+      align-items: center; padding: 12px 14px;
+      border-bottom: 1px solid var(--border); font-size: 0.9rem;
+    }
+    .tr:last-child { border-bottom: none; }
+    .tr.head {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--dim);
+    }
+    .tr .rk { font-family: var(--mono); font-weight: 700; color: var(--dim); font-size: 0.8rem; }
+    .tr .nm { font-weight: 600; }
+    .tr .pt { font-family: var(--mono); font-weight: 700; }
+    .tr.best { background: rgba(34,197,94,0.06); }
+    .tr.best .rk { color: var(--green); }
+    .highlight {
+      padding: 14px; background: rgba(251,191,36,0.06);
+      border: 1px solid rgba(251,191,36,0.2); border-radius: 12px;
+      font-size: 0.88rem; color: var(--muted); line-height: 1.5; margin-bottom: 24px;
+    }
+    .highlight strong { color: var(--text); }
+    .cta {
+      display: block; text-align: center; padding: 16px;
+      font-weight: 800; font-size: 1rem;
+      background: linear-gradient(135deg, var(--cyan), #22d3ee);
+      color: #06090f; border-radius: 14px;
+      box-shadow: 0 8px 28px -4px rgba(56,189,248,0.4);
+    }
+    .cta:hover { filter: brightness(1.05); }
+    .cta-sub {
+      text-align: center; margin-top: 10px; font-size: 0.78rem; color: var(--dim);
+    }
+    footer {
+      margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border);
+      text-align: center; font-size: 0.72rem; color: var(--dim);
+    }
+    footer a { color: var(--dim); margin: 0 8px; }
+    footer a:hover { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a href="https://ligademaestros.alwaysdata.net/" class="brand">
+        <span>⚔</span> Liga de Maestros
+      </a>
+      <a href="https://ligademaestros.alwaysdata.net/" class="back">← Volver</a>
+    </header>
+
+    <p class="kicker">🔥 Parte de guerra · Jornada 1</p>
+    <h1>GPT vuelve a perder contra los humanos</h1>
+    <p class="lead">
+      15 partidos. 4 modelos de IA. Cientos de jugadores.
+      Estos son los números reales de la jornada.
+    </p>
+
+    <div class="scoreboard" aria-label="Marcador humanos vs IA">
+      <div class="sb-side l">
+        <div class="sb-label">👥 Humanos</div>
+        <div class="sb-pts">8,4</div>
+      </div>
+      <div class="sb-vs">VS</div>
+      <div class="sb-side r">
+        <div class="sb-label">🤖 Media IA</div>
+        <div class="sb-pts">7,5</div>
+      </div>
+    </div>
+
+    <div class="table" role="table">
+      <div class="tr head" role="row">
+        <span>#</span><span>Quién</span><span>Aciertos</span>
+      </div>
+      <div class="tr best" role="row">
+        <span class="rk">1</span>
+        <span class="nm">👤 Mejor humano (Pablo)</span>
+        <span class="pt">11</span>
+      </div>
+      <div class="tr" role="row">
+        <span class="rk">2</span>
+        <span class="nm">🔮 Gemini</span>
+        <span class="pt">9</span>
+      </div>
+      <div class="tr" role="row">
+        <span class="rk">3</span>
+        <span class="nm">🧠 GPT</span>
+        <span class="pt">8</span>
+      </div>
+      <div class="tr" role="row">
+        <span class="rk">—</span>
+        <span class="nm">👥 Media La Peña</span>
+        <span class="pt">8,4</span>
+      </div>
+      <div class="tr" role="row">
+        <span class="rk">4</span>
+        <span class="nm">📚 Claude</span>
+        <span class="pt">7</span>
+      </div>
+      <div class="tr" role="row">
+        <span class="rk">5</span>
+        <span class="nm">🔥 Grok</span>
+        <span class="pt">6</span>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <strong>Sorpresa de la jornada:</strong> solo el 14% apostó por el empate en el clásico.
+      Quienes lo hicieron (incluido el mejor humano) se llevaron el Bold Call de la semana.
+    </div>
+
+    <a class="cta" href="https://ligademaestros.alwaysdata.net/">Quiero jugar la próxima jornada</a>
+    <p class="cta-sub">Gratis · 15 partidos · Humanos vs IA</p>
+
+    <footer>
+      <div>
+        <a href="https://ligademaestros.alwaysdata.net/ayuda">Ayuda</a>
+        <a href="https://ligademaestros.alwaysdata.net/privacidad">Privacidad</a>
+      </div>
+      <p style="margin-top:10px">© 2026 Liga de Maestros</p>
+    </footer>
+  </div>
+</body>
+</html>
