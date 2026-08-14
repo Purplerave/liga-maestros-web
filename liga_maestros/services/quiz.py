@@ -1,6 +1,7 @@
 """Quiz service: Reto 10 LaLiga - scoring, ranking, validation."""
 
 import json
+import sqlite3
 from datetime import datetime
 
 from ..db.connection import get_db
@@ -128,26 +129,32 @@ def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms
         puntos_total += participation_bonus
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        conn.execute(
-            """
-            INSERT INTO quiz_participaciones
-            (jornada, user_id, nombre, respuestas, aciertos, total_preguntas, puntos, tiempo_total_ms, racha_max, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                jornada,
-                user_id,
-                nombre,
-                json.dumps(detalle, ensure_ascii=False),
-                aciertos,
-                len(preguntas),
-                puntos_total,
-                tiempo_total_ms,
-                racha_max,
-                now,
-            ),
-        )
-        conn.commit()
+        try:
+            conn.execute(
+                """
+                INSERT INTO quiz_participaciones
+                (jornada, user_id, nombre, respuestas, aciertos, total_preguntas, puntos,
+                 tiempo_total_ms, racha_max, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    jornada,
+                    user_id,
+                    nombre,
+                    json.dumps(detalle, ensure_ascii=False),
+                    aciertos,
+                    len(preguntas),
+                    puntos_total,
+                    tiempo_total_ms,
+                    racha_max,
+                    now,
+                ),
+            )
+            conn.commit()
+        except sqlite3.IntegrityError:
+            # The unique index is the final authority under simultaneous submits.
+            conn.rollback()
+            return {"error": "Ya has participado en el Reto 10 de esta jornada."}
 
         ranking = get_quiz_ranking_jornada(jornada)
         position = None

@@ -4,6 +4,7 @@
 | Variable | Descripción | Ejemplo |
 |----------|-------------|---------|
 | `ADMIN_EMAILS` | Emails de administradores separados por coma | admin@email.com |
+| `ADMIN_API_SECRET` | Secreto opcional para automatizaciones admin; solo cabecera `X-Admin-Secret`, nunca URL | valor aleatorio largo |
 | `API_FOOTBALL_KEY` | Clave API de football-api.com (respaldo) | xxxxxxxxxxxxxxxx |
 | `DATA_DIR` | Directorio de datos en producción | /var/data |
 | `DB_BACKUP_DIR` | Directorio de backups de la BD | /var/data/backups |
@@ -46,6 +47,8 @@
 |----------|-------------|---------|
 | `MAX_DOBLES_PER_TICKET` | Máximo de dobles por quiniela | 14 |
 | `MAX_TRIPLES_PER_TICKET` | Máximo de triples por quiniela | 14 |
+| `LIVE_SSE_ENABLED` | Activa streams SSE; mantener `0` con Gunicorn síncrono por threads | 0 |
+| `SLOW_REQUEST_MS` | Umbral para registrar requests lentas | 750 |
 
 ## Configuración Render.com (automática)
 | Variable | Descripción |

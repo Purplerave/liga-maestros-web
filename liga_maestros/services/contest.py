@@ -2,6 +2,7 @@
 
 import threading
 from datetime import datetime
+from typing import Any
 
 from ..db.connection import get_db
 from ..scoring import score_prediction
@@ -11,7 +12,7 @@ CONTEST_DYNAMIC_START_JORNADA = 58
 Q15_EXPECTED_MATCHES = 15
 
 _contest_cache_lock = threading.Lock()
-_contest_payload_cache = {}
+_contest_payload_cache: dict[tuple[Any, ...], dict[str, Any]] = {}
 
 
 def contest_month_key(date_text):

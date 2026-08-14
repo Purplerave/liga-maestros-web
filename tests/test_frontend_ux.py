@@ -110,3 +110,17 @@ def test_live_refresh_does_not_spawn_goal_popups():
     js = QUANTUM_JS.read_text(encoding="utf-8")
     assert "showInAppNotification" not in js
     assert "checkLiveNotifications" not in js
+
+
+def test_live_transport_waits_for_data_and_degrades_to_bounded_polling():
+    events = (ROOT / "static" / "js" / "events.js").read_text(encoding="utf-8")
+    quantum = QUANTUM_JS.read_text(encoding="utf-8")
+
+    dom_ready = events.split('document.addEventListener("DOMContentLoaded"', 1)[1]
+    assert dom_ready.index("await refreshData()") < dom_ready.index("startLiveUpdates()")
+    assert "state.data?.live_stream_enabled" in events
+    assert "window.setTimeout" in events
+    assert "30000" in events and "120000" in events
+    assert "setInterval(refreshLiveSnapshot" not in events
+    assert "liveTransportKey = `${jornada}:poll`" in events
+    assert 'typeof startLiveUpdates === "function"' in quantum

@@ -77,6 +77,7 @@ def get_liga_data():
                 "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
                 "ranking_maestros": predictions_payload["ranking_maestros"],
                 "auth_enabled": config.GOOGLE_AUTH_ENABLED,
+                "live_stream_enabled": config.LIVE_SSE_ENABLED,
                 "is_admin": is_admin_request(),
                 "ticket_policy": {
                     "max_dobles": config.MAX_DOBLES_PER_TICKET,

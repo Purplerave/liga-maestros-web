@@ -2,6 +2,42 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-14 — Hardening de administración y directo
+
+### Seguridad
+
+- Las rutas destructivas `/api/admin/*` ya no tienen credenciales por defecto
+  ni aceptan secretos en la URL. Exigen sesión de administrador o un
+  `ADMIN_API_SECRET` configurado explícitamente y enviado en
+  `X-Admin-Secret`, con comparación en tiempo constante.
+- `/api/admin/debug-files` queda protegido y devuelve solo un resumen mínimo,
+  sin rutas absolutas ni contenido de archivos.
+- Las respuestas administrativas se marcan siempre `no-store`.
+
+### Rendimiento y fiabilidad
+
+- El rate limiter crea su esquema durante las migraciones y sustituye el DDL,
+  `BEGIN IMMEDIATE` y limpieza de cada request por un UPSERT condicional
+  atómico y limpieza periódica.
+- SSE pasa a ser opt-in. El despliegue Gunicorn síncrono usa polling adaptativo
+  (30 s en directo, 120 s fuera de directo), se pausa con la pestaña oculta y
+  evita reconexiones infinitas. Se corrige además la carrera que intentaba abrir
+  el stream antes de cargar la jornada.
+- `Procfile` y Render quedan alineados en un worker mientras SQLite y los
+  procesos de background sigan embebidos.
+- Cada respuesta incluye `X-Request-ID` y `Server-Timing`; las peticiones lentas
+  quedan registradas con contexto.
+- El índice `(jornada, partido_id)` acelera las lecturas repetidas del directo.
+- Los envíos simultáneos del quiz devuelven un error de dominio limpio gracias
+  al índice único, en lugar de propagar un `IntegrityError`.
+
+### Tests
+
+- Regresiones para autorización admin fail-closed, secretos solo por cabecera,
+  diagnóstico sin rutas internas, SSE opt-in, telemetría y rate limiting.
+- `mypy liga_maestros` queda en verde; se tipan las cachés globales que
+  impedían ejecutar la comprobación de forma fiable.
+
 ## 2026-08-12 — Ligas 2026-27: planteles oficiales y extranjeras a cero
 
 ### Corregido

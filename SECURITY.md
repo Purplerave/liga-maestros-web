@@ -1,6 +1,6 @@
 # Seguridad de Liga de Maestros
 
-Ultima revision: 2026-07-17
+Ultima revision: 2026-08-14
 
 ## Datos protegidos
 
@@ -33,7 +33,9 @@ puede ofrecer Flask y exige rotar credenciales.
 - Cookies `HttpOnly`, `Secure` en produccion, `SameSite=Lax` y caducidad de 12 horas.
 - Token CSRF ligado a sesion para escrituras autenticadas.
 - Autorizacion por propietario en quinielas, comentarios, porra, quiz y juegos.
-- Endpoints administrativos separados y comprobados en servidor.
+- Endpoints administrativos cerrados por defecto: sesión admin o
+  `ADMIN_API_SECRET` explícito, recibido únicamente por cabecera y comparado en
+  tiempo constante. No existen credenciales por defecto ni secretos en URLs.
 - Identificadores de proveedor sustituidos por codigos publicos opacos estables.
 - Correo eliminado de la base activa y de las copias retenidas.
 - CSP, bloqueo de framing, `nosniff`, politica de permisos, HSTS y respuestas
@@ -64,6 +66,17 @@ puede ofrecer Flask y exige rotar credenciales.
    cadena de suministro del despliegue. El 18 de julio de 2026 se solicito a
    GitHub Support la purga de referencias internas de la PR #1 mediante el
    ticket #4581722; permanece pendiente hasta que GitHub confirme el borrado.
+
+## Hallazgos corregidos en agosto de 2026
+
+1. Se eliminaron el secreto administrativo por defecto y la autenticacion por
+   query string de las operaciones destructivas.
+2. El diagnostico de archivos exige autorizacion y ya no expone rutas absolutas
+   ni contenido interno.
+3. El rate limiter deja de ejecutar DDL y limpieza global en cada request; la
+   reserva usa un UPSERT condicional atomico y el esquema se crea al arrancar.
+4. SSE queda desactivado por defecto en Gunicorn sincrono y el cliente degrada a
+   polling acotado para no agotar los threads del servicio.
 
 ## Operacion segura
 

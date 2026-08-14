@@ -1,5 +1,7 @@
 """Predictions route: save user predictions."""
 
+import logging
+
 from flask import Blueprint, jsonify, request, session
 
 import config
@@ -13,6 +15,7 @@ from ..services.teams import is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
+logger = logging.getLogger(__name__)
 
 
 @bp.route("/api/predicciones/save", methods=["POST"])
@@ -114,6 +117,7 @@ def save_predictions():
     except Exception:
         if transaction_started:
             conn.rollback()
+        logger.exception("No se pudo guardar la quiniela de la jornada %s", target_jornada)
         return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500
     finally:
         conn.close()

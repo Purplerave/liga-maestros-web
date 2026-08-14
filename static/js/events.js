@@ -271,29 +271,66 @@ async function refreshLiveSnapshot() {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     bindEvents();
     initMicroInteractions();
     try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
     try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
-    refreshData();
-    startLiveSSE();
+    await refreshData();
+    startLiveUpdates();
     showWelcomeOnboarding();
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
-            stopLiveSSE();
+            stopLiveUpdates();
         } else {
-            startLiveSSE();
+            startLiveUpdates();
         }
     });
 });
 
 let liveSSE = null;
+let liveRefreshTimer = null;
+let liveTransportKey = "";
 
-function startLiveSSE() {
-    if (liveSSE) return;
-    const jornada = state.data?.jornada || "";
-    if (!jornada) return;
+function livePollDelay() {
+    return hasLiveLeagueMatches() ? 30000 : 120000;
+}
+
+function scheduleLivePoll(delay = livePollDelay()) {
+    if (liveRefreshTimer) window.clearTimeout(liveRefreshTimer);
+    if (document.hidden) {
+        liveRefreshTimer = null;
+        return;
+    }
+    liveRefreshTimer = window.setTimeout(async () => {
+        liveRefreshTimer = null;
+        await refreshLiveSnapshot();
+        scheduleLivePoll();
+    }, delay);
+}
+
+function startLivePolling() {
+    stopLiveSSE();
+    scheduleLivePoll();
+}
+
+function startLiveUpdates() {
+    const jornada = String(state.data?.jornada || "");
+    if (!jornada || document.hidden) return;
+    const useSSE = Boolean(state.data?.live_stream_enabled && "EventSource" in window);
+    const nextKey = `${jornada}:${useSSE ? "sse" : "poll"}`;
+    if (liveTransportKey === nextKey && (liveSSE || liveRefreshTimer)) return;
+
+    stopLiveUpdates();
+    liveTransportKey = nextKey;
+    if (useSSE) {
+        startLiveSSE(jornada);
+    } else {
+        startLivePolling();
+    }
+}
+
+function startLiveSSE(jornada) {
     const url = `/api/live/stream?j=${encodeURIComponent(jornada)}`;
     try {
         liveSSE = new EventSource(url);
@@ -314,25 +351,17 @@ function startLiveSSE() {
                     loadPorra();
                 }
             } catch {
-                // Ignore parse errors
+                // A malformed event must not stop future live updates.
             }
         });
         liveSSE.onerror = () => {
-            stopLiveSSE();
-            setTimeout(startLiveSSE, 5000);
+            // Degrade once to bounded polling instead of reconnecting forever.
+            startLivePolling();
+            liveTransportKey = `${jornada}:poll`;
         };
     } catch {
-        // SSE not supported, fall back to polling
-        let liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                clearInterval(liveRefreshId);
-                liveRefreshId = null;
-            } else if (!liveRefreshId) {
-                refreshLiveSnapshot();
-                liveRefreshId = setInterval(refreshLiveSnapshot, 60000);
-            }
-        });
+        startLivePolling();
+        liveTransportKey = `${jornada}:poll`;
     }
 }
 
@@ -341,6 +370,15 @@ function stopLiveSSE() {
         liveSSE.close();
         liveSSE = null;
     }
+}
+
+function stopLiveUpdates() {
+    stopLiveSSE();
+    if (liveRefreshTimer) {
+        window.clearTimeout(liveRefreshTimer);
+        liveRefreshTimer = null;
+    }
+    liveTransportKey = "";
 }
 
 function mergeLiveData(partidos, liveMatches) {

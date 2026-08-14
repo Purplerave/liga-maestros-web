@@ -51,13 +51,17 @@ GOOGLE_CLIENT_ID=<cliente OAuth de Google>
 GOOGLE_CLIENT_SECRET=<secreto OAuth de Google>
 HIGHLIGHTLY_API_KEY=<clave Highlightly/RapidAPI>
 ADMIN_EMAILS=<tu correo si quieres permisos admin>
+# Solo si una automatizacion externa necesita llamar a /api/admin/*:
+ADMIN_API_SECRET=<cadena aleatoria larga, enviada solo en X-Admin-Secret>
 LEGAL_OWNER_NAME=<responsable de la web>
 LEGAL_OWNER_ID=<identificacion legal>
 LEGAL_OWNER_ADDRESS=<direccion de contacto>
 LEGAL_CONTACT_EMAIL=<correo publico de privacidad>
 ```
 
-El `render.yaml` actual esta preparado como **beta de un solo servicio**:
+El `render.yaml` actual esta preparado como **beta de un solo servicio**. Si
+cambias el nombre del servicio o añades un dominio propio, actualiza también
+`TRUSTED_HOSTS`; el valor incluido corresponde a `liga-maestros.onrender.com`.
 
 - 1 web service con disco persistente en `/var/data`;
 - SQLite en `/var/data/LIGA_MAESTROS_PRO.db`;
@@ -167,6 +171,11 @@ El estado se consulta en:
 /api/live/health
 /api/sync/status
 ```
+
+El navegador usa polling acotado (30 s durante partidos, 120 s fuera de directo) con
+`LIVE_SSE_ENABLED=0`. No actives SSE en el Gunicorn actual: cada cliente ocuparia
+uno de sus pocos threads. `LIVE_SSE_ENABLED=1` queda reservado para un despliegue
+async/event-capable validado con carga.
 
 Para un directo fuerte con varios procesos o servicios, el siguiente paso sera PostgreSQL/Redis.
 

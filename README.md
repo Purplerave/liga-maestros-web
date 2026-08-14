@@ -41,7 +41,7 @@ flowchart LR
     COL[web_collector<br/>circuit breaker + cuota diaria]
   end
   subgraph Nucleo["Flask · liga_maestros"]
-    RT[15 Blueprints]
+    RT[16 Blueprints]
     SV[Services<br/>payloads · scoring · quiz · ticket]
     MW[Middleware<br/>CSRF · authz · rate limit · json lock]
   end
@@ -49,7 +49,7 @@ flowchart LR
     DB[(SQLite WAL<br/>+ backups verificados)]
     JS[/JSON runtime<br/>DATA_DIR/]
   end
-  UI[Frontend vanilla<br/>@layer CSS · 8 modulos JS]
+  UI[Frontend vanilla<br/>@layer CSS · modulos por vista]
   Q15-->SCR-->JS
   HL-->COL-->JS
   NEWS-->COL
@@ -87,8 +87,10 @@ Abre `http://127.0.0.1:5000/`.
 ## Testing
 
 ```bash
-python -m pytest -q          # 109 tests (seguridad, dominio, frontend)
-ruff check .                # lint
+python -m pytest -q          # seguridad, integración, dominio y frontend
+ruff check .                 # lint
+ruff format --check .        # formato
+mypy liga_maestros           # tipos
 ```
 
 ## Estructura
@@ -96,7 +98,7 @@ ruff check .                # lint
 ```
 app.py                         # Punto de entrada
 liga_maestros/                 # Paquete principal
-  routes/                      # 15 blueprints
+  routes/                      # 16 blueprints
   services/                    # Scoring, payloads, quiz, ticket
   middleware/                   # CSRF, auth, rate limit
   workers/                     # Collector live
