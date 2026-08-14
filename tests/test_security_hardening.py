@@ -143,11 +143,13 @@ def test_public_contest_endpoint_never_exposes_provider_ids(tmp_path, monkeypatc
             "INSERT INTO usuarios (id, nombre, email) VALUES (?, ?, ?)",
             (PRIVATE_ID, "Pablo", None),
         )
-        _insert_scored_prediction(conn, PRIVATE_ID)
+        # Jornada de la temporada publicada: las de pruebas (51-76) ya no
+        # alimentan el concurso.
+        _insert_scored_prediction(conn, PRIVATE_ID, jornada=1)
         conn.commit()
         conn.close()
 
-    response = app.test_client().get("/api/concurso?j=73")
+    response = app.test_client().get("/api/concurso?j=1")
     assert response.status_code == 200
     assert PRIVATE_ID not in response.get_data(as_text=True)
     assert PUBLIC_USER_PREFIX in response.get_data(as_text=True)

@@ -6,6 +6,31 @@ con datos históricos o de preparación haga que cada endpoint elija una
 jornada distinta.
 """
 
+# Temporada publicada 2026/27. La quiniela publicada reinicia su numeración
+# en J1 (LaLiga: 38 jornadas; se deja margen hasta 42 por boletos extra).
+# Las jornadas 51-76 conservadas en la BD pertenecen al periodo de pruebas
+# 2025/26: se mantienen como archivo, pero no deben alimentar rankings,
+# rachas, galardones ni estadísticas de jugadores. La competición y las
+# estadísticas de todos los participantes arrancan de cero con la J1.
+CURRENT_SEASON_MAX_JORNADA = 42
+
+
+def is_current_season_jornada(jornada):
+    """True si la jornada pertenece a la temporada publicada (2026/27)."""
+    try:
+        num = int(jornada)
+    except (TypeError, ValueError):
+        return False
+    return 1 <= num <= CURRENT_SEASON_MAX_JORNADA
+
+
+def current_season_sql(column="jornada"):
+    """Fragmento SQL que limita una consulta a la temporada actual.
+
+    El límite es una constante interna (int literal), nunca entrada externa.
+    """
+    return f"{column} BETWEEN 1 AND {int(CURRENT_SEASON_MAX_JORNADA)}"
+
 
 def resolve_active_jornada(conn):
     """Return the jornada currently editable and displayed as active.

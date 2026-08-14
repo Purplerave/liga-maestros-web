@@ -1,14 +1,15 @@
 """Contest engine: ranking, profiles, streaks, awards."""
 
+import sqlite3
 import threading
 from datetime import datetime
 from typing import Any
 
 from ..db.connection import get_db
 from ..scoring import score_prediction
+from .jornada import current_season_sql
 from .teams import canonical_contest_id, is_scored_status, public_contest_name
 
-CONTEST_DYNAMIC_START_JORNADA = 58
 Q15_EXPECTED_MATCHES = 15
 
 _contest_cache_lock = threading.Lock()
@@ -28,11 +29,10 @@ def contest_month_key(date_text):
 def contest_cache_signature():
     conn = get_db()
     pred = conn.execute(
-        """
+        f"""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
-        FROM predicciones WHERE jornada >= ?
-    """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        FROM predicciones WHERE {current_season_sql("jornada")}
+    """
     ).fetchone()
     results = conn.execute("""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
@@ -41,10 +41,21 @@ def contest_cache_signature():
         FROM resultados
     """).fetchone()
     users = conn.execute("""
-        SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
-            COALESCE(SUM(COALESCE(puntos_acumulados, 0)), 0) AS points_sig
+        SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
         FROM usuarios
     """).fetchone()
+    porra_sig = (0, 0, 0)
+    try:
+        porra = conn.execute(
+            f"""
+            SELECT COUNT(*) AS n, COALESCE(SUM(puntos), 0) AS points_sig,
+                COALESCE(MAX(id), 0) AS max_id
+            FROM porra_puntos WHERE {current_season_sql("jornada")}
+        """
+        ).fetchone()
+        porra_sig = (int(porra["n"] or 0), int(porra["points_sig"] or 0), int(porra["max_id"] or 0))
+    except sqlite3.OperationalError:
+        pass
     return (
         int(pred["n"] or 0),
         int(pred["max_rowid"] or 0),
@@ -54,7 +65,7 @@ def contest_cache_signature():
         int(results["state_sig"] or 0),
         int(users["n"] or 0),
         int(users["max_rowid"] or 0),
-        int(users["points_sig"] or 0),
+        *porra_sig,
     )
 
 
@@ -78,12 +89,25 @@ def build_contest_payload(current_jornada=None, current_user_id=None):
 def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
     hidden_ids = {"hermes", "molbot", "jenova", "pena", "consenso", "momo", "manu", "manus"}
     conn = get_db()
-    user_rows = conn.execute("SELECT id, nombre, puntos_acumulados FROM usuarios").fetchall()
+    user_rows = conn.execute("SELECT id, nombre FROM usuarios").fetchall()
     users = {row["id"]: row["nombre"] for row in user_rows}
+    # Bonus de la porra: solo puntos registrados en jornadas de la temporada
+    # actual (porra_puntos). Lo acumulado en el periodo de pruebas no cuenta.
     extra_points = {}
-    for row in user_rows:
-        uid = canonical_contest_id(row["id"])
-        extra_points[uid] = max(int(extra_points.get(uid, 0) or 0), int(row["puntos_acumulados"] or 0))
+    try:
+        bonus_rows = conn.execute(
+            f"""
+            SELECT user_id, SUM(puntos) AS pts
+            FROM porra_puntos
+            WHERE {current_season_sql("jornada")}
+            GROUP BY user_id
+            """
+        ).fetchall()
+    except sqlite3.OperationalError:
+        bonus_rows = []
+    for row in bonus_rows:
+        uid = canonical_contest_id(row["user_id"])
+        extra_points[uid] = max(int(extra_points.get(uid, 0) or 0), int(row["pts"] or 0))
 
     result_rows = conn.execute("""
         SELECT jornada, partido_id, local, visitante, signo_actual, goles_local, goles_visitante, fecha, status
@@ -105,12 +129,13 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         jornada_dates.setdefault(jornada, str(row["fecha"] or "")[:10])
         match_labels[key] = {"local": row["local"] or "", "visitante": row["visitante"] or ""}
 
+    # Solo cuenta la temporada publicada (2026/27, J1 en adelante). Las
+    # jornadas 51-76 de pruebas quedan archivadas y fuera del cómputo.
     pred_rows = conn.execute(
-        """
+        f"""
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
-        FROM predicciones WHERE jornada >= ?
-    """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        FROM predicciones WHERE {current_season_sql("jornada")}
+    """
     ).fetchall()
 
     totals = {}

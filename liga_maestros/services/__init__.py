@@ -1,4 +1,4 @@
-from .contest import CONTEST_DYNAMIC_START_JORNADA, build_contest_payload
+from .contest import build_contest_payload
 from .highlightly import (
     HIGHLIGHTLY_REFRESH_ENABLED,
     Q15_EXPECTED_MATCHES,
@@ -11,6 +11,7 @@ from .highlightly import (
     today_madrid,
     trigger_highlightly_refresh_async,
 )
+from .jornada import CURRENT_SEASON_MAX_JORNADA, current_season_sql, is_current_season_jornada
 from .news_radar import build_news_radar
 from .teams import (
     build_participant_contract,
@@ -53,7 +54,9 @@ __all__ = [
     "is_scored_status",
     "is_live_scored_status",
     "build_contest_payload",
-    "CONTEST_DYNAMIC_START_JORNADA",
+    "CURRENT_SEASON_MAX_JORNADA",
+    "current_season_sql",
+    "is_current_season_jornada",
     "compute_ticket_close_info",
     "parse_madrid_datetime",
     "parse_madrid_date_start",

@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 
 from ..db.connection import get_db
+from .jornada import current_season_sql
 
 
 def ensure_quiz_tables(conn):
@@ -198,7 +199,9 @@ def get_quiz_ranking_jornada(jornada):
 def get_quiz_ranking_temporada():
     conn = get_db()
     try:
-        rows = conn.execute("""
+        # Ranking de la temporada publicada: las participaciones del periodo
+        # de pruebas (jornadas 51-76) no cuentan.
+        rows = conn.execute(f"""
             SELECT user_id, nombre,
                    SUM(puntos) AS puntos_totales,
                    COUNT(*) AS jornadas_participadas,
@@ -207,6 +210,7 @@ def get_quiz_ranking_temporada():
                    MAX(racha_max) AS mejor_racha,
                    ROUND(AVG(puntos), 0) AS media_puntos
             FROM quiz_participaciones
+            WHERE {current_season_sql("jornada")}
             GROUP BY user_id
             ORDER BY puntos_totales DESC
         """).fetchall()

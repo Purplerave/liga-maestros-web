@@ -6,6 +6,7 @@ P0 de la auditoría de enganche (2026-08-14).
 from __future__ import annotations
 
 from ..scoring import score_prediction
+from .jornada import current_season_sql
 from .teams import (
     build_participant_contract,
     canonical_contest_id,
@@ -30,11 +31,13 @@ def compute_quiniela_streak(conn, user_id: str) -> dict:
         return {"racha_actual": 0, "racha_max": 0, "ultima_jornada": None, "jornadas_jugadas": 0}
 
     placeholders = ",".join("?" for _ in aliases)
+    # Las rachas se miden sobre la temporada publicada; el periodo de
+    # pruebas (jornadas 51-76) queda fuera.
     rows = conn.execute(
         f"""
         SELECT DISTINCT p.jornada
         FROM predicciones p
-        WHERE p.user_id IN ({placeholders})
+        WHERE p.user_id IN ({placeholders}) AND {current_season_sql("p.jornada")}
         ORDER BY p.jornada ASC
         """,
         aliases,
@@ -127,6 +130,7 @@ def build_post_jornada_summary(conn, user_id: str, jornada: int | None = None) -
             FROM predicciones p
             JOIN resultados r ON p.jornada = r.jornada AND p.partido_id = r.partido_id
             WHERE p.user_id IN ({placeholders})
+              AND {current_season_sql("p.jornada")}
               AND r.signo_actual IS NOT NULL AND r.signo_actual != '-'
             """,
             aliases,
