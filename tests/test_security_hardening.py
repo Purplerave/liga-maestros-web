@@ -25,6 +25,9 @@ def _test_app(tmp_path, monkeypatch):
     monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
     monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
     monkeypatch.setenv("ALLOW_LOCAL_ADMIN", "0")
+    monkeypatch.setenv("ALLOW_IFRAME_EMBED", "0")
+    monkeypatch.setenv("FLASK_DEBUG", "0")
+    monkeypatch.setenv("FLASK_ENV", "production")
     monkeypatch.setenv("TRUSTED_HOSTS", "localhost,127.0.0.1,ligademaestros.alwaysdata.net")
     return create_app()
 
