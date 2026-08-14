@@ -6,6 +6,11 @@ from ..db.connection import get_db
 from ..middleware.csrf import get_csrf_token
 from ..scoring import score_prediction
 from ..services.contest import build_contest_payload
+from ..services.engagement import (
+    build_post_jornada_summary,
+    build_share_card_payload,
+    compute_quiniela_streak,
+)
 from ..services.teams import contest_aliases_for_uid, is_scored_status
 
 bp = Blueprint("user", __name__)
@@ -71,13 +76,58 @@ def get_user_stats():
         profile = build_contest_payload(None, uid).get("profile")
     except Exception:
         pass
+    streak = compute_quiniela_streak(conn, uid)
     return jsonify(
         {
             "total_aciertos": total_hits,
             "mejor_jornada": best_hits,
             "posicion": profile.get("position") if profile else None,
+            "racha_actual": streak.get("racha_actual", 0),
+            "racha_max": streak.get("racha_max", 0),
+            "ultima_jornada": streak.get("ultima_jornada"),
+            "jornadas_jugadas": streak.get("jornadas_jugadas", 0),
         }
     )
+
+
+@bp.route("/api/user/post-jornada-summary")
+def post_jornada_summary():
+    """Resumen emocional post-jornada: tú vs maestros IA + racha."""
+    user = session.get("user") or {}
+    uid = request.args.get("uid") or user.get("id")
+    if not uid:
+        return jsonify({"status": "error", "message": "Usuario no identificado"}), 401
+    current_uid = str(user.get("id") or "")
+    is_admin = bool(user.get("is_admin"))
+    if str(uid) != current_uid and not is_admin:
+        return jsonify({"status": "forbidden"}), 403
+
+    jornada = request.args.get("jornada", type=int)
+    conn = get_db()
+    summary = build_post_jornada_summary(conn, str(uid), jornada)
+    if not summary:
+        return jsonify({"status": "not_found", "message": "Sin jornada puntuada aún"}), 404
+    return jsonify(summary)
+
+
+@bp.route("/api/share-card")
+def share_card():
+    """Payload para tarjeta compartible (cliente o render servidor)."""
+    user = session.get("user") or {}
+    uid = request.args.get("uid") or user.get("id")
+    if not uid:
+        return jsonify({"status": "error", "message": "Usuario no identificado"}), 401
+    current_uid = str(user.get("id") or "")
+    is_admin = bool(user.get("is_admin"))
+    if str(uid) != current_uid and not is_admin:
+        return jsonify({"status": "forbidden"}), 403
+
+    jornada = request.args.get("jornada", type=int)
+    conn = get_db()
+    payload = build_share_card_payload(conn, str(uid), jornada)
+    if not payload:
+        return jsonify({"status": "not_found", "message": "Sin datos para la tarjeta"}), 404
+    return jsonify(payload)
 
 
 def _admin_emails():
