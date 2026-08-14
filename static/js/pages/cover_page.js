@@ -402,10 +402,6 @@ function renderNewspaperCoverPageV3() {
             <strong>${userDone}/15</strong>
             <div class="cp-user-track" aria-hidden="true"><i style="width:${((userDone / 15) * 100).toFixed(1)}%"></i></div>
         </div>` : "";
-    const masterPills = coverMasterNames().slice(0, 6);
-    const mastersHtml = masterPills.length
-        ? `<div class="cp-ai-pills" aria-label="Maestros IA">${masterPills.map(name => `<span>${escapeHtml(name)}</span>`).join("")}</div>`
-        : "";
     const assetsV = document.body?.dataset?.assetsV || "";
     const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
 
@@ -452,7 +448,6 @@ function renderNewspaperCoverPageV3() {
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
                     <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
                 </div>
-                ${mastersHtml}
             </header>
 
             <section class="cp-arena" aria-label="El duelo">
