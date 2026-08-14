@@ -55,6 +55,9 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 data/backups/
+# Volcado del archivo de la liga de pruebas (se genera junto a la BD en runtime)
+DATOS/archivo_temporada_pruebas.json
+data/archivo_temporada_pruebas.json
 
 # Temporary screenshots and visual QA artifacts
 /*.png

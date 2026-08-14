@@ -13,6 +13,7 @@ from ..services.payloads.league_matches import build_all_league_matches, build_l
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload
+from ..services.season import filter_season_jornadas
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
 from ..utils import load_team_logos
@@ -124,9 +125,9 @@ def _resolve_available_jornadas(conn):
         return [1]
     if 1 in jornadas:
         return [1]
-    # Sin J1 en la BD: mostrar las jornadas existentes pero ocultar 75/76 que fueron pruebas de verano
-    filtered = [j for j in jornadas if j not in (75, 76)]
-    # Si tras filtrar queda vacío (solo había 75/76), mostrar 1
+    # Sin J1 en la BD: mostrar solo las jornadas de la temporada publicada
+    # (oculta la liga de pruebas y los ensayos J75/J76 del verano).
+    filtered = sorted(filter_season_jornadas(jornadas), reverse=True)
     return filtered if filtered else [1]
 
 

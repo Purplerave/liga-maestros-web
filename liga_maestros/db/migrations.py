@@ -295,14 +295,18 @@ def run_startup_migrations():
             ensure_porra_table(conn)
             ensure_snake_table(conn)
             ensure_arcade_table(conn)
+            # Temporada 2026-27: la J75/J76 (ensayos de verano) y la liga de
+            # pruebas ya NO se reimportan en cada arranque. Se conservan en la
+            # BD como archivo histórico, pero quedan ocultas para la web.
+            # Antes, ensure_jornada_75(..., force=True) las recreaba en cada
+            # despliegue y deshacía cualquier limpieza manual.
+            ensure_jornada_1(conn)
             try:
-                ensure_jornada_75(conn)
+                archive_legacy_jornadas(conn)
             except Exception as e:
                 import sys
 
-                print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
-            ensure_jornada_76(conn)
-            ensure_jornada_1(conn)
+                print(f"[migration] archive_legacy_jornadas failed (non-fatal): {e}", file=sys.stderr)
             from ..services.season_rosters import sync_runtime_standings_files
 
             try:
@@ -879,3 +883,103 @@ def ensure_jornada_76(conn):
     ensure_jornada_completa(conn, 76, fallback_matches=J76_FALLBACK_MATCHES)
     _import_j76_resultados(conn)
     conn.commit()
+
+
+def _legacy_backup_path():
+    """Ruta del volcado JSON del archivo histórico (fuera de Git, junto a la BD)."""
+    base = os.path.dirname(config.DB_PATH) or config.DATA_DIR
+    return os.path.join(base, "archivo_temporada_pruebas.json")
+
+
+def archive_legacy_jornadas(conn):
+    """Archiva la liga de pruebas: la conserva en la BD, pero fuera de la web.
+
+    Temporada 2026-27: la competición empieza en la J1. Las jornadas anteriores
+    (liga de pruebas J51-J73) y los ensayos de verano J75/J76 se mantienen en
+    `resultados`/`predicciones` como registro histórico —no se borra nada— pero
+    ninguna pantalla los muestra: el filtro vive en `services.season`.
+
+    Lo único que hace esta migración es:
+      1. Volcar una copia legible del histórico a JSON la primera vez (backup
+         consultable aunque algún día se decida purgar la BD).
+      2. Poner a cero `usuarios.puntos_acumulados`, que arrastraba los puntos de
+         la temporada de pruebas al ranking general de la nueva.
+
+    Es idempotente: el volcado solo se escribe si no existe, y los puntos solo
+    se tocan mientras la temporada nueva no haya otorgado ninguno.
+    """
+    from ..services.season import LEGACY_JORNADA_MAX, LEGACY_JORNADA_MIN, season_start
+
+    start = season_start()
+    # Complemento exacto de season_sql_filter(): todo lo que la web NO muestra.
+    where = "jornada < ? OR jornada BETWEEN ? AND ?"
+    params = [start, LEGACY_JORNADA_MIN, LEGACY_JORNADA_MAX]
+
+    rows = conn.execute(f"SELECT COUNT(*) FROM resultados WHERE {where}", params).fetchone()
+    legacy_results = int(rows[0] or 0)
+    if not legacy_results:
+        return False
+
+    backup_path = _legacy_backup_path()
+    if not os.path.exists(backup_path):
+        try:
+            payload = {
+                "descripcion": (
+                    "Archivo de la liga de pruebas (temporada 2025-26 y ensayos J75/J76). "
+                    "Los datos siguen en la base de datos; esta copia existe por si algún "
+                    "día se purgan y hay que consultarlos."
+                ),
+                "temporada_nueva_empieza_en_jornada": start,
+                "jornadas_archivadas": [
+                    int(r[0])
+                    for r in conn.execute(
+                        f"SELECT DISTINCT jornada FROM resultados WHERE {where} ORDER BY jornada",
+                        params,
+                    ).fetchall()
+                ],
+                "resultados": [
+                    dict(r)
+                    for r in conn.execute(
+                        f"SELECT * FROM resultados WHERE {where} ORDER BY jornada, partido_id",
+                        params,
+                    ).fetchall()
+                ],
+                "predicciones": [
+                    dict(r)
+                    for r in conn.execute(
+                        f"SELECT * FROM predicciones WHERE {where} ORDER BY jornada, partido_id",
+                        params,
+                    ).fetchall()
+                ],
+                "puntos_acumulados": [
+                    {"id": r["id"], "nombre": r["nombre"], "puntos": int(r["puntos_acumulados"] or 0)}
+                    for r in conn.execute(
+                        "SELECT id, nombre, puntos_acumulados FROM usuarios WHERE puntos_acumulados > 0"
+                    ).fetchall()
+                ],
+            }
+            os.makedirs(os.path.dirname(backup_path) or ".", exist_ok=True)
+            with open(backup_path, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False, indent=2)
+        except (OSError, ValueError, TypeError, sqlite3.Error):
+            # El backup es una cortesía; nunca debe impedir el arranque.
+            pass
+
+    # Los puntos acumulados de la temporada de pruebas no deben sumar en el
+    # ranking nuevo. Solo se ponen a cero mientras la temporada actual no haya
+    # repartido puntos de porra (si ya los hay, respetamos lo jugado).
+    from ..services.season import season_sql_filter
+
+    season_where, season_params = season_sql_filter()
+    season_porra = conn.execute(
+        f"SELECT COUNT(*) FROM resultados WHERE {season_where} AND status IN ('FT', 'FINISHED')",
+        season_params,
+    ).fetchone()
+    if not int(season_porra[0] or 0):
+        pending = conn.execute("SELECT COUNT(*) FROM usuarios WHERE COALESCE(puntos_acumulados, 0) != 0").fetchone()
+        if int(pending[0] or 0):
+            conn.execute("UPDATE usuarios SET puntos_acumulados = 0")
+            conn.commit()
+            return True
+
+    return False

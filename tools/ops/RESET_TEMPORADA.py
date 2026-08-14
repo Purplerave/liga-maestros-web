@@ -15,6 +15,16 @@ import config
 from liga_maestros.db.migrations import ensure_jornada_completa, run_startup_migrations
 
 
+def backup_database():
+    """Copia la BD antes de borrar nada. Este script es destructivo."""
+    import shutil
+
+    stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+    dest = f"{config.DB_PATH}.pre-reset-{stamp}.bak"
+    shutil.copy2(config.DB_PATH, dest)
+    return dest
+
+
 def save_season_summary(conn):
     """Save top 3 participants and season stats before reset."""
     rows = conn.execute("""
@@ -55,7 +65,13 @@ def save_season_summary(conn):
 
 
 def reset_tables(conn):
-    """Clear old season data for a fresh start."""
+    """Clear old season data for a fresh start.
+
+    OJO: esto BORRA el histórico. La política por defecto del proyecto es
+    conservarlo y limitarse a ocultarlo (ver `liga_maestros/services/season.py`),
+    cosa que ocurre sola en cada arranque. Este script es la opción destructiva,
+    solo para cuando se quiera vaciar la base de verdad.
+    """
     tables_to_clear = [
         ("predicciones", None),
         ("resultados", None),
@@ -106,6 +122,11 @@ def main():
     conn.row_factory = sqlite3.Row
 
     try:
+        print("0. Backing up the database...")
+        backup_path = backup_database()
+        print(f"   Backup: {backup_path}")
+        print()
+
         print("1. Saving season summary...")
         summary = save_season_summary(conn)
         print(f"   Top 3: {[p['name'] + ' (' + str(p['points']) + 'pts)' for p in summary['top_3']]}")

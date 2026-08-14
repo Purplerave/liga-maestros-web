@@ -5,9 +5,13 @@ from datetime import datetime
 
 from ..db.connection import get_db
 from ..scoring import score_prediction
+from .season import season_sql_filter, season_start
 from .teams import canonical_contest_id, is_scored_status, public_contest_name
 
-CONTEST_DYNAMIC_START_JORNADA = 58
+# Temporada 2026-27: el concurso arranca en la J1 y el histórico de la liga de
+# pruebas (J51-J76) queda archivado, no puntúa. Se mantiene el nombre por
+# compatibilidad con los imports existentes.
+CONTEST_DYNAMIC_START_JORNADA = season_start()
 Q15_EXPECTED_MATCHES = 15
 
 _contest_cache_lock = threading.Lock()
@@ -26,19 +30,23 @@ def contest_month_key(date_text):
 
 def contest_cache_signature():
     conn = get_db()
+    season_where, season_params = season_sql_filter()
     pred = conn.execute(
-        """
+        f"""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid
-        FROM predicciones WHERE jornada >= ?
+        FROM predicciones WHERE {season_where}
     """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        season_params,
     ).fetchone()
-    results = conn.execute("""
+    results = conn.execute(
+        f"""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
             COALESCE(SUM(COALESCE(goles_local, -99) * 31 + COALESCE(goles_visitante, -99) * 17), 0) AS goals_sig,
             COALESCE(SUM(LENGTH(COALESCE(status, '')) + LENGTH(COALESCE(signo_actual, ''))), 0) AS state_sig
-        FROM resultados
-    """).fetchone()
+        FROM resultados WHERE {season_where}
+    """,
+        season_params,
+    ).fetchone()
     users = conn.execute("""
         SELECT COUNT(*) AS n, COALESCE(MAX(rowid), 0) AS max_rowid,
             COALESCE(SUM(COALESCE(puntos_acumulados, 0)), 0) AS points_sig
@@ -84,10 +92,15 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         uid = canonical_contest_id(row["id"])
         extra_points[uid] = max(int(extra_points.get(uid, 0) or 0), int(row["puntos_acumulados"] or 0))
 
-    result_rows = conn.execute("""
+    season_where, season_params = season_sql_filter()
+    result_rows = conn.execute(
+        f"""
         SELECT jornada, partido_id, local, visitante, signo_actual, goles_local, goles_visitante, fecha, status
-        FROM resultados WHERE signo_actual IS NOT NULL AND signo_actual != '-'
-    """).fetchall()
+        FROM resultados
+        WHERE signo_actual IS NOT NULL AND signo_actual != '-' AND {season_where}
+    """,
+        season_params,
+    ).fetchall()
     results = {}
     jornada_dates = {}
     match_labels = {}
@@ -105,11 +118,11 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         match_labels[key] = {"local": row["local"] or "", "visitante": row["visitante"] or ""}
 
     pred_rows = conn.execute(
-        """
+        f"""
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
-        FROM predicciones WHERE jornada >= ?
+        FROM predicciones WHERE {season_where}
     """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        season_params,
     ).fetchall()
 
     totals = {}
