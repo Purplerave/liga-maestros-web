@@ -18,7 +18,7 @@ def _get_assets_version():
     try:
         for root, _, files in os.walk(static_dir):
             for file in files:
-                if file.endswith((".css", ".js", ".png", ".jpg", ".svg")):
+                if file.endswith((".css", ".js", ".png", ".jpg", ".svg", ".webp", ".ico", ".webmanifest")):
                     try:
                         mtimes.append(int(os.path.getmtime(os.path.join(root, file))))
                     except OSError:

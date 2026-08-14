@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, render_template, request, session
+from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
@@ -63,9 +64,17 @@ def create_app():
         raise RuntimeError("SECRET_KEY no configurada.")
     app.secret_key = SECRET_KEY
 
-    _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or os.getenv(
-        "FLASK_ENV", ""
-    ).strip().lower() in ("development", "dev")
+    # Determinar modo de ejecución: FLASK_ENV explícito tiene prioridad.
+    # Si no se establece ninguno, asumir producción por seguridad.
+    _flask_env = os.getenv("FLASK_ENV", "").strip().lower()
+    if _flask_env in ("development", "dev"):
+        _is_dev = True
+    elif _flask_env in ("production", "prod", ""):
+        # No activar modo dev sólo por FLASK_DEBUG=1: si alguien arranca con
+        # FLASK_DEBUG=1 en producción no queremos relajar la seguridad.
+        _is_dev = False
+    else:
+        _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
 
     # En desarrollo: permitir cualquier host (necesario para proxies de preview)
     # En produccion: restringir a hosts conocidos
@@ -83,6 +92,7 @@ def create_app():
             if item.strip()
         ]
         app.config["TRUSTED_HOSTS"] = trusted_hosts if trusted_hosts else None
+    app.config["IS_DEV"] = _is_dev
 
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
@@ -95,8 +105,33 @@ def create_app():
         MAX_FORM_PARTS=int(os.getenv("MAX_FORM_PARTS", "50")),
     )
 
+    # Compresión gzip / Brotli si estuviera disponible
+    app.config["COMPRESS_MIMETYPES"] = [
+        "text/html", "text/css", "text/plain", "text/xml", "text/javascript",
+        "application/javascript", "application/x-javascript", "application/json",
+        "application/xml", "application/xml+rss", "image/svg+xml",
+    ]
+    app.config["COMPRESS_LEVEL"] = 6
+    app.config["COMPRESS_MIN_SIZE"] = 500
+    Compress(app)
+
     _configure_logging(app)
     register_routes(app)
+
+    @app.before_request
+    def validate_host_header():
+        """Reject requests with an untrusted Host header (host header injection / cache poisoning)."""
+        trusted = app.config.get("TRUSTED_HOSTS")
+        if not trusted:
+            return None
+        host = (request.host or "").split(":", 1)[0].lower()
+        if host in {t.lower() for t in trusted}:
+            return None
+        # Allow the server's own bind host for health probes
+        _local_aliases = {"localhost", "127.0.0.1", "::1"}  # sin 0.0.0.0 para evitar S104 (comparacion por string)
+        if host in _local_aliases and any(h.lower() in {"localhost", "127.0.0.1"} for h in trusted):
+            return None
+        return jsonify({"status": "error", "error": "Host no permitido."}), 400
 
     @app.before_request
     def protect_authenticated_writes():
@@ -110,13 +145,9 @@ def create_app():
 
     @app.after_request
     def set_security_headers(response):
-        _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
-        _allow_frame_embed = _is_dev or os.getenv("ALLOW_IFRAME_EMBED", "0").strip().lower() in (
-            "1",
-            "true",
-            "yes",
-            "on",
-        )
+        _allow_frame_embed = bool(app.config.get("TRUSTED_HOSTS") is None) or os.getenv(
+            "ALLOW_IFRAME_EMBED", "0"
+        ).strip().lower() in ("1", "true", "yes", "on")
 
         if request.path.startswith("/juegos/"):
             response.headers["X-Frame-Options"] = "SAMEORIGIN"
