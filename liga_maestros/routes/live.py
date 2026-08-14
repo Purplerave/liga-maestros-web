@@ -1,6 +1,7 @@
 """Live routes: ticker, Q15 directo, sync status, health, refresh, probe, SSE."""
 
 import json
+import logging
 import os
 import time
 from datetime import datetime
@@ -10,7 +11,7 @@ from flask import Blueprint, Response, jsonify, request
 import config
 
 from ..db.connection import get_db
-from ..middleware.authz import is_admin_request
+from ..middleware.authz import is_admin_or_service_request, is_admin_request
 from ..middleware.json_lock import write_json_locked
 from ..services.highlightly import (
     HIGHLIGHTLY_REFRESH_ENABLED,
@@ -26,6 +27,7 @@ from ..services.ticket import validate_q15_payload
 from ..utils import safe_read_json
 
 bp = Blueprint("live", __name__)
+logger = logging.getLogger(__name__)
 
 
 def _build_q15_cache_status(jornada):
@@ -319,54 +321,69 @@ def live_probe():
 
 @bp.route("/api/live/stream")
 def live_stream():
-    """SSE endpoint for live match updates."""
-    jornada = request.args.get("j", "")
+    """SSE endpoint for deployments explicitly prepared for long-lived clients."""
+    if not config.LIVE_SSE_ENABLED:
+        response = jsonify({"status": "disabled", "message": "Directo por polling"})
+        response.status_code = 503
+        response.headers["Retry-After"] = "120"
+        return response
+
+    jornada = request.args.get("j", "").strip()
+    if not jornada.isdigit():
+        return jsonify({"status": "error", "message": "Jornada invalida"}), 400
+
+    def load_rows():
+        conn = get_db()
+        try:
+            return conn.execute(
+                """
+                SELECT jornada, partido_id, local, visitante, signo_actual,
+                       goles_local, goles_visitante, status, minuto
+                FROM resultados
+                WHERE jornada = ?
+                ORDER BY partido_id
+                """,
+                (int(jornada),),
+            ).fetchall()
+        finally:
+            conn.close()
 
     def generate():
         last_signature = None
+        last_emit = time.monotonic()
         while True:
             try:
-                conn = get_db()
-                rows = conn.execute(
-                    """
-                    SELECT jornada, partido_id, local, visitante, signo_actual,
-                           goles_local, goles_visitante, status, minuto
-                    FROM resultados
-                    WHERE jornada = ?
-                    ORDER BY partido_id
-                    """,
-                    (jornada,),
-                ).fetchall()
-                conn.close()
-
-                matches = []
-                for row in rows:
-                    matches.append(
-                        {
-                            "partido_id": int(row["partido_id"]),
-                            "local": row["local"] or "",
-                            "visitante": row["visitante"] or "",
-                            "signo_actual": row["signo_actual"] or "-",
-                            "goles_local": row["goles_local"],
-                            "goles_visitante": row["goles_visitante"],
-                            "status": row["status"] or "",
-                            "minuto": row["minuto"],
-                        }
-                    )
+                rows = load_rows()
+                matches = [
+                    {
+                        "partido_id": int(row["partido_id"]),
+                        "local": row["local"] or "",
+                        "visitante": row["visitante"] or "",
+                        "signo_actual": row["signo_actual"] or "-",
+                        "goles_local": row["goles_local"],
+                        "goles_visitante": row["goles_visitante"],
+                        "status": row["status"] or "",
+                        "minuto": row["minuto"],
+                    }
+                    for row in rows
+                ]
 
                 signature = json.dumps(matches, sort_keys=True)
-                if signature == last_signature:
-                    time.sleep(5)
-                    continue
-
-                last_signature = signature
-                payload = json.dumps(
-                    {"type": "live_update", "jornada": jornada, "matches": matches},
-                    ensure_ascii=False,
-                )
-                yield f"data: {payload}\n\n"
+                if signature != last_signature:
+                    last_signature = signature
+                    last_emit = time.monotonic()
+                    payload = json.dumps(
+                        {"type": "live_update", "jornada": int(jornada), "matches": matches},
+                        ensure_ascii=False,
+                    )
+                    yield f"data: {payload}\n\n"
+                elif time.monotonic() - last_emit >= 20:
+                    # Comments are valid SSE heartbeats and are ignored by EventSource.
+                    last_emit = time.monotonic()
+                    yield ": keep-alive\n\n"
                 time.sleep(5)
             except Exception:
+                logger.warning("No se pudo leer el estado para SSE", exc_info=True)
                 yield f"data: {json.dumps({'type': 'error', 'message': 'connection lost'})}\n\n"
                 time.sleep(10)
 
@@ -374,7 +391,7 @@ def live_stream():
         generate(),
         mimetype="text/event-stream",
         headers={
-            "Cache-Control": "no-cache",
+            "Cache-Control": "no-cache, no-store",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
         },
@@ -384,11 +401,8 @@ def live_stream():
 @bp.route("/api/admin/reset-standings", methods=["POST"])
 def reset_standings():
     """Reset all league standings and accumulated points to zero."""
-    if not is_admin_request():
-        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
-        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
-        if not secret or secret != admin_secret:
-            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     conn = get_db()
     try:
@@ -414,21 +428,17 @@ def reset_standings():
                 "teams_reset": teams,
             }
         )
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+        logger.exception("No se pudo reiniciar la clasificacion")
+        return jsonify({"status": "error", "message": "No se pudo completar la operacion."}), 500
 
 
 @bp.route("/api/admin/reset-j75", methods=["POST"])
 def reset_j75():
     """Force reset J75 data with original matches."""
-    # Check admin authentication
-    if not is_admin_request():
-        # Also accept secret key in header
-        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
-        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
-        if not secret or secret != admin_secret:
-            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     from ..db.migrations import ensure_jornada_75
 
@@ -453,13 +463,8 @@ def reset_j75():
 @bp.route("/api/admin/setup-j76", methods=["POST"])
 def setup_j76():
     """Setup J76 data with Nordic matches and predictions."""
-    # Check admin authentication
-    if not is_admin_request():
-        # Also accept secret key in header
-        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
-        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
-        if not secret or secret != admin_secret:
-            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     from ..db.migrations import J76_FALLBACK_MATCHES
 
@@ -558,51 +563,40 @@ def setup_j76():
 
 @bp.route("/api/admin/debug-files")
 def debug_files():
-    """Debug endpoint to check file paths."""
-    import json as json_mod
+    """Return a minimal runtime-cache diagnostic to authorized operators."""
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    import config
-
-    scrape_path_data = os.path.join(config.DATA_DIR, "quiniela15_J76_scrape.json")
-    scrape_path_seed = os.path.join(config.SEED_DATA_DIR, "quiniela15_J76_scrape.json")
-
-    result = {
-        "BASE_DIR": config.BASE_DIR,
-        "DATA_DIR": config.DATA_DIR,
-        "SEED_DATA_DIR": config.SEED_DATA_DIR,
-        "scrape_in_DATA_DIR": os.path.exists(scrape_path_data),
-        "scrape_in_SEED_DATA_DIR": os.path.exists(scrape_path_seed),
+    candidates = {
+        "runtime": os.path.join(config.DATA_DIR, "quiniela15_J76_scrape.json"),
+        "seed": os.path.join(config.SEED_DATA_DIR, "quiniela15_J76_scrape.json"),
     }
-
-    # Read the file directly
-    for path in [scrape_path_data, scrape_path_seed]:
-        if os.path.exists(path):
+    files = {}
+    for label, path in candidates.items():
+        summary = {"exists": os.path.isfile(path)}
+        if summary["exists"]:
             try:
-                with open(path, encoding="utf-8") as f:
-                    data = json_mod.load(f)
-                partidos = data.get("partidos", [])
-                if partidos:
-                    first = partidos[0]
-                    result["file_path"] = path
-                    result["first_partido"] = first
-                    result["first_q15"] = first.get("q15")
-                    result["first_q15_type"] = type(first.get("q15")).__name__
-                break
-            except Exception as e:
-                result[f"error_{path}"] = str(e)
+                data = safe_read_json(path, {})
+                partidos = data.get("partidos") or []
+                summary.update(
+                    {
+                        "matches": len(partidos),
+                        "has_q15_mapping": bool(partidos and partidos[0].get("q15") is not None),
+                    }
+                )
+            except Exception:
+                summary["readable"] = False
+        files[label] = summary
 
-    return jsonify(result)
+    return jsonify({"status": "ok", "files": files})
 
 
 @bp.route("/api/admin/sync-scrape", methods=["POST"])
 def sync_scrape():
     """Sync scrape files from SEED_DATA_DIR to DATA_DIR."""
     # Check admin authentication
-    if not is_admin_request():
-        secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
-        admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
-        if not secret or secret != admin_secret:
-            return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     import shutil
 

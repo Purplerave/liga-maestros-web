@@ -94,6 +94,12 @@ def ensure_core_tables(conn):
             etiqueta TEXT NOT NULL DEFAULT 'Bar',
             created_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS api_rate_limit (
+            scope TEXT NOT NULL,
+            identity TEXT NOT NULL,
+            last_seen REAL NOT NULL,
+            PRIMARY KEY (scope, identity)
+        );
     """)
     conn.commit()
 
@@ -260,7 +266,9 @@ def ensure_quiz_tables(conn):
 
 def ensure_missing_indexes(conn):
     conn.execute("CREATE INDEX IF NOT EXISTS idx_resultados_api_id ON resultados(api_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_resultados_jornada_partido ON resultados(jornada, partido_id)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_clasificacion_div_pos ON clasificacion(division, pos)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rate_limit_last_seen ON api_rate_limit(last_seen)")
     conn.commit()
 
 

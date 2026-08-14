@@ -2,6 +2,8 @@
 
 import logging
 import os
+import secrets
+import time
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 from .db.backups import minimize_backup_personal_data, start_backup_scheduler
 from .db.migrations import run_startup_migrations
+from .middleware.authz import is_admin_or_service_request
 from .middleware.csrf import valid_csrf_request
 from .routes import register_routes
 from .workers.web_collector import start_web_collector
@@ -37,7 +40,7 @@ if _sentry_dsn:
 
 
 def _configure_logging(app):
-    """Set up structured logging for production."""
+    """Set up consistent logging for production."""
     level = logging.DEBUG if os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true") else logging.INFO
     fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
     logging.basicConfig(level=level, format=fmt, force=True)
@@ -97,6 +100,20 @@ def create_app():
 
     _configure_logging(app)
     register_routes(app)
+    slow_request_ms = max(1.0, float(os.getenv("SLOW_REQUEST_MS", "750")))
+
+    @app.before_request
+    def begin_request_observability():
+        g.request_started_at = time.perf_counter()
+        g.request_id = secrets.token_hex(8)
+
+    @app.before_request
+    def protect_admin_api():
+        if not request.path.startswith("/api/admin/"):
+            return None
+        if is_admin_or_service_request():
+            return None
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     @app.before_request
     def protect_authenticated_writes():
@@ -157,10 +174,29 @@ def create_app():
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         if request.is_secure:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        if request.path in {"/api/user/status", "/api/user/stats", "/cuenta"} or (
-            session.get("user") and request.path.startswith("/api/")
+        if (
+            request.path in {"/api/user/status", "/api/user/stats", "/cuenta"}
+            or request.path.startswith("/api/admin/")
+            or (session.get("user") and request.path.startswith("/api/"))
         ):
             response.headers["Cache-Control"] = "no-store, private"
+
+        request_id = getattr(g, "request_id", "")
+        started_at = getattr(g, "request_started_at", None)
+        if request_id:
+            response.headers["X-Request-ID"] = request_id
+        if started_at is not None:
+            duration_ms = (time.perf_counter() - started_at) * 1000
+            response.headers["Server-Timing"] = f"app;dur={duration_ms:.1f}"
+            if duration_ms >= slow_request_ms:
+                logger.warning(
+                    "Slow request request_id=%s method=%s path=%s status=%s duration_ms=%.1f",
+                    request_id,
+                    request.method,
+                    request.path,
+                    response.status_code,
+                    duration_ms,
+                )
         return response
 
     @app.teardown_request

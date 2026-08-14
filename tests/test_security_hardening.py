@@ -264,3 +264,96 @@ def test_retained_backups_are_scrubbed_of_emails(tmp_path, monkeypatch):
     conn = sqlite3.connect(backup)
     assert conn.execute("SELECT email FROM usuarios").fetchone()[0] is None
     conn.close()
+
+
+def test_admin_endpoints_fail_closed_and_ignore_query_secrets(tmp_path, monkeypatch):
+    monkeypatch.delenv("ADMIN_API_SECRET", raising=False)
+    monkeypatch.setenv("ADMIN_SECRET", "legacy-secret-must-not-authorize")
+    app = _test_app(tmp_path, monkeypatch)
+    client = app.test_client()
+
+    requests = (
+        ("post", "/api/admin/reset-standings?secret=legacy-secret-must-not-authorize"),
+        ("post", "/api/admin/reset-j75?secret=legacy-secret-must-not-authorize"),
+        ("post", "/api/admin/setup-j76?secret=legacy-secret-must-not-authorize"),
+        ("post", "/api/admin/sync-scrape?secret=legacy-secret-must-not-authorize"),
+        ("get", "/api/admin/debug-files?secret=legacy-secret-must-not-authorize"),
+    )
+    for method, path in requests:
+        response = getattr(client, method)(path, headers={"X-Admin-Secret": "legacy-secret-must-not-authorize"})
+        assert response.status_code == 403, path
+        assert response.headers["Cache-Control"] == "no-store, private"
+
+
+def test_admin_session_writes_still_require_csrf(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    client = app.test_client()
+    with client.session_transaction() as flask_session:
+        flask_session["user"] = {"id": PRIVATE_ID, "name": "Admin", "is_admin": True}
+
+    response = client.post("/api/admin/sync-scrape")
+    assert response.status_code == 403
+    assert response.get_json()["error"] == "Solicitud de seguridad caducada."
+
+
+def test_admin_service_secret_is_header_only_and_diagnostics_are_minimal(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setenv("ADMIN_API_SECRET", "configured-test-service-secret")
+    client = app.test_client()
+
+    assert client.get("/api/admin/debug-files?secret=configured-test-service-secret").status_code == 403
+    response = client.get(
+        "/api/admin/debug-files",
+        headers={"X-Admin-Secret": "configured-test-service-secret"},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "ok"
+    assert set(payload["files"]) == {"runtime", "seed"}
+    serialized = json.dumps(payload)
+    assert config.BASE_DIR not in serialized
+    assert config.DATA_DIR not in serialized
+
+
+def test_live_stream_is_opt_in_on_synchronous_deployments(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(config, "LIVE_SSE_ENABLED", False)
+
+    response = app.test_client().get("/api/live/stream?j=73")
+    assert response.status_code == 503
+    assert response.headers["Retry-After"] == "120"
+    assert response.get_json()["status"] == "disabled"
+
+
+def test_responses_include_request_diagnostics(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    response = app.test_client().get("/health")
+
+    assert response.status_code == 200
+    assert len(response.headers["X-Request-ID"]) == 16
+    assert response.headers["Server-Timing"].startswith("app;dur=")
+
+
+def test_rate_limiter_schema_is_migrated_and_reservation_is_atomic(tmp_path, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from liga_maestros.middleware import rate_limit
+
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(rate_limit.time, "time", lambda: 1_800_000_000.0)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(lambda _: rate_limit.is_rate_limited("test_scope", "u1", 5), range(8)))
+
+    assert results.count(False) == 1
+    assert results.count(True) == 7
+
+    with app.app_context():
+        conn = get_db()
+        row = conn.execute(
+            "SELECT last_seen FROM api_rate_limit WHERE scope = ? AND identity = ?",
+            ("test_scope", "u1"),
+        ).fetchone()
+        assert row["last_seen"] == 1_800_000_000.0
+        indexes = {item[1] for item in conn.execute("PRAGMA index_list(api_rate_limit)")}
+        assert "idx_rate_limit_last_seen" in indexes
+        conn.close()

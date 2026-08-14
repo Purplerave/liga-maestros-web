@@ -15,6 +15,7 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ if str(MOTOR_ROOT) not in sys.path:
 PREDICTION_CACHE_TTL = 3600
 
 _cache_lock = threading.Lock()
-_prediction_cache = {}
-_last_prediction_time = {}
+_prediction_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+_last_prediction_time: dict[str, float] = {}
 
 
 def motor_enabled():

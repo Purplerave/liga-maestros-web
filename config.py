@@ -78,6 +78,9 @@ API_FOOTBALL_DAILY_RESERVE = int(os.getenv("API_FOOTBALL_DAILY_RESERVE", "10"))
 MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
 MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
 GOOGLE_AUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
+# A synchronous Gunicorn thread remains occupied for every SSE client. Keep
+# streams opt-in until production uses an async/event-capable deployment.
+LIVE_SSE_ENABLED = os.getenv("LIVE_SSE_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on")
 
 # Configuración Radar de Noticias
 NEWS_CACHE_PATH = os.path.join(DATA_DIR, "RADAR_NOTICIAS.json")

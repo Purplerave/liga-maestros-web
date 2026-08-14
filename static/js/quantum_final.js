@@ -32,6 +32,7 @@ async function refreshData(options = {}) {
         logoAliasIndex = null;
         logoCache.clear();
         state.jornada = String(state.data.jornada || state.jornada);
+        if (typeof startLiveUpdates === "function") startLiveUpdates();
 
         // 🎊 Welcome-back celebration for returning users
         if (!options.auto && state.user && hasSavedTicket() && state.draftDirty === false) {

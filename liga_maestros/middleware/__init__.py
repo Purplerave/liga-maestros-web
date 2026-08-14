@@ -1,4 +1,4 @@
-from .authz import is_admin_request
+from .authz import is_admin_or_service_request, is_admin_request
 from .json_lock import (
     _lock_file,
     _unlock_file,
@@ -18,4 +18,5 @@ __all__ = [
     "_unlock_file",
     "is_rate_limited",
     "is_admin_request",
+    "is_admin_or_service_request",
 ]

@@ -208,7 +208,6 @@ def test_account_deletion_removes_all_owned_activity():
     ensure_porra_table(conn)
     ensure_snake_table(conn)
     ensure_quiz_tables(conn)
-    conn.execute("CREATE TABLE api_rate_limit (scope TEXT, identity TEXT, last_seen REAL)")
     conn.execute("INSERT INTO usuarios (id, nombre, email) VALUES ('u1', 'User', 'user@example.test')")
     conn.execute("INSERT INTO predicciones VALUES ('u1', 1, 1, '1')")
     conn.execute(
