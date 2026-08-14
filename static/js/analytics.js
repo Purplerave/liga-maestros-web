@@ -16,7 +16,7 @@ const LMAnalytics = {
         }
         this.track("page_view", { path: location.pathname + location.search });
         document.addEventListener("click", (e) => {
-            const el = e.target.closest?.["[data-analytics]"];
+            const el = e.target.closest?.("[data-analytics]");
             if (!el) return;
             const event = el.getAttribute("data-analytics");
             if (event) this.track(event, { label: el.getAttribute("data-analytics-label") || el.textContent?.trim()?.slice(0, 40) });

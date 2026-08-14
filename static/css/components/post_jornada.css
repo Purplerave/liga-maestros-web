@@ -1,3 +1,4 @@
+@layer overlays {
 /* Post-jornada summary banner */
 .pj-banner {
   position: fixed;
@@ -153,4 +154,5 @@
 
 @media (min-width: 640px) {
   .pj-banner { align-items: center; }
+}
 }
