@@ -47,8 +47,6 @@
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <!-- Sistema de capas CSS: gobierna la cascada (sin !important). El orden replica
-         la carga historica; las vistas lazy se insertan siempre en 'pages'. -->
     <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
@@ -69,6 +67,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-2') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/post_jornada.css', v=assets_v ~ '-pj-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/match_cards.css', v=assets_v ~ '-match-cards-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_responsive.css', v=assets_v ~ '-mobile-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/onboarding.css', v=assets_v ~ '-onboarding-1') }}">
@@ -108,7 +107,7 @@
                 </button>
                 <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)" aria-label="Actualizar">↻</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
-                <button id="share-ticket-btn" class="primary-btn" type="button">Compartir</button>
+                <button id="share-ticket-btn" class="primary-btn" data-analytics="share_click" data-analytics-label="ticket" type="button">Compartir</button>
             </div>
 
         </header>
@@ -153,6 +152,7 @@
     </div>
     <div id="toast-container"></div>
     <script defer src="{{ url_for('main.static_files', filename='js/utils.js', v=assets_v ~ '-utils-6') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/analytics.js', v=assets_v ~ '-analytics-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/state.js', v=assets_v ~ '-state-8') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/logos.js', v=assets_v ~ '-logos-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/navigation.js', v=assets_v ~ '-navigation-8') }}"></script>
@@ -164,6 +164,7 @@
     <script defer src="{{ url_for('main.static_files', filename='js/sound_manager.js', v=assets_v ~ '-sound-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/ux_signals.js', v=assets_v ~ '-ux-signals-1') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/post_jornada.js', v=assets_v ~ '-pj-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/onboarding.js', v=assets_v ~ '-onboarding-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-2') }}"
             data-sw-url="{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}"></script>
