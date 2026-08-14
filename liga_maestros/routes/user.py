@@ -11,6 +11,7 @@ from ..services.engagement import (
     build_share_card_payload,
     compute_quiniela_streak,
 )
+from ..services.jornada import current_season_sql
 from ..services.teams import contest_aliases_for_uid, is_scored_status
 
 bp = Blueprint("user", __name__)
@@ -46,12 +47,14 @@ def get_user_stats():
     conn = get_db()
     aliases = contest_aliases_for_uid(uid)
     placeholders = ",".join("?" for _ in aliases)
+    # Solo la temporada publicada: las jornadas de pruebas no alimentan
+    # total de aciertos ni mejor jornada.
     rows = conn.execute(
         f"""
         SELECT p.jornada, p.partido_id, p.signo, r.signo_actual, r.goles_local, r.goles_visitante, r.status
         FROM predicciones p
         JOIN resultados r ON p.jornada = r.jornada AND p.partido_id = r.partido_id
-        WHERE p.user_id IN ({placeholders})
+        WHERE p.user_id IN ({placeholders}) AND {current_season_sql("p.jornada")}
         ORDER BY p.jornada, p.partido_id
     """,
         aliases,

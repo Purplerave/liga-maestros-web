@@ -2,10 +2,11 @@
 
 import json
 import os
+import sqlite3
 
 from ... import config
 from ...scoring import pleno_score_key, score_prediction
-from ...services.contest import CONTEST_DYNAMIC_START_JORNADA
+from ...services.jornada import current_season_sql
 from ...services.privacy import public_participant_id, publicize_mapping_keys
 from ...services.teams import (
     build_participant_contract,
@@ -206,12 +207,11 @@ def _build_ranking(conn, jornada):
     final_res_map, current_res_map = _build_result_maps(conn, jornada)
     ranking = {}
     all_preds = conn.execute(
-        """
+        f"""
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
         FROM predicciones
-        WHERE jornada >= ?
-    """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        WHERE {current_season_sql("jornada")}
+    """
     ).fetchall()
 
     seen_ranking_predictions = set()
@@ -275,11 +275,23 @@ def _build_result_maps(conn, jornada):
 
 
 def _apply_user_bonus_points(conn, ranking):
-    rows = conn.execute("SELECT id, puntos_acumulados FROM usuarios").fetchall()
+    # Bonus de la porra acotado a la temporada actual: los puntos del periodo
+    # de pruebas no cuentan en el ranking publicado.
     extra_points = {}
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT user_id, SUM(puntos) AS pts
+            FROM porra_puntos
+            WHERE {current_season_sql("jornada")}
+            GROUP BY user_id
+            """
+        ).fetchall()
+    except sqlite3.OperationalError:
+        rows = []
     for row in rows:
-        uid = canonical_contest_id(row["id"])
-        extra_points[uid] = max(int(extra_points.get(uid, 0) or 0), int(row["puntos_acumulados"] or 0))
+        uid = canonical_contest_id(row["user_id"])
+        extra_points[uid] = max(int(extra_points.get(uid, 0) or 0), int(row["pts"] or 0))
 
     for uid, points in extra_points.items():
         if uid not in ranking:

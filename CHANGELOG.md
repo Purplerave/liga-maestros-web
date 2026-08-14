@@ -2,6 +2,37 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-14 — Las estadísticas vuelven a cero con la temporada 2026/27
+
+### Corregido
+
+- 🔴 **Las estadísticas de las pruebas (jornadas 51-76) seguían sumando en la
+  web.** El ranking general, las fichas de perfil (aciertos, mejor jornada,
+  galardones, historial), las rachas y el resumen post-jornada se calculaban
+  con `predicciones` desde J58, así que la temporada publicada (que reinicia
+  la numeración en J1) quedaba **sin contar** y el marcador arrastraba el
+  periodo de pruebas. Además, la página de "nueva temporada" del frontend
+  ("Ahora todo vuelve a cero") nunca llegaba a activarse.
+  - Nueva fuente única de verdad en `services/jornada.py`:
+    `CURRENT_SEASON_MAX_JORNADA = 42`, `is_current_season_jornada()` y
+    `current_season_sql()`. Solo cuentan las jornadas de la temporada
+    publicada (J1 en adelante); las 51-76 se conservan en la BD como
+    archivo, pero fuera de todo cómputo visible.
+  - Aplicado a: motor del concurso (`build_contest_payload`: general,
+    jornada, mensual, galardones, momentos y perfiles), ranking de la
+    pestaña Quiniela (`_build_ranking`), `/api/user/stats`,
+    `compute_quiniela_streak`, `build_post_jornada_summary` (ya no elige la
+    J75/J76 de pruebas como "última jornada") y ranking de temporada del
+    quiz.
+  - El bonus de la porra sale ahora de `porra_puntos` acotado a la
+    temporada actual, en lugar del acumulado histórico
+    `usuarios.puntos_acumulados`: los puntos de porra ganados en pruebas
+    tampoco suman.
+- Tests de regresión (`tests/test_season_stats_reset.py`): con 15 aciertos
+  en pruebas y 2 en la J1, todos los endpoints devuelven exactamente 2;
+  rachas, resumen post-jornada, ranking y quiz de temporada ignoran las
+  jornadas 51-76.
+
 ## 2026-08-14 — Hardening de administración y directo
 
 ### Seguridad
