@@ -419,30 +419,43 @@ def reset_standings():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@bp.route("/api/admin/reset-j75", methods=["POST"])
-def reset_j75():
-    """Force reset J75 data with original matches."""
-    # Check admin authentication
+@bp.route("/api/admin/reset-jornada", methods=["POST"])
+def reset_jornada_activa():
+    """Recarga la jornada activa desde su boleto oficial (data/quiniela15_J{N}_scrape.json).
+
+    Sustituye al antiguo /api/admin/reset-j75: la J75 pertenece al archivo
+    histórico de la liga de pruebas y ya no debe reimportarse.
+    """
     if not is_admin_request():
-        # Also accept secret key in header
         secret = request.headers.get("X-Admin-Secret") or request.args.get("secret")
         admin_secret = os.getenv("ADMIN_SECRET", "liga-maestros-2026")
         if not secret or secret != admin_secret:
             return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
-    from ..db.migrations import ensure_jornada_75
+    from ..db.migrations import ensure_jornada_completa
+    from ..services.jornada import resolve_active_jornada
+    from ..services.season import is_season_jornada
 
     conn = get_db()
     try:
-        # Use ensure_jornada_75 to restore original data
-        ensure_jornada_75(conn)
+        requested = request.args.get("jornada") or (request.get_json(silent=True) or {}).get("jornada")
+        jornada = int(requested) if str(requested or "").strip().isdigit() else resolve_active_jornada(conn)
+        if not is_season_jornada(jornada):
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": f"J{jornada} pertenece al archivo histórico y no se puede reimportar.",
+                }
+            ), 400
 
-        # Verify
-        rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
+        ensure_jornada_completa(conn, jornada, force=True)
+        conn.commit()
+        rows = conn.execute("SELECT * FROM resultados WHERE jornada = ? ORDER BY partido_id", (jornada,)).fetchall()
         return jsonify(
             {
                 "status": "ok",
-                "message": f"J75 restaurada con {len(rows)} partidos originales",
+                "message": f"J{jornada} restaurada con {len(rows)} partidos oficiales",
+                "jornada": jornada,
                 "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows],
             }
         )
@@ -608,8 +621,10 @@ def sync_scrape():
 
     import config
 
+    from ..services.jornada import resolve_active_jornada
+
     results = []
-    for jornada in [75, 76]:
+    for jornada in [resolve_active_jornada(get_db())]:
         src = os.path.join(config.SEED_DATA_DIR, f"quiniela15_J{jornada}_scrape.json")
         dst = os.path.join(config.DATA_DIR, f"quiniela15_J{jornada}_scrape.json")
         if os.path.exists(src):

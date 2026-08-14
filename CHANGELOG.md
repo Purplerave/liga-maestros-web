@@ -2,6 +2,56 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-14 — La temporada empieza (de verdad) en la Jornada 1
+
+### Corregido
+
+- 🔴 **La J75 y la J76 resucitaban en cada arranque.** `run_startup_migrations()`
+  llamaba a `ensure_jornada_75(conn)`, que internamente usa
+  `ensure_jornada_completa(..., force=True)`: cualquier limpieza manual —incluida
+  la de `tools/ops/RESET_TEMPORADA.py`— se deshacía en el siguiente despliegue.
+  Esas llamadas se han retirado del arranque.
+- 🔴 **El ranking general seguía sumando la liga de pruebas.** El concurso
+  arrancaba en `CONTEST_DYNAMIC_START_JORNADA = 58`, así que la clasificación
+  acumulada mostraba GROK 138, CHATGPT 132, CLAUDE 132… de la temporada de
+  ensayo, y el selector ofrecía 22 jornadas (J51-J73) mientras la pestaña
+  Quiniela ya mostraba solo la J1. Ahora el concurso empieza en la J1 y todo
+  queda a cero.
+- 🔴 **`jornada >= 1` no bastaba para filtrar el histórico.** La liga de pruebas
+  usó numeración continua hasta la J76, así que sus jornadas son
+  **numéricamente mayores** que las de la temporada nueva aunque sean anteriores
+  en el tiempo. Los galardones, los "momentos" y las medias mensuales seguían
+  saliendo de esa ventana.
+
+### Añadido
+
+- **`liga_maestros/services/season.py`** — frontera única de la temporada.
+  Antes cada módulo aplicaba su propio criterio (`>= 58` en el concurso, listas
+  negras `(75, 76)` en dos rutas, `MAX(jornada)` a pelo en otras) y por eso cada
+  pantalla contestaba una cosa distinta. Ahora hay una sola respuesta:
+  `is_season_jornada()`, `filter_season_jornadas()` y `season_sql_filter()`.
+  El histórico es la ventana J40-J76 y el arranque es configurable con
+  `SEASON_START_JORNADA`.
+- **`archive_legacy_jornadas()`** — corre sola en cada arranque. **No borra
+  nada**: conserva el histórico en la base de datos, vuelca una copia legible a
+  `archivo_temporada_pruebas.json` (junto a la BD, fuera de Git) y pone a cero
+  `usuarios.puntos_acumulados`, que arrastraba puntos de la temporada vieja al
+  ranking nuevo. Solo los toca mientras la temporada actual no haya repartido
+  puntos.
+- Tests de regresión en `tests/test_season_boundary.py` (14 nuevos): la J75/J76
+  no vuelven, el histórico se conserva pero no puntúa, y la jornada activa es la
+  1 aunque exista una J76 con número mayor.
+
+### Cambiado
+
+- `/api/admin/reset-j75` → **`/api/admin/reset-jornada`**: recarga la jornada
+  activa (o la que se le pase) desde su boleto oficial y **rechaza** las
+  jornadas del archivo histórico. `/api/admin/sync-scrape` sincroniza la jornada
+  activa en vez de las fijas 75/76.
+- `tools/ops/RESET_TEMPORADA.py` hace **backup de la BD** antes de borrar y
+  documenta que es la opción destructiva (la política por defecto es conservar
+  y ocultar).
+
 ## 2026-08-12 — Ligas 2026-27: planteles oficiales y extranjeras a cero
 
 ### Corregido

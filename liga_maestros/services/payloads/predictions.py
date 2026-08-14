@@ -5,8 +5,8 @@ import os
 
 from ... import config
 from ...scoring import pleno_score_key, score_prediction
-from ...services.contest import CONTEST_DYNAMIC_START_JORNADA
 from ...services.privacy import public_participant_id, publicize_mapping_keys
+from ...services.season import season_sql_filter
 from ...services.teams import (
     build_participant_contract,
     canonical_contest_id,
@@ -205,13 +205,14 @@ def _filter_public_predictions(preds, participant_contract, current_user_id=None
 def _build_ranking(conn, jornada):
     final_res_map, current_res_map = _build_result_maps(conn, jornada)
     ranking = {}
+    season_where, season_params = season_sql_filter()
     all_preds = conn.execute(
-        """
+        f"""
         SELECT rowid AS pred_rowid, user_id, jornada, partido_id, signo
         FROM predicciones
-        WHERE jornada >= ?
+        WHERE {season_where}
     """,
-        (CONTEST_DYNAMIC_START_JORNADA,),
+        season_params,
     ).fetchall()
 
     seen_ranking_predictions = set()

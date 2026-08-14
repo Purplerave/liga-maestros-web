@@ -25,11 +25,14 @@ def _test_app(tmp_path, monkeypatch):
     monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
     monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
     monkeypatch.setenv("ALLOW_LOCAL_ADMIN", "0")
+    monkeypatch.setenv("ALLOW_IFRAME_EMBED", "0")
+    monkeypatch.setenv("FLASK_DEBUG", "0")
+    monkeypatch.setenv("FLASK_ENV", "production")
     monkeypatch.setenv("TRUSTED_HOSTS", "localhost,127.0.0.1,ligademaestros.alwaysdata.net")
     return create_app()
 
 
-def _insert_scored_prediction(conn, user_id, jornada=73, partido_id=1):
+def _insert_scored_prediction(conn, user_id, jornada=1, partido_id=1):
     conn.execute(
         """
         INSERT INTO resultados
@@ -147,7 +150,7 @@ def test_public_contest_endpoint_never_exposes_provider_ids(tmp_path, monkeypatc
         conn.commit()
         conn.close()
 
-    response = app.test_client().get("/api/concurso?j=73")
+    response = app.test_client().get("/api/concurso?j=1")
     assert response.status_code == 200
     assert PRIVATE_ID not in response.get_data(as_text=True)
     assert PUBLIC_USER_PREFIX in response.get_data(as_text=True)
@@ -165,7 +168,7 @@ def test_public_liga_payload_never_exposes_provider_ids(tmp_path, monkeypatch):
         conn.commit()
         conn.close()
 
-    response = app.test_client().get("/api/liga/data?j=73")
+    response = app.test_client().get("/api/liga/data?j=1")
     assert response.status_code == 200
     assert PRIVATE_ID not in response.get_data(as_text=True)
     payload = response.get_json()
@@ -198,7 +201,7 @@ def test_authenticated_writes_require_session_csrf_token(tmp_path, monkeypatch):
     with client.session_transaction() as flask_session:
         flask_session["user"] = {"id": PRIVATE_ID, "name": "Pablo", "is_admin": False}
 
-    payload = {"user_id": PRIVATE_ID, "jornada": 73, "signos": ["1"] * 15}
+    payload = {"user_id": PRIVATE_ID, "jornada": 1, "signos": ["1"] * 15}
     rejected = client.post("/api/predicciones/save", json=payload)
     assert rejected.status_code == 403
 

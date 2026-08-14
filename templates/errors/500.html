@@ -2,25 +2,37 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>500 - Liga de Maestros</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#06090f">
+    <title>500 — Liga de Maestros</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root { --bg:#06090f; --fg:#f0f4f8; --muted:#8b9dc3; --accent:#38bdf8; --red:#ef4444; --gold:#fbbf24; }
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#06090f;color:#f0f4f8;font-family:"Plus Jakarta Sans",system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-        .error-page{text-align:center;max-width:480px}
-        .error-code{font-family:"Rajdhani","Outfit",sans-serif;font-size:clamp(5rem,15vw,9rem);font-weight:700;line-height:1;background:linear-gradient(135deg,#ef4444,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
-        .error-title{font-size:1.5rem;font-weight:600;margin-bottom:12px;color:#f0f4f8}
-        .error-msg{color:#8b9dc3;line-height:1.6;margin-bottom:32px;font-size:1rem}
-        .error-btn{display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#06090f;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s}
-        .error-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,189,248,.35)}
+        html,body{height:100%}
+        body{background:radial-gradient(800px 400px at 80% 10%, rgba(239,68,68,.12), transparent 60%),radial-gradient(600px 400px at 20% 90%, rgba(251,191,36,.10), transparent 60%),var(--bg);color:var(--fg);font-family:Outfit,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+        .wrap{text-align:center;max-width:520px;animation:pop .5s cubic-bezier(.2,.8,.2,1)}
+        .code{font-family:"Bebas Neue",sans-serif;font-size:clamp(6rem,20vw,11rem);font-weight:700;line-height:.9;background:linear-gradient(135deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
+        h1{font-size:clamp(1.2rem,4vw,1.6rem);font-weight:800;margin:.2rem 0 .7rem}
+        p{color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+        .card{display:inline-block;padding:1rem 1.2rem;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;color:#fecaca;margin:0 auto 1.5rem}
+        .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.2rem;border-radius:12px;font-weight:700;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.2s transform,.2s filter;background:linear-gradient(135deg,var(--gold),var(--accent));color:#03121c;box-shadow:0 10px 25px rgba(56,189,248,.25)}
+        .btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+        @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
     </style>
 </head>
 <body>
-    <div class="error-page">
-        <div class="error-code">500</div>
-        <h1 class="error-title">Error del servidor</h1>
-        <p class="error-msg">Algo ha fallado de nuestro lado. Ya estamos trabajando para solucionarlo. Vuelve a intentarlo en unos minutos.</p>
-        <a href="/" class="error-btn">Volver a la portada</a>
-    </div>
+    <main class="wrap">
+        <div class="code" aria-hidden="true">500</div>
+        <h1>Tarjeta roja al servidor</h1>
+        <p>Algo se ha roto de nuestro lado. Hemos pitado falta y ya estamos revisando la jugada. Inténtalo de nuevo en un momento.</p>
+        <div class="card">Error interno · lo hemos registrado</div>
+        <a href="/" class="btn">⚽ Volver a la portada</a>
+    </main>
 </body>
 </html>
