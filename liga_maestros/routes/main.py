@@ -50,6 +50,20 @@ def index():
         return f"La plantilla no se encontro. Jornada actual: {escape(j)}", 500
 
 
+@bp.route("/landing")
+def landing():
+    """Landing SEO de conversión (kit viral). Indexable, CTAs hacia /app."""
+    response = make_response(render_template("landing.html"))
+    response.headers["Cache-Control"] = "public, max-age=300"
+    return response
+
+
+@bp.route("/app")
+def app_index():
+    """Alias explícito de la app (para CTAs de la landing)."""
+    return index()
+
+
 @bp.route("/static/<path:filename>")
 def static_files(filename):
     static_root = os.path.realpath(os.path.join(config.BASE_DIR, "static"))
@@ -63,8 +77,6 @@ def static_files(filename):
     if not stays_inside_static or not os.path.isfile(file_path):
         abort(404)
 
-    # Las URLs versionadas (?v=<cambian con el contenido>) pueden cachearse de
-    # forma inmutable: si el archivo cambia, la plantilla emite una URL nueva.
     has_fingerprint = bool(request.args.get("v"))
     if normalized.startswith("img/") or has_fingerprint:
         cache_control = "public, max-age=31536000, immutable"
@@ -111,6 +123,8 @@ def robots_txt():
     body = (
         "User-agent: *\n"
         "Allow: /$\n"
+        "Allow: /landing\n"
+        "Allow: /app\n"
         "Allow: /static/\n"
         "Disallow: /api/\n"
         "Disallow: /cuenta\n"
@@ -131,6 +145,8 @@ def sitemap_xml():
         f"  <url><loc>{root}{path}</loc><changefreq>{freq}</changefreq></url>\n"
         for path, freq in (
             ("/", "daily"),
+            ("/landing", "weekly"),
+            ("/app", "daily"),
             ("/privacidad", "yearly"),
             ("/cookies", "yearly"),
             ("/aviso-legal", "yearly"),
