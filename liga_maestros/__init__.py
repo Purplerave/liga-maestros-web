@@ -107,9 +107,17 @@ def create_app():
 
     # Compresión gzip / Brotli si estuviera disponible
     app.config["COMPRESS_MIMETYPES"] = [
-        "text/html", "text/css", "text/plain", "text/xml", "text/javascript",
-        "application/javascript", "application/x-javascript", "application/json",
-        "application/xml", "application/xml+rss", "image/svg+xml",
+        "text/html",
+        "text/css",
+        "text/plain",
+        "text/xml",
+        "text/javascript",
+        "application/javascript",
+        "application/x-javascript",
+        "application/json",
+        "application/xml",
+        "application/xml+rss",
+        "image/svg+xml",
     ]
     app.config["COMPRESS_LEVEL"] = 6
     app.config["COMPRESS_MIN_SIZE"] = 500

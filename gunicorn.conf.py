@@ -1,4 +1,5 @@
 """Gunicorn production config for Liga de Maestros."""
+
 import multiprocessing
 import os
 
