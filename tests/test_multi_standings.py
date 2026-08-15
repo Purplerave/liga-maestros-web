@@ -1,4 +1,8 @@
+import json
+
 from liga_maestros.services import highlightly_standings, multi_standings
+from liga_maestros.services.season_rosters import LALIGA_2026_27, SEGUNDA_2026_27
+from liga_maestros.utils import normalize_team_key
 
 
 def test_official_standings_include_only_relevant_logo_data(monkeypatch):
@@ -68,6 +72,147 @@ def test_refresh_all_standings_covers_spanish_and_foreign_leagues(monkeypatch):
 
     assert summary["spanish"] == ["primera", "segunda"]
     assert summary["external"] == ["PREMIER LEAGUE", "BUNDESLIGA", "LIGUE 1"]
+
+
+def _provider_row(name, pos, **stats):
+    return {
+        "n": name,
+        "pos": pos,
+        "pj": 0,
+        "pg": 0,
+        "pe": 0,
+        "pp": 0,
+        "gf": 0,
+        "gc": 0,
+        "pts": 0,
+        **stats,
+    }
+
+
+def test_spanish_refresh_matches_all_provider_names_and_keeps_official_display_names(tmp_path, monkeypatch):
+    """Highlightly aliases must not make either complete Spanish league get discarded."""
+    primera_variants = {
+        "FC Barcelona": "Barcelona",
+        "Villarreal CF": "Villarreal",
+        "Atlético de Madrid": "Atletico Madrid",
+        "Celta": "Celta Vigo",
+        "Getafe CF": "Getafe",
+        "Valencia CF": "Valencia",
+        "RCD Espanyol de Barcelona": "Espanyol",
+        "Athletic Club": "Athletic Bilbao",
+        "Sevilla FC": "Sevilla",
+        "Deportivo Alavés": "Alaves",
+        "Elche CF": "Elche",
+        "Levante UD": "Levante",
+        "CA Osasuna": "Osasuna",
+        "R. Racing Club": "Racing Santander",
+        "RC Deportivo": "Deportivo La Coruña",
+        "Málaga CF": "Malaga",
+    }
+    segunda_variants = {
+        "RCD Mallorca": "Mallorca",
+        "Girona FC": "Girona",
+        "Real Oviedo": "Oviedo",
+        "UD Almería": "Almeria",
+        "UD Las Palmas": "Las Palmas",
+        "CD Castellón": "Castellon",
+        "Burgos CF": "Burgos",
+        "SD Eibar": "Eibar",
+        "Córdoba CF": "Cordoba",
+        "Albacete BP": "Albacete Balompie",
+        "AD Ceuta FC": "Ceuta",
+        "FC Andorra": "Andorra",
+        "Real Sporting": "Sporting Gijon",
+        "Granada CF": "Granada",
+        "R. Sociedad B": "Real Sociedad II",
+        "Real Valladolid CF": "Real Valladolid",
+        "Cádiz CF": "Cadiz",
+        "CD Leganés": "Leganes",
+        "CD Tenerife": "Tenerife",
+        "CD Eldense": "Eldense",
+        "CE Sabadell": "Sabadell",
+        "Celta Fortuna": "Celta de Vigo B",
+    }
+
+    primera = [_provider_row(primera_variants.get(name, name), pos) for pos, name in enumerate(LALIGA_2026_27, 1)]
+    segunda_by_official = {
+        name: _provider_row(segunda_variants.get(name, name), pos) for pos, name in enumerate(SEGUNDA_2026_27, 1)
+    }
+    segunda_by_official["CD Castellón"].update(pj=1, pg=1, gf=1, gc=0, pts=3)
+    segunda_by_official["R. Sociedad B"].update(pj=1, pp=1, gf=0, gc=1, pts=0)
+    # Reproduce provider ranking order after Castellón's 0-1 win.
+    segunda = [segunda_by_official["CD Castellón"]]
+    segunda.extend(row for name, row in segunda_by_official.items() if name not in {"CD Castellón", "R. Sociedad B"})
+    segunda.append(segunda_by_official["R. Sociedad B"])
+    for pos, row in enumerate(segunda, 1):
+        row["pos"] = pos
+
+    assert {normalize_team_key(row["n"]) for row in primera} == {normalize_team_key(name) for name in LALIGA_2026_27}
+    assert {normalize_team_key(row["n"]) for row in segunda} == {normalize_team_key(name) for name in SEGUNDA_2026_27}
+
+    monkeypatch.setattr(multi_standings.config, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(
+        multi_standings.config,
+        "HIGHLIGHTLY_LEAGUES",
+        {"LA LIGA": 101, "SEGUNDA DIVISION": 202},
+    )
+    monkeypatch.setattr(
+        multi_standings,
+        "fetch_highlightly_standings",
+        lambda league_id, season: primera if league_id == 101 else segunda,
+    )
+
+    result = multi_standings.refresh_spanish_standings(season=2026)
+
+    assert result == ["primera", "segunda"]
+    assert result.skipped == []
+    assert result.failures == []
+    with open(tmp_path / "STANDINGS_SEGUNDA_BASE.json", encoding="utf-8") as fh:
+        saved = json.load(fh)
+    by_name = {row["n"]: row for row in saved}
+    assert set(by_name) == set(SEGUNDA_2026_27)
+    assert "Real Sociedad II" not in by_name
+    assert "Celta de Vigo B" not in by_name
+    assert by_name["CD Castellón"] == {
+        "pos": 1,
+        "n": "CD Castellón",
+        "pj": 1,
+        "pg": 1,
+        "pe": 0,
+        "pp": 0,
+        "gf": 1,
+        "gc": 0,
+        "pts": 3,
+    }
+
+
+def test_spanish_refresh_reports_roster_mismatch_instead_of_overwriting_file(tmp_path, monkeypatch):
+    path = tmp_path / "STANDINGS_SEGUNDA_BASE.json"
+    path.write_text('[{"n": "datos anteriores", "pts": 9}]', encoding="utf-8")
+    invalid_segunda = [_provider_row(name, pos) for pos, name in enumerate(SEGUNDA_2026_27, 1)]
+    invalid_segunda[-1]["n"] = "Equipo desconocido"
+
+    monkeypatch.setattr(multi_standings.config, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(
+        multi_standings.config,
+        "HIGHLIGHTLY_LEAGUES",
+        {"LA LIGA": 101, "SEGUNDA DIVISION": 202},
+    )
+    monkeypatch.setattr(
+        multi_standings,
+        "fetch_highlightly_standings",
+        lambda league_id, season: [] if league_id == 101 else invalid_segunda,
+    )
+
+    result = multi_standings.refresh_spanish_standings(season=2026)
+
+    assert result == []
+    assert {item["code"] for item in result.skipped} == {"no_data", "roster_mismatch"}
+    mismatch = next(item for item in result.skipped if item["code"] == "roster_mismatch")
+    assert mismatch["league"] == "SEGUNDA DIVISION"
+    assert mismatch["unexpected_teams"] == ["Equipo desconocido"]
+    assert "Celta Fortuna" in mismatch["missing_teams"]
+    assert json.loads(path.read_text(encoding="utf-8"))[0]["pts"] == 9
 
 
 def test_cached_international_competitions_are_not_exposed(monkeypatch):

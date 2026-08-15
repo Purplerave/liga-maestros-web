@@ -171,6 +171,28 @@ def _load_and_repair_match_info(jornada, partidos):
     return match_info
 
 
+def _refresh_issue_message(status, skipped, failures):
+    if status == "ok":
+        return "Actualización completada sin incidencias."
+
+    def describe(item):
+        label = item.get("league") or item.get("component") or "operación"
+        reason = item.get("reason")
+        return f"{label} ({reason})" if reason else label
+
+    details = []
+    if skipped:
+        details.append(f"Omitidos: {', '.join(describe(item) for item in skipped)}")
+    if failures:
+        details.append(f"Fallos: {', '.join(describe(item) for item in failures)}")
+    suffix = f" {'; '.join(details)}." if details else ""
+    return f"Actualización parcial.{suffix}"
+
+
+def _tag_refresh_issues(issues, component):
+    return [{"component": component, **issue} for issue in issues if isinstance(issue, dict)]
+
+
 @bp.post("/api/admin/refresh-standings")
 def refresh_standings():
     if not is_admin_request():
@@ -178,7 +200,18 @@ def refresh_standings():
     from ..services.multi_standings import refresh_all_standings
 
     summary = refresh_all_standings(season=2026)
-    return jsonify({"status": "ok", "updated": summary})
+    status = summary.get("status", "ok")
+    skipped = _tag_refresh_issues(summary.get("skipped", []), "standings")
+    failures = _tag_refresh_issues(summary.get("failures", []), "standings")
+    return jsonify(
+        {
+            "status": status,
+            "updated": summary,
+            "skipped": skipped,
+            "failures": failures,
+            "message": _refresh_issue_message(status, skipped, failures),
+        }
+    )
 
 
 @bp.post("/api/admin/refresh-all")
@@ -198,26 +231,48 @@ def refresh_everything():
     from ..services.multi_standings import refresh_all_standings
 
     summary = {}
+    skipped = []
+    failures = []
     try:
-        summary["standings"] = refresh_all_standings(season=2026)
+        standings = refresh_all_standings(season=2026)
+        summary["standings"] = standings
+        skipped.extend(_tag_refresh_issues(standings.get("skipped", []), "standings"))
+        failures.extend(_tag_refresh_issues(standings.get("failures", []), "standings"))
+        if standings.get("status") in ("partial", "error") and not (skipped or failures):
+            failures.append({"component": "standings", "reason": "la actualización no se completó"})
     except Exception:
         logger.exception("refresh-all: standings failed")
         summary["standings"] = "error"
+        failures.append({"component": "standings", "reason": "falló la actualización de clasificaciones"})
     try:
         agenda = refresh_daily_agenda(force=True)
         summary["agenda_matches"] = len(agenda.get("matches", []))
     except Exception:
         logger.exception("refresh-all: agenda failed")
         summary["agenda_matches"] = "error"
+        failures.append({"component": "agenda", "reason": "falló la actualización de la agenda"})
     try:
         summary["panel_matches"] = refresh_live_scores()
     except Exception:
         logger.exception("refresh-all: live scores failed")
         summary["panel_matches"] = "error"
+        failures.append({"component": "directo", "reason": "falló la actualización del panel en directo"})
     try:
         summary["quiniela_refresh_started"] = bool(trigger_highlightly_refresh_async(force=True))
+        if not summary["quiniela_refresh_started"]:
+            skipped.append({"component": "quiniela", "reason": "la actualización asíncrona no se inició"})
     except Exception:
         logger.exception("refresh-all: quiniela live refresh failed")
         summary["quiniela_refresh_started"] = False
+        failures.append({"component": "quiniela", "reason": "falló el inicio de la actualización"})
 
-    return jsonify({"status": "ok", "summary": summary})
+    status = "partial" if skipped or failures else "ok"
+    return jsonify(
+        {
+            "status": status,
+            "summary": summary,
+            "skipped": skipped,
+            "failures": failures,
+            "message": _refresh_issue_message(status, skipped, failures),
+        }
+    )

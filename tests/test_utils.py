@@ -48,6 +48,12 @@ class TestNormalizeTeamKey:
     def test_passthrough(self):
         assert normalize_team_key("OSASUNA") == "OSASUNA"
 
+    def test_spanish_reserve_team_variants_share_one_key(self):
+        assert normalize_team_key("Real Sociedad B") == normalize_team_key("Real Sociedad II")
+        assert normalize_team_key("R. Sociedad B") == normalize_team_key("Real Sociedad II")
+        assert normalize_team_key("Celta Fortuna") == normalize_team_key("Celta de Vigo B")
+        assert normalize_team_key("Celta Fortuna") == normalize_team_key("Celta de Vigo II")
+
 
 class TestShortTeamName:
     def test_known_short_names(self):
