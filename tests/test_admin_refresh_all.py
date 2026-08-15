@@ -1,5 +1,7 @@
 """Tests for the admin-only 'refresh everything now' endpoint."""
 
+from pathlib import Path
+
 import config
 from liga_maestros import create_app
 
@@ -99,11 +101,65 @@ def test_refresh_all_survives_partial_failures(tmp_path, monkeypatch):
 
     assert response.status_code == 200
     payload = response.get_json()
+    assert payload["status"] == "partial"
     assert payload["summary"]["standings"] == "error"
+    assert payload["failures"] == [{"component": "standings", "reason": "falló la actualización de clasificaciones"}]
+    assert "Actualización parcial" in payload["message"]
     # The remaining refreshers still ran.
     assert "agenda" in calls
     assert "scores" in calls
     assert "quiniela" in calls
+
+
+def test_refresh_all_exposes_skipped_leagues_as_partial(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    calls = []
+    _patch_refreshers(monkeypatch, calls)
+
+    from liga_maestros.services import multi_standings
+
+    monkeypatch.setattr(
+        multi_standings,
+        "refresh_all_standings",
+        lambda season: {
+            "status": "partial",
+            "spanish": ["primera"],
+            "external": ["PREMIER LEAGUE"],
+            "skipped": [
+                {
+                    "league": "SEGUNDA DIVISION",
+                    "code": "roster_mismatch",
+                    "reason": "la plantilla normalizada no coincide con la oficial 2026-27",
+                }
+            ],
+            "failures": [],
+            "updated_count": 2,
+            "expected_count": 5,
+        },
+    )
+
+    client = app.test_client()
+    with client.session_transaction() as flask_session:
+        flask_session["user"] = {"id": "1", "name": "Admin", "is_admin": True}
+        flask_session["csrf_token"] = "tok"
+
+    response = client.post("/api/admin/refresh-all", headers={"X-CSRF-Token": "tok"})
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "partial"
+    assert payload["skipped"][0]["component"] == "standings"
+    assert payload["skipped"][0]["league"] == "SEGUNDA DIVISION"
+    assert "Omitidos: SEGUNDA DIVISION" in payload["message"]
+
+
+def test_refresh_all_toast_warns_on_partial_results():
+    source = (Path(__file__).resolve().parents[1] / "static" / "js" / "quantum_final.js").read_text(encoding="utf-8")
+
+    assert 'payload.status !== "ok"' in source
+    assert "payload.skipped" in source
+    assert "payload.failures" in source
+    assert 'showToast(`${payload.message || "Actualización parcial."}${completed}`, "error")' in source
 
 
 def test_liga_data_exposes_is_admin_flag(tmp_path, monkeypatch):

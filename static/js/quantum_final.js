@@ -378,14 +378,26 @@ async function adminRefreshAll() {
         if (s.standings && s.standings !== "error") {
             const spanish = (s.standings.spanish || []).length;
             const external = (s.standings.external || []).length;
-            parts.push(`${spanish + external} clasificaciones`);
+            const expected = Number(s.standings.expected_count || 0);
+            parts.push(expected
+                ? `${spanish + external}/${expected} clasificaciones`
+                : `${spanish + external} clasificaciones`);
         }
         if (typeof s.agenda_matches === "number") parts.push(`${s.agenda_matches} partidos hoy`);
         if (typeof s.panel_matches === "number" && s.panel_matches > 0) parts.push(`${s.panel_matches} en directo`);
-        showToast(parts.length ? `Actualizado: ${parts.join(", ")}.` : "Servidor actualizado.");
+
+        const skipped = Array.isArray(payload.skipped) ? payload.skipped : [];
+        const failures = Array.isArray(payload.failures) ? payload.failures : [];
+        const partial = payload.status !== "ok" || skipped.length > 0 || failures.length > 0;
+        if (partial) {
+            const completed = parts.length ? ` Completado: ${parts.join(", ")}.` : "";
+            showToast(`${payload.message || "Actualización parcial."}${completed}`, "error");
+        } else {
+            showToast(parts.length ? `Actualizado: ${parts.join(", ")}.` : "Servidor actualizado.");
+        }
         await refreshData();
     } catch {
-        showToast("No se pudo actualizar todo.", "error");
+        showToast("No se pudo actualizar todo. Revisa los fallos del servidor.", "error");
     }
 }
 
