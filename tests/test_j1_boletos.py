@@ -12,6 +12,8 @@ Contrato (aportado por el usuario el 12/08):
 
 import json
 import sqlite3
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import config
 from liga_maestros import create_app
@@ -21,6 +23,9 @@ from liga_maestros.db.migrations import (
     ensure_jornada_1,
     ensure_predicciones_unique_index,
 )
+from liga_maestros.routes import liga_data
+from liga_maestros.services import ticket
+from liga_maestros.services.privacy import is_private_account_id
 
 COPILOT_SIGNOS = ["1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "1", "1", "1", "1", "1-0"]
 
@@ -171,11 +176,26 @@ def test_rekey_j1_keeps_results_attached_to_their_match():
     assert _rekey_j1_partido_ids(conn) == 0
 
 
+def _freeze_before_close(monkeypatch):
+    """Congela el reloj antes del cierre de la J1 (sábado 15/08 a las 16:45).
+
+    Sin esto el test dependía de la hora real: pasaba por la mañana y fallaba
+    a partir de las 16:45, porque tras el cierre `reveal_all` destapa todas las
+    columnas. La visibilidad hay que probarla en cada estado, no al azar.
+    """
+    frozen = datetime(2026, 8, 15, 9, 0, tzinfo=ZoneInfo("Europe/Madrid"))
+    monkeypatch.setattr(liga_data, "madrid_now", lambda: frozen)
+    monkeypatch.setattr(ticket, "madrid_now", lambda: frozen)
+
+
 def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
+    _freeze_before_close(monkeypatch)
     response = app.test_client().get("/api/liga/data?j=1")
     assert response.status_code == 200
     payload = response.get_json()
+
+    assert payload["is_locked"] is False, "El test debe correr con la quiniela abierta"
 
     assert payload["jornada"] == "1"
     assert payload["partidos"][0]["local"] == "Alavés"
@@ -195,3 +215,28 @@ def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, 
     predicciones = payload["predicciones_actuales"]
     assert {"copilot", "gemini", "claude", "grok", "chatgpt"} <= set(predicciones)
     assert PENA_12.isdisjoint(predicciones)
+
+
+def test_al_cerrar_se_revelan_las_columnas_sin_filtrar_cuentas_reales(tmp_path, monkeypatch):
+    """Al cerrar, `reveal_all` destapa todas las columnas.
+
+    Los peñistas son alias fijos del concurso (chipi, geli...), no cuentas, así
+    que mostrarlos es intencionado. Lo que nunca puede aparecer es el
+    identificador de una cuenta real de Google: esos se sustituyen por un id
+    opaco. Este test fija la diferencia para que no se confunda en el futuro.
+    """
+    app = _test_app(tmp_path, monkeypatch)
+    frozen = datetime(2026, 8, 15, 23, 0, tzinfo=ZoneInfo("Europe/Madrid"))
+    monkeypatch.setattr(liga_data, "madrid_now", lambda: frozen)
+    monkeypatch.setattr(ticket, "madrid_now", lambda: frozen)
+
+    payload = app.test_client().get("/api/liga/data?j=1").get_json()
+
+    assert payload["is_locked"] is True, "Pasado el cierre la quiniela debe estar bloqueada"
+    predicciones = payload["predicciones_actuales"]
+    # Tras el cierre se ven maestros y peñistas (alias públicos del concurso).
+    assert {"copilot", "gemini", "claude", "grok", "chatgpt"} <= set(predicciones)
+    assert PENA_12 <= set(predicciones)
+    # Pero ningún identificador de cuenta real (sub de Google: 16+ dígitos).
+    leaked = [uid for uid in predicciones if is_private_account_id(uid)]
+    assert leaked == [], f"IDs de cuentas reales expuestos: {leaked}"

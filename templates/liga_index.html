@@ -74,6 +74,14 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_enhancements.css', v=assets_v ~ '-visual-1') }}">
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
+    <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+    <noscript>
+        <div class="noscript-warning">
+            <strong>Liga de Maestros necesita JavaScript.</strong>
+            Actívalo para firmar tu quiniela y ver el directo. Mientras tanto puedes consultar la
+            <a href="/ayuda">ayuda</a>, la <a href="/privacidad">privacidad</a> y el <a href="/aviso-legal">aviso legal</a>.
+        </div>
+    </noscript>
     <div class="app-shell">
         <section class="panel header-brand-panel">
             <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Pe&ntilde;a vs IA" loading="lazy">
@@ -121,7 +129,7 @@
             <button type="button" data-page-action="CONTEST"><i class="nav-ico" aria-hidden="true">★</i><span>La Pe&ntilde;a</span></button>
         </nav>
 
-        <main class="main-arena">
+        <main class="main-arena" id="contenido-principal" tabindex="-1">
             <section id="matches-body" class="arena-content" aria-live="polite"></section>
         </main>
     </div>

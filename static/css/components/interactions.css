@@ -55,4 +55,39 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 .panel:hover, .cp-card:hover {
     border-color: rgba(245, 158, 11, 0.3);
 }
+
+/* Salto al contenido: visible solo al tabular (accesibilidad de teclado). */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 999;
+    padding: 0.65rem 1rem;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 2px solid var(--color-focus);
+    border-radius: 0 0 8px 0;
+    font-weight: 700;
+    text-decoration: none;
+}
+.skip-link:focus {
+    left: 0;
+}
+#contenido-principal:focus {
+    outline: none;
+}
+
+/* Aviso cuando el navegador no ejecuta JavaScript. */
+.noscript-warning {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--gold);
+    text-align: center;
+    line-height: 1.5;
+}
+.noscript-warning a {
+    color: var(--accent);
+}
 }

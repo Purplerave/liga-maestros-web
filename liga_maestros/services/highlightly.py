@@ -51,11 +51,19 @@ _highlightly_thread_management_lock = threading.Lock()
 
 
 def resolve_jornada(conn, jornada=None):
+    """Jornada objetivo para directo, collector y health.
+
+    Debe coincidir con la jornada que ve el usuario. Antes hacía
+    `MAX(jornada)`, lo que apuntaba al periodo de pruebas (J51-76) que sigue
+    archivado en `resultados`: el collector refrescaba fechas de la J76
+    mientras la web mostraba la J1 y el directo nunca se movía.
+    """
     raw = str(jornada or "").strip()
     if raw.isdigit():
         return int(raw)
-    row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
-    return row[0] if row and row[0] is not None else None
+    from .jornada import resolve_active_jornada
+
+    return resolve_active_jornada(conn)
 
 
 def compute_refresh_window(conn, jornada=None):

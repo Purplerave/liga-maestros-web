@@ -8,6 +8,7 @@ funcionando exactamente igual. Nunca lanzan excepciones hacia arriba.
 from .predictor import (  # noqa: F401
     get_cached_predictions,
     get_prediction_stats,
+    motor_available,
     motor_enabled,
     refresh_predictions_for_active_jornada,
 )

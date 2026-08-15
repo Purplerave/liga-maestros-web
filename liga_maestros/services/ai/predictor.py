@@ -34,6 +34,26 @@ def motor_enabled():
     return os.getenv("MOTOR_ENABLED", "1").strip().lower() in ("1", "true", "yes", "on")
 
 
+def motor_available():
+    """True si el paquete del motor existe y se puede importar.
+
+    `MOTOR_QUINIELA_MAESTRO` vive en el repositorio hermano `QUINIELA_MOTOR`,
+    que no se despliega con la web. Cuando falta, cada petición a
+    /api/ai/predictions lanzaba un ImportError capturado por el `except`
+    genérico y escribía un WARNING, mientras /api/ai/status seguía diciendo
+    `enabled: true`. Comprobarlo antes evita el ruido y permite informar del
+    estado real.
+    """
+    if not motor_enabled():
+        return False
+    from importlib.util import find_spec
+
+    try:
+        return find_spec("MOTOR_QUINIELA_MAESTRO") is not None
+    except (ImportError, ValueError):
+        return False
+
+
 def _load_history():
     from MOTOR_QUINIELA_MAESTRO import load_raw_history
 
@@ -110,6 +130,12 @@ def generate_predictions(jornada):
     """
     if not motor_enabled():
         return []
+    if not motor_available():
+        logger.debug(
+            "AI predictor: MOTOR_QUINIELA_MAESTRO no disponible en %s; se omite la generacion.",
+            MOTOR_ROOT,
+        )
+        return []
 
     try:
         history = _load_history()
@@ -169,8 +195,12 @@ def get_prediction_stats():
         cached_keys = list(_prediction_cache.keys())
         last_refresh = {k: _last_prediction_time.get(k, 0) for k in cached_keys}
 
+    available = motor_available()
     return {
         "enabled": motor_enabled(),
+        "available": available,
+        "reason": None if available else "motor_no_instalado",
+        "motor_path": str(MOTOR_ROOT),
         "cached_jornadas": cached_keys,
         "last_refresh": last_refresh,
         "cache_ttl_seconds": PREDICTION_CACHE_TTL,

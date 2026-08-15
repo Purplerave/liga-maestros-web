@@ -187,6 +187,13 @@ TEAM_LOGO_ALIASES = {
     "CEUTA": "AD CEUTA FC",
     "AD CEUTA": "AD CEUTA FC",
     "AD CEUTA FC": "AD CEUTA FC",
+    # El escudo local está guardado como FC_ANDORRA.png; sin este alias la
+    # clave "ANDORRA" caía en la URL externa de highlightly.net.
+    "ANDORRA": "FC ANDORRA",
+    "FC ANDORRA": "FC ANDORRA",
+    # El filial comparte escudo con el primer equipo.
+    "CELTA FORTUNA": "CELTA DE VIGO",
+    "CELTA B": "CELTA DE VIGO",
     "MALAGA": "MALAGA",
     "MALAGA CF": "MALAGA",
     "DEPORTIVO": "DEPORTIVO LA CORUNA",

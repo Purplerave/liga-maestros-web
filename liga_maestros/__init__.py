@@ -50,6 +50,57 @@ def _configure_logging(app):
     app.logger.setLevel(level)
 
 
+#: Datos del responsable exigidos por el RGPD/LSSI para publicar las páginas
+#: legales. Sin ellos, /privacidad y /aviso-legal salían con "No configurado".
+REQUIRED_LEGAL_ENV_VARS = (
+    "LEGAL_OWNER_NAME",
+    "LEGAL_CONTACT_EMAIL",
+)
+
+
+def missing_launch_config(env=None):
+    """Variables imprescindibles que faltan para abrir al público."""
+    env = os.environ if env is None else env
+    return [name for name in REQUIRED_LEGAL_ENV_VARS if not str(env.get(name, "")).strip()]
+
+
+def _is_production_deploy():
+    """Despliegue público real, no un test ni un arranque local.
+
+    Se usa el mismo criterio que ya aplicaba `routes/legal.py` para avisar de
+    textos legales incompletos, para no cambiar el comportamiento en local ni
+    en la suite de tests.
+    """
+    if os.getenv("ALLOW_INCOMPLETE_LEGAL", "0").strip().lower() in ("1", "true", "yes", "on"):
+        return False
+    return os.getenv("FLASK_ENV", "").strip().lower() == "production" or os.getenv("RENDER") == "1"
+
+
+def _check_launch_configuration(is_dev=False):
+    """Impide publicar sin datos legales; fuera de producción solo avisa.
+
+    Antes esto fallaba en silencio: la web arrancaba y servía una política de
+    privacidad que decía literalmente "Responsable: No configurado", lo que
+    incumple RGPD/LSSI teniendo login de Google y datos personales de por medio.
+    """
+    missing = missing_launch_config()
+    if not missing:
+        return
+    detail = ", ".join(missing)
+    if is_dev or not _is_production_deploy():
+        logger.warning(
+            "Datos legales incompletos (%s). Las páginas legales mostrarán 'No configurado'. "
+            "Rellena estas variables antes de abrir al público.",
+            detail,
+        )
+        return
+    raise RuntimeError(
+        f"Faltan datos legales obligatorios: {detail}. "
+        "Rellénalos en el .env antes de desplegar (RGPD/LSSI), o exporta "
+        "ALLOW_INCOMPLETE_LEGAL=1 si estás haciendo pruebas."
+    )
+
+
 def create_app():
     app = Flask(
         __name__,
@@ -69,6 +120,8 @@ def create_app():
     _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on") or os.getenv(
         "FLASK_ENV", ""
     ).strip().lower() in ("development", "dev")
+
+    _check_launch_configuration(is_dev=_is_dev)
 
     # En desarrollo: permitir cualquier host (necesario para proxies de preview)
     # En produccion: restringir a hosts conocidos

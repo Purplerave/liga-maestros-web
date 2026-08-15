@@ -93,7 +93,10 @@ BACKUP_S3_KEY_ID=
 BACKUP_S3_SECRET=
 BACKUP_S3_REGION=us-east-1
 
-# --- Datos legales del pie de pagina (obligatorio antes de lanzar) ---
+# --- Datos legales del pie de pagina (OBLIGATORIO: la web no arranca sin esto) ---
+# Con FLASK_ENV=production, si faltan LEGAL_OWNER_NAME o LEGAL_CONTACT_EMAIL la
+# aplicacion se niega a arrancar. Es a proposito: sin ellos las paginas legales
+# publicaban "Responsable: No configurado", lo que incumple RGPD/LSSI.
 LEGAL_OWNER_NAME=                               # <-- RELLENA (tu nombre)
 LEGAL_OWNER_ID=
 LEGAL_OWNER_ADDRESS=
