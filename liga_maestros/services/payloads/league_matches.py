@@ -143,8 +143,7 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
     if quiniela_league_matches:
         quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
         quiniela_has_live = any(
-            str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED")
-            for m in quiniela_league_matches
+            str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED") for m in quiniela_league_matches
         )
         if quiniela_datetimes and quiniela_has_live:
             window_start = min(quiniela_datetimes) - timedelta(days=1)
