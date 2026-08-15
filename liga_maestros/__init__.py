@@ -138,7 +138,7 @@ def create_app():
         if request.path.startswith("/juegos/"):
             response.headers["X-Frame-Options"] = "SAMEORIGIN"
             response.headers["Content-Security-Policy"] = (
-                "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                "default-src 'self'; script-src 'self'; "
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: https://highlightly.net; connect-src 'self'; "
@@ -148,7 +148,7 @@ def create_app():
             # En desarrollo / previews: permitir embedding para que funcione el proxy de preview
             response.headers["X-Frame-Options"] = "ALLOWALL"
             response.headers["Content-Security-Policy"] = (
-                "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                "default-src 'self'; script-src 'self'; "
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
                 "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; "
                 "connect-src 'self' https:; object-src 'none'; base-uri 'self'; "
