@@ -94,7 +94,10 @@ const CommandPalette = {
 
         // Comando oculto de admin: fuerza la actualizacion completa del
         // servidor (clasificaciones, agenda del dia, directo y quiniela).
-        if (state?.user?.is_admin) {
+        if (
+            state?.user?.is_admin
+            || state?.data?.is_admin
+        ) {
             list.push({
                 id: "admin:refresh-all",
                 group: "Admin",

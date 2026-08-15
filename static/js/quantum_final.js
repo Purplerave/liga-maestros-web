@@ -364,7 +364,7 @@ async function savePredictions() {
 }
 
 async function adminRefreshAll() {
-    if (!state.user?.is_admin) return showToast("Solo admin.", "error");
+    if (!state.user?.is_admin && !state.data?.is_admin) return showToast("Solo admin.", "error");
     showToast("Actualizando todo en el servidor...");
     try {
         const response = await fetch("/api/admin/refresh-all", {

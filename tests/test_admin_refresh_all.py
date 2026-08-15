@@ -104,3 +104,23 @@ def test_refresh_all_survives_partial_failures(tmp_path, monkeypatch):
     assert "agenda" in calls
     assert "scores" in calls
     assert "quiniela" in calls
+
+
+def test_liga_data_exposes_is_admin_flag(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    client = app.test_client()
+
+    anonymous_response = client.get("/api/liga/data")
+    assert anonymous_response.status_code == 200
+    assert anonymous_response.get_json()["is_admin"] is False
+
+    with client.session_transaction() as flask_session:
+        flask_session["user"] = {
+            "id": "1",
+            "name": "Admin",
+            "is_admin": True,
+        }
+
+    admin_response = client.get("/api/liga/data")
+    assert admin_response.status_code == 200
+    assert admin_response.get_json()["is_admin"] is True
