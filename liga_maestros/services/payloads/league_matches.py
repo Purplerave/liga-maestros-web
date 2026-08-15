@@ -29,19 +29,39 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     return _add_team_logos(all_league_matches, team_logos)
 
 
+def _match_pair_key(match):
+    """Clave estable de un encuentro: sus dos equipos normalizados.
+
+    Es lo único que comparten el proveedor y la quiniela. El `fixture_id` no
+    sirve para cruzarlos: el de la quiniela es sintético
+    (``quiniela-{jornada}-{n}``) y el de Highlightly es numérico, así que
+    deduplicar por id dejaba el mismo partido dos veces en Directo.
+    """
+    home = normalize_team_key(match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"))
+    away = normalize_team_key(match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"))
+    return f"{home}|{away}"
+
+
+def _has_score(match):
+    return bool(str(match.get("score") or match.get("marcador") or "").strip())
+
+
 def build_live_matches(partidos, team_logos):
-    """Return every live match from the shared Highlightly snapshot."""
+    """Return every live match from the shared Highlightly snapshot.
+
+    Un mismo encuentro puede llegar por dos vías (el panel externo y la propia
+    quiniela). Se colapsan por pareja de equipos y gana el que traiga marcador,
+    que es el que lleva el dato en vivo bueno.
+    """
     external_live = [match for match in _load_external_matches() if _is_live_match(match)]
     quiniela_live = [match for match in _build_quiniela_league_matches("", partidos, {}) if _is_live_match(match)]
-    matches_by_id = {}
+    matches_by_pair = {}
     for match in external_live + quiniela_live:
-        key = str(match.get("fixture_id") or match.get("id") or "").strip()
-        if not key:
-            home = normalize_team_key(match.get("local") or (match.get("home") or {}).get("name"))
-            away = normalize_team_key(match.get("visitante") or (match.get("away") or {}).get("name"))
-            key = f"{home}|{away}"
-        matches_by_id[key] = match
-    return _add_team_logos(list(matches_by_id.values()), team_logos)
+        key = _match_pair_key(match)
+        previous = matches_by_pair.get(key)
+        if previous is None or (_has_score(match) and not _has_score(previous)):
+            matches_by_pair[key] = match
+    return _add_team_logos(list(matches_by_pair.values()), team_logos)
 
 
 def _add_team_logos(matches, team_logos):
