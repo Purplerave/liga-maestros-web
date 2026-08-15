@@ -203,8 +203,17 @@ def _is_domestic_league_match(match):
 
 
 def _duplicates_quiniela_match(match, quiniela_pairs):
-    competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()
-    if competition not in ("LA LIGA", "SEGUNDA DIVISION"):
+    """True si el partido externo es uno que la quiniela ya publica.
+
+    Antes se exigía que la competición fuese literalmente "LA LIGA" o
+    "SEGUNDA DIVISION". El proveedor no siempre usa esos nombres exactos
+    ("LALIGA EA SPORTS", "LALIGA HYPERMOTION", "PRIMERA DIVISION"...), así que
+    el partido se colaba sin filtrar y aparecía DUPLICADO junto al de la
+    quiniela. La pareja de equipos ya identifica el encuentro de forma única
+    dentro de la jornada, así que basta con comprobar que no sea una
+    competición ajena (Champions, amistosos...).
+    """
+    if not _is_domestic_league_match(match):
         return False
     home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
     away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")

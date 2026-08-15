@@ -230,12 +230,13 @@ function getLiveLeagueMatches() {
         }
         return isLiveMatch(m);
     }).forEach(match => {
-        const home = normalizeName(match.local || match.home_name || match.home?.name || "");
-        const away = normalizeName(match.visitante || match.away_name || match.away?.name || "");
         // Clave por pareja de equipos, NO por fixture_id: el id de la quiniela
         // es sintetico ("quiniela-1-3") y nunca coincide con el numerico del
         // proveedor, asi que el mismo partido salia duplicado en Directo.
-        const key = (home || away) ? `${home}|${away}` : String(match.fixture_id || match.id || "");
+        // Se reutiliza matchPairKey para que el agrupado y el parcheo del DOM
+        // usen exactamente la misma clave.
+        const pairKey = matchPairKey(match);
+        const key = pairKey !== "-" ? pairKey : String(match.fixture_id || match.id || "");
         // Si ya existe y el nuevo es más fresco (tiene gol o minuto), sobrescribe
         if (!matchesById.has(key)) {
             matchesById.set(key, match);

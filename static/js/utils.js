@@ -473,7 +473,11 @@ function compactTensionLabel(label) {
 }
 
 function matchPairKey(match) {
-    const home = normalizeName(match.local || match.home_name || "");
-    const away = normalizeName(match.visitante || match.away_name || "");
+    // Los partidos del proveedor externo solo traen la forma anidada
+    // (home.name / away.name); los de la quiniela vienen planos. Si no se leen
+    // las dos, el externo devolvia la clave vacia "-" y el mismo encuentro se
+    // duplicaba en Directo en vez de colapsarse en una sola tarjeta.
+    const home = normalizeName(match.local || match.home_name || match.home?.name || "");
+    const away = normalizeName(match.visitante || match.away_name || match.away?.name || "");
     return `${home}-${away}`;
 }

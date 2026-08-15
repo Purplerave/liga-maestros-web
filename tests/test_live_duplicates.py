@@ -10,6 +10,8 @@ con los datos del proveedor y otra con los de la quiniela.
 (`_duplicates_quiniela_match`); el camino de Directo se quedó sin esa red.
 """
 
+import pytest
+
 from liga_maestros.services.payloads import league_matches
 
 
@@ -112,3 +114,64 @@ def test_deduplica_aunque_el_nombre_venga_escrito_distinto(monkeypatch):
     result = league_matches.build_live_matches([_quiniela_partido()], {})
 
     assert len(result) == 1, f"No se detectó el mismo equipo con otra grafía: {_pairs(result)}"
+
+
+def _external(competition, home="Alavés", away="Getafe"):
+    return {
+        "id": 987654,
+        "fixture_id": 987654,
+        "status": "LIVE",
+        "score": "1-0",
+        "added": "2026-08-15 19:30:00",
+        "fecha_raw": "2026-08-15",
+        "hora": "19:30",
+        "competition_name": competition,
+        "competition": {"name": competition},
+        "home": {"name": home},
+        "away": {"name": away},
+        "local": home,
+        "visitante": away,
+    }
+
+
+# El proveedor no siempre nombra la competición igual. Todos estos son LaLiga.
+LALIGA_ALIASES = [
+    "LA LIGA",
+    "LALIGA",
+    "LALIGA EA SPORTS",
+    "LALIGA SANTANDER",
+    "PRIMERA DIVISION",
+    "LALIGA HYPERMOTION",
+    "SEGUNDA DIVISION",
+    "ES - LA LIGA",
+]
+
+
+@pytest.mark.parametrize("competition", LALIGA_ALIASES)
+def test_el_panel_no_duplica_sea_cual_sea_el_nombre_de_la_competicion(monkeypatch, competition):
+    """Regresión: solo se filtraba con el literal "LA LIGA"/"SEGUNDA DIVISION".
+
+    Con cualquier otra grafía el partido del proveedor se colaba y aparecía
+    duplicado junto al de la quiniela.
+    """
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-15")
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [_external(competition)])
+
+    result = league_matches.build_all_league_matches("1", [_quiniela_partido()], {}, {})
+
+    pairs = _pairs(result)
+    assert pairs.count(("Alavés", "Getafe")) == 1, f"Duplicado con competicion {competition!r}: {pairs}"
+
+
+def test_un_partido_de_otra_competicion_no_se_descarta(monkeypatch):
+    """Champions/amistosos son encuentros distintos: deben seguir apareciendo."""
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-15")
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [_external("UEFA CHAMPIONS LEAGUE", home="Arsenal", away="PSG")],
+    )
+
+    result = league_matches.build_all_league_matches("1", [_quiniela_partido()], {}, {})
+
+    assert ("Alavés", "Getafe") in _pairs(result)
