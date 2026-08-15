@@ -363,6 +363,32 @@ async function savePredictions() {
     }
 }
 
+async function adminRefreshAll() {
+    if (!state.user?.is_admin) return showToast("Solo admin.", "error");
+    showToast("Actualizando todo en el servidor...");
+    try {
+        const response = await fetch("/api/admin/refresh-all", {
+            method: "POST",
+            headers: { "X-CSRF-Token": state.csrfToken || "" },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        const s = payload.summary || {};
+        const parts = [];
+        if (s.standings && s.standings !== "error") {
+            const spanish = (s.standings.spanish || []).length;
+            const external = (s.standings.external || []).length;
+            parts.push(`${spanish + external} clasificaciones`);
+        }
+        if (typeof s.agenda_matches === "number") parts.push(`${s.agenda_matches} partidos hoy`);
+        if (typeof s.panel_matches === "number" && s.panel_matches > 0) parts.push(`${s.panel_matches} en directo`);
+        showToast(parts.length ? `Actualizado: ${parts.join(", ")}.` : "Servidor actualizado.");
+        await refreshData();
+    } catch {
+        showToast("No se pudo actualizar todo.", "error");
+    }
+}
+
 function buildShareText() {
     const matches = state.data?.partidos || [];
     const done = (state.my_signs || []).filter(sign => sign && sign !== "-").length;

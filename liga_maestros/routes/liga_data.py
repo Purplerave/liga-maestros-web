@@ -179,3 +179,45 @@ def refresh_standings():
 
     summary = refresh_all_standings(season=2026)
     return jsonify({"status": "ok", "updated": summary})
+
+
+@bp.post("/api/admin/refresh-all")
+def refresh_everything():
+    """Admin-only 'update everything NOW' switch.
+
+    Refreshes, in order: all league standings (Spanish BASE + foreign cache),
+    today's agenda for every followed league, today's live scores/panel (which
+    also archives newly finished matches with their statistics), and kicks the
+    quiniela live refresh asynchronously.
+    """
+    if not is_admin_request():
+        return jsonify({"status": "forbidden"}), 403
+
+    from ..services.daily_matches import refresh_daily_agenda, refresh_live_scores
+    from ..services.highlightly import trigger_highlightly_refresh_async
+    from ..services.multi_standings import refresh_all_standings
+
+    summary = {}
+    try:
+        summary["standings"] = refresh_all_standings(season=2026)
+    except Exception:
+        logger.exception("refresh-all: standings failed")
+        summary["standings"] = "error"
+    try:
+        agenda = refresh_daily_agenda(force=True)
+        summary["agenda_matches"] = len(agenda.get("matches", []))
+    except Exception:
+        logger.exception("refresh-all: agenda failed")
+        summary["agenda_matches"] = "error"
+    try:
+        summary["panel_matches"] = refresh_live_scores()
+    except Exception:
+        logger.exception("refresh-all: live scores failed")
+        summary["panel_matches"] = "error"
+    try:
+        summary["quiniela_refresh_started"] = bool(trigger_highlightly_refresh_async(force=True))
+    except Exception:
+        logger.exception("refresh-all: quiniela live refresh failed")
+        summary["quiniela_refresh_started"] = False
+
+    return jsonify({"status": "ok", "summary": summary})

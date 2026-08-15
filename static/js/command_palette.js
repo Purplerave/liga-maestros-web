@@ -92,6 +92,19 @@ const CommandPalette = {
             run: () => window.scrollTo({ top: 0, behavior: "smooth" }),
         });
 
+        // Comando oculto de admin: fuerza la actualizacion completa del
+        // servidor (clasificaciones, agenda del dia, directo y quiniela).
+        if (state?.user?.is_admin) {
+            list.push({
+                id: "admin:refresh-all",
+                group: "Admin",
+                title: "Actualizar TODO (servidor)",
+                desc: "Clasificaciones, agenda, directo y quiniela ahora mismo",
+                icon: "⚡",
+                run: () => (typeof adminRefreshAll === "function" ? adminRefreshAll() : null),
+            });
+        }
+
         const jornadas = Array.isArray(state?.data?.jornadas) ? state.data.jornadas : [];
         jornadas.slice(-12).reverse().forEach(jornada => {
             list.push({
