@@ -51,6 +51,25 @@ def test_external_standings_refresh_is_explicit(monkeypatch):
     assert saved == [result]
 
 
+def test_refresh_all_standings_covers_spanish_and_foreign_leagues(monkeypatch):
+    """Daily refresh must update Spanish BASE files AND the foreign cache."""
+    monkeypatch.setattr(multi_standings, "refresh_spanish_standings", lambda season: ["primera", "segunda"])
+    monkeypatch.setattr(
+        multi_standings,
+        "refresh_external_standings",
+        lambda season: [
+            {"name": "PREMIER LEAGUE", "teams": []},
+            {"name": "BUNDESLIGA", "teams": []},
+            {"name": "LIGUE 1", "teams": []},
+        ],
+    )
+
+    summary = multi_standings.refresh_all_standings(season=2026)
+
+    assert summary["spanish"] == ["primera", "segunda"]
+    assert summary["external"] == ["PREMIER LEAGUE", "BUNDESLIGA", "LIGUE 1"]
+
+
 def test_cached_international_competitions_are_not_exposed(monkeypatch):
     monkeypatch.setattr(
         multi_standings,

@@ -1,6 +1,7 @@
 """Multi-league standings built from local data and an explicit external cache."""
 
 import json
+import logging
 import os
 import time
 
@@ -8,6 +9,8 @@ import config
 
 from ..utils import normalize_team_key
 from .highlightly_standings import fetch_highlightly_standings
+
+logger = logging.getLogger(__name__)
 
 CACHE_PATH = os.path.join(config.DATA_DIR, "MULTI_STANDINGS.json")
 
@@ -96,12 +99,24 @@ def refresh_external_standings(season=2026):
     return external
 
 
+def refresh_all_standings(season=2026):
+    """Daily full refresh: Spanish leagues (BASE files) + foreign leagues (cache).
+
+    Cost: one Highlightly call per league (5 total with the default config:
+    La Liga, Segunda, Premier, Bundesliga, Ligue 1). Designed to run daily so
+    midweek matches (e.g. a Castellon game on a Wednesday) show up in the
+    standings the same day, not on the weekend.
+    """
+    spanish = refresh_spanish_standings(season=season)
+    external = refresh_external_standings(season=season)
+    return {
+        "spanish": spanish,
+        "external": [league["name"] for league in external],
+    }
+
+
 def refresh_spanish_standings(season=2026):
     """Fetch La Liga and Segunda standings from Highlightly and update BASE files."""
-    import logging
-
-    logger = logging.getLogger(__name__)
-
     spanish_leagues = {
         "primera": (config.HIGHLIGHTLY_LEAGUES.get("LA LIGA", 119924), "STANDINGS_LALIGA_BASE.json"),
         "segunda": (config.HIGHLIGHTLY_LEAGUES.get("SEGUNDA DIVISION", 120775), "STANDINGS_SEGUNDA_BASE.json"),

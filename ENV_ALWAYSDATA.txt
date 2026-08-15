@@ -61,6 +61,15 @@ WEB_COLLECTOR_ENABLED=1
 WEB_COLLECTOR_INTERVAL_SECONDS=60
 WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS=60
 WEB_COLLECTOR_DISABLE_Q15=0
+# Horas (España) a las que se actualizan TODAS las clasificaciones cada dia
+# (La Liga, Segunda, Premier, Bundesliga, Ligue 1). Asi los partidos entre
+# semana aparecen en la tabla esa misma noche. Coste: ~25 llamadas/dia de 7500.
+STANDINGS_REFRESH_TIMES=01:30,08:00,14:30,19:00,23:30
+# Seguimiento diario de TODOS los partidos de las ligas seguidas (agenda por
+# la manana, directo mientras juegan, estadisticas al acabar cada partido).
+DAILY_TRACKER_ENABLED=1
+DAILY_TRACKER_IDLE_SECONDS=900
+DAILY_TRACKER_LIVE_SECONDS=120
 
 # --- Rutas de datos (vacio = usa las carpetas del proyecto, correcto en Alwaysdata) ---
 DB_PATH=
