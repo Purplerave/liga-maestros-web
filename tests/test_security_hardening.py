@@ -117,6 +117,46 @@ def test_security_headers_host_validation_and_request_limits(tmp_path, monkeypat
     assert client.post("/_security/echo", data=b"x" * (65 * 1024)).status_code == 413
 
 
+def test_csp_never_allows_inline_scripts(tmp_path, monkeypatch):
+    """Regression guard: script-src must never include 'unsafe-inline'.
+
+    Inline scripts defeat the whole point of the CSP against XSS. All JS must
+    live in external files under static/js/ or juegos/.
+    """
+    app = _test_app(tmp_path, monkeypatch)
+    client = app.test_client()
+    for path in ("/", "/juegos/arkanoid.html"):
+        response = client.get(path)
+        csp = response.headers.get("Content-Security-Policy", "")
+        script_src = next(
+            (directive.strip() for directive in csp.split(";") if directive.strip().startswith("script-src")),
+            "",
+        )
+        assert script_src, f"Missing script-src directive for {path}"
+        assert "'unsafe-inline'" not in script_src, f"script-src allows inline scripts on {path}: {script_src}"
+
+
+def test_shipped_html_has_no_inline_scripts():
+    """No template or game page may embed executable inline <script> blocks."""
+    import re
+    from pathlib import Path
+
+    root = Path(config.BASE_DIR)
+    offenders = []
+    for html_path in list(root.glob("templates/**/*.html")) + list(root.glob("juegos/**/*.html")):
+        content = html_path.read_text(encoding="utf-8", errors="replace")
+        for match in re.finditer(r"<script\b([^>]*)>", content, flags=re.I):
+            attrs = match.group(1)
+            if "src=" in attrs:
+                continue
+            # JSON-LD and other data blocks are not executable.
+            if re.search(r"type\s*=\s*[\"'](application/(ld\+json|json))[\"']", attrs, flags=re.I):
+                continue
+            offenders.append(str(html_path.relative_to(root)))
+            break
+    assert not offenders, f"Inline executable <script> found in: {offenders}"
+
+
 def test_authenticated_api_responses_are_not_cached(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
     client = app.test_client()

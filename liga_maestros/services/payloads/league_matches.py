@@ -130,34 +130,36 @@ def _infer_match_competition(match, standings_db):
 
 
 def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):
-    # Si no hay partidos de quiniela, no mostrar externos
-    if not quiniela_league_matches:
-        return []
+    """Keep external matches that are relevant right now.
 
-    # Verificar si hay partidos de quiniela en vivo o terminados
-    quiniela_has_live = any(
-        str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED") for m in quiniela_league_matches
-    )
-
-    # Si no hay partidos en vivo/terminados en la quiniela, no mostrar externos
-    if not quiniela_has_live:
-        return []
-
-    quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
-    if not quiniela_datetimes:
-        return []
-
-    window_start = min(quiniela_datetimes) - timedelta(days=1)
-    window_end = max(quiniela_datetimes) + timedelta(days=1)
+    Always keep today's matches (scheduled, live or finished today): a
+    midweek Castellon game must show up in the Directo even when the
+    quiniela is idle. Additionally, during the jornada window keep the
+    matches inside it, as before.
+    """
     today_str = today_madrid()
 
+    window_start = window_end = None
+    if quiniela_league_matches:
+        quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
+        quiniela_has_live = any(
+            str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED") for m in quiniela_league_matches
+        )
+        if quiniela_datetimes and quiniela_has_live:
+            window_start = min(quiniela_datetimes) - timedelta(days=1)
+            window_end = max(quiniela_datetimes) + timedelta(days=1)
+
     def keep_external_match(match):
+        match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
+        if match_date == today_str:
+            return True
         dt = parse_any_match_datetime(match)
-        if dt and window_start <= dt <= window_end:
+        if dt is not None and dt.strftime("%Y-%m-%d") == today_str:
+            return True
+        if window_start is not None and dt is not None and window_start <= dt <= window_end:
             return True
         raw_status = str(match.get("status") or "").upper()
         raw_score = str(match.get("score") or match.get("marcador") or "").strip()
-        match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
         has_score = bool(re.search(r"\d+\s*-\s*\d+", raw_score))
         looks_live = raw_status in ("LIVE", "IN PLAY", "HT", "EN JUEGO")
         return match_date == today_str and (looks_live or has_score)

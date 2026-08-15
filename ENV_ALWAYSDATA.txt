@@ -1,0 +1,112 @@
+# ============================================================
+# FICHERO DE CONFIGURACION PARA ALWAYSDATA
+# ============================================================
+# COMO USARLO (2 pasos):
+#   1. Sube este fichero a Alwaysdata, a la misma carpeta donde este app.py
+#   2. Renombralo a:  .env   (punto + env, sin .txt)
+#
+# Solo tienes que rellenar los valores marcados con  <-- RELLENA
+# Todo lo demas ya esta puesto con valores correctos.
+# ============================================================
+
+# --- Flask (obligatorio) ---
+# SECRET_KEY: escribe una cadena larga aleatoria (50+ caracteres, letras y numeros).
+# Vale aporrear el teclado. Ejemplo del formato: k9Hf2mPz8qLx4vN7...
+SECRET_KEY=                                     # <-- RELLENA (cadena aleatoria larga)
+SESSION_COOKIE_SECURE=1
+SESSION_COOKIE_SAMESITE=Lax
+PREFERRED_URL_SCHEME=https
+TRUST_PROXY_HEADERS=1
+TRUSTED_HOSTS=ligademaestros.alwaysdata.net,localhost,127.0.0.1
+SESSION_LIFETIME_HOURS=12
+MAX_CONTENT_LENGTH=65536
+MAX_FORM_MEMORY_SIZE=32768
+MAX_FORM_PARTS=50
+
+# --- Google OAuth (obligatorio para que la gente entre con Google) ---
+# Se consiguen en console.cloud.google.com > APIs y servicios > Credenciales
+# Redirect URI autorizada: https://ligademaestros.alwaysdata.net/authorize
+GOOGLE_CLIENT_ID=                               # <-- RELLENA
+GOOGLE_CLIENT_SECRET=                           # <-- RELLENA
+
+# --- Datos en directo (obligatorio para el live) ---
+# Tu clave de highlightly.net
+HIGHLIGHTLY_API_KEY=                            # <-- RELLENA
+HIGHLIGHTLY_REFRESH_ENABLED=1
+HIGHLIGHTLY_DAILY_CALL_LIMIT=7500
+HIGHLIGHTLY_DAILY_CALL_RESERVE=250
+HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT=3
+HIGHLIGHTLY_CIRCUIT_COOLDOWN_SECONDS=600
+HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS=3600
+LIVE_SSE_ENABLED=0
+
+# --- APIs de reserva (opcional, dejar vacio si no tienes) ---
+API_FOOTBALL_KEY=
+API_FOOTBALL_DAILY_LIMIT=100
+API_FOOTBALL_DAILY_RESERVE=10
+
+# --- Reglas del juego (ya configurado, no tocar) ---
+PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF=15
+MAX_DOBLES_PER_TICKET=14
+MAX_TRIPLES_PER_TICKET=14
+ALLOW_LOCAL_ADMIN=0
+# Tu email de Google para tener permisos de admin en la web:
+ADMIN_EMAILS=                                   # <-- RELLENA (tu email)
+ADMIN_API_SECRET=
+FLASK_DEBUG=0
+FLASK_ENV=production
+
+# --- Collector (recoge resultados en directo) ---
+WEB_COLLECTOR_ENABLED=1
+WEB_COLLECTOR_INTERVAL_SECONDS=60
+WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS=60
+WEB_COLLECTOR_DISABLE_Q15=0
+# Horas (España) a las que se actualizan TODAS las clasificaciones cada dia
+# (La Liga, Segunda, Premier, Bundesliga, Ligue 1). Asi los partidos entre
+# semana aparecen en la tabla esa misma noche. Coste: ~25 llamadas/dia de 7500.
+STANDINGS_REFRESH_TIMES=01:30,08:00,14:30,19:00,23:30
+# Seguimiento diario de TODOS los partidos de las ligas seguidas (agenda por
+# la manana, directo mientras juegan, estadisticas al acabar cada partido).
+DAILY_TRACKER_ENABLED=1
+DAILY_TRACKER_IDLE_SECONDS=900
+DAILY_TRACKER_LIVE_SECONDS=120
+
+# --- Rutas de datos (vacio = usa las carpetas del proyecto, correcto en Alwaysdata) ---
+DB_PATH=
+DATA_DIR=
+PRODUCTION_SEED_PATH=
+
+# --- Backups locales automaticos (cada 6 horas, ya configurado) ---
+DB_BACKUP_ENABLED=1
+DB_BACKUP_DIR=
+DB_BACKUP_INTERVAL_SECONDS=21600
+DB_BACKUP_RETENTION=14
+
+# --- Backup off-site a Backblaze B2 (OPCIONAL, se puede dejar vacio al lanzar) ---
+# Si algun dia quieres activarlo: crea cuenta gratis en backblaze.com,
+# crea un bucket privado y una Application Key, y rellena estos 4 valores.
+# Guia completa: docs/operations/BACKUP_OFFSITE.md
+BACKUP_S3_BUCKET=
+BACKUP_S3_PREFIX=liga-maestros-backups
+BACKUP_S3_ENDPOINT=
+BACKUP_S3_KEY_ID=
+BACKUP_S3_SECRET=
+BACKUP_S3_REGION=us-east-1
+
+# --- Datos legales del pie de pagina (obligatorio antes de lanzar) ---
+LEGAL_OWNER_NAME=                               # <-- RELLENA (tu nombre)
+LEGAL_OWNER_ID=
+LEGAL_OWNER_ADDRESS=
+LEGAL_CONTACT_EMAIL=                            # <-- RELLENA (email de contacto)
+
+# --- Monitorizacion de errores (opcional) ---
+SENTRY_DSN=
+SENTRY_TRACES_SAMPLE_RATE=0.1
+SLOW_REQUEST_MS=750
+
+# --- Noticias con IA (opcional, dejar apagado al principio) ---
+AI_NEWS_ENABLED=0
+GROQ_API_KEY=
+GEMINI_API_KEY=
+AI_DAILY_CALL_LIMIT=12
+AI_NEWS_MIN_INTERVAL_SECONDS=7200

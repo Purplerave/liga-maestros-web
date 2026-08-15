@@ -66,19 +66,67 @@ def start_web_collector(app):
     thread.start()
     app.extensions["web_collector_thread"] = thread
 
-    # Background Spanish standings refresh (every 6 hours)
+    # Background standings refresh: ALL leagues (Spanish BASE files + foreign
+    # cache) at fixed local times, so midweek matches (Copa days, Friday
+    # matches, a Wednesday Castellon game...) appear in the tables the same
+    # night instead of waiting for the weekend cycle.
+    #
+    # Default schedule (Europe/Madrid): 01:30 (after late matches end),
+    # 08:00 (morning catch-up), 14:30, 19:00 and 23:30. Cost: 5 leagues x
+    # 5 slots = ~25 calls/day out of the 7500 daily quota (~0.3%).
     def _standings_loop():
-        from ..services.multi_standings import refresh_spanish_standings
+        from datetime import datetime, timedelta
+        from zoneinfo import ZoneInfo
+
+        from ..services.multi_standings import refresh_all_standings
+
+        madrid = ZoneInfo("Europe/Madrid")
+        raw_slots = os.getenv("STANDINGS_REFRESH_TIMES", "01:30,08:00,14:30,19:00,23:30")
+        slots = []
+        for chunk in raw_slots.split(","):
+            chunk = chunk.strip()
+            try:
+                hour, minute = chunk.split(":")
+                slots.append((int(hour), int(minute)))
+            except Exception:
+                continue
+        if not slots:
+            slots = [(8, 0), (23, 30)]
+        slots.sort()
+
+        def seconds_until_next_slot():
+            now = datetime.now(madrid)
+            candidates = []
+            for hour, minute in slots:
+                slot_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                if slot_time <= now:
+                    slot_time += timedelta(days=1)
+                candidates.append(slot_time)
+            return max(60, (min(candidates) - now).total_seconds())
 
         time.sleep(30)  # Wait for app to start
+        # Refresh once on boot so a redeploy never leaves stale tables.
+        try:
+            summary = refresh_all_standings(season=2026)
+            logger.info("Standings refreshed on boot: %s", summary)
+        except Exception:
+            logger.exception("Boot standings refresh failed")
         while True:
+            time.sleep(seconds_until_next_slot())
             try:
-                updated = refresh_spanish_standings(season=2026)
-                if updated:
-                    logger.info("Spanish standings refreshed: %s", updated)
+                summary = refresh_all_standings(season=2026)
+                logger.info("Standings refreshed: %s", summary)
             except Exception:
-                logger.exception("Spanish standings refresh failed")
-            time.sleep(6 * 3600)  # Every 6 hours
+                logger.exception("Standings refresh failed")
 
     standings_thread = threading.Thread(target=_standings_loop, name="liga-standings-refresh", daemon=True)
     standings_thread.start()
+
+    # Daily tracker: agenda + live scores + stats history for ALL followed
+    # leagues, every day (not only during the quiniela window). This is what
+    # makes a midweek Castellon match show up in the Directo and feed the
+    # standings/stats the same night.
+    if _truthy(os.getenv("DAILY_TRACKER_ENABLED", "1")):
+        from ..services.daily_matches import start_daily_tracker
+
+        start_daily_tracker(app)

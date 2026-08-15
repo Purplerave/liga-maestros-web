@@ -450,6 +450,14 @@ function runShareAction(action) {
         showToast("Abriendo WhatsApp...");
         return;
     }
+    if (action === "image" && window.TicketImage) {
+        showToast("Generando imagen del boleto...");
+        window.TicketImage.share(state).then(() => {
+            if (typeof SoundManager !== "undefined" && SoundManager.playSave) SoundManager.playSave();
+            closeShareSheet();
+        }).catch(() => showToast("No se pudo generar la imagen.", "error"));
+        return;
+    }
     if (action === "native" && navigator.share) {
         navigator.share({ title: "Liga de Maestros", text, url: shareUrl }).catch(error => {
             if (error && error.name === "AbortError") return;
