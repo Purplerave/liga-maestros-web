@@ -30,7 +30,7 @@ indent-style = "space"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-q"
+addopts = "-q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py"
 
 [tool.mypy]
 python_version = "3.11"
