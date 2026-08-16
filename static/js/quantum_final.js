@@ -75,7 +75,11 @@ async function refreshData(options = {}) {
             return;
         }
         const body = qs("matches-body");
-        if (body) body.innerHTML = `<div class="empty-state">No se pudo cargar la Arena. Revisa que Flask y la base de datos esten activos.</div>`;
+        if (body) {
+            const status = error?.status || error?.response?.status;
+            const message = error?.message || error?.statusText || "Error desconocido";
+            body.innerHTML = `<div class="empty-state">No se pudo cargar la Arena (HTTP ${status || "?"}). ${escapeHtml(message)}. Revisa que Flask y la base de datos esten activos.</div>`;
+        }
     }
 }
 
