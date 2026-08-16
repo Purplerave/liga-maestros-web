@@ -90,7 +90,6 @@ def get_liga_data():
         return jsonify({"status": "error", "message": str(exc)}), 500
 
 
-
 def _resolve_max_jornada(conn):
     # La web y el guardado comparten exactamente esta jornada activa.
     from ..services.jornada import resolve_active_jornada

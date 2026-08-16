@@ -62,7 +62,9 @@ function checkQuinielaCompletion() {
 
 function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
     if (!canEdit) {
-        return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(mySign === "-" ? "—" : mySign)}</b>`;
+        // An empty pleno is not a real 0-0 pick; prompt the user to choose instead.
+        const shown = exactScore && mySign === "-" ? "Elegir" : (mySign === "-" ? "—" : mySign);
+        return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(shown)}</b>`;
     }
     return `<div class="ticket-user-sign-group" data-match-idx="${idx}">${["1", "X", "2"].map(sign => `<button class="ia-signo clickable ${mySign === sign ? "active" : ""}" data-sign="${sign}" type="button">${sign}</button>`).join("")}</div>`;
 }
@@ -124,6 +126,7 @@ function renderArenaTensionBody(matches) {
         const isPleno = idx === 14;
         const real = m.signo_actual || "-";
         const mySign = (state.my_signs || [])[idx] || "-";
+        const plenoLabel = mySign === "-" ? "Elegir" : mySign;
         const c = consenso.find(item => Number(item.id) === Number(m.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
         const pendingResult = Boolean(m.resultado_pendiente) || String(m.marcador || "").toLowerCase().includes("pendiente de resultado");
         const liveMatch = isMatchLiveNow(m) && !pendingResult;
@@ -156,7 +159,7 @@ function renderArenaTensionBody(matches) {
             <td class="ticket-status-cell" data-ticket-status>${scoreBadge}${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}</td>
             ${predictorCells}
             <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
-            <td class="ticket-pick-cell ticket-user-cell"><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
+            <td class="ticket-pick-cell ticket-user-cell"${isPleno ? ` title="Elegir resultado del Pleno al 15" data-pleno-label="${plenoLabel}"` : ""}><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
         </tr>${state.expandedMatch === idx ? `<tr class="match-detail-row"><td colspan="${predictorColumns.length + 5}">${renderMatchDetailGrid(m, c)}</td></tr>` : ""}`;
     }).join("");
 

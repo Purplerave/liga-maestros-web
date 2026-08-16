@@ -119,4 +119,3 @@ def save_predictions():
             conn.rollback()
         logger.exception("No se pudo guardar la quiniela de la jornada %s", target_jornada)
         return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500
-
