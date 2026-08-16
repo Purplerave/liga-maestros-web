@@ -12,6 +12,8 @@ Contrato (aportado por el usuario el 12/08):
 
 import json
 import sqlite3
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import config
 from liga_maestros import create_app
@@ -21,6 +23,7 @@ from liga_maestros.db.migrations import (
     ensure_jornada_1,
     ensure_predicciones_unique_index,
 )
+from liga_maestros.routes import liga_data
 
 COPILOT_SIGNOS = ["1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "1", "1", "1", "1", "1-0"]
 
@@ -172,6 +175,12 @@ def test_rekey_j1_keeps_results_attached_to_their_match():
 
 
 def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, monkeypatch):
+    # Keep this privacy-before-kickoff contract deterministic after the real J1 date.
+    monkeypatch.setattr(
+        liga_data,
+        "madrid_now",
+        lambda: datetime(2026, 8, 14, 12, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
     app = _test_app(tmp_path, monkeypatch)
     response = app.test_client().get("/api/liga/data?j=1")
     assert response.status_code == 200
