@@ -171,6 +171,27 @@ function formatSmartDate(fechaRaw, horaRaw) {
     }
 }
 
+function fixtureScheduleDisplay(match) {
+    const fecha = String(match?.fecha_raw || match?.fecha || match?.added || "").slice(0, 10);
+    const hora = String(match?.hora || match?.scheduled || "").replace(/h$/i, "").trim();
+    const serverToday = typeof state !== "undefined" ? String(state.data?.today_madrid || "") : "";
+    if (fecha && serverToday && fecha === serverToday) return hora ? `${hora}h` : "Horario por confirmar";
+    return formatSmartDate(fecha, hora);
+}
+
+function hasUnconfirmedFixtureResult(match) {
+    const display = String(match?.marcador || match?.score || "").toLowerCase();
+    return display.includes("pendiente de resultado") && !scoreOnly(display);
+}
+
+function needsFixtureSchedule(match) {
+    if (!match) return false;
+    if (isScheduledStatus(match.status) || hasUnconfirmedFixtureResult(match)) return true;
+    const hasScore = Boolean(scoreOnly(match.marcador || match.score || match.scores?.score))
+        || (match.goles_local != null && match.goles_visitante != null);
+    return isFinishedStatus(match.status) && !hasScore;
+}
+
 function isLiveStatus(status) {
     const raw = String(status || "").toUpperCase();
     return ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H"].includes(raw);
@@ -223,7 +244,16 @@ function scoreOnly(value) {
 
 function plenoScoreKey(value) {
     const only = scoreOnly(value);
-    return only ? only.replace(/–/g, "-") : "";
+    if (!only) return "";
+    const parts = only.replace(/–/g, "-").split("-");
+    if (parts.length !== 2) return "";
+    const buckets = parts.map(goal => {
+        if (goal === "M") return "M";
+        const numeric = Number.parseInt(goal, 10);
+        if (Number.isNaN(numeric) || numeric < 0) return "";
+        return numeric >= 3 ? "M" : String(numeric);
+    });
+    return buckets.every(Boolean) ? buckets.join("-") : "";
 }
 
 function liveStage(match) {
@@ -254,7 +284,21 @@ function isMatchLiveNow(match) {
 }
 
 function competitionLabel(match) {
-    return (match?.competition || match?.liga || match?.league || "OTROS").toString().toUpperCase();
+    const candidates = [
+        match?.competition_name,
+        match?._competition_name,
+        match?.competition,
+        match?.liga,
+        match?.league
+    ];
+    for (const candidate of candidates) {
+        if (typeof candidate === "string" && candidate.trim()) return candidate.trim().toUpperCase();
+        if (candidate && typeof candidate === "object") {
+            const name = candidate.name || candidate.nombre || candidate.label;
+            if (typeof name === "string" && name.trim()) return name.trim().toUpperCase();
+        }
+    }
+    return "OTROS";
 }
 
 function matchCompetitionMeta(match) {
@@ -269,9 +313,19 @@ function getSign(preds, idx, primary, fallback) {
 }
 
 function normalizeSign(value) {
-    const s = String(value || "-").trim().toUpperCase();
-    if (s === "1" || s === "X" || s === "2") return s;
-    return "-";
+    const raw = String(value || "-")
+        .trim()
+        .toUpperCase()
+        .replace(/[–—]/g, "-")
+        .replaceAll(" ", "");
+    if (!raw || raw === "-") return "-";
+
+    const pleno = plenoScoreKey(raw);
+    if (pleno) return pleno;
+
+    if (!/^[1X2]+$/.test(raw)) return "-";
+    const ordered = ["1", "X", "2"].filter(sign => raw.includes(sign)).join("");
+    return ordered || "-";
 }
 
 function standardSignMatches(sign, real) {

@@ -3,12 +3,7 @@
 import logging
 from datetime import datetime
 
-from ...services.live_state import (
-    PENDING_OVERDUE,
-    RESET_TO_SCHEDULED,
-    closes_live,
-    evaluate_match_state,
-)
+from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state
 from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_db_match_datetime
 
@@ -69,13 +64,6 @@ def _display_safe_row(row):
         last_update_at=_parse_updated_at(row.get("updated_at")),
         minute=row.get("minuto"),
     )
-    if decision["action"] == PENDING_OVERDUE:
-        # Kickoff long past and still no data: flag it so the ticket says
-        # 'pending result' instead of advertising a kickoff time that has
-        # already gone by (how yesterday's matches looked simply upcoming).
-        overdue = dict(row)
-        overdue["resultado_pendiente"] = True
-        return overdue
     if not closes_live(decision["action"]):
         return row
     safe = dict(row)
@@ -96,6 +84,16 @@ def _parse_updated_at(raw):
     except ValueError:
         return None
     return parsed.replace(tzinfo=None) if parsed.tzinfo is not None else parsed
+
+
+def _fixture_schedule_label(row, fecha_limpia):
+    """Human-friendly fixture time, even when a provider score is unavailable."""
+    hora_label = str(row.get("hora") or "").strip()
+    if str(row.get("fecha") or "")[:10] == today_madrid():
+        return f"{hora_label}h" if hora_label else "Horario por confirmar"
+    if fecha_limpia and hora_label:
+        return f"{fecha_limpia} {hora_label}h"
+    return fecha_limpia or (f"{hora_label}h" if hora_label else "Horario por confirmar")
 
 
 def build_jornada_matches(conn, jornada, team_logos):
@@ -184,28 +182,17 @@ def build_jornada_matches(conn, jornada, team_logos):
         elif status in ("NS", "SCHEDULED"):
             minuto_num = ""
             marcador_base = ""
-            hora_label = (r.get("hora") or "").strip()
-            if r.get("resultado_pendiente"):
-                # Kickoff was hours ago and no provider ever reported it.
-                # Announcing a past kickoff time as if it were upcoming is what
-                # left matches from the previous day looking merely 'scheduled'.
-                marcador = "Pendiente de resultado"
-            elif r.get("fecha") == today_madrid():
-                marcador = f"{hora_label}h" if hora_label else "Horario pendiente"
-            else:
-                marcador = (
-                    f"{fecha_limpia} {hora_label}h".strip() if hora_label else (fecha_limpia or "Horario pendiente")
-                )
+            marcador = _fixture_schedule_label(r, fecha_limpia)
         else:
             minuto_num = ""
             marcador_base = f"{gh}-{ga}" if gh is not None and ga is not None else ""
             if gh is not None and ga is not None:
                 marcador = f"{gh}-{ga}"
-            elif status in ("STALE", "FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED"):
-                # Closed without a provider score: do not pretend it is still upcoming.
-                marcador = "Pendiente de resultado"
             else:
-                marcador = "-:-"
+                # A stale/final provider state without a score is not a result.
+                # Keep the useful, verifiable fixture time visible until an
+                # actual score arrives instead of showing a vague placeholder.
+                marcador = _fixture_schedule_label(r, fecha_limpia)
 
         partidos.append(
             {
@@ -223,7 +210,9 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "signo_actual": signo,
                 "goles_local": gh,
                 "goles_visitante": ga,
-                "resultado_pendiente": bool(r.get("resultado_pendiente")),
+                # Compatibility field for older clients. A fixture never gets a
+                # vague pending-result label: it shows its schedule or a score.
+                "resultado_pendiente": False,
             }
         )
 
@@ -243,7 +232,7 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "visitante": "-",
                 "logo_local": "",
                 "logo_visitante": "",
-                "marcador": "Pendiente",
+                "marcador": "Horario por confirmar",
                 "status": "NS",
                 "marcador_base": "",
                 "minuto_live": "",

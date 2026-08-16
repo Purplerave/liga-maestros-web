@@ -19,23 +19,23 @@
     "1",
     "1",
     "1",
-    "1"
+    "2-1"
   ],
   "pleno15": {
     "signo": "1",
-    "marcador_predicho": "1-0",
+    "marcador_predicho": "2-1",
     "top_marcadores": [
       {
-        "score": "1-0",
-        "prob": 0.1296
+        "score": "2-1",
+        "prob": 0.21
       },
       {
         "score": "1-1",
-        "prob": 0.1277
+        "prob": 0.16
       },
       {
         "score": "2-0",
-        "prob": 0.1017
+        "prob": 0.09
       }
     ],
     "goles_local": {
@@ -51,11 +51,11 @@
       "M": 0.0629
     },
     "seleccion": {
-      "local": "1",
-      "visitante": "0",
-      "alternativa_local": "2",
-      "alternativa_visitante": "1",
-      "confianza": 0.1349,
+      "local": "2",
+      "visitante": "1",
+      "alternativa_local": "1",
+      "alternativa_visitante": "0",
+      "confianza": 0.21,
       "nota": "Alternativa sugerida si el segundo bucket está a menos de 0.10 del primero."
     },
     "buckets": [

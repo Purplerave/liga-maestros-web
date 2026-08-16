@@ -5,6 +5,7 @@ import sqlite3
 
 import config
 
+from ..scoring import normalize_prediction_sign
 from ..utils import clean_team_key
 from .connection import ClosingConnection, ensure_db_file
 
@@ -375,6 +376,50 @@ J1_OFFICIAL_ORDER_BY_OLD = {
 }
 
 
+def _import_j1_programa_ticket(conn):
+    """Apply Programa's editorial J1 ticket without a hard-coded duplicate.
+
+    ``data/predicciones_J1.json`` is the compact file used by the Programa
+    workflow. The inbox remains the source for the full roster (including La
+    Peña), while this explicit Programa entry is allowed to replace only that
+    one ticket. This makes a corrected double or Pleno survive every restart.
+    """
+    candidates = [
+        os.path.join(config.SEED_DATA_DIR, "predicciones_J1.json"),
+        os.path.join(config.DATA_DIR, "predicciones_J1.json"),
+    ]
+    for path in dict.fromkeys(candidates):
+        if not path or not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                payload = json.load(fh)
+            if int(payload.get("jornada") or 0) != 1:
+                continue
+            raw_signs = list((payload.get("programa") or {}).get("signos") or [])
+        except (OSError, ValueError, TypeError, AttributeError):
+            continue
+        if len(raw_signs) != 15:
+            continue
+
+        signos = []
+        for partido_id, raw_sign in enumerate(raw_signs, start=1):
+            sign = normalize_prediction_sign(partido_id, raw_sign)
+            if not sign or sign == "-":
+                signos = []
+                break
+            signos.append(sign)
+        if len(signos) != 15:
+            continue
+
+        conn.executemany(
+            "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES ('programa', 1, ?, ?)",
+            enumerate(signos, start=1),
+        )
+        return len(signos)
+    return 0
+
+
 def _rekey_j1_partido_ids(conn):
     row = conn.execute("SELECT local, visitante FROM resultados WHERE jornada = 1 AND partido_id = 1").fetchone()
     if row is None:
@@ -422,18 +467,11 @@ def ensure_jornada_1(conn):
     if updated:
         conn.commit()
     _import_j1_resultados(conn)
+    # Import the signed full roster, then the compact Programa ticket supplied
+    # by its editorial workflow. Neither path is hard-coded, so corrections to
+    # doubles or the Pleno survive deploys and restarts.
     _import_j1_pronosticos(conn)
-    j1_programa = ["1X", "1", "2", "1X", "1", "1", "1", "1X", "1", "1", "1", "1", "1", "1", "1-0"]
-    try:
-        conn.executemany(
-            """INSERT INTO predicciones (user_id, jornada, partido_id, signo)
-               VALUES ('programa', 1, ?, ?)
-               ON CONFLICT(user_id, jornada, partido_id) DO UPDATE SET signo = excluded.signo""",
-            enumerate(j1_programa, start=1),
-        )
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass
+    _import_j1_programa_ticket(conn)
     conn.commit()
 
 

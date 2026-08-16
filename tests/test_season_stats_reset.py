@@ -171,6 +171,11 @@ def test_quiz_ranking_temporada_ignores_test_jornadas(tmp_path, monkeypatch):
 
 
 def _test_app(tmp_path, monkeypatch):
+    # This fixture owns its two final J1 results. Do not let the real-time
+    # official-result feed add more finished rows during app startup.
+    import liga_maestros.db.migrations as migrations
+
+    monkeypatch.setattr(migrations, "_import_j1_resultados", lambda conn: 0)
     monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
     monkeypatch.setattr(config, "FIXTURE_CORRECTIONS_PATH", str(tmp_path / "missing-fixtures.json"))
     monkeypatch.setattr(config, "DB_BACKUP_DIR", str(tmp_path / "backups"))

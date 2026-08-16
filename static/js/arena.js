@@ -209,7 +209,7 @@ function renderGroupedMatchCards(matches, singleCompetition = false) {
         return a.label.localeCompare(b.label, "es");
     });
     return groups.map(group => `
-        <section class="league-match-group">
+        <section class="league-match-group" data-competition="${escapeHtml(group.key)}">
             <header class="league-group-header">
                 <strong>${escapeHtml(group.label)}</strong>
                 <span>${group.matches.length} partido${group.matches.length === 1 ? "" : "s"}</span>
@@ -230,6 +230,15 @@ function patchLiveArena() {
     if (!container) return false;
 
     const matches = getLiveLeagueMatches();
+    const expectedCompetitions = new Set(matches.map(competitionLabel));
+    const renderedCompetitions = new Set(
+        [...container.querySelectorAll(".league-match-group[data-competition]")].map(group => group.dataset.competition)
+    );
+    if (
+        expectedCompetitions.size !== renderedCompetitions.size
+        || [...expectedCompetitions].some(competition => !renderedCompetitions.has(competition))
+    ) return false;
+
     const cards = [...container.querySelectorAll(".match-card[data-live-key]")];
     if (!cards.length || cards.length !== matches.length) return false;
 
@@ -257,17 +266,14 @@ function renderMatchCard(match) {
     const home = match.local || match.home_name || match.home?.name || "Local";
     const away = match.visitante || match.away_name || match.away?.name || "Visitante";
 
-    const pendingResult = Boolean(match.resultado_pendiente) || String(match.marcador || "").toLowerCase().includes("pendiente de resultado");
-    const finished = isFinishedStatus(match.status) || isImplicitlyFinished(match) || isExpiredLiveMatch(match) || pendingResult;
-    const live = (isLiveMatch(match) || isLiveStatus(match.status)) && !finished;
-    const scheduled = isScheduledStatus(match.status) && !live && !finished && !pendingResult;
-    const score = pendingResult
-        ? (match.marcador || "Pendiente de resultado")
-        : scheduled
-            ? formatSmartDate(match.added || match.fecha_raw, match.scheduled || match.time || match.hora)
-            : live
-                ? liveScoreDisplay(match, "-")
-                : (match.marcador || match.score || match.scores?.score || "-");
+    const scheduled = needsFixtureSchedule(match);
+    const finished = isFinishedStatus(match.status) || isImplicitlyFinished(match) || isExpiredLiveMatch(match);
+    const live = (isLiveMatch(match) || isLiveStatus(match.status)) && !finished && !scheduled;
+    const score = scheduled
+        ? fixtureScheduleDisplay(match)
+        : live
+            ? liveScoreDisplay(match, "-")
+            : (match.marcador || match.score || match.scores?.score || "-");
 
     const cardClass = live ? "is-live" : (finished ? "is-finished" : "");
 
