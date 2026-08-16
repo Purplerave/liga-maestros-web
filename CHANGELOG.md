@@ -2,6 +2,20 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-16 — Cierre fiable de partidos en directo
+
+### Corregido
+
+- Los snapshots que sigan en `LIVE`, `HT` o equivalentes dos horas después
+  del saque inicial (90 minutos más 30 de margen) dejan de aparecer en
+  Directo y se muestran cerrados en la pestaña Liga, conservando el último
+  marcador conocido.
+- El colector aplica el cierre de respaldo en todas sus pasadas, incluso si
+  todavía hay otros partidos dentro de la ventana de jornada, y persiste
+  `FT`, `Finalizado` y el signo correcto en la base de datos.
+- El frontend replica el límite temporal como segunda barrera y ya no cuenta
+  como activos esos partidos si recibe una caché antigua.
+
 ## 2026-08-14 — Las estadísticas vuelven a cero con la temporada 2026/27
 
 ### Corregido

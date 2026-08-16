@@ -257,7 +257,7 @@ function renderMatchCard(match) {
     const home = match.local || match.home_name || match.home?.name || "Local";
     const away = match.visitante || match.away_name || match.away?.name || "Visitante";
 
-    const finished = isFinishedStatus(match.status) || isImplicitlyFinished(match);
+    const finished = isFinishedStatus(match.status) || isImplicitlyFinished(match) || isExpiredLiveMatch(match);
     const live = (isLiveMatch(match) || isLiveStatus(match.status)) && !finished;
     const scheduled = isScheduledStatus(match.status) && !live && !finished;
     const score = scheduled

@@ -32,7 +32,7 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-62")]],
+    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-63")]],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-8")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-3")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],

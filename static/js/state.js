@@ -198,14 +198,8 @@ function getBrowsableLeagueMatches() {
 
 function isLiveMatch(match) {
     const status = String(match.status || "").toUpperCase();
-    if (isImplicitlyFinished(match)) return false;
-    if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") {
-        const kickoff = parseMatchTimestamp(match);
-        const twoAndAHalfHoursAgo = Date.now() - (2.5 * 60 * 60 * 1000);
-        if (kickoff && kickoff < twoAndAHalfHoursAgo) return false;
-        return true;
-    }
-    return false;
+    if (isImplicitlyFinished(match) || isExpiredLiveMatch(match)) return false;
+    return status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO";
 }
 
 function getLiveLeagueMatches() {
@@ -213,7 +207,7 @@ function getLiveLeagueMatches() {
     const source = (lm && lm.length > 0)
         ? lm
         : [...(state.data?.partidos || []), ...getAllLeagueMatches()];
-    const MAX_LIVE_AGE_MS = 3 * 60 * 60 * 1000; // 3h - evita partidos atascados en LIVE/HT/SUSPENDED
+    const MAX_LIVE_AGE_MS = 2 * 60 * 60 * 1000; // 90 min + 30 min de margen máximo
     const matchesById = new Map();
     source.filter(m => {
         const status = String(m.status || "").toUpperCase();

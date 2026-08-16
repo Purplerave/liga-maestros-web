@@ -7,13 +7,46 @@ from datetime import timedelta
 
 import config
 
-from ...services.ticket import today_madrid
+from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_any_match_datetime
+
+STALE_LIVE_AFTER = timedelta(minutes=120)
+_LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
+
+
+def _close_stale_live_match(match):
+    """Return a display-safe copy of a live match that has outlived its window.
+
+    Providers occasionally leave the last snapshot at LIVE/HT when the final
+    update is missed (quota, network error or collector restart). After the 90
+    regulation minutes plus a generous 30-minute margin, such a row must not
+    keep the Liga or Directo tabs open. We deliberately
+    use STALE rather than inventing an official FT result; the score is kept
+    and the next real provider update still replaces this fallback.
+    """
+    status = str(match.get("status") or "").upper()
+    if status not in _LIVE_STATUSES:
+        return match
+    kickoff = parse_any_match_datetime(match)
+    if kickoff is None:
+        return match
+    now = madrid_now().replace(tzinfo=None)
+    if now < kickoff + STALE_LIVE_AFTER:
+        return match
+    closed = dict(match)
+    closed["status"] = "STALE"
+    closed["time"] = "Finalizado"
+    closed["minute"] = "Finalizado"
+    return closed
+
+
+def _close_stale_live_matches(matches):
+    return [_close_stale_live_match(match) for match in matches]
 
 
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
-    all_league_matches = _load_external_matches()
-    quiniela_league_matches = _build_quiniela_league_matches(jornada, partidos, standings_db)
+    all_league_matches = _close_stale_live_matches(_load_external_matches())
+    quiniela_league_matches = _close_stale_live_matches(_build_quiniela_league_matches(jornada, partidos, standings_db))
     quiniela_pairs = {
         (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante"))) for m in quiniela_league_matches
     }
@@ -30,9 +63,13 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
 
 
 def build_live_matches(partidos, team_logos):
-    """Return every live match from the shared Highlightly snapshot."""
-    external_live = [match for match in _load_external_matches() if _is_live_match(match)]
-    quiniela_live = [match for match in _build_quiniela_league_matches("", partidos, {}) if _is_live_match(match)]
+    """Return genuinely live matches, never expired provider snapshots."""
+    external_live = [match for match in _close_stale_live_matches(_load_external_matches()) if _is_live_match(match)]
+    quiniela_live = [
+        match
+        for match in _close_stale_live_matches(_build_quiniela_league_matches("", partidos, {}))
+        if _is_live_match(match)
+    ]
     matches_by_id = {}
     for match in external_live + quiniela_live:
         key = str(match.get("fixture_id") or match.get("id") or "").strip()
