@@ -7,4 +7,4 @@ import config
 from ..utils import clean_team_key
 from .connection import ClosingConnection, ensure_db_file
 
-# Restored + J1 results import - full content follows in next push if truncated
+# NOTE: truncated in previous pushes - full file must be restored from 421fe7e + J1 import. See local artifact.
