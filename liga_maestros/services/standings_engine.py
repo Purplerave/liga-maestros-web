@@ -23,10 +23,8 @@ path can inflate ``PJ``.
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-from collections import defaultdict
 
 import config
 
