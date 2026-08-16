@@ -12,7 +12,7 @@ from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
-from ..services.payloads.standings import build_standings_payload
+from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
 from ..utils import load_team_logos
@@ -38,11 +38,12 @@ def get_liga_data():
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
         standings, standings_db = build_standings_payload(conn, partidos)
+        persist_standings(conn, standings)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos)
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
         multi_league_standings = {"leagues": multi_league_leagues}
-        jornada_liga = _detect_jornada_liga(conn)
+        jornada_liga = str(matchday_played(standings) or "")
         match_info = _load_and_repair_match_info(jornada, partidos)
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
         is_locked = _is_ticket_locked(partidos, close_info)
@@ -130,17 +131,6 @@ def _resolve_available_jornadas(conn):
     filtered = [j for j in jornadas if j not in (75, 76)]
     # Si tras filtrar queda vacío (solo había 75/76), mostrar 1
     return filtered if filtered else [1]
-
-
-def _detect_jornada_liga(conn):
-    try:
-        row = conn.execute("SELECT AVG(pj) as avg_pj FROM clasificacion WHERE division = 1").fetchone()
-        if row and row["avg_pj"] is not None:
-            return str(int(round(row["avg_pj"])))
-    except Exception:
-        logger.exception("No se pudo detectar la jornada de liga")
-        return ""
-    return ""
 
 
 def _is_ticket_locked(partidos, close_info):

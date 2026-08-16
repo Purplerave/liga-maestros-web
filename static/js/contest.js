@@ -86,6 +86,19 @@ async function fetchSeasonSummaryForPena() {
         return _seasonSummaryCache;
     } catch { return null; }
 }
+function hasSeasonStats(contest) {
+    // Hay estadisticas en cuanto la temporada ha producido algo puntuable:
+    // puntos en la general, filas de la jornada en curso o galardones.
+    if (!contest) return false;
+    const scored = rows => (rows || []).some(row => Number(row?.points || 0) > 0);
+    if (scored(contest.general)) return true;
+    if (scored(contest.jornada?.rows)) return true;
+    if (scored(contest.monthly?.rows)) return true;
+    if ((contest.galardones?.jornadas || []).length) return true;
+    if ((contest.galardones?.meses || []).length) return true;
+    return false;
+}
+
 function renderNewSeasonPenaPlaceholder() {
     // Podio de pruebas guardado en season_2025_2026_summary.json
     // Mientras no haya resultados de la nueva temporada, mostramos solo el podio + mensaje чulo
@@ -130,10 +143,9 @@ function renderNewSeasonPenaPlaceholder() {
 
 function renderContestOverview(contest) {
     const generalRows = contest.general || [];
-    // Nueva temporada: si estamos en J1 (única jornada visible) mostramos solo el podio de pruebas
-    const isNewSeasonJ1 = String(state.data?.jornada || "") === "1" && Array.isArray(state.data?.jornadas_disponibles) && state.data.jornadas_disponibles.length === 1 && Number(state.data.jornadas_disponibles[0]) === 1;
-    const isEmptyGeneral = !generalRows.length || generalRows.every(r => Number(r.points||0)===0);
-    if (isNewSeasonJ1 || isEmptyGeneral) {
+    // El podio de pruebas solo se muestra mientras NO haya ni un punto de la
+    // temporada nueva. En cuanto hay resultados, mandan las estadisticas reales.
+    if (!hasSeasonStats(contest)) {
         return renderNewSeasonPenaPlaceholder();
     }
     const top10 = generalRows.slice(0, 10);
@@ -316,9 +328,8 @@ function renderContestPage(view = "CONTEST_GENERAL") {
 function renderContestPageContent(view = "CONTEST_GENERAL") {
     const contest = state.contest;
     if (!contest) return `<div class="empty-state">No se pudo cargar La Peña.</div>`;
-    const isNewSeasonJ1 = String(state.data?.jornada || "") === "1" && Array.isArray(state.data?.jornadas_disponibles) && state.data.jornadas_disponibles.length === 1 && Number(state.data.jornadas_disponibles[0]) === 1;
-    // En la nueva temporada solo mostramos el podio de pruebas + mensaje hasta que haya resultados
-    if (isNewSeasonJ1 && view !== "CONTEST_PROFILE") {
+    // Solo se oculta la seccion mientras la temporada no ha dado ni un punto.
+    if (!hasSeasonStats(contest) && view !== "CONTEST_PROFILE") {
         return renderNewSeasonPenaPlaceholder();
     }
     const profile = contest.profile;

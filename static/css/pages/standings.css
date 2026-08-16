@@ -271,4 +271,35 @@
         width: 34px;
     }
 }
+
+/* Marca de partido en juego: informa sin alterar puntos ni posicion. */
+.standings-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--red) 18%, transparent);
+    color: var(--red);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.full-standings-table tr.is-playing .full-points {
+    opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .standings-live {
+        animation: standingsLivePulse 1.6s ease-in-out infinite;
+    }
+}
+
+@keyframes standingsLivePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
 }

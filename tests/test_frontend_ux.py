@@ -120,7 +120,14 @@ def test_live_transport_waits_for_data_and_degrades_to_bounded_polling():
     assert dom_ready.index("await refreshData()") < dom_ready.index("startLiveUpdates()")
     assert "state.data?.live_stream_enabled" in events
     assert "window.setTimeout" in events
-    assert "30000" in events and "120000" in events
+    # Sondeo acotado y escalonado: rapido con partidos en juego, intermedio
+    # dentro de la ventana de la jornada y lento cuando no hay nada que seguir.
+    delays = re.search(r"function livePollDelay\(\) \{(.*?)\n\}", events, re.DOTALL)
+    assert delays, "livePollDelay debe existir para acotar el sondeo"
+    tiers = sorted(int(value) for value in re.findall(r"\b(\d{4,})\b", delays.group(1)))
+    assert len(tiers) >= 2, "debe haber al menos una cadencia rapida y una lenta"
+    assert tiers[0] <= 30000, "con partidos en juego el refresco debe ser <= 30s"
+    assert tiers[-1] <= 180000, "el sondeo lento no debe superar los 3 minutos"
     assert "setInterval(refreshLiveSnapshot" not in events
     assert "liveTransportKey = `${jornada}:poll`" in events
     assert 'typeof startLiveUpdates === "function"' in quantum

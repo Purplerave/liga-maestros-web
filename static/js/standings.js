@@ -40,6 +40,18 @@ function standingsZone(idx, total, league = "primera") {
     return "mid";
 }
 
+function standingsFreshnessLabel() {
+    // La cabecera debe decir la verdad: cuantas jornadas se han jugado y si
+    // hay partidos en curso ahora mismo (que aun no suman puntos).
+    const leagues = state.data?.multi_league_standings?.leagues || [];
+    const playing = leagues.some(l => (l.teams || []).some(t => t.en_juego));
+    const jornada = Number(state.data?.jornada_liga || 0);
+    const parts = [];
+    parts.push(jornada > 0 ? `${jornada} ${jornada === 1 ? "jornada jugada" : "jornadas jugadas"}` : "Temporada sin empezar");
+    parts.push(playing ? "hay partidos en juego (no suman hasta el final)" : "actualizada al ultimo resultado");
+    return parts.join(" · ");
+}
+
 function renderFullStandingsPage() {
     const liveResults = getLiveStandingsResults();
     const multi = state.data.multi_league_standings;
@@ -69,7 +81,7 @@ function renderFullStandingsPage() {
                         <span class="section-kicker">Clasificaciones</span>
                         <h2>Todas las ligas</h2>
                     </div>
-                    <small>Calculada desde resultados · actualizacion automatica</small>
+                    <small>${escapeHtml(standingsFreshnessLabel())}</small>
                 </div>
                 <div class="league-tabs">${tabsHtml}</div>
                 ${panelsHtml}
@@ -82,6 +94,8 @@ function renderMultiLeagueTable(league, liveResults) {
     if (rows.length === 0) return `<div class="empty-state">Sin datos para esta liga.</div>`;
     const showStreak = rows.some(team => String(team.streak || "").trim());
     const showForm = rows.some(team => Array.isArray(team.form) && team.form.length > 0);
+    // Las zonas (Champions/descenso, ascenso/playoff) dependen de la liga.
+    const zoneKey = /SEGUNDA/i.test(league.name || "") ? "segunda" : "primera";
 
     return `
         <table class="full-standings-table">
@@ -103,10 +117,13 @@ function renderMultiLeagueTable(league, liveResults) {
             </thead>
             <tbody>${rows.map((team, idx) => {
                 const formArr = team.form || [];
+                const live = team.en_juego
+                    ? `<span class="standings-live" title="Partido en juego: ${escapeHtml(team.marcador_live || "")}">● ${escapeHtml(team.marcador_live || "en juego")}</span>`
+                    : "";
                 return `
-                    <tr class="zone-${standingsZone(idx, rows.length)}">
+                    <tr class="zone-${standingsZone(idx, rows.length, zoneKey)} ${team.en_juego ? "is-playing" : ""}">
                         <td class="full-pos">${idx + 1}</td>
-                        <td class="full-club">${logoBadge(team.n, team.logo || findTeamLogo(team.n))}<span>${escapeHtml(team.n)}</span></td>
+                        <td class="full-club">${logoBadge(team.n, team.logo || findTeamLogo(team.n))}<span>${escapeHtml(team.n)}</span>${live}</td>
                         <td>${team.pj}</td>
                         <td>${team.pg}</td>
                         <td>${team.pe}</td>
