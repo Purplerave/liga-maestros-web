@@ -46,8 +46,8 @@ def get_arcade_scores(game_id):
                 "mine": mine,
             }
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/arcade/<game_id>", methods=["POST"])
@@ -82,5 +82,5 @@ def post_arcade_score(game_id):
         )
         conn.commit()
         return jsonify({"status": "ok", "game_id": game_id, "score": score})
-    finally:
-        conn.close()
+    except Exception:
+        raise

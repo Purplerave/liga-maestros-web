@@ -60,8 +60,8 @@ def authorize():
                 (user_info["sub"], user_info["name"], None),
             )
             conn.commit()
-        finally:
-            conn.close()
+        except Exception:
+            raise
         email = str(user_info.get("email") or "").strip().lower()
         session.clear()
         session.permanent = True

@@ -52,9 +52,17 @@ def get_db():
         if not hasattr(g, "_managed_db_conns"):
             g._managed_db_conns = []
         if g._managed_db_conns:
+            conn = g._managed_db_conns[0]
             try:
-                g._managed_db_conns[0].execute("SELECT 1")
-                return g._managed_db_conns[0]
+                # Verificar si la conexión sigue abierta antes de intentar un execute
+                conn.execute("SELECT 1")
+                return conn
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError) as exc:
+                if "closed" in str(exc).lower():
+                    g._managed_db_conns.clear()
+                else:
+                    # Si es otro error (ej. base de datos bloqueada), también limpiamos
+                    g._managed_db_conns.clear()
             except Exception:
                 g._managed_db_conns.clear()
 

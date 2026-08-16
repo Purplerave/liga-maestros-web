@@ -40,8 +40,8 @@ def get_comments():
             """,
             (jornada, MAX_VISIBLE_COMMENTS),
         ).fetchall()
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
     comments = [dict(row) for row in reversed(rows)]
     return jsonify({"status": "ok", "jornada": jornada, "comments": comments})
@@ -82,8 +82,8 @@ def post_comment():
         )
         conn.commit()
         comment_id = cursor.lastrowid
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
     return jsonify(
         {

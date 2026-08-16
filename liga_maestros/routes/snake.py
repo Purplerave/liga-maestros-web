@@ -62,8 +62,8 @@ def get_snake_scores():
         return jsonify(
             {"status": "ok", "auth": bool(user.get("id")), "scores": [dict(row) for row in rows], "mine": mine}
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/snake", methods=["POST"])
@@ -93,5 +93,5 @@ def post_snake_score():
         )
         conn.commit()
         return jsonify({"status": "ok", "score": score})
-    finally:
-        conn.close()
+    except Exception:
+        raise

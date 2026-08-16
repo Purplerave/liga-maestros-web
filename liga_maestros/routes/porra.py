@@ -341,8 +341,8 @@ def get_porra():
                 "auth": bool(user.get("id")),
             }
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/porra", methods=["POST"])
@@ -443,8 +443,8 @@ def post_porra():
                     "message": "Porra guardada. Podrás cambiarla una vez más.",
                 }
             )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/porra/check-points", methods=["POST"])
@@ -482,5 +482,5 @@ def check_porra_points():
                 "message": f"Se otorgaron {awarded} puntos de porra.",
             }
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise

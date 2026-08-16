@@ -88,8 +88,7 @@ def get_liga_data():
     except Exception as exc:
         logger.exception("api_liga_data failed")
         return jsonify({"status": "error", "message": str(exc)}), 500
-    finally:
-        conn.close()
+
 
 
 def _resolve_max_jornada(conn):

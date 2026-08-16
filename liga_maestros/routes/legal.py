@@ -57,8 +57,8 @@ def account():
         row = conn.execute("SELECT nombre FROM usuarios WHERE id = ?", (user.get("id"),)).fetchone()
         if row:
             account_user["name"] = row["nombre"] or account_user["name"]
-    finally:
-        conn.close()
+    except Exception:
+        pass
     context = _legal_context()
     context["user"] = account_user
     return render_template("legal/account.html", csrf_token=get_csrf_token(), **context)
@@ -112,7 +112,5 @@ def delete_account():
     except Exception:
         conn.rollback()
         raise
-    finally:
-        conn.close()
     session.clear()
     return render_template("legal/account_deleted.html", **_legal_context())

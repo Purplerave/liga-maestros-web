@@ -132,8 +132,8 @@ def sync_status():
         if q15_cache.get("available") and q15_cache.get("last_sync") not in ("", "--:--"):
             last_sync = q15_cache["last_sync"]
             last_sync_source = "quiniela15"
-    finally:
-        conn.close()
+    except Exception:
+        pass
     payload = {
         "jornada": target_jornada,
         "live_matches": live,
@@ -186,8 +186,6 @@ def live_health():
             db_path = config.DB_PATH
             if os.path.exists(db_path):
                 db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2)
-        finally:
-            conn2.close()
     except Exception:
         pass
     uptime_s = int(time.time() - start) if start else None
@@ -345,8 +343,8 @@ def live_stream():
                 """,
                 (int(jornada),),
             ).fetchall()
-        finally:
-            conn.close()
+        except Exception:
+            raise
 
     def generate():
         last_signature = None
@@ -456,8 +454,8 @@ def reset_j75():
                 "matches": [{"id": r["partido_id"], "local": r["local"], "visitante": r["visitante"]} for r in rows],
             }
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/admin/setup-j76", methods=["POST"])
@@ -557,8 +555,8 @@ def setup_j76():
                 ],
             }
         )
-    finally:
-        conn.close()
+    except Exception:
+        raise
 
 
 @bp.route("/api/admin/debug-files")
