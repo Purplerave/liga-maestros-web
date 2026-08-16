@@ -186,6 +186,8 @@ def live_health():
             db_path = config.DB_PATH
             if os.path.exists(db_path):
                 db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2)
+        finally:
+            conn2.close()
     except Exception:
         pass
     uptime_s = int(time.time() - start) if start else None
@@ -376,7 +378,6 @@ def live_stream():
                     )
                     yield f"data: {payload}\n\n"
                 elif time.monotonic() - last_emit >= 20:
-                    # Comments are valid SSE heartbeats and are ignored by EventSource.
                     last_emit = time.monotonic()
                     yield ": keep-alive\n\n"
                 time.sleep(5)
@@ -404,15 +405,12 @@ def reset_standings():
 
     conn = get_db()
     try:
-        # Reset accumulated points
         conn.execute("UPDATE usuarios SET puntos_acumulados = 0")
         users = conn.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0]
 
-        # Reset clasificacion
         conn.execute("UPDATE clasificacion SET pj=0, pts=0, pg=0, pe=0, pp=0, gf=0, gc=0, racha=NULL")
         teams = conn.execute("SELECT COUNT(*) FROM clasificacion").fetchone()[0]
 
-        # Clear predicciones, resultados, consenso
         conn.execute("DELETE FROM predicciones")
         conn.execute("DELETE FROM resultados")
         conn.execute("DELETE FROM consenso")
@@ -442,10 +440,8 @@ def reset_j75():
 
     conn = get_db()
     try:
-        # Use ensure_jornada_75 to restore original data
         ensure_jornada_75(conn)
 
-        # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 75 ORDER BY partido_id").fetchall()
         return jsonify(
             {
@@ -468,12 +464,10 @@ def setup_j76():
 
     conn = get_db()
     try:
-        # Delete existing J76 data
         conn.execute("DELETE FROM resultados WHERE jornada = 76")
         conn.execute("DELETE FROM predicciones WHERE jornada = 76")
         conn.commit()
 
-        # Insert J76 matches
         for num, local, visitante, fecha, hora in J76_FALLBACK_MATCHES:
             conn.execute(
                 """
@@ -486,7 +480,6 @@ def setup_j76():
                 (76, num, local, visitante, fecha, hora),
             )
 
-        # Load and insert predictions
         import json
 
         pred_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "predicciones_J76.json")
@@ -494,7 +487,6 @@ def setup_j76():
             with open(pred_path, encoding="utf-8") as f:
                 pred_data = json.load(f)
 
-            # Insert Programa
             programa = pred_data["programa"]
             for i, signo in enumerate(programa["signos"], start=1):
                 conn.execute(
@@ -507,7 +499,6 @@ def setup_j76():
                     (programa["user_id"], 76, i, signo),
                 )
 
-            # Insert La Peña
             pena = pred_data["pena"]
             for i, signo in enumerate(pena["signos"], start=1):
                 conn.execute(
@@ -520,7 +511,6 @@ def setup_j76():
                     (pena["user_id"], 76, i, signo),
                 )
 
-            # Insert Maestros
             maestros = pred_data["maestros"]
             for maestro_id, maestro in maestros.items():
                 for i, signo in enumerate(maestro["signos"], start=1):
@@ -536,7 +526,6 @@ def setup_j76():
 
         conn.commit()
 
-        # Verify
         rows = conn.execute("SELECT * FROM resultados WHERE jornada = 76 ORDER BY partido_id").fetchall()
         pred_count = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 76").fetchone()[0]
         return jsonify(
@@ -592,7 +581,6 @@ def debug_files():
 @bp.route("/api/admin/sync-scrape", methods=["POST"])
 def sync_scrape():
     """Sync scrape files from SEED_DATA_DIR to DATA_DIR."""
-    # Check admin authentication
     if not is_admin_or_service_request():
         return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
