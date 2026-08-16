@@ -1,3 +1,4 @@
+# fmt: off
 import json
 import os
 import sqlite3
@@ -522,3 +523,4 @@ def run_startup_migrations():
                 except Exception:
                     pass
             _unlock_file(lock_fh)
+# fmt: on
