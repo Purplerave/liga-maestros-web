@@ -132,7 +132,7 @@ def write_health(status, window=None, error=None, metrics=None):
     write_json_locked(str(HEALTH_PATH), payload)
 
 
-def detect_stuck_live_matches(jornada, grace_minutes=180):
+def detect_stuck_live_matches(jornada, grace_minutes=120):
     if not jornada:
         return []
     stuck = []
@@ -164,7 +164,7 @@ def detect_stuck_live_matches(jornada, grace_minutes=180):
     return stuck
 
 
-def close_stuck_live_matches(jornada, grace_minutes=180):
+def close_stuck_live_matches(jornada, grace_minutes=120):
     """Persistently close live DB rows after the maximum match window.
 
     This is the last-resort path for a missed provider FT event.  It runs on
@@ -514,14 +514,14 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     enabled, window = should_refresh(jornada)
     backup_runtime_state(window=window)
     target_jornada = window.get("jornada") or jornada
-    try:
-        auto_closed = close_stuck_live_matches(target_jornada)
-    except Exception as exc:
-        auto_closed = []
-        log_line(f"auto_ft_error={exc}")
+    auto_closed = []
     q15_catchup = bool(q15 and window.get("jornada") and window.get("reason") == "ventana_jornada" and enabled)
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
+        try:
+            auto_closed = close_stuck_live_matches(target_jornada)
+        except Exception as exc:
+            log_line(f"auto_ft_error={exc}")
         stuck_live = detect_stuck_live_matches(target_jornada)
         write_health(
             "idle",
@@ -576,6 +576,13 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     else:
         highlightly_status = "window_closed"
         log_line("highlightly_skip=window_closed")
+
+    # Provider/Q15 refreshes can return a stale LIVE snapshot and reopen a row.
+    # Apply the hard deadline afterwards so the same pass always ends closed.
+    try:
+        auto_closed = close_stuck_live_matches(target_jornada)
+    except Exception as exc:
+        log_line(f"auto_ft_error={exc}")
 
     # Update Spanish league standings from all collected matches
     if updates > 0 or highlightly_status == "refresh_api":

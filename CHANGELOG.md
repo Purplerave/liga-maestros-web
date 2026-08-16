@@ -6,9 +6,10 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Corregido
 
-- Los snapshots que sigan en `LIVE`, `HT` o equivalentes tres horas después
-  del saque inicial dejan de aparecer en Directo y se muestran cerrados en la
-  pestaña Liga, conservando el último marcador conocido.
+- Los snapshots que sigan en `LIVE`, `HT` o equivalentes dos horas después
+  del saque inicial (90 minutos más 30 de margen) dejan de aparecer en
+  Directo y se muestran cerrados en la pestaña Liga, conservando el último
+  marcador conocido.
 - El colector aplica el cierre de respaldo en todas sus pasadas, incluso si
   todavía hay otros partidos dentro de la ventana de jornada, y persiste
   `FT`, `Finalizado` y el signo correcto en la base de datos.

@@ -9,7 +9,7 @@ def test_live_payload_keeps_all_current_competitions(monkeypatch):
     monkeypatch.setattr(
         league_matches,
         "madrid_now",
-        lambda: datetime(2026, 7, 25, 20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+        lambda: datetime(2026, 7, 25, 19, 59, tzinfo=ZoneInfo("Europe/Madrid")),
     )
     monkeypatch.setattr(
         league_matches,
@@ -56,7 +56,7 @@ def test_stale_live_snapshot_is_closed_in_liga_and_removed_from_directo(monkeypa
     monkeypatch.setattr(
         league_matches,
         "madrid_now",
-        lambda: datetime(2026, 8, 15, 23, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+        lambda: datetime(2026, 8, 15, 21, 31, tzinfo=ZoneInfo("Europe/Madrid")),
     )
     stale = {
         "id": 44,

@@ -190,7 +190,7 @@ function isFinishedStatus(status) {
     return ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "STALE", "AWARDED"].includes(raw);
 }
 
-function isExpiredLiveMatch(match, maxAgeMs = 3 * 60 * 60 * 1000) {
+function isExpiredLiveMatch(match, maxAgeMs = 2 * 60 * 60 * 1000) {
     if (!isLiveStatus(match?.status)) return false;
     const kickoff = parseMatchTimestamp(match);
     return Boolean(kickoff && Date.now() - kickoff > maxAgeMs);
