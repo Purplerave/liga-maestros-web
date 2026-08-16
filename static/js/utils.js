@@ -311,7 +311,10 @@ function parseMatchTimestamp(match) {
     if (!fecha && !timePart) return null;
     const isoDate = String(fecha).slice(0, 10);
     if (!isoDate || isoDate.length < 8) return null;
-    const ts = new Date(`${isoDate}T${timePart || "12:00"}`).getTime();
+    // Combine the ISO date with the kickoff time part into a full timestamp.
+    const ts = timePart
+        ? new Date(`${isoDate}T${timePart}`).getTime()
+        : new Date(`${isoDate}T12:00`).getTime();
     return Number.isNaN(ts) ? null : ts;
 }
 
