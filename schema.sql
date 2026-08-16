@@ -57,7 +57,7 @@ CREATE TABLE predicciones
 -- table: resultados
 CREATE TABLE resultados 
                       (jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT, 
-                       goles_local INTEGER, goles_visitante INTEGER, status TEXT, fecha DATE, hora TEXT, minuto TEXT, posesion_h INTEGER, posesion_a INTEGER, tiros_h INTEGER, tiros_a INTEGER, signo_actual TEXT, jornada_liga INTEGER, api_id INTEGER);
+                       goles_local INTEGER, goles_visitante INTEGER, status TEXT, fecha DATE, hora TEXT, minuto TEXT, posesion_h INTEGER, posesion_a INTEGER, tiros_h INTEGER, tiros_a INTEGER, signo_actual TEXT, jornada_liga INTEGER, api_id INTEGER, updated_at TEXT);
 
 -- table: usuarios
 CREATE TABLE usuarios (

@@ -207,20 +207,19 @@ function getLiveLeagueMatches() {
     const source = (lm && lm.length > 0)
         ? lm
         : [...(state.data?.partidos || []), ...getAllLeagueMatches()];
-    const MAX_LIVE_AGE_MS = 2 * 60 * 60 * 1000; // 90 min + 30 min de margen máximo
     const matchesById = new Map();
     source.filter(m => {
         const status = String(m.status || "").toUpperCase();
-        // Si está marcado LIVE/HT etc, comprueba que no sea viejo
         if (isLiveStatus(status)) {
             // SUSPENDED que lleva más de 60 min no se muestra como live
             if (status === "SUSPENDED") {
                 const ts = parseMatchTimestamp(m);
                 if (ts && Date.now() - ts > 60 * 60 * 1000) return false;
             }
-            const ts = parseMatchTimestamp(m);
-            if (ts && Date.now() - ts > MAX_LIVE_AGE_MS) return false;
-            return true;
+            // Regla única de caducidad (isExpiredLiveMatch): además de la edad
+            // máxima descarta el directo imposible (aún no ha empezado) y el
+            // congelado (minuto por delante del tiempo real transcurrido).
+            return !isExpiredLiveMatch(m);
         }
         return isLiveMatch(m);
     }).forEach(match => {

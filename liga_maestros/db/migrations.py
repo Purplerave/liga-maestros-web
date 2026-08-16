@@ -36,7 +36,8 @@ def ensure_core_tables(conn):
             tiros_a INTEGER,
             signo_actual TEXT,
             jornada_liga INTEGER,
-            api_id INTEGER
+            api_id INTEGER,
+            updated_at TEXT
         );
         CREATE TABLE IF NOT EXISTS predicciones (
             user_id TEXT,
@@ -264,6 +265,20 @@ def ensure_quiz_tables(conn):
     conn.commit()
 
 
+def ensure_resultados_updated_at(conn):
+    """Track when a provider last confirmed each match row.
+
+    Without this timestamp a frozen LIVE snapshot is indistinguishable from a
+    real one, and the only available signal is the kickoff time (which fails
+    for matches whose kickoff is in the future). The column is nullable so
+    legacy rows keep working: the freshness rule is simply skipped for them.
+    """
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+    if "updated_at" not in columns:
+        conn.execute("ALTER TABLE resultados ADD COLUMN updated_at TEXT")
+    conn.commit()
+
+
 def ensure_missing_indexes(conn):
     conn.execute("CREATE INDEX IF NOT EXISTS idx_resultados_api_id ON resultados(api_id)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_resultados_jornada_partido ON resultados(jornada, partido_id)")
@@ -321,6 +336,7 @@ def run_startup_migrations():
                 print(f"[migration] sync_runtime_standings_files failed (non-fatal): {e}", file=sys.stderr)
             ensure_clasificacion_zero(conn)
             ensure_porra_points_upgrade(conn)
+            ensure_resultados_updated_at(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
         finally:

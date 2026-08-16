@@ -33,6 +33,16 @@ from liga_maestros.services import (  # noqa: E402
     refresh_current_matches_from_highlightly,
     validate_q15_payload,
 )
+from liga_maestros.services.live_state import (  # noqa: E402
+    CLOSE_FINAL,
+    FINAL_MINUTE,
+    FINAL_STATUS,
+    NO_UPDATE_TIMEOUT,
+    RESET_TO_SCHEDULED,
+    closes_live,
+    evaluate_match_state,
+    is_live_status,
+)
 
 DATA_DIR = Path(config.DATA_DIR)
 LOG_PATH = DATA_DIR / "LIVE_COLLECTOR.log"
@@ -132,44 +142,87 @@ def write_health(status, window=None, error=None, metrics=None):
     write_json_locked(str(HEALTH_PATH), payload)
 
 
-def detect_stuck_live_matches(jornada, grace_minutes=120):
+def _row_updated_at(row):
+    """Best-effort read of the freshness stamp (column may not exist yet)."""
+    try:
+        raw = row["updated_at"]
+    except (IndexError, KeyError):
+        return None
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw))
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=MADRID_TZ) if parsed.tzinfo is None else parsed
+
+
+def detect_stuck_live_matches(jornada, grace_minutes=None):
+    """Return live rows that cannot legitimately be live any more.
+
+    Three independent signals are checked (see ``services.live_state``): a
+    kickoff still in the future, a broadcast minute ahead of the real clock,
+    and no provider update for 30 minutes. The schedule alone is not enough:
+    a row stuck at LIVE minute 90 with a 17:00 kickoff never expires by time.
+    """
     if not jornada:
         return []
     stuck = []
     with get_db() as conn:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+        updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
         rows = conn.execute(
-            """
-            SELECT partido_id, local, visitante, fecha, hora, status, minuto
+            f"""
+            SELECT partido_id, local, visitante, fecha, hora, status, minuto, {updated_at_select}
             FROM resultados
             WHERE jornada = ?
-              AND UPPER(COALESCE(status, '')) IN ('LIVE', 'IN PLAY', 'HT', 'HALF TIME BREAK', 'EN JUEGO')
             ORDER BY partido_id
-            """,
+            """,  # noqa: S608 - column name comes from a local allowlist, never user input
             (jornada,),
         ).fetchall()
     now = madrid_now()
     for row in rows:
+        if not is_live_status(row["status"]):
+            continue
         kickoff_at = parse_madrid_datetime(row["fecha"], row["hora"])
-        if kickoff_at and now >= kickoff_at + timedelta(minutes=grace_minutes):
-            stuck.append(
-                {
-                    "id": int(row["partido_id"]),
-                    "local": row["local"],
-                    "visitante": row["visitante"],
-                    "status": row["status"],
-                    "minuto": row["minuto"],
-                    "kickoff_at": kickoff_at.isoformat(timespec="minutes"),
-                }
-            )
+        decision = evaluate_match_state(
+            row["status"],
+            kickoff_at,
+            now,
+            last_update_at=_row_updated_at(row),
+            minute=row["minuto"],
+            no_update_timeout=timedelta(minutes=grace_minutes) if grace_minutes else NO_UPDATE_TIMEOUT,
+        )
+        if not closes_live(decision["action"]):
+            continue
+        stuck.append(
+            {
+                "id": int(row["partido_id"]),
+                "local": row["local"],
+                "visitante": row["visitante"],
+                "status": row["status"],
+                "minuto": row["minuto"],
+                "kickoff_at": kickoff_at.isoformat(timespec="minutes") if kickoff_at else "",
+                "action": decision["action"],
+                "reason": decision["reason"],
+                "new_status": decision["status"],
+                "new_minute": decision["minute"],
+            }
+        )
     return stuck
 
 
-def close_stuck_live_matches(jornada, grace_minutes=120):
-    """Persistently close live DB rows after the maximum match window.
+def close_stuck_live_matches(jornada, grace_minutes=None):
+    """Persistently close live DB rows that are impossible or frozen.
 
-    This is the last-resort path for a missed provider FT event.  It runs on
-    every collector pass (not only after the jornada window closes), so a
-    single stuck match cannot keep Directo open while other matches continue.
+    Last-resort path for a missed provider FT event or a corrupted snapshot.
+    Runs on every collector pass (not only once the jornada window closes) so
+    a single stuck match cannot keep Directo open while others continue.
+
+    The written state depends on why the row is being closed: a match whose
+    full window elapsed is finalised (FT + sign), one that is merely frozen or
+    inconsistent is marked STALE (score kept, no sign invented), and one that
+    was never actually playing goes back to NS.
     """
     stuck = detect_stuck_live_matches(jornada, grace_minutes=grace_minutes)
     if not stuck:
@@ -178,27 +231,50 @@ def close_stuck_live_matches(jornada, grace_minutes=120):
         conn.execute("PRAGMA busy_timeout = 30000")
         conn.execute("BEGIN IMMEDIATE")
         for match in stuck:
+            action = match.get("action") or CLOSE_FINAL
+            new_status = match.get("new_status") or FINAL_STATUS
+            new_minute = match.get("new_minute")
+            if new_minute is None:
+                new_minute = FINAL_MINUTE
             row = conn.execute(
                 "SELECT goles_local, goles_visitante FROM resultados WHERE jornada = ? AND partido_id = ?",
                 (jornada, match["id"]),
             ).fetchone()
-            signo = utils.signo_for_match(
-                match["id"],
-                row["goles_local"] if row else None,
-                row["goles_visitante"] if row else None,
-            )
+            if action == RESET_TO_SCHEDULED:
+                # Never played: drop the phantom score so the fixture can be
+                # repopulated cleanly when it really kicks off.
+                conn.execute(
+                    """
+                    UPDATE resultados
+                    SET status = ?, minuto = ?, goles_local = NULL, goles_visitante = NULL, signo_actual = '-'
+                    WHERE jornada = ? AND partido_id = ?
+                    """,
+                    (new_status, new_minute, jornada, match["id"]),
+                )
+                continue
+            if action == CLOSE_FINAL:
+                signo = utils.signo_for_match(
+                    match["id"],
+                    row["goles_local"] if row else None,
+                    row["goles_visitante"] if row else None,
+                )
+                conn.execute(
+                    "UPDATE resultados SET status = ?, minuto = ?, signo_actual = ? WHERE jornada = ? AND partido_id = ?",
+                    (new_status, new_minute, signo, jornada, match["id"]),
+                )
+                continue
+            # CLOSE_NO_DATA: stop showing it live but do not invent a result.
             conn.execute(
-                """
-                UPDATE resultados
-                SET status = 'FT', minuto = 'Finalizado', signo_actual = ?
-                WHERE jornada = ? AND partido_id = ?
-                  AND UPPER(COALESCE(status, '')) IN
-                      ('LIVE', 'IN PLAY', 'HT', 'HALF TIME BREAK', 'EN JUEGO')
-                """,
-                (signo, jornada, match["id"]),
+                "UPDATE resultados SET status = ?, minuto = ? WHERE jornada = ? AND partido_id = ?",
+                (new_status, new_minute, jornada, match["id"]),
             )
         conn.commit()
-    log_line(f"auto_ft={len(stuck)} ids={','.join(str(match['id']) for match in stuck)}")
+    log_line(
+        "auto_close="
+        + str(len(stuck))
+        + " "
+        + " ".join(f"{match['id']}:{match.get('reason', 'desconocido')}" for match in stuck)
+    )
     return stuck
 
 
@@ -338,6 +414,8 @@ def apply_q15_results_to_db(jornada, payload):
     if not matches:
         return 0
     updates = 0
+    now = madrid_now()
+    stamp = now.isoformat(timespec="seconds")
     with get_db() as conn:
         conn.execute("PRAGMA busy_timeout = 30000")
         conn.execute("BEGIN IMMEDIATE")
@@ -400,20 +478,44 @@ def apply_q15_results_to_db(jornada, payload):
             else:
                 continue
             match_minute = str(match.get("minute") or ("Finalizado" if status == "FT" else "")).strip()
-            if (
+
+            # A provider snapshot must never (re)open an impossible live state,
+            # e.g. LIVE minute 90 on a match that kicks off later today.
+            if is_live_status(status):
+                decision = evaluate_match_state(
+                    status,
+                    parse_madrid_datetime(row["fecha"], row["hora"]),
+                    now,
+                    last_update_at=now,
+                    minute=match_minute,
+                )
+                if closes_live(decision["action"]):
+                    log_line(f"q15_live_incoherente_descartado id={partido_id} reason={decision['reason']}")
+                    continue
+
+            unchanged = (
                 row["goles_local"] == home_goals
                 and row["goles_visitante"] == away_goals
                 and str(row["status"] or "").upper() == status
                 and str(row["minuto"] or "") == match_minute
-            ):
+            )
+            if unchanged:
+                # Same values still mean "the provider confirmed this row now":
+                # refresh the freshness stamp so a legitimately quiet 0-0 is
+                # not closed by the 30-minute no-update rule.
+                conn.execute(
+                    "UPDATE resultados SET updated_at = ? WHERE jornada = ? AND partido_id = ?",
+                    (stamp, jornada, partido_id),
+                )
                 continue
             conn.execute(
                 """
                 UPDATE resultados
-                SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?
+                SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?,
+                    updated_at = ?
                 WHERE jornada = ? AND partido_id = ?
                 """,
-                (int(home_goals), int(away_goals), status, match_minute, signo, jornada, partido_id),
+                (int(home_goals), int(away_goals), status, match_minute, signo, stamp, jornada, partido_id),
             )
             updates += 1
         conn.commit()

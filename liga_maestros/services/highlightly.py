@@ -27,6 +27,7 @@ from .highlightly_limits import (
     record_highlightly_success,
     reserve_highlightly_calls,
 )
+from .live_state import closes_live, evaluate_match_state, is_live_status
 from .ticket import madrid_now, today_madrid
 
 logger = logging.getLogger(__name__)
@@ -333,11 +334,13 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
 
             rows = conn.execute(
                 """
-                SELECT partido_id, local, visitante, status, minuto, goles_local, goles_visitante
+                SELECT partido_id, local, visitante, status, minuto, goles_local, goles_visitante, fecha, hora
                 FROM resultados WHERE jornada = ?
             """,
                 (target_jornada,),
             ).fetchall()
+            now = madrid_now()
+            stamp = now.isoformat(timespec="seconds")
             for row in rows:
                 if str(row["minuto"] or "").upper().startswith("SUSPENDIDO LAE"):
                     continue
@@ -351,14 +354,36 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 if reversed_match:
                     home_goals, away_goals = away_goals, home_goals
                 status, minute = highlightly_status(state)
+
+                # Reject incoherent live snapshots (kickoff still ahead, minute
+                # running faster than the clock): writing them is exactly how a
+                # match got stuck at LIVE 90' with a 17:00 kickoff.
+                if is_live_status(status):
+                    decision = evaluate_match_state(
+                        status,
+                        parse_db_match_datetime(row["fecha"], row["hora"]),
+                        now.replace(tzinfo=None),
+                        last_update_at=now.replace(tzinfo=None),
+                        minute=minute,
+                    )
+                    if closes_live(decision["action"]):
+                        logger.warning(
+                            "Snapshot LIVE incoherente descartado j=%s partido=%s motivo=%s",
+                            target_jornada,
+                            row["partido_id"],
+                            decision["reason"],
+                        )
+                        continue
+
                 signo = signo_for_match(row["partido_id"], home_goals, away_goals)
                 conn.execute(
                     """
                     UPDATE resultados
-                    SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?
+                    SET goles_local = ?, goles_visitante = ?, status = ?, minuto = ?, signo_actual = ?,
+                        updated_at = ?
                     WHERE jornada = ? AND partido_id = ?
                 """,
-                    (home_goals, away_goals, status, minute, signo, target_jornada, row["partido_id"]),
+                    (home_goals, away_goals, status, minute, signo, stamp, target_jornada, row["partido_id"]),
                 )
                 updates += 1
 

@@ -190,10 +190,26 @@ function isFinishedStatus(status) {
     return ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "STALE", "AWARDED"].includes(raw);
 }
 
+/**
+ * True when a LIVE status cannot be believed any more.
+ *
+ * Mirrors the server rules in liga_maestros/services/live_state.py so a stale
+ * cached payload (service worker, a tab left open, a slow API) never keeps a
+ * match rendered as live. Time alone is not enough: a row can be stuck at
+ * LIVE minute 90 while its kickoff is still in the future, and that never
+ * expires by age.
+ */
 function isExpiredLiveMatch(match, maxAgeMs = 2 * 60 * 60 * 1000) {
     if (!isLiveStatus(match?.status)) return false;
     const kickoff = parseMatchTimestamp(match);
-    return Boolean(kickoff && Date.now() - kickoff > maxAgeMs);
+    if (!kickoff) return false;
+    const elapsedMs = Date.now() - kickoff;
+    // Live before kickoff (beyond a 5 min clock tolerance): impossible.
+    if (elapsedMs < -5 * 60 * 1000) return true;
+    // Broadcast minute running ahead of real elapsed time: frozen snapshot.
+    const minute = matchMinuteValue(match);
+    if (minute > 0 && minute > elapsedMs / 60000 + 15) return true;
+    return elapsedMs > maxAgeMs;
 }
 
 function isScheduledStatus(status) {
