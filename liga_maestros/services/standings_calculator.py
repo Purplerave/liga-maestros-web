@@ -10,17 +10,7 @@ import sys
 from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-try:
-    from utils import normalize_team_key
-except ImportError:
-
-    def normalize_team_key(value):
-        import unicodedata
-
-        text = unicodedata.normalize("NFD", str(value or "").upper())
-        text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
-        text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
-        return text
+from liga_maestros.utils import normalize_team_key
 
 
 def _parse_score(match):

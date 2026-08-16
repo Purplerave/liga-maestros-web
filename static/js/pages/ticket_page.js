@@ -253,3 +253,10 @@ function loadPorra() {
 }
 
 /* botón guardar oculto si no hay usuario */
+
+const PLENO_PLACEHOLDER = "Elegir resultado del Pleno al 15";
+
+function plenoLabelForSign(mySign) {
+    const plenoLabel = mySign === "-" ? "Elegir" : mySign;
+    return plenoLabel;
+}

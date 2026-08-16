@@ -55,6 +55,9 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 data/backups/
+config/DATOS/
+config/data/
+config/__pycache__/
 
 # Temporary screenshots and visual QA artifacts
 /*.png
@@ -86,3 +89,8 @@ data/LIVE_ALL_MATCHES*.json
 data/LIVE_TICKER.json
 data/RESULTADOS_LIVE.json
 liga_maestros.db
+
+# Kilo agent config (local only)
+dev.md
+
+dev.md

@@ -376,3 +376,29 @@ function matchPairKey(match) {
     const away = normalizeName(match.visitante || match.away_name || "");
     return `${home}-${away}`;
 }
+
+function standardSignMatches(sign, real) {
+    const prediction = String(sign || "-").trim().toUpperCase();
+    const result = String(real || "-").trim().toUpperCase();
+    if (prediction === "-" || result === "-") return false;
+    return prediction.includes(result);
+}
+
+// Frontend helper for ticket hit/miss rendering.
+function signHitClass(sign, real) {
+    return standardSignMatches(sign, real) ? "hit" : "miss";
+}
+
+function hitClassFromSign(sign, real) {
+    return standardSignMatches(sign, real);
+}
+
+function nextMatchTimestamp(match, graceMinutes = 5) {
+    const fecha = match.fecha_raw || match.fecha || "";
+    const timePart = (match.hora || match.scheduled || "").toString().replace(/h$/i, "").trim();
+    if (!fecha && !timePart) return null;
+    const isoDate = String(fecha).slice(0, 10);
+    const ts = new Date(`${isoDate}T${timePart}`).getTime();
+    if (Number.isNaN(ts)) return null;
+    return ts > Date.now() - graceMinutes * 60 * 1000 ? ts : null;
+}

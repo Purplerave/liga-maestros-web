@@ -24,10 +24,12 @@ def start_web_collector(app):
     """Start the background collector when WEB_COLLECTOR_ENABLED=1."""
     global _collector_started
     if not _truthy(os.getenv("WEB_COLLECTOR_ENABLED", "0")):
+        logger.info("web_collector=disabled")
         return
 
     with _collector_lock:
         if _collector_started:
+            logger.info("web_collector=already_running")
             return
         _collector_started = True
 
@@ -45,6 +47,7 @@ def start_web_collector(app):
         from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
 
         log_line("web_collector=start")
+        logger.info("web_collector=started interval=%s highlightly_interval=%s q15=%s", interval, highlightly_interval, q15_enabled)
         while True:
             try:
                 _, window = run_once(
@@ -59,12 +62,14 @@ def start_web_collector(app):
                     write_health("error", error=exc)
                 except Exception:
                     pass
+                logger.exception("web_collector loop error")
                 sleep_seconds = max(60, min(interval or 60, 300))
             time.sleep(max(30, int(sleep_seconds)))
 
     thread = threading.Thread(target=_loop, name="liga-web-collector", daemon=True)
     thread.start()
     app.extensions["web_collector_thread"] = thread
+    logger.info("web_collector=thread_started")
 
     # Background standings refresh: ALL leagues (Spanish BASE files + foreign
     # cache) at fixed local times, so midweek matches (Copa days, Friday
@@ -121,6 +126,7 @@ def start_web_collector(app):
 
     standings_thread = threading.Thread(target=_standings_loop, name="liga-standings-refresh", daemon=True)
     standings_thread.start()
+    logger.info("web_collector=standings_thread_started")
 
     # Daily tracker: agenda + live scores + stats history for ALL followed
     # leagues, every day (not only during the quiniela window). This is what
@@ -130,3 +136,4 @@ def start_web_collector(app):
         from ..services.daily_matches import start_daily_tracker
 
         start_daily_tracker(app)
+        logger.info("web_collector=daily_tracker_started")

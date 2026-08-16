@@ -301,3 +301,25 @@ def test_user_stats_are_private_to_account_owner(tmp_path, monkeypatch):
         flask_session["user"] = {"id": "u1", "name": "User", "is_admin": False}
 
     assert client.get("/api/user/stats?uid=u2").status_code == 403
+
+
+def test_api_v1_endpoints_are_registered(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "DB_PATH", str(tmp_path / "v1.db"))
+    monkeypatch.setattr(config, "BOOTSTRAP_DB_PATH", str(tmp_path / "missing.db"))
+    monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
+    monkeypatch.setenv("SECRET_KEY", "v1-test-secret")
+    monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
+    monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
+    app = create_app()
+    client = app.test_client()
+
+    # Original endpoints still work.
+    assert client.get("/api/liga/data?j=1").status_code == 200
+    assert client.get("/api/live/health").status_code == 200
+
+    # Versioned aliases also work.
+    assert client.get("/api/v1/liga/data?j=1").status_code == 200
+    assert client.get("/api/v1/live/health").status_code == 200
+
+    # 404 for unknown v1 paths.
+    assert client.get("/api/v1/does-not-exist").status_code == 404

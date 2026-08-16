@@ -6,7 +6,7 @@ from pathlib import Path
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from utils import (
+from liga_maestros.utils import (
     clean_team_key,
     highlightly_status,
     news_relevance_score,

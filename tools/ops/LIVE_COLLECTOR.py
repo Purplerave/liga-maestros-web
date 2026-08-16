@@ -20,7 +20,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in sys.path:
 from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo  # noqa: E402
 
 import config  # noqa: E402
-import utils  # noqa: E402
+from liga_maestros import utils  # noqa: E402
 from liga_maestros.db.connection import get_db  # noqa: E402
 from liga_maestros.middleware.json_lock import write_json_locked  # noqa: E402
 from liga_maestros.services import (  # noqa: E402

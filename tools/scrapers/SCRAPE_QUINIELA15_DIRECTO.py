@@ -8,7 +8,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-import utils
+from liga_maestros import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")

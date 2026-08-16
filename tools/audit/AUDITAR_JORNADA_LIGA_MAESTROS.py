@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 import config
-import utils
-from scoring import pleno_score_key, score_prediction
+from liga_maestros import utils
+from liga_maestros.scoring import pleno_score_key, score_prediction
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(config.DB_PATH)

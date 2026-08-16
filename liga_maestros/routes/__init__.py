@@ -1,6 +1,7 @@
 """Register all route blueprints."""
 
 from .ai_predictions import bp as ai_predictions_bp
+from .api_v1 import register_api_v1_aliases
 from .arcade import bp as arcade_bp
 from .auth import bp as auth_bp
 from .comments import bp as comments_bp
@@ -35,3 +36,4 @@ def register_routes(app):
     app.register_blueprint(arcade_bp)
     app.register_blueprint(comments_bp)
     app.register_blueprint(ai_predictions_bp)
+    register_api_v1_aliases(app)

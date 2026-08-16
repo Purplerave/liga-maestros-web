@@ -125,6 +125,29 @@ def create_app():
             return None
         return jsonify({"status": "error", "error": "Solicitud de seguridad caducada."}), 403
 
+    @app.before_request
+    def enforce_json_content_type():
+        """Rechazar mutaciones API con Content-Type incorrecto cuando hay body."""
+        if request.method not in {"POST", "PUT", "PATCH"}:
+            return None
+        if not request.path.startswith("/api/"):
+            return None
+        if request.content_length is not None and request.content_length > 0:
+            ct = request.content_type or ""
+            if "application/json" not in ct:
+                return jsonify({"status": "error", "error": "Content-Type debe ser application/json."}), 415
+        return None
+
+    @app.before_request
+    def reject_request_smuggling():
+        """Bloquear combinaciones sospechosas de Transfer-Encoding / Content-Length."""
+        te = (request.headers.get("Transfer-Encoding") or "").lower()
+        cl = request.headers.get("Content-Length")
+        if te and cl:
+            return jsonify({"status": "error", "error": "Solicitud rechazada."}), 400
+        if "chunked" in te:
+            return jsonify({"status": "error", "error": "Solicitud rechazada."}), 400
+
     @app.after_request
     def set_security_headers(response):
         _is_dev = os.getenv("FLASK_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
@@ -172,6 +195,7 @@ def create_app():
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         if request.is_secure:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if (
