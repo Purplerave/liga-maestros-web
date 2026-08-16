@@ -5,8 +5,9 @@ Import from ``config`` directly; the package ``__init__`` re-exports the
 public surface used across the codebase.
 """
 
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
 
 # Cargar variables de entorno una sola vez.
 load_dotenv()
@@ -17,9 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Datos runtime: Render usa /var/data, si no, data/ junto al proyecto.
 RENDER_DATA_DIR = "/var/data"
 DEFAULT_DATA_DIR = (
-    RENDER_DATA_DIR
-    if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR)
-    else os.path.join(BASE_DIR, "data")
+    RENDER_DATA_DIR if os.getenv("RENDER") and os.path.isdir(RENDER_DATA_DIR) else os.path.join(BASE_DIR, "data")
 )
 DATA_DIR = os.getenv("DATA_DIR", "").strip() or DEFAULT_DATA_DIR
 SEED_DATA_DIR = os.path.join(BASE_DIR, "data")

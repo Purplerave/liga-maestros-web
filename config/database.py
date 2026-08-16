@@ -2,7 +2,7 @@
 
 import os
 
-from . import BASE_DIR, DATA_DIR, SEED_DATA_DIR
+from . import BASE_DIR, DATA_DIR
 
 # Primary database path (runtime). Can be overridden with DB_PATH.
 DEFAULT_DB_PATH = (

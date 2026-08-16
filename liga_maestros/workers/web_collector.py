@@ -47,7 +47,12 @@ def start_web_collector(app):
         from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
 
         log_line("web_collector=start")
-        logger.info("web_collector=started interval=%s highlightly_interval=%s q15=%s", interval, highlightly_interval, q15_enabled)
+        logger.info(
+            "web_collector=started interval=%s highlightly_interval=%s q15=%s",
+            interval,
+            highlightly_interval,
+            q15_enabled,
+        )
         while True:
             try:
                 _, window = run_once(

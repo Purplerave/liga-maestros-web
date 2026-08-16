@@ -2,8 +2,6 @@
 
 import os
 
-from . import BASE_DIR, DATA_DIR
-
 # Core secret.
 SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 
