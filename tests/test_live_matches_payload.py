@@ -97,3 +97,114 @@ def test_recent_live_snapshot_remains_live(monkeypatch):
     monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [match])
 
     assert league_matches.build_live_matches([], {})[0]["status"] == "HT"
+
+
+def test_live_before_kickoff_is_never_shown_as_live(monkeypatch):
+    """Andorra-Ceuta: LIVE minuto 90 mientras su inicio (17:00) es futuro.
+
+    La regla antigua solo miraba `kickoff + 120 min`, asi que un inicio en el
+    futuro no expiraba jamas y el partido se quedaba en directo para siempre.
+    """
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-16")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 16, 15, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    impossible = {
+        "id": 6,
+        "status": "IN PLAY",
+        "time": "90",
+        "added": "2026-08-16 17:00:00",
+        "scheduled": "17:00",
+        "score": "1 - 0",
+        "competition_name": "SEGUNDA DIVISION",
+        "home": {"name": "Andorra"},
+        "away": {"name": "Ceuta"},
+    }
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [impossible])
+
+    liga = league_matches.build_all_league_matches("", [], {}, {})
+    directo = league_matches.build_live_matches([], {})
+
+    assert liga[0]["status"] == "SCHEDULED"
+    assert liga[0]["score"] == ""
+    assert directo == []
+    assert impossible["status"] == "IN PLAY", "no debe mutar la cache compartida"
+
+
+def test_live_with_minute_ahead_of_the_clock_is_closed_as_stale(monkeypatch):
+    """Cadiz-Celta Fortuna: minuto 45 cuando solo han pasado 10 minutos."""
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-16")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 16, 19, 10, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    frozen = {
+        "id": 7,
+        "status": "IN PLAY",
+        "time": "45",
+        "added": "2026-08-16 19:00:00",
+        "scheduled": "19:00",
+        "score": "2 - 1",
+        "competition_name": "SEGUNDA DIVISION",
+        "home": {"name": "Cádiz"},
+        "away": {"name": "Celta Fortuna"},
+    }
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [frozen])
+
+    liga = league_matches.build_all_league_matches("", [], {}, {})
+
+    assert liga[0]["status"] == "STALE"
+    assert liga[0]["score"] == "2 - 1", "el marcador se conserva, no se inventa un FT"
+    assert league_matches.build_live_matches([], {}) == []
+
+
+def test_live_without_provider_updates_for_thirty_minutes_is_closed(monkeypatch):
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-16")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 16, 20, 15, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    frozen = {
+        "id": 8,
+        "status": "IN PLAY",
+        "time": "60",
+        "added": "2026-08-16 19:00:00",
+        "scheduled": "19:00",
+        "score": "1 - 1",
+        "updated_at": "2026-08-16T19:40:00",
+        "competition_name": "LA LIGA",
+        "home": {"name": "Celta"},
+        "away": {"name": "Osasuna"},
+    }
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [frozen])
+
+    assert league_matches.build_all_league_matches("", [], {}, {})[0]["status"] == "STALE"
+
+
+def test_genuine_live_match_with_fresh_data_stays_in_directo(monkeypatch):
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-16")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 16, 19, 50, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    running = {
+        "id": 9,
+        "status": "IN PLAY",
+        "time": "45",
+        "added": "2026-08-16 19:00:00",
+        "scheduled": "19:00",
+        "score": "1 - 0",
+        "updated_at": "2026-08-16T19:49:00",
+        "competition_name": "LA LIGA",
+        "home": {"name": "Celta"},
+        "away": {"name": "Osasuna"},
+    }
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [running])
+
+    assert league_matches.build_all_league_matches("", [], {}, {})[0]["status"] == "IN PLAY"
+    assert len(league_matches.build_live_matches([], {})) == 1

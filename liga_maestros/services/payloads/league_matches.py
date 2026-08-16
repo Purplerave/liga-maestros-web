@@ -3,10 +3,11 @@
 import json
 import os
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import config
 
+from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state, is_live_status
 from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_any_match_datetime
 
@@ -15,29 +16,59 @@ _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", 
 
 
 def _close_stale_live_match(match):
-    """Return a display-safe copy of a live match that has outlived its window.
+    """Return a display-safe copy of a live match that cannot really be live.
 
-    Providers occasionally leave the last snapshot at LIVE/HT when the final
-    update is missed (quota, network error or collector restart). After the 90
-    regulation minutes plus a generous 30-minute margin, such a row must not
-    keep the Liga or Directo tabs open. We deliberately
-    use STALE rather than inventing an official FT result; the score is kept
-    and the next real provider update still replaces this fallback.
+    Three independent signals are evaluated (see ``services.live_state``) so
+    the page never depends on the clock alone:
+
+    * the kickoff is still in the future (a reschedule or a mismatched fixture
+      left the row at LIVE, sometimes at minute 90);
+    * the broadcast minute is ahead of the elapsed real time (frozen snapshot);
+    * the provider stopped updating (quota, network error, collector restart).
+
+    STALE is used rather than inventing an official FT result: the score is
+    kept and the next genuine provider update still replaces this fallback. A
+    match that was never actually playing goes back to SCHEDULED instead, so it
+    is announced with its kickoff time rather than a fake final score.
     """
-    status = str(match.get("status") or "").upper()
-    if status not in _LIVE_STATUSES:
+    if not is_live_status(match.get("status")):
         return match
     kickoff = parse_any_match_datetime(match)
-    if kickoff is None:
-        return match
     now = madrid_now().replace(tzinfo=None)
-    if now < kickoff + STALE_LIVE_AFTER:
+    decision = evaluate_match_state(
+        match.get("status"),
+        kickoff,
+        now,
+        last_update_at=_match_updated_at(match),
+        minute=match.get("time") or match.get("minute") or match.get("minuto"),
+        full_match_window=STALE_LIVE_AFTER,
+    )
+    if not closes_live(decision["action"]):
         return match
     closed = dict(match)
+    if decision["action"] == RESET_TO_SCHEDULED:
+        closed["status"] = "SCHEDULED"
+        closed["time"] = ""
+        closed["minute"] = ""
+        closed["score"] = ""
+        closed["marcador"] = ""
+        return closed
     closed["status"] = "STALE"
     closed["time"] = "Finalizado"
     closed["minute"] = "Finalizado"
     return closed
+
+
+def _match_updated_at(match):
+    """Read the provider freshness stamp from a payload match, if present."""
+    raw = match.get("updated_at") or match.get("fetched_at")
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw))
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=None) if parsed.tzinfo is not None else parsed
 
 
 def _close_stale_live_matches(matches):

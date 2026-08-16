@@ -3,8 +3,14 @@
 import logging
 from datetime import datetime
 
-from ...services.ticket import today_madrid
-from ...utils import normalize_team_key
+from ...services.live_state import (
+    PENDING_OVERDUE,
+    RESET_TO_SCHEDULED,
+    closes_live,
+    evaluate_match_state,
+)
+from ...services.ticket import madrid_now, today_madrid
+from ...utils import normalize_team_key, parse_db_match_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -46,21 +52,69 @@ def _scrape_backfill_rows(jornada, present_ids):
     return rows
 
 
+def _display_safe_row(row):
+    """Neutralise an impossible or frozen LIVE row before it reaches the page.
+
+    The collector closes these rows persistently, but the web must not depend
+    on the collector having run: if it is down, throttled or its last pass
+    failed, a stuck LIVE row would still be served. Applying the same rules on
+    read means the page is self-healing and never shows, for example, a match
+    LIVE at minute 90 whose kickoff is still hours away.
+    """
+    kickoff = parse_db_match_datetime(row.get("fecha"), row.get("hora"))
+    decision = evaluate_match_state(
+        row.get("status"),
+        kickoff,
+        madrid_now().replace(tzinfo=None),
+        last_update_at=_parse_updated_at(row.get("updated_at")),
+        minute=row.get("minuto"),
+    )
+    if decision["action"] == PENDING_OVERDUE:
+        # Kickoff long past and still no data: flag it so the ticket says
+        # 'pending result' instead of advertising a kickoff time that has
+        # already gone by (how yesterday's matches looked simply upcoming).
+        overdue = dict(row)
+        overdue["resultado_pendiente"] = True
+        return overdue
+    if not closes_live(decision["action"]):
+        return row
+    safe = dict(row)
+    if decision["action"] == RESET_TO_SCHEDULED:
+        # Never kicked off: show the fixture with its schedule, no phantom score.
+        safe.update({"status": "NS", "minuto": "", "goles_local": None, "goles_visitante": None})
+        return safe
+    safe["status"] = decision["status"]
+    safe["minuto"] = decision["minute"]
+    return safe
+
+
+def _parse_updated_at(raw):
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw))
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=None) if parsed.tzinfo is not None else parsed
+
+
 def build_jornada_matches(conn, jornada, team_logos):
     def logo_for(team_name):
         return team_logos.get(normalize_team_key(team_name), "")
 
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+    updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
     rows = conn.execute(
-        """
+        f"""
         SELECT partido_id as id, local, visitante, goles_local, goles_visitante,
-               status, fecha, hora, minuto
+               status, fecha, hora, minuto, {updated_at_select}
         FROM resultados
         WHERE jornada = ?
         ORDER BY partido_id ASC
-    """,
+    """,  # noqa: S608 - column name comes from a local allowlist, never user input
         (jornada,),
     ).fetchall()
-    rows = [dict(row) for row in rows]
+    rows = [_display_safe_row(dict(row)) for row in rows]
 
     present_ids = set()
     for row in rows:
@@ -117,7 +171,12 @@ def build_jornada_matches(conn, jornada, team_logos):
             minuto_num = ""
             marcador_base = ""
             hora_label = (r.get("hora") or "").strip()
-            if r.get("fecha") == today_madrid():
+            if r.get("resultado_pendiente"):
+                # Kickoff was hours ago and no provider ever reported it.
+                # Announcing a past kickoff time as if it were upcoming is what
+                # left matches from the previous day looking merely 'scheduled'.
+                marcador = "Pendiente de resultado"
+            elif r.get("fecha") == today_madrid():
                 marcador = f"{hora_label}h" if hora_label else "Horario pendiente"
             else:
                 marcador = (
@@ -144,6 +203,7 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "signo_actual": signo,
                 "goles_local": gh,
                 "goles_visitante": ga,
+                "resultado_pendiente": bool(r.get("resultado_pendiente")),
             }
         )
 
