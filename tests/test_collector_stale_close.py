@@ -14,9 +14,7 @@ def test_stuck_match_is_persistently_closed_with_final_sign(monkeypatch):
         )
         """
     )
-    conn.execute(
-        "INSERT INTO resultados VALUES (1, 4, 2, 1, 'IN PLAY', '90', 'X')"
-    )
+    conn.execute("INSERT INTO resultados VALUES (1, 4, 2, 1, 'IN PLAY', '90', 'X')")
     conn.commit()
     stuck = [{"id": 4, "local": "A", "visitante": "B", "status": "IN PLAY", "minuto": "90"}]
     monkeypatch.setattr(collector, "detect_stuck_live_matches", lambda jornada, grace_minutes=180: stuck)

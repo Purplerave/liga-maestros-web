@@ -10,7 +10,6 @@ import config
 from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_any_match_datetime
 
-
 STALE_LIVE_AFTER = timedelta(minutes=120)
 _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
 
@@ -47,9 +46,7 @@ def _close_stale_live_matches(matches):
 
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     all_league_matches = _close_stale_live_matches(_load_external_matches())
-    quiniela_league_matches = _close_stale_live_matches(
-        _build_quiniela_league_matches(jornada, partidos, standings_db)
-    )
+    quiniela_league_matches = _close_stale_live_matches(_build_quiniela_league_matches(jornada, partidos, standings_db))
     quiniela_pairs = {
         (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante"))) for m in quiniela_league_matches
     }
@@ -67,9 +64,7 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
 
 def build_live_matches(partidos, team_logos):
     """Return genuinely live matches, never expired provider snapshots."""
-    external_live = [
-        match for match in _close_stale_live_matches(_load_external_matches()) if _is_live_match(match)
-    ]
+    external_live = [match for match in _close_stale_live_matches(_load_external_matches()) if _is_live_match(match)]
     quiniela_live = [
         match
         for match in _close_stale_live_matches(_build_quiniela_league_matches("", partidos, {}))
