@@ -190,6 +190,12 @@ function isFinishedStatus(status) {
     return ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "STALE", "AWARDED"].includes(raw);
 }
 
+function isExpiredLiveMatch(match, maxAgeMs = 3 * 60 * 60 * 1000) {
+    if (!isLiveStatus(match?.status)) return false;
+    const kickoff = parseMatchTimestamp(match);
+    return Boolean(kickoff && Date.now() - kickoff > maxAgeMs);
+}
+
 function isScheduledStatus(status) {
     const raw = String(status || "").toUpperCase();
     return ["SCHEDULED", "NS", "NOT STARTED", ""].includes(raw);

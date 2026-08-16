@@ -276,7 +276,7 @@ function renderNewspaperCoverPageV3() {
     const closed = coverIsClosed();
     const saved = hasSavedTicket();
     const jornada = state.data?.jornada || state.jornada || "";
-    const liveCount = matches.filter(m => isLiveStatus(m.status) || isLiveMatch(m)).length;
+    const liveCount = matches.filter(m => !isExpiredLiveMatch(m) && (isLiveStatus(m.status) || isLiveMatch(m))).length;
     const rankingRows = coverRankingRows();
     const disagreement = coverDisagreementMatch(matches);
     const penaPulse = coverTightPenaMatch(matches);

@@ -132,7 +132,7 @@ def write_health(status, window=None, error=None, metrics=None):
     write_json_locked(str(HEALTH_PATH), payload)
 
 
-def detect_stuck_live_matches(jornada, grace_minutes=150):
+def detect_stuck_live_matches(jornada, grace_minutes=180):
     if not jornada:
         return []
     stuck = []
@@ -161,6 +161,44 @@ def detect_stuck_live_matches(jornada, grace_minutes=150):
                     "kickoff_at": kickoff_at.isoformat(timespec="minutes"),
                 }
             )
+    return stuck
+
+
+def close_stuck_live_matches(jornada, grace_minutes=180):
+    """Persistently close live DB rows after the maximum match window.
+
+    This is the last-resort path for a missed provider FT event.  It runs on
+    every collector pass (not only after the jornada window closes), so a
+    single stuck match cannot keep Directo open while other matches continue.
+    """
+    stuck = detect_stuck_live_matches(jornada, grace_minutes=grace_minutes)
+    if not stuck:
+        return []
+    with get_db() as conn:
+        conn.execute("PRAGMA busy_timeout = 30000")
+        conn.execute("BEGIN IMMEDIATE")
+        for match in stuck:
+            row = conn.execute(
+                "SELECT goles_local, goles_visitante FROM resultados WHERE jornada = ? AND partido_id = ?",
+                (jornada, match["id"]),
+            ).fetchone()
+            signo = utils.signo_for_match(
+                match["id"],
+                row["goles_local"] if row else None,
+                row["goles_visitante"] if row else None,
+            )
+            conn.execute(
+                """
+                UPDATE resultados
+                SET status = 'FT', minuto = 'Finalizado', signo_actual = ?
+                WHERE jornada = ? AND partido_id = ?
+                  AND UPPER(COALESCE(status, '')) IN
+                      ('LIVE', 'IN PLAY', 'HT', 'HALF TIME BREAK', 'EN JUEGO')
+                """,
+                (signo, jornada, match["id"]),
+            )
+        conn.commit()
+    log_line(f"auto_ft={len(stuck)} ids={','.join(str(match['id']) for match in stuck)}")
     return stuck
 
 
@@ -475,23 +513,16 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     started_at = time.time()
     enabled, window = should_refresh(jornada)
     backup_runtime_state(window=window)
+    target_jornada = window.get("jornada") or jornada
+    try:
+        auto_closed = close_stuck_live_matches(target_jornada)
+    except Exception as exc:
+        auto_closed = []
+        log_line(f"auto_ft_error={exc}")
     q15_catchup = bool(q15 and window.get("jornada") and window.get("reason") == "ventana_jornada" and enabled)
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
-        stuck_live = detect_stuck_live_matches(window.get("jornada") or jornada)
-        if stuck_live:
-            try:
-                conn = get_db()
-                for match in stuck_live:
-                    conn.execute(
-                        "UPDATE resultados SET status = 'FT', minuto = 'Finalizado' WHERE jornada = ? AND partido_id = ?",
-                        (window.get("jornada") or jornada, match["id"]),
-                    )
-                conn.commit()
-                conn.close()
-                log_line(f"auto_ft={len(stuck_live)} ids={','.join(str(m['id']) for m in stuck_live)}")
-            except Exception as exc:
-                log_line(f"auto_ft_error={exc}")
+        stuck_live = detect_stuck_live_matches(target_jornada)
         write_health(
             "idle",
             window=window,
@@ -499,6 +530,8 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
                 "duration_ms": int((time.time() - started_at) * 1000),
                 "stuck_live_count": len(stuck_live),
                 "stuck_live_matches": stuck_live,
+                "auto_closed_count": len(auto_closed),
+                "auto_closed_matches": auto_closed,
             },
         )
         return 0, window
@@ -575,6 +608,8 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
             "last_success_per_match": q15_detail.get("last_success_per_match", {}),
             "stuck_live_count": len(stuck_live),
             "stuck_live_matches": stuck_live,
+            "auto_closed_count": len(auto_closed),
+            "auto_closed_matches": auto_closed,
         },
     )
     return updates, window

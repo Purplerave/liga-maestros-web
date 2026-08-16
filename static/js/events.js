@@ -232,7 +232,7 @@ async function refreshLiveSnapshot() {
             ...(data?.all_league_matches || []),
             ...(data?.live_matches || [])
         ]
-            .filter(match => isLiveStatus(match.status) || isLiveMatch(match))
+            .filter(match => !isExpiredLiveMatch(match) && (isLiveStatus(match.status) || isLiveMatch(match)))
             .map(match => [
                 matchPairKey(match),
                 String(match.status || ""),

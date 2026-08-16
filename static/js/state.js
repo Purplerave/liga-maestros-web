@@ -198,14 +198,8 @@ function getBrowsableLeagueMatches() {
 
 function isLiveMatch(match) {
     const status = String(match.status || "").toUpperCase();
-    if (isImplicitlyFinished(match)) return false;
-    if (status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO") {
-        const kickoff = parseMatchTimestamp(match);
-        const twoAndAHalfHoursAgo = Date.now() - (2.5 * 60 * 60 * 1000);
-        if (kickoff && kickoff < twoAndAHalfHoursAgo) return false;
-        return true;
-    }
-    return false;
+    if (isImplicitlyFinished(match) || isExpiredLiveMatch(match)) return false;
+    return status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO";
 }
 
 function getLiveLeagueMatches() {
