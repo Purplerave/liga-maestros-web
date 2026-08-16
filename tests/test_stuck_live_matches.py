@@ -208,8 +208,8 @@ class TestJornadaPayloadSelfHeals:
         assert partidos[0]["status"] == "LIVE"
         assert partidos[0]["minuto_live"] == "40"
 
-    def test_yesterdays_pending_match_says_pending_result(self, monkeypatch):
-        """Eibar-Tenerife del 15/08 sigue en NS: no debe anunciarse como futuro."""
+    def test_yesterdays_unscored_match_keeps_its_fixture_date(self, monkeypatch):
+        """Eibar-Tenerife del 15/08 muestra su fecha, nunca un placeholder opaco."""
         self._freeze(monkeypatch)
         conn = self._conn(
             [(10, "Eibar", "Tenerife", None, None, "NS", "2026-08-15", "21:30", "", None)],
@@ -218,8 +218,8 @@ class TestJornadaPayloadSelfHeals:
         partidos = matches_payload.build_jornada_matches(conn, 1, {})
         eibar = partidos[9]
 
-        assert eibar["resultado_pendiente"] is True
-        assert eibar["marcador"] == "Pendiente de resultado"
+        assert eibar["resultado_pendiente"] is False
+        assert eibar["marcador"] == "sabado 15/08 21:30h"
 
     def test_todays_upcoming_match_still_shows_its_kickoff_time(self, monkeypatch):
         self._freeze(monkeypatch)
@@ -231,6 +231,18 @@ class TestJornadaPayloadSelfHeals:
 
         assert partidos[4]["resultado_pendiente"] is False
         assert partidos[4]["marcador"] == "21:30h"
+
+    def test_closed_provider_row_without_score_keeps_its_fixture_date(self, monkeypatch):
+        """STALE/FT without goals must not leak a fake result label to the UI."""
+        self._freeze(monkeypatch)
+        conn = self._conn(
+            [(10, "Eibar", "Tenerife", None, None, "STALE", "2026-08-15", "21:30", "Sin datos", None)],
+        )
+
+        partidos = matches_payload.build_jornada_matches(conn, 1, {})
+
+        assert partidos[9]["marcador"] == "sabado 15/08 21:30h"
+        assert "pendiente" not in partidos[9]["marcador"].lower()
 
     def test_legacy_database_without_updated_at_column_still_works(self, monkeypatch):
         self._freeze(monkeypatch)

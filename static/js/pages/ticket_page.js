@@ -28,15 +28,24 @@ function getPenaHiddenUserIds() {
 }
 
 function getPenaPlenoSummary(idx = 14) {
-    return { top: "-", pct: 0, total: 0 };
+    if (idx !== 14) return { top: "-", pct: 0, total: 0 };
+    const summary = state.data?.consenso_pleno_pena || {};
+    const topScore = Array.isArray(summary.topScore) ? summary.topScore : [];
+    const top = plenoScoreKey(topScore[0]) || "-";
+    const votes = Number(topScore[1] || 0);
+    const total = Number(summary.valid || 0);
+    return { top, votes, total, pct: total ? Math.round((votes * 100) / total) : 0 };
 }
 
 function renderPenaPleno(summary, realScore, status) {
-    return `<span class="pena-pick">—</span>`;
+    if (!summary?.total || summary.top === "-") return `<span class="pena-pick">—</span>`;
+    const detail = `${summary.top} · ${summary.votes}/${summary.total} votos`;
+    return `<span class="pena-pick ${hitClass(summary.top, realScore, status, true)}" title="${escapeHtml(detail)}">${escapeHtml(summary.top)} <small>${summary.pct}%</small></span>`;
 }
 
 function renderPenaPlenoDetail(idx = 14) {
-    return "";
+    const summary = getPenaPlenoSummary(idx);
+    return summary.total ? `${summary.top} · ${summary.votes}/${summary.total}` : "";
 }
 
 function renderTensionChip(label, sign, real, status, exactScore = false, extraClass = "", reason = "") {
@@ -45,7 +54,8 @@ function renderTensionChip(label, sign, real, status, exactScore = false, extraC
 }
 
 function getPredictionReason(preds, idx, primary, fallback) {
-    return preds?.[primary]?.razones?.[idx] || preds?.[fallback]?.razones?.[idx] || "";
+    const reasonFor = id => preds?.[id]?.razones?.[idx] || preds?.[id]?.motivos?.[idx] || "";
+    return reasonFor(primary) || reasonFor(fallback);
 }
 
 function renderTensionPenaChip(content, label) {
@@ -128,21 +138,23 @@ function renderArenaTensionBody(matches) {
         const mySign = (state.my_signs || [])[idx] || "-";
         const plenoLabel = mySign === "-" ? "Elegir" : mySign;
         const c = consenso.find(item => Number(item.id) === Number(m.id)) || { p1: 0, px: 0, p2: 0, ganador: "-" };
-        const pendingResult = Boolean(m.resultado_pendiente) || String(m.marcador || "").toLowerCase().includes("pendiente de resultado");
-        const liveMatch = isMatchLiveNow(m) && !pendingResult;
-        const scheduledMatch = isScheduledStatus(m.status) && !liveMatch && !pendingResult;
-        const score = pendingResult
-            ? (m.marcador || "Pendiente de resultado")
-            : (scheduledMatch ? formatSmartDate(m.fecha_raw, m.hora) : (m.marcador || "-"));
+        const scheduledMatch = needsFixtureSchedule(m);
+        const liveMatch = isMatchLiveNow(m) && !scheduledMatch;
+        const score = scheduledMatch ? fixtureScheduleDisplay(m) : (m.marcador || m.score || "-");
         const scoreText = liveMatch ? liveScoreDisplay(m, score) : score;
-        const isFinished = isFinishedStatus(m.status) || pendingResult;
+        const isFinished = isFinishedStatus(m.status) || isImplicitlyFinished(m);
         const values = [Number(c.p1 || 0), Number(c.px || 0), Number(c.p2 || 0)].sort((a, b) => b - a);
         const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
-        const rowClass = [councilStyle ? "is-council-row" : "", liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""), splitMatch ? "is-split-row" : ""].filter(Boolean).join(" ");
-        const statusText = scheduledMatch && !pendingResult ? score : "";
-        const scoreBadge = scheduledMatch && !pendingResult
+        const rowClass = [
+            councilStyle ? "is-council-row" : "",
+            isPleno ? "is-pleno-row" : "",
+            liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
+            splitMatch ? "is-split-row" : ""
+        ].filter(Boolean).join(" ");
+        const statusText = scheduledMatch ? score : "";
+        const scoreBadge = scheduledMatch
             ? ""
-            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : (pendingResult ? "is-pending-result" : "")}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>`;
+            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>`;
         const penaChip = isPleno
             ? renderTensionPenaChip(renderPenaPleno(getPenaPlenoSummary(idx), m.marcador, m.status), "Peña")
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
@@ -189,19 +201,16 @@ function patchTicketArena() {
     for (const [idx, match] of matches.entries()) {
         const row = rows.find(item => Number(item.dataset.ticketRow) === idx);
         if (!row) continue;
-        const pendingResult = Boolean(match.resultado_pendiente) || String(match.marcador || "").toLowerCase().includes("pendiente de resultado");
-        const liveMatch = isMatchLiveNow(match) && !pendingResult;
-        const scheduledMatch = isScheduledStatus(match.status) && !liveMatch && !pendingResult;
-        const isFinished = isFinishedStatus(match.status) || pendingResult;
-        const score = pendingResult
-            ? (match.marcador || "Pendiente de resultado")
-            : (scheduledMatch ? formatSmartDate(match.fecha_raw, match.hora) : (match.marcador || "-"));
+        const scheduledMatch = needsFixtureSchedule(match);
+        const liveMatch = isMatchLiveNow(match) && !scheduledMatch;
+        const isFinished = isFinishedStatus(match.status) || isImplicitlyFinished(match);
+        const score = scheduledMatch ? fixtureScheduleDisplay(match) : (match.marcador || match.score || "-");
         const scoreText = liveMatch ? liveScoreDisplay(match, score) : score;
         const statusCell = row.querySelector("[data-ticket-status]");
         if (!statusCell) continue;
-        statusCell.innerHTML = scheduledMatch && !pendingResult
+        statusCell.innerHTML = scheduledMatch
             ? `<span class="tension-status">${escapeHtml(score)}</span>`
-            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : (pendingResult ? "is-pending-result" : "")}"${liveScoreAttrs(match, liveMatch)}>${escapeHtml(scoreText)}</span>`;
+            : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(match, liveMatch)}>${escapeHtml(scoreText)}</span>`;
         row.classList.toggle("is-live-row", liveMatch);
         row.classList.toggle("is-finished-row", isFinished);
     }

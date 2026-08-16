@@ -470,6 +470,13 @@ body.quiniela-focus .tension-row td {
     font-size: 0.55rem;
 }
 
+/* El Pleno al 15 muestra marcadores (p. ej. 2-1), no solo un signo 1X2. */
+.tension-row.is-pleno-row .tension-chip .ia-signo {
+    width: auto;
+    min-width: 30px;
+    padding-inline: 3px;
+}
+
 .tension-chip-user .action-buttons {
     gap: 2px;
 }

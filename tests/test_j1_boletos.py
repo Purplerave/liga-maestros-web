@@ -26,6 +26,7 @@ from liga_maestros.db.migrations import (
 from liga_maestros.routes import liga_data
 
 COPILOT_SIGNOS = ["1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "1", "1", "1", "1", "1-0"]
+PROGRAMA_SIGNOS = ["1X", "1", "2", "1X", "1", "1", "1", "1X", "1", "1", "1", "1", "1", "1", "2-1"]
 
 PENA_12 = {
     "chipi",
@@ -60,11 +61,15 @@ def _test_app(tmp_path, monkeypatch):
 def test_arena_file_has_copilot_real_ticket_and_12_pena_members():
     with open("data/inbox/JORNADA_1_LM_ARENA.json", encoding="utf-8") as fh:
         arena = json.load(fh)
+    with open("data/predicciones_J1.json", encoding="utf-8") as fh:
+        programa_source = json.load(fh)
     assert arena["jornada"] == 1
     pronosticos = {p["participante_id"]: p for p in arena["pronosticos"]}
 
     assert pronosticos["copilot"]["signos"] == COPILOT_SIGNOS
     assert pronosticos["copilot"]["grupo"] == "maestro"
+    assert pronosticos["programa"]["signos"] == PROGRAMA_SIGNOS
+    assert programa_source["programa"]["signos"] == PROGRAMA_SIGNOS
 
     pena = {uid for uid, p in pronosticos.items() if p["grupo"] == "pena"}
     maestros = {uid for uid, p in pronosticos.items() if p["grupo"] == "maestro"}
@@ -92,6 +97,7 @@ def test_ensure_jornada_1_imports_boletos_from_arena_file():
     for row in rows:
         by_user.setdefault(row["user_id"], []).append(row["signo"])
     assert by_user["copilot"] == COPILOT_SIGNOS
+    assert by_user["programa"] == PROGRAMA_SIGNOS
     assert set(by_user) == MAESTROS | PENA_12
 
     # Idempotente: re-ejecutar no duplica ni cambia los boletos
@@ -193,14 +199,19 @@ def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, 
     assert payload["partidos"][14]["local"] == "Deportivo"
 
     copilot = payload["predicciones_actuales"]["copilot"]["signos"]
+    programa = payload["predicciones_actuales"]["programa"]["signos"]
     assert copilot == COPILOT_SIGNOS
+    assert programa == PROGRAMA_SIGNOS
 
     consenso = payload["consenso_pena"]
     assert len(consenso) == 14
     assert all(item["total"] == 12 for item in consenso)
     assert all(item["fuente"] == "pena" for item in consenso)
 
-    # Los maestros son públicos antes del cierre; La Peña no se filtra (privacidad)
+    # Los maestros son públicos antes del cierre; La Peña solo se revela una vez cerrada.
     predicciones = payload["predicciones_actuales"]
     assert {"copilot", "gemini", "claude", "grok", "chatgpt"} <= set(predicciones)
-    assert PENA_12.isdisjoint(predicciones)
+    if payload["is_locked"]:
+        assert PENA_12 <= set(predicciones)
+    else:
+        assert PENA_12.isdisjoint(predicciones)

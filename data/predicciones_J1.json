@@ -3,6 +3,27 @@
   "temporada": "2026-2027",
   "generado_en": "2026-08-12T12:00:00",
   "nota": "Boletos reales de la Jornada 1 (temporada 2026-2027). Copilot es el boleto real aportado por el usuario; Sesudo es el Deep Search del 12/08; el resto proviene de data/jornada 1.txt. MrPurple rellena su quiniela en la web.",
+  "programa": {
+    "signos": [
+      "1X",
+      "1",
+      "2",
+      "1X",
+      "1",
+      "1",
+      "1",
+      "1X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2-1"
+    ],
+    "nombre": "PROGRAMA",
+    "puntos_jornada": 0
+  },
   "gemini": {
     "signos": [
       "1",
