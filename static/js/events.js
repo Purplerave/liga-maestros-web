@@ -224,6 +224,23 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
     });
 }
 
+function resultsSignature(data) {
+    // Marcador y estado de los 15 partidos: cambia en cuanto entra un gol o
+    // un partido pasa a finalizado.
+    return (data?.partidos || [])
+        .map(match => [match.id, match.status || "", match.goles_local ?? "", match.goles_visitante ?? ""].join(":"))
+        .join("|");
+}
+
+function standingsSignature(data) {
+    const leagues = data?.multi_league_standings?.leagues || [];
+    return leagues
+        .map(league => `${league.name}:` + (league.teams || [])
+            .map(team => `${team.n}${team.pj}${team.pts}${team.gf}${team.gc}${team.en_juego ? "L" : ""}`)
+            .join(","))
+        .join("|");
+}
+
 async function refreshLiveSnapshot() {
     if (!state.data || document.hidden) return;
     try {
@@ -242,18 +259,29 @@ async function refreshLiveSnapshot() {
             .sort()
             .join("|");
         const previousSignature = liveSignature(state.data);
+        const previousResults = resultsSignature(state.data);
+        const previousStandings = standingsSignature(state.data);
         const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
         if (!response.ok) return;
         const freshData = await response.json();
         if (String(freshData.jornada || "") !== String(state.jornada || "")) return;
-        const hadLive = hasLiveLeagueMatches();
         const nextSignature = liveSignature(freshData);
+        const nextResults = resultsSignature(freshData);
+        const nextStandings = standingsSignature(freshData);
         state.data = freshData;
         logoAliasIndex = null;
         logoCache.clear();
-        const hasLive = hasLiveLeagueMatches();
-        if (!hadLive && !hasLive) return;
-        if (previousSignature === nextSignature) return;
+        // Un partido que termina deja de ser "live": si solo mirasemos los
+        // partidos en juego, el resultado final y la clasificacion nunca se
+        // repintarian. Por eso tambien se comparan marcadores y clasificacion.
+        const changed = previousSignature !== nextSignature
+            || previousResults !== nextResults
+            || previousStandings !== nextStandings;
+        if (!changed) return;
+        // La Peña se recalcula con cada resultado cerrado.
+        if (previousResults !== nextResults && typeof ensureContestData === "function") {
+            try { await ensureContestData({ force: true }); } catch { /* no bloquea el repintado */ }
+        }
         if (state.currentFilter === "LIVE" && patchLiveArena()) return;
         if (state.currentFilter === "TICKET" && patchTicketArena()) return;
         const pageX = window.scrollX;
@@ -293,7 +321,34 @@ let liveRefreshTimer = null;
 let liveTransportKey = "";
 
 function livePollDelay() {
-    return hasLiveLeagueMatches() ? 30000 : 120000;
+    // 30s con partidos en juego. Tambien se refresca rapido en la ventana de
+    // una jornada (desde 10 min antes del primer saque hasta que todos han
+    // terminado): si solo mirasemos "hay algo en vivo" el primer gol del dia
+    // podia tardar dos minutos en aparecer.
+    if (hasLiveLeagueMatches()) return 30000;
+    return isJornadaWindowOpen() ? 45000 : 180000;
+}
+
+function isJornadaWindowOpen() {
+    const partidos = state.data?.partidos || [];
+    if (!partidos.length) return false;
+    const now = Date.now();
+    return partidos.some(match => {
+        const status = String(match.status || "").toUpperCase();
+        if (["FT", "FINISHED", "TERMINADO"].includes(status)) return false;
+        const kickoff = matchKickoffTime(match);
+        if (!kickoff) return false;
+        // Desde 10 minutos antes del saque hasta 3h despues.
+        return now >= kickoff - 600000 && now <= kickoff + 10800000;
+    });
+}
+
+function matchKickoffTime(match) {
+    const date = String(match.fecha_raw || "").slice(0, 10);
+    const time = String(match.hora || "").slice(0, 5);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return null;
+    const parsed = Date.parse(`${date}T${time}:00`);
+    return Number.isNaN(parsed) ? null : parsed;
 }
 
 function scheduleLivePoll(delay = livePollDelay()) {

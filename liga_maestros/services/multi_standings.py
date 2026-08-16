@@ -99,8 +99,12 @@ def build_multi_league_standings(official_standings, team_logos=None):
                     "dg": gf - gc,
                     "pts": row.get("pts", 0),
                     "logo": team_logos.get(normalize_team_key(row.get("n", "")), ""),
-                    "form": [],
-                    "streak": row.get("racha", ""),
+                    # Form and streak are computed by the standings engine from
+                    # our own match ledger; the provider does not send them.
+                    "form": list(row.get("form") or []),
+                    "streak": row.get("streak") or row.get("racha") or "",
+                    "en_juego": bool(row.get("en_juego")),
+                    "marcador_live": row.get("marcador_live") or "",
                 }
             )
         leagues.append({"name": label, "teams": teams, "source": "official"})
