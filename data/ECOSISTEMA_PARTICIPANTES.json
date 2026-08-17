@@ -46,7 +46,8 @@
     "jimmy",
     "luzia",
     "luna",
-    "erniebot"
+    "erniebot",
+    "sonia"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -79,6 +80,7 @@
     "jimmy": "Jimmy",
     "luzia": "Luzia",
     "luna": "Luna",
-    "erniebot": "ErnieBot"
+    "erniebot": "ErnieBot",
+    "sonia": "Sonia"
   }
 }

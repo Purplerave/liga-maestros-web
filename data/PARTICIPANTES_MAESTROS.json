@@ -143,5 +143,14 @@
     "puntos_totales": 6,
     "activo": true,
     "descripcion": "Participante de La Pena."
+  },
+  {
+    "id": "sonia",
+    "nombre": "Sonia",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Participante de La Pena."
   }
 ]
