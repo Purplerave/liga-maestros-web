@@ -65,6 +65,55 @@ function standingsZone(idx, total, league = "primera") {
     return "mid";
 }
 
+/* Las letras que circulan por dentro (W/D/L) son codigo de maquina.
+   En pantalla se muestran en espanol, como en la cabecera G/E/P:
+   G = ganado, E = empatado, P = perdido. */
+function formOutcomeLetter(code) {
+    if (code === "W") return "G";
+    if (code === "D") return "E";
+    if (code === "L") return "P";
+    return String(code || "");
+}
+
+function formOutcomeTitle(code) {
+    if (code === "W") return "Ganado";
+    if (code === "D") return "Empatado";
+    if (code === "L") return "Perdido";
+    return "";
+}
+
+/* La racha llega como "3W", "2D"... se traduce solo la letra final. */
+function spanishStreak(streak) {
+    const raw = String(streak || "").trim();
+    if (!raw) return "";
+    return raw.replace(/([WDL])$/i, m => formOutcomeLetter(m.toUpperCase()));
+}
+
+function streakOutcomeTitle(streak) {
+    const match = String(streak || "").match(/([WDL])$/i);
+    return match ? formOutcomeTitle(match[1].toUpperCase()) : "";
+}
+
+/* Procedimiento de cada liga: que significa cada zona coloreada. */
+function standingsLegend(zoneKey, leagueName = "") {
+    const name = String(leagueName || "").toUpperCase();
+    if (zoneKey === "segunda") {
+        return `
+        <div class="standings-legend" role="note">
+            <span class="legend-item zone-direct"><i aria-hidden="true"></i>1º y 2º: ascenso directo a Primera</span>
+            <span class="legend-item zone-playoff"><i aria-hidden="true"></i>3º a 6º: playoff de ascenso (semifinales y final)</span>
+            <span class="legend-item zone-danger"><i aria-hidden="true"></i>Últimos 4: descenso</span>
+        </div>`;
+    }
+    const descenso = name.includes("LA LIGA") ? "descienden a Segunda" : "descenso";
+    return `
+        <div class="standings-legend" role="note">
+            <span class="legend-item zone-champions"><i aria-hidden="true"></i>1º a 4º: Champions League</span>
+            <span class="legend-item zone-europe"><i aria-hidden="true"></i>5º y 6º: Europa League</span>
+            <span class="legend-item zone-danger"><i aria-hidden="true"></i>Últimos 3: ${descenso}</span>
+        </div>`;
+}
+
 function standingsFreshnessLabel() {
     // La cabecera debe decir la verdad: cuantas jornadas se han jugado y si
     // hay partidos en curso ahora mismo (que aun no suman puntos). Se usa el
@@ -178,12 +227,13 @@ function renderMultiLeagueTable(league, liveResults = {}, finishedTeams = new Se
                         <td>${team.gc}</td>
                         <td>${team.dg}</td>
                         <td class="full-points">${team.pts}</td>
-                        ${showStreak ? `<td>${escapeHtml(team.streak || "")}</td>` : ""}
+                        ${showStreak ? `<td title="${escapeHtml(streakOutcomeTitle(team.streak))}">${escapeHtml(spanishStreak(team.streak))}</td>` : ""}
                         ${showForm ? `<td class="form-cell">${formArr.map(f => {
                             const cls = f === "W" ? "form-win" : f === "D" ? "form-draw" : "form-loss";
-                            return `<span class="form-dot ${cls}">${f}</span>`;
+                            return `<span class="form-dot ${cls}" title="${escapeHtml(formOutcomeTitle(f))}">${escapeHtml(formOutcomeLetter(f))}</span>`;
                         }).join("")}</td>` : ""}
                     </tr>`;
             }).join("")}</tbody>
-        </table>`;
+        </table>
+        ${standingsLegend(zoneKey, league.name)}`;
 }
