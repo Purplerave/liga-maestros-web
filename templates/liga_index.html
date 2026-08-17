@@ -59,7 +59,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/ticket_compact.css', v=assets_v ~ '-ticket-mobile-cards-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/typewriter_system.css', v=assets_v ~ '-typewriter-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/surface_shape.css', v=assets_v ~ '-surface-shape-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-64') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-65') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/typography.css', v=assets_v ~ '-typography-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
@@ -113,16 +113,6 @@
 
         </header>
 
-        <div id="cp-scorebar" class="cp-scorebar" aria-live="polite" hidden>
-            <span>HUMANOS <b id="cp-scorebar-human">—</b> vs <b id="cp-scorebar-ia">—</b> MÁQUINAS</span>
-            <div class="cp-scorebar-track" aria-hidden="true"><i id="cp-scorebar-pena" class="is-pena" style="width:50%"></i><i id="cp-scorebar-ia-bar" class="is-ia" style="width:50%"></i></div>
-            <small id="cp-scorebar-label">Jornada —</small>
-        </div>
-        <div id="cp-urgency" class="cp-urgency" hidden role="status" aria-live="assertive">
-            <span class="cp-urgency-dot" aria-hidden="true"></span>
-            <span id="cp-urgency-text">Te falta firmar — cierra en 00m 00s</span>
-            <button type="button" class="cp-urgency-cta" data-page-action="TICKET">Firmar ahora →</button>
-        </div>
         <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
             <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">⌂</i><span>Portada</span></button>
             <button type="button" data-page-action="TICKET"><i class="nav-ico" aria-hidden="true">1X2</i><span>Quiniela</span></button>

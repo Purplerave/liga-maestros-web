@@ -78,6 +78,6 @@ def test_cover_version_bumped_after_change():
     """El cache-bust de la portada debe haber sido bumpeado para invalidar la caché."""
     nav = (ROOT / "static" / "js" / "navigation.js").read_text(encoding="utf-8")
     template = TEMPLATE.read_text(encoding="utf-8")
-    # Tras los cambios, ambos deben apuntar al menos a 64
-    assert "cover-page-64" in nav
-    assert "cover-hero-64" in template
+    # Tras los cambios, ambos deben apuntar al menos a 65
+    assert "cover-page-65" in nav
+    assert "cover-hero-65" in template

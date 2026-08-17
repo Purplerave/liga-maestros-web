@@ -2,6 +2,18 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-17 — Portada: panel de control compacto
+
+### Cambiado
+
+- La portada deja el hero-póster enorme y pasa a un **panel de control** más
+  pequeño: franja de comando (marca + cierre + CTAs), tablero de 3 cartas
+  (duelo, partido, voz del duelo) y operativa abajo.
+- Scorebar y banner de urgencia salen del chrome del `app-shell` (rompían el
+  grid al aparecer) y viven dentro del propio panel.
+- Titular, escudo y countdown se reducen para que quepa todo sin aplastar
+  las cartas.
+
 ## 2026-08-17 — Forma y racha completas en la clasificación
 
 ### Corregido
