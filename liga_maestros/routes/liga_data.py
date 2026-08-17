@@ -8,6 +8,7 @@ import config
 
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
+from ..schemas import validate_liga_data
 from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
@@ -15,6 +16,7 @@ from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
+from ..services.trash_talk import build_trash_talk
 from ..utils import load_team_logos
 
 bp = Blueprint("liga_data", __name__)
@@ -56,36 +58,45 @@ def get_liga_data():
         )
 
         participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
-        return jsonify(
-            {
-                "jornada": jornada,
-                "jornada_liga": jornada_liga,
-                "max_jornada": max_jornada,
-                "jornadas_disponibles": jornadas_disponibles,
-                "today_madrid": today_madrid(),
-                "is_locked": is_locked,
-                "edit_deadline": _format_dt(close_info.get("close_at")),
-                "kickoff_at": _format_dt(close_info.get("first_kickoff")),
-                "partidos": partidos,
-                "all_league_matches": all_league_matches,
-                "live_matches": live_matches,
-                "standings": standings,
-                "multi_league_standings": multi_league_standings,
-                "participant_contract": participant_contract,
-                "match_info": match_info,
-                "predicciones_actuales": predictions_payload["predicciones_actuales"],
-                "consenso_pena": predictions_payload["consenso_pena"],
-                "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
-                "ranking_maestros": predictions_payload["ranking_maestros"],
-                "auth_enabled": config.GOOGLE_AUTH_ENABLED,
-                "live_stream_enabled": config.LIVE_SSE_ENABLED,
-                "is_admin": is_admin_request(),
-                "ticket_policy": {
-                    "max_dobles": config.MAX_DOBLES_PER_TICKET,
-                    "max_triples": config.MAX_TRIPLES_PER_TICKET,
-                },
-            }
+        trash_talk = _build_trash_talk_payload(
+            jornada=jornada,
+            ranking=predictions_payload.get("ranking_maestros", {}),
+            participant_contract=participant_contract,
         )
+        response_payload = {
+            "jornada": jornada,
+            "jornada_liga": jornada_liga,
+            "max_jornada": max_jornada,
+            "jornadas_disponibles": jornadas_disponibles,
+            "today_madrid": today_madrid(),
+            "is_locked": is_locked,
+            "edit_deadline": _format_dt(close_info.get("close_at")),
+            "kickoff_at": _format_dt(close_info.get("first_kickoff")),
+            "partidos": partidos,
+            "all_league_matches": all_league_matches,
+            "live_matches": live_matches,
+            "standings": standings,
+            "multi_league_standings": multi_league_standings,
+            "participant_contract": participant_contract,
+            "match_info": match_info,
+            "predicciones_actuales": predictions_payload["predicciones_actuales"],
+            "consenso_pena": predictions_payload["consenso_pena"],
+            "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
+            "ranking_maestros": predictions_payload["ranking_maestros"],
+            "trash_talk": trash_talk,
+            "auth_enabled": config.GOOGLE_AUTH_ENABLED,
+            "live_stream_enabled": config.LIVE_SSE_ENABLED,
+            "is_admin": is_admin_request(),
+            "ticket_policy": {
+                "max_dobles": config.MAX_DOBLES_PER_TICKET,
+                "max_triples": config.MAX_TRIPLES_PER_TICKET,
+            },
+        }
+        # Validación de contrato (no rompe la respuesta si hay drift, solo loguea)
+        validated, schema_error = validate_liga_data(response_payload)
+        if schema_error:
+            logger.info("api_liga_data served with schema drift: %s", schema_error)
+        return jsonify(validated)
     except Exception as exc:
         logger.exception("api_liga_data failed")
         return jsonify({"status": "error", "message": str(exc)}), 500
@@ -160,6 +171,51 @@ def _load_and_repair_match_info(jornada, partidos):
         )
         info["detalle"] = detail
     return match_info
+
+
+def _bando_state_for(ranking, participant_contract):
+    """Calcula el estado del duelo (Peña vs IA) replicando la lógica del frontend.
+
+    Devuelve: va_ganando (Peña), va_perdiendo (Peña), empate, primera.
+    Usa las medias de puntos por jornada (``jornada_live`` o ``jornada``) sobre
+    el conjunto de ids oficiales y de La Peña. Robusto ante ranking vacío.
+    """
+    if not ranking or not participant_contract:
+        return "primera"
+    ai_ids = {str(col.get("id", "")).lower() for col in participant_contract.get("visible_ai_columns", [])}
+    pena_ids = {str(uid).lower() for uid in participant_contract.get("pena_ids", [])}
+    human_total, human_count, ai_total, ai_count = 0, 0, 0, 0
+    for raw_uid, values in ranking.items():
+        uid = str(raw_uid or "").lower()
+        jornada_pts = values.get("jornada_live") if values.get("jornada_live") is not None else values.get("jornada", 0)
+        try:
+            pts = int(jornada_pts or 0)
+        except (TypeError, ValueError):
+            pts = 0
+        if uid in ai_ids:
+            ai_total += pts
+            ai_count += 1
+        elif uid in pena_ids:
+            human_total += pts
+            human_count += 1
+    if human_count == 0 and ai_count == 0:
+        return "primera"
+    if human_count == 0 or ai_count == 0:
+        return "primera"
+    human_avg = human_total / human_count
+    ai_avg = ai_total / ai_count
+    diff = ai_avg - human_avg
+    if diff > 0.05:
+        return "va_perdiendo"  # Peña perdiendo (IA ganando)
+    if diff < -0.05:
+        return "va_ganando"  # Peña ganando
+    return "empate"
+
+
+def _build_trash_talk_payload(*, jornada, ranking, participant_contract):
+    """Construye el payload de trash-talk para el frontend."""
+    state = _bando_state_for(ranking, participant_contract)
+    return build_trash_talk(jornada, state)
 
 
 def _refresh_issue_message(status, skipped, failures):
