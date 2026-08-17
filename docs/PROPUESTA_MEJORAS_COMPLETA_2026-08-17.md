@@ -377,4 +377,50 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 
 ---
 
-*Documento generado para servir como backlog priorizado. Se puede convertir en issues de GitHub por sección (P0-1 Countdown, P0-2 Hero copy, etc.).*
+---
+
+## 13. Seguimiento de implementación — actualizado 2026-08-17
+
+> **Estado general:** P0 Semana 1 completada en `arena/01a00ffe-liga-maestros-web`. Los 6 ítems P0 están implementados y verificados manualmente. P1/P2/P3 quedan como backlog priorizado.
+
+### 13.1 Changelog P0 — 2026-08-17 (esta sesión)
+
+| ID | Propuesta | Estado | Qué se hizo | Archivos tocados |
+|---|---|---|---|---|
+| **1.1** Countdown vivo | ✅ Hecho | `#cp-deadline` ahora hace `setInterval 1s` con formato `2h 05m 41s` (siempre con segundos), clase `is-urgent` + `animation: cp-urgentPulse` cuando `<1h`, `aria-live=assertive` y `title` dinámico. Respeta `prefers-reduced-motion`. `coverCloseLabel` sigue calculando `d/h/m` para el kicker. | `static/js/pages/cover_page.js` (`startCoverCountdown`), `static/css/cover_hero.css` (`#cp-deadline.is-urgent`, `@keyframes cp-urgentPulse`) |
+| **1.2** Hero y copy tribal | ✅ Hecho | Kicker dinámico con datos reales: `J1 · LAS MÁQUINAS NOS ESTÁN GANANDO` / `LA PEÑA VA GANANDO` / `DUELO IGUALADO` / `LAS MÁQUINAS NOS ESPERAN` (según `bando.aiAvg vs humanAvg`). Lead dinámico: `Top jornada: <nombre 3pts> · <nombre 2pts> … ¿Firmas por la humanidad y los superas?` si hay datos reales, si no fallback estático. CTA primario `Firmar por la humanidad` (nuevo) / `Revisar mi bando` (ya guardó); CTA secundario `Ver cómo van las máquinas` (con datos) / `Clasificación` (sin datos). Todo sale de `coverRankingRows()` / `coverBandoDetailed()`, nunca inventado. | `static/js/pages/cover_page.js` (`renderNewspaperCoverPageV3` — `kickerBandoLabel`, `ctaLabel`, `ctaSecondaryLabel`, `heroPitch`) |
+| **1.3** VS que pelea | ✅ Hecho | `vsBeat` (latido 1.6s) en `.cp-duel-vs`, `cornerIn`/`cornerInR` en entradas de `.cp-duel-side.is-pena` / `.is-ia`, hover que empuja 2px al rival. Todo con `@media (prefers-reduced-motion: reduce) { animation: none }`. | `static/css/cover_hero.css` (`@keyframes vsBeat`, `cornerIn`, `cornerInR`, `.cp-duel-vs`, `.cp-duel-side`) |
+| **1.4** Sticky scorebar | ✅ Hecho | Nueva franja ` #cp-scorebar` bajo el topbar: `HUMANOS <avg> vs <avg> MÁQUINAS · J<n> · <estado>` + barra `is-pena`/`is-ia` proporcional a `humanTotal/total`. Se hidrata vía `updateCpScorebar(bando, jornada)` en cada render (con `setTimeout 0`). Oculta si `total===0` (jornada no empezada). Actualiza live al cambiar `state.data`. | `templates/liga_index.html` (`#cp-scorebar`), `static/js/pages/cover_page.js` (`updateCpScorebar`), `static/css/cover_hero.css` (`.cp-scorebar`, `.cp-scorebar-track`) |
+| **1.5** Progreso 7/15 | ✅ Hecho (mejorado) | `cp-user-progress` ya existía (`7/15` + barra). Ahora: tracking de `_prevUserDone`, `triggerProgressPop()` hace `pop` (`@keyframes pop 0.3s`) en cada signo nuevo y `confetti()` al llegar a 15/15. Respeta reduced-motion vía CSS existente. | `static/js/pages/cover_page.js` (`triggerProgressPop`, `_prevUserDone`), `static/css/cover_hero.css` (`@keyframes pop`, `.is-pop`) |
+| **1.6** Porra “mojarse” | ✅ Hecho | Estado vacío cambiado de `Elige tu partido — +2 pts si aciertas` a `Los maestros ya se han mojado. ¿Y tú?` + step `¡Mójate!` + hint `Elige tu partido — +2 pts si clavas el marcador` con clase `is-cta` dorada. Estado con porra mantiene `Tu porra: X-Y guardado`. | `static/js/pages/cover_page.js` (`hydrateCoverPorra`), `static/css/cover_hero.css` (`.cp-porra-change.is-cta`) |
+
+**Cómo probar P0:**
+1. `python -m http.server` o Flask `app.py` → abrir `/` en desktop y móvil.
+2. Ver kicker `J1 · LAS MÁQUINAS NOS ESPERAN` (sin datos) o `LAS MÁQUINAS NOS ESTÁN GANANDO` (con ranking).
+3. Esperar tick de `#cp-deadline` — debe cambiar cada segundo con `h m s`; forzar `edit_deadline` a `now+30min` para ver `is-urgent` rojo + pulso.
+4. Hacer hover sobre duelo Peña vs IA → VS late, lados se empujan.
+5. Marcar signos en quiniela → `Tu quiniela 3/15 → 4/15` hace pop; al 15/15 confeti.
+6. Sin porra → ver `Los maestros ya se han mojado. ¿Y tú?` + `¡Mójate!`.
+7. Sticky bar aparece solo cuando hay puntos reales (`humanTotal+aiTotal>0`).
+
+### 13.2 Qué queda pendiente (próximos pasos según el doc)
+
+- **P1 2.1 Tarjeta compartible:** `static/js/ticket_image.js` ya genera imagen de quiniela, pero falta la variante `Jornada N — Tú vs Grok vs Claude` con puntos + OG dinámica. Es el siguiente multiplicador viral.
+- **P1 2.3 Banner <2h + recordatorio:** falta banner in-app `Te falta firmar y cierra en 1h 12m` cuando `!saved && diff<2h`. Fácil tras P0.
+- **P1 3.1 / 3.3 / 6.x:** JSON Schema, health enriquecido, Makefile/pre-commit — previstos Semana 3. No bloquean conversión.
+- **P2 4.2 / 5.x:** Accesibilidad y observabilidad — mantener como deuda técnica vigilada.
+
+### 13.3 Decisiones tomadas en esta iteración
+
+- Se mantuvo `H1 = LIGA DE MAESTROS` (marca) y se movió el drama a kicker + lead. Cambiar el H1 a `Las máquinas nos están ganando` se probó y se descartó por pérdida de marca; se puede A/B testear luego.
+- Kicker ya no es solo `Quiniela 1` sino `J1 · <estado del duelo>` para que incluso sin abrir el duelo se vea el drama.
+- `is-urgent` ahora anima también `cp-countdown-timer .cp-digit` y `#cp-deadline` para coherencia visual.
+- Se añadió `aria-live` dinámico (`polite` vs `assertive` bajo 1h) para accesibilidad.
+
+### 13.4 Métricas a medir tras deploy (ver §9)
+
+Activar en analytics: `cta_click` (`Firmar por la humanidad` vs `Revisar mi bando`), `deadline_impression_urgent`, `porra_mojarse_click`, `scorebar_view`. Comparar baseline pre-P0 con 7 días post-P0.
+
+---
+
+*Documento vivo: actualizar este §13 en cada PR que cierre un ítem P0/P1. Fuente de verdad del backlog sigue siendo §1-§12.*

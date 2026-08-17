@@ -31,15 +31,18 @@ function startCoverCountdown() {
         const deadline = document.querySelector("#cp-deadline");
         if (!deadline) return;
         const raw = (state && state.data && (state.data.edit_deadline || state.data.kickoff_at || "")) || "";
-        if (!raw) { deadline.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
+        if (!raw) { deadline.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; deadline.setAttribute("aria-live","polite"); return; }
         const target = new Date(String(raw).replace(" ", "T"));
         if (Number.isNaN(target.getTime())) { deadline.textContent = state?.data?.is_locked ? "CERRADA" : "ABIERTA"; return; }
         const diff = target.getTime() - Date.now();
-        if (diff <= 0 || state.data.is_locked) { deadline.textContent = "CERRADA"; deadline.classList.add("is-urgent"); return; }
+        if (diff <= 0 || state.data.is_locked) { deadline.textContent = "CERRADA"; deadline.classList.add("is-urgent"); deadline.setAttribute("aria-live","assertive"); return; }
         const s = Math.max(0, Math.floor(diff / 1000));
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-        deadline.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+        // P0: formato con segundos siempre vivo
+        deadline.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
         deadline.classList.toggle("is-urgent", diff < 3_600_000);
+        deadline.setAttribute("aria-live", diff < 3_600_000 ? "assertive" : "polite");
+        deadline.setAttribute("title", h > 0 ? `Cierre en ${h} horas ${m} minutos` : `Cierre en ${m} minutos`);
     };
     tick(); setInterval(tick, 1000);
 }
@@ -88,6 +91,37 @@ if (document.readyState === "loading") {
 } else {
     startCoverCountdown();
     startSeasonCountdown();
+}
+
+function updateCpScorebar(bando, jornada) {
+    const bar = document.getElementById("cp-scorebar");
+    if (!bar) return;
+    const total = (bando.humanTotal || 0) + (bando.aiTotal || 0);
+    if (total === 0) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const hEl = document.getElementById("cp-scorebar-human");
+    const iaEl = document.getElementById("cp-scorebar-ia");
+    const penaBar = document.getElementById("cp-scorebar-pena");
+    const iaBar = document.getElementById("cp-scorebar-ia-bar");
+    const label = document.getElementById("cp-scorebar-label");
+    if (hEl) hEl.textContent = bando.humanAvg.toFixed(1).replace(".0","");
+    if (iaEl) iaEl.textContent = bando.aiAvg.toFixed(1).replace(".0","");
+    const pct = total ? (bando.humanTotal / total) * 100 : 50;
+    if (penaBar) penaBar.style.width = Math.max(8,Math.min(92,pct)).toFixed(1)+"%";
+    if (iaBar) iaBar.style.width = Math.max(8,Math.min(92,100-pct)).toFixed(1)+"%";
+    if (label) label.textContent = `J${jornada || "—"} · ${bando.aiAvg > bando.humanAvg ? "van ganando máquinas" : bando.humanAvg > bando.aiAvg ? "vamos ganando" : "empate"}`;
+}
+
+let _prevUserDone = -1;
+function triggerProgressPop(done) {
+    if (_prevUserDone !== -1 && done !== _prevUserDone && done > 0) {
+        requestAnimationFrame(() => {
+            const el = document.querySelector(".cp-user-progress strong");
+            if (el) { el.classList.remove("is-pop"); void el.offsetWidth; el.classList.add("is-pop"); }
+            if (done === 15 && typeof confetti === "function") { try{ confetti(); }catch(e){} }
+        });
+    }
+    _prevUserDone = done;
 }
 
 function loadSeasonSummary() {
@@ -246,12 +280,13 @@ function hydrateCoverPorra(data) {
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const leaders = (data.distribution || []).slice(0, 3);
     const hint = data.hint || "Marcador exacto: +2 puntos.";
-    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Elige tu partido — +2 pts si aciertas";
+    // P0 1.6: copy de “mojarse” más tribal
+    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Los maestros ya se han mojado. ¿Y tú?";
     const changes = data.my_changes || 0;
     const jornadaLocked = data.jornada_locked || false;
 
     if (hasMine) updateCoverPorraStep(`${Number(mine.goles_local)}-${Number(mine.goles_visitante)} guardado`, "done");
-    else updateCoverPorraStep(data.locked ? "Cerrada" : "Elige marcador");
+    else updateCoverPorraStep(data.locked ? "Cerrada" : "¡Mójate!");
 
     let changeInfo = "";
     if (hasMine && !jornadaLocked) {
@@ -260,6 +295,8 @@ function hydrateCoverPorra(data) {
         } else {
             changeInfo = `<span class="cp-porra-change locked">Ya no puedes cambiar</span>`;
         }
+    } else if (!hasMine && !data.locked) {
+        changeInfo = `<span class="cp-porra-change is-cta">Elige tu partido — +2 pts si clavas el marcador</span>`;
     }
     const porraHintHtml = !hasMine && !data.locked ? `<div class="cp-porra-hint">${escapeHtml(hint)}</div>` : "";
 
@@ -295,11 +332,17 @@ function renderNewspaperCoverPageV3() {
         return penaIds.has(String(r.uid).toLowerCase());
     }).sort((a,b) => b.total - a.total).slice(0,3);
 
-    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar quiniela" : "Jugar quiniela");
+    const isFirstOfficial = rankingRows.length === 0 || (bando.humanTotal === 0 && bando.aiTotal === 0) || collective.played === 0;
+    // P0 1.2: CTAs tribales + P0 1.4 datos reales para kicker
+    const hasRealBando = !isFirstOfficial && (bando.humanTotal + bando.aiTotal) > 0;
+    const kickerBandoLabel = hasRealBando
+        ? (bando.aiAvg > bando.humanAvg + 0.05 ? "LAS MÁQUINAS NOS ESTÁN GANANDO" : bando.humanAvg > bando.aiAvg + 0.05 ? "LA PEÑA VA GANANDO" : "DUELO IGUALADO")
+        : `JORNADA ${escapeHtml(String(jornada || "1"))} · LAS MÁQUINAS NOS ESPERAN`;
+    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar mi bando" : "Firmar por la humanidad");
+    const ctaSecondaryLabel = hasRealBando ? "Ver cómo van las máquinas" : "Clasificación";
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
     const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
-    const isFirstOfficial = rankingRows.length === 0 || bando.humanTotal === 0 && bando.aiTotal === 0 || collective.played === 0;
 
     // Portada v12 — narrativa corta + duelo + partido + operativa
     const seasonLabel = "Temporada 26/27";
@@ -396,6 +439,8 @@ function renderNewspaperCoverPageV3() {
     }
 
     const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
+    // P0 1.4 + 1.5: actualizar scorebar y animar progreso
+    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); }, 0);
     const userProgressHtml = state.user ? `
         <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
             <span>Tu quiniela</span>
@@ -427,26 +472,32 @@ function renderNewspaperCoverPageV3() {
             <p class="cp-empty">Los partidos se publicarán con el cierre de la jornada anterior.</p>
         </article>`;
 
+    // P0 1.2 hero pitch dinámico con datos reales
+    const top3Names = rankingRows.slice(0,3).map(r=> `${escapeHtml(r.name)} ${r.jornada}pts`).join(" · ");
+    const heroPitch = hasRealBando && top3Names
+        ? `Top jornada: ${top3Names}. ¿Firmas por la humanidad y los superas?`
+        : `Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.`;
+    const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
     return `<div class="cp">
         <div class="cp-main">
             <header class="cp-hero">
                 <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72">
                 <div class="cp-kicker">
-                    <span>Quiniela ${escapeHtml(String(jornada || "1"))}</span>
+                    <span>${heroKickerJornada} · ${escapeHtml(kickerBandoLabel)}</span>
                     <i class="cp-kicker-dot"></i>
-                    <span id="cp-deadline">${escapeHtml(statusLabel)}</span>
+                    <span id="cp-deadline" aria-live="polite">${escapeHtml(statusLabel)}</span>
                     ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
                 </div>
                 <div class="cp-hero-tagline"><b>1X2</b> · La Peña contra las máquinas</div>
                 <h1 class="cp-hero-title">
                     <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
                 </h1>
-                <p class="cp-hero-pitch">Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.</p>
+                <p class="cp-hero-pitch">${heroPitch.includes("Top jornada") ? heroPitch : escapeHtml(heroPitch)}</p>
                 ${countdownHtml}
                 ${userProgressHtml}
                 <div class="cp-actions">
                     <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    <button type="button" class="cp-secondary" data-page-action="CONTEST">Clasificación</button>
+                    <button type="button" class="cp-secondary" data-page-action="CONTEST">${escapeHtml(ctaSecondaryLabel)}</button>
                 </div>
             </header>
 
