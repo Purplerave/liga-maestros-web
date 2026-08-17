@@ -40,73 +40,202 @@ function showToast(message, type = "success") {
     }, 3200);
 }
 
+/* Nombres cortos de equipo.
+   Regla: el nombre debe leerse entero. Nunca se corta una palabra a medias
+   ("LAS PALMAS" no puede quedarse en "LAS"), nunca se deja solo el prefijo
+   juridico del club ("CE SABADELL" no puede quedarse en "CE") y dos equipos
+   distintos no pueden compartir etiqueta (Celta / Celta Fortuna). Por eso la
+   plantilla oficial de Primera y Segunda esta mapeada a mano y el fallback
+   solo se aplica a nombres desconocidos (ligas extranjeras, copas). */
+const SHORT_NAME_MAX = 14;
+
+// Ruido juridico/organizativo que no identifica al club.
+const SHORT_NAME_NOISE = [
+    "FC", "CF", "CD", "CE", "CP", "UD", "UE", "SD", "AD", "CA", "RC", "RCD", "SAD",
+    "BP", "B.P.", "AC", "CFS", "SAF", "FUTBOL", "BALOMPIE", "CLUB"
+];
+
+const SHORT_NAME_EXACT = {
+    "CLUB ATLETICO DE MADRID": "AT. MADRID",
+    "CLUB ATLÉTICO DE MADRID": "AT. MADRID",
+    "REAL MADRID C.F.": "R. MADRID",
+    "F.C. BARCELONA": "BARCA",
+    "ATHLETIC CLUB BILBAO": "ATHLETIC",
+    "REAL SOCIEDAD DE FUTBOL": "R. SOCIEDAD",
+    "REAL SOCIEDAD DE FÚTBOL": "R. SOCIEDAD",
+    "VILLARREAL C.F.": "VILLARREAL",
+    "REAL BETIS BALOMPIE": "BETIS",
+    "REAL BETIS BALOMPIÉ": "BETIS",
+    "DEPORTIVO ALAVES": "ALAVES",
+    "DEPORTIVO ALAVÉS": "ALAVES",
+    "R.C.D. ESPANYOL DE BARCELONA": "ESPANYOL",
+    "R.C.D. MALLORCA": "MALLORCA"
+};
+
+// Clave: nombre en mayusculas y sin acentos. Cubre la plantilla 2026-27 de
+// Primera y Segunda mas las variantes que envian los proveedores.
+const SHORT_NAME_NORMALIZED = {
+    // --- Primera ---
+    "ATLETICO MADRID": "AT. MADRID",
+    "ATLETICO DE MADRID": "AT. MADRID",
+    "CLUB ATLETICO DE MADRID": "AT. MADRID",
+    "AT. MADRID": "AT. MADRID",
+    "REAL MADRID": "R. MADRID",
+    "REAL MADRID C.F.": "R. MADRID",
+    "REAL MADRID CF": "R. MADRID",
+    "FC BARCELONA": "BARCA",
+    "BARCELONA": "BARCA",
+    "VILLARREAL": "VILLARREAL",
+    "VILLARREAL CF": "VILLARREAL",
+    "VILLARREAL C.F.": "VILLARREAL",
+    "REAL BETIS": "BETIS",
+    "REAL BETIS BALOMPIE": "BETIS",
+    "BETIS": "BETIS",
+    "CELTA": "CELTA",
+    "RC CELTA": "CELTA",
+    "RC CELTA DE VIGO": "CELTA",
+    "CELTA DE VIGO": "CELTA",
+    "CELTA VIGO": "CELTA",
+    "GETAFE": "GETAFE",
+    "GETAFE CF": "GETAFE",
+    "RAYO VALLECANO": "RAYO",
+    "VALENCIA": "VALENCIA",
+    "VALENCIA CF": "VALENCIA",
+    "REAL SOCIEDAD": "R. SOCIEDAD",
+    "R. SOCIEDAD": "R. SOCIEDAD",
+    "REAL SOCIEDAD DE FUTBOL": "R. SOCIEDAD",
+    "REAL SOCIEDAD DE FUTBOL SAD": "R. SOCIEDAD",
+    "ESPANYOL": "ESPANYOL",
+    "RCD ESPANYOL": "ESPANYOL",
+    "RCD ESPANYOL DE BARCELONA": "ESPANYOL",
+    "REAL CLUB DEPORTIVO ESPANYOL": "ESPANYOL",
+    "ATHLETIC": "ATHLETIC",
+    "ATHLETIC CLUB": "ATHLETIC",
+    "ATHLETIC CLUB BILBAO": "ATHLETIC",
+    "ATHLETIC BILBAO": "ATHLETIC",
+    "SEVILLA": "SEVILLA",
+    "SEVILLA FC": "SEVILLA",
+    "DEPORTIVO ALAVES": "ALAVES",
+    "ALAVES": "ALAVES",
+    "ELCHE": "ELCHE",
+    "ELCHE CF": "ELCHE",
+    "LEVANTE": "LEVANTE",
+    "LEVANTE UD": "LEVANTE",
+    "OSASUNA": "OSASUNA",
+    "CA OSASUNA": "OSASUNA",
+    "CLUB ATLETICO OSASUNA": "OSASUNA",
+    "R. RACING CLUB": "RACING",
+    "R RACING CLUB": "RACING",
+    "RACING CLUB": "RACING",
+    "RACING SANTANDER": "RACING",
+    "RACING DE SANTANDER": "RACING",
+    "REAL RACING CLUB DE SANTANDER": "RACING",
+    "R. SANTANDER": "RACING",
+    "R SANTANDER": "RACING",
+    "RC DEPORTIVO": "DEPOR",
+    "REAL CLUB DEPORTIVO": "DEPOR",
+    "DEPORTIVO LA CORUNA": "DEPOR",
+    "RC DEPORTIVO DE LA CORUNA": "DEPOR",
+    "MALAGA": "MALAGA",
+    "MALAGA CF": "MALAGA",
+    // --- Segunda ---
+    "RCD MALLORCA": "MALLORCA",
+    "MALLORCA": "MALLORCA",
+    "GIRONA": "GIRONA",
+    "GIRONA FC": "GIRONA",
+    "REAL OVIEDO": "R. OVIEDO",
+    "OVIEDO": "R. OVIEDO",
+    "UD ALMERIA": "ALMERIA",
+    "ALMERIA": "ALMERIA",
+    "UD LAS PALMAS": "LAS PALMAS",
+    "LAS PALMAS": "LAS PALMAS",
+    "CD CASTELLON": "CASTELLON",
+    "CASTELLON": "CASTELLON",
+    "BURGOS CF": "BURGOS",
+    "BURGOS": "BURGOS",
+    "SD EIBAR": "EIBAR",
+    "EIBAR": "EIBAR",
+    "CORDOBA CF": "CORDOBA",
+    "CORDOBA": "CORDOBA",
+    "ALBACETE BP": "ALBACETE",
+    "ALBACETE BALOMPIE": "ALBACETE",
+    "ALBACETE": "ALBACETE",
+    "AD CEUTA FC": "CEUTA",
+    "AD CEUTA": "CEUTA",
+    "CEUTA": "CEUTA",
+    "FC ANDORRA": "ANDORRA",
+    "ANDORRA": "ANDORRA",
+    "REAL SPORTING": "SPORTING",
+    "REAL SPORTING DE GIJON": "SPORTING",
+    "SPORTING DE GIJON": "SPORTING",
+    "SPORTING GIJON": "SPORTING",
+    "SPORTING": "SPORTING",
+    "GRANADA CF": "GRANADA",
+    "GRANADA": "GRANADA",
+    "R. SOCIEDAD B": "R. SOCIEDAD B",
+    "REAL SOCIEDAD B": "R. SOCIEDAD B",
+    "SANSE": "R. SOCIEDAD B",
+    "REAL VALLADOLID CF": "VALLADOLID",
+    "REAL VALLADOLID": "VALLADOLID",
+    "VALLADOLID": "VALLADOLID",
+    "CADIZ CF": "CADIZ",
+    "CADIZ": "CADIZ",
+    "CD LEGANES": "LEGANES",
+    "LEGANES": "LEGANES",
+    "CD TENERIFE": "TENERIFE",
+    "TENERIFE": "TENERIFE",
+    "CD ELDENSE": "ELDENSE",
+    "ELDENSE": "ELDENSE",
+    "CE SABADELL": "SABADELL",
+    "CE SABADELL FC": "SABADELL",
+    "SABADELL": "SABADELL",
+    "CELTA FORTUNA": "CELTA FORTUNA",
+    "CELTA B": "CELTA FORTUNA",
+    // --- Otros clubes espanoles habituales ---
+    "REAL ZARAGOZA": "ZARAGOZA",
+    "ZARAGOZA": "ZARAGOZA",
+    "SD HUESCA": "HUESCA",
+    "HUESCA": "HUESCA",
+    "RACING DE FERROL": "R. FERROL",
+    "RACING FERROL": "R. FERROL",
+    "CD MIRANDES": "MIRANDES",
+    "MIRANDES": "MIRANDES",
+    "CULTURAL Y DEPORTIVA LEONESA": "C. LEONESA",
+    "CULTURAL LEONESA": "C. LEONESA",
+    "C LEONESA": "C. LEONESA",
+    "C. LEONESA": "C. LEONESA"
+};
+
+function shortNameLookup(table, key) {
+    const value = table[key];
+    return typeof value === "string" ? value : "";
+}
+
+function shortNameFallback(normalized) {
+    // Un nombre desconocido (liga extranjera, copa) se limpia sin mutilarlo:
+    // se quitan las siglas del club y, si aun sobra, se abrevian las primeras
+    // palabras. La ultima palabra (la que identifica al equipo) nunca se corta;
+    // si es larga se muestra entera y es el CSS quien decide como encajarla.
+    const words = normalized.replace(/[.,]/g, " ").split(/\s+/).filter(Boolean);
+    const noise = new Set(SHORT_NAME_NOISE);
+    const meaningful = words.filter(word => !noise.has(word) && !/^\d+$/.test(word));
+    const parts = (meaningful.length ? meaningful : words).slice();
+    let label = parts.join(" ");
+    for (let i = 0; i < parts.length - 1 && label.length > SHORT_NAME_MAX; i++) {
+        parts[i] = `${parts[i].charAt(0)}.`;
+        label = parts.join(" ");
+    }
+    return label.length > SHORT_NAME_MAX ? parts[parts.length - 1] : label;
+}
+
 function getShortName(name) {
     if (!name) return "-";
-    const clean = String(name).toUpperCase();
+    const clean = String(name).trim().toUpperCase();
+    if (!clean) return "-";
     const normalized = clean.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const map = {
-        "CLUB ATLETICO DE MADRID": "AT. MADRID",
-        "CLUB ATLÉTICO DE MADRID": "AT. MADRID",
-        "REAL MADRID C.F.": "R. MADRID",
-        "F.C. BARCELONA": "BARCA",
-        "ATHLETIC CLUB BILBAO": "ATHLETIC",
-        "REAL SOCIEDAD DE FUTBOL": "R. SOCIEDAD",
-        "REAL SOCIEDAD DE FÚTBOL": "R. SOCIEDAD",
-        "VILLARREAL C.F.": "VILLARREAL",
-        "REAL BETIS BALOMPIE": "BETIS",
-        "REAL BETIS BALOMPIÉ": "BETIS",
-        "DEPORTIVO ALAVES": "ALAVES",
-        "DEPORTIVO ALAVÉS": "ALAVES",
-        "R.C.D. ESPANYOL DE BARCELONA": "ESPANYOL",
-        "R.C.D. MALLORCA": "MALLORCA"
-    };
-    const normalizedMap = {
-        "ATLETICO MADRID": "AT. MADRID",
-        "ATLETICO DE MADRID": "AT. MADRID",
-        "CLUB ATLETICO DE MADRID": "AT. MADRID",
-        "AT. MADRID": "AT. MADRID",
-        "REAL MADRID": "R. MADRID",
-        "REAL MADRID C.F.": "R. MADRID",
-        "R. SOCIEDAD": "R. SOC.",
-        "SEVILLA FC": "SEVILLA",
-        "FC BARCELONA": "BARCA",
-        "BARCELONA": "BARCA",
-        "REAL BETIS": "BETIS",
-        "VILLARREAL CF": "VILLARREAL",
-        "VILLARREAL C.F.": "VILLARREAL",
-        "REAL SOCIEDAD": "R. SOC.",
-        "REAL SOCIEDAD DE FUTBOL": "R. SOC.",
-        "REAL SOCIEDAD DE FUTBOL SAD": "R. SOC.",
-        "REAL OVIEDO": "R. OVIEDO",
-        "DEPORTIVO LA CORUNA": "DEPOR",
-        "RAYO VALLECANO": "RAYO",
-        "R. SANTANDER": "RACING",
-        "R SANTANDER": "RACING",
-        "CA OSASUNA": "OSASUNA",
-        "CLUB ATLETICO OSASUNA": "OSASUNA",
-        "REAL CLUB DEPORTIVO ESPANYOL": "ESPANYOL",
-        "REAL RACING CLUB DE SANTANDER": "RACING",
-        "R RACING CLUB": "RACING",
-        "R. RACING CLUB": "RACING",
-        "RACING CLUB": "RACING",
-        "RACING SANTANDER": "RACING",
-        "RC DEPORTIVO": "DEPOR",
-        "REAL CLUB DEPORTIVO": "DEPOR",
-        "CULTURAL Y DEPORTIVA LEONESA": "C. LEONESA",
-        "C LEONESA": "C. LEONESA",
-        "REAL SPORTING": "SPORTING",
-        "ALBACETE BP": "ALBACETE",
-        "SPORTING DE GIJON": "SPORTING",
-        "SPORTING GIJON": "SPORTING"
-    };
-    if (map[clean]) return map[clean];
-    if (normalizedMap[normalized]) return normalizedMap[normalized];
-    const words = clean.split(/\s+/).filter(Boolean);
-    if (words.length <= 1) return clean.slice(0, 10);
-    if (words[0] === "REAL" || words[0] === "CLUB" || words[0] === "DEPORTIVO") {
-        return words.slice(0, 2).join(" ").slice(0, 12);
-    }
-    return words[0].slice(0, 10);
+    return shortNameLookup(SHORT_NAME_EXACT, clean)
+        || shortNameLookup(SHORT_NAME_NORMALIZED, normalized)
+        || shortNameFallback(normalized);
 }
 
 function normalizeName(text) {

@@ -174,9 +174,11 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
         min-width: 0;
     }
 
+    /* La columna tiene que caber la etiqueta mas larga que se muestra aqui,
+       un horario completo tipo "lun 17/08 19:00h", no solo un marcador. */
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-heading,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell {
-        width: 92px;
+        width: 124px;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-predictor-heading,
@@ -249,18 +251,38 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mo
         text-align: center;
     }
 
+    /* El marcador es corto ("2-1") y puede ir en caja fija; el horario
+       ("lun 17/08 19:00h") es largo y variable, asi que su caja se adapta al
+       texto en vez de recortarlo o dejarlo salir fuera del recuadro. */
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        box-sizing: border-box;
+        max-width: 100%;
+        min-height: 24px;
+        padding: 0 6px;
+        font-size: 0.68rem;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge {
         width: 84px;
         min-width: 84px;
         height: 24px;
-        min-height: 24px;
-        padding: 0 4px;
-        font-size: 0.68rem;
-        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
+        width: auto;
+        min-width: 0;
+        height: auto;
+        font-size: 0.64rem;
+        letter-spacing: 0;
+        /* La columna esta dimensionada para el horario completo; esto es solo
+           la red de seguridad para que el texto jamas se salga del recuadro. */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip {

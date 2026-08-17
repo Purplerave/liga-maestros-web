@@ -25,11 +25,20 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import datetime
 
 import config
 
-from ..utils import normalize_team_key, parse_score_text, safe_read_json
+from ..utils import (
+    normalize_team_key,
+    parse_any_match_datetime,
+    parse_db_match_datetime,
+    parse_score_text,
+    safe_read_json,
+)
 from .jornada import CURRENT_SEASON_MAX_JORNADA
+from .live_state import closes_live, evaluate_match_state
+from .ticket import madrid_now
 
 logger = logging.getLogger(__name__)
 
@@ -215,22 +224,69 @@ def _panel_entry(match, allow_live=False):
     return entry
 
 
+def _parse_updated_at(raw):
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw))
+    except (TypeError, ValueError):
+        return None
+    return parsed.replace(tzinfo=None) if parsed.tzinfo is not None else parsed
+
+
+def _still_live(status, kickoff, minute, updated_at):
+    """True only when a LIVE row is still credible right now.
+
+    A LIVE marker alone is not enough: the collector can be down, the provider
+    can freeze a snapshot, or a rescheduled fixture can keep an old LIVE row.
+    The classification must apply exactly the same closing rules as the rest of
+    the site (``services.live_state``); otherwise a finished match keeps showing
+    its provisional score next to a team that has already been given its points.
+    """
+    if not is_live_status(status):
+        return False
+    decision = evaluate_match_state(
+        status,
+        kickoff,
+        madrid_now().replace(tzinfo=None),
+        last_update_at=updated_at,
+        minute=minute,
+    )
+    return not closes_live(decision["action"])
+
+
 def collect_live_matches(conn, extra_matches=None):
-    """Matches being played right now, with their provisional score."""
+    """Matches being played right now, with their provisional score.
+
+    Only genuinely live matches are returned. A row that the provider left
+    stuck at LIVE (finished, frozen or not started yet) is dropped here so the
+    table never shows a live badge for a match that is already over.
+    """
     entries = {}
+    try:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+    except Exception:
+        columns = set()
+    updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
     try:
         rows = conn.execute(
             f"""
-            SELECT local, visitante, goles_local, goles_visitante, status, fecha
+            SELECT local, visitante, goles_local, goles_visitante, status, fecha, hora, minuto,
+                   {updated_at_select}
             FROM resultados
             WHERE jornada BETWEEN 1 AND {int(CURRENT_SEASON_MAX_JORNADA)}
-            """  # noqa: S608 - the bound is an internal int constant
+            """  # noqa: S608 - the bound is an internal int constant, the column an allowlist
         ).fetchall()
     except Exception:
         rows = []
     for row in rows:
         row = dict(row)
-        if not is_live_status(row.get("status")):
+        if not _still_live(
+            row.get("status"),
+            parse_db_match_datetime(row.get("fecha"), row.get("hora")),
+            row.get("minuto"),
+            _parse_updated_at(row.get("updated_at")),
+        ):
             continue
         entry = _match_entry(
             row.get("local"),
@@ -245,6 +301,15 @@ def collect_live_matches(conn, extra_matches=None):
             entries.setdefault(entry["key"], entry)
 
     for match in list(extra_matches or []) + _load_panel_matches():
+        if not isinstance(match, dict):
+            continue
+        if not _still_live(
+            match.get("status"),
+            parse_any_match_datetime(match),
+            match.get("time") or match.get("minute") or match.get("minuto"),
+            _parse_updated_at(match.get("updated_at") or match.get("fetched_at")),
+        ):
+            continue
         entry = _panel_entry(match, allow_live=True)
         if entry and entry.get("live"):
             entries.setdefault(entry["key"], entry)

@@ -312,9 +312,14 @@ body.quiniela-focus .tension-row td {
     font-weight: 900;
 }
 
+/* Muestra el horario del partido ("lun 17/08 19:00h"), que es mas largo y mas
+   variable que un marcador: la caja se ajusta al texto y nunca al reves. */
 .tension-status {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    max-width: 100%;
     min-height: 22px;
     padding: 2px 9px;
     border-radius: 999px;
@@ -323,7 +328,8 @@ body.quiniela-focus .tension-row td {
     color: #7dd3fc;
     font-size: 0.66rem;
     font-weight: 900;
-    line-height: 1;
+    line-height: 1.15;
+    text-align: center;
 }
 
 .tension-consensus-cell {
