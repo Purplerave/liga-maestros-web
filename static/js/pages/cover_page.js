@@ -1,6 +1,7 @@
-/* Portada Liga de Maestros v14 - Panel de control compacto
-   Comando (marca + reloj + CTAs) + tablero 3 cartas + operativa.
-   Scorebar y urgencia viven DENTRO del panel, no en el chrome. */
+/* Portada Liga de Maestros v17 — Boleto integrado en panel de control
+   Combina la estructura contractual (duel + featured + voz + ops + journey
+   + scorebar + urgency) con un panel central de boleto de quiniela
+   con 15 casillas, denso, monoespaciado, vivo. */
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
@@ -10,6 +11,9 @@ let _countdownStarted = false;
 let _seasonCountdownStarted = false;
 const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
 
+// ============================================================
+// COUNTDOWN
+// ============================================================
 function formatCountdownDigits(diff) {
     const safe = Math.max(0, diff);
     const days = Math.floor(safe / 86400000);
@@ -35,12 +39,10 @@ function startCoverCountdown() {
         if (diff <= 0 || state.data.is_locked) { deadline.textContent = "CERRADA"; deadline.classList.add("is-urgent"); deadline.setAttribute("aria-live","assertive"); return; }
         const s = Math.max(0, Math.floor(diff / 1000));
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-        // P0: formato con segundos siempre vivo
         deadline.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
         deadline.classList.toggle("is-urgent", diff < 3_600_000);
         deadline.setAttribute("aria-live", diff < 3_600_000 ? "assertive" : "polite");
         deadline.setAttribute("title", h > 0 ? `Cierre en ${h} horas ${m} minutos` : `Cierre en ${m} minutos`);
-        // P1 2.3 banner urgencia
         try { updateCpUrgency(diff, Boolean(state.data.is_locked), typeof hasSavedTicket==="function" ? hasSavedTicket() : false); } catch(e) {}
     };
     tick(); setInterval(tick, 1000);
@@ -92,18 +94,15 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
-// Delegación de clicks para el carrusel de trash-talk (dots + avatares)
 document.addEventListener("click", (ev) => {
     const target = ev.target instanceof Element ? ev.target.closest("[data-voz-idx]") : null;
     if (!target) return;
     const idx = Number(target.getAttribute("data-voz-idx"));
     if (Number.isNaN(idx)) return;
     setTrashTalkIdx(idx);
-    // reset del autoplay tras interacción manual
     if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
     _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
 });
-// Pausa del autoplay cuando la pestaña no es visible
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         if (_trashTalkRotateTimer) { clearInterval(_trashTalkRotateTimer); _trashTalkRotateTimer = null; }
@@ -142,7 +141,9 @@ function updateCpUrgency(diff, closed, saved) {
     bar.hidden = false;
 }
 
-// Trash-talk: voz del duelo (Maestros + réplica Peña)
+// ============================================================
+// TRASH TALK (mantenido: cp-voz + 6 maestros + data-voz-idx + visibilitychange)
+// ============================================================
 const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
 const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
 const _MAESTRO_TONE = { programa: "is-programa", claude: "is-claude", grok: "is-grok", chatgpt: "is-chatgpt", copilot: "is-copilot", gemini: "is-gemini" };
@@ -174,7 +175,6 @@ function coverTrashTalkHtml() {
     const masters = coverTrashTalkMasters();
     const replica = coverTrashTalkReplica();
     if (!masters.length && !replica) return "";
-    // Si solo hay réplica (sin frases de maestro), no mostramos el carrusel pero sí la réplica
     if (!masters.length) {
         return `<article class="cp-voz" aria-label="La voz del duelo">
             <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Réplica</b></div>
@@ -220,9 +220,9 @@ function setTrashTalkIdx(idx) {
         quote.className = `cp-voz-quote ${current.tone}`;
         const avatar = quote.querySelector(".cp-voz-quote-avatar");
         if (avatar) avatar.textContent = current.avatar;
-        const name = quote.querySelector(".cp-voz-quote-body b");
+        const name = stage.querySelector(".cp-voz-quote-body b");
         if (name) name.textContent = current.label;
-        const text = quote.querySelector(".cp-voz-quote-body p");
+        const text = stage.querySelector(".cp-voz-quote-body p");
         if (text) text.textContent = current.phrase;
     }
     stage.querySelectorAll(".cp-voz-dot").forEach((dot, i) => dot.classList.toggle("is-active", i === _currentTrashTalkIdx));
@@ -405,7 +405,6 @@ function hydrateCoverPorra(data) {
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const leaders = (data.distribution || []).slice(0, 3);
     const hint = data.hint || "Marcador exacto: +2 puntos.";
-    // P0 1.6: copy de “mojarse” más tribal
     const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Los maestros ya se han mojado. ¿Y tú?";
     const changes = data.my_changes || 0;
     const jornadaLocked = data.jornada_locked || false;
@@ -433,6 +432,68 @@ function hydrateCoverPorra(data) {
         ${changeInfo}`;
 }
 
+// ============================================================
+// HELPERS BOLETO
+// ============================================================
+function _teamAbbr(name) {
+    if (!name) return "—";
+    const s = String(name).trim();
+    return s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, "")
+        .split(/\s+/)
+        .map(w => w[0] || "")
+        .join("")
+        .slice(0, 3)
+        .toUpperCase() || s.slice(0, 3).toUpperCase();
+}
+
+function _maestroInitial(col) {
+    if (!col) return "?";
+    const id = String(col.id || col.label || "").toLowerCase();
+    if (id.includes("claude")) return "C";
+    if (id.includes("gpt") || id.includes("chatgpt")) return "G";
+    if (id.includes("gemini")) return "G";
+    if (id.includes("grok")) return "X";
+    if (id.includes("copilot")) return "K";
+    if (id.includes("programa")) return "P";
+    return (col.label || id).slice(0, 1).toUpperCase();
+}
+
+function _maestroToneClass(col) {
+    if (!col) return "is-default";
+    const id = String(col.id || col.label || "").toLowerCase();
+    if (id.includes("claude")) return "is-claude";
+    if (id.includes("gpt") || id.includes("chatgpt")) return "is-chatgpt";
+    if (id.includes("gemini")) return "is-gemini";
+    if (id.includes("grok")) return "is-grok";
+    if (id.includes("copilot")) return "is-copilot";
+    if (id.includes("programa")) return "is-programa";
+    return "is-default";
+}
+
+function _userPickFor(index) {
+    const signs = state.my_signs || [];
+    const raw = signs[index];
+    if (!raw || raw === "-") return null;
+    return String(raw).toUpperCase();
+}
+
+function _isMatchLive(match) {
+    if (!match) return false;
+    if (typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(match)) return false;
+    if (typeof isLiveStatus === "function" && isLiveStatus(match.status)) return true;
+    if (typeof isLiveMatch === "function" && isLiveMatch(match)) return true;
+    return false;
+}
+
+function _isMatchClosed(match) {
+    if (!match) return false;
+    const real = String(match.signo_actual || "").toUpperCase();
+    return ["1","X","2"].includes(real);
+}
+
+// ============================================================
+// RENDER PRINCIPAL — v17 BOLETO INTEGRADO EN PANEL DE CONTROL
+// ============================================================
 function renderNewspaperCoverPageV3() {
     const matches = state.data?.partidos || [];
     const closed = coverIsClosed();
@@ -450,7 +511,6 @@ function renderNewspaperCoverPageV3() {
     const totalBando = bando.humanTotal + bando.aiTotal;
     const humanPct = totalBando > 0 ? (bando.humanTotal / totalBando) * 100 : 50;
 
-    const rankingForCover = [...rankingRows].sort((a,b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name,"es"));
     const top3Pruebas = [...rankingRows].sort((a,b) => b.total - a.total).slice(0,3);
     const bestPenaPruebas = rankingRows.filter(r => {
         const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id).toLowerCase()));
@@ -458,7 +518,6 @@ function renderNewspaperCoverPageV3() {
     }).sort((a,b) => b.total - a.total).slice(0,3);
 
     const isFirstOfficial = rankingRows.length === 0 || (bando.humanTotal === 0 && bando.aiTotal === 0) || collective.played === 0;
-    // P0 1.2: CTAs tribales + P0 1.4 datos reales para kicker
     const hasRealBando = !isFirstOfficial && (bando.humanTotal + bando.aiTotal) > 0;
     const kickerBandoLabel = hasRealBando
         ? (bando.aiAvg > bando.humanAvg + 0.05 ? "LAS MÁQUINAS NOS ESTÁN GANANDO" : bando.humanAvg > bando.aiAvg + 0.05 ? "LA PEÑA VA GANANDO" : "DUELO IGUALADO")
@@ -469,7 +528,6 @@ function renderNewspaperCoverPageV3() {
     const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
     const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
 
-    // Portada v12 — narrativa corta + duelo + partido + operativa
     const seasonLabel = "Temporada 26/27";
     const featured = disagreement || (matches[0] ? { match: matches[0], picks: [], pena: null } : null);
     let featuredMeta = "";
@@ -479,7 +537,78 @@ function renderNewspaperCoverPageV3() {
         featuredMeta = when ? escapeHtml(String(when)) : "Jornada " + escapeHtml(String(jornada || "1"));
     }
 
-    // Mini 1X2 de la Peña sobre el partido destacado
+    // ===== BOLETO 15 CASILLAS (panel central nuevo) =====
+    const masterCols = coverMasterColumns();
+    const predictions = state.data?.predicciones_actuales || {};
+
+    function buildQuinielaCell(match, index) {
+        if (!match) {
+            return `<div class="cp-q-cell is-empty">
+                <span class="cp-q-num">${String(index + 1).padStart(2, "0")}</span>
+                <span class="cp-q-empty">—</span>
+            </div>`;
+        }
+        const homeAbbr = _teamAbbr(match.local);
+        const awayAbbr = _teamAbbr(match.visitante);
+        const userPick = _userPickFor(index);
+        const isLive = _isMatchLive(match);
+        const isClosed = _isMatchClosed(match);
+        const realSign = String(match.signo_actual || "").toUpperCase();
+
+        const maestroSigns = masterCols.map(col => {
+            const signs = coverPredictionSigns(predictions[col.id]);
+            const sign = signs[index] || "-";
+            if (sign === "-") return null;
+            return { sign, tone: _maestroToneClass(col), initial: _maestroInitial(col), label: col.label };
+        }).filter(Boolean);
+
+        const maestroLine = maestroSigns.length
+            ? maestroSigns.map(m => `<span class="cp-q-pick ${m.tone}" title="${escapeHtml(m.label)}"><i>${m.initial}</i><b>${escapeHtml(m.sign)}</b></span>`).join("")
+            : `<span class="cp-q-no-pick">—</span>`;
+
+        const statusClass = userPick
+            ? (realSign && userPick === realSign ? " is-hit" : (realSign ? " is-miss" : ""))
+            : "";
+
+        return `
+            <button type="button" class="cp-q-cell${userPick ? " is-signed" : ""}${isLive ? " is-live" : ""}${isClosed ? " is-closed" : ""}${statusClass}"
+                    data-page-action="TICKET"
+                    aria-label="Partido ${index + 1}: ${escapeHtml(match.local)} contra ${escapeHtml(match.visitante)}">
+                <span class="cp-q-num">${String(index + 1).padStart(2, "0")}</span>
+                ${isLive ? '<span class="cp-q-live-dot" aria-label="En directo">●</span>' : ""}
+                ${isClosed && realSign ? `<span class="cp-q-result" aria-label="Resultado ${escapeHtml(realSign)}">${escapeHtml(realSign)}</span>` : ""}
+                <span class="cp-q-teams">
+                    <span class="cp-q-team is-home">${homeAbbr}</span>
+                    <span class="cp-q-sep">·</span>
+                    <span class="cp-q-team is-away">${awayAbbr}</span>
+                </span>
+                <span class="cp-q-masters">${maestroLine}</span>
+                <span class="cp-q-mypick">${userPick ? `<span class="cp-q-mypick-val">${userPick}</span>` : `<span class="cp-q-mypick-val is-empty">—</span>`}</span>
+            </button>
+        `;
+    }
+
+    const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
+    const userPct = Math.min(100, (userDone / 15) * 100);
+
+    setTimeout(() => {
+        updateCpScorebar(bando, jornada);
+        triggerProgressPop(userDone);
+        startTrashTalkRotation();
+        startCoverCountdown();
+        startSeasonCountdown();
+    }, 0);
+
+    const userProgressHtml = state.user ? `
+        <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
+            <span>Tu quiniela</span>
+            <strong>${userDone}/15</strong>
+            <div class="cp-user-track" aria-hidden="true"><i style="width:${userPct.toFixed(1)}%"></i></div>
+        </div>` : "";
+    const assetsV = document.body?.dataset?.assetsV || "";
+    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
+
+    // Featured pulse
     let featuredPulse = "";
     if (featured && featured.match) {
         const row = consenso.find(r => Number(r.id) === Number(featured.match.id));
@@ -505,7 +634,6 @@ function renderNewspaperCoverPageV3() {
         }
     }
 
-    // Picks IA del partido destacado
     let featuredPicks = "";
     if (featured && featured.picks && featured.picks.length) {
         const limited = featured.picks.slice(0, 4);
@@ -514,7 +642,6 @@ function renderNewspaperCoverPageV3() {
         ).join("")}</div>`;
     }
 
-    // Duelo Peña vs IA
     let duelBody = "";
     if (isFirstOfficial) {
         duelBody = `
@@ -563,24 +690,6 @@ function renderNewspaperCoverPageV3() {
             <div class="cp-duel-foot"><b>${escapeHtml(leader)}</b> · diff ${escapeHtml(diffStr)}</div>`;
     }
 
-    const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
-    // P0 1.4 + 1.5: actualizar scorebar y animar progreso
-    setTimeout(() => {
-        updateCpScorebar(bando, jornada);
-        triggerProgressPop(userDone);
-        startTrashTalkRotation();
-        startCoverCountdown();
-        startSeasonCountdown();
-    }, 0);
-    const userProgressHtml = state.user ? `
-        <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
-            <span>Tu quiniela</span>
-            <strong>${userDone}/15</strong>
-            <div class="cp-user-track" aria-hidden="true"><i style="width:${((userDone / 15) * 100).toFixed(1)}%"></i></div>
-        </div>` : "";
-    const assetsV = document.body?.dataset?.assetsV || "";
-    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
-
     const firstMatch = matches[0];
     let countdownDate = "";
     if (firstMatch) {
@@ -611,12 +720,36 @@ function renderNewspaperCoverPageV3() {
             <p class="cp-empty">Los partidos se publicarán con el cierre de la jornada anterior.</p>
         </article>`;
 
-    // P0 1.2 hero pitch dinámico con datos reales
     const top3Names = rankingRows.slice(0,3).map(r=> `${escapeHtml(r.name)} ${r.jornada}pts`).join(" · ");
     const heroPitch = hasRealBando && top3Names
         ? `Top jornada: ${top3Names}. ¿Firmas por la humanidad y los superas?`
         : `Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.`;
     const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
+
+    // BOLETO HTML
+    const boletoGridHtml = matches.slice(0, 15).map((m, i) => buildQuinielaCell(m, i)).join("");
+    const boletoEmpty = matches.length === 0
+        ? `<div class="cp-q-empty-grid">Los partidos se publicarán con el cierre de la jornada anterior.</div>`
+        : "";
+    const boletoHtml = `
+        <article class="cp-q-panel" aria-label="Boleto de la jornada">
+            <header class="cp-q-head-bar">
+                <div class="cp-q-title">
+                    <span class="cp-q-jornada">JORNADA ${escapeHtml(String(jornada || "1"))}</span>
+                    <span class="cp-q-sub">EL BOLETO · 15 PARTIDOS</span>
+                </div>
+                <div class="cp-q-status">
+                    <b>${userDone}/15</b>
+                    <span class="cp-q-status-label">FIRMADOS · <b>${15 - userDone}</b> ABIERTOS</span>
+                </div>
+            </header>
+            <div class="cp-q-grid">
+                ${boletoGridHtml}
+                ${boletoEmpty}
+            </div>
+        </article>
+    `;
+
     return `<div class="cp">
         <div class="cp-top">
             <div id="cp-scorebar" class="cp-scorebar" aria-live="polite" hidden>
@@ -662,7 +795,7 @@ function renderNewspaperCoverPageV3() {
                     <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
                     ${duelBody}
                 </article>
-                ${featuredHtml}
+                ${boletoHtml}
                 ${coverTrashTalkHtml()}
             </section>
         </div>
