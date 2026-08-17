@@ -439,6 +439,12 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 
 **Cómo probar 4.x:** 1) Tab por la portada → outlines visibles en CTAs y dots; 2) Primer Tab muestra "Saltar al contenido principal"; 3) DevTools "Emulate prefers-reduced-motion: reduce" → animaciones y hovers deshabilitados.
 
+### 13.2e Portada compacta — sesión `arena/01a010dd-liga-maestros-web` (2026-08-17)
+
+| ID | Propuesta | Estado | Qué se hizo | Archivos tocados |
+|---|---|---|---|---|
+| **UI portada** Panel de control | ✅ Hecho | El hero-póster (H1 3.8rem + countdown 4 cajas + trash-talk como 3er hijo del grid de 2 columnas) aplastaba el tablero. Nuevo layout: comando horizontal compacto + tablero 3 cartas (duelo / partido / voz) + ops a 22vh. Scorebar y urgencia salen del `app-shell` (filas implícitas + `overflow:hidden`) y se renderan dentro de `.cp`. Cache-bust `cover-page-65` / `cover-hero-65`. | `static/css/cover_hero.css`, `static/js/pages/cover_page.js`, `templates/liga_index.html`, `static/js/navigation.js`, `tests/test_cover_layout.py`, `tests/test_a11y_cover.py` |
+
 ### 13.2b Pendiente P1/P2 (siguiente)
 - **2.4 Grupos privados:** sigue previsto para Semana 4. No bloquea viral ni conversión.
 - **3.2 Source of truth:** documentar formalmente qué vive en SQLite vs JSON de disco (un solo lugar por dato, tests que lo enforcen). Bajo esfuerzo, alto valor de mantenimiento.

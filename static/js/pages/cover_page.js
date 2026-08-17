@@ -1,7 +1,6 @@
-/* Portada Liga de Maestros v4 - Panel control compacto, español natural
-   Encima del rediseño de main: escudo grande a la izquierda del titular,
-   nombres directos (El duelo, El partido en disputa, Así vota la Peña,
-   Última hora, La porra) y quitado el comentario IA fijo de ejemplo. */
+/* Portada Liga de Maestros v14 - Panel de control compacto
+   Comando (marca + reloj + CTAs) + tablero 3 cartas + operativa.
+   Scorebar y urgencia viven DENTRO del panel, no en el chrome. */
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
@@ -24,8 +23,6 @@ function formatCountdownDigits(diff) {
 
 function startCoverCountdown() {
     if (_countdownStarted) return;
-    const node = document.querySelector("#cp-deadline");
-    if (!node) return;
     _countdownStarted = true;
     const tick = () => {
         const deadline = document.querySelector("#cp-deadline");
@@ -568,7 +565,13 @@ function renderNewspaperCoverPageV3() {
 
     const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
     // P0 1.4 + 1.5: actualizar scorebar y animar progreso
-    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); startTrashTalkRotation(); }, 0);
+    setTimeout(() => {
+        updateCpScorebar(bando, jornada);
+        triggerProgressPop(userDone);
+        startTrashTalkRotation();
+        startCoverCountdown();
+        startSeasonCountdown();
+    }, 0);
     const userProgressHtml = state.user ? `
         <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
             <span>Tu quiniela</span>
@@ -578,10 +581,18 @@ function renderNewspaperCoverPageV3() {
     const assetsV = document.body?.dataset?.assetsV || "";
     const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
 
+    const firstMatch = matches[0];
+    let countdownDate = "";
+    if (firstMatch) {
+        const when = firstMatch.hora || firstMatch.kickoff || firstMatch.fecha || "";
+        const home = typeof getShortName === "function" ? getShortName(firstMatch.local) : (firstMatch.local || "");
+        const away = typeof getShortName === "function" ? getShortName(firstMatch.visitante) : (firstMatch.visitante || "");
+        countdownDate = [when, home && away ? `${home} vs ${away}` : ""].filter(Boolean).join(" · ");
+    }
     const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
-        <div class="cp-countdown-label">Jornada 1 · arranque</div>
+        <div class="cp-countdown-label">Cierre de jornada</div>
         <div class="cp-countdown-timer" id="cp-countdown-timer"></div>
-        <div class="cp-countdown-date">15 ago · 19:30 · Alavés vs Getafe</div>
+        ${countdownDate ? `<div class="cp-countdown-date">${escapeHtml(String(countdownDate))}</div>` : ""}
     </div>`;
 
     const featuredHtml = featured && featured.match ? `
@@ -607,36 +618,53 @@ function renderNewspaperCoverPageV3() {
         : `Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.`;
     const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
     return `<div class="cp">
-        <div class="cp-main">
+        <div class="cp-top">
+            <div id="cp-scorebar" class="cp-scorebar" aria-live="polite" hidden>
+                <span>HUMANOS <b id="cp-scorebar-human">—</b> vs <b id="cp-scorebar-ia">—</b> MÁQUINAS</span>
+                <div class="cp-scorebar-track" aria-hidden="true"><i id="cp-scorebar-pena" class="is-pena" style="width:50%"></i><i id="cp-scorebar-ia-bar" class="is-ia" style="width:50%"></i></div>
+                <small id="cp-scorebar-label">Jornada —</small>
+            </div>
+            <div id="cp-urgency" class="cp-urgency" hidden role="status" aria-live="assertive">
+                <span class="cp-urgency-dot" aria-hidden="true"></span>
+                <span id="cp-urgency-text">Te falta firmar — cierra en 00m 00s</span>
+                <button type="button" class="cp-urgency-cta" data-page-action="TICKET">Firmar ahora →</button>
+            </div>
             <header class="cp-hero">
-                <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72" decoding="async" fetchpriority="high">
-                <div class="cp-kicker">
-                    <span>${heroKickerJornada} · ${escapeHtml(kickerBandoLabel)}</span>
-                    <i class="cp-kicker-dot"></i>
-                    <span id="cp-deadline" aria-live="polite">${escapeHtml(statusLabel)}</span>
-                    ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
+                <div class="cp-command-brand">
+                    <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72" decoding="async" fetchpriority="high">
+                    <div class="cp-command-copy">
+                        <div class="cp-kicker">
+                            <span>${heroKickerJornada} · ${escapeHtml(kickerBandoLabel)}</span>
+                            <i class="cp-kicker-dot"></i>
+                            <span id="cp-deadline" aria-live="polite">${escapeHtml(statusLabel)}</span>
+                            ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
+                        </div>
+                        <h1 class="cp-hero-title">
+                            <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
+                        </h1>
+                        <p class="cp-hero-pitch">${heroPitch.includes("Top jornada") ? heroPitch : escapeHtml(heroPitch)}</p>
+                    </div>
                 </div>
-                <div class="cp-hero-tagline"><b>1X2</b> · La Peña contra las máquinas</div>
-                <h1 class="cp-hero-title">
-                    <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
-                </h1>
-                <p class="cp-hero-pitch">${heroPitch.includes("Top jornada") ? heroPitch : escapeHtml(heroPitch)}</p>
                 ${countdownHtml}
-                ${userProgressHtml}
-                <div class="cp-actions">
-                    <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                    <button type="button" class="cp-secondary" data-page-action="CONTEST">${escapeHtml(ctaSecondaryLabel)}</button>
+                <div class="cp-command-side">
+                    ${userProgressHtml}
+                    <div class="cp-actions">
+                        <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+                        <button type="button" class="cp-secondary" data-page-action="CONTEST">${escapeHtml(ctaSecondaryLabel)}</button>
+                    </div>
                 </div>
             </header>
+        </div>
 
+        <div class="cp-main">
             <section class="cp-arena" aria-label="El duelo">
                 <article class="cp-duel">
                     <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
                     ${duelBody}
                 </article>
                 ${featuredHtml}
+                ${coverTrashTalkHtml()}
             </section>
-            ${coverTrashTalkHtml()}
         </div>
 
         <section class="cp-ops" aria-label="Tu jornada">

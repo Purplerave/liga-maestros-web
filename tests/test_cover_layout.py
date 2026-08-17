@@ -8,7 +8,7 @@ PORRA_ROUTE = ROOT / "liga_maestros" / "routes" / "porra.py"
 
 
 def test_cover_fills_lower_panel_with_useful_journey_actions():
-    """Portada v13: hero izq + duelo/partido der + ops; sin scroll en desktop."""
+    """Portada v14: comando compacto + tablero 3 cartas + ops."""
     cover = COVER_JS.read_text(encoding="utf-8")
     css = COVER_CSS.read_text(encoding="utf-8")
 
@@ -18,11 +18,28 @@ def test_cover_fills_lower_panel_with_useful_journey_actions():
     assert "cp-featured" in cover
     assert "cp-main" in cover
     assert "cp-ops" in cover
+    assert "cp-command-brand" in cover
     assert "cp-quicklinks-footer" not in cover
     assert ".cp-journey-card" in css
     assert ".cp-main" in css
     assert ".cp-arena" in css
-    assert "grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr)" in css
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr))" in css
+
+
+def test_cover_keeps_alerts_inside_the_panel():
+    """Scorebar y urgencia viven en el panel, no como filas sueltas del app-shell."""
+    cover = COVER_JS.read_text(encoding="utf-8")
+    template = (ROOT / "templates" / "liga_index.html").read_text(encoding="utf-8")
+    assert 'id="cp-scorebar"' in cover
+    assert 'id="cp-urgency"' in cover
+    assert 'id="cp-scorebar"' not in template
+    assert 'id="cp-urgency"' not in template
+    # La voz del duelo es una carta del tablero, no un tercer hijo que rompe el grid.
+    arena_idx = cover.find('class="cp-arena"')
+    voz_idx = cover.find("${coverTrashTalkHtml()}")
+    ops_idx = cover.find('class="cp-ops"')
+    assert arena_idx != -1 and voz_idx != -1 and ops_idx != -1
+    assert arena_idx < voz_idx < ops_idx
 
 
 def test_porra_bonus_copy_is_short_and_consistent():
