@@ -14,6 +14,7 @@
    1. APP SHELL — Layout limpio y predecible
    ────────────────────────────────────────── */
 body.newspaper-ui.quiniela-focus .app-shell {
+    grid-template-rows: 66px 38px minmax(0, 1fr) auto;
     gap: 6px;
     padding: 6px;
     background: var(--bg-main);
@@ -435,19 +436,24 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
    11. LEGAL LINKS — Footer discreto pero legible
    ────────────────────────────────────────── */
 .site-legal-links {
-    position: fixed;
-    left: 12px;
-    bottom: 10px;
-    z-index: 50;
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: auto;
+    z-index: auto;
+    justify-self: start;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 999px;
     background: rgba(6, 9, 15, 0.9);
     backdrop-filter: blur(12px);
-    padding: 6px 14px;
-    gap: 14px;
+    padding: 5px 12px;
+    gap: 12px;
+    margin: 0;
 }
 
 .site-legal-links a {
@@ -485,6 +491,7 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
 /* Móvil */
 @media (max-width: 899px) {
     body.newspaper-ui.quiniela-focus .app-shell {
+        grid-template-rows: 56px 52px 42px minmax(0, 1fr) auto;
         gap: 3px;
         padding: 3px;
     }
@@ -526,11 +533,13 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
     }
 
     .site-legal-links {
-        left: 8px;
-        bottom: 8px;
+        position: static;
+        left: auto;
+        bottom: auto;
+        justify-self: start;
         padding: 4px 10px;
         gap: 8px;
-        opacity: 0.7;
+        opacity: 0.75;
     }
 }
 
