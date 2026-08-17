@@ -115,8 +115,8 @@ def help_page():
 @bp.route("/health")
 def health():
     """Probe ligero + enriquecido para Alwaysdata/Render (sin secretos)."""
-    import sqlite3
     from ..db.connection import get_db
+
     build_sha = "local"
     try:
         with open(os.path.join(config.BASE_DIR, ".release-sha"), encoding="utf-8") as f:
@@ -135,7 +135,7 @@ def health():
             db_ok = db_integrity == "ok"
             conn.execute("SELECT 1")
             if os.path.exists(config.DB_PATH):
-                db_size_mb = round(os.path.getsize(config.DB_PATH)/(1024*1024), 2)
+                db_size_mb = round(os.path.getsize(config.DB_PATH) / (1024 * 1024), 2)
         finally:
             conn.close()
     except Exception:
@@ -149,7 +149,7 @@ def health():
             latest = max(candidates, key=lambda p: os.path.getmtime(p) if os.path.exists(p) else 0)
             if os.path.exists(latest):
                 backup_ok = True
-                backup_age_h = round((time.time() - os.path.getmtime(latest))/3600, 1)
+                backup_age_h = round((time.time() - os.path.getmtime(latest)) / 3600, 1)
     except Exception:
         pass
     # collector health
@@ -160,6 +160,7 @@ def health():
         if os.path.exists(hp):
             collector_age_s = int(time.time() - os.path.getmtime(hp))
             import json as _j
+
             with open(hp, encoding="utf-8") as fh:
                 collector_status = _j.load(fh).get("status", "unknown")
         else:
@@ -170,6 +171,7 @@ def health():
     quota = {}
     try:
         from ..services.highlightly import get_highlightly_usage
+
         u = get_highlightly_usage()
         quota = {"remaining_pct": u.get("remaining_pct"), "used": u.get("used"), "limit": u.get("limit")}
     except Exception:
