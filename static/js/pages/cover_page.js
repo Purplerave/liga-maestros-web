@@ -1,6 +1,6 @@
-/* Portada Liga de Maestros v14 - Panel de control compacto
-   Comando (marca + reloj + CTAs) + tablero 3 cartas + operativa.
-   Scorebar y urgencia viven DENTRO del panel, no en el chrome. */
+/* Portada Liga de Maestros v15 — Mission control tipo boleto de quiniela
+   Header compacto + quiniela densa (3x5) en el centro + sidebars pequeñas.
+   Toda la info visible de un vistazo, sin scroll en desktop. */
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
@@ -10,6 +10,9 @@ let _countdownStarted = false;
 let _seasonCountdownStarted = false;
 const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
 
+// ============================================================
+// COUNTDOWN HELPERS (se mantienen igual que v14)
+// ============================================================
 function formatCountdownDigits(diff) {
     const safe = Math.max(0, diff);
     const days = Math.floor(safe / 86400000);
@@ -18,7 +21,7 @@ function formatCountdownDigits(diff) {
     const secs = Math.floor((safe % 60000) / 1000);
     const cell = (value, unit) =>
         `<span class="cp-digit"><b>${String(value).padStart(2, "0")}</b><small>${unit}</small></span>`;
-    return `${cell(days, "días")}<i aria-hidden="true">:</i>${cell(hours, "hrs")}<i aria-hidden="true">:</i>${cell(mins, "min")}<i aria-hidden="true">:</i>${cell(secs, "seg")}`;
+    return `${cell(days, "d")}<i aria-hidden="true">:</i>${cell(hours, "h")}<i aria-hidden="true">:</i>${cell(mins, "m")}<i aria-hidden="true">:</i>${cell(secs, "s")}`;
 }
 
 function startCoverCountdown() {
@@ -35,12 +38,10 @@ function startCoverCountdown() {
         if (diff <= 0 || state.data.is_locked) { deadline.textContent = "CERRADA"; deadline.classList.add("is-urgent"); deadline.setAttribute("aria-live","assertive"); return; }
         const s = Math.max(0, Math.floor(diff / 1000));
         const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-        // P0: formato con segundos siempre vivo
         deadline.textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
         deadline.classList.toggle("is-urgent", diff < 3_600_000);
         deadline.setAttribute("aria-live", diff < 3_600_000 ? "assertive" : "polite");
         deadline.setAttribute("title", h > 0 ? `Cierre en ${h} horas ${m} minutos` : `Cierre en ${m} minutos`);
-        // P1 2.3 banner urgencia
         try { updateCpUrgency(diff, Boolean(state.data.is_locked), typeof hasSavedTicket==="function" ? hasSavedTicket() : false); } catch(e) {}
     };
     tick(); setInterval(tick, 1000);
@@ -92,18 +93,15 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
-// Delegación de clicks para el carrusel de trash-talk (dots + avatares)
 document.addEventListener("click", (ev) => {
     const target = ev.target instanceof Element ? ev.target.closest("[data-voz-idx]") : null;
     if (!target) return;
     const idx = Number(target.getAttribute("data-voz-idx"));
     if (Number.isNaN(idx)) return;
     setTrashTalkIdx(idx);
-    // reset del autoplay tras interacción manual
     if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
     _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
 });
-// Pausa del autoplay cuando la pestaña no es visible
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         if (_trashTalkRotateTimer) { clearInterval(_trashTalkRotateTimer); _trashTalkRotateTimer = null; }
@@ -142,7 +140,9 @@ function updateCpUrgency(diff, closed, saved) {
     bar.hidden = false;
 }
 
-// Trash-talk: voz del duelo (Maestros + réplica Peña)
+// ============================================================
+// TRASH TALK (se mantiene igual que v14)
+// ============================================================
 const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
 const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
 const _MAESTRO_TONE = { programa: "is-programa", claude: "is-claude", grok: "is-grok", chatgpt: "is-chatgpt", copilot: "is-copilot", gemini: "is-gemini" };
@@ -174,7 +174,6 @@ function coverTrashTalkHtml() {
     const masters = coverTrashTalkMasters();
     const replica = coverTrashTalkReplica();
     if (!masters.length && !replica) return "";
-    // Si solo hay réplica (sin frases de maestro), no mostramos el carrusel pero sí la réplica
     if (!masters.length) {
         return `<article class="cp-voz" aria-label="La voz del duelo">
             <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Réplica</b></div>
@@ -220,9 +219,9 @@ function setTrashTalkIdx(idx) {
         quote.className = `cp-voz-quote ${current.tone}`;
         const avatar = quote.querySelector(".cp-voz-quote-avatar");
         if (avatar) avatar.textContent = current.avatar;
-        const name = quote.querySelector(".cp-voz-quote-body b");
+        const name = stage.querySelector(".cp-voz-quote-body b");
         if (name) name.textContent = current.label;
-        const text = quote.querySelector(".cp-voz-quote-body p");
+        const text = stage.querySelector(".cp-voz-quote-body p");
         if (text) text.textContent = current.phrase;
     }
     stage.querySelectorAll(".cp-voz-dot").forEach((dot, i) => dot.classList.toggle("is-active", i === _currentTrashTalkIdx));
@@ -405,7 +404,6 @@ function hydrateCoverPorra(data) {
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const leaders = (data.distribution || []).slice(0, 3);
     const hint = data.hint || "Marcador exacto: +2 puntos.";
-    // P0 1.6: copy de “mojarse” más tribal
     const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Los maestros ya se han mojado. ¿Y tú?";
     const changes = data.my_changes || 0;
     const jornadaLocked = data.jornada_locked || false;
@@ -433,279 +431,355 @@ function hydrateCoverPorra(data) {
         ${changeInfo}`;
 }
 
+// ============================================================
+// HELPERS NUEVOS para v15
+// ============================================================
+function _teamAbbr(name) {
+    if (!name) return "—";
+    const s = String(name).trim();
+    // 3 letras mayúsculas, fallback primeras 3 letras
+    return s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, "").split(/\s+/).map(w => w[0] || "").join("").slice(0,3).toUpperCase() || s.slice(0,3).toUpperCase();
+}
+
+function _maestroInitial(col) {
+    if (!col) return "?";
+    const id = String(col.id || col.label || "").toLowerCase();
+    if (id.includes("claude")) return "C";
+    if (id.includes("gpt") || id.includes("chatgpt")) return "G";
+    if (id.includes("gemini")) return "G";
+    if (id.includes("grok")) return "X";
+    if (id.includes("copilot")) return "K";
+    if (id.includes("programa")) return "P";
+    return (col.label || id).slice(0,1).toUpperCase();
+}
+
+function _maestroToneClass(col) {
+    if (!col) return "is-default";
+    const id = String(col.id || col.label || "").toLowerCase();
+    if (id.includes("claude")) return "is-claude";
+    if (id.includes("gpt") || id.includes("chatgpt")) return "is-chatgpt";
+    if (id.includes("gemini")) return "is-gemini";
+    if (id.includes("grok")) return "is-grok";
+    if (id.includes("copilot")) return "is-copilot";
+    if (id.includes("programa")) return "is-programa";
+    return "is-default";
+}
+
+function _userPickFor(matchIndex) {
+    const signs = state.my_signs || [];
+    const raw = signs[matchIndex];
+    if (!raw || raw === "-") return null;
+    return String(raw).toUpperCase();
+}
+
+function _isMatchLive(match) {
+    if (!match) return false;
+    if (typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(match)) return false;
+    if (typeof isLiveStatus === "function" && isLiveStatus(match.status)) return true;
+    if (typeof isLiveMatch === "function" && isLiveMatch(match)) return true;
+    return false;
+}
+
+function _isMatchClosed(match) {
+    if (!match) return false;
+    const real = String(match.signo_actual || "").toUpperCase();
+    return ["1","X","2"].includes(real);
+}
+
+// ============================================================
+// RENDER PRINCIPAL — v15 mission control
+// ============================================================
 function renderNewspaperCoverPageV3() {
     const matches = state.data?.partidos || [];
     const closed = coverIsClosed();
     const saved = hasSavedTicket();
     const jornada = state.data?.jornada || state.jornada || "";
-    const liveCount = matches.filter(m => !isExpiredLiveMatch(m) && (isLiveStatus(m.status) || isLiveMatch(m))).length;
+    const liveCount = matches.filter(m => _isMatchLive(m)).length;
     const rankingRows = coverRankingRows();
-    const disagreement = coverDisagreementMatch(matches);
-    const penaPulse = coverTightPenaMatch(matches);
-    const bando = coverBandoDetailed();
+    const masterCols = coverMasterColumns();
+    const predictions = state.data?.predicciones_actuales || {};
     const consenso = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
-    const collective = coverCollectivePenaScore(matches, consenso);
-    const humanAvgStr = bando.humanAvg.toFixed(1).replace(".0","").replace(".",",");
-    const aiAvgStr = bando.aiAvg.toFixed(1).replace(".0","").replace(".",",");
-    const totalBando = bando.humanTotal + bando.aiTotal;
-    const humanPct = totalBando > 0 ? (bando.humanTotal / totalBando) * 100 : 50;
+    const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
 
-    const rankingForCover = [...rankingRows].sort((a,b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name,"es"));
-    const top3Pruebas = [...rankingRows].sort((a,b) => b.total - a.total).slice(0,3);
-    const bestPenaPruebas = rankingRows.filter(r => {
-        const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id).toLowerCase()));
-        return penaIds.has(String(r.uid).toLowerCase());
-    }).sort((a,b) => b.total - a.total).slice(0,3);
+    // === HEADER ===
+    const assetsV = document.body?.dataset?.assetsV || "";
+    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
+    const statusLabel = closed ? "CERRADA" : coverCloseLabel();
+    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar quiniela" : "Firmar ahora");
+    const ctaSecondaryLabel = "Ver boletos";
+    const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
 
-    const isFirstOfficial = rankingRows.length === 0 || (bando.humanTotal === 0 && bando.aiTotal === 0) || collective.played === 0;
-    // P0 1.2: CTAs tribales + P0 1.4 datos reales para kicker
-    const hasRealBando = !isFirstOfficial && (bando.humanTotal + bando.aiTotal) > 0;
-    const kickerBandoLabel = hasRealBando
-        ? (bando.aiAvg > bando.humanAvg + 0.05 ? "LAS MÁQUINAS NOS ESTÁN GANANDO" : bando.humanAvg > bando.aiAvg + 0.05 ? "LA PEÑA VA GANANDO" : "DUELO IGUALADO")
-        : `JORNADA ${escapeHtml(String(jornada || "1"))} · LAS MÁQUINAS NOS ESPERAN`;
-    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar mi bando" : "Firmar por la humanidad");
-    const ctaSecondaryLabel = hasRealBando ? "Ver cómo van las máquinas" : "Clasificación";
-    const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
-    const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
-    const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
-
-    // Portada v12 — narrativa corta + duelo + partido + operativa
-    const seasonLabel = "Temporada 26/27";
-    const featured = disagreement || (matches[0] ? { match: matches[0], picks: [], pena: null } : null);
-    let featuredMeta = "";
-    if (featured && featured.match) {
-        const m = featured.match;
-        const when = m.hora || m.kickoff || m.fecha || "";
-        featuredMeta = when ? escapeHtml(String(when)) : "Jornada " + escapeHtml(String(jornada || "1"));
+    // === SIDEBAR IZQUIERDA: clasificaciones 1ª y 2ª ===
+    function buildStandingsPanel(title, points) {
+        // points es un array ordenado [{name, jornada, total}]
+        const rowsHtml = points.slice(0, 6).map((r, i) => `
+            <div class="cp-st-row${i === 0 ? " is-leader" : ""}">
+                <span class="cp-st-pos">${String(i + 1).padStart(2, "0")}</span>
+                <span class="cp-st-name">${escapeHtml(r.name)}</span>
+                <span class="cp-st-pts">${r.jornada || 0}<small>pts</small></span>
+            </div>
+        `).join("");
+        return `
+            <section class="cp-st-panel">
+                <header class="cp-st-head">
+                    <span>${escapeHtml(title)}</span>
+                    <b>J${escapeHtml(String(jornada || "1"))}</b>
+                </header>
+                <div class="cp-st-list">${rowsHtml || '<div class="cp-empty">Sin datos</div>'}</div>
+            </section>
+        `;
     }
 
-    // Mini 1X2 de la Peña sobre el partido destacado
-    let featuredPulse = "";
-    if (featured && featured.match) {
-        const row = consenso.find(r => Number(r.id) === Number(featured.match.id));
+    // Partimos el ranking en 1ª y 2ª basándonos en participant_contract
+    const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
+    const aiIds = new Set(masterCols.map(c => String(c.id || "").toLowerCase()));
+    const sortedByPts = [...rankingRows].sort((a, b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name, "es"));
+    const firstDiv = sortedByPts.filter(r => penaIds.has(String(r.uid).toLowerCase()) || /humano|peña|pena/i.test(r.name)).slice(0, 6);
+    const secondDiv = sortedByPts.filter(r => aiIds.has(String(r.uid).toLowerCase())).slice(0, 6);
+
+    // Fallback si no hay clasificación dividida: mostramos 2 paneles con los mismos top 8
+    const firstDivRows = firstDiv.length >= 2 ? firstDiv : sortedByPts.slice(0, 6);
+    const secondDivRows = secondDiv.length >= 2 ? secondDiv : sortedByPts.slice(6, 12);
+    const standingsHtml = `
+        ${buildStandingsPanel("1ª DIVISIÓN", firstDivRows)}
+        ${buildStandingsPanel("2ª DIVISIÓN", secondDivRows)}
+    `;
+
+    // === QUINIELA CENTRAL (formato boleto) ===
+    function buildQuinielaCell(match, index) {
+        if (!match) return `<div class="cp-q-cell is-empty"><span class="cp-q-num">${String(index + 1).padStart(2, "0")}</span><span class="cp-q-empty">—</span></div>`;
+        const homeAbbr = _teamAbbr(match.local);
+        const awayAbbr = _teamAbbr(match.visitante);
+        const userPick = _userPickFor(index);
+        const isLive = _isMatchLive(match);
+        const isClosed = _isMatchClosed(match);
+        const live = isLive ? `<span class="cp-q-live" aria-label="En directo">●</span>` : "";
+        const done = isClosed ? `<span class="cp-q-done" aria-label="Acabado">✓</span>` : "";
+
+        // Picks de los maestros
+        const masterPicks = masterCols.map(col => {
+            const signs = coverPredictionSigns(predictions[col.id]);
+            const sign = signs[index] || "-";
+            if (sign === "-") return "";
+            return `<span class="cp-q-pick ${_maestroToneClass(col)}" title="${escapeHtml(col.label)}: ${escapeHtml(sign)}">${_maestroInitial(col)}<i>${escapeHtml(sign)}</i></span>`;
+        }).join("");
+
+        // Consenso La Peña
+        const row = consenso.find(r => Number(r.id) === Number(match.id));
+        let consensusBar = "";
         if (row && Number(row.total || 0) > 0) {
             const p1 = Number(row.p1 || 0), px = Number(row.px || 0), p2 = Number(row.p2 || 0);
             const t = p1 + px + p2 || 1;
-            featuredPulse = `
-                <div class="cp-featured-pulse" aria-label="Voto de La Peña">
-                    <div class="cp-featured-pulse-bars">
-                        <i class="is-one" style="width:${(p1/t*100).toFixed(1)}%"></i>
-                        <i class="is-draw" style="width:${(px/t*100).toFixed(1)}%"></i>
-                        <i class="is-two" style="width:${(p2/t*100).toFixed(1)}%"></i>
-                    </div>
-                    <div class="cp-featured-pulse-labels">
-                        <span>1 · ${(p1/t*100).toFixed(0)}%</span>
-                        <span>X · ${(px/t*100).toFixed(0)}%</span>
-                        <span>2 · ${(p2/t*100).toFixed(0)}%</span>
-                    </div>
-                    <div class="cp-featured-pulse-foot">${Number(row.total)} votos de La Peña</div>
-                </div>`;
-        } else if (featured.pena) {
-            featuredPulse = `<div class="cp-featured-pulse-foot">La Peña se inclina por <b>${escapeHtml(featured.pena.sign)}</b></div>`;
-        }
-    }
-
-    // Picks IA del partido destacado
-    let featuredPicks = "";
-    if (featured && featured.picks && featured.picks.length) {
-        const limited = featured.picks.slice(0, 4);
-        featuredPicks = `<div class="cp-featured-picks">${limited.map(item =>
-            `<span title="${escapeHtml(item.label)}"><small>${escapeHtml(item.label).slice(0, 10)}</small><b>${escapeHtml(item.sign)}</b></span>`
-        ).join("")}</div>`;
-    }
-
-    // Duelo Peña vs IA
-    let duelBody = "";
-    if (isFirstOfficial) {
-        duelBody = `
-            <div class="cp-duel-zero">
-                <div class="cp-duel-zero-badge">${escapeHtml(seasonLabel)}</div>
-                <div class="cp-duel-zero-title">TODO A CERO</div>
-                <p class="cp-duel-zero-text">Las pruebas acabaron. Empieza la liga de verdad.</p>
-            </div>
-            <div class="cp-duel-scores is-reset">
-                <div class="cp-duel-side is-pena">
-                    <span class="cp-duel-avatar" aria-hidden="true">👥</span>
-                    <span class="cp-duel-side-label">La Peña</span>
-                    <strong class="cp-duel-side-value">0</strong>
-                    <small>media pruebas 6,9</small>
-                </div>
-                <div class="cp-duel-vs" aria-hidden="true">VS</div>
-                <div class="cp-duel-side is-ia">
-                    <span class="cp-duel-avatar" aria-hidden="true">✦</span>
-                    <span class="cp-duel-side-label">Maestros IA</span>
-                    <strong class="cp-duel-side-value">0</strong>
-                    <small>media pruebas 8,2</small>
-                </div>
+            consensusBar = `<div class="cp-q-consensus" aria-label="Voto La Peña">
+                <i class="is-one" style="width:${(p1/t*100).toFixed(0)}%"></i>
+                <i class="is-draw" style="width:${(px/t*100).toFixed(0)}%"></i>
+                <i class="is-two" style="width:${(p2/t*100).toFixed(0)}%"></i>
             </div>`;
-    } else {
-        const diff = (bando.aiAvg - bando.humanAvg);
-        const diffStr = (diff >= 0 ? "+" : "") + diff.toFixed(1).replace(".", ",");
-        const leader = diff > 0.05 ? "Las máquinas van por delante" : diff < -0.05 ? "La Peña va por delante" : "Empate técnico";
-        duelBody = `
-            <div class="cp-duel-scores">
-                <div class="cp-duel-side is-pena">
-                    <span class="cp-duel-side-label">La Peña</span>
-                    <strong class="cp-duel-side-value">${escapeHtml(humanAvgStr)}</strong>
-                    <small>media aciertos</small>
+        }
+
+        return `
+            <button type="button" class="cp-q-cell${userPick ? " is-signed" : ""}${isLive ? " is-live" : ""}${isClosed ? " is-closed" : ""}" data-page-action="TICKET" aria-label="Partido ${index + 1}: ${escapeHtml(match.local)} contra ${escapeHtml(match.visitante)}">
+                <div class="cp-q-head">
+                    <span class="cp-q-num">${String(index + 1).padStart(2, "0")}</span>
+                    ${live}${done}
                 </div>
-                <div class="cp-duel-vs" aria-hidden="true">VS</div>
-                <div class="cp-duel-side is-ia">
-                    <span class="cp-duel-side-label">Maestros IA</span>
-                    <strong class="cp-duel-side-value">${escapeHtml(aiAvgStr)}</strong>
-                    <small>media aciertos</small>
+                <div class="cp-q-teams">
+                    <span class="cp-q-team is-home"><b>${homeAbbr}</b></span>
+                    <span class="cp-q-sep">·</span>
+                    <span class="cp-q-team is-away"><b>${awayAbbr}</b></span>
                 </div>
-            </div>
-            <div class="cp-duel-bar" role="img" aria-label="Reparto del duelo">
-                <i class="is-pena" style="width:${Math.max(8, Math.min(92, humanPct)).toFixed(1)}%"></i>
-                <i class="is-ia" style="width:${Math.max(8, Math.min(92, 100 - humanPct)).toFixed(1)}%"></i>
-            </div>
-            <div class="cp-duel-foot"><b>${escapeHtml(leader)}</b> · diff ${escapeHtml(diffStr)}</div>`;
+                <div class="cp-q-masters">${masterPicks || '<span class="cp-q-no-pick">sin picks</span>'}</div>
+                ${consensusBar}
+                <div class="cp-q-mypick">
+                    ${userPick ? `<b class="cp-q-pick-value">${userPick}</b><small>tu pick</small>` : `<b class="cp-q-pick-value is-empty">—</b><small>sin firmar</small>`}
+                </div>
+            </button>
+        `;
     }
 
-    const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
-    // P0 1.4 + 1.5: actualizar scorebar y animar progreso
+    const quinielaGridHtml = matches.slice(0, 15).map((m, i) => buildQuinielaCell(m, i)).join("");
+    const quinielaEmpty = matches.length === 0
+        ? `<div class="cp-q-empty-grid">Los partidos se publicarán con el cierre de la jornada anterior.</div>`
+        : "";
+    const userPct = Math.min(100, ((userDone / 15) * 100));
+
+    const quinielaHtml = `
+        <section class="cp-q-panel" aria-label="Quiniela de la jornada">
+            <header class="cp-q-head-bar">
+                <div class="cp-q-title">
+                    <span class="cp-q-jornada">JORNADA ${escapeHtml(String(jornada || "1"))}</span>
+                    <span class="cp-q-sub">· LA PEÑA</span>
+                </div>
+                <div class="cp-q-status">
+                    <b>${userDone}/15</b>
+                    <span class="cp-q-status-label">FIRMADOS · <b>${15 - userDone}</b> ABIERTOS</span>
+                </div>
+            </header>
+            <div class="cp-q-progress" aria-hidden="true"><i style="width:${userPct.toFixed(1)}%"></i></div>
+            <div class="cp-q-grid">
+                ${quinielaGridHtml}
+                ${quinielaEmpty}
+            </div>
+        </section>
+    `;
+
+    // === SIDEBAR DERECHA: directo + porra ===
+    function buildLiveCard(match) {
+        if (!match) return "";
+        const homeAbbr = _teamAbbr(match.local);
+        const awayAbbr = _teamAbbr(match.visitante);
+        const score = match.marcador || match.score || match.resultado || "0-0";
+        const minute = match.minuto || match.minute || "";
+        const realSign = String(match.signo_actual || "").toUpperCase();
+        const row = consenso.find(r => Number(r.id) === Number(match.id));
+        let distBar = "";
+        if (row && Number(row.total || 0) > 0) {
+            const p1 = Number(row.p1 || 0), px = Number(row.px || 0), p2 = Number(row.p2 || 0);
+            const t = p1 + px + p2 || 1;
+            distBar = `<div class="cp-live-dist"><i class="is-one" style="width:${(p1/t*100).toFixed(0)}%"></i><i class="is-draw" style="width:${(px/t*100).toFixed(0)}%"></i><i class="is-two" style="width:${(p2/t*100).toFixed(0)}%"></i></div>`;
+        }
+        return `
+            <div class="cp-live-card">
+                <div class="cp-live-head">
+                    <span class="cp-live-pulse" aria-hidden="true"></span>
+                    <span class="cp-live-minute">${escapeHtml(String(minute))}'</span>
+                </div>
+                <div class="cp-live-teams">
+                    <span><b>${homeAbbr}</b></span>
+                    <span class="cp-live-score">${escapeHtml(String(score))}</span>
+                    <span><b>${awayAbbr}</b></span>
+                </div>
+                ${distBar}
+                ${realSign ? `<div class="cp-live-sign">SIGNO <b>${escapeHtml(realSign)}</b></div>` : ""}
+            </div>
+        `;
+    }
+
+    const liveMatches = matches.filter(m => _isMatchLive(m)).slice(0, 3);
+    const livePanelHtml = `
+        <section class="cp-side-panel cp-live-panel" aria-label="En directo">
+            <header class="cp-side-head">
+                <span class="cp-side-pulse" aria-hidden="true"></span>
+                <span>EN DIRECTO</span>
+                <b>${liveMatches.length}</b>
+            </header>
+            <div class="cp-side-body">
+                ${liveMatches.length ? liveMatches.map(buildLiveCard).join("") : '<div class="cp-empty">Sin partidos en directo</div>'}
+            </div>
+        </section>
+    `;
+
+    const porraHtml = `
+        <section class="cp-side-panel cp-porra-panel" aria-label="Porra">
+            <header class="cp-side-head">
+                <span>PORRA</span>
+                <b>+2 PTS</b>
+            </header>
+            <div class="cp-side-body" id="cover-porra-content">
+                <span class="cp-porra-loading">Cargando…</span>
+            </div>
+        </section>
+    `;
+
+    // === BOTTOM STRIP: partido destacado + consenso ===
+    const featured = coverDisagreementMatch(matches) || (matches[0] ? { match: matches[0], picks: [], pena: null } : null);
+    let featuredHtml = "";
+    if (featured && featured.match) {
+        const m = featured.match;
+        const when = m.hora || m.kickoff || m.fecha || "";
+        const row = consenso.find(r => Number(r.id) === Number(m.id));
+        const p1 = row ? Number(row.p1 || 0) : 0;
+        const px = row ? Number(row.px || 0) : 0;
+        const p2 = row ? Number(row.p2 || 0) : 0;
+        const t = p1 + px + p2 || 1;
+        const home = typeof getShortName === "function" ? getShortName(m.local) : m.local;
+        const away = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
+        featuredHtml = `
+            <button type="button" class="cp-featured-strip" data-page-action="TICKET">
+                <span class="cp-featured-label">PARTIDO DESTACADO</span>
+                <span class="cp-featured-match">${escapeHtml(home)} <i>vs</i> ${escapeHtml(away)}</span>
+                ${when ? `<span class="cp-featured-when">· ${escapeHtml(String(when))}</span>` : ""}
+                <span class="cp-featured-consensus">
+                    LA PEÑA VOTA
+                    <span class="cp-featured-bar"><i class="is-one" style="width:${(p1/t*100).toFixed(0)}%"></i><i class="is-draw" style="width:${(px/t*100).toFixed(0)}%"></i><i class="is-two" style="width:${(p2/t*100).toFixed(0)}%"></i></span>
+                    <span class="cp-featured-legend">1·${(p1/t*100).toFixed(0)}%</span>
+                    <span class="cp-featured-legend">X·${(px/t*100).toFixed(0)}%</span>
+                    <span class="cp-featured-legend">2·${(p2/t*100).toFixed(0)}%</span>
+                </span>
+            </button>
+        `;
+    }
+
+    // === TRASH TALK (compacto, se mantiene al final) ===
+    const trashTalkHtml = coverTrashTalkHtml();
+
+    // === URGENCY ===
+    const urgencyHtml = `<div id="cp-urgency" class="cp-urgency" hidden role="status" aria-live="assertive">
+        <span class="cp-urgency-dot" aria-hidden="true"></span>
+        <span id="cp-urgency-text">Te falta firmar — cierra en 00m 00s</span>
+        <button type="button" class="cp-urgency-cta" data-page-action="TICKET">Firmar ahora →</button>
+    </div>`;
+
+    // === SCOREBAR ===
+    const scorebarHtml = `<div id="cp-scorebar" class="cp-scorebar" aria-live="polite" hidden>
+        <span>HUMANOS <b id="cp-scorebar-human">—</b> vs <b id="cp-scorebar-ia">—</b> MÁQUINAS</span>
+        <div class="cp-scorebar-track" aria-hidden="true"><i id="cp-scorebar-pena" class="is-pena" style="width:50%"></i><i id="cp-scorebar-ia-bar" class="is-ia" style="width:50%"></i></div>
+        <small id="cp-scorebar-label">Jornada —</small>
+    </div>`;
+
+    // Hooks post-render
     setTimeout(() => {
+        const bando = coverBandoDetailed();
         updateCpScorebar(bando, jornada);
         triggerProgressPop(userDone);
         startTrashTalkRotation();
         startCoverCountdown();
         startSeasonCountdown();
     }, 0);
-    const userProgressHtml = state.user ? `
-        <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
-            <span>Tu quiniela</span>
-            <strong>${userDone}/15</strong>
-            <div class="cp-user-track" aria-hidden="true"><i style="width:${((userDone / 15) * 100).toFixed(1)}%"></i></div>
-        </div>` : "";
-    const assetsV = document.body?.dataset?.assetsV || "";
-    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
 
-    const firstMatch = matches[0];
-    let countdownDate = "";
-    if (firstMatch) {
-        const when = firstMatch.hora || firstMatch.kickoff || firstMatch.fecha || "";
-        const home = typeof getShortName === "function" ? getShortName(firstMatch.local) : (firstMatch.local || "");
-        const away = typeof getShortName === "function" ? getShortName(firstMatch.visitante) : (firstMatch.visitante || "");
-        countdownDate = [when, home && away ? `${home} vs ${away}` : ""].filter(Boolean).join(" · ");
-    }
-    const countdownHtml = `<div class="cp-countdown" id="cp-countdown">
-        <div class="cp-countdown-label">Cierre de jornada</div>
-        <div class="cp-countdown-timer" id="cp-countdown-timer"></div>
-        ${countdownDate ? `<div class="cp-countdown-date">${escapeHtml(String(countdownDate))}</div>` : ""}
-    </div>`;
-
-    const featuredHtml = featured && featured.match ? `
-        <article class="cp-featured" data-page-action="TICKET">
-            <div class="cp-card-head">
-                <span>PARTIDO DE LA JORNADA</span>
-                <b>${featuredMeta || "Jornada " + escapeHtml(String(jornada || ""))}</b>
-            </div>
-            ${coverFixtureHtml(featured.match, false)}
-            ${featuredPulse}
-            ${featuredPicks}
-            <button type="button" class="cp-featured-cta" data-page-action="TICKET">Pronosticar →</button>
-        </article>` : `
-        <article class="cp-featured is-empty">
-            <div class="cp-card-head"><span>PARTIDO DE LA JORNADA</span></div>
-            <p class="cp-empty">Los partidos se publicarán con el cierre de la jornada anterior.</p>
-        </article>`;
-
-    // P0 1.2 hero pitch dinámico con datos reales
-    const top3Names = rankingRows.slice(0,3).map(r=> `${escapeHtml(r.name)} ${r.jornada}pts`).join(" · ");
-    const heroPitch = hasRealBando && top3Names
-        ? `Top jornada: ${top3Names}. ¿Firmas por la humanidad y los superas?`
-        : `Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.`;
-    const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
-    return `<div class="cp">
-        <div class="cp-top">
-            <div id="cp-scorebar" class="cp-scorebar" aria-live="polite" hidden>
-                <span>HUMANOS <b id="cp-scorebar-human">—</b> vs <b id="cp-scorebar-ia">—</b> MÁQUINAS</span>
-                <div class="cp-scorebar-track" aria-hidden="true"><i id="cp-scorebar-pena" class="is-pena" style="width:50%"></i><i id="cp-scorebar-ia-bar" class="is-ia" style="width:50%"></i></div>
-                <small id="cp-scorebar-label">Jornada —</small>
-            </div>
-            <div id="cp-urgency" class="cp-urgency" hidden role="status" aria-live="assertive">
-                <span class="cp-urgency-dot" aria-hidden="true"></span>
-                <span id="cp-urgency-text">Te falta firmar — cierra en 00m 00s</span>
-                <button type="button" class="cp-urgency-cta" data-page-action="TICKET">Firmar ahora →</button>
-            </div>
-            <header class="cp-hero">
-                <div class="cp-command-brand">
-                    <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72" decoding="async" fetchpriority="high">
-                    <div class="cp-command-copy">
-                        <div class="cp-kicker">
-                            <span>${heroKickerJornada} · ${escapeHtml(kickerBandoLabel)}</span>
-                            <i class="cp-kicker-dot"></i>
-                            <span id="cp-deadline" aria-live="polite">${escapeHtml(statusLabel)}</span>
-                            ${liveCount ? `<span class="cp-kicker-live">● ${liveCount} en directo</span>` : ""}
-                        </div>
-                        <h1 class="cp-hero-title">
-                            <span class="cp-title-white">LIGA DE </span><span class="cp-title-gold">MAESTROS</span>
-                        </h1>
-                        <p class="cp-hero-pitch">${heroPitch.includes("Top jornada") ? heroPitch : escapeHtml(heroPitch)}</p>
-                    </div>
+    return `<div class="cp cp-v15">
+        ${scorebarHtml}
+        ${urgencyHtml}
+        <header class="cp-mc-header">
+            <div class="cp-mc-brand">
+                <img class="cp-mc-crest" src="${crestSrc}" alt="" width="28" height="28" decoding="async" fetchpriority="high">
+                <div class="cp-mc-brand-text">
+                    <b>LIGA DE MAESTROS</b>
+                    <span>${heroKickerJornada} · La Peña vs IA</span>
                 </div>
-                ${countdownHtml}
-                <div class="cp-command-side">
-                    ${userProgressHtml}
-                    <div class="cp-actions">
-                        <button type="button" class="cp-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
-                        <button type="button" class="cp-secondary" data-page-action="CONTEST">${escapeHtml(ctaSecondaryLabel)}</button>
-                    </div>
-                </div>
-            </header>
+            </div>
+            <div class="cp-mc-cd" id="cp-countdown">
+                <span class="cp-mc-cd-label">CIERRE</span>
+                <span class="cp-mc-cd-value" id="cp-countdown-timer">—</span>
+            </div>
+            <div class="cp-mc-progress">
+                <span class="cp-mc-progress-label">${userDone}/15</span>
+                <span class="cp-mc-progress-track"><i style="width:${userPct.toFixed(1)}%"></i></span>
+            </div>
+            <div class="cp-mc-actions">
+                <button type="button" class="cp-mc-btn-ghost" data-page-action="TICKET">${escapeHtml(ctaSecondaryLabel)}</button>
+                <button type="button" class="cp-mc-btn-primary" data-page-action="TICKET">${escapeHtml(ctaLabel)}</button>
+            </div>
+        </header>
+
+        <div class="cp-mc-grid">
+            <aside class="cp-mc-left" aria-label="Clasificaciones">
+                ${standingsHtml}
+            </aside>
+
+            <main class="cp-mc-center">
+                ${quinielaHtml}
+                ${trashTalkHtml}
+            </main>
+
+            <aside class="cp-mc-right" aria-label="Directo y porra">
+                ${livePanelHtml}
+                ${porraHtml}
+            </aside>
         </div>
 
-        <div class="cp-main">
-            <section class="cp-arena" aria-label="El duelo">
-                <article class="cp-duel">
-                    <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
-                    ${duelBody}
-                </article>
-                ${featuredHtml}
-                ${coverTrashTalkHtml()}
-            </section>
-        </div>
+        ${featuredHtml ? `<footer class="cp-mc-foot">${featuredHtml}</footer>` : ""}
 
-        <section class="cp-ops" aria-label="Tu jornada">
-            <div class="cp-data-card cp-porra" data-page-action="TICKET">
-                <div class="cp-card-head"><span id="cover-porra-title">LA PORRA</span><b>+2 pts</b></div>
-                <div id="cover-porra-content" class="cp-porra-content"><span class="cp-porra-loading">Cargando</span></div>
-            </div>
-
-            <section class="cp-journey-card" aria-labelledby="cp-journey-title">
-                <div class="cp-card-head">
-                    <span id="cp-journey-title">TU JORNADA</span>
-                    <b>3 pasos</b>
-                </div>
-                <div class="cp-journey-steps">
-                    <button type="button" class="cp-journey-step${saved ? " is-done" : ""}" data-page-action="TICKET">
-                        <span class="cp-journey-number" aria-hidden="true">1</span>
-                        <span><b>Quiniela</b><small>${escapeHtml(ticketStepLabel)}</small></span>
-                        <i aria-hidden="true">→</i>
-                    </button>
-                    <button type="button" class="cp-journey-step" id="cover-porra-step" data-page-action="TICKET">
-                        <span class="cp-journey-number" aria-hidden="true">2</span>
-                        <span><b>Porra</b><small id="cover-porra-step-status">Cargando...</small></span>
-                        <i aria-hidden="true">→</i>
-                    </button>
-                    <button type="button" class="cp-journey-step${liveCount ? " is-live" : ""}" data-page-action="LIVE">
-                        <span class="cp-journey-number" aria-hidden="true">3</span>
-                        <span><b>Directo</b><small>${escapeHtml(liveStepLabel)}</small></span>
-                        <i aria-hidden="true">→</i>
-                    </button>
-                </div>
-            </section>
-
-            <div class="cp-data-card cp-news-card" id="cp-news-card">
-                <div class="cp-news-header">
-                    <span>ÚLTIMA HORA</span>
-                    <a href="#" data-page-action="NEWS">Ver todas →</a>
-                </div>
-                <div id="cover-news-content" class="cp-news-content"><span class="cp-porra-loading">Cargando...</span></div>
-            </div>
-        </section>
-
-        ${liveCount ? `<button type="button" class="cp-live" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b><em>Seguimiento</em></button>` : ""}
+        ${liveCount ? `<button type="button" class="cp-live-fab" data-page-action="LIVE"><span></span><b>${liveCount} EN DIRECTO</b></button>` : ""}
     </div>`;
 }
