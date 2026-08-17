@@ -272,6 +272,75 @@
     }
 }
 
+/* Zonas de la clasificacion: la franja izquierda y el tinte de fondo cuentan
+   el procedimiento de cada liga (Champions/Europa/descenso, ascenso/playoff). */
+.full-standings-table tr.zone-champions td {
+    background: rgba(56, 189, 248, 0.045);
+}
+.full-standings-table tr.zone-champions td:first-child {
+    border-left: 3px solid var(--accent);
+}
+
+.full-standings-table tr.zone-europe td {
+    background: rgba(251, 191, 36, 0.045);
+}
+.full-standings-table tr.zone-europe td:first-child {
+    border-left: 3px solid var(--gold);
+}
+
+.full-standings-table tr.zone-direct td {
+    background: rgba(34, 197, 94, 0.05);
+}
+.full-standings-table tr.zone-direct td:first-child {
+    border-left: 3px solid var(--green);
+}
+
+.full-standings-table tr.zone-playoff td {
+    background: rgba(56, 189, 248, 0.045);
+}
+.full-standings-table tr.zone-playoff td:first-child {
+    border-left: 3px solid var(--accent);
+}
+
+.full-standings-table tr.zone-danger td {
+    background: rgba(239, 68, 68, 0.05);
+}
+.full-standings-table tr.zone-danger td:first-child {
+    border-left: 3px solid var(--red);
+}
+
+/* Leyenda que explica el procedimiento de cada liga. */
+.standings-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-main);
+    color: var(--text-muted);
+    font-size: 0.64rem;
+}
+
+.standings-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.standings-legend .legend-item i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #64748b;
+    flex: 0 0 auto;
+}
+
+.standings-legend .zone-champions i { background: var(--accent); }
+.standings-legend .zone-europe i { background: var(--gold); }
+.standings-legend .zone-direct i { background: var(--green); }
+.standings-legend .zone-playoff i { background: var(--accent); }
+.standings-legend .zone-danger i { background: var(--red); }
+
 /* Marca de partido en juego: informa sin alterar puntos ni posicion. */
 .standings-live {
     display: inline-flex;
@@ -301,5 +370,4 @@
 @keyframes standingsLivePulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.55; }
-}
 }
