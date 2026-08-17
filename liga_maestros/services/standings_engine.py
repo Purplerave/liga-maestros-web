@@ -23,8 +23,11 @@ path can inflate ``PJ``.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+import re
+import unicodedata
 from datetime import datetime
 
 import config
@@ -42,7 +45,10 @@ from .ticket import madrid_now
 
 logger = logging.getLogger(__name__)
 
-FINISHED_STATUSES = ("FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED")
+# "STALE" es un partido cerrado sin confirmacion oficial del proveedor: la web
+# (services.live_state y el JS) ya lo trata como terminado, asi que la
+# clasificacion tambien debe contarlo cuando trae marcador.
+FINISHED_STATUSES = ("FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED", "STALE")
 LIVE_STATUSES = ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET")
 
 LEAGUE_CATEGORY = {
@@ -52,6 +58,7 @@ LEAGUE_CATEGORY = {
     "SEGUNDA DIVISION": "segunda",
     "SEGUNDA": "segunda",
     "LALIGA HYPERMOTION": "segunda",
+    "LA LIGA HYPERMOTION": "segunda",
 }
 
 
@@ -180,7 +187,55 @@ def collect_finished_matches(conn, extra_matches=None):
         if entry:
             entries.setdefault(entry["key"], entry)
 
+    for entry in _load_history_matches():
+        entries.setdefault(entry["key"], entry)
+
     return list(entries.values())
+
+
+def _load_history_matches():
+    """Partidos acabados archivados por el tracker diario (JSONL por temporada).
+
+    El panel es volatil: solo conserva lo que el tracker vio en directo, asi
+    que un partido que termino antes de su primera pasada del dia puede
+    perderse. El historico de temporada es un anexo permanente y sirve de red
+    de seguridad para que la forma y la racha nunca se queden a medias.
+    """
+    try:
+        from .daily_matches import history_path
+    except Exception:  # pragma: no cover - el modulo siempre existe
+        return []
+    path = history_path()
+    if not os.path.exists(path):
+        return []
+    entries = []
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if LEAGUE_CATEGORY.get(_normalize_league_name(record.get("league"))) not in ("primera", "segunda"):
+                    continue
+                gh, ga = parse_score_text(record.get("score") or "")
+                entry = _match_entry(
+                    record.get("home"),
+                    record.get("away"),
+                    gh,
+                    ga,
+                    str(record.get("date") or "")[:10],
+                    "historial",
+                )
+                if entry:
+                    entries.append(entry)
+    except Exception:
+        logger.exception("No se pudo leer el historial de partidos para la clasificacion")
+        return []
+    return entries
 
 
 def _load_panel_matches():
@@ -197,9 +252,21 @@ def _load_panel_matches():
     return []
 
 
+def _normalize_league_name(raw):
+    """Nombre de competicion sin tildes ni espacios raros, en mayusculas.
+
+    El panel (Highlightly) entrega "Segunda División" con tilde mientras que
+    LEAGUE_CATEGORY guarda las claves sin tildes: sin esta normalizacion la
+    consulta exacta falla y el partido se pierde para la clasificacion.
+    """
+    value = unicodedata.normalize("NFD", str(raw or ""))
+    value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
+    return re.sub(r"\s+", " ", value).strip().upper()
+
+
 def _panel_competition(match):
     raw = match.get("competition_name") or (match.get("competition") or {}).get("name") or ""
-    return LEAGUE_CATEGORY.get(str(raw).strip().upper())
+    return LEAGUE_CATEGORY.get(_normalize_league_name(raw))
 
 
 def _panel_entry(match, allow_live=False):

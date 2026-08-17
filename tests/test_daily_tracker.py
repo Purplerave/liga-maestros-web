@@ -219,3 +219,34 @@ def test_agenda_respects_open_circuit(tmp_path, monkeypatch):
     )
 
     assert daily_matches.fetch_today_agenda("2026-08-15") == []
+
+
+def test_backfill_adds_finished_matches_from_recent_days_once(tmp_path, monkeypatch):
+    _patch_data_dir(tmp_path, monkeypatch)
+    monkeypatch.setattr(daily_matches, "today_madrid", lambda: "2026-08-17")
+
+    def fake_api_get(path, params):
+        assert params["date"] in ("2026-08-16", "2026-08-15", "2026-08-14")
+        return {
+            "data": [
+                {
+                    "id": 42,
+                    "date": f"{params['date']}T17:00:00.000Z",
+                    "league": {"name": "Segunda División"},
+                    "homeTeam": {"name": "Castellón", "logo": None},
+                    "awayTeam": {"name": "R. Sociedad B", "logo": None},
+                    "state": {"description": "FINISHED", "score": {"current": "1 - 0"}},
+                }
+            ]
+        }
+
+    monkeypatch.setattr(daily_matches, "_api_get", fake_api_get)
+
+    # 3 dias x 2 ligas: el fake devuelve el mismo partido para ambas ligas.
+    assert daily_matches.backfill_recent_spanish_matches(days=3) == 6
+
+    panel = json.loads((tmp_path / "LIVE_ALL_MATCHES_V3.json").read_text(encoding="utf-8"))
+    assert any(m["id"] == 42 and m["competition_name"] == "SEGUNDA DIVISION" for m in panel)
+
+    # Cada fecha se rellena una sola vez.
+    assert daily_matches.backfill_recent_spanish_matches(days=3) == 0
