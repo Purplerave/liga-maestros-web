@@ -3,7 +3,6 @@
    nombres directos (El duelo, El partido en disputa, Así vota la Peña,
    Última hora, La porra) y quitado el comentario IA fijo de ejemplo. */
 
-function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
 function startCoverScorebar() {}
 
@@ -249,17 +248,6 @@ function coverDisagreementMatch(matches) {
     });
     return best;
 }
-function coverTightPenaMatch(matches) {
-    const rows = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
-    let best = null;
-    rows.forEach(row => {
-        const match = matches.find(item => Number(item.id) === Number(row.id));
-        if (!match || !Number(row.total || 0)) return;
-        const peak = Math.max(Number(row.p1 || 0), Number(row.px || 0), Number(row.p2 || 0));
-        if (!best || peak < best.peak) best = { match, row, peak };
-    });
-    return best;
-}
 function coverFixtureHtml(match, compact = false) {
     if (!match) return `<span class="cp-empty">Pendiente</span>`;
     return `<div class="cp-fixture ${compact ? "is-compact" : ""}">
@@ -268,6 +256,51 @@ function coverFixtureHtml(match, compact = false) {
         <span class="cp-team cp-team-away">${logoBadge(match.visitante, teamLogo(match, "away"))}<strong>${escapeHtml(getShortName(match.visitante))}</strong></span>
     </div>`;
 }
+function coverCompareTableHtml(matches) {
+    // Tabla densa: 15 filas, columna por IA, columna Peña, columna tú.
+    const columns = coverMasterColumns();
+    if (!matches.length || !columns.length) {
+        return `<p class="cp-empty">La comparativa se publica con los partidos de la jornada.</p>`;
+    }
+    const predictions = state.data?.predicciones_actuales || {};
+    const penaRows = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
+    const mySigns = Array.isArray(state.my_signs) ? state.my_signs : [];
+    const shortLabel = (label) => escapeHtml(String(label || "").slice(0, 4).toUpperCase());
+    const signCell = (sign, extraClass = "") => {
+        const s = String(sign || "-").toUpperCase();
+        const known = ["1", "X", "2", "1X", "X2", "12"].includes(s);
+        return `<td class="cp-cmp-sign${known ? " is-" + s.toLowerCase() : " is-empty"}${extraClass}">${escapeHtml(known ? s : "·")}</td>`;
+    };
+    const head = `<tr>
+        <th class="cp-cmp-match" scope="col">Partido</th>
+        ${columns.map(col => `<th scope="col" title="${escapeHtml(col.label)}">${shortLabel(col.label)}</th>`).join("")}
+        <th scope="col" title="Signo más votado por La Peña">PEÑA</th>
+        <th scope="col" title="Tu quiniela">TÚ</th>
+    </tr>`;
+    const body = matches.slice(0, 15).map((match, index) => {
+        const isPleno = index === 14;
+        const penaRow = penaRows.find(row => Number(row.id) === Number(match.id));
+        const pena = coverPenaReading(penaRow);
+        const real = String(match.signo_actual || "").toUpperCase();
+        const hasResult = ["1", "X", "2"].includes(real);
+        return `<tr${isPleno ? ` class="is-pleno"` : ""}>
+            <td class="cp-cmp-match">
+                <span>${escapeHtml(getShortName(match.local))}</span><i>–</i><span>${escapeHtml(getShortName(match.visitante))}</span>
+                ${hasResult ? `<b class="cp-cmp-real" title="Resultado actual">${escapeHtml(real)}</b>` : ""}
+            </td>
+            ${columns.map(col => signCell(coverPredictionSigns(predictions[col.id])[index])).join("")}
+            ${signCell(pena ? pena.sign : "-")}
+            ${signCell(mySigns[index])}
+        </tr>`;
+    }).join("");
+    return `<div class="cp-cmp-wrap" data-page-action="TICKET" role="button" tabindex="0" aria-label="Ver y editar mi quiniela">
+        <table class="cp-cmp" aria-label="Pronóstico de cada IA por partido">
+            <thead>${head}</thead>
+            <tbody>${body}</tbody>
+        </table>
+    </div>`;
+}
+
 function updateCoverPorraStep(label, stateName = "") {
     const step = document.getElementById("cover-porra-step");
     const status = document.getElementById("cover-porra-step-status");
@@ -328,14 +361,11 @@ function renderNewspaperCoverPageV3() {
     const liveCount = matches.filter(m => !isExpiredLiveMatch(m) && (isLiveStatus(m.status) || isLiveMatch(m))).length;
     const rankingRows = coverRankingRows();
     const disagreement = coverDisagreementMatch(matches);
-    const penaPulse = coverTightPenaMatch(matches);
     const bando = coverBandoDetailed();
     const consenso = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
     const collective = coverCollectivePenaScore(matches, consenso);
     const humanAvgStr = bando.humanAvg.toFixed(1).replace(".0","").replace(".",",");
     const aiAvgStr = bando.aiAvg.toFixed(1).replace(".0","").replace(".",",");
-    const totalBando = bando.humanTotal + bando.aiTotal;
-    const humanPct = totalBando > 0 ? (bando.humanTotal / totalBando) * 100 : 50;
 
     const rankingForCover = [...rankingRows].sort((a,b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name,"es"));
     const top3Pruebas = [...rankingRows].sort((a,b) => b.total - a.total).slice(0,3);
@@ -401,54 +431,12 @@ function renderNewspaperCoverPageV3() {
         ).join("")}</div>`;
     }
 
-    // Duelo Peña vs IA
-    let duelBody = "";
-    if (isFirstOfficial) {
-        duelBody = `
-            <div class="cp-duel-zero">
-                <div class="cp-duel-zero-badge">${escapeHtml(seasonLabel)}</div>
-                <div class="cp-duel-zero-title">TODO A CERO</div>
-                <p class="cp-duel-zero-text">Las pruebas acabaron. Empieza la liga de verdad.</p>
-            </div>
-            <div class="cp-duel-scores is-reset">
-                <div class="cp-duel-side is-pena">
-                    <span class="cp-duel-avatar" aria-hidden="true">👥</span>
-                    <span class="cp-duel-side-label">La Peña</span>
-                    <strong class="cp-duel-side-value">0</strong>
-                    <small>media pruebas 6,9</small>
-                </div>
-                <div class="cp-duel-vs" aria-hidden="true">VS</div>
-                <div class="cp-duel-side is-ia">
-                    <span class="cp-duel-avatar" aria-hidden="true">✦</span>
-                    <span class="cp-duel-side-label">Maestros IA</span>
-                    <strong class="cp-duel-side-value">0</strong>
-                    <small>media pruebas 8,2</small>
-                </div>
-            </div>`;
-    } else {
-        const diff = (bando.aiAvg - bando.humanAvg);
-        const diffStr = (diff >= 0 ? "+" : "") + diff.toFixed(1).replace(".", ",");
-        const leader = diff > 0.05 ? "Las máquinas van por delante" : diff < -0.05 ? "La Peña va por delante" : "Empate técnico";
-        duelBody = `
-            <div class="cp-duel-scores">
-                <div class="cp-duel-side is-pena">
-                    <span class="cp-duel-side-label">La Peña</span>
-                    <strong class="cp-duel-side-value">${escapeHtml(humanAvgStr)}</strong>
-                    <small>media aciertos</small>
-                </div>
-                <div class="cp-duel-vs" aria-hidden="true">VS</div>
-                <div class="cp-duel-side is-ia">
-                    <span class="cp-duel-side-label">Maestros IA</span>
-                    <strong class="cp-duel-side-value">${escapeHtml(aiAvgStr)}</strong>
-                    <small>media aciertos</small>
-                </div>
-            </div>
-            <div class="cp-duel-bar" role="img" aria-label="Reparto del duelo">
-                <i class="is-pena" style="width:${Math.max(8, Math.min(92, humanPct)).toFixed(1)}%"></i>
-                <i class="is-ia" style="width:${Math.max(8, Math.min(92, 100 - humanPct)).toFixed(1)}%"></i>
-            </div>
-            <div class="cp-duel-foot"><b>${escapeHtml(leader)}</b> · diff ${escapeHtml(diffStr)}</div>`;
-    }
+    // La tabla comparativa de IAs ES la portada: partido a partido, cada IA con
+    // su signo, la Peña y tú. Es lo que nadie más tiene y se lee en 3 segundos.
+    const duelHeadRight = hasRealBando
+        ? `IA ${escapeHtml(aiAvgStr)} · Peña ${escapeHtml(humanAvgStr)}`
+        : escapeHtml(seasonLabel);
+    const duelBody = coverCompareTableHtml(matches);
 
     const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
     // P0 1.4 + 1.5: actualizar scorebar y animar progreso
@@ -515,7 +503,7 @@ function renderNewspaperCoverPageV3() {
 
             <section class="cp-arena" aria-label="El duelo">
                 <article class="cp-duel">
-                    <div class="cp-card-head"><span>EL DUELO</span><b>Peña vs IA</b></div>
+                    <div class="cp-card-head"><span>LAS IAs, PARTIDO A PARTIDO</span><b>${duelHeadRight}</b></div>
                     ${duelBody}
                 </article>
                 ${featuredHtml}

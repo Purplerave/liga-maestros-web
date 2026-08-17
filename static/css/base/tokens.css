@@ -6,10 +6,12 @@
    ========================================================================== */
 :root {
     /* ---------- Typography ---------- */
-    --font-ui: "Outfit", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-    --font-display: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
+    /* 2 familias, punto: Outfit (UI + display) y JetBrains Mono (dato).
+       --font-display y --font-headline son alias para no romper consumidores. */
+    --font-ui: "Outfit", system-ui, -apple-system, sans-serif;
+    --font-display: var(--font-ui);
     --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-    --font-headline: "Bebas Neue", "Outfit", sans-serif;
+    --font-headline: var(--font-ui);
     --font-main: var(--font-ui); /* alias legacy */
     --fu: var(--font-ui);        /* alias legacy */
 

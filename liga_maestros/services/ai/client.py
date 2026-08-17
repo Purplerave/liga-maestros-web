@@ -1,12 +1,16 @@
-"""Cliente minimo para APIs de IA con tier gratuito.
+"""Cliente minimo para APIs de IA con tier gratuito o plan de tokens.
 
-Groq y Gemini exponen endpoints compatibles con OpenAI, asi que un unico cliente
-sirve para ambos y no hace falta ninguna dependencia nueva: basta `requests`,
-que ya esta en requirements.txt.
+MiMo (Xiaomi Token Plan), Groq y Gemini exponen endpoints compatibles con
+OpenAI, asi que un unico cliente sirve para todos y no hace falta ninguna
+dependencia nueva: basta `requests`, que ya esta en requirements.txt.
 
 Orden de preferencia:
-  1. Groq (Llama 3.3 70B) - rapido y no entrena con los datos enviados.
-  2. Gemini 2.5 Flash - reserva con cuota diaria mas amplia.
+  1. MiMo Token Plan - plan de tokens ya contratado; el techo diario de
+     llamadas (AI_DAILY_CALL_LIMIT) y la cache por firma mantienen el gasto
+     en unos pocos miles de tokens al dia, irrelevante frente al plan.
+     Nota de coste: MiMo-V2-Omni consume 1 credito/token; MiMo-V2-Pro, 2.
+  2. Groq (Llama 3.3 70B) - rapido y no entrena con los datos enviados.
+  3. Gemini 2.5 Flash - reserva con cuota diaria mas amplia.
 """
 
 import logging
@@ -18,7 +22,15 @@ logger = logging.getLogger(__name__)
 
 AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "10"))
 
+_MIMO_BASE_URL = os.getenv("MIMO_BASE_URL", "https://token-plan-ams.xiaomimimo.com/v1").rstrip("/")
+
 PROVIDERS = (
+    {
+        "name": "mimo",
+        "url": f"{_MIMO_BASE_URL}/chat/completions",
+        "key_env": "MIMO_API_KEY",
+        "model": os.getenv("MIMO_MODEL", "mimo-v2-omni"),
+    },
     {
         "name": "groq",
         "url": "https://api.groq.com/openai/v1/chat/completions",

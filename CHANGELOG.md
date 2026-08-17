@@ -2,6 +2,33 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-17 — Tipografía a 2 familias + tabla comparativa de IAs en portada
+
+### Cambiado
+
+- 🔤 **Tipografía consolidada a 2 familias**: Outfit (UI + display) y
+  JetBrains Mono (dato). Fuera Bebas Neue del bundle de Google Fonts y de
+  todos los tokens; `--font-display`/`--font-headline` quedan como alias de
+  `--font-ui`. Eliminadas las referencias fantasma a Syne, Impact, Space
+  Grotesk y Plus Jakarta Sans (fuentes que nunca se cargaban) en
+  `cover_hero.css`, `tokens.css` y `ticket_image.js`. También el stub
+  `loadSacramentoFont()`.
+- 📊 **La tabla comparativa de las 6 IAs es ahora el centro de la portada**,
+  donde antes estaba el VS animado: 15 filas (partido a partido), una columna
+  por IA con su signo, columna Peña (signo más votado) y columna Tú. Con
+  resultado en juego, el signo real aparece junto al partido. Toda la tabla
+  lleva a la quiniela. Fuera el bloque `cp-duel-scores`/`cp-duel-vs` con las
+  animaciones `vsBeat`/`cornerIn`.
+- 🤖 **MiMo (Xiaomi Token Plan) como proveedor de IA preferido** para el
+  boletín/parte de bajas, por delante de Groq y Gemini. Endpoint
+  OpenAI-compatible (`MIMO_BASE_URL`, por defecto token-plan-ams), modelo
+  `mimo-v2-omni` por defecto (1 crédito/token, la mitad que Pro). El techo
+  diario `AI_DAILY_CALL_LIMIT` y la caché por firma ya limitan el gasto a
+  unos pocos miles de tokens/día. Nuevas vars: `MIMO_API_KEY`, `MIMO_BASE_URL`,
+  `MIMO_MODEL` (ver `.env.example`). Tests nuevos en
+  `tests/test_ai_client_providers.py`.
+- Cache-bust: portada → 66, arena → 13, ticket_image → 2.
+
 ## 2026-08-17 — Fuera trash-talk y copy tribal: la portada es dato
 
 ### Eliminado

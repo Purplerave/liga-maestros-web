@@ -105,7 +105,11 @@ SENTRY_TRACES_SAMPLE_RATE=0.1
 SLOW_REQUEST_MS=750
 
 # --- Noticias con IA (opcional, dejar apagado al principio) ---
+# MiMo Token Plan es el proveedor preferido si hay key; Groq/Gemini de respaldo.
 AI_NEWS_ENABLED=0
+MIMO_API_KEY=
+MIMO_BASE_URL=https://token-plan-ams.xiaomimimo.com/v1
+MIMO_MODEL=mimo-v2-omni
 GROQ_API_KEY=
 GEMINI_API_KEY=
 AI_DAILY_CALL_LIMIT=12

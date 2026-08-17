@@ -65,23 +65,23 @@
     function drawHeader(ctx, jornada, userName) {
         ctx.textAlign = "center";
         ctx.fillStyle = COLORS.neon;
-        ctx.font = "600 34px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "600 34px 'Outfit', system-ui, sans-serif";
         ctx.fillText("LA PEÑA CONTRA LOS MAESTROS IA", W / 2, 120);
 
         ctx.fillStyle = COLORS.text;
-        ctx.font = "700 96px 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 96px 'Outfit', system-ui, sans-serif";
         ctx.shadowColor = COLORS.glow;
         ctx.shadowBlur = 30;
         ctx.fillText("LIGA DE MAESTROS", W / 2, 225);
         ctx.shadowBlur = 0;
 
         ctx.fillStyle = COLORS.gold;
-        ctx.font = "700 52px 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 52px 'Outfit', system-ui, sans-serif";
         ctx.fillText("MI QUINIELA · JORNADA " + (jornada || "?"), W / 2, 300);
 
         if (userName) {
             ctx.fillStyle = COLORS.soft;
-            ctx.font = "500 34px 'Space Grotesk', system-ui, sans-serif";
+            ctx.font = "500 34px 'Outfit', system-ui, sans-serif";
             ctx.fillText(fitText(ctx, userName, W - 200), W / 2, 352);
         }
     }
@@ -102,13 +102,13 @@
         // Number badge
         ctx.textAlign = "center";
         ctx.fillStyle = COLORS.muted;
-        ctx.font = "700 34px 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 34px 'Outfit', system-ui, sans-serif";
         ctx.fillText(String(index + 1), x + 46, y + rowH / 2 + 12);
 
         // Teams
         ctx.textAlign = "left";
         ctx.fillStyle = COLORS.text;
-        ctx.font = "600 32px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "600 32px 'Outfit', system-ui, sans-serif";
         const local = match?.local || "Local";
         const away = match?.visitante || "Visitante";
         const label = isPleno ? "PLENO AL 15 · " + local + " - " + away : local + " - " + away;
@@ -128,7 +128,7 @@
         ctx.stroke();
         ctx.textAlign = "center";
         ctx.fillStyle = hasSign ? COLORS.neon : COLORS.red;
-        ctx.font = "700 " + (String(sign).length > 3 ? 28 : 36) + "px 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 " + (String(sign).length > 3 ? 28 : 36) + "px 'Outfit', system-ui, sans-serif";
         ctx.fillText(hasSign ? String(sign) : "—", chipX + chipW / 2, y + rowH / 2 + 13);
     }
 
@@ -136,16 +136,16 @@
         const y = H - 200;
         ctx.textAlign = "center";
         ctx.fillStyle = COLORS.text;
-        ctx.font = "700 46px 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 46px 'Outfit', system-ui, sans-serif";
         ctx.fillText(doneCount + "/15 FIRMADOS", W / 2, y);
         ctx.fillStyle = COLORS.neon;
-        ctx.font = "600 40px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "600 40px 'Outfit', system-ui, sans-serif";
         ctx.shadowColor = COLORS.glow;
         ctx.shadowBlur = 18;
         ctx.fillText("¿Puedes ganar a la IA?", W / 2, y + 66);
         ctx.shadowBlur = 0;
         ctx.fillStyle = COLORS.muted;
-        ctx.font = "500 30px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "500 30px 'Outfit', system-ui, sans-serif";
         ctx.fillText(window.location.host || "ligademaestros", W / 2, y + 126);
     }
 
@@ -250,10 +250,10 @@
     function drawVsHeader(ctx, jornada) {
         ctx.textAlign = "center";
         ctx.fillStyle = COLORS.neon;
-        ctx.font = "600 30px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "600 30px 'Outfit', system-ui, sans-serif";
         ctx.fillText("JORNADA " + (jornada || "?") + " · HUMANO VS MÁQUINAS", W/2, 110);
         ctx.fillStyle = COLORS.text;
-        ctx.font = "700 82px 'Bebas Neue', system-ui, sans-serif";
+        ctx.font = "700 82px 'Outfit', system-ui, sans-serif";
         ctx.shadowColor = COLORS.glow; ctx.shadowBlur = 28;
         ctx.fillText("¿QUIÉN ACERTÓ MÁS?", W/2, 200);
         ctx.shadowBlur = 0;
@@ -280,7 +280,7 @@
             // name
             ctx.textAlign = "left";
             ctx.fillStyle = row.isUser ? "#7cc6ff" : row.isAI ? "#f472b6" : COLORS.text;
-            ctx.font = "700 36px 'Space Grotesk', system-ui, sans-serif";
+            ctx.font = "700 36px 'Outfit', system-ui, sans-serif";
             const label = (row.isUser ? "TÚ · " : row.isAI ? "IA · " : "") + row.name;
             ctx.fillText(fitText(ctx, label, w-240), x+90, y+rowH/2+12);
             // pts
@@ -290,7 +290,7 @@
             ctx.fillStyle = i===0 ? "rgba(251,191,36,0.18)" : "rgba(255,255,255,0.06)";
             ctx.fill();
             ctx.fillStyle = i===0 ? COLORS.gold : COLORS.text;
-            ctx.font = "800 40px 'Bebas Neue', system-ui, sans-serif";
+            ctx.font = "800 40px 'Outfit', system-ui, sans-serif";
             ctx.fillText(row.pts + " pts", ptsX, ptsY+14);
         });
     }
@@ -299,12 +299,12 @@
         const y = H - 180;
         ctx.textAlign = "center";
         ctx.fillStyle = COLORS.neon;
-        ctx.font = "700 38px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "700 38px 'Outfit', system-ui, sans-serif";
         ctx.shadowColor = COLORS.glow; ctx.shadowBlur = 16;
         ctx.fillText("LIGA DE MAESTROS", W/2, y);
         ctx.shadowBlur = 0;
         ctx.fillStyle = COLORS.muted;
-        ctx.font = "500 28px 'Space Grotesk', system-ui, sans-serif";
+        ctx.font = "500 28px 'Outfit', system-ui, sans-serif";
         ctx.fillText("Firma tu quiniela en ligademaestros", W/2, y+48);
     }
 
