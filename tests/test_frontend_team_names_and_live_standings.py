@@ -104,7 +104,7 @@ def test_live_standings_use_the_strict_live_guard():
     assert "isLiveMatch(" not in source, "isLiveMatch no descarta un partido terminado"
     assert "function getFinishedStandingsTeams()" in source
     assert "function teamLiveState(team, liveResults, finishedTeams)" in source
-    assert "if (finishedTeams.has(key)) return { live: false, score: \"\" };" in source
+    assert 'if (finishedTeams.has(key)) return { live: false, score: "" };' in source
 
 
 def _standings_script(partidos, all_league_matches, teams):
