@@ -1,5 +1,7 @@
 # Propuesta completa de mejoras — Liga de Maestros
 
+> **🤖 Para la IA del próximo chat:** ve directo a **§13 Seguimiento de implementación** — ahí está el changelog real de lo ya hecho (P0+P1+P2 en `arena/01a00ffe-liga-maestros-web` commits `bf14687`, `4b70b88`, `dd9f5a0`) y el backlog que queda. §1-§12 es el backlog original de Grok, no el estado actual. Rama de trabajo: `arena/01a00ffe-liga-maestros-web` (base `cfc3884` en `main`).
+
 **Fecha:** 17 de agosto de 2026  
 **Autor de la propuesta:** Auditoría externa (Grok)  
 **Repo:** `Purplerave/liga-maestros-web`  
@@ -379,9 +381,10 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 
 ---
 
-## 13. Seguimiento de implementación — actualizado 2026-08-17
+## 13. Seguimiento de implementación — actualizado 2026-08-17 (FUENTE DE VERDAD)
 
-> **Estado general:** P0 Semana 1 completada en `arena/01a00ffe-liga-maestros-web`. Los 6 ítems P0 están implementados y verificados manualmente. P1/P2/P3 quedan como backlog priorizado.
+> **Estado general:** P0 + P1 (2.1, 2.3) + P2 (6.1, 6.2, 6.3, 3.3) completados en `arena/01a00ffe-liga-maestros-web` (`bf14687`, `4b70b88`, `dd9f5a0` sobre `cfc3884` de `main`). Ver `git log main..arena` y `git diff --stat` abajo. P2 restante y P3 quedan como backlog.
+> **Cómo retomar en un chat nuevo:** 1) lee esta §13, 2) `git log --oneline main..arena`, 3) sigue por §13.2b pendiente.
 
 ### 13.1 Changelog P0 — 2026-08-17 (esta sesión)
 
