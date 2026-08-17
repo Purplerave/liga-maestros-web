@@ -500,6 +500,14 @@ function runShareAction(action) {
         }).catch(() => showToast("No se pudo generar la imagen.", "error"));
         return;
     }
+    if (action === "imageVs" && window.TicketImage?.shareVs) {
+        showToast("Generando duelo vs IA...");
+        window.TicketImage.shareVs(state).then(() => {
+            if (typeof SoundManager !== "undefined" && SoundManager.playSave) SoundManager.playSave();
+            closeShareSheet();
+        }).catch(() => showToast("No se pudo generar el duelo.", "error"));
+        return;
+    }
     if (action === "native" && navigator.share) {
         navigator.share({ title: "Liga de Maestros", text, url: shareUrl }).catch(error => {
             if (error && error.name === "AbortError") return;

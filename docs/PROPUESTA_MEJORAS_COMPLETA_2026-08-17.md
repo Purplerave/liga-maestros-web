@@ -403,12 +403,18 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 6. Sin porra → ver `Los maestros ya se han mojado. ¿Y tú?` + `¡Mójate!`.
 7. Sticky bar aparece solo cuando hay puntos reales (`humanTotal+aiTotal>0`).
 
-### 13.2 Qué queda pendiente (próximos pasos según el doc)
+### 13.2 Changelog P1 — 2026-08-17 (continuación)
 
-- **P1 2.1 Tarjeta compartible:** `static/js/ticket_image.js` ya genera imagen de quiniela, pero falta la variante `Jornada N — Tú vs Grok vs Claude` con puntos + OG dinámica. Es el siguiente multiplicador viral.
-- **P1 2.3 Banner <2h + recordatorio:** falta banner in-app `Te falta firmar y cierra en 1h 12m` cuando `!saved && diff<2h`. Fácil tras P0.
-- **P1 3.1 / 3.3 / 6.x:** JSON Schema, health enriquecido, Makefile/pre-commit — previstos Semana 3. No bloquean conversión.
-- **P2 4.2 / 5.x:** Accesibilidad y observabilidad — mantener como deuda técnica vigilada.
+| ID | Propuesta | Estado | Qué se hizo | Archivos tocados |
+|---|---|---|---|---|
+| **2.1** Tarjeta compartible Jornada | ✅ Hecho | Canvas 1080×1920 nuevo: `JORNADA N · HUMANO VS MÁQUINAS — ¿QUIÉN ACERTÓ MÁS?` con Top 5 (Tú + 4 IAs) ordenado por `pts` jornada, badges `isUser` cian / `isAI` rosa / oro para líder, footer `LIGA DE MAESTROS`. `TicketImage.generateVs(state)` + `shareVs(state)` con `navigator.share` + fallback `download`. Botón nuevo `Duelo vs IA 📊` en share-sheet junto a `Mi quiniela 📸`. Datos reales de `ranking_maestros` + `participant_contract`, nunca inventados. | `static/js/ticket_image.js` (`getVsRows`, `renderVs`, `generateVs`, `shareVs`), `templates/liga_index.html` (botón `imageVs`), `static/js/quantum_final.js` (`runShareAction imageVs`) |
+| **2.3** Banner urgencia <2h | ✅ Hecho | Nueva franja `#cp-urgency` bajo scorebar: `Te falta firmar — cierra en 01h 12m 05s` + CTA `Firmar ahora →`, solo visible si `!closed && !saved && 0<diff<=2h`. Tick 1s en `startCoverCountdown` vía `updateCpUrgency(diff, closed, saved)`. Con `role=status aria-live=assertive` y pulso `cp-urgentPulse`. Respeta `prefers-reduced-motion`. | `templates/liga_index.html` (`#cp-urgency`), `static/js/pages/cover_page.js` (`updateCpUrgency`), `static/css/cover_hero.css` (`.cp-urgency`) |
+
+### 13.2b Pendiente P1/P2 (siguiente)
+
+- **2.2 Avatares / trash talk Maestros + réplica mejor humano:** falta frase corta rotativa por jornada en portada (no inventar resultados).
+- **2.4 Grupos privados, 3.1 JSON Schema, 3.3 Health, 6.x Makefile/pre-commit:** previstos Semana 3. No bloquean viral.
+- **4.x/5.x:** Accesibilidad motion, performance, observabilidad — deuda vigilada.
 
 ### 13.3 Decisiones tomadas en esta iteración
 

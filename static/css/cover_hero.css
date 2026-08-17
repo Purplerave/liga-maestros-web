@@ -149,6 +149,18 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
 @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
 .cp-user-progress strong.is-pop { animation: pop 0.3s ease; }
 .cp-porra-change.is-cta { color: #f5b53f; font-weight: 700; }
+/* P1 2.3 Banner urgencia <2h */
+.cp-urgency {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:7px 12px; font-size:0.68rem; font-weight:700;
+    background: linear-gradient(90deg, rgba(245,181,63,0.18), rgba(239,68,68,0.18));
+    border-bottom:1px solid rgba(245,181,63,0.28);
+    color:#ffe7a4;
+}
+.cp-urgency[hidden]{ display:none; }
+.cp-urgency-dot{ width:8px; height:8px; border-radius:50%; background:#f87171; box-shadow:0 0 8px #f87171; animation: cp-urgentPulse 1s infinite; }
+.cp-urgency-cta{ margin-left:6px; padding:4px 10px; border-radius:999px; border:1px solid rgba(245,181,63,0.5); background: linear-gradient(180deg,#ffd56a,#f5b53f); color:#1a1205; font-size:0.66rem; font-weight:800; cursor:pointer; }
+@media (prefers-reduced-motion: reduce){ .cp-urgency-dot{ animation:none; } }
 
 .cp-hero-tagline {
     color: var(--cp-cyan);

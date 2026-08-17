@@ -43,6 +43,8 @@ function startCoverCountdown() {
         deadline.classList.toggle("is-urgent", diff < 3_600_000);
         deadline.setAttribute("aria-live", diff < 3_600_000 ? "assertive" : "polite");
         deadline.setAttribute("title", h > 0 ? `Cierre en ${h} horas ${m} minutos` : `Cierre en ${m} minutos`);
+        // P1 2.3 banner urgencia
+        try { updateCpUrgency(diff, Boolean(state.data.is_locked), typeof hasSavedTicket==="function" ? hasSavedTicket() : false); } catch(e) {}
     };
     tick(); setInterval(tick, 1000);
 }
@@ -110,6 +112,17 @@ function updateCpScorebar(bando, jornada) {
     if (penaBar) penaBar.style.width = Math.max(8,Math.min(92,pct)).toFixed(1)+"%";
     if (iaBar) iaBar.style.width = Math.max(8,Math.min(92,100-pct)).toFixed(1)+"%";
     if (label) label.textContent = `J${jornada || "—"} · ${bando.aiAvg > bando.humanAvg ? "van ganando máquinas" : bando.humanAvg > bando.aiAvg ? "vamos ganando" : "empate"}`;
+}
+
+function updateCpUrgency(diff, closed, saved) {
+    const bar = document.getElementById("cp-urgency");
+    const txt = document.getElementById("cp-urgency-text");
+    if (!bar || !txt) return;
+    if (closed || saved || diff <= 0 || diff > 2*3600*1000) { bar.hidden = true; return; }
+    const s = Math.floor(diff/1000);
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    txt.textContent = h>0 ? `Te falta firmar — cierra en ${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `Te falta firmar — cierra en ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+    bar.hidden = false;
 }
 
 let _prevUserDone = -1;

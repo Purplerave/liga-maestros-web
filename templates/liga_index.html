@@ -117,6 +117,11 @@
             <div class="cp-scorebar-track" aria-hidden="true"><i id="cp-scorebar-pena" class="is-pena" style="width:50%"></i><i id="cp-scorebar-ia-bar" class="is-ia" style="width:50%"></i></div>
             <small id="cp-scorebar-label">Jornada —</small>
         </div>
+        <div id="cp-urgency" class="cp-urgency" hidden role="status" aria-live="assertive">
+            <span class="cp-urgency-dot" aria-hidden="true"></span>
+            <span id="cp-urgency-text">Te falta firmar — cierra en 00m 00s</span>
+            <button type="button" class="cp-urgency-cta" data-page-action="TICKET">Firmar ahora →</button>
+        </div>
         <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
             <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">⌂</i><span>Portada</span></button>
             <button type="button" data-page-action="TICKET"><i class="nav-ico" aria-hidden="true">1X2</i><span>Quiniela</span></button>
@@ -149,7 +154,8 @@
             <pre id="share-sheet-preview" class="share-sheet-preview"></pre>
             <div class="share-sheet-actions">
                 <button type="button" data-share-action="copy">Copiar</button>
-                <button type="button" data-share-action="image">Imagen 📸</button>
+                <button type="button" data-share-action="image">Mi quiniela 📸</button>
+                <button type="button" data-share-action="imageVs">Duelo vs IA 📊</button>
                 <button type="button" data-share-action="whatsapp">WhatsApp</button>
                 <button type="button" data-share-action="twitter">X / Twitter</button>
                 <button type="button" data-share-action="native">Más</button>

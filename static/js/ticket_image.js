@@ -218,5 +218,129 @@
         download(blob, filename);
     }
 
-    window.TicketImage = { generate, share, render };
+    // P1 2.1 — Tarjeta compartible Jornada: Tú vs IAs
+    function getVsRows(state) {
+        const ranking = state?.data?.ranking_maestros || {};
+        const names = state?.data?.participant_contract?.names || {};
+        const visibleCols = state?.data?.participant_contract?.visible_ai_columns || [];
+        const aiIds = visibleCols.map(c => String(Array.isArray(c) ? c[0] : c.id).toLowerCase());
+        const entries = Object.entries(ranking).map(([uid, v]) => {
+            const name = names[String(uid).toLowerCase()] || names[uid] || String(uid).split("@")[0];
+            const isAI = aiIds.includes(String(uid).toLowerCase());
+            const pts = Number(v?.jornada ?? v?.total ?? 0);
+            const isUser = state?.user && String(state.user.id).toLowerCase() === String(uid).toLowerCase();
+            return { uid, name: isUser ? (state.user.name || "Tú") : name, pts, isAI, isUser };
+        }).sort((a,b)=> b.pts - a.pts);
+        // Ensure user appears even if not in ranking (fallback from signs)
+        if (!entries.some(e=>e.isUser) && state?.user) {
+            const done = (state.my_signs||[]).filter(s=>s&&s!=="-").length;
+            entries.push({ uid: state.user.id, name: state.user.name||"Tú", pts: done, isAI:false, isUser:true });
+            entries.sort((a,b)=> b.pts - a.pts);
+        }
+        // Take top 5 (user + 4 AIs) or first 5
+        const top = entries.slice(0, 6);
+        // Prioritize keeping user visible
+        if (top.length>5 && !top.some(e=>e.isUser)) {
+            const userEntry = entries.find(e=>e.isUser);
+            if (userEntry) { top.pop(); top.push(userEntry); top.sort((a,b)=>b.pts-a.pts); }
+        }
+        return top.slice(0,5);
+    }
+
+    function drawVsHeader(ctx, jornada) {
+        ctx.textAlign = "center";
+        ctx.fillStyle = COLORS.neon;
+        ctx.font = "600 30px 'Space Grotesk', system-ui, sans-serif";
+        ctx.fillText("JORNADA " + (jornada || "?") + " · HUMANO VS MÁQUINAS", W/2, 110);
+        ctx.fillStyle = COLORS.text;
+        ctx.font = "700 82px 'Bebas Neue', system-ui, sans-serif";
+        ctx.shadowColor = COLORS.glow; ctx.shadowBlur = 28;
+        ctx.fillText("¿QUIÉN ACERTÓ MÁS?", W/2, 200);
+        ctx.shadowBlur = 0;
+    }
+
+    function drawVsRows(ctx, rows) {
+        const top = 280;
+        const rowH = 110;
+        const gap = 14;
+        const x = 70, w = W-140;
+        rows.forEach((row, i) => {
+            const y = top + i*(rowH+gap);
+            const medal = i===0 ? "🥇" : i===1 ? "🥈" : i===2 ? "🥉" : String(i+1);
+            roundRect(ctx, x, y, w, rowH, 14);
+            ctx.fillStyle = row.isUser ? "rgba(56,217,255,0.10)" : row.isAI ? "rgba(239,90,139,0.08)" : COLORS.panel;
+            ctx.fill();
+            ctx.strokeStyle = row.isUser ? "rgba(56,217,255,0.35)" : row.isAI ? "rgba(239,90,139,0.25)" : COLORS.panelBorder;
+            ctx.lineWidth = 2; ctx.stroke();
+            // medal
+            ctx.textAlign = "center";
+            ctx.fillStyle = COLORS.muted;
+            ctx.font = "700 34px system-ui, sans-serif";
+            ctx.fillText(medal, x+46, y+rowH/2+12);
+            // name
+            ctx.textAlign = "left";
+            ctx.fillStyle = row.isUser ? "#7cc6ff" : row.isAI ? "#f472b6" : COLORS.text;
+            ctx.font = "700 36px 'Space Grotesk', system-ui, sans-serif";
+            const label = (row.isUser ? "TÚ · " : row.isAI ? "IA · " : "") + row.name;
+            ctx.fillText(fitText(ctx, label, w-240), x+90, y+rowH/2+12);
+            // pts
+            ctx.textAlign = "center";
+            const ptsX = x+w-80, ptsY = y+rowH/2;
+            roundRect(ctx, ptsX-70, ptsY-30, 140, 60, 10);
+            ctx.fillStyle = i===0 ? "rgba(251,191,36,0.18)" : "rgba(255,255,255,0.06)";
+            ctx.fill();
+            ctx.fillStyle = i===0 ? COLORS.gold : COLORS.text;
+            ctx.font = "800 40px 'Bebas Neue', system-ui, sans-serif";
+            ctx.fillText(row.pts + " pts", ptsX, ptsY+14);
+        });
+    }
+
+    function drawVsFooter(ctx) {
+        const y = H - 180;
+        ctx.textAlign = "center";
+        ctx.fillStyle = COLORS.neon;
+        ctx.font = "700 38px 'Space Grotesk', system-ui, sans-serif";
+        ctx.shadowColor = COLORS.glow; ctx.shadowBlur = 16;
+        ctx.fillText("LIGA DE MAESTROS", W/2, y);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = COLORS.muted;
+        ctx.font = "500 28px 'Space Grotesk', system-ui, sans-serif";
+        ctx.fillText("Firma tu quiniela en ligademaestros", W/2, y+48);
+    }
+
+    function renderVs(state) {
+        const canvas = document.createElement("canvas");
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext("2d");
+        const jornada = state?.data?.jornada || "?";
+        const rows = getVsRows(state);
+        drawBackground(ctx);
+        drawVsHeader(ctx, jornada);
+        if (rows.length) drawVsRows(ctx, rows);
+        else {
+            ctx.fillStyle = COLORS.muted; ctx.textAlign="center";
+            ctx.font = "600 32px system-ui, sans-serif";
+            ctx.fillText("Aún sin resultados — ¡sé el primero en firmar!", W/2, 500);
+        }
+        drawVsFooter(ctx);
+        return canvas;
+    }
+
+    function generateVs(state) {
+        return new Promise((resolve, reject) => {
+            try { renderVs(state).toBlob(b=> b?resolve(b):reject(new Error("null")), "image/png"); }
+            catch(e){ reject(e); }
+        });
+    }
+    async function shareVs(state) {
+        const blob = await generateVs(state);
+        const jornada = state?.data?.jornada || "x";
+        const file = new File([blob], `duelo-j${jornada}.png`, {type:"image/png"});
+        if (navigator.canShare && navigator.canShare({files:[file]})) {
+            try { await navigator.share({files:[file], title:"Liga de Maestros", text:`J${jornada} — ¿Humano o IA? Mi duelo en Liga de Maestros`}); return; } catch(e){ if(e&&e.name==="AbortError") return; }
+        }
+        download(blob, `duelo-j${jornada}.png`);
+    }
+
+    window.TicketImage = { generate, share, render, generateVs, shareVs, renderVs };
 })();
