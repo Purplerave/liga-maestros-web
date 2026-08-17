@@ -20,6 +20,7 @@ from liga_maestros.services.payloads.standings import (
 )
 from liga_maestros.services.season_rosters import LALIGA_2026_27, SEGUNDA_2026_27
 from liga_maestros.services.standings_engine import (
+    _panel_competition,
     collect_finished_matches,
     compute_table,
     merge_rows,
@@ -337,3 +338,62 @@ def test_compute_table_ignores_teams_outside_the_roster():
     ]
     table = compute_table(matches, LALIGA_2026_27)
     assert all(row["pj"] == 0 for row in table)
+
+
+def test_panel_competition_ignores_accents():
+    """El panel entrega 'Segunda División' con tilde: no puede perderse."""
+    assert _panel_competition({"competition_name": "Segunda División"}) == "segunda"
+    assert _panel_competition({"competition": {"name": "Segunda División"}}) == "segunda"
+    assert _panel_competition({"competition_name": "La Liga"}) == "primera"
+    assert _panel_competition({"competition_name": "Segunda División de Chile"}) is None
+
+
+def test_panel_match_with_accented_competition_feeds_the_table(conn, monkeypatch):
+    """Castellón 1-0 R. Sociedad B: solo llega por el panel, con tilde en la competición.
+
+    El partido no esta en la quiniela, asi que si el panel no se lee bien el
+    Castellon se queda sin forma y sin racha (aunque el proveedor oficial le
+    ponga los numeros).
+    """
+    _no_official(monkeypatch)
+    panel = [
+        {
+            "competition_name": "Segunda División",
+            "competition": {"name": "Segunda División"},
+            "status": "FINISHED",
+            "local": "Castellón",
+            "visitante": "R. Sociedad B",
+            "score": "1 - 0",
+        }
+    ]
+
+    standings, _ = build_standings_payload(conn, extra_matches=panel)
+
+    castellon = _row(standings, "CD Castellón", category="segunda")
+    assert (castellon["pj"], castellon["pts"]) == (1, 3)
+    assert castellon["form"] == ["W"]
+    assert castellon["streak"] == "1W"
+    sociedad_b = _row(standings, "R. Sociedad B", category="segunda")
+    assert sociedad_b["form"] == ["L"]
+    assert sociedad_b["streak"] == "1L"
+
+
+def test_panel_match_closed_as_stale_with_a_score_still_counts(conn, monkeypatch):
+    """Un directo cerrado sin confirmacion (STALE) ya es un resultado para la tabla."""
+    _no_official(monkeypatch)
+    panel = [
+        {
+            "competition_name": "Segunda División",
+            "status": "STALE",
+            "local": "Castellón",
+            "visitante": "R. Sociedad B",
+            "score": "1 - 0",
+        }
+    ]
+
+    standings, _ = build_standings_payload(conn, extra_matches=panel)
+
+    castellon = _row(standings, "CD Castellón", category="segunda")
+    assert castellon["form"] == ["W"]
+    assert castellon["streak"] == "1W"
+    assert (castellon["pj"], castellon["pts"]) == (1, 3)

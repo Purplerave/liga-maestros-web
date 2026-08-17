@@ -213,3 +213,26 @@ def test_live_match_outside_the_quiniela_is_shown_in_the_classification():
 
     assert rows["Real Madrid"] == {"live": "1-0", "playing": True}
     assert rows["Villarreal CF"] == {"live": "0-1", "playing": True}
+
+
+@requires_node
+def test_accented_panel_competition_still_shows_the_live_score():
+    """'Segunda División' llega con tilde desde el panel: el directo se ve igual."""
+    rows = _run_node(
+        _standings_script(
+            partidos="ago => []",
+            all_league_matches="""ago => [
+                { local: "Castellón", visitante: "R. Sociedad B", status: "LIVE", score: "1-0",
+                  competition_name: "Segunda División", minute: "20", ...ago(20) }
+            ]""",
+            teams="""[
+                { n: "CD Castellón", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dg: 0, pts: 0,
+                  form: [], streak: "", en_juego: false, marcador_live: "" },
+                { n: "R. Sociedad B", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dg: 0, pts: 0,
+                  form: [], streak: "", en_juego: false, marcador_live: "" }
+            ]""",
+        )
+    )
+
+    assert rows["CD Castellón"] == {"live": "1-0", "playing": True}
+    assert rows["R. Sociedad B"] == {"live": "0-1", "playing": True}

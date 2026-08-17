@@ -16,7 +16,9 @@ function getLiveStandingsResults() {
         const home = m.home_name || m.home?.name || m.local;
         const away = m.visitante || m.away_name || m.away?.name;
         const league = competitionLabel(m);
-        if (!["LA LIGA", "SEGUNDA DIVISION"].includes(league)) return;
+        // El panel entrega "Segunda División" con tilde; normalizeName la quita
+        // para que el partido no se pierda por una diferencia de acento.
+        if (!["LALIGA", "SEGUNDADIVISION"].includes(normalizeName(league))) return;
         if (!isMatchLiveNow(m)) return;
         const score = scoreOnly(m.score || m.scores?.score || m.marcador);
         if (home && away && score) allMatches.push({ local: home, visitante: away, marcador: score, status: "LIVE" });

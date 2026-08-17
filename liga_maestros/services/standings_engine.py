@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import logging
 import os
+import re
+import unicodedata
 from datetime import datetime
 
 import config
@@ -42,7 +44,10 @@ from .ticket import madrid_now
 
 logger = logging.getLogger(__name__)
 
-FINISHED_STATUSES = ("FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED")
+# "STALE" es un partido cerrado sin confirmacion oficial del proveedor: la web
+# (services.live_state y el JS) ya lo trata como terminado, asi que la
+# clasificacion tambien debe contarlo cuando trae marcador.
+FINISHED_STATUSES = ("FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED", "STALE")
 LIVE_STATUSES = ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET")
 
 LEAGUE_CATEGORY = {
@@ -52,6 +57,7 @@ LEAGUE_CATEGORY = {
     "SEGUNDA DIVISION": "segunda",
     "SEGUNDA": "segunda",
     "LALIGA HYPERMOTION": "segunda",
+    "LA LIGA HYPERMOTION": "segunda",
 }
 
 
@@ -197,9 +203,21 @@ def _load_panel_matches():
     return []
 
 
+def _normalize_league_name(raw):
+    """Nombre de competicion sin tildes ni espacios raros, en mayusculas.
+
+    El panel (Highlightly) entrega "Segunda División" con tilde mientras que
+    LEAGUE_CATEGORY guarda las claves sin tildes: sin esta normalizacion la
+    consulta exacta falla y el partido se pierde para la clasificacion.
+    """
+    value = unicodedata.normalize("NFD", str(raw or ""))
+    value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
+    return re.sub(r"\s+", " ", value).strip().upper()
+
+
 def _panel_competition(match):
     raw = match.get("competition_name") or (match.get("competition") or {}).get("name") or ""
-    return LEAGUE_CATEGORY.get(str(raw).strip().upper())
+    return LEAGUE_CATEGORY.get(_normalize_league_name(raw))
 
 
 def _panel_entry(match, allow_live=False):

@@ -2,6 +2,25 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-17 — Forma y racha completas en la clasificación
+
+### Corregido
+
+- 🔴 **El Castellón (y cualquier equipo fuera de la quiniela) se quedaba sin
+  iconos de forma (G/E/P) ni racha en la clasificación.** El panel de directos
+  entrega la competición como "Segunda División" (con tilde) y el motor de la
+  clasificación hacía una comparación exacta sin normalizar acentos, así que
+  sus partidos no entraban en el registro propio. Los números sí salían porque
+  el proveedor oficial los refresca por su cuenta.
+  - `services/standings_engine.py` normaliza tildes al resolver la competición
+    de un partido del panel.
+  - Los partidos del panel cerrados como `STALE` (sin confirmación oficial
+    pero con marcador) ahora cuentan como terminados, igual que ya hacían
+    `services/live_state` y el frontend.
+  - `static/js/standings.js` compara la competición sin tildes para que el
+    marcador en vivo de un partido del panel (p. ej. del Castellón) también
+    aparezca en la tabla.
+
 ## 2026-08-16 — Cierre fiable de partidos en directo
 
 ### Corregido
