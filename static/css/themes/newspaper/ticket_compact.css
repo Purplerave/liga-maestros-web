@@ -359,8 +359,23 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
         grid-column: 7 / 9;
         grid-row: 1;
         width: auto;
+        min-width: 0;
         justify-self: stretch;
         align-self: center;
+        text-align: center;
+    }
+
+    /* En la tarjeta movil la celda es estrecha: el horario completo
+       ("lun 17/08 19:00h") se reparte en dos lineas en vez de desbordar. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
+        display: inline-flex;
+        max-width: 100%;
+        padding: 2px 6px;
+        font-size: 0.58rem;
+        line-height: 1.15;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pick-cell {

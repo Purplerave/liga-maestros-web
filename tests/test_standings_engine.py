@@ -7,6 +7,7 @@ aparecía con ``PJ 2`` y el doble de puntos tras haber jugado un solo partido.
 """
 
 import sqlite3
+from datetime import timedelta
 
 import pytest
 
@@ -23,6 +24,7 @@ from liga_maestros.services.standings_engine import (
     compute_table,
     merge_rows,
 )
+from liga_maestros.services.ticket import madrid_now
 
 HOME = "Deportivo Alavés"
 AWAY = "Getafe CF"
@@ -46,16 +48,34 @@ def conn():
     return connection
 
 
-def _add_result(conn, partido_id, local, visitante, gh, ga, status="FT", jornada=1):
+def _add_result(
+    conn,
+    partido_id,
+    local,
+    visitante,
+    gh,
+    ga,
+    status="FT",
+    jornada=1,
+    fecha="2026-08-15",
+    hora="19:30",
+    minuto="",
+):
     conn.execute(
         """
         INSERT INTO resultados
             (jornada, partido_id, local, visitante, goles_local, goles_visitante, status, fecha, hora, minuto)
-        VALUES (?, ?, ?, ?, ?, ?, ?, '2026-08-15', '19:30', '')
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (jornada, partido_id, local, visitante, gh, ga, status),
+        (jornada, partido_id, local, visitante, gh, ga, status, fecha, hora, minuto),
     )
     conn.commit()
+
+
+def _kickoff_minutes_ago(minutes):
+    """Fecha/hora of a match that started ``minutes`` ago in Madrid time."""
+    started = madrid_now() - timedelta(minutes=minutes)
+    return started.strftime("%Y-%m-%d"), started.strftime("%H:%M")
 
 
 def _row(standings, name, category="primera"):
@@ -125,13 +145,81 @@ def test_local_ledger_wins_while_provider_lags(conn, monkeypatch):
 
 def test_live_match_does_not_award_points(conn, monkeypatch):
     _no_official(monkeypatch)
-    _add_result(conn, 1, HOME, AWAY, 2, 0, status="LIVE")
+    fecha, hora = _kickoff_minutes_ago(30)
+    _add_result(conn, 1, HOME, AWAY, 2, 0, status="LIVE", fecha=fecha, hora=hora, minuto="30")
 
     row = _row(build_standings_payload(conn)[0], HOME)
     assert row["pj"] == 0, "un partido en juego no suma hasta que termina"
     assert row["pts"] == 0
     assert row["en_juego"] is True
     assert row["marcador_live"] == "2-0"
+
+
+def test_finished_match_left_stuck_at_live_never_shows_a_live_score(conn, monkeypatch):
+    """Sevilla ya habia terminado y la clasificacion seguia dando su marcador.
+
+    El proveedor (o el colector caido) puede dejar la fila en LIVE despues del
+    pitido final. La tabla debe cerrar ese directo con las mismas reglas que el
+    resto de la web: los puntos ya estan contados y el marcador provisional
+    tiene que desaparecer.
+    """
+    _no_official(monkeypatch)
+    fecha, hora = _kickoff_minutes_ago(400)
+    _add_result(conn, 1, HOME, AWAY, 2, 1, status="LIVE", fecha=fecha, hora=hora, minuto="90")
+
+    row = _row(build_standings_payload(conn)[0], HOME)
+
+    assert row.get("en_juego") is not True, "un partido acabado no puede seguir en juego"
+    assert not row.get("marcador_live"), "el marcador en vivo debe desaparecer al terminar"
+
+
+def test_live_match_from_the_panel_is_closed_when_the_provider_freezes(conn, monkeypatch):
+    """Un partido que no esta en la quiniela tambien se cierra al congelarse."""
+    _no_official(monkeypatch)
+    frozen = madrid_now().replace(tzinfo=None) - timedelta(minutes=200)
+    panel = [
+        {
+            "competition_name": "LA LIGA",
+            "status": "LIVE",
+            "local": "Real Madrid",
+            "visitante": "FC Barcelona",
+            "score": "1-0",
+            "fecha_raw": frozen.strftime("%Y-%m-%d"),
+            "hora": frozen.strftime("%H:%M"),
+            "time": "90",
+        }
+    ]
+
+    standings, _ = build_standings_payload(conn, extra_matches=panel)
+    row = _row(standings, "Real Madrid")
+
+    assert row.get("en_juego") is not True
+    assert not row.get("marcador_live")
+
+
+def test_genuine_panel_live_match_still_shows_its_provisional_score(conn, monkeypatch):
+    """Un directo real fuera de la quiniela si tiene que verse en la tabla."""
+    _no_official(monkeypatch)
+    started = madrid_now().replace(tzinfo=None) - timedelta(minutes=25)
+    panel = [
+        {
+            "competition_name": "LA LIGA",
+            "status": "LIVE",
+            "local": "Real Madrid",
+            "visitante": "FC Barcelona",
+            "score": "1-0",
+            "fecha_raw": started.strftime("%Y-%m-%d"),
+            "hora": started.strftime("%H:%M"),
+            "time": "25",
+        }
+    ]
+
+    standings, _ = build_standings_payload(conn, extra_matches=panel)
+    row = _row(standings, "Real Madrid")
+
+    assert row["en_juego"] is True
+    assert row["marcador_live"] == "1-0"
+    assert row["pj"] == 0, "un directo no suma puntos hasta que acaba"
 
 
 def test_duplicate_sources_are_deduplicated(conn):

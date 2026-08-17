@@ -112,10 +112,6 @@ function renderLiveScrutinyBadge(matches) {
     return `<div class="live-scrutiny-badge" aria-live="polite">${live ? `<span class="is-live">${live} en directo</span>` : ""}${finished ? `<span class="is-done">${finished} finalizados</span>` : ""}</div>`;
 }
 
-function fixtureInline(home, away, homeLogo, awayLogo) {
-    return `<div class="fixture-inline"><span class="fi-home">${escapeHtml(getShortName(home))}</span><span class="fi-vs">–</span><span class="fi-away">${escapeHtml(getShortName(away))}</span></div>`;
-}
-
 function renderArenaTensionBody(matches) {
     const tbody = qs("arena-body");
     const thead = qs("arena-thead");
@@ -167,7 +163,7 @@ function renderArenaTensionBody(matches) {
 
         return `<tr class="tension-row ${rowClass}" data-ticket-row="${idx}">
             <td class="match-index-cell"><span class="match-number">${idx + 1}</span></td>
-            <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante)}</div></td>
+            <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante, m.logo_local, m.logo_visitante)}</div></td>
             <td class="ticket-status-cell" data-ticket-status>${scoreBadge}${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}</td>
             ${predictorCells}
             <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
