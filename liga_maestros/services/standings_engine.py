@@ -23,6 +23,7 @@ path can inflate ``PJ``.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -186,7 +187,55 @@ def collect_finished_matches(conn, extra_matches=None):
         if entry:
             entries.setdefault(entry["key"], entry)
 
+    for entry in _load_history_matches():
+        entries.setdefault(entry["key"], entry)
+
     return list(entries.values())
+
+
+def _load_history_matches():
+    """Partidos acabados archivados por el tracker diario (JSONL por temporada).
+
+    El panel es volatil: solo conserva lo que el tracker vio en directo, asi
+    que un partido que termino antes de su primera pasada del dia puede
+    perderse. El historico de temporada es un anexo permanente y sirve de red
+    de seguridad para que la forma y la racha nunca se queden a medias.
+    """
+    try:
+        from .daily_matches import history_path
+    except Exception:  # pragma: no cover - el modulo siempre existe
+        return []
+    path = history_path()
+    if not os.path.exists(path):
+        return []
+    entries = []
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if LEAGUE_CATEGORY.get(_normalize_league_name(record.get("league"))) not in ("primera", "segunda"):
+                    continue
+                gh, ga = parse_score_text(record.get("score") or "")
+                entry = _match_entry(
+                    record.get("home"),
+                    record.get("away"),
+                    gh,
+                    ga,
+                    str(record.get("date") or "")[:10],
+                    "historial",
+                )
+                if entry:
+                    entries.append(entry)
+    except Exception:
+        logger.exception("No se pudo leer el historial de partidos para la clasificacion")
+        return []
+    return entries
 
 
 def _load_panel_matches():

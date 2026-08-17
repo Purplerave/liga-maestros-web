@@ -6,6 +6,7 @@ quiniela *encima* del fichero oficial. En cuanto el proveedor refrescaba
 aparecía con ``PJ 2`` y el doble de puntos tras haber jugado un solo partido.
 """
 
+import json
 import sqlite3
 from datetime import timedelta
 
@@ -397,3 +398,52 @@ def test_panel_match_closed_as_stale_with_a_score_still_counts(conn, monkeypatch
     assert castellon["form"] == ["W"]
     assert castellon["streak"] == "1W"
     assert (castellon["pj"], castellon["pts"]) == (1, 3)
+
+
+def test_history_archive_feeds_form_and_streak(conn, monkeypatch, tmp_path):
+    """El historial JSONL es la red de seguridad cuando el panel pierde un partido.
+
+    El partido del Castellon no esta en la quiniela ni en el panel: solo el
+    historial del tracker puede darle forma y racha. Ademas llega con la
+    competicion acentuada, igual que el proveedor.
+    """
+    from liga_maestros.services import daily_matches
+
+    _no_official(monkeypatch)
+    history = tmp_path / "HISTORICO_PARTIDOS_2026-27.jsonl"
+    history.write_text(
+        json.dumps(
+            {
+                "league": "Segunda División",
+                "home": "Castellón",
+                "away": "R. Sociedad B",
+                "score": "1 - 0",
+                "date": "2026-08-15",
+            },
+            ensure_ascii=False,
+        )
+        + "\n"
+        + json.dumps(
+            {
+                "league": "Liga MX Femenil",
+                "home": "América Women",
+                "away": "Puebla Women",
+                "score": "2 - 0",
+                "date": "2026-08-15",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(daily_matches, "history_path", lambda season=None: str(history))
+
+    standings, _ = build_standings_payload(conn)
+
+    castellon = _row(standings, "CD Castellón", category="segunda")
+    assert castellon["form"] == ["W"]
+    assert castellon["streak"] == "1W"
+    assert (castellon["pj"], castellon["pts"]) == (1, 3)
+    sociedad_b = _row(standings, "R. Sociedad B", category="segunda")
+    assert sociedad_b["form"] == ["L"]
+    assert sociedad_b["streak"] == "1L"

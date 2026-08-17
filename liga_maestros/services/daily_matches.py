@@ -210,6 +210,54 @@ def refresh_live_scores():
     return len(panel_matches)
 
 
+def backfill_recent_spanish_matches(days=3):
+    """Rellena el panel con los partidos acabados de los ultimos dias.
+
+    El panel solo conserva lo que el tracker vio mientras corria: un partido
+    que termino antes de la primera pasada del dia (p. ej. el Castellon en la
+    jornada 1) nunca llego al panel y, sin el, la clasificacion no puede
+    calcular su forma ni su racha. Cada fecha se rellena una sola vez y solo
+    para La Liga y Segunda (2 llamadas por dia), guardando unicamente
+    partidos terminados.
+    """
+    state = _load_state()
+    done = set(state.get("backfilled_dates") or [])
+    today_date = datetime.strptime(today_madrid(), "%Y-%m-%d").date()
+    panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
+    added = 0
+    for offset in range(days, 0, -1):
+        date_text = (today_date - timedelta(days=offset)).strftime("%Y-%m-%d")
+        if date_text in done:
+            continue
+        day_matches = []
+        for league_name in ("LA LIGA", "SEGUNDA DIVISION"):
+            league_id = config.HIGHLIGHTLY_LEAGUES.get(league_name)
+            if not league_id:
+                continue
+            payload = _api_get(
+                "/matches",
+                {"date": date_text, "leagueId": league_id, "timezone": "Europe/Madrid", "limit": 100},
+            )
+            if payload is None:
+                continue
+            for match in payload.get("data", []):
+                description = str((match.get("state") or {}).get("description") or "").upper()
+                if not description.startswith("FINISHED") and description not in ("FT", "FULL TIME"):
+                    continue
+                match["_competition_name"] = league_name
+                day_matches.append(match)
+        panel_matches = [highlightly_match_to_panel(match) for match in day_matches if match.get("id")]
+        if panel_matches:
+            update_json_list_by_id_locked(panel_path, panel_matches)
+            added += len(panel_matches)
+        done.add(date_text)
+        state["backfilled_dates"] = sorted(done)
+        _save_state(state)
+    if added:
+        logger.info("Backfill de partidos acabados: %d anadidos al panel", added)
+    return added
+
+
 # --- Stats history (JSONL, one line per finished match) ---
 
 
@@ -350,6 +398,10 @@ def run_daily_tick():
     Returns a summary dict; the caller decides how long to sleep.
     """
     summary = {"agenda": 0, "panel": 0, "window_open": False}
+    try:
+        summary["backfill"] = backfill_recent_spanish_matches()
+    except Exception:
+        logger.exception("Daily backfill of finished matches failed")
     try:
         agenda = refresh_daily_agenda()
         summary["agenda"] = len(agenda.get("matches", []))

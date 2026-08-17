@@ -10,16 +10,20 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
   iconos de forma (G/E/P) ni racha en la clasificación.** El panel de directos
   entrega la competición como "Segunda División" (con tilde) y el motor de la
   clasificación hacía una comparación exacta sin normalizar acentos, así que
-  sus partidos no entraban en el registro propio. Los números sí salían porque
-  el proveedor oficial los refresca por su cuenta.
+  sus partidos no entraban en el registro propio. Además, si el partido
+  terminaba antes de la primera pasada del tracker del día, ni siquiera
+  llegaba al panel. Los números sí salían porque el proveedor oficial los
+  refresca por su cuenta.
   - `services/standings_engine.py` normaliza tildes al resolver la competición
-    de un partido del panel.
-  - Los partidos del panel cerrados como `STALE` (sin confirmación oficial
-    pero con marcador) ahora cuentan como terminados, igual que ya hacían
-    `services/live_state` y el frontend.
+    de un partido del panel y cuenta como terminados los cerrados como `STALE`
+    con marcador (igual que `services/live_state` y el frontend).
+  - Nuevo respaldo permanente: la clasificación también lee el histórico
+    JSONL de partidos acabados por temporada, que no se pierde como el panel.
+  - Nuevo backfill en el tracker diario: rellena el panel con los partidos
+    acabados de La Liga y Segunda de los últimos días (una vez por fecha),
+    para reparar huecos como el del Castellón en la jornada 1.
   - `static/js/standings.js` compara la competición sin tildes para que el
-    marcador en vivo de un partido del panel (p. ej. del Castellón) también
-    aparezca en la tabla.
+    marcador en vivo de un partido del panel también aparezca en la tabla.
 
 ## 2026-08-16 — Cierre fiable de partidos en directo
 
