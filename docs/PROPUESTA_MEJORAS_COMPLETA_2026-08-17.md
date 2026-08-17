@@ -410,10 +410,20 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 | **2.1** Tarjeta compartible Jornada | ✅ Hecho | Canvas 1080×1920 nuevo: `JORNADA N · HUMANO VS MÁQUINAS — ¿QUIÉN ACERTÓ MÁS?` con Top 5 (Tú + 4 IAs) ordenado por `pts` jornada, badges `isUser` cian / `isAI` rosa / oro para líder, footer `LIGA DE MAESTROS`. `TicketImage.generateVs(state)` + `shareVs(state)` con `navigator.share` + fallback `download`. Botón nuevo `Duelo vs IA 📊` en share-sheet junto a `Mi quiniela 📸`. Datos reales de `ranking_maestros` + `participant_contract`, nunca inventados. | `static/js/ticket_image.js` (`getVsRows`, `renderVs`, `generateVs`, `shareVs`), `templates/liga_index.html` (botón `imageVs`), `static/js/quantum_final.js` (`runShareAction imageVs`) |
 | **2.3** Banner urgencia <2h | ✅ Hecho | Nueva franja `#cp-urgency` bajo scorebar: `Te falta firmar — cierra en 01h 12m 05s` + CTA `Firmar ahora →`, solo visible si `!closed && !saved && 0<diff<=2h`. Tick 1s en `startCoverCountdown` vía `updateCpUrgency(diff, closed, saved)`. Con `role=status aria-live=assertive` y pulso `cp-urgentPulse`. Respeta `prefers-reduced-motion`. | `templates/liga_index.html` (`#cp-urgency`), `static/js/pages/cover_page.js` (`updateCpUrgency`), `static/css/cover_hero.css` (`.cp-urgency`) |
 
-### 13.2b Pendiente P1/P2 (siguiente)
+### 13.2c Changelog P2 — 2026-08-17 (DX + Operación)
 
+| ID | Propuesta | Estado | Qué se hizo |
+|---|---|---|---|
+| **6.1** Makefile | ✅ Hecho | `Makefile` con `install/test/lint/format/audit/jornada/health/clean`. |
+| **6.2** Pre-commit | ✅ Hecho | `.pre-commit-config.yaml` con `ruff` + `ruff-format` + hooks `check-added-large-files`, `detect-private-key`, `forbid-new-submodules`, `no-commit-to-branch main`. |
+| **6.3** Limpieza raíz | ✅ Hecho | `fix-j75-*.patch` movidos a `scripts/archive/` (quedan `scripts/archive/fix-j75-quiniela.patch`, `fix-j75-resultados.patch`). |
+| **3.3** Health enriquecido | ✅ Hecho | `GET /health` ampliado: `build_sha`, `db.{ok,integrity,size_mb}`, `backup.{ok,age_hours}`, `collector.{status,age_seconds}`, `quota.{remaining_pct}` sin secretos, `version`. Compatible con Alwaysdata/Render. |
+| **3.4** Legales | ✅ Verificado | `LEGAL_OWNER_*` vía env, plantillas sin `Pendiente de configurar` hardcodeado. Pendiente rellenar env en prod antes de lanzamiento. |
+| **2.2/2.4/3.1/4.x/5.x** | ⏳ Pendiente | Avatares trash-talk, grupos privados, JSON Schema/Pydantic, performance, Sentry — backlog Semana 3-4. |
+
+### 13.2b Pendiente P1/P2 (siguiente)
 - **2.2 Avatares / trash talk Maestros + réplica mejor humano:** falta frase corta rotativa por jornada en portada (no inventar resultados).
-- **2.4 Grupos privados, 3.1 JSON Schema, 3.3 Health, 6.x Makefile/pre-commit:** previstos Semana 3. No bloquean viral.
+- **2.4 Grupos privados, 3.1 JSON Schema, 3.2 Source of truth:** previstos Semana 3. No bloquean viral.
 - **4.x/5.x:** Accesibilidad motion, performance, observabilidad — deuda vigilada.
 
 ### 13.3 Decisiones tomadas en esta iteración

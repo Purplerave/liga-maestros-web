@@ -114,8 +114,77 @@ def help_page():
 
 @bp.route("/health")
 def health():
-    """Probe ligero para monitores de uptime (sin datos sensibles)."""
-    return {"status": "ok", "service": "liga-maestros-web"}
+    """Probe ligero + enriquecido para Alwaysdata/Render (sin secretos)."""
+    import sqlite3
+    from ..db.connection import get_db
+    build_sha = "local"
+    try:
+        with open(os.path.join(config.BASE_DIR, ".release-sha"), encoding="utf-8") as f:
+            build_sha = f.read().strip() or "local"
+    except OSError:
+        pass
+    # DB check
+    db_ok = False
+    db_integrity = "unknown"
+    db_size_mb = 0.0
+    try:
+        conn = get_db()
+        try:
+            row = conn.execute("PRAGMA integrity_check").fetchone()
+            db_integrity = row[0] if row else "unknown"
+            db_ok = db_integrity == "ok"
+            conn.execute("SELECT 1")
+            if os.path.exists(config.DB_PATH):
+                db_size_mb = round(os.path.getsize(config.DB_PATH)/(1024*1024), 2)
+        finally:
+            conn.close()
+    except Exception:
+        db_ok = False
+    # backup
+    backup_ok = False
+    backup_age_h = None
+    try:
+        candidates = [os.path.join(config.DATA_DIR, n) for n in os.listdir(config.DATA_DIR) if "backup" in n.lower()]
+        if candidates:
+            latest = max(candidates, key=lambda p: os.path.getmtime(p) if os.path.exists(p) else 0)
+            if os.path.exists(latest):
+                backup_ok = True
+                backup_age_h = round((time.time() - os.path.getmtime(latest))/3600, 1)
+    except Exception:
+        pass
+    # collector health
+    collector_status = "unknown"
+    collector_age_s = None
+    try:
+        hp = os.path.join(config.DATA_DIR, "LIVE_COLLECTOR_HEALTH.json")
+        if os.path.exists(hp):
+            collector_age_s = int(time.time() - os.path.getmtime(hp))
+            import json as _j
+            with open(hp, encoding="utf-8") as fh:
+                collector_status = _j.load(fh).get("status", "unknown")
+        else:
+            collector_status = "missing"
+    except Exception:
+        collector_status = "error"
+    # quota sin secretos
+    quota = {}
+    try:
+        from ..services.highlightly import get_highlightly_usage
+        u = get_highlightly_usage()
+        quota = {"remaining_pct": u.get("remaining_pct"), "used": u.get("used"), "limit": u.get("limit")}
+    except Exception:
+        quota = {"remaining_pct": None}
+    payload = {
+        "status": "ok" if db_ok else "degraded",
+        "service": "liga-maestros-web",
+        "build_sha": build_sha,
+        "db": {"ok": db_ok, "integrity": db_integrity, "size_mb": db_size_mb},
+        "backup": {"ok": backup_ok, "age_hours": backup_age_h},
+        "collector": {"status": collector_status, "age_seconds": collector_age_s},
+        "quota": quota,
+        "version": build_sha,
+    }
+    return payload
 
 
 @bp.route("/robots.txt")
