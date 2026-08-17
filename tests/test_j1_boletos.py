@@ -3,11 +3,11 @@
 Contrato (aportado por el usuario el 12/08):
 - Copilot publica su boleto REAL en el orden oficial del boleto de la J1:
   1,1,X,1,X,1,1,X,1,X,1,1,1,1,1-0.
-- La Peña (12 peñistas: chipi, geli, pepe, profe, fortu, oraculo, fistro,
-  sesudo, jimmy, luzia, luna, erniebot) entrega sus boletos; MrPurple es el
-  usuario humano y rellena su quiniela en la web.
+- La Peña (13 peñistas: chipi, geli, pepe, profe, fortu, oraculo, fistro,
+  sesudo, jimmy, luzia, luna, erniebot y sonia) entrega sus boletos;
+  MrPurple es el usuario humano y rellena su quiniela en la web.
 - /api/liga/data?j=1 devuelve copilot con esos signos y consenso_pena con
-  total 12 votos por partido.
+  total 13 votos por partido.
 """
 
 import json
@@ -27,8 +27,9 @@ from liga_maestros.routes import liga_data
 
 COPILOT_SIGNOS = ["1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "1", "1", "1", "1", "1-0"]
 PROGRAMA_SIGNOS = ["1X", "1", "2", "1X", "1", "1", "1", "1X", "1", "1", "1", "1", "1", "1", "2-1"]
+SONIA_SIGNOS = ["X", "2", "2", "1", "1", "X", "1", "1", "X", "1", "2", "1", "1", "1", "2-1"]
 
-PENA_12 = {
+PENA_13 = {
     "chipi",
     "geli",
     "pepe",
@@ -41,6 +42,7 @@ PENA_12 = {
     "luzia",
     "luna",
     "erniebot",
+    "sonia",
 }
 MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot", "programa"}
 
@@ -73,7 +75,7 @@ def test_arena_file_has_copilot_real_ticket_and_12_pena_members():
 
     pena = {uid for uid, p in pronosticos.items() if p["grupo"] == "pena"}
     maestros = {uid for uid, p in pronosticos.items() if p["grupo"] == "maestro"}
-    assert pena == PENA_12
+    assert pena == PENA_13
     assert maestros == MAESTROS
     assert "mrpurple" not in pronosticos  # el usuario rellena su quiniela en la web
     for p in pronosticos.values():
@@ -98,7 +100,8 @@ def test_ensure_jornada_1_imports_boletos_from_arena_file():
         by_user.setdefault(row["user_id"], []).append(row["signo"])
     assert by_user["copilot"] == COPILOT_SIGNOS
     assert by_user["programa"] == PROGRAMA_SIGNOS
-    assert set(by_user) == MAESTROS | PENA_12
+    assert by_user["sonia"] == SONIA_SIGNOS
+    assert set(by_user) == MAESTROS | PENA_13
 
     # Idempotente: re-ejecutar no duplica ni cambia los boletos
     ensure_jornada_1(conn)
@@ -205,13 +208,13 @@ def test_api_liga_data_j1_returns_copilot_and_pena_consensus_total_12(tmp_path, 
 
     consenso = payload["consenso_pena"]
     assert len(consenso) == 14
-    assert all(item["total"] == 12 for item in consenso)
+    assert all(item["total"] == 13 for item in consenso)
     assert all(item["fuente"] == "pena" for item in consenso)
 
     # Los maestros son públicos antes del cierre; La Peña solo se revela una vez cerrada.
     predicciones = payload["predicciones_actuales"]
     assert {"copilot", "gemini", "claude", "grok", "chatgpt"} <= set(predicciones)
     if payload["is_locked"]:
-        assert PENA_12 <= set(predicciones)
+        assert PENA_13 <= set(predicciones)
     else:
-        assert PENA_12.isdisjoint(predicciones)
+        assert PENA_13.isdisjoint(predicciones)
