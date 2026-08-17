@@ -335,6 +335,11 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     border-color: var(--cp-line-strong);
 }
 .cp-secondary:hover { background: rgba(255,255,255,0.08); }
+.cp-primary:focus-visible, .cp-secondary:focus-visible {
+    outline: 2px solid var(--cp-gold);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(245,181,63,0.25);
+}
 
 /* ===== ARENA DERECHA: duelo + partido apilados ===== */
 .cp-arena {
@@ -611,6 +616,8 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     flex-shrink: 0;
 }
 .cp-featured-cta:hover { background: rgba(56,217,255,0.14); }
+.cp-featured-cta:focus-visible { outline: 2px solid var(--cp-cyan); outline-offset: 3px; }
+.cp-journey-step:focus-visible { outline: 2px solid var(--cp-gold); outline-offset: 2px; }
 .cp-featured.is-empty .cp-empty {
     color: var(--cp-muted);
     font-size: 0.72rem;
@@ -870,3 +877,99 @@ body.newspaper-ui.quiniela-focus .cp .cp-hero-title .cp-title-gold {
     .cp-countdown-timer { font-size: 1.2rem; }
 }
 }
+
+/* ==== Trash talk: La voz del duelo (P1 2.2) ==== */
+.cp-voz {
+    background: linear-gradient(180deg, rgba(14,21,38,0.92), rgba(14,21,38,0.78));
+    border: 1px solid var(--cp-line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.cp-voz .cp-card-head { margin: 0; }
+.cp-voz-stage { display: flex; flex-direction: column; gap: 8px; }
+.cp-voz-avatars { display: flex; gap: 6px; align-items: center; }
+.cp-voz-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 800;
+    background: rgba(255,255,255,0.06);
+    color: var(--cp-muted);
+    border: 1px solid var(--cp-line);
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+    opacity: 0.55;
+}
+.cp-voz-avatar:hover { transform: translateY(-1px) scale(1.06); opacity: 1; }
+.cp-voz-avatar.is-active { opacity: 1; transform: scale(1.08); background: rgba(245,181,63,0.18); color: var(--cp-gold); }
+.cp-voz-avatar:focus-visible { outline: 2px solid var(--cp-gold); outline-offset: 2px; }
+.cp-voz-quote {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--cp-line-strong);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    animation: cpVozFade 0.35s ease both;
+}
+.cp-voz-quote-avatar {
+    flex: 0 0 auto;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(245,181,63,0.16);
+    color: var(--cp-gold);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; font-weight: 800;
+}
+.cp-voz-quote-body b { display: block; color: var(--cp-text); font-size: 0.85rem; margin-bottom: 2px; letter-spacing: 0.02em; }
+.cp-voz-quote-body p { margin: 0; color: var(--cp-text); font-size: 0.95rem; line-height: 1.35; }
+.cp-voz-quote.is-programa { border-left-color: #f5b53f; }
+.cp-voz-quote.is-programa .cp-voz-quote-avatar { background: rgba(245,181,63,0.18); color: #f5b53f; }
+.cp-voz-quote.is-claude { border-left-color: #d97757; }
+.cp-voz-quote.is-claude .cp-voz-quote-avatar { background: rgba(217,119,87,0.18); color: #f59e7d; }
+.cp-voz-quote.is-grok { border-left-color: #ef5a8b; }
+.cp-voz-quote.is-grok .cp-voz-quote-avatar { background: rgba(239,90,139,0.18); color: #f472b6; }
+.cp-voz-quote.is-chatgpt { border-left-color: #10a37f; }
+.cp-voz-quote.is-chatgpt .cp-voz-quote-avatar { background: rgba(16,163,127,0.18); color: #34d39a; }
+.cp-voz-quote.is-copilot { border-left-color: #38d9ff; }
+.cp-voz-quote.is-copilot .cp-voz-quote-avatar { background: rgba(56,217,255,0.18); color: #7ce5ff; }
+.cp-voz-quote.is-gemini { border-left-color: #8b5cf6; }
+.cp-voz-quote.is-gemini .cp-voz-quote-avatar { background: rgba(139,92,246,0.20); color: #b497ff; }
+.cp-voz-dots { display: flex; gap: 6px; justify-content: center; }
+.cp-voz-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    border: 0; padding: 0; cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+.cp-voz-dot:hover { background: rgba(255,255,255,0.36); }
+.cp-voz-dot.is-active { background: var(--cp-gold); transform: scale(1.4); }
+.cp-voz-dot:focus-visible { outline: 2px solid var(--cp-gold); outline-offset: 2px; }
+.cp-voz-replica {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(124,198,255,0.07);
+    border-left: 3px solid var(--cp-pena);
+}
+.cp-voz-replica-avatar {
+    flex: 0 0 auto;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(124,198,255,0.18); color: var(--cp-pena);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+}
+.cp-voz-replica b { display: block; color: var(--cp-pena); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+.cp-voz-replica p { margin: 0; color: var(--cp-text); font-size: 0.88rem; line-height: 1.35; }
+.cp-voz-replica.is-standalone { background: rgba(124,198,255,0.10); }
+@keyframes cpVozFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+    .cp-voz-quote { animation: none; }
+    .cp-voz-avatar, .cp-voz-dot { transition: none; }
+    .cp-primary, .cp-secondary, .cp-featured-cta, .cp-journey-step { transition: none; }
+    .cp-primary:hover, .cp-secondary:hover { transform: none; }
+}
+
