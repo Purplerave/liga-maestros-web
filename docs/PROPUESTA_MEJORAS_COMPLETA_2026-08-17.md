@@ -1,6 +1,6 @@
 # Propuesta completa de mejoras — Liga de Maestros
 
-> **🤖 Para la IA del próximo chat:** ve directo a **§13 Seguimiento de implementación** — ahí está el changelog real de lo ya hecho (P0+P1+P2 en `arena/01a00ffe-liga-maestros-web` mergeado en PR #69 `eb334c7`, más P1 2.2 + P2 3.1 + P2 4.x en la sesión actual `arena/01a01089-liga-maestros-web`). §1-§12 es el backlog original de Grok, no el estado actual. Rama de trabajo: `arena/01a01089-liga-maestros-web` (base `eb334c7` en `main`).
+> **🤖 Para la IA del próximo chat:** ve directo a **§13 Seguimiento de implementación** — ahí está el changelog real de lo ya hecho. Sesión 1: P0+P1+P2 en `arena/01a00ffe-liga-maestros-web` mergeada en PR #69 (`eb334c7`). Sesión 2: P1 2.2 + P2 3.1 + P2 4.x en `arena/01a01089-liga-maestros-web` mergeada en PR #70 (`8328a1d`). §1-§12 es el backlog original de Grok, no el estado actual. Estado `main` actualizado: `git log --oneline -3` en `main` muestra los dos merges.
 
 **Fecha:** 17 de agosto de 2026  
 **Autor de la propuesta:** Auditoría externa (Grok)  
@@ -383,8 +383,8 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 
 ## 13. Seguimiento de implementación — actualizado 2026-08-17 (FUENTE DE VERDAD)
 
-> **Estado general:** P0 + P1 (2.1, 2.3) + P2 (6.1, 6.2, 6.3, 3.3) completados en `arena/01a00ffe-liga-maestros-web` (`bf14687`, `4b70b88`, `dd9f5a0` sobre `cfc3884` de `main`) y mergeados a `main` como PR #69 (commit `eb334c7`). Sesión actual `arena/01a01089-liga-maestros-web` añade P1 (2.2) + P2 (3.1) + P2 (4.x) sobre el merge.
-> **Cómo retomar en un chat nuevo:** 1) lee esta §13, 2) `git log --oneline main..HEAD`, 3) sigue por §13.2b pendiente.
+> **Estado general:** P0 + P1 (2.1, 2.3) + P2 (6.1, 6.2, 6.3, 3.3) completados en `arena/01a00ffe-liga-maestros-web` (`bf14687`, `4b70b88`, `dd9f5a0` sobre `cfc3884` de `main`) y mergeados a `main` como PR #69 (commit `eb334c7`). Sesión `arena/01a01089-liga-maestros-web` añade P1 (2.2) + P2 (3.1) + P2 (4.x) mergeada a `main` como PR #70 (squash commit `8328a1d`).
+> **Cómo retomar en un chat nuevo:** 1) lee esta §13, 2) `git log --oneline -5`, 3) sigue por §13.2b pendiente.
 
 ### 13.1 Changelog P0 — 2026-08-17 (esta sesión)
 
