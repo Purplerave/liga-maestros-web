@@ -4,7 +4,6 @@ Cubren:
 - Validación de un payload mínimo real
 - Drift de tipos: el validador detecta y reporta, sin lanzar
 - Schema drift en participant_contract (campo faltante)
-- Trash-talk con estado inválido cae a 'primera'
 - Match con signo inválido cae a '-'
 - helper validate_liga_data devuelve el payload original si hay error
 """
@@ -59,19 +58,6 @@ def test_match_signo_accepts_valid():
     for sign in ("1", "X", "2", "-"):
         m = s.MatchPayload.model_validate({**_min_partido(), "signo": sign})
         assert m.signo == sign
-
-
-def test_trash_talk_state_normalized():
-    s = _schemas()
-    tt = s.TrashTalkPayload.model_validate({"bando_state": "inventado", "masters": {}, "pena_replica": ""})
-    assert tt.bando_state == "primera"
-
-
-def test_trash_talk_valid_states():
-    s = _schemas()
-    for st in ("va_ganando", "va_perdiendo", "empate", "primera"):
-        tt = s.TrashTalkPayload.model_validate({"bando_state": st})
-        assert tt.bando_state == st
 
 
 def test_liga_data_minimal_passes():

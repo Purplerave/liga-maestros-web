@@ -95,26 +95,6 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
-// Delegación de clicks para el carrusel de trash-talk (dots + avatares)
-document.addEventListener("click", (ev) => {
-    const target = ev.target instanceof Element ? ev.target.closest("[data-voz-idx]") : null;
-    if (!target) return;
-    const idx = Number(target.getAttribute("data-voz-idx"));
-    if (Number.isNaN(idx)) return;
-    setTrashTalkIdx(idx);
-    // reset del autoplay tras interacción manual
-    if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
-    _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
-});
-// Pausa del autoplay cuando la pestaña no es visible
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-        if (_trashTalkRotateTimer) { clearInterval(_trashTalkRotateTimer); _trashTalkRotateTimer = null; }
-    } else {
-        startTrashTalkRotation();
-    }
-});
-
 function updateCpScorebar(bando, jornada) {
     const bar = document.getElementById("cp-scorebar");
     if (!bar) return;
@@ -131,7 +111,7 @@ function updateCpScorebar(bando, jornada) {
     const pct = total ? (bando.humanTotal / total) * 100 : 50;
     if (penaBar) penaBar.style.width = Math.max(8,Math.min(92,pct)).toFixed(1)+"%";
     if (iaBar) iaBar.style.width = Math.max(8,Math.min(92,100-pct)).toFixed(1)+"%";
-    if (label) label.textContent = `J${jornada || "—"} · ${bando.aiAvg > bando.humanAvg ? "van ganando máquinas" : bando.humanAvg > bando.aiAvg ? "vamos ganando" : "empate"}`;
+    if (label) label.textContent = `J${jornada || "—"} · IA ${bando.aiAvg.toFixed(1).replace(".",",")} pts · Peña ${bando.humanAvg.toFixed(1).replace(".",",")} pts`;
 }
 
 function updateCpUrgency(diff, closed, saved) {
@@ -141,103 +121,8 @@ function updateCpUrgency(diff, closed, saved) {
     if (closed || saved || diff <= 0 || diff > 2*3600*1000) { bar.hidden = true; return; }
     const s = Math.floor(diff/1000);
     const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-    txt.textContent = h>0 ? `Te falta firmar — cierra en ${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `Te falta firmar — cierra en ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+    txt.textContent = h>0 ? `Quiniela sin guardar — cierra en ${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `Quiniela sin guardar — cierra en ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
     bar.hidden = false;
-}
-
-// Trash-talk: voz del duelo (Maestros + réplica Peña)
-const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
-const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
-const _MAESTRO_TONE = { programa: "is-programa", claude: "is-claude", grok: "is-grok", chatgpt: "is-chatgpt", copilot: "is-copilot", gemini: "is-gemini" };
-let _currentTrashTalkIdx = 0;
-let _trashTalkRotateTimer = null;
-
-function coverBandoState(bando) {
-    if (!bando || bando.rows.length === 0) return "primera";
-    if (bando.humanCount === 0 || bando.aiCount === 0) return "primera";
-    const diff = bando.aiAvg - bando.humanAvg;
-    if (diff > 0.05) return "va_perdiendo";
-    if (diff < -0.05) return "va_ganando";
-    return "empate";
-}
-
-function coverTrashTalkMasters() {
-    const tt = state.data?.trash_talk;
-    if (!tt || !tt.masters) return [];
-    return Object.keys(_MAESTRO_LABEL)
-        .map(id => ({ id, label: _MAESTRO_LABEL[id], avatar: _MAESTRO_AVATAR[id], tone: _MAESTRO_TONE[id], phrase: tt.masters[id] || "" }))
-        .filter(item => item.phrase);
-}
-
-function coverTrashTalkReplica() {
-    return state.data?.trash_talk?.pena_replica || "";
-}
-
-function coverTrashTalkHtml() {
-    const masters = coverTrashTalkMasters();
-    const replica = coverTrashTalkReplica();
-    if (!masters.length && !replica) return "";
-    // Si solo hay réplica (sin frases de maestro), no mostramos el carrusel pero sí la réplica
-    if (!masters.length) {
-        return `<article class="cp-voz" aria-label="La voz del duelo">
-            <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Réplica</b></div>
-            <div class="cp-voz-replica is-standalone">
-                <span class="cp-voz-replica-avatar" aria-hidden="true">👥</span>
-                <div><b>La Peña</b><p>${escapeHtml(replica)}</p></div>
-            </div>
-        </article>`;
-    }
-    const idx = _currentTrashTalkIdx % masters.length;
-    const current = masters[idx];
-    const dots = masters.map((m, i) => `<button type="button" class="cp-voz-dot${i === idx ? " is-active" : ""}" data-voz-idx="${i}" aria-label="${escapeHtml(m.label)}"></button>`).join("");
-    const avatars = masters.map(m => `<span class="cp-voz-avatar ${m.tone}" title="${escapeHtml(m.label)}" data-voz-idx="${masters.indexOf(m)}" aria-hidden="true">${m.avatar}</span>`).join("");
-    return `<article class="cp-voz" aria-label="La voz del duelo">
-        <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Maestros</b></div>
-        <div class="cp-voz-stage">
-            <div class="cp-voz-avatars" aria-hidden="true">${avatars}</div>
-            <blockquote class="cp-voz-quote ${current.tone}">
-                <span class="cp-voz-quote-avatar" aria-hidden="true">${current.avatar}</span>
-                <div class="cp-voz-quote-body">
-                    <b>${escapeHtml(current.label)}</b>
-                    <p>${escapeHtml(current.phrase)}</p>
-                </div>
-            </blockquote>
-            ${dots ? `<div class="cp-voz-dots" role="tablist" aria-label="Cambiar de maestro">${dots}</div>` : ""}
-        </div>
-        ${replica ? `<div class="cp-voz-replica">
-            <span class="cp-voz-replica-avatar" aria-hidden="true">👥</span>
-            <div><b>La Peña replica</b><p>${escapeHtml(replica)}</p></div>
-        </div>` : ""}
-    </article>`;
-}
-
-function setTrashTalkIdx(idx) {
-    const masters = coverTrashTalkMasters();
-    if (!masters.length) return;
-    _currentTrashTalkIdx = ((idx % masters.length) + masters.length) % masters.length;
-    const stage = document.querySelector(".cp-voz");
-    if (!stage) { return; }
-    const current = masters[_currentTrashTalkIdx];
-    const quote = stage.querySelector(".cp-voz-quote");
-    if (quote) {
-        quote.className = `cp-voz-quote ${current.tone}`;
-        const avatar = quote.querySelector(".cp-voz-quote-avatar");
-        if (avatar) avatar.textContent = current.avatar;
-        const name = quote.querySelector(".cp-voz-quote-body b");
-        if (name) name.textContent = current.label;
-        const text = quote.querySelector(".cp-voz-quote-body p");
-        if (text) text.textContent = current.phrase;
-    }
-    stage.querySelectorAll(".cp-voz-dot").forEach((dot, i) => dot.classList.toggle("is-active", i === _currentTrashTalkIdx));
-    stage.querySelectorAll(".cp-voz-avatar").forEach((avatar, i) => avatar.classList.toggle("is-active", i === _currentTrashTalkIdx));
-    try { if (typeof trackEvent === "function") trackEvent("trash_talk_swap", { maestro: current.id }); } catch (e) { /* no-op */ }
-}
-
-function startTrashTalkRotation() {
-    if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
-    const masters = coverTrashTalkMasters();
-    if (masters.length <= 1) return;
-    _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
 }
 
 let _prevUserDone = -1;
@@ -408,13 +293,12 @@ function hydrateCoverPorra(data) {
     const hasMine = mine.goles_local !== undefined && mine.goles_local !== null && mine.goles_visitante !== undefined && mine.goles_visitante !== null;
     const leaders = (data.distribution || []).slice(0, 3);
     const hint = data.hint || "Marcador exacto: +2 puntos.";
-    // P0 1.6: copy de “mojarse” más tribal
-    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Los maestros ya se han mojado. ¿Y tú?";
+    const status = hasMine ? `Tu porra: ${Number(mine.goles_local)}-${Number(mine.goles_visitante)}` : data.locked ? "Cerrada" : "Marcador exacto: +2 puntos";
     const changes = data.my_changes || 0;
     const jornadaLocked = data.jornada_locked || false;
 
     if (hasMine) updateCoverPorraStep(`${Number(mine.goles_local)}-${Number(mine.goles_visitante)} guardado`, "done");
-    else updateCoverPorraStep(data.locked ? "Cerrada" : "¡Mójate!");
+    else updateCoverPorraStep(data.locked ? "Cerrada" : "Pendiente");
 
     let changeInfo = "";
     if (hasMine && !jornadaLocked) {
@@ -461,13 +345,13 @@ function renderNewspaperCoverPageV3() {
     }).sort((a,b) => b.total - a.total).slice(0,3);
 
     const isFirstOfficial = rankingRows.length === 0 || (bando.humanTotal === 0 && bando.aiTotal === 0) || collective.played === 0;
-    // P0 1.2: CTAs tribales + P0 1.4 datos reales para kicker
+    // Kicker plano: dato real, sin narrativa
     const hasRealBando = !isFirstOfficial && (bando.humanTotal + bando.aiTotal) > 0;
     const kickerBandoLabel = hasRealBando
-        ? (bando.aiAvg > bando.humanAvg + 0.05 ? "LAS MÁQUINAS NOS ESTÁN GANANDO" : bando.humanAvg > bando.aiAvg + 0.05 ? "LA PEÑA VA GANANDO" : "DUELO IGUALADO")
-        : `JORNADA ${escapeHtml(String(jornada || "1"))} · LAS MÁQUINAS NOS ESPERAN`;
-    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Revisar mi bando" : "Firmar por la humanidad");
-    const ctaSecondaryLabel = hasRealBando ? "Ver cómo van las máquinas" : "Clasificación";
+        ? `IA ${aiAvgStr} pts · Peña ${humanAvgStr} pts`
+        : `Temporada 26/27 · 6 IAs vs La Peña`;
+    const ctaLabel = closed ? (saved ? "Ver mi quiniela" : "Ver resultados") : (saved ? "Ver mi quiniela" : "Hacer mi quiniela");
+    const ctaSecondaryLabel = "Clasificación";
     const statusLabel = closed ? "Cerrada" : `${coverCloseLabel()}`;
     const ticketStepLabel = saved ? "Guardada" : closed ? "Ver resultados" : "Pendiente";
     const liveStepLabel = liveCount ? `${liveCount} en directo` : "Horarios y resultados";
@@ -568,7 +452,7 @@ function renderNewspaperCoverPageV3() {
 
     const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
     // P0 1.4 + 1.5: actualizar scorebar y animar progreso
-    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); startTrashTalkRotation(); }, 0);
+    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); }, 0);
     const userProgressHtml = state.user ? `
         <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
             <span>Tu quiniela</span>
@@ -600,11 +484,11 @@ function renderNewspaperCoverPageV3() {
             <p class="cp-empty">Los partidos se publicarán con el cierre de la jornada anterior.</p>
         </article>`;
 
-    // P0 1.2 hero pitch dinámico con datos reales
+    // Hero pitch con datos reales, sin narrativa
     const top3Names = rankingRows.slice(0,3).map(r=> `${escapeHtml(r.name)} ${r.jornada}pts`).join(" · ");
     const heroPitch = hasRealBando && top3Names
-        ? `Top jornada: ${top3Names}. ¿Firmas por la humanidad y los superas?`
-        : `Temporada oficial. 15 partidos por jornada. Humanos vs IA. Gana quien acierte más.`;
+        ? `Top jornada: ${top3Names}.`
+        : `Temporada oficial. 15 partidos por jornada. 6 IAs y La Peña. Gana quien acierte más.`;
     const heroKickerJornada = `J${escapeHtml(String(jornada || "1"))}`;
     return `<div class="cp">
         <div class="cp-main">
@@ -636,7 +520,6 @@ function renderNewspaperCoverPageV3() {
                 </article>
                 ${featuredHtml}
             </section>
-            ${coverTrashTalkHtml()}
         </div>
 
         <section class="cp-ops" aria-label="Tu jornada">

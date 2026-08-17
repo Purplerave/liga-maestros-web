@@ -75,20 +75,6 @@ class MatchPayload(_StrictBase):
         return v
 
 
-class TrashTalkPayload(_StrictBase):
-    jornada: str = ""
-    bando_state: str = "primera"
-    masters: dict[str, str] = Field(default_factory=dict)
-    pena_replica: str = ""
-
-    @field_validator("bando_state")
-    @classmethod
-    def _state_in_set(cls, v: str) -> str:
-        if v not in {"va_ganando", "va_perdiendo", "empate", "primera"}:
-            return "primera"
-        return v
-
-
 class LigaDataPayload(_StrictBase):
     """Schema del payload principal que sirve ``GET /api/liga/data``.
 
@@ -115,7 +101,6 @@ class LigaDataPayload(_StrictBase):
     consenso_pena: list[Any] = Field(default_factory=list)
     consenso_pleno_pena: list[Any] = Field(default_factory=list)
     ranking_maestros: dict[str, Any] = Field(default_factory=dict)
-    trash_talk: TrashTalkPayload = Field(default_factory=TrashTalkPayload)
     auth_enabled: bool = False
     live_stream_enabled: bool = False
     is_admin: bool = False

@@ -39,30 +39,23 @@ def test_focus_visible_on_cover_ctas():
     assert ".cp-secondary:focus-visible" in css
     assert ".cp-featured-cta:focus-visible" in css
     assert ".cp-journey-step:focus-visible" in css
-    # Carrusel trash-talk también
-    assert ".cp-voz-avatar:focus-visible" in css
-    assert ".cp-voz-dot:focus-visible" in css
 
 
 def test_reduced_motion_disables_new_animations():
     css = COVER_CSS.read_text(encoding="utf-8")
-    # Patrones clave de la nueva sección trash-talk
-    assert "@keyframes cpVozFade" in css
     assert "@media (prefers-reduced-motion: reduce)" in css
-    # La regla RM desactiva las animaciones que introducimos
+    # La regla RM desactiva los hovers/transiciones que introducimos
     section = css[css.rfind("@media (prefers-reduced-motion: reduce)") :]
-    assert ".cp-voz-quote" in section and "animation: none" in section
-    # Y también los hovers nuevos
     assert ".cp-primary" in section or ".cp-primary:hover" in section
 
 
-def test_cover_trash_talk_keyboard_accessible():
+def test_cover_has_no_trash_talk_carousel():
+    """El carrusel de trash-talk fue retirado: la portada es dato, no narrativa."""
     cover = COVER_JS.read_text(encoding="utf-8")
-    # dots y avatares son <button> o tienen role
-    assert "data-voz-idx" in cover
-    assert 'type="button"' in cover
-    # aria-labels para los dots
-    assert "aria-label=" in cover
+    css = COVER_CSS.read_text(encoding="utf-8")
+    assert "cp-voz" not in cover
+    assert "trash_talk" not in cover
+    assert ".cp-voz" not in css
 
 
 def test_cover_uses_real_data_not_invented():
@@ -78,6 +71,6 @@ def test_cover_version_bumped_after_change():
     """El cache-bust de la portada debe haber sido bumpeado para invalidar la caché."""
     nav = (ROOT / "static" / "js" / "navigation.js").read_text(encoding="utf-8")
     template = TEMPLATE.read_text(encoding="utf-8")
-    # Tras los cambios, ambos deben apuntar al menos a 64
-    assert "cover-page-64" in nav
-    assert "cover-hero-64" in template
+    # Tras los cambios, ambos deben apuntar al menos a 65
+    assert "cover-page-65" in nav
+    assert "cover-hero-65" in template

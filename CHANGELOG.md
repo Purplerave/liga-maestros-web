@@ -2,6 +2,30 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-17 — Fuera trash-talk y copy tribal: la portada es dato
+
+### Eliminado
+
+- 🗑️ **Sistema de trash-talk completo.** El diferencial del producto son 6
+  IAs reales compitiendo con dato auditable, no frases inventadas: fuera
+  `data/MAESTROS_TRASH_TALK.json`, `services/trash_talk.py`, el carrusel
+  `cp-voz` de la portada (JS + CSS), el payload `trash_talk` de
+  `/api/liga/data`, el schema `TrashTalkPayload` y sus tests.
+
+### Cambiado
+
+- El kicker bélico ("LAS MÁQUINAS NOS ESTÁN GANANDO" / "LA PEÑA VA GANANDO")
+  pasa a dato plano: `IA 8,4 pts · Peña 6,2 pts`. El scorebar sticky también
+  muestra medias en vez de narrativa.
+- CTAs neutros: "Firmar por la humanidad" → "Hacer mi quiniela";
+  "Revisar mi bando" → "Ver mi quiniela".
+- La porra vuelve al copy informativo: "Elige tu partido — +2 pts si clavas
+  el marcador" (fuera "¡Mójate!" y "Los maestros ya se han mojado").
+- Banner de urgencia: "Te falta firmar" → "Quiniela sin guardar".
+- Se conservan intactos los schemas Pydantic (3.1) y la a11y (focus-visible,
+  skip link, reduced-motion) de la misma sesión: ingeniería aparte del copy.
+- Cache-bust de portada bumpeado a 65 (`cover-page-65` / `cover-hero-65`).
+
 ## 2026-08-17 — Forma y racha completas en la clasificación
 
 ### Corregido
