@@ -1,6 +1,6 @@
 # Propuesta completa de mejoras — Liga de Maestros
 
-> **🤖 Para la IA del próximo chat:** ve directo a **§13 Seguimiento de implementación** — ahí está el changelog real de lo ya hecho (P0+P1+P2 en `arena/01a00ffe-liga-maestros-web` commits `bf14687`, `4b70b88`, `dd9f5a0`) y el backlog que queda. §1-§12 es el backlog original de Grok, no el estado actual. Rama de trabajo: `arena/01a00ffe-liga-maestros-web` (base `cfc3884` en `main`).
+> **🤖 Para la IA del próximo chat:** ve directo a **§13 Seguimiento de implementación** — ahí está el changelog real de lo ya hecho (P0+P1+P2 en `arena/01a00ffe-liga-maestros-web` mergeado en PR #69 `eb334c7`, más P1 2.2 + P2 3.1 + P2 4.x en la sesión actual `arena/01a01089-liga-maestros-web`). §1-§12 es el backlog original de Grok, no el estado actual. Rama de trabajo: `arena/01a01089-liga-maestros-web` (base `eb334c7` en `main`).
 
 **Fecha:** 17 de agosto de 2026  
 **Autor de la propuesta:** Auditoría externa (Grok)  
@@ -383,8 +383,8 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 
 ## 13. Seguimiento de implementación — actualizado 2026-08-17 (FUENTE DE VERDAD)
 
-> **Estado general:** P0 + P1 (2.1, 2.3) + P2 (6.1, 6.2, 6.3, 3.3) completados en `arena/01a00ffe-liga-maestros-web` (`bf14687`, `4b70b88`, `dd9f5a0` sobre `cfc3884` de `main`). Ver `git log main..arena` y `git diff --stat` abajo. P2 restante y P3 quedan como backlog.
-> **Cómo retomar en un chat nuevo:** 1) lee esta §13, 2) `git log --oneline main..arena`, 3) sigue por §13.2b pendiente.
+> **Estado general:** P0 + P1 (2.1, 2.3) + P2 (6.1, 6.2, 6.3, 3.3) completados en `arena/01a00ffe-liga-maestros-web` (`bf14687`, `4b70b88`, `dd9f5a0` sobre `cfc3884` de `main`) y mergeados a `main` como PR #69 (commit `eb334c7`). Sesión actual `arena/01a01089-liga-maestros-web` añade P1 (2.2) + P2 (3.1) + P2 (4.x) sobre el merge.
+> **Cómo retomar en un chat nuevo:** 1) lee esta §13, 2) `git log --oneline main..HEAD`, 3) sigue por §13.2b pendiente.
 
 ### 13.1 Changelog P0 — 2026-08-17 (esta sesión)
 
@@ -422,12 +422,28 @@ Todo lo demás (contratos de datos, health, DX, features de crecimiento) sostien
 | **6.3** Limpieza raíz | ✅ Hecho | `fix-j75-*.patch` movidos a `scripts/archive/` (quedan `scripts/archive/fix-j75-quiniela.patch`, `fix-j75-resultados.patch`). |
 | **3.3** Health enriquecido | ✅ Hecho | `GET /health` ampliado: `build_sha`, `db.{ok,integrity,size_mb}`, `backup.{ok,age_hours}`, `collector.{status,age_seconds}`, `quota.{remaining_pct}` sin secretos, `version`. Compatible con Alwaysdata/Render. |
 | **3.4** Legales | ✅ Verificado | `LEGAL_OWNER_*` vía env, plantillas sin `Pendiente de configurar` hardcodeado. Pendiente rellenar env en prod antes de lanzamiento. |
-| **2.2/2.4/3.1/4.x/5.x** | ⏳ Pendiente | Avatares trash-talk, grupos privados, JSON Schema/Pydantic, performance, Sentry — backlog Semana 3-4. |
+| **2.2/3.1/4.x** | ✅ Hecho (sesión `arena/01a01089`) | Trash-talk + réplica Peña, JSON Schema Pydantic, focus-visible + skip link + reduced motion. Ver §13.2d abajo. |
+| **2.4/3.2/5.x/P3** | ⏳ Pendiente | Grupos privados, documentar source of truth, observabilidad, P3 — backlog Semana 4+. |
+
+### 13.2d Changelog P1+P2 — sesión `arena/01a01089-liga-maestros-web` (2026-08-17)
+
+| ID | Propuesta | Estado | Qué se hizo | Archivos tocados |
+|---|---|---|---|---|
+| **2.2** Trash-talk Maestros + réplica Peña | ✅ Hecho | Banco de frases `data/MAESTROS_TRASH_TALK.json` por maestro (programa/claude/grok/chatgpt/copilot/gemini) × estado (va_ganando/va_perdiendo/empate/primera). Elección determinista por seed `jornada+maestro` (FNV-1a) para que rote sin duplicar visitas. Réplica de La Peña con su propio banco. Estado del duelo calculado server-side en `_bando_state_for` (mismo criterio ±0.05 que el frontend). Carrusel `cp-voz` con 6 avatares, autoplay 6.5s, click/dot/avatar para cambiar, pausa por `visibilitychange`, animación `cpVozFade` con override en `prefers-reduced-motion`. | `data/MAESTROS_TRASH_TALK.json` (nuevo), `liga_maestros/services/trash_talk.py` (nuevo), `liga_maestros/routes/liga_data.py` (`_bando_state_for` + payload `trash_talk`), `static/js/pages/cover_page.js` (`coverTrashTalkHtml`, `setTrashTalkIdx`, `startTrashTalkRotation`, click delegation), `static/css/cover_hero.css` (`.cp-voz*`), `tests/test_trash_talk.py` (nuevo, 16 tests) |
+| **3.1** JSON Schema / Pydantic para payloads | ✅ Hecho | Módulo `liga_maestros/schemas.py` con modelos `LigaDataPayload`, `MatchPayload`, `ParticipantContract`, `TrashTalkPayload`. Helper `validate_liga_data` valida la respuesta de `/api/liga/data`; en caso de drift loguea y devuelve el payload (no rompe la respuesta). `pydantic>=2.5` añadido a `requirements.txt`. | `liga_maestros/schemas.py` (nuevo), `liga_maestros/routes/liga_data.py` (validación al final del handler), `requirements.txt` (`pydantic>=2.5`), `tests/test_payload_schemas.py` (nuevo, 10 tests) |
+| **4.1/4.2** A11y: focus + skip link + reduced motion | ✅ Hecho | `:focus-visible` en `.cp-primary`, `.cp-secondary`, `.cp-featured-cta`, `.cp-journey-step` (todos los CTAs de la portada con outline dorado/cian visible). Skip link `Saltar al contenido principal → #matches-body` (el CSS ya existía en `ux_signals.css`, sólo se ha añadido el `<a>` en la plantilla). LCP image `cp-hero-crest` ahora con `decoding="async" fetchpriority="high"` explícitos. Override de `prefers-reduced-motion` añadido a los nuevos selectores (sin `!important`, manteniendo el contrato del governance test). Cache-bust: `cover-page-63→64` y `cover-hero-63→64`. | `templates/liga_index.html` (skip link), `static/js/pages/cover_page.js` (crest attrs), `static/css/cover_hero.css` (focus + RM), `static/js/navigation.js` (cover-page-64), `tests/test_a11y_cover.py` (nuevo, 8 tests) |
+
+**Cómo probar 2.2:** 1) Visitar `/`; 2) En la portada aparece "LA VOZ DEL DUELO" con un maestro y una réplica; 3) Click en un dot o avatar → cambia la frase sin recargar; 4) Tras 6.5s autoplay, rota solo; 5) `prefers-reduced-motion` desactiva la animación de fade. **Trash-talk vacío** (sin ranking) → muestra "TODO A CERO" en el duelo y oculta el bloque trash-talk.
+
+**Cómo probar 3.1:** 1) `python -c "from liga_maestros.schemas import validate_liga_data; print(validate_liga_data({})[1])"` → reporta drift sin lanzar. 2) Si cambias un campo en `build_*_payload` y rompe el schema, el log del servidor lo dirá sin 500.
+
+**Cómo probar 4.x:** 1) Tab por la portada → outlines visibles en CTAs y dots; 2) Primer Tab muestra "Saltar al contenido principal"; 3) DevTools "Emulate prefers-reduced-motion: reduce" → animaciones y hovers deshabilitados.
 
 ### 13.2b Pendiente P1/P2 (siguiente)
-- **2.2 Avatares / trash talk Maestros + réplica mejor humano:** falta frase corta rotativa por jornada en portada (no inventar resultados).
-- **2.4 Grupos privados, 3.1 JSON Schema, 3.2 Source of truth:** previstos Semana 3. No bloquean viral.
-- **4.x/5.x:** Accesibilidad motion, performance, observabilidad — deuda vigilada.
+- **2.4 Grupos privados:** sigue previsto para Semana 4. No bloquea viral ni conversión.
+- **3.2 Source of truth:** documentar formalmente qué vive en SQLite vs JSON de disco (un solo lugar por dato, tests que lo enforcen). Bajo esfuerzo, alto valor de mantenimiento.
+- **5.x:** Collector como worker separado, Sentry DSN en prod, endurecer anti-cheat arcade — deuda vigilada.
+- **P3:** Arena más IAs, API pública, bot Telegram, PWA push, torneos arcade, multi-tenant, modo probabilidad + Brier.
 
 ### 13.3 Decisiones tomadas en esta iteración
 

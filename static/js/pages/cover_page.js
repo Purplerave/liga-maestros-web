@@ -95,6 +95,26 @@ if (document.readyState === "loading") {
     startSeasonCountdown();
 }
 
+// Delegación de clicks para el carrusel de trash-talk (dots + avatares)
+document.addEventListener("click", (ev) => {
+    const target = ev.target instanceof Element ? ev.target.closest("[data-voz-idx]") : null;
+    if (!target) return;
+    const idx = Number(target.getAttribute("data-voz-idx"));
+    if (Number.isNaN(idx)) return;
+    setTrashTalkIdx(idx);
+    // reset del autoplay tras interacción manual
+    if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
+    _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
+});
+// Pausa del autoplay cuando la pestaña no es visible
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        if (_trashTalkRotateTimer) { clearInterval(_trashTalkRotateTimer); _trashTalkRotateTimer = null; }
+    } else {
+        startTrashTalkRotation();
+    }
+});
+
 function updateCpScorebar(bando, jornada) {
     const bar = document.getElementById("cp-scorebar");
     if (!bar) return;
@@ -123,6 +143,101 @@ function updateCpUrgency(diff, closed, saved) {
     const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
     txt.textContent = h>0 ? `Te falta firmar — cierra en ${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s` : `Te falta firmar — cierra en ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
     bar.hidden = false;
+}
+
+// Trash-talk: voz del duelo (Maestros + réplica Peña)
+const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
+const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
+const _MAESTRO_TONE = { programa: "is-programa", claude: "is-claude", grok: "is-grok", chatgpt: "is-chatgpt", copilot: "is-copilot", gemini: "is-gemini" };
+let _currentTrashTalkIdx = 0;
+let _trashTalkRotateTimer = null;
+
+function coverBandoState(bando) {
+    if (!bando || bando.rows.length === 0) return "primera";
+    if (bando.humanCount === 0 || bando.aiCount === 0) return "primera";
+    const diff = bando.aiAvg - bando.humanAvg;
+    if (diff > 0.05) return "va_perdiendo";
+    if (diff < -0.05) return "va_ganando";
+    return "empate";
+}
+
+function coverTrashTalkMasters() {
+    const tt = state.data?.trash_talk;
+    if (!tt || !tt.masters) return [];
+    return Object.keys(_MAESTRO_LABEL)
+        .map(id => ({ id, label: _MAESTRO_LABEL[id], avatar: _MAESTRO_AVATAR[id], tone: _MAESTRO_TONE[id], phrase: tt.masters[id] || "" }))
+        .filter(item => item.phrase);
+}
+
+function coverTrashTalkReplica() {
+    return state.data?.trash_talk?.pena_replica || "";
+}
+
+function coverTrashTalkHtml() {
+    const masters = coverTrashTalkMasters();
+    const replica = coverTrashTalkReplica();
+    if (!masters.length && !replica) return "";
+    // Si solo hay réplica (sin frases de maestro), no mostramos el carrusel pero sí la réplica
+    if (!masters.length) {
+        return `<article class="cp-voz" aria-label="La voz del duelo">
+            <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Réplica</b></div>
+            <div class="cp-voz-replica is-standalone">
+                <span class="cp-voz-replica-avatar" aria-hidden="true">👥</span>
+                <div><b>La Peña</b><p>${escapeHtml(replica)}</p></div>
+            </div>
+        </article>`;
+    }
+    const idx = _currentTrashTalkIdx % masters.length;
+    const current = masters[idx];
+    const dots = masters.map((m, i) => `<button type="button" class="cp-voz-dot${i === idx ? " is-active" : ""}" data-voz-idx="${i}" aria-label="${escapeHtml(m.label)}"></button>`).join("");
+    const avatars = masters.map(m => `<span class="cp-voz-avatar ${m.tone}" title="${escapeHtml(m.label)}" data-voz-idx="${masters.indexOf(m)}" aria-hidden="true">${m.avatar}</span>`).join("");
+    return `<article class="cp-voz" aria-label="La voz del duelo">
+        <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Maestros</b></div>
+        <div class="cp-voz-stage">
+            <div class="cp-voz-avatars" aria-hidden="true">${avatars}</div>
+            <blockquote class="cp-voz-quote ${current.tone}">
+                <span class="cp-voz-quote-avatar" aria-hidden="true">${current.avatar}</span>
+                <div class="cp-voz-quote-body">
+                    <b>${escapeHtml(current.label)}</b>
+                    <p>${escapeHtml(current.phrase)}</p>
+                </div>
+            </blockquote>
+            ${dots ? `<div class="cp-voz-dots" role="tablist" aria-label="Cambiar de maestro">${dots}</div>` : ""}
+        </div>
+        ${replica ? `<div class="cp-voz-replica">
+            <span class="cp-voz-replica-avatar" aria-hidden="true">👥</span>
+            <div><b>La Peña replica</b><p>${escapeHtml(replica)}</p></div>
+        </div>` : ""}
+    </article>`;
+}
+
+function setTrashTalkIdx(idx) {
+    const masters = coverTrashTalkMasters();
+    if (!masters.length) return;
+    _currentTrashTalkIdx = ((idx % masters.length) + masters.length) % masters.length;
+    const stage = document.querySelector(".cp-voz");
+    if (!stage) { return; }
+    const current = masters[_currentTrashTalkIdx];
+    const quote = stage.querySelector(".cp-voz-quote");
+    if (quote) {
+        quote.className = `cp-voz-quote ${current.tone}`;
+        const avatar = quote.querySelector(".cp-voz-quote-avatar");
+        if (avatar) avatar.textContent = current.avatar;
+        const name = quote.querySelector(".cp-voz-quote-body b");
+        if (name) name.textContent = current.label;
+        const text = quote.querySelector(".cp-voz-quote-body p");
+        if (text) text.textContent = current.phrase;
+    }
+    stage.querySelectorAll(".cp-voz-dot").forEach((dot, i) => dot.classList.toggle("is-active", i === _currentTrashTalkIdx));
+    stage.querySelectorAll(".cp-voz-avatar").forEach((avatar, i) => avatar.classList.toggle("is-active", i === _currentTrashTalkIdx));
+    try { if (typeof trackEvent === "function") trackEvent("trash_talk_swap", { maestro: current.id }); } catch (e) { /* no-op */ }
+}
+
+function startTrashTalkRotation() {
+    if (_trashTalkRotateTimer) clearInterval(_trashTalkRotateTimer);
+    const masters = coverTrashTalkMasters();
+    if (masters.length <= 1) return;
+    _trashTalkRotateTimer = setInterval(() => setTrashTalkIdx(_currentTrashTalkIdx + 1), 6500);
 }
 
 let _prevUserDone = -1;
@@ -453,7 +568,7 @@ function renderNewspaperCoverPageV3() {
 
     const userDone = (state.my_signs || []).filter(sign => sign && sign !== "-").length;
     // P0 1.4 + 1.5: actualizar scorebar y animar progreso
-    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); }, 0);
+    setTimeout(() => { updateCpScorebar(bando, jornada); triggerProgressPop(userDone); startTrashTalkRotation(); }, 0);
     const userProgressHtml = state.user ? `
         <div class="cp-user-progress${userDone === 15 ? " is-done" : ""}" data-page-action="TICKET">
             <span>Tu quiniela</span>
@@ -494,7 +609,7 @@ function renderNewspaperCoverPageV3() {
     return `<div class="cp">
         <div class="cp-main">
             <header class="cp-hero">
-                <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72">
+                <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72" decoding="async" fetchpriority="high">
                 <div class="cp-kicker">
                     <span>${heroKickerJornada} · ${escapeHtml(kickerBandoLabel)}</span>
                     <i class="cp-kicker-dot"></i>
@@ -521,6 +636,7 @@ function renderNewspaperCoverPageV3() {
                 </article>
                 ${featuredHtml}
             </section>
+            ${coverTrashTalkHtml()}
         </div>
 
         <section class="cp-ops" aria-label="Tu jornada">
