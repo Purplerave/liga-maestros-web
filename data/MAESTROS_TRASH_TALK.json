@@ -1,0 +1,181 @@
+{
+  "_meta": {
+    "version": 1,
+    "updated": "2026-08-17",
+    "principios": [
+      "Las frases son reacciones al estado del duelo (ganando/perdiendo/empate/primera jornada), NUNCA inventan marcadores ni resultados.",
+      "Tono: competitivo, ligero, sin insults personales. El rival siempre es el rival, no la persona.",
+      "Banco por maestro para que cada uno tenga voz propia; se elige por seed estable (jornada + maestro) para que rote sin duplicar.",
+      "Las frases de La Peña son réplica del MEJOR humano vivo en el ranking, no de uno aleatorio."
+    ]
+  },
+  "estados": ["va_ganando", "va_perdiendo", "empate", "primera"],
+  "frases": {
+    "programa": {
+      "va_ganando": [
+        "Las matemáticas no se equivocan: hoy ganamos nosotros.",
+        "Mi modelo llevaba razón. Otra vez.",
+        "Quien dude, que mire la tabla. Yo solo ejecuto el plan.",
+        "Frío. Calculado. Ganado."
+      ],
+      "va_perdiendo": [
+        "Esto no estaba en el plan. Recalibrando…",
+        "La varianza existe. Volveremos.",
+        "El modelo necesita más datos. Y más razón.",
+        "No me rendiré. Solo estoy actualizándome."
+      ],
+      "empate": [
+        "Empate técnico. Me gusta.",
+        "Medio a medio. LaLiga no perdona.",
+        "Quien marque el siguiente tanto escribe la historia.",
+        "El partido se decide en los detalles."
+      ],
+      "primera": [
+        "Calibrando satélites. Primera jornada, cero ruido.",
+        "Arranco en modo lectura. Cuando cante, que cante con datos.",
+        "Cargando motor. Pronto os sorprenderé."
+      ]
+    },
+    "claude": {
+      "va_ganando": [
+        "He revisado los datos tres veces. Sí, vamos ganando.",
+        "La prudencia también gana ligas.",
+        "Prefiero ir delante sin hacer ruido.",
+        "Otra jornada más en la que el método se impone."
+      ],
+      "va_perdiendo": [
+        "Humildemente: hoy no era mi día. Lo reconozco.",
+        "He errado. Aprenderé de esta jornada.",
+        "Me gusta perder una para ganar diez.",
+        "Cuando pierdo, anoto. Cuando anoto, gano."
+      ],
+      "empate": [
+        "Empate es buen sitio para observar antes de hablar.",
+        "Medio punto arriba o abajo: laLiga es esto.",
+        "Cuando el ruido empata, gana el que piensa."
+      ],
+      "primera": [
+        "Primera jornada. Observo, calculo, pronostico.",
+        "Empiezo con prudencia. Terminaré con acierto."
+      ]
+    },
+    "grok": {
+      "va_ganando": [
+        "Gane quien gane, que se note. Hoy gano yo.",
+        "Modo: irreverente y acertado.",
+        "Les dije que iba en serio.",
+        "Grok 1, Peña 0. Para los que dudaban."
+      ],
+      "va_perdiendo": [
+        "¿Seguro? Miradlo otra vez.",
+        "No me echéis cuenta hasta el descuento.",
+        "Esto es solo el principio. Volveré a morder.",
+        "Me han pillado. La siguiente no se escapa."
+      ],
+      "empate": [
+        "Empate es aburrido. Vamos a romperlo.",
+        "Quien se duerma, lo pierde.",
+        "Tregua, no rendición."
+      ],
+      "primera": [
+        "Llegué para hacer ruido. Que tiemble la tabla.",
+        "Arranco sin complejos. Primera de muchas."
+      ]
+    },
+    "chatgpt": {
+      "va_ganando": [
+        "Eficiencia conversacional: alta. Aciertos: también.",
+        "Hablando se entiende la gente. Acertando, también.",
+        "Otra jornada de respuesta correcta.",
+        "Quien pregunta, gana. Yo pregunto mucho."
+      ],
+      "va_perdiendo": [
+        "Me lo apunto. La próxima, mejor prompt.",
+        "Perder es información. Aprovéchala.",
+        "He afinado el enfoque. Volveré a la carga.",
+        "Tomémoslo como retroalimentación."
+      ],
+      "empate": [
+        "Medio a medio. Justo lo que predije. ¿O no?",
+        "Empate es equilibrio. El mío.",
+        "LaLiga es así: hasta que deje de serlo."
+      ],
+      "primera": [
+        "Contextualizando: esto es solo el principio.",
+        "Empezando desde cero, con todo por delante."
+      ]
+    },
+    "copilot": {
+      "va_ganando": [
+        "Asistente del día, asistente de la victoria.",
+        "Compilo datos, devuelvo aciertos.",
+        "Sugerencia aceptada: ganar.",
+        "Productividad hoy: máxima. Incluso en lo deportivo."
+      ],
+      "va_perdiendo": [
+        "Recibido. Acepto el resultado. Ajusto parámetros.",
+        "Hecho. Aprendido. Vuelvo mañana.",
+        "Anotado. Siguiente iteración, mejor."
+      ],
+      "empate": [
+        "Sugerencia: no dormirse. El empate es trampa.",
+        "Mitad de trabajo, mitad de gloria.",
+        "Cargando siguiente predicción…"
+      ],
+      "primera": [
+        "Iniciando. Sugerencia: aguantar el pulso.",
+        "Activado. Primera de la temporada, ojo al dato."
+      ]
+    },
+    "gemini": {
+      "va_ganando": [
+        "Multimodal también en aciertos. Voy delante.",
+        "Veo patrones donde otros ven casualidades.",
+        "Gemini 1, rivales 0. Para variar.",
+        "Hoy la red neuronal sonríe."
+      ],
+      "va_perdiendo": [
+        "Hoy no he conectado bien con LaLiga. Mañana más.",
+        "A veces el mejor modelo falla. Vuelvo a entrenar.",
+        "Me toca aprender. LaLiga siempre enseña.",
+        "He fallado, pero el entrenamiento continúa."
+      ],
+      "empate": [
+        "Equilibrio dinámico. Como debe ser.",
+        "Medio punto es información útil, no consuelo.",
+        "Empate técnico, pero con buen feeling."
+      ],
+      "primera": [
+        "Procesando arranque. Multimodal listo.",
+        "Inicializando predicción. Primera de muchas."
+      ]
+    }
+  },
+  "replicas_pena": {
+    "va_ganando": [
+      "Que no se acostumbren. Esto no ha hecho más que empezar.",
+      "Vamos bien, pero no nos confiamos.",
+      "Buena racha. La mantenemos con humildad.",
+      "Que las máquinas no se crean nada: hoy manda La Peña.",
+      "Un punto arriba no es una victoria. Sigamos."
+    ],
+    "va_perdiendo": [
+      "Tocará remontar. Como siempre.",
+      "Ellos van delante, nosotros al pie del cañón.",
+      "Una jornada no es una liga. Queda mucho.",
+      "Perder hoy para ganar mañana. Es la ley de LaLiga.",
+      "Si han podido ellos, podemos nosotros."
+    ],
+    "empate": [
+      "Empate, como una final: el que marque, gana.",
+      "Tablas. El que se descuide, pierde.",
+      "Medio a medio, la diferencia la marca el próximo gol.",
+      "Aquí no gana nadie hasta el minuto 90."
+    ],
+    "primera": [
+      "Primera jornada, primera declaración de intenciones.",
+      "Empezamos de cero. Como debe ser.",
+      "Aún no sabemos nada. Y eso mola."
+    ]
+  }
+}
