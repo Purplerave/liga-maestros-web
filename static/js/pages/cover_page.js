@@ -113,9 +113,60 @@ function coverBandoDetailed() {
 function coverPredictionSigns(e) { if (Array.isArray(e)) return e; return Array.isArray(e?.signos) ? e.signos : []; }
 function coverPenaReading(row) {
     if (!row || !Number(row.total || 0)) return null;
-    const r = [{ s: "1", p: Number(row.p1 || 0) }, { s: "X", p: Number(row.px || 0) }, { s: "2", p: Number(row.p2 || 0) }];
+    const share = coverPenaPercents(row);
+    const r = [{ s: "1", p: share.p1 }, { s: "X", p: share.px }, { s: "2", p: share.p2 }];
     const peak = Math.max(...r.map(x => x.p));
     return { sign: r.filter(x => x.p === peak).map(x => x.s).join(""), percent: peak, total: Number(row.total || 0) };
+}
+
+function coverPenaVoteWeights(row) {
+    const votes = row?.votes;
+    if (votes && typeof votes === "object") {
+        return {
+            v1: Number(votes["1"] || 0),
+            vx: Number(votes.X ?? votes.x ?? 0),
+            v2: Number(votes["2"] || 0),
+        };
+    }
+    // Backend already sends p1/px/p2 as percentages and total as peñistas.
+    const total = Number(row?.total || 0);
+    return {
+        v1: Number(row?.p1 || 0) * total / 100,
+        vx: Number(row?.px || 0) * total / 100,
+        v2: Number(row?.p2 || 0) * total / 100,
+    };
+}
+
+function coverShareFromWeights(v1, vx, v2) {
+    const weight = v1 + vx + v2;
+    if (weight <= 0) return { p1: 0, px: 0, p2: 0 };
+    const p1 = Math.round((v1 / weight) * 100);
+    const px = Math.round((vx / weight) * 100);
+    return { p1, px, p2: Math.max(0, 100 - p1 - px) };
+}
+
+function coverPenaPercents(row) {
+    const { v1, vx, v2 } = coverPenaVoteWeights(row);
+    const share = coverShareFromWeights(v1, vx, v2);
+    if (v1 + vx + v2 > 0) return share;
+    const p1 = Math.max(0, Math.round(Number(row?.p1 || 0)));
+    const px = Math.max(0, Math.round(Number(row?.px || 0)));
+    return { p1, px, p2: Math.max(0, 100 - p1 - px) };
+}
+
+function coverAggregatePenaVote(consenso) {
+    let w1 = 0, wx = 0, w2 = 0, penistas = 0, matches = 0;
+    (Array.isArray(consenso) ? consenso : []).forEach(row => {
+        const total = Number(row?.total || 0);
+        const { v1, vx, v2 } = coverPenaVoteWeights(row);
+        if (v1 + vx + v2 <= 0 && total <= 0) return;
+        matches += 1;
+        if (total > penistas) penistas = total;
+        w1 += v1;
+        wx += vx;
+        w2 += v2;
+    });
+    return { ...coverShareFromWeights(w1, wx, w2), penistas, matches };
 }
 function coverCollectivePenaScore() { return { hits: 0, played: 0, totalMatches: 0 }; }
 function coverDisagreementMatch() { return null; }
@@ -256,18 +307,11 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    let totalVotes = 0, v1 = 0, vx = 0, v2 = 0;
-    consenso.forEach(r => {
-        const t = Number(r.total || 0);
-        totalVotes += t;
-        v1 += Number(r.p1 || 0) * t;
-        vx += Number(r.px || 0) * t;
-        v2 += Number(r.p2 || 0) * t;
-    });
-    const totalPct = totalVotes || 1;
-    const consensusPct1 = Math.round((v1 / totalPct) * 100);
-    const consensusPctX = Math.round((vx / totalPct) * 100);
-    const consensusPct2 = Math.max(0, 100 - consensusPct1 - consensusPctX);
+    const penaVote = coverAggregatePenaVote(consenso);
+    const consensusPct1 = penaVote.p1;
+    const consensusPctX = penaVote.px;
+    const consensusPct2 = penaVote.p2;
+    const penaVoters = penaVote.penistas;
 
     const tickerItems = liveMatches.map(m => {
         const home = _abbr(m.local, 3);
@@ -366,10 +410,7 @@ function renderNewspaperCoverPageV3() {
         const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
         let consHtml = '<span class="cx-row-cons is-empty">—</span>';
         if (rowCons && Number(rowCons.total || 0) > 0) {
-            const t = Number(rowCons.total || 0);
-            const p1 = Math.round((Number(rowCons.p1 || 0) / t) * 100);
-            const px = Math.round((Number(rowCons.px || 0) / t) * 100);
-            const p2 = Math.max(0, 100 - p1 - px);
+            const { p1, px, p2 } = coverPenaPercents(rowCons);
             const peak = Math.max(p1, px, p2);
             const cls1 = p1 === peak ? "is-peak" : "";
             const clsx = px === peak ? "is-peak" : "";
@@ -516,25 +557,28 @@ function renderNewspaperCoverPageV3() {
         </section>
     `;
 
+    const consensusRows = [
+        { sign: "1", pct: consensusPct1 },
+        { sign: "X", pct: consensusPctX },
+        { sign: "2", pct: consensusPct2 },
+    ];
+    const consensusPeak = Math.max(consensusPct1, consensusPctX, consensusPct2);
+    const consensusMeta = penaVoters
+        ? `${penaVoters} PEÑISTA${penaVoters === 1 ? "" : "S"}`
+        : "SIN VOTOS";
     const consensusHtml = `
         <section class="cx-panel cx-consensus cx-accent-purple">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow">VOTO LA PEÑA</span>
-                <span class="cx-pn-meta">${totalVotes} VOTOS</span>
+                <span class="cx-pn-meta">${escapeHtml(consensusMeta)}</span>
             </header>
             <div class="cx-pn-body">
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">1</span>
-                    <span class="cx-cons-pct">${consensusPct1}%</span>
-                </div>
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">X</span>
-                    <span class="cx-cons-pct">${consensusPctX}%</span>
-                </div>
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">2</span>
-                    <span class="cx-cons-pct">${consensusPct2}%</span>
-                </div>
+                ${penaVoters ? consensusRows.map(item => `
+                <div class="cx-cons-row${item.pct === consensusPeak ? " is-peak" : ""}">
+                    <span class="cx-cons-lab">${item.sign}</span>
+                    <span class="cx-cons-bar" aria-hidden="true"><i style="width:${item.pct}%"></i></span>
+                    <span class="cx-cons-pct">${item.pct}%</span>
+                </div>`).join("") : '<div class="cx-empty">Aún no hay consenso de La Peña</div>'}
             </div>
         </section>
     `;
