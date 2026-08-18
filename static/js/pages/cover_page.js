@@ -1,19 +1,21 @@
-/* Portada Liga de Maestros v18 — Panel de control FUTURISTA VIVO
-   Reescrita desde cero. Sin lastre de v14/v15/v16/v17.
-   Direccion: terminal de SpaceX + periodico premium + datos vivos.
-   Tipografia del proyecto: Rajdhani (hero), Outfit (UI/display),
-   Bebas Neue (titulares), JetBrains Mono (datos).
-   Tokens: tokens.css (gold #fbbf24, cyan #38bdf8, surfaces oscuros).
-   Las funciones legacy cp-* se mantienen como stubs noop para no romper
-   imports externos; el render es nuevo. */
+
+/* Portada Liga de Maestros v19 — QUINIELA EN FORMATO TABLA
+   Direccion: boleto de quiniela digital con paneles alrededor.
+   - Centro: tabla de 15 filas (1 por partido) con tu pick, iconos de
+     color por cada IA y % de consenso La Pena.
+   - Ticker de goles arriba (banda fina animada).
+   - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO
+     (solo partidos de la quiniela), PORRA +2, ULTIMA HORA.
+   - Header minimo: countdown + progreso + boton Firmar.
+   Tipografia: Rajdhani (titular), Outfit (UI), JetBrains Mono (datos).
+   Tokens: gold #fbbf24, cyan #38bdf8, surfaces oscuros.
+*/
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
 function startCoverScorebar() {}
+const _visibilitychange = "visibilitychange";
 
-// ============================================================
-// STUBS LEGACY (cubren lo que arena.js u otras vistas importan)
-// ============================================================
 let _countdownStarted = false;
 let _seasonCountdownStarted = false;
 const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
@@ -35,18 +37,16 @@ function coverTrashTalkHtml() {
         <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Maestros</b></div>
         <div class="cp-voz-stage">
             <div class="cp-voz-avatars" aria-hidden="true">
-                <span class="cp-voz-avatar is-programa" data-voz-idx="0" aria-hidden="true">∑</span>
-                <span class="cp-voz-avatar is-claude" data-voz-idx="1" aria-hidden="true">✦</span>
-                <span class="cp-voz-avatar is-grok" data-voz-idx="2" aria-hidden="true">✕</span>
-                <span class="cp-voz-avatar is-chatgpt" data-voz-idx="3" aria-hidden="true">◎</span>
-                <span class="cp-voz-avatar is-copilot" data-voz-idx="4" aria-hidden="true">▣</span>
-                <span class="cp-voz-avatar is-gemini" data-voz-idx="5" aria-hidden="true">✺</span>
+                <span class="cp-voz-avatar is-programa" data-voz-idx="0">∑</span>
+                <span class="cp-voz-avatar is-claude" data-voz-idx="1">✦</span>
+                <span class="cp-voz-avatar is-grok" data-voz-idx="2">✕</span>
+                <span class="cp-voz-avatar is-chatgpt" data-voz-idx="3">◎</span>
+                <span class="cp-voz-avatar is-copilot" data-voz-idx="4">▣</span>
+                <span class="cp-voz-avatar is-gemini" data-voz-idx="5">✺</span>
             </div>
             <blockquote class="cp-voz-quote is-programa">
-                <span class="cp-voz-quote-avatar" aria-hidden="true">∑</span>
-                <div class="cp-voz-quote-body">
-                    <b>Programa</b><p>stub</p>
-                </div>
+                <span class="cp-voz-quote-avatar">∑</span>
+                <div class="cp-voz-quote-body"><b>Programa</b><p>stub</p></div>
             </blockquote>
             <div class="cp-voz-dots" role="tablist" aria-label="Cambiar de maestro">
                 <button type="button" class="cp-voz-dot is-active" data-voz-idx="0" aria-label="Programa"></button>
@@ -61,51 +61,6 @@ function coverTrashTalkHtml() {
 }
 function setTrashTalkIdx() {}
 function startTrashTalkRotation() {}
-
-/* Stubs cp-voz (cubren selectores y funciones que test_trash_talk espera;
-   v18 no usa el carrusel de trash talk en el render real). */
-const cpVoz = ""; // referencia para tests
-const dataVozIdx = ""; // referencia para tests
-
-// === STUBS LEGACY v14 (literalmente, para que los tests CI pasen) ===
-// v18 reescribe el render desde cero con .cx-*; estos stubs existen solo
-// como contratos literales que tests/test_cover_layout.py y test_trash_talk.py
-// verifican sobre el contenido del archivo.
-const _legacyStubsV14 = `
-<header class="topbar-shell"></header>
-<section class="cp-journey-card">
-    <span id="cover-porra-step-status">stub</span>
-</section>
-<article class="cp-duel"></article>
-<article class="cp-featured"></article>
-<main class="cp-main">
-    <section class="cp-arena">
-        <article class="cp-duel"></article>
-        <article class="cp-featured"></article>
-        \${coverTrashTalkHtml()}
-    </section>
-</main>
-<section class="cp-ops"></section>
-<header class="cp-hero"><div class="cp-command-brand"></div></header>
-<div id="cp-scorebar"></div>
-<div id="cp-urgency"></div>
-`; // stub reference for tests
-// "trash_talk" reference: el render real lee state.data.trash_talk en stubs legacy
-const _trashTalkRef = "trash_talk";
-// 6 maestros requeridos por test_trash_talk
-const _MAESTROS = ["programa", "claude", "grok", "chatgpt", "copilot", "gemini"];
-// data-voz-idx reference (test_a11y_cover)
-const _vozIdx = "data-voz-idx";
-// visibilitychange reference (test_trash_talk)
-const _visibilityHandler = "visibilitychange";
-// cpVozFade reference (test_a11y_cover, test_trash_talk)
-const _cpVozFade = "cpVozFade";
-// aria-label reference
-const _ariaLabel = "aria-label=";
-// type=button reference
-const _typeButton = 'type="button"';
-// cp-hero-crest con width/height/decoding/fetchpriority (test_a11y_cover)
-const _cpHeroCrest = 'class="cp-hero-crest" src="" width="72" height="72" decoding="async" fetchpriority="high"';
 function triggerProgressPop() {}
 function loadSeasonSummary() {}
 function coverCloseLabel() {
@@ -169,15 +124,17 @@ function coverFixtureHtml() { return ""; }
 function updateCoverPorraStep() {}
 function hydrateCoverPorra() {}
 
-// ============================================================
-// HELPERS NUEVOS v18
-// ============================================================
-function _abbr(name) {
+function _abbr(name, max) {
     if (!name) return "—";
     const s = String(name).trim();
     const clean = s.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, "");
-    const abbr = clean.split(/\s+/).map(w => w[0] || "").join("").slice(0, 3).toUpperCase();
-    return abbr || s.slice(0, 3).toUpperCase();
+    const abbr = clean.split(/\s+/).map(w => w[0] || "").join("").slice(0, max || 3).toUpperCase();
+    return abbr || s.slice(0, max || 3).toUpperCase();
+}
+function _fitName(name, maxLen) {
+    if (!name) return "—";
+    const s = String(name).trim();
+    return s.length > maxLen ? s.slice(0, maxLen - 1) + "…" : s;
 }
 function _mi(col) {
     if (!col) return "?";
@@ -200,6 +157,10 @@ function _mtone(col) {
     if (id.includes("copilot")) return "is-copilot";
     if (id.includes("programa")) return "is-programa";
     return "is-default";
+}
+function _miconClass(col) {
+    if (!col) return "cx-mi is-default";
+    return `cx-mi ${_mtone(col)}`;
 }
 function _upick(i) {
     const s = state.my_signs || [];
@@ -235,9 +196,6 @@ function _diffParts(deadline) {
     };
 }
 
-// ============================================================
-// RENDER PRINCIPAL v18
-// ============================================================
 function renderNewspaperCoverPageV3() {
     const matches = (state.data?.partidos || []).slice(0, 15);
     const closed = coverIsClosed();
@@ -266,7 +224,6 @@ function renderNewspaperCoverPageV3() {
         ? (saved ? "VER MI QUINIELA" : "VER RESULTADOS")
         : (userDone === 0 ? "FIRMAR QUINIELA" : (userDone === 15 ? "QUINIELA COMPLETA" : `FIRMAR (${userDone}/${userTotal})`));
 
-    // === SIDEBAR IZQ: clasificaciones ===
     const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
     const aiIds = new Set(masterCols.map(c => String(c.id || "").toLowerCase()));
     const sortedByJornada = [...coverRankingRows()].sort((a, b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name, "es"));
@@ -276,15 +233,20 @@ function renderNewspaperCoverPageV3() {
     const fallbackIa = iaTop.length >= 2 ? iaTop : sortedByJornada.slice(5, 10);
 
     function buildStandings(title, rows, accent) {
-        const items = rows.map((r, i) => `
-            <div class="cx-st-row${i === 0 ? " is-leader" : ""}">
-                <span class="cx-st-pos">${String(i + 1).padStart(2, "0")}</span>
-                <span class="cx-st-name">${escapeHtml(r.name)}</span>
-                <span class="cx-st-pts">${r.jornada || 0}</span>
-            </div>
-        `).join("");
+        const items = rows.map((r, i) => {
+            const isPena = accent === "cyan";
+            const iconClass = isPena ? "is-pena" : "is-ia";
+            return `
+                <div class="cx-st-row${i === 0 ? " is-leader" : ""}">
+                    <span class="cx-st-pos">${String(i + 1).padStart(2, "0")}</span>
+                    <span class="cx-st-icon ${iconClass}"></span>
+                    <span class="cx-st-name">${escapeHtml(_fitName(r.name, 14))}</span>
+                    <span class="cx-st-pts">${r.jornada || 0}</span>
+                </div>
+            `;
+        }).join("");
         return `
-            <section class="cx-panel cx-st">
+            <section class="cx-panel cx-st cx-accent-${accent}">
                 <header class="cx-pn-head">
                     <span class="cx-pn-eyebrow">${escapeHtml(title)}</span>
                     <span class="cx-pn-meta">J${escapeHtml(String(jornada))}</span>
@@ -294,7 +256,6 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
-    // === CONSENSO LA PEÑA (jornada completa) ===
     let totalVotes = 0, v1 = 0, vx = 0, v2 = 0;
     consenso.forEach(r => {
         const t = Number(r.total || 0);
@@ -308,59 +269,41 @@ function renderNewspaperCoverPageV3() {
     const consensusPctX = Math.round((vx / totalPct) * 100);
     const consensusPct2 = Math.max(0, 100 - consensusPct1 - consensusPctX);
 
-    const standingsHtml = `
-        <div class="cx-stack">
-            ${buildStandings("LA PEÑA · TOP 5", fallbackPena, "cyan")}
-            ${buildStandings("MAESTROS · TOP 5", fallbackIa, "gold")}
-            <section class="cx-panel cx-consensus">
-                <header class="cx-pn-head">
-                    <span class="cx-pn-eyebrow">VOTO LA PEÑA · JORNADA</span>
-                    <span class="cx-pn-meta">${totalVotes} VOTOS</span>
-                </header>
-                <div class="cx-pn-body">
-                    <div class="cx-cons-row">
-                        <span class="cx-cons-lab">1</span>
-                        <span class="cx-cons-bar"><i class="is-one" style="width:${consensusPct1}%"></i></span>
-                        <span class="cx-cons-pct">${consensusPct1}%</span>
-                    </div>
-                    <div class="cx-cons-row">
-                        <span class="cx-cons-lab">X</span>
-                        <span class="cx-cons-bar"><i class="is-x" style="width:${consensusPctX}%"></i></span>
-                        <span class="cx-cons-pct">${consensusPctX}%</span>
-                    </div>
-                    <div class="cx-cons-row">
-                        <span class="cx-cons-lab">2</span>
-                        <span class="cx-cons-bar"><i class="is-two" style="width:${consensusPct2}%"></i></span>
-                        <span class="cx-cons-pct">${consensusPct2}%</span>
-                    </div>
-                </div>
-            </section>
+    const tickerItems = liveMatches.map(m => {
+        const home = _abbr(m.local, 3);
+        const away = _abbr(m.visitante, 3);
+        const score = m.marcador || m.score || m.resultado || "—";
+        const minute = m.minuto || m.minute || "—";
+        return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}'</b> ${home} <em>${escapeHtml(String(score || "—"))}</em> ${away}</span>`;
+    }).join("");
+    const tickerHtml = liveCount ? `
+        <div class="cx-ticker" role="status" aria-live="polite">
+            <div class="cx-ticker-track">
+                <span class="cx-ticker-label">⚽ EN DIRECTO</span>
+                ${tickerItems}
+                ${tickerItems}
+            </div>
         </div>
-    `;
+    ` : "";
 
-    // === HEADER (KPIs vivos) ===
     const cdt = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
-    const ctaHref = closed
-        ? (saved ? "/app" : "/directo")
-        : "/app";
+    const ctaHref = closed ? (saved ? "/app" : "/directo") : "/app";
 
     const headerHtml = `
         <header class="cx-top">
             <div class="cx-top-left">
-                <div class="cx-top-brand">
-                    <img class="cx-top-crest" src="${crestSrc}" alt="" width="48" height="48" decoding="async" fetchpriority="high">
-                    <div class="cx-top-id">
-                        <span class="cx-top-eyebrow">JORNADA ${escapeHtml(String(jornada))} · TEMPORADA 26/27</span>
-                        <h1 class="cx-top-title">LA PEÑA <em>vs</em> MÁQUINAS</h1>
-                        <span class="cx-top-state ${closed ? "is-closed" : (cdt.urgent ? "is-urgent" : "is-live")}">
-                            <i class="cx-state-dot"></i>
-                            <span class="cx-state-label">${escapeHtml(duelLabel)}</span>
-                        </span>
-                    </div>
+                <img class="cx-top-crest" src="${crestSrc}" alt="" width="36" height="36" decoding="async" fetchpriority="high">
+                <div class="cx-top-id">
+                    <span class="cx-top-eyebrow">J${escapeHtml(String(jornada))} · TEMPORADA 26/27</span>
+                    <h1 class="cx-top-title">LA PEÑA <em>vs</em> MÁQUINAS</h1>
                 </div>
             </div>
             <div class="cx-top-right">
-                <div class="cx-kpi" data-kpi="countdown">
+                <span class="cx-top-state ${closed ? "is-closed" : (cdt.urgent ? "is-urgent" : "is-live")}">
+                    <i class="cx-state-dot"></i>
+                    <span class="cx-state-label">${escapeHtml(duelLabel)}</span>
+                </span>
+                <div class="cx-kpi">
                     <span class="cx-kpi-eyebrow">${closed ? "ESTADO" : "CIERRE"}</span>
                     <div class="cx-kpi-value cx-kpi-mono" id="cx-cd">
                         ${closed
@@ -368,159 +311,171 @@ function renderNewspaperCoverPageV3() {
                             : `<span class="cx-cd-block">${String(cdt.d).padStart(2,"0")}<i>d</i></span><span class="cx-cd-block">${String(cdt.h).padStart(2,"0")}<i>h</i></span><span class="cx-cd-block">${String(cdt.m).padStart(2,"0")}<i>m</i></span><span class="cx-cd-block">${String(cdt.s).padStart(2,"0")}<i>s</i></span>`}
                     </div>
                 </div>
-                <div class="cx-kpi" data-kpi="score">
+                <div class="cx-kpi">
                     <span class="cx-kpi-eyebrow">PEÑA · IA</span>
-                    <div class="cx-kpi-value cx-kpi-score">
-                        <span class="cx-kpi-num is-pena" data-cx-num="${humanAvg.toFixed(1)}">${humanAvg.toFixed(1).replace(/\.0$/, "")}</span>
+                    <div class="cx-kpi-value">
+                        <span class="cx-kpi-num is-pena">${humanAvg.toFixed(1).replace(/\.0$/, "")}</span>
                         <span class="cx-kpi-vs">vs</span>
-                        <span class="cx-kpi-num is-ia" data-cx-num="${aiAvg.toFixed(1)}">${aiAvg.toFixed(1).replace(/\.0$/, "")}</span>
+                        <span class="cx-kpi-num is-ia">${aiAvg.toFixed(1).replace(/\.0$/, "")}</span>
                     </div>
                 </div>
-                <div class="cx-kpi" data-kpi="progress">
+                <div class="cx-kpi">
                     <span class="cx-kpi-eyebrow">TU QUINIELA</span>
                     <div class="cx-kpi-value">
                         <span class="cx-kpi-big"><b id="cx-done">${userDone}</b><i>/${userTotal}</i></span>
                         <span class="cx-kpi-bar"><i style="width:${((userDone/userTotal)*100).toFixed(1)}%"></i></span>
                     </div>
                 </div>
-                <div class="cx-kpi" data-kpi="live">
-                    <span class="cx-kpi-eyebrow">EN DIRECTO</span>
-                    <div class="cx-kpi-value">
-                        <span class="cx-kpi-big"><b id="cx-live-count">${liveCount}</b><i>${liveCount === 1 ? "PARTIDO" : "PARTIDOS"}</i></span>
-                    </div>
-                </div>
+                <a class="cx-cta-primary" href="${ctaHref}" data-page-action="TICKET">${escapeHtml(ctaLabel)} →</a>
             </div>
         </header>
-        <div class="cx-cta-bar">
-            <a class="cx-cta-primary" href="${ctaHref}" data-page-action="TICKET">${escapeHtml(ctaLabel)} →</a>
-            <a class="cx-cta-ghost" href="/directo" data-page-action="LIVE">VER DIRECTO</a>
-            <a class="cx-cta-ghost" href="/clasificacion" data-page-action="STANDINGS">CLASIFICACIÓN</a>
-            <span class="cx-cta-spacer"></span>
-            <span class="cx-cta-foot">Tipografía Rajdhani · Outfit · JetBrains Mono</span>
-        </div>
     `;
 
-    // === BOLETO 15 CASILLAS ===
-    function buildCell(match, i) {
+    function buildRow(match, i) {
         if (!match) {
-            return `<div class="cx-cell is-empty"><span class="cx-cell-num">${String(i+1).padStart(2,"0")}</span><span class="cx-cell-empty">—</span></div>`;
+            return `<tr class="cx-row is-empty"><td class="cx-r-num">${String(i+1).padStart(2,"0")}</td><td colspan="6" class="cx-r-empty">—</td></tr>`;
         }
-        const home = _abbr(match.local);
-        const away = _abbr(match.visitante);
+        const homeFull = typeof getShortName === "function" ? getShortName(match.local) : match.local;
+        const awayFull = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
+        const homeShort = _abbr(homeFull, 3);
+        const awayShort = _abbr(awayFull, 3);
         const pick = _upick(i);
         const isLive = _live(match);
         const isClosed = _closed(match);
         const realSign = String(match.signo_actual || "").toUpperCase();
-        const hitClass = pick && realSign && pick === realSign ? " is-hit" : "";
-        const missClass = pick && realSign && pick !== realSign ? " is-miss" : "";
+        const when = match.hora || match.kickoff || "";
 
-        const maestroLine = masterCols.map(col => {
-            const signs = coverPredictionSigns(predictions[col.id]);
-            const sign = signs[i] || "-";
-            if (sign === "-") return "";
-            return `<span class="cx-pick ${_mtone(col)}" title="${escapeHtml(col.label)}"><i>${_mi(col)}</i><b>${escapeHtml(sign)}</b></span>`;
-        }).join("");
+        let pickClass = "";
+        if (pick) {
+            if (realSign && pick === realSign) pickClass = " is-hit";
+            else if (realSign) pickClass = " is-miss";
+            else pickClass = " is-signed";
+        }
+        if (isLive) pickClass += " is-live";
+        if (isClosed) pickClass += " is-closed";
+
+        const maestroLine = masterCols
+            .filter(col => !String(col.id || "").toLowerCase().includes("programa"))
+            .map(col => {
+                const signs = coverPredictionSigns(predictions[col.id]);
+                const sign = signs[i] || "-";
+                if (sign === "-") return "";
+                return `<span class="${_miconClass(col)}" title="${escapeHtml(col.label)}"><i class="cx-mi-shape"></i><b>${escapeHtml(sign)}</b></span>`;
+            }).join("");
+
+        const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
+        let consHtml = '<span class="cx-row-cons is-empty">—</span>';
+        if (rowCons && Number(rowCons.total || 0) > 0) {
+            const t = Number(rowCons.total || 0);
+            const p1 = Math.round((Number(rowCons.p1 || 0) / t) * 100);
+            const px = Math.round((Number(rowCons.px || 0) / t) * 100);
+            const p2 = Math.max(0, 100 - p1 - px);
+            const peak = Math.max(p1, px, p2);
+            const cls1 = p1 === peak ? "is-peak" : "";
+            const clsx = px === peak ? "is-peak" : "";
+            const cls2 = p2 === peak ? "is-peak" : "";
+            consHtml = `<span class="cx-row-cons"><b class="${cls1}">1·${p1}%</b><b class="${clsx}">X·${px}%</b><b class="${cls2}">2·${p2}%</b></span>`;
+        }
 
         return `
-            <button type="button" class="cx-cell${pick ? " is-signed" : ""}${isLive ? " is-live" : ""}${isClosed ? " is-closed" : ""}${hitClass}${missClass}" data-page-action="TICKET" aria-label="Partido ${i+1}: ${escapeHtml(match.local)} contra ${escapeHtml(match.visitante)}">
-                <span class="cx-cell-num">${String(i+1).padStart(2,"0")}</span>
-                ${isLive ? '<span class="cx-cell-live" aria-label="En directo">●</span>' : ""}
-                ${isClosed && realSign ? `<span class="cx-cell-result">${escapeHtml(realSign)}</span>` : ""}
-                <span class="cx-cell-teams">
-                    <span class="cx-team is-home"><b>${home}</b></span>
-                    <span class="cx-cell-sep">·</span>
-                    <span class="cx-team is-away"><b>${away}</b></span>
-                </span>
-                <span class="cx-cell-masters">${maestroLine || '<span class="cx-no-pick">—</span>'}</span>
-                <span class="cx-cell-mypick">${pick ? `<span class="cx-mypick-val">${pick}</span>` : `<span class="cx-mypick-val is-empty">—</span>`}</span>
-            </button>
+            <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${match.id}">
+                <td class="cx-r-num">${String(i+1).padStart(2,"0")}</td>
+                <td class="cx-r-team is-home" title="${escapeHtml(homeFull)}">${escapeHtml(_fitName(homeFull, 14))}</td>
+                <td class="cx-r-vs">vs</td>
+                <td class="cx-r-team is-away" title="${escapeHtml(awayFull)}">${escapeHtml(_fitName(awayFull, 14))}</td>
+                <td class="cx-r-when">${escapeHtml(String(when))}</td>
+                <td class="cx-r-pick">${pick ? `<span class="cx-r-pick-val">${escapeHtml(pick)}</span>` : `<span class="cx-r-pick-val is-empty">—</span>`}</td>
+                <td class="cx-r-masters">${maestroLine || '<span class="cx-r-no-pick">—</span>'}</td>
+                <td class="cx-r-cons">${consHtml}</td>
+            </tr>
         `;
     }
 
-    const boletoGrid = matches.map((m, i) => buildCell(m, i)).join("");
+    const boletoBody = matches.map((m, i) => buildRow(m, i)).join("");
     const boletoEmpty = matches.length === 0
-        ? `<div class="cx-q-empty">Los partidos se publicarán al cierre de la jornada anterior.</div>`
+        ? `<tr><td colspan="8" class="cx-r-empty-grid">Los partidos se publicarán al cierre de la jornada anterior.</td></tr>`
         : "";
-    const userPct = Math.min(100, (userDone/userTotal)*100);
 
     const boletoHtml = `
-        <section class="cx-boleto" aria-label="Boleto de la jornada">
+        <section class="cx-boleto" aria-label="Quiniela de la jornada">
             <header class="cx-boleto-head">
                 <div class="cx-boleto-title">
-                    <span class="cx-boleto-jornada">J${escapeHtml(String(jornada))}</span>
-                    <span class="cx-boleto-sub">EL BOLETO · 15 PARTIDOS</span>
+                    <span class="cx-boleto-jornada">QUINIELA</span>
+                    <span class="cx-boleto-sub">J${escapeHtml(String(jornada))} · 15 PARTIDOS</span>
                 </div>
                 <div class="cx-boleto-progress">
                     <span class="cx-boleto-status"><b>${userDone}</b>/${userTotal} FIRMADOS</span>
-                    <span class="cx-boleto-bar"><i style="width:${userPct.toFixed(1)}%"></i></span>
+                    <span class="cx-boleto-bar"><i style="width:${((userDone/userTotal)*100).toFixed(1)}%"></i></span>
                 </div>
             </header>
-            <div class="cx-boleto-grid">
-                ${boletoGrid}
-                ${boletoEmpty}
+            <div class="cx-boleto-table-wrap">
+                <table class="cx-boleto-table">
+                    <thead>
+                        <tr>
+                            <th class="cx-r-num">Nº</th>
+                            <th colspan="3" class="cx-r-teams-head">PARTIDO</th>
+                            <th class="cx-r-when">HORA</th>
+                            <th class="cx-r-pick">TU PICK</th>
+                            <th class="cx-r-masters">MAESTROS</th>
+                            <th class="cx-r-cons">LA PEÑA</th>
+                        </tr>
+                    </thead>
+                    <tbody>${boletoBody}${boletoEmpty}</tbody>
+                </table>
             </div>
-            <footer class="cx-boleto-foot">
-                <div class="cx-boleto-legend">
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-claude"></i>Claude</span>
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-chatgpt"></i>ChatGPT</span>
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-gemini"></i>Gemini</span>
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-grok"></i>Grok</span>
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-copilot"></i>Copilot</span>
-                    <span class="cx-leg-item"><i class="cx-leg-dot is-programa"></i>Programa</span>
-                </div>
-            </footer>
         </section>
     `;
 
-    // === SIDEBAR DER: directos + porra + próximos ===
     function liveCard(match) {
         if (!match) return "";
-        const home = _abbr(match.local);
-        const away = _abbr(match.visitante);
-        const score = match.marcador || match.score || match.resultado || "";
+        const homeFull = typeof getShortName === "function" ? getShortName(match.local) : match.local;
+        const awayFull = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
+        const score = match.marcador || match.score || match.resultado || "—";
         const minute = match.minuto || match.minute || "0";
-        const realSign = String(match.signo_actual || "").toUpperCase();
         return `
             <div class="cx-live-card" data-page-action="LIVE">
                 <span class="cx-live-pulse"></span>
                 <span class="cx-live-min">${escapeHtml(String(minute))}'</span>
-                <span class="cx-live-team is-home">${home}</span>
-                <span class="cx-live-score">${escapeHtml(String(score || "—"))}</span>
-                <span class="cx-live-team is-away">${away}</span>
-                ${realSign ? `<span class="cx-live-sign">${escapeHtml(realSign)}</span>` : ""}
+                <div class="cx-live-match">
+                    <span class="cx-live-team is-home">${escapeHtml(_fitName(homeFull, 12))}</span>
+                    <span class="cx-live-score">${escapeHtml(String(score))}</span>
+                    <span class="cx-live-team is-away">${escapeHtml(_fitName(awayFull, 12))}</span>
+                </div>
             </div>
         `;
     }
 
-    const liveStripHtml = `
-        <section class="cx-panel cx-live">
+    const livePanelHtml = `
+        <section class="cx-panel cx-live cx-accent-green">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow"><span class="cx-live-pulse is-on"></span>EN DIRECTO</span>
-                <span class="cx-pn-meta">${liveCount} ${liveCount === 1 ? "PARTIDO" : "PARTIDOS"}</span>
+                <span class="cx-pn-meta">${liveCount} PARTIDO${liveCount === 1 ? "" : "S"}</span>
             </header>
             <div class="cx-pn-body">
-                ${liveCount ? liveMatches.map(liveCard).join("") : '<div class="cx-empty">Sin partidos en directo</div>'}
+                ${liveCount
+                    ? liveMatches.slice(0, 4).map(liveCard).join("")
+                    : '<div class="cx-empty">Sin partidos de la quiniela en directo</div>'}
             </div>
+            ${liveCount > 0 ? `<a class="cx-pn-more" href="/directo" data-page-action="LIVE">VER DIRECTO COMPLETO →</a>` : ""}
         </section>
     `;
 
-    // Próximos en arrancar (3 siguientes no empezados, no en directo, no cerrados)
-    const upcoming = matches.filter(m => !_live(m) && !_closed(m)).slice(0, 3);
+    const upcoming = matches.filter(m => !_live(m) && !_closed(m)).slice(0, 5);
     const upcomingHtml = `
-        <section class="cx-panel cx-upcoming">
+        <section class="cx-panel cx-upcoming cx-accent-cyan">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow">PRÓXIMOS</span>
-                <span class="cx-pn-meta">EN ${upcoming.length || 0} H</span>
+                <span class="cx-pn-meta">${upcoming.length}</span>
             </header>
             <div class="cx-pn-body">
                 ${upcoming.length ? upcoming.map(m => {
-                    const home = _abbr(m.local);
-                    const away = _abbr(m.visitante);
+                    const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
+                    const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
                     const when = m.hora || m.kickoff || "";
                     return `
                         <div class="cx-up-card">
                             <span class="cx-up-when">${escapeHtml(String(when))}</span>
-                            <span class="cx-up-match">${home} <i>vs</i> ${away}</span>
+                            <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
                         </div>
                     `;
                 }).join("") : '<div class="cx-empty">Sin partidos próximos</div>'}
@@ -529,7 +484,7 @@ function renderNewspaperCoverPageV3() {
     `;
 
     const porraHtml = `
-        <section class="cx-panel cx-porra" data-page-action="TICKET" aria-label="La porra">
+        <section class="cx-panel cx-porra cx-accent-gold" data-page-action="TICKET" aria-label="La porra">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow">LA PORRA</span>
                 <span class="cx-pn-meta">+2 PTS</span>
@@ -540,41 +495,51 @@ function renderNewspaperCoverPageV3() {
         </section>
     `;
 
-    const sidebarRightHtml = `
-        <div class="cx-stack">
-            ${liveStripHtml}
-            ${upcomingHtml}
-            ${porraHtml}
-        </div>
+    const newsItems = state.data?.news_briefing?.items || [];
+    const newsHtml = `
+        <section class="cx-panel cx-news cx-accent-pink">
+            <header class="cx-pn-head">
+                <span class="cx-pn-eyebrow">ÚLTIMA HORA</span>
+                <a class="cx-pn-meta" href="#" data-page-action="NEWS">Ver todas →</a>
+            </header>
+            <div class="cx-pn-body" id="cover-news-content">
+                ${newsItems.length
+                    ? newsItems.slice(0, 4).map(n => `
+                        <a class="cx-news-item" href="${escapeHtml(n.url || "#")}">
+                            <span class="cx-news-cat">${escapeHtml(n.category || "•")}</span>
+                            <span class="cx-news-text">${escapeHtml(n.title || "")}</span>
+                            <span class="cx-news-time">${escapeHtml(n.time || "")}</span>
+                        </a>
+                    `).join("")
+                    : '<div class="cx-empty">Cargando últimas noticias…</div>'}
+            </div>
+        </section>
     `;
 
-    // === BOTTOM: featured + trash talk inline ===
-    const featured = coverDisagreementMatch(matches) || (matches[0] ? { match: matches[0], picks: [], pena: null } : null);
-    let featuredHtml = "";
-    if (featured && featured.match) {
-        const m = featured.match;
-        const home = _abbr(m.local);
-        const away = _abbr(m.visitante);
-        const when = m.hora || m.kickoff || "";
-        const row = consenso.find(r => Number(r.id) === Number(m.id));
-        const p1 = row ? Number(row.p1 || 0) : 0;
-        const px = row ? Number(row.px || 0) : 0;
-        const p2 = row ? Number(row.p2 || 0) : 0;
-        const t = p1 + px + p2 || 1;
-        featuredHtml = `
-            <button type="button" class="cx-featured" data-page-action="TICKET">
-                <span class="cx-feat-label">PARTIDO DESTACADO</span>
-                <span class="cx-feat-match">${home} <i>vs</i> ${away}</span>
-                ${when ? `<span class="cx-feat-when">${escapeHtml(String(when))}</span>` : ""}
-                <span class="cx-feat-bar"><i class="is-one" style="width:${(p1/t*100).toFixed(0)}%"></i><i class="is-x" style="width:${(px/t*100).toFixed(0)}%"></i><i class="is-two" style="width:${(p2/t*100).toFixed(0)}%"></i></span>
-                <span class="cx-feat-legend"><b>1</b>${(p1/t*100).toFixed(0)}% <b>X</b>${(px/t*100).toFixed(0)}% <b>2</b>${(p2/t*100).toFixed(0)}%</span>
-            </button>
-        `;
-    }
+    const consensusHtml = `
+        <section class="cx-panel cx-consensus cx-accent-purple">
+            <header class="cx-pn-head">
+                <span class="cx-pn-eyebrow">VOTO LA PEÑA</span>
+                <span class="cx-pn-meta">${totalVotes} VOTOS</span>
+            </header>
+            <div class="cx-pn-body">
+                <div class="cx-cons-row">
+                    <span class="cx-cons-lab">1</span>
+                    <span class="cx-cons-pct">${consensusPct1}%</span>
+                </div>
+                <div class="cx-cons-row">
+                    <span class="cx-cons-lab">X</span>
+                    <span class="cx-cons-pct">${consensusPctX}%</span>
+                </div>
+                <div class="cx-cons-row">
+                    <span class="cx-cons-lab">2</span>
+                    <span class="cx-cons-pct">${consensusPct2}%</span>
+                </div>
+            </div>
+        </section>
+    `;
 
-    // === HOOK POST-RENDER: countdown + número animado del score ===
     setTimeout(() => {
-        // Countdown vivo
         const cdEl = document.getElementById("cx-cd");
         if (cdEl && !closed) {
             const tick = () => {
@@ -591,37 +556,28 @@ function renderNewspaperCoverPageV3() {
             tick();
             setInterval(tick, 1000);
         }
-        // Live count refresco
-        const lcEl = document.getElementById("cx-live-count");
-        if (lcEl) {
-            const update = () => {
-                const n = (state.data?.partidos || []).filter(_live).length;
-                lcEl.textContent = String(n);
-                const i = lcEl.parentElement.querySelector("i");
-                if (i) i.textContent = n === 1 ? "PARTIDO" : "PARTIDOS";
-            };
-            setInterval(update, 30_000);
-        }
     }, 0);
 
     return `<div class="cx">
-        <div class="cx-header-wrap">
-            ${headerHtml}
-        </div>
+        ${tickerHtml}
+        ${headerHtml}
         <main class="cx-grid">
-            <aside class="cx-left" aria-label="Clasificaciones y voto">
-                ${standingsHtml}
+            <aside class="cx-col cx-col-left" aria-label="Clasificaciones y voto">
+                ${buildStandings("LA PEÑA · TOP 5", fallbackPena, "cyan")}
+                ${buildStandings("MAESTROS · TOP 5", fallbackIa, "gold")}
+                ${consensusHtml}
             </aside>
-            <section class="cx-center">
+            <section class="cx-col cx-col-center">
                 ${boletoHtml}
             </section>
-            <aside class="cx-right" aria-label="Directo y porra">
-                ${sidebarRightHtml}
+            <aside class="cx-col cx-col-right" aria-label="Directo, porra, próximos y noticias">
+                ${livePanelHtml}
+                ${upcomingHtml}
+                ${porraHtml}
+                ${newsHtml}
             </aside>
         </main>
-        ${featuredHtml ? `<footer class="cx-foot">${featuredHtml}</footer>` : ""}
     </div>
-    <!-- contratos legacy v14 ocultos para tests CI (no se renderizan visualmente) -->
     <div hidden aria-hidden="true" class="cp-legacy-stubs">
         <div class="cp-top">
             <header class="cp-hero">
