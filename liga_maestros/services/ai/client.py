@@ -20,8 +20,11 @@ logger = logging.getLogger(__name__)
 AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "10"))
 
 # Base del token plan de Xiaomi MiMo (sin /chat/completions). Mirrors:
-#   token-plan-sgp (Singapur) y token-plan-cn (China). Override con MIMO_BASE_URL.
-_MIMO_BASE_URL = os.getenv("MIMO_BASE_URL", "https://token-plan-sgp.xiaomimimo.com/v1").rstrip("/")
+#   token-plan-ams (Ámsterdam) | token-plan-sgp (Singapur) | token-plan-cn (China).
+#   Override con MIMO_API_BASE o MIMO_BASE_URL (alias).
+_MIMO_BASE_URL = os.getenv(
+    "MIMO_API_BASE", os.getenv("MIMO_BASE_URL", "https://token-plan-ams.xiaomimimo.com/v1")
+).rstrip("/")
 
 PROVIDERS = (
     {

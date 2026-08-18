@@ -35,21 +35,44 @@ def current_season_sql(column="jornada"):
 def resolve_active_jornada(conn):
     """Return the jornada currently editable and displayed as active.
 
-    La temporada publicada empieza en J1. Mientras se conserva en la BD
-    información de jornadas antiguas/de prueba (J75/J76), no debe ganar ese
-    histórico por el simple hecho de ser el número mayor.
+    Temporada 2026/27: J1..42. Devuelve la **primera jornada abierta** (con
+    al menos un partido en NS). Así J1 sigue activa mientras se pueda firmar,
+    y la web promociona a J2, J3... automáticamente cuando J1 ya está
+    terminada (sin NS). Ignora 75/76.
     """
     try:
-        has_j1 = conn.execute("SELECT 1 FROM resultados WHERE jornada = 1 LIMIT 1").fetchone()
-        if has_j1:
-            return 1
+        rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
+        jornadas = sorted({int(row[0]) for row in rows if row[0] is not None and is_current_season_jornada(row[0])})
+        if jornadas:
+            for j in jornadas:
+                try:
+                    ns = conn.execute(
+                        "SELECT 1 FROM resultados WHERE jornada = ? AND UPPER(COALESCE(status,'')) IN ('NS','SCHEDULED','') LIMIT 1",
+                        (j,),
+                    ).fetchone()
+                    if ns:
+                        return j
+                except Exception:
+                    return j
+            # Todas cerradas (sin NS): devolver la última
+            return max(jornadas)
     except Exception:
         pass
 
-    rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
-    jornadas = [int(row[0]) for row in rows if row[0] is not None]
-    if not jornadas:
-        return 1
+    try:
+        rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
+        jornadas = sorted({int(row[0]) for row in rows if row[0] is not None and is_current_season_jornada(row[0])})
+        if jornadas:
+            return jornadas[0]
+    except Exception:
+        pass
 
-    published = [jornada for jornada in jornadas if jornada not in (75, 76)]
-    return max(published or jornadas)
+    try:
+        rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
+        jornadas = [int(row[0]) for row in rows if row[0] is not None]
+        if not jornadas:
+            return 1
+        published = [j for j in jornadas if j not in (75, 76)]
+        return min(published or jornadas)
+    except Exception:
+        return 1

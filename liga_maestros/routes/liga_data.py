@@ -112,38 +112,69 @@ def _resolve_max_jornada(conn):
 
 
 def _resolve_available_jornadas(conn):
-    # Lista oficial para la nueva temporada: únicamente Jornada 1 cuando está disponible.
-    # En producción tras la migración, solo [1] será visible. En tests con BDs temporales
-    # mantenemos las jornadas reales insertadas para no romper las pruebas.
+    # Jornadas visibles de la temporada 2026/27 (1..42), ordenadas de más
+    # reciente a más antigua. Así la web promociona a J2 cuando ya está
+    # cargada, sin dejar J1 fija para siempre.
+    from ..services.jornada import is_current_season_jornada
+
+    def _row_jornada(row):
+        try:
+            return row["jornada"]
+        except Exception:
+            try:
+                return row[0]
+            except Exception:
+                return None
+
     try:
-        has_j1 = conn.execute("SELECT 1 FROM resultados WHERE jornada = 1 LIMIT 1").fetchone()
-        if has_j1:
-            return [1]
+        rows = conn.execute("""
+            SELECT jornada, COUNT(*) AS partidos
+            FROM resultados
+            GROUP BY jornada
+            HAVING partidos > 0
+            ORDER BY jornada DESC
+        """).fetchall()
+        jornadas = [
+            int(_row_jornada(row))
+            for row in rows
+            if _row_jornada(row) is not None and is_current_season_jornada(_row_jornada(row))
+        ]
+        if jornadas:
+            return sorted(set(jornadas), reverse=True)
     except Exception:
         pass
-    rows = conn.execute("""
-        SELECT jornada, COUNT(*) AS partidos
-        FROM resultados
-        GROUP BY jornada
-        HAVING partidos > 0
-        ORDER BY jornada DESC
-    """).fetchall()
-    jornadas = [int(row["jornada"]) for row in rows if row["jornada"] is not None]
-    if not jornadas:
-        import os as _os
 
-        import config as _cfg
+    # Fallback: sin jornadas de la temporada actual
+    try:
+        rows = conn.execute("""
+            SELECT jornada, COUNT(*) AS partidos
+            FROM resultados
+            GROUP BY jornada
+            HAVING partidos > 0
+            ORDER BY jornada DESC
+        """).fetchall()
+        jornadas = [int(_row_jornada(row)) for row in rows if _row_jornada(row) is not None]
+        filtered = [j for j in jornadas if j not in (75, 76)]
+        if filtered:
+            cur = [j for j in filtered if is_current_season_jornada(j)]
+            return sorted(set(cur or filtered), reverse=True)
+    except Exception:
+        pass
 
+    # Último recurso: si hay scrape de alguna jornada 1..42 en disco, ofrecerla
+    import os as _os
+
+    import config as _cfg
+
+    found = []
+    for j in range(1, 43):
         for base in (_cfg.SEED_DATA_DIR, _cfg.DATA_DIR, _os.path.join(_cfg.BASE_DIR, "data")):
-            if base and _os.path.exists(_os.path.join(base, "quiniela15_J1_scrape.json")):
-                return [1]
-        return [1]
-    if 1 in jornadas:
-        return [1]
-    # Sin J1 en la BD: mostrar las jornadas existentes pero ocultar 75/76 que fueron pruebas de verano
-    filtered = [j for j in jornadas if j not in (75, 76)]
-    # Si tras filtrar queda vacío (solo había 75/76), mostrar 1
-    return filtered if filtered else [1]
+            if base and _os.path.exists(_os.path.join(base, f"quiniela15_J{j}_scrape.json")):
+                found.append(j)
+                break
+    if found:
+        return sorted(set(found), reverse=True)
+    return [1]
 
 
 def _is_ticket_locked(partidos, close_info):

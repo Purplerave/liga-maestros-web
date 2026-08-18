@@ -51,7 +51,8 @@
 | `AI_DAILY_CALL_LIMIT` | Tope diario duro de llamadas IA (compartido) | 12 |
 | `AI_NEWS_MIN_INTERVAL_SECONDS` | Cadencia mínima del boletín | 7200 (2 h) |
 | `MIMO_API_KEY` | Clave del token plan de Xiaomi MiMo (comentarista) | — |
-| `MIMO_BASE_URL` | Base OpenAI-compatible de MiMo, sin `/chat/completions` | `https://token-plan-sgp.xiaomimimo.com/v1` |
+| `MIMO_API_BASE` | Base OpenAI-compatible de MiMo, sin `/chat/completions` (alias de `MIMO_BASE_URL`) | `https://token-plan-ams.xiaomimimo.com/v1` |
+| `MIMO_BASE_URL` | Alias de `MIMO_API_BASE` | `https://token-plan-ams.xiaomimimo.com/v1` |
 | `MIMO_MODEL` | Modelo de MiMo (pro = 2 créditos/token) | `mimo-v2.5-pro` |
 | `MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS` | Cadencia mínima del comentarista aunque cambie el marcador | 600 (10 min) |
 

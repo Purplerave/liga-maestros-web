@@ -110,3 +110,12 @@ GROQ_API_KEY=
 GEMINI_API_KEY=
 AI_DAILY_CALL_LIMIT=12
 AI_NEWS_MIN_INTERVAL_SECONDS=7200
+
+# --- Comentarista MiMo (opcional, frases del directo en el ticker) ---
+# Xiaomi MiMo token plan, OpenAI-compatible. Sin key, la web funciona igual.
+# Espejos: token-plan-ams (Ámsterdam, recomendado UE) | token-plan-sgp (Singapur) | token-plan-cn (China)
+MIMO_API_KEY=                                   # <-- RELLENA si quieres comentarista
+MIMO_API_BASE=https://token-plan-ams.xiaomimimo.com/v1
+MIMO_BASE_URL=https://token-plan-ams.xiaomimimo.com/v1  # alias de MIMO_API_BASE
+MIMO_MODEL=mimo-v2.5-pro
+MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS=600
