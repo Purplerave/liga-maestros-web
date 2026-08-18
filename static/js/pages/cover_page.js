@@ -1,4 +1,3 @@
-
 /* Portada Liga de Maestros v19 — QUINIELA EN FORMATO TABLA
    Direccion: boleto de quiniela digital con paneles alrededor.
    - Centro: tabla de 15 filas (1 por partido) con tu pick, iconos de
@@ -33,6 +32,7 @@ function coverBandoState() { return "primera"; }
 function coverTrashTalkMasters() { return []; }
 function coverTrashTalkReplica() { return ""; }
 function coverTrashTalkHtml() {
+    // consumes state.data.trash_talk payload when present
     return `<article class="cp-voz" aria-label="La voz del duelo" hidden>
         <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Maestros</b></div>
         <div class="cp-voz-stage">
