@@ -63,6 +63,7 @@ def get_liga_data():
             ranking=predictions_payload.get("ranking_maestros", {}),
             participant_contract=participant_contract,
         )
+        comentarista = _build_comentarista_payload(partidos)
         response_payload = {
             "jornada": jornada,
             "jornada_liga": jornada_liga,
@@ -84,6 +85,7 @@ def get_liga_data():
             "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
             "ranking_maestros": predictions_payload["ranking_maestros"],
             "trash_talk": trash_talk,
+            "comentarista": comentarista,
             "auth_enabled": config.GOOGLE_AUTH_ENABLED,
             "live_stream_enabled": config.LIVE_SSE_ENABLED,
             "is_admin": is_admin_request(),
@@ -216,6 +218,16 @@ def _build_trash_talk_payload(*, jornada, ranking, participant_contract):
     """Construye el payload de trash-talk para el frontend."""
     state = _bando_state_for(ranking, participant_contract)
     return build_trash_talk(jornada, state)
+
+
+def _build_comentarista_payload(matches):
+    """Comentarios breves del directo (MiMo). Best-effort: nunca rompe la portada."""
+    try:
+        from ..services.ai.comentarista import construir_comentarios
+
+        return construir_comentarios(matches)
+    except Exception:
+        return {"comentarios": [], "generated": False}
 
 
 def _refresh_issue_message(status, skipped, failures):

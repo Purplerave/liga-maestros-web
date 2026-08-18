@@ -89,6 +89,19 @@ class TrashTalkPayload(_StrictBase):
         return v
 
 
+class ComentarioPayload(_StrictBase):
+    texto: str = ""
+    local: str = ""
+    visitante: str = ""
+    minuto: str = ""
+    marcador: str = ""
+
+
+class ComentaristaPayload(_StrictBase):
+    comentarios: list[ComentarioPayload] = Field(default_factory=list)
+    generated: bool = False
+
+
 class LigaDataPayload(_StrictBase):
     """Schema del payload principal que sirve ``GET /api/liga/data``.
 
@@ -116,6 +129,7 @@ class LigaDataPayload(_StrictBase):
     consenso_pleno_pena: list[Any] = Field(default_factory=list)
     ranking_maestros: dict[str, Any] = Field(default_factory=dict)
     trash_talk: TrashTalkPayload = Field(default_factory=TrashTalkPayload)
+    comentarista: ComentaristaPayload = Field(default_factory=ComentaristaPayload)
     auth_enabled: bool = False
     live_stream_enabled: bool = False
     is_admin: bool = False

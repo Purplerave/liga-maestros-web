@@ -116,6 +116,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena { overflow: 
     flex-shrink: 0;
     animation: cxPulse 1.2s ease-in-out infinite;
 }
+.cx-ticker-item.is-comentario {
+    font-family: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
+    font-size: 0.72rem;
+    color: var(--cx-gold-soft);
+}
+.cx-ticker-item.is-comentario b { color: var(--cx-gold); }
+.cx-ticker-dot.is-comentario {
+    background: var(--cx-gold);
+    box-shadow: 0 0 6px var(--cx-gold);
+}
 
 .cx-top {
     display: grid;

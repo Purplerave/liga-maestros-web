@@ -42,6 +42,19 @@
 |----------|-------------|---------|
 | `NEWS_REFRESH_SECONDS` | Segundos entre refrescos de noticias | 900 (15 min) |
 
+## Variables de IA (opcional)
+| Variable | Descripción | Default |
+|----------|-------------|---------|
+| `AI_NEWS_ENABLED` | Activa la capa IA (boletín + comentarista). `1`/`true`/`yes` | 0 |
+| `GROQ_API_KEY` | Clave de Groq (tier gratuito) | — |
+| `GEMINI_API_KEY` | Clave de Gemini (fallback) | — |
+| `AI_DAILY_CALL_LIMIT` | Tope diario duro de llamadas IA (compartido) | 12 |
+| `AI_NEWS_MIN_INTERVAL_SECONDS` | Cadencia mínima del boletín | 7200 (2 h) |
+| `MIMO_API_KEY` | Clave del token plan de Xiaomi MiMo (comentarista) | — |
+| `MIMO_BASE_URL` | Base OpenAI-compatible de MiMo, sin `/chat/completions` | `https://token-plan-sgp.xiaomimimo.com/v1` |
+| `MIMO_MODEL` | Modelo de MiMo (pro = 2 créditos/token) | `mimo-v2.5-pro` |
+| `MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS` | Cadencia mínima del comentarista aunque cambie el marcador | 600 (10 min) |
+
 ## Variables de Aplicación (opcional)
 | Variable | Descripción | Default |
 |----------|-------------|---------|

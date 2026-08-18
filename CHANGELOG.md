@@ -2,6 +2,18 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-18 — Comentarista MiMo en el ticker
+
+### Añadido
+
+- 🎙 **Comentarista MiMo**: frases breves del directo (≤16 palabras, solo
+  texto) generadas por Xiaomi MiMo (token plan, modelo pro) e intercaladas en
+  la banda `EN DIRECTO` de la portada. Una sola llamada para todos los partidos
+  en juego, disparada por cambio de marcador/estado, con cadencia mínima
+  (`MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS`) y tope diario duro
+  (`AI_DAILY_CALL_LIMIT`). Sin key, la web funciona igual. Detalle en
+  `docs/COMENTARISTA_MIMO.md`.
+
 ## 2026-08-18 — Voto La Peña: porcentajes imposibles
 
 ### Corregido
