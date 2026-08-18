@@ -381,13 +381,33 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 
 .cx-cons-row {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
     gap: 8px;
     align-items: center;
-    padding: 4px 0;
+    padding: 5px 2px;
 }
-.cx-cons-lab { font-family: "Rajdhani", "Outfit", sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--cx-text); line-height: 1; }
-.cx-cons-pct { font-family: "JetBrains Mono", monospace; font-size: 1rem; font-weight: 800; color: var(--cx-text); font-variant-numeric: tabular-nums; }
+.cx-cons-lab { font-family: "Rajdhani", "Outfit", sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--cx-muted); line-height: 1; }
+.cx-cons-pct { font-family: "JetBrains Mono", monospace; font-size: 0.92rem; font-weight: 800; color: var(--cx-muted); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+.cx-cons-bar {
+    display: block;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+.cx-cons-bar i {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    background: linear-gradient(90deg, rgba(167, 139, 250, 0.55), var(--cx-purple));
+    border-radius: inherit;
+}
+.cx-cons-row.is-peak .cx-cons-lab,
+.cx-cons-row.is-peak .cx-cons-pct { color: var(--cx-text); }
+.cx-cons-row.is-peak .cx-cons-bar i {
+    background: linear-gradient(90deg, var(--cx-cyan), var(--cx-purple));
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.28);
+}
 
 .cx-live-pulse {
     width: 7px; height: 7px; border-radius: 50%;

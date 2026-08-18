@@ -2,6 +2,19 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-18 — Voto La Peña: porcentajes imposibles
+
+### Corregido
+
+- 🔴 **El panel «VOTO LA PEÑA» de la portada pintaba 6443% / 2521% / 0% y
+  «182 votos».** El backend ya entrega `p1`/`px`/`p2` en tanto por ciento
+  (0-100) y `total` como peñistas de ese partido. La portada sumaba `total`
+  de los 14 partidos (13×14 = 182) y volvía a multiplicar esos porcentajes
+  por 100. El «1» del signo y el «6443%» se leían pegados como **16443%**.
+  Ahora el recuento usa los votos reales, los tres signos suman 100% y el
+  meta dice «13 peñistas». La columna de consenso de cada partido también
+  deja de dividir el porcentaje otra vez entre el número de votantes.
+
 ## 2026-08-17 — Portada: panel de control compacto
 
 ### Cambiado

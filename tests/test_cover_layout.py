@@ -42,6 +42,19 @@ def test_cover_keeps_alerts_inside_the_panel():
     assert arena_idx < voz_idx < ops_idx
 
 
+def test_cover_pena_vote_uses_backend_percentages():
+    """p1/px/p2 de consenso_pena ya vienen en tanto por ciento. No volver a * total * 100."""
+    cover = COVER_JS.read_text(encoding="utf-8")
+    assert "function coverAggregatePenaVote" in cover
+    assert "function coverPenaPercents" in cover
+    assert "PEÑISTA" in cover
+    assert "(v1 / totalPct) * 100" not in cover
+    assert "Number(rowCons.p1 || 0) / t" not in cover
+    assert "totalVotes += t" not in cover
+    css = COVER_CSS.read_text(encoding="utf-8")
+    assert ".cx-cons-bar" in css
+
+
 def test_porra_bonus_copy_is_short_and_consistent():
     files = (PORRA_JS, PORRA_ROUTE, COVER_JS)
     combined = "\n".join(path.read_text(encoding="utf-8") for path in files)
