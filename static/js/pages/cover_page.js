@@ -320,12 +320,21 @@ function renderNewspaperCoverPageV3() {
         const minute = m.minuto || m.minute || "—";
         return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}'</b> ${home} <em>${escapeHtml(String(score || "—"))}</em> ${away}</span>`;
     }).join("");
+    const comentarista = state.data?.comentarista || {};
+    const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
+    const comentarioItems = comentarios.map(c => {
+        const local = _abbr(c.local, 3);
+        const visitante = _abbr(c.visitante, 3);
+        const contexto = `${local}${c.marcador ? ` ${String(c.marcador)} ` : "–"}${visitante}`;
+        return `<span class="cx-ticker-item is-comentario"><i class="cx-ticker-dot is-comentario"></i><b>COMENTARISTA</b> ${escapeHtml(String(c.texto || ""))} <em>${escapeHtml(contexto)}</em></span>`;
+    }).join("");
+    const trackItems = tickerItems + comentarioItems;
     const tickerHtml = liveCount ? `
         <div class="cx-ticker" role="status" aria-live="polite">
             <div class="cx-ticker-track">
                 <span class="cx-ticker-label">⚽ EN DIRECTO</span>
-                ${tickerItems}
-                ${tickerItems}
+                ${trackItems}
+                ${trackItems}
             </div>
         </div>
     ` : "";
