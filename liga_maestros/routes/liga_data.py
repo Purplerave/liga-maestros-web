@@ -134,7 +134,11 @@ def _resolve_available_jornadas(conn):
             HAVING partidos > 0
             ORDER BY jornada DESC
         """).fetchall()
-        jornadas = [int(_row_jornada(row)) for row in rows if _row_jornada(row) is not None and is_current_season_jornada(_row_jornada(row))]
+        jornadas = [
+            int(_row_jornada(row))
+            for row in rows
+            if _row_jornada(row) is not None and is_current_season_jornada(_row_jornada(row))
+        ]
         if jornadas:
             return sorted(set(jornadas), reverse=True)
     except Exception:
@@ -159,6 +163,7 @@ def _resolve_available_jornadas(conn):
 
     # Último recurso: si hay scrape de alguna jornada 1..42 en disco, ofrecerla
     import os as _os
+
     import config as _cfg
 
     found = []
