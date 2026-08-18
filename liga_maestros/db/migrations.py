@@ -475,6 +475,13 @@ def ensure_jornada_1(conn):
     conn.commit()
 
 
+def ensure_jornada_2(conn):
+    updated = ensure_jornada_completa(conn, 2)
+    if updated:
+        conn.commit()
+    return updated
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     conn.commit()
@@ -543,6 +550,11 @@ def run_startup_migrations():
                 print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
             ensure_jornada_76(conn)
             ensure_jornada_1(conn)
+            try:
+                ensure_jornada_2(conn)
+            except Exception as e:
+                import sys
+                print(f"[migration] ensure_jornada_2 failed (non-fatal): {e}", file=sys.stderr)
             from ..services.season_rosters import sync_runtime_standings_files
             try:
                 sync_runtime_standings_files()

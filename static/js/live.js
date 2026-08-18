@@ -10,9 +10,15 @@ function renderDirectEmptyState() {
             nextMatch.scheduled || nextMatch.time || nextMatch.hora
         )
         : "";
+    const isQuiniela = Boolean(nextMatch && (state.data?.partidos || []).some(m =>
+        String(m.local||"").trim().toLowerCase() === String(home||"").trim().toLowerCase() &&
+        String(m.visitante||"").trim().toLowerCase() === String(away||"").trim().toLowerCase()
+    ));
+    // Si el próximo viene de all_league_matches (no quiniela), no mentir con la etiqueta
+    const label = isQuiniela ? "Próximo partido de la quiniela" : "Próximo partido del día";
     const nextHtml = nextMatch ? `
         <div class="direct-empty-next">
-            <span>Proximo partido de la quiniela</span>
+            <span>${label}</span>
             <strong>${escapeHtml(home)} - ${escapeHtml(away)}</strong>
             <small>${escapeHtml(kickoff)}</small>
         </div>` : "";

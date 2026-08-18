@@ -35,21 +35,26 @@ def current_season_sql(column="jornada"):
 def resolve_active_jornada(conn):
     """Return the jornada currently editable and displayed as active.
 
-    La temporada publicada empieza en J1. Mientras se conserva en la BD
-    información de jornadas antiguas/de prueba (J75/J76), no debe ganar ese
-    histórico por el simple hecho de ser el número mayor.
+    Temporada 2026/27: J1..42. Devuelve la última jornada con al menos un
+    partido cargado (normalmente 15), ignorando 75/76 de pruebas.
+    Así J1 deja de ser fija y la web promociona automáticamente a J2, J3...
     """
     try:
-        has_j1 = conn.execute("SELECT 1 FROM resultados WHERE jornada = 1 LIMIT 1").fetchone()
-        if has_j1:
-            return 1
+        rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
+        jornadas = [int(row[0]) for row in rows if row[0] is not None and is_current_season_jornada(row[0])]
+        if jornadas:
+            return max(jornadas)
     except Exception:
         pass
 
-    rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
-    jornadas = [int(row[0]) for row in rows if row[0] is not None]
-    if not jornadas:
+    # Fallback: si no hay nada en la temporada actual, mantener J1 (seed) y no
+    # dejar que 75/76 de pruebas se convierta en activa por ser mayor.
+    try:
+        rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
+        jornadas = [int(row[0]) for row in rows if row[0] is not None]
+        if not jornadas:
+            return 1
+        published = [j for j in jornadas if j not in (75, 76)]
+        return max(published or jornadas)
+    except Exception:
         return 1
-
-    published = [jornada for jornada in jornadas if jornada not in (75, 76)]
-    return max(published or jornadas)
