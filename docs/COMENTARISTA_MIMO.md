@@ -39,13 +39,13 @@ En `.env` (plantilla en `.env.example`):
 ```ini
 AI_NEWS_ENABLED=1
 MIMO_API_KEY=tu-clave-del-token-plan
-MIMO_BASE_URL=https://token-plan-sgp.xiaomimimo.com/v1
+MIMO_API_BASE=https://token-plan-ams.xiaomimimo.com/v1
 MIMO_MODEL=mimo-v2.5-pro
 MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS=600
+# Alias alternativo: MIMO_BASE_URL (mismo valor)
 ```
 
-- `MIMO_BASE_URL` admite los espejos `token-plan-sgp` (Singapur) o
-  `token-plan-cn` (China), sin el sufijo `/chat/completions`.
+- `MIMO_API_BASE` / `MIMO_BASE_URL` (alias) admite los espejos `token-plan-ams` (Ámsterdam, recomendado en UE) | `token-plan-sgp` (Singapur) | `token-plan-cn` (China), sin el sufijo `/chat/completions`.
 - `MIMO_MODEL`: `mimo-v2.5-pro` (2 créditos/token) o `mimo-v2.5`
   (1 crédito/token) según tu plan.
 - Si no hay `MIMO_API_KEY` o se agota la cuota, la web sigue funcionando
