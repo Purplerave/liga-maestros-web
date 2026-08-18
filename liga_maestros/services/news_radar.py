@@ -22,11 +22,15 @@ from ..utils import (
 
 def _is_recent(item, now=None):
     now = now or datetime.now()
+    raw = (item.get("published_at") or "").strip()
+    # Sin fecha no podemos descartarla: la dejamos pasar y el orden final la relega.
+    if not raw:
+        return True
     try:
-        published = datetime.strptime(item.get("published_at") or "", "%Y-%m-%d %H:%M")
+        published = datetime.strptime(raw, "%Y-%m-%d %H:%M")
         return now - timedelta(days=7) <= published <= now + timedelta(hours=6)
     except (TypeError, ValueError):
-        return False
+        return True
 
 
 def fetch_feed_items(feed):
@@ -45,16 +49,13 @@ def fetch_feed_items(feed):
     payload = sanitize_xml_payload(response.content)
     root = ET.fromstring(payload)
     items = []
-    for item in root.findall(".//item"):
-        title = strip_html(item.findtext("title", ""))
-        link = strip_html(item.findtext("link", ""))
-        desc = strip_html(item.findtext("description", ""))
-        pub = parse_rfc822_to_iso(item.findtext("pubDate", ""))
+
+    def _append(title, link, desc, pub):
         joined = f"{title} {desc}".strip()
         score = news_relevance_score(joined)
         link_parts = urlsplit(link)
         if not title or link_parts.scheme not in {"http", "https"} or not link_parts.hostname:
-            continue
+            return
         items.append(
             {
                 "source": feed["name"],
@@ -66,6 +67,32 @@ def fetch_feed_items(feed):
                 "score": score,
             }
         )
+
+    # RSS 2.0 / RDF: <item>
+    for item in root.findall(".//item"):
+        title = strip_html(item.findtext("title", ""))
+        link = strip_html(item.findtext("link", ""))
+        desc = strip_html(item.findtext("description", ""))
+        pub = parse_rfc822_to_iso(item.findtext("pubDate", ""))
+        _append(title, link, desc, pub)
+
+    # Atom: <entry> con <link href> y <updated>/<published>
+    if not items:
+        for entry in root.findall(".//{http://www.w3.org/2005/Atom}entry"):
+            title = strip_html(entry.findtext("{http://www.w3.org/2005/Atom}title", ""))
+            link = ""
+            link_node = entry.find("{http://www.w3.org/2005/Atom}link")
+            if link_node is not None:
+                link = link_node.get("href", "")
+            desc = strip_html(
+                entry.findtext("{http://www.w3.org/2005/Atom}summary", "")
+                or entry.findtext("{http://www.w3.org/2005/Atom}content", "")
+            )
+            pub = parse_rfc822_to_iso(
+                entry.findtext("{http://www.w3.org/2005/Atom}updated", "")
+                or entry.findtext("{http://www.w3.org/2005/Atom}published", "")
+            )
+            _append(title, link, desc, pub)
     return items
 
 

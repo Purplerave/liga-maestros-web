@@ -251,6 +251,24 @@ def parse_rfc822_to_iso(value):
             return dt.strftime("%Y-%m-%d %H:%M")
         except Exception:
             continue
+    # ISO 8601 con "Z" y/o fracciones de segundo (feeds Atom).
+    normalized = raw
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    for fmt in (
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+    ):
+        try:
+            dt = datetime.strptime(normalized, fmt)
+            if dt.tzinfo:
+                dt = dt.astimezone(ZoneInfo("Europe/Madrid"))
+            return dt.strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            continue
     return ""
 
 

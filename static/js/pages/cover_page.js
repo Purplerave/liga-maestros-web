@@ -122,7 +122,32 @@ function coverDisagreementMatch() { return null; }
 function coverTightPenaMatch() { return null; }
 function coverFixtureHtml() { return ""; }
 function updateCoverPorraStep() {}
-function hydrateCoverPorra() {}
+function hydrateCoverPorra(data) {
+    // Panel "LA PORRA" de la portada: resumen compacto del marcador exacto (+2 pts).
+    const target = qs("cover-porra-content");
+    if (!target) return;
+    if (!data || data.status !== "ok" || !data.enabled) {
+        target.innerHTML = `<div class="cx-empty">${escapeHtml((data && data.message) || "Sin porra disponible esta jornada")}</div>`;
+        return;
+    }
+    const match = data.match || {};
+    const total = Number(data.total_entries || 0);
+    const distribution = Array.isArray(data.distribution) ? data.distribution : [];
+    const mine = data.mine || {};
+    const hasMine = mine.goles_local != null && mine.goles_visitante != null;
+    const short = name => (typeof getShortName === "function" ? getShortName(name) : name);
+    const pills = distribution.slice(0, 3).map(item => {
+        const score = `${Number(item.goles_local)}-${Number(item.goles_visitante)}`;
+        const pct = Number(item.percent || 0);
+        return `<span class="cx-porra-pill"><b>${escapeHtml(score)}</b><em>${total === 1 ? "&uacute;nico" : `${Math.round(pct)}%`}</em></span>`;
+    }).join("");
+    target.innerHTML = `
+        <div class="cx-porra-match"><strong>${escapeHtml(short(match.local || "Local"))} vs ${escapeHtml(short(match.visitante || "Visitante"))}</strong><span class="cx-porra-meta">+2 pts</span></div>
+        ${hasMine ? `<div class="cx-porra-mine">Tu marcador: <b>${Number(mine.goles_local)}-${Number(mine.goles_visitante)}</b></div>` : ""}
+        ${total
+            ? `<div class="cx-porra-share"><span class="cx-porra-total">${total} participante${total === 1 ? "" : "s"}</span>${pills}</div>`
+            : `<div class="cx-empty">S&eacute; el primero en firmar un marcador exacto</div>`}`;
+}
 
 function _abbr(name, max) {
     if (!name) return "—";
@@ -256,18 +281,22 @@ function renderNewspaperCoverPageV3() {
         `;
     }
 
+    // p1/px/p2 llegan ya como porcentajes (de cero a cien). Sumamos los votos
+    // reales (consenso[].votes) para calcular un promedio ponderado correcto.
     let totalVotes = 0, v1 = 0, vx = 0, v2 = 0;
     consenso.forEach(r => {
-        const t = Number(r.total || 0);
-        totalVotes += t;
-        v1 += Number(r.p1 || 0) * t;
-        vx += Number(r.px || 0) * t;
-        v2 += Number(r.p2 || 0) * t;
+        const votes = r.votes || {};
+        const a = Number(votes["1"] || 0);
+        const b = Number(votes["X"] || 0);
+        const c = Number(votes["2"] || 0);
+        totalVotes += a + b + c;
+        v1 += a;
+        vx += b;
+        v2 += c;
     });
-    const totalPct = totalVotes || 1;
-    const consensusPct1 = Math.round((v1 / totalPct) * 100);
-    const consensusPctX = Math.round((vx / totalPct) * 100);
-    const consensusPct2 = Math.max(0, 100 - consensusPct1 - consensusPctX);
+    const consensusPct1 = totalVotes ? Math.round((v1 * 100) / totalVotes) : 0;
+    const consensusPctX = totalVotes ? Math.round((vx * 100) / totalVotes) : 0;
+    const consensusPct2 = totalVotes ? Math.max(0, 100 - consensusPct1 - consensusPctX) : 0;
 
     const tickerItems = liveMatches.map(m => {
         const home = _abbr(m.local, 3);
@@ -366,9 +395,9 @@ function renderNewspaperCoverPageV3() {
         const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
         let consHtml = '<span class="cx-row-cons is-empty">—</span>';
         if (rowCons && Number(rowCons.total || 0) > 0) {
-            const t = Number(rowCons.total || 0);
-            const p1 = Math.round((Number(rowCons.p1 || 0) / t) * 100);
-            const px = Math.round((Number(rowCons.px || 0) / t) * 100);
+            // p1/px/p2 ya son porcentajes (de cero a cien) calculados en backend.
+            const p1 = Math.round(Number(rowCons.p1 || 0));
+            const px = Math.round(Number(rowCons.px || 0));
             const p2 = Math.max(0, 100 - p1 - px);
             const peak = Math.max(p1, px, p2);
             const cls1 = p1 === peak ? "is-peak" : "";
@@ -520,21 +549,26 @@ function renderNewspaperCoverPageV3() {
         <section class="cx-panel cx-consensus cx-accent-purple">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow">VOTO LA PEÑA</span>
-                <span class="cx-pn-meta">${totalVotes} VOTOS</span>
+                <span class="cx-pn-meta">${totalVotes} VOTO${totalVotes === 1 ? "" : "S"}</span>
             </header>
             <div class="cx-pn-body">
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">1</span>
-                    <span class="cx-cons-pct">${consensusPct1}%</span>
-                </div>
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">X</span>
-                    <span class="cx-cons-pct">${consensusPctX}%</span>
-                </div>
-                <div class="cx-cons-row">
-                    <span class="cx-cons-lab">2</span>
-                    <span class="cx-cons-pct">${consensusPct2}%</span>
-                </div>
+                ${totalVotes
+                    ? `<div class="cx-cons-row">
+                        <span class="cx-cons-lab is-1">1</span>
+                        <span class="cx-cons-track"><i class="is-1" style="width:${consensusPct1}%"></i></span>
+                        <span class="cx-cons-pct">${consensusPct1}%</span>
+                    </div>
+                    <div class="cx-cons-row">
+                        <span class="cx-cons-lab is-x">X</span>
+                        <span class="cx-cons-track"><i class="is-x" style="width:${consensusPctX}%"></i></span>
+                        <span class="cx-cons-pct">${consensusPctX}%</span>
+                    </div>
+                    <div class="cx-cons-row">
+                        <span class="cx-cons-lab is-2">2</span>
+                        <span class="cx-cons-track"><i class="is-2" style="width:${consensusPct2}%"></i></span>
+                        <span class="cx-cons-pct">${consensusPct2}%</span>
+                    </div>`
+                    : '<div class="cx-empty">Aún no hay votos de La Peña</div>'}
             </div>
         </section>
     `;
@@ -570,11 +604,11 @@ function renderNewspaperCoverPageV3() {
             <section class="cx-col cx-col-center">
                 ${boletoHtml}
             </section>
-            <aside class="cx-col cx-col-right" aria-label="Directo, porra, próximos y noticias">
+            <aside class="cx-col cx-col-right" aria-label="Directo, porra, noticias y próximos">
                 ${livePanelHtml}
-                ${upcomingHtml}
                 ${porraHtml}
                 ${newsHtml}
+                ${upcomingHtml}
             </aside>
         </main>
     </div>

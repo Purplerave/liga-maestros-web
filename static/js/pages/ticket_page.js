@@ -213,11 +213,6 @@ function patchTicketArena() {
     return true;
 }
 
-function ensureQ15Directo() {
-    return Promise.resolve(false);
-}
-
-function loadPorra() {
-    const body = qs("ticket-porra-body");
-    if (body) body.innerHTML = `<div class="empty-state">Porra de la jornada</div>`;
-}
+// La porra y el directo Q15 viven en quantum_final.js (carga global).
+// No redefinirlos aqui: sobrescribirian las implementaciones reales al
+// cargar esta vista y dejarian el panel de la porra como placeholder.

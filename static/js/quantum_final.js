@@ -537,30 +537,66 @@ async function loadNewsBriefing() {
         const timeout = setTimeout(() => controller.abort(), 8000);
         const res = await fetch("/api/noticias/radar", { signal: controller.signal });
         clearTimeout(timeout);
-        if (!res.ok) { target.innerHTML = '<span class="cp-empty">Sin novedades</span>'; return; }
+        if (!res.ok) {
+            target.innerHTML = '<div class="cx-empty">El radar de noticias no está disponible</div>';
+            return;
+        }
         const data = await res.json();
         const novedades = Array.isArray(data.novedades) ? data.novedades : [];
         const bajas = Array.isArray(data.bajas) ? data.bajas : [];
-        if (!novedades.length && !bajas.length) {
-            target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
-            return;
-        }
-        const newsHtml = novedades.map(item => {
+        // Fallback: si no hay boletín IA, mostramos los titulares RSS crudos del radar.
+        const items = Array.isArray(data.items) ? data.items : [];
+
+        const timeOf = published => {
+            const p = String(published || "");
+            const m = p.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+            if (!m) return "";
+            const [, date, time] = m;
+            const today = new Date();
+            const y = String(today.getFullYear()).padStart(2, "0");
+            const dd = String(today.getDate()).padStart(2, "0");
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
+            if (date === `${y}-${mm}-${dd}`) return time;
+            return `${date.slice(5).replace("-", "/")}`;
+        };
+
+        const newsHtml = novedades.slice(0, 4).map(item => {
             const category = escapeHtml(String(item.categoria || "noticia").toUpperCase());
-            const text = escapeHtml(item.texto || "");
+            const text = escapeHtml(item.texto || item.title || "");
             const source = escapeHtml(item.source || "");
             const link = escapeHtml(item.link || "#");
-            return `<a class="cp-news-row" href="${link}" target="_blank" rel="noopener noreferrer"><span class="cp-news-category">${category}</span><strong>${text}</strong><small>${source}</small></a>`;
+            const when = escapeHtml(timeOf(item.published_at));
+            return `<a class="cx-news-item" href="${link}" target="_blank" rel="noopener noreferrer"><span class="cx-news-cat">${category}</span><span class="cx-news-text">${text}</span><span class="cx-news-time">${when || source}</span></a>`;
         }).join("");
+
         const injuriesHtml = bajas.slice(0, 3).map(item => {
             const status = escapeHtml(String(item.estado || "baja").toUpperCase());
             const player = escapeHtml(item.jugador || "");
             const team = escapeHtml(item.equipo || "");
             const note = escapeHtml(item.nota || "");
-            return `<div class="cp-news-row is-availability"><span class="cp-news-category">${status}</span><strong>${player} · ${team}</strong><small>${note}</small></div>`;
+            return `<div class="cx-news-item is-availability"><span class="cx-news-cat">${status}</span><span class="cx-news-text">${player} · ${team}</span><span class="cx-news-time">${note}</span></div>`;
         }).join("");
-        target.innerHTML = newsHtml + injuriesHtml;
+
+        if (newsHtml || injuriesHtml) {
+            target.innerHTML = newsHtml + injuriesHtml;
+            return;
+        }
+
+        const rssHtml = items.slice(0, 4).map(item => {
+            const source = escapeHtml(item.source || "noticia");
+            const title = escapeHtml(item.title || "");
+            const link = escapeHtml(item.link || "#");
+            const when = escapeHtml(timeOf(item.published_at));
+            return `<a class="cx-news-item" href="${link}" target="_blank" rel="noopener noreferrer"><span class="cx-news-cat">${source}</span><span class="cx-news-text">${title}</span><span class="cx-news-time">${when}</span></a>`;
+        }).join("");
+
+        if (rssHtml) {
+            target.innerHTML = rssHtml;
+            return;
+        }
+
+        target.innerHTML = '<div class="cx-empty">Sin novedades de momento</div>';
     } catch (error) {
-        target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
+        target.innerHTML = '<div class="cx-empty">Sin novedades de momento</div>';
     }
 }
