@@ -3,8 +3,8 @@
    PORTADA v19 — QUINIELA EN FORMATO TABLA
    Layout: ticker arriba + header + grid 3 cols (clasif | tabla quiniela |
    directo/porra/proximos/noticias). El boleto es una TABLA con 15 filas
-   tipo quiniela de toda la vida, con nombres enteros, iconos de color
-   por maestro, y % de consenso La Pena.
+   tipo quiniela: una columna por Maestro (logo arriba, signo 1/X/2 normal,
+   sin pastillas de color) y una columna PEÑA con el signo de consenso.
    ========================================================================== */
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-cover-brand,
@@ -366,8 +366,8 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 
 .cx-st-row {
     display: grid;
-    grid-template-columns: 22px 12px 1fr auto;
-    gap: 6px;
+    grid-template-columns: 22px 16px 1fr auto;
+    gap: 5px;
     align-items: center;
     padding: 4px 4px;
     border-radius: 5px;
@@ -377,7 +377,16 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-st-row:hover { background: rgba(56, 189, 248, 0.05); }
 .cx-st-pos { font-family: "JetBrains Mono", monospace; font-size: 0.65rem; color: var(--cx-dim); font-weight: 700; }
 .cx-st-icon { width: 8px; height: 8px; border-radius: 2px; background: var(--cx-cyan); }
-.cx-st-icon.is-ia { background: var(--cx-gold); }
+.cx-st-icon.is-ia {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    border-radius: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.cx-st-icon.is-ia .cx-mi-logo { width: 14px; height: 14px; }
 .cx-st-name { color: var(--cx-text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cx-st-pts {
     font-family: "JetBrains Mono", monospace;
@@ -585,8 +594,16 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-boleto-table thead th.cx-r-num { text-align: center; width: 36px; }
 .cx-boleto-table thead th.cx-r-when { text-align: center; width: 50px; }
 .cx-boleto-table thead th.cx-r-pick { text-align: center; width: 64px; color: var(--cx-gold); }
-.cx-boleto-table thead th.cx-r-masters { text-align: center; }
-.cx-boleto-table thead th.cx-r-cons { text-align: right; color: var(--cx-cyan); }
+.cx-boleto-table thead th.cx-r-ia { text-align: center; width: 42px; color: var(--cx-muted); }
+.cx-boleto-table thead th.cx-r-ia .cx-mi-logo { display: block; margin: 0 auto 3px; object-fit: contain; }
+.cx-boleto-table thead th.cx-r-ia em { font-style: normal; font-size: 0.52rem; font-weight: 800; letter-spacing: 0.06em; }
+.cx-boleto-table thead th.cx-r-ia.is-claude em { color: var(--m-claude); }
+.cx-boleto-table thead th.cx-r-ia.is-chatgpt em { color: var(--m-chatgpt); }
+.cx-boleto-table thead th.cx-r-ia.is-gemini em { color: var(--m-gemini); }
+.cx-boleto-table thead th.cx-r-ia.is-grok em { color: var(--m-grok); }
+.cx-boleto-table thead th.cx-r-ia.is-copilot em { color: var(--m-copilot); }
+.cx-boleto-table thead th.cx-r-ia.is-programa em { color: var(--m-programa); }
+.cx-boleto-table thead th.cx-r-ia.is-pena em { color: var(--cx-cyan); }
 .cx-boleto-table thead th.cx-r-teams-head { text-align: left; }
 
 .cx-boleto-table tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: background 0.12s ease; }
@@ -624,46 +641,26 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     text-shadow: 0 0 6px rgba(251, 191, 36, 0.3);
 }
 .cx-r-pick-val.is-empty { background: rgba(255, 255, 255, 0.03); border-color: var(--cx-line); color: var(--cx-dim); opacity: 0.4; text-shadow: none; }
-.cx-r-masters { text-align: center; white-space: nowrap; }
-.cx-r-no-pick { color: var(--cx-dim); font-style: italic; font-size: 0.7rem; }
 .cx-r-empty-grid { text-align: center; color: var(--cx-muted); padding: 40px 12px; font-size: 0.85rem; }
 .cx-r-empty { color: var(--cx-dim); text-align: center; padding: 20px 12px; }
 
-.cx-mi {
+.cx-r-ia { text-align: center; width: 42px; padding: 7px 2px; }
+.cx-mi-logo { display: block; object-fit: contain; }
+.cx-ia-sign {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    margin: 0 2px;
-    border-radius: 5px;
-    position: relative;
-    font-family: "JetBrains Mono", monospace;
-    font-weight: 800;
-    font-size: 0.7rem;
+    min-width: 26px;
+    padding: 2px 6px;
+    font-family: "Rajdhani", "Outfit", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
     line-height: 1;
-    flex-shrink: 0;
-    transition: transform 0.12s ease;
+    color: var(--cx-text);
 }
-.cx-mi:hover { transform: scale(1.1); }
-.cx-mi b { z-index: 2; }
-.cx-mi-shape { position: absolute; inset: 4px; z-index: 1; opacity: 0.6; }
-.cx-mi.is-claude { background: rgba(251, 146, 60, 0.18); color: var(--m-claude); border: 1px solid rgba(251, 146, 60, 0.4); }
-.cx-mi.is-claude .cx-mi-shape { background: radial-gradient(circle at 30% 30%, var(--m-claude), transparent 70%); }
-.cx-mi.is-chatgpt { background: rgba(52, 211, 153, 0.18); color: var(--m-chatgpt); border: 1px solid rgba(52, 211, 153, 0.4); }
-.cx-mi.is-chatgpt .cx-mi-shape { background: radial-gradient(circle at 70% 30%, var(--m-chatgpt), transparent 70%); }
-.cx-mi.is-gemini { background: rgba(167, 139, 250, 0.18); color: var(--m-gemini); border: 1px solid rgba(167, 139, 250, 0.4); }
-.cx-mi.is-gemini .cx-mi-shape { background: radial-gradient(circle at 50% 50%, var(--m-gemini), transparent 60%); }
-.cx-mi.is-grok { background: rgba(244, 114, 182, 0.18); color: var(--m-grok); border: 1px solid rgba(244, 114, 182, 0.4); }
-.cx-mi.is-grok .cx-mi-shape { background: radial-gradient(circle at 50% 50%, var(--m-grok), transparent 60%); }
-.cx-mi.is-copilot { background: rgba(56, 189, 248, 0.18); color: var(--m-copilot); border: 1px solid rgba(56, 189, 248, 0.4); }
-.cx-mi.is-copilot .cx-mi-shape { background: radial-gradient(circle at 30% 70%, var(--m-copilot), transparent 70%); }
-
-.cx-r-cons { text-align: right; white-space: nowrap; }
-.cx-row-cons { display: inline-flex; gap: 8px; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 600; color: var(--cx-muted); }
-.cx-row-cons b { font-weight: 700; color: var(--cx-muted); font-variant-numeric: tabular-nums; }
-.cx-row-cons b.is-peak { color: var(--cx-cyan); font-weight: 800; text-shadow: 0 0 4px rgba(56, 189, 248, 0.3); }
-.cx-row-cons.is-empty { color: var(--cx-dim); font-style: italic; }
+.cx-ia-sign.is-empty { color: var(--cx-dim); opacity: 0.45; }
+.cx-ia-sign.is-hit { color: #6ee7b7; text-shadow: 0 0 6px rgba(52, 211, 153, 0.35); }
+.cx-ia-sign.is-pena { color: var(--cx-cyan); }
 
 .cp-arena { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .cp-main { display: block; }
@@ -702,8 +699,9 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-top-right { flex-wrap: wrap; }
     .cx-r-team { max-width: 80px; }
     .cx-boleto-table { font-size: 0.7rem; }
-    .cx-r-masters .cx-mi { width: 18px; height: 18px; font-size: 0.6rem; }
-    .cx-row-cons { font-size: 0.62rem; gap: 4px; }
+    .cx-boleto-table thead th.cx-r-ia { width: 34px; }
+    .cx-r-ia { padding: 6px 2px; }
+    .cx-ia-sign { min-width: 22px; font-size: 0.92rem; padding: 1px 4px; }
     .cx-col { flex-direction: column; }
     .cx-ticker { font-size: 0.7rem; }
 }

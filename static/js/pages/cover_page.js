@@ -1,7 +1,8 @@
 /* Portada Liga de Maestros v19 — QUINIELA EN FORMATO TABLA
    Direccion: boleto de quiniela digital con paneles alrededor.
-   - Centro: tabla de 15 filas (1 por partido) con tu pick, iconos de
-     color por cada IA y % de consenso La Pena.
+   - Centro: tabla de 15 filas (1 por partido) con una columna por Maestro
+     (logo arriba, signo 1/X/2 normal, sin pastillas de color) y una
+     columna PEÑA con el signo de consenso.
    - Ticker de goles arriba (banda fina animada).
    - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO
      (solo partidos de la quiniela), PORRA +2, ULTIMA HORA.
@@ -187,17 +188,6 @@ function _fitName(name, maxLen) {
     const s = String(name).trim();
     return s.length > maxLen ? s.slice(0, maxLen - 1) + "…" : s;
 }
-function _mi(col) {
-    if (!col) return "?";
-    const id = String(col.id || col.label || "").toLowerCase();
-    if (id.includes("claude")) return "C";
-    if (id.includes("chatgpt") || id.includes("gpt")) return "G";
-    if (id.includes("gemini")) return "G";
-    if (id.includes("grok")) return "X";
-    if (id.includes("copilot")) return "K";
-    if (id.includes("programa")) return "P";
-    return (col.label || id).slice(0, 1).toUpperCase();
-}
 function _mtone(col) {
     if (!col) return "is-default";
     const id = String(col.id || col.label || "").toLowerCase();
@@ -209,9 +199,41 @@ function _mtone(col) {
     if (id.includes("programa")) return "is-programa";
     return "is-default";
 }
-function _miconClass(col) {
-    if (!col) return "cx-mi is-default";
-    return `cx-mi ${_mtone(col)}`;
+function _mlogoKey(colOrUid) {
+    const id = String(colOrUid?.id || colOrUid?.label || colOrUid || "").toLowerCase();
+    if (id.includes("claude")) return "claude";
+    if (id.includes("chatgpt") || (id.includes("gpt") && !id.includes("gemini"))) return "chatgpt";
+    if (id.includes("gemini")) return "gemini";
+    if (id.includes("grok")) return "grok";
+    if (id.includes("copilot")) return "copilot";
+    if (id.includes("programa")) return "programa";
+    return "";
+}
+function _mlogoSrc(colOrUid) {
+    const key = _mlogoKey(colOrUid);
+    if (!key) return "";
+    const assetsV = document.body?.dataset?.assetsV || "";
+    return `/static/img/maestros/${key}.svg?v=${encodeURIComponent(assetsV)}`;
+}
+function _mlogoImg(colOrUid, size) {
+    const src = _mlogoSrc(colOrUid);
+    if (!src) return "";
+    const px = Number(size || 12);
+    const label = String(colOrUid?.label || colOrUid?.name || colOrUid?.id || colOrUid || "");
+    return `<img class="cx-mi-logo" src="${src}" alt="" width="${px}" height="${px}" decoding="async" aria-hidden="true"${label ? ` title="${escapeHtml(label)}"` : ""}>`;
+}
+function _mshort(col) {
+    const id = String(col?.id || col?.label || "").toLowerCase();
+    if (id.includes("claude")) return "CLD";
+    if (id.includes("chatgpt") || (id.includes("gpt") && !id.includes("gemini"))) return "GPT";
+    if (id.includes("gemini")) return "GEM";
+    if (id.includes("grok")) return "GRK";
+    if (id.includes("copilot")) return "COP";
+    if (id.includes("programa")) return "PRG";
+    return String(col?.label || id || "?").slice(0, 3).toUpperCase();
+}
+function _visibleMasters(cols) {
+    return (cols || []).filter(col => !String(col.id || "").toLowerCase().includes("programa"));
 }
 function _upick(i) {
     const s = state.my_signs || [];
@@ -253,6 +275,8 @@ function renderNewspaperCoverPageV3() {
     const saved = typeof hasSavedTicket === "function" ? hasSavedTicket() : false;
     const jornada = state.data?.jornada || state.jornada || "1";
     const masterCols = coverMasterColumns();
+    const visibleMasters = _visibleMasters(masterCols);
+    const plenoConsenso = state.data?.consenso_pleno_pena || {};
     const predictions = state.data?.predicciones_actuales || {};
     const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
     const userTotal = 15;
@@ -287,10 +311,12 @@ function renderNewspaperCoverPageV3() {
         const items = rows.map((r, i) => {
             const isPena = accent === "cyan";
             const iconClass = isPena ? "is-pena" : "is-ia";
+            const col = masterCols.find(c => String(c.id || "").toLowerCase() === String(r.uid || "").toLowerCase());
+            const iconInner = (!isPena && col) ? _mlogoImg(col, 14) : "";
             return `
                 <div class="cx-st-row${i === 0 ? " is-leader" : ""}">
                     <span class="cx-st-pos">${String(i + 1).padStart(2, "0")}</span>
-                    <span class="cx-st-icon ${iconClass}"></span>
+                    <span class="cx-st-icon ${iconClass}">${iconInner}</span>
                     <span class="cx-st-name">${escapeHtml(_fitName(r.name, 14))}</span>
                     <span class="cx-st-pts">${r.jornada || 0}</span>
                 </div>
@@ -385,13 +411,12 @@ function renderNewspaperCoverPageV3() {
     `;
 
     function buildRow(match, i) {
+        const totalCols = 7 + visibleMasters.length;
         if (!match) {
-            return `<tr class="cx-row is-empty"><td class="cx-r-num">${String(i+1).padStart(2,"0")}</td><td colspan="6" class="cx-r-empty">—</td></tr>`;
+            return `<tr class="cx-row is-empty"><td class="cx-r-num">${String(i+1).padStart(2,"0")}</td><td colspan="${totalCols}" class="cx-r-empty">—</td></tr>`;
         }
         const homeFull = typeof getShortName === "function" ? getShortName(match.local) : match.local;
         const awayFull = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
-        const homeShort = _abbr(homeFull, 3);
-        const awayShort = _abbr(awayFull, 3);
         const pick = _upick(i);
         const isLive = _live(match);
         const isClosed = _closed(match);
@@ -407,25 +432,29 @@ function renderNewspaperCoverPageV3() {
         if (isLive) pickClass += " is-live";
         if (isClosed) pickClass += " is-closed";
 
-        const maestroLine = masterCols
-            .filter(col => !String(col.id || "").toLowerCase().includes("programa"))
-            .map(col => {
-                const signs = coverPredictionSigns(predictions[col.id]);
-                const sign = signs[i] || "-";
-                if (sign === "-") return "";
-                return `<span class="${_miconClass(col)}" title="${escapeHtml(col.label)}"><i class="cx-mi-shape"></i><b>${escapeHtml(sign)}</b></span>`;
-            }).join("");
+        const maestroCells = visibleMasters.map(col => {
+            const signs = coverPredictionSigns(predictions[col.id]);
+            const sign = signs[i] || "-";
+            const signEmpty = sign === "-";
+            const signHit = isClosed && realSign && sign === realSign;
+            const hitClass = signHit ? " is-hit" : "";
+            return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
+        }).join("");
 
         const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
-        let consHtml = '<span class="cx-row-cons is-empty">—</span>';
-        if (rowCons && Number(rowCons.total || 0) > 0) {
-            const { p1, px, p2 } = coverPenaPercents(rowCons);
-            const peak = Math.max(p1, px, p2);
-            const cls1 = p1 === peak ? "is-peak" : "";
-            const clsx = px === peak ? "is-peak" : "";
-            const cls2 = p2 === peak ? "is-peak" : "";
-            consHtml = `<span class="cx-row-cons"><b class="${cls1}">1·${p1}%</b><b class="${clsx}">X·${px}%</b><b class="${cls2}">2·${p2}%</b></span>`;
+        let penaSign = "—";
+        if (i === 14) {
+            if (plenoConsenso.topScore && plenoConsenso.topScore[0]) penaSign = String(plenoConsenso.topScore[0]);
+        } else if (rowCons) {
+            if (String(rowCons.ganador || "").trim() && String(rowCons.ganador).trim() !== "-") {
+                penaSign = String(rowCons.ganador).trim();
+            } else if (Number(rowCons.total || 0) > 0 && coverPenaReading(rowCons)) {
+                penaSign = coverPenaReading(rowCons).sign || "—";
+            }
         }
+        const penaEmpty = penaSign === "—" || penaSign === "-";
+        const penaHit = isClosed && realSign && penaSign === realSign;
+        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaHit ? " is-hit" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
 
         return `
             <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${match.id}">
@@ -435,15 +464,19 @@ function renderNewspaperCoverPageV3() {
                 <td class="cx-r-team is-away" title="${escapeHtml(awayFull)}">${escapeHtml(_fitName(awayFull, 14))}</td>
                 <td class="cx-r-when">${escapeHtml(String(when))}</td>
                 <td class="cx-r-pick">${pick ? `<span class="cx-r-pick-val">${escapeHtml(pick)}</span>` : `<span class="cx-r-pick-val is-empty">—</span>`}</td>
-                <td class="cx-r-masters">${maestroLine || '<span class="cx-r-no-pick">—</span>'}</td>
-                <td class="cx-r-cons">${consHtml}</td>
+                ${maestroCells}
+                ${penaCell}
             </tr>
         `;
     }
 
+    const masterHeads = visibleMasters.map(col =>
+        `<th class="cx-r-ia ${_mtone(col)}" title="${escapeHtml(col.label || col.id)}">${_mlogoImg(col, 18)}<em>${escapeHtml(_mshort(col))}</em></th>`
+    ).join("");
     const boletoBody = matches.map((m, i) => buildRow(m, i)).join("");
+    const totalCols = 7 + visibleMasters.length;
     const boletoEmpty = matches.length === 0
-        ? `<tr><td colspan="8" class="cx-r-empty-grid">Los partidos se publicarán al cierre de la jornada anterior.</td></tr>`
+        ? `<tr><td colspan="${totalCols}" class="cx-r-empty-grid">Los partidos se publicarán al cierre de la jornada anterior.</td></tr>`
         : "";
 
     const boletoHtml = `
@@ -465,9 +498,9 @@ function renderNewspaperCoverPageV3() {
                             <th class="cx-r-num">Nº</th>
                             <th colspan="3" class="cx-r-teams-head">PARTIDO</th>
                             <th class="cx-r-when">HORA</th>
-                            <th class="cx-r-pick">TU PICK</th>
-                            <th class="cx-r-masters">MAESTROS</th>
-                            <th class="cx-r-cons">LA PEÑA</th>
+                            <th class="cx-r-pick">TÚ</th>
+                            ${masterHeads}
+                            <th class="cx-r-ia is-pena" title="Consenso de La Peña"><em>PEÑA</em></th>
                         </tr>
                     </thead>
                     <tbody>${boletoBody}${boletoEmpty}</tbody>

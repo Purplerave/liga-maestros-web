@@ -55,6 +55,32 @@ def test_cover_pena_vote_uses_backend_percentages():
     assert ".cx-cons-bar" in css
 
 
+def test_cover_masters_use_column_logos_and_plain_signs():
+    """Portada: una columna por Maestro con logo arriba y signo 1/X/2 normal.
+
+    Sustituye la celda única «MAESTROS» con pastillas de color (.cx-mi) por
+    columnas reales: cabecera con logo SVG + abreviatura y celdas solo con
+    el signo, más una columna PEÑA con el signo de consenso.
+    """
+    logo_dir = ROOT / "static" / "img" / "maestros"
+    for name in ("claude", "chatgpt", "gemini", "grok", "copilot", "programa"):
+        assert (logo_dir / f"{name}.svg").is_file(), f"falta el logo de {name}.svg"
+
+    cover = COVER_JS.read_text(encoding="utf-8")
+    assert "_mlogoSrc" in cover
+    assert "_mshort" in cover
+    assert "cx-r-ia" in cover
+    assert "cx-ia-sign" in cover
+    assert "masterHeads" in cover
+    # Las pastillas de color y la celda única desaparecen del boleto.
+    assert "cx-r-masters" not in cover
+    assert "cx-mi-shape" not in cover
+
+    css = COVER_CSS.read_text(encoding="utf-8")
+    assert ".cx-mi-logo" in css
+    assert ".cx-ia-sign" in css
+
+
 def test_porra_bonus_copy_is_short_and_consistent():
     files = (PORRA_JS, PORRA_ROUTE, COVER_JS)
     combined = "\n".join(path.read_text(encoding="utf-8") for path in files)
