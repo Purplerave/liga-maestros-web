@@ -14,9 +14,10 @@ from liga_maestros.scoring import normalize_prediction_sign
 from liga_maestros.services.payloads.predictions import _load_prediction_reasons
 
 MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot"}
-PENA_9 = {"chipi", "geli", "pepe", "profe", "fortu", "oraculo", "sesudo", "luzia", "erniebot"}
-PENA_PENDING = {"jimmy", "luna", "fistro", "sonia"}
+PENA_10 = {"chipi", "geli", "pepe", "profe", "fortu", "oraculo", "sesudo", "luzia", "erniebot", "jimmy"}
+PENA_PENDING = {"luna", "fistro", "sonia"}
 CHIPI_SIGNOS = ["1", "X", "2", "1", "2", "1", "X", "1", "2", "X", "1", "1", "1", "2", "2-1"]
+JIMMY_SIGNOS = ["2", "X", "1", "2", "2", "2", "1", "X", "1", "1", "X", "1", "X", "2", "M-0"]
 FORTU_PLENO = "2-0"
 
 
@@ -94,14 +95,15 @@ def test_load_prediction_reasons_falls_back_to_compact_jornada_file(tmp_path, mo
     assert reasons["gemini"][14] == "Razón 15"
 
 
-def test_j2_file_has_five_masters_and_nine_pena_tickets():
+def test_j2_file_has_five_masters_and_ten_pena_tickets():
     payload = _load_j2()
     assert payload["jornada"] == 2
     tickets = {uid: entry for uid, entry in payload.items() if isinstance(entry, dict) and entry.get("signos")}
     assert MAESTROS <= set(tickets)
-    assert PENA_9 <= set(tickets)
+    assert PENA_10 <= set(tickets)
     assert PENA_PENDING.isdisjoint(tickets)
     assert tickets["chipi"]["signos"] == CHIPI_SIGNOS
+    assert tickets["jimmy"]["signos"] == JIMMY_SIGNOS
     assert tickets["fortu"]["signos"][14] == FORTU_PLENO
     for uid, entry in tickets.items():
         signos = entry["signos"]
@@ -119,15 +121,16 @@ def test_ensure_jornada_2_imports_masters_and_pena():
     ensure_predicciones_unique_index(conn)
 
     imported = ensure_jornada_2(conn)
-    assert imported >= 210
+    assert imported >= 225
     rows = conn.execute(
         "SELECT user_id, signo FROM predicciones WHERE jornada = 2 ORDER BY user_id, partido_id"
     ).fetchall()
     by_user = {}
     for row in rows:
         by_user.setdefault(row["user_id"], []).append(row["signo"])
-    assert MAESTROS | PENA_9 <= set(by_user)
+    assert MAESTROS | PENA_10 <= set(by_user)
     assert by_user["chipi"] == CHIPI_SIGNOS
+    assert by_user["jimmy"] == JIMMY_SIGNOS
     assert by_user["chatgpt"][14] == "M-1"
     assert by_user["fortu"][14] == FORTU_PLENO
     assert PENA_PENDING.isdisjoint(by_user)
@@ -139,7 +142,7 @@ def test_ensure_jornada_2_imports_masters_and_pena():
 
 def test_j2_prediction_reasons_include_pena_explanations():
     reasons = _load_prediction_reasons(2)
-    assert MAESTROS | PENA_9 <= set(reasons)
+    assert MAESTROS | PENA_10 <= set(reasons)
     assert len(reasons["oraculo"]) == 15
     assert "San Mamés" in reasons["luzia"][0] or "Athletic" in reasons["luzia"][0]
     assert reasons["erniebot"][14]
@@ -158,19 +161,20 @@ def test_api_liga_data_j2_hides_pena_tickets_and_exposes_consensus(tmp_path, mon
 
     predicciones = payload["predicciones_actuales"]
     assert MAESTROS <= set(predicciones)
-    assert PENA_9.isdisjoint(predicciones)
+    assert PENA_10.isdisjoint(predicciones)
 
     consenso = payload["consenso_pena"]
     assert len(consenso) == 14
-    assert all(item["total"] == 9 for item in consenso)
+    assert all(item["total"] == 10 for item in consenso)
     assert all(item["fuente"] == "pena" for item in consenso)
     assert consenso[0]["ganador"] == "1"
     assert consenso[4]["ganador"] == "2"
     assert consenso[8]["ganador"] == "2"
 
     pleno = payload["consenso_pleno_pena"]
-    assert pleno["valid"] == 9
+    assert pleno["valid"] == 10
     assert pleno["exactCounts"]["2-1"] == 7
+    assert pleno["exactCounts"]["M-0"] == 1
     assert pleno["topScore"] == ["2-1", 7]
 
 
@@ -178,7 +182,7 @@ def test_pena_revision_file_matches_compact_tickets():
     compact = _load_j2()
     revision = json.loads(Path("data/predicciones_J2_pena_revision.json").read_text(encoding="utf-8"))
     assert revision["jornada"] == 2
-    assert set(revision["entregados"]) == PENA_9
+    assert set(revision["entregados"]) == PENA_10
     assert set(revision["pendientes"]) == PENA_PENDING
     for uid, entry in revision["entregados"].items():
         assert compact[uid]["signos"] == entry["signos"]

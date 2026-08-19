@@ -2,7 +2,7 @@
   "jornada": 2,
   "temporada": "2026-2027",
   "generado_en": "2026-08-19T12:00:00+02:00",
-  "nota": "Boletos de los cinco Maestros y nueve peñistas aportados para la Jornada 2. Pendientes Jimmy, Luna, Fistro y Sonia.",
+  "nota": "Boletos de los cinco Maestros y diez peñistas aportados para la Jornada 2. Pendientes Luna, Fistro y Sonia. Jimmy: signos 0 de los partidos 8/11/13 normalizados a X; Pleno M normalizado a M-0.",
   "gemini": {
     "nombre": "GEMINI",
     "signos": [
@@ -528,6 +528,49 @@
       "Partido muy equilibrado, ambos con defensa sólida en estreno.",
       "Almería con mayor potencial ofensivo y menos bajas relevantes.",
       "Atlético domina pero Villarreal marca en contraataque con claridad."
+    ]
+  },
+  "jimmy": {
+    "nombre": "JIMMY",
+    "origen": "ChatJimmy",
+    "signos": [
+      "2",
+      "X",
+      "1",
+      "2",
+      "2",
+      "2",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "X",
+      "2",
+      "M-0"
+    ],
+    "razones": [
+      "Los partidos a favor del Athletic Club en Bilbao",
+      "Partido equilibrado en un rendimiento similar en la pretemporada",
+      "El Espanyol se lleva un partido emocionante con victoria",
+      "El Getafe se lleva un partido emocionante en el campo de la pretemporada",
+      "El Barcelona se lleva el partido en un emocionante rendimiento",
+      "El Leganes se lleva el partido en un rendimiento emocionante",
+      "El Málaga se lleva el partido en un emocionante rendimiento",
+      "El Leganes se lleva el partido en un emocionante rendimiento",
+      "El Ceuta se lleva el partido en un emocionante rendimiento",
+      "El Cádiz se lleva el partido en un emocionante rendimiento",
+      "El Villarreal se lleva el partido en un emocionante rendimiento",
+      "El Castellón se lleva el partido en un emocionante rendimiento",
+      "El Burgos se lleva el partido en un emocionante rendimiento",
+      "El Tenerife se lleva el partido en un emocionante rendimiento",
+      "El Atletico de Madrid se lleva el partido con tres goles en un emocionante rendimiento"
+    ],
+    "incidencias": [
+      "Partidos 8, 11 y 13 llegaron con signo 0; se normalizaron a X como en J1.",
+      "Pleno llegó como M; se guardó M-0 (Atlético 3 o más, visitante no aportado).",
+      "Varios nombres de rival no coinciden con el boleto oficial; se respetó el orden 1-15."
     ]
   }
 }
