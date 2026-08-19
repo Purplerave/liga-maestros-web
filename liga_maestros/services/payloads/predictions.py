@@ -50,6 +50,16 @@ def _load_predictions(conn, jornada):
     return preds
 
 
+def _normalize_prediction_reasons(raw_reasons):
+    normalized = {}
+    for raw_uid, raw_items in raw_reasons.items():
+        if not isinstance(raw_items, list):
+            continue
+        items = [str(item or "").strip() for item in raw_items[:15]]
+        normalized[str(raw_uid).strip().lower()] = (items + [""] * 15)[:15]
+    return normalized
+
+
 def _load_prediction_reasons(jornada):
     candidates = [
         os.path.join(config.SEED_DATA_DIR, "PREDICTION_REASONS.json"),
@@ -63,14 +73,33 @@ def _load_prediction_reasons(jornada):
             continue
         jornada_reasons = payload.get(str(jornada), {}) if isinstance(payload, dict) else {}
         if not isinstance(jornada_reasons, dict):
-            return {}
-        normalized = {}
-        for raw_uid, raw_items in jornada_reasons.items():
-            if not isinstance(raw_items, list):
-                continue
-            items = [str(item or "").strip() for item in raw_items[:15]]
-            normalized[str(raw_uid).strip().lower()] = (items + [""] * 15)[:15]
-        return normalized
+            continue
+        normalized = _normalize_prediction_reasons(jornada_reasons)
+        if normalized:
+            return normalized
+
+    # Las jornadas nuevas se guardan en un único fichero compacto junto a sus
+    # signos. Así no hay que duplicar las explicaciones en PREDICTION_REASONS.
+    compact_candidates = [
+        os.path.join(config.SEED_DATA_DIR, f"predicciones_J{jornada}.json"),
+        os.path.join(config.DATA_DIR, f"predicciones_J{jornada}.json"),
+    ]
+    for path in dict.fromkeys(compact_candidates):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                payload = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        raw_reasons = {
+            uid: entry.get("razones")
+            for uid, entry in payload.items()
+            if isinstance(entry, dict) and isinstance(entry.get("razones"), list)
+        }
+        normalized = _normalize_prediction_reasons(raw_reasons)
+        if normalized:
+            return normalized
     return {}
 
 
