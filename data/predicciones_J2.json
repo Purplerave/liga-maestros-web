@@ -1,0 +1,111 @@
+{
+  "jornada": 2,
+  "temporada": "2026-2027",
+  "generado_en": "2026-08-19T12:00:00+02:00",
+  "nota": "Boletos de los cinco Maestros aportados para la Jornada 2.",
+  "gemini": {
+    "nombre": "GEMINI",
+    "signos": ["1", "1", "2", "1", "2", "1", "X", "1", "2", "1", "1", "1", "1", "2", "2-1"],
+    "razones": [
+      "El Athletic busca hacerse fuerte en San Mamés ante un Sevilla en reestructuración y con menor solidez.",
+      "La fortaleza de Mestalla y la igualdad táctica declinan la balanza ligeramente a favor del conjunto che.",
+      "La superioridad de plantilla y la calidad individual del Real Madrid decantarán el partido en Barcelona.",
+      "El Getafe busca rehacerse en el Coliseum mostrando mayor solidez defensiva frente al combativo recién ascendido.",
+      "El Barcelona impone su potencial ofensivo y control de juego para llevarse la victoria a domicilio.",
+      "La intensidad de Osasuna en El Sadar aprovechará las dudas defensivas mostradas por el Levante.",
+      "Duelo entre dos históricos muy parejos tácticamente donde el equilibrio de fuerzas inclina hacia el empate.",
+      "El Real Oviedo buscará imponer el factor campo en el Carlos Tartiere ante un bloque rocoso.",
+      "Las Palmas muestra mayor jerarquía y solidez defensiva para superar al Ceuta en su desplazamiento.",
+      "El Eldense aprovecha su empuje en el Pepico Amat ante las dudas del Cádiz a domicilio.",
+      "El empuje de Ipurua y el ritmo colectivo del Eibar le otorgan ventaja ante el Valladolid.",
+      "El Castellón impondrá su gran pegada y dominio como local en Castalia frente al Sabadell.",
+      "El apoyo de El Molinón será decisivo para romper la resistencia defensiva del conjunto burgalés.",
+      "La mayor calidad de la plantilla almeriense inclina el duelo pese a la exigencia del Heliodoro.",
+      "El Atlético impondrá su intensidad en el Metropolitano ante un Villarreal peligroso pero permisivo en defensa."
+    ]
+  },
+  "chatgpt": {
+    "nombre": "CHATGPT",
+    "signos": ["1", "1", "2", "X", "2", "1", "1", "X", "2", "2", "X", "1", "2", "X", "M-1"],
+    "razones": [
+      "La defensa del Athletic y factor local a su favor; Sevilla debutó irregular con expulsado.",
+      "La plantilla valencianista reforzada y el factor Mestalla los favorece. Celta cayó 0-2 en su debut.",
+      "El Real viaja motivado pese a no debutar; el Espanyol ganó con solvencia, pero Real es superior.",
+      "No hay claro favorito: Getafe cayó 3-0 sin sus jugadores clave; Racing empató con Villarreal en su debut.",
+      "La calidad de los blaugranas es abismal. Elche consiguió un punto, pero no puede compararse.",
+      "La diferencia de resultados iniciales (Osasuna 0-2, Levante 0-3) da ventaja al local Osasuna.",
+      "Deportivo empató 1-1 vs Elche; Málaga cayó con el Atlético pero debe dominar en su campo.",
+      "Ambos sin goles en casa: Oviedo cedió empate 0-0, Leganés 1-1; se prevé duelo parejo.",
+      "Las Palmas fue superior con victoria 2-1; el Ceuta debutó goleado 1-5, favorece al visitante.",
+      "Eldense fue goleado 0-3 en su debut; Cádiz comenzó sólido (0-0). El visitante es favorito.",
+      "Empate: Eibar 1-3 Tenerife, Valladolid 0-2. Ambos con debut negativo, duelo parejo en Ipurua.",
+      "Castellón debutó con victoria 1-0; Sabadell 0-0. En casa, Castellón impone su estilo.",
+      "Burgos 3-2, Sporting 0-0. Burgos más en confianza y con más gol, favor visita.",
+      "Triunfos de 3 goles: Tenerife ganó 3-1, Almería 3-0. Con ambos entonados, empate parece lógico.",
+      "Atlético domina en casa con su poder ofensivo; Villarreal empató 2-2, se prevé victoria con 3-1."
+    ]
+  },
+  "copilot": {
+    "nombre": "COPILOT",
+    "signos": ["1", "X", "2", "1", "2", "1", "2", "1", "2", "X", "1", "X", "1", "X", "1-1"],
+    "razones": [
+      "Athletic sólido en casa, menos bajas clave y presión alta efectiva.",
+      "Ambos mostraron equilibrio en estreno; ataque similar y defensas firmes.",
+      "Real superior plantilla y eficacia; Espanyol limitado ofensivamente y cansado.",
+      "Getafe más compacto defensivamente y ventaja por experiencia en Primera.",
+      "Barcelona domina posesión y remate; Elche con dudas defensivas claras.",
+      "Osasuna fuerte en casa, mejor bloque y balón parado peligroso.",
+      "Deportivo mejor rodado y más contundente; Málaga irregular en defensa.",
+      "Oviedo sólido en casa, profundidad de plantilla y buen contraataque.",
+      "Las Palmas superior en calidad y experiencia; Ceuta limitado físicamente.",
+      "Eldense intenso en casa; Cádiz con dudas defensivas y rotaciones.",
+      "Eibar sólido tácticamente y eficaz en transiciones ofensivas rápidas.",
+      "Castellón y Sabadell parejos; pocos goles esperados y rotaciones.",
+      "Sporting favorito por localía, plantilla más equilibrada y remate aéreo.",
+      "Tenerife ordenado atrás; Almería peligroso en contragolpes y balón parado.",
+      "Atlético intenso; Villarreal efectivo en contras, empate probable con goles."
+    ]
+  },
+  "grok": {
+    "nombre": "GROK",
+    "signos": ["1", "X", "2", "1", "2", "1", "X", "X", "2", "2", "1", "1", "X", "1", "2-1"],
+    "razones": [
+      "Athletic debuta en casa con buena pretemporada y Sevilla llega tras esfuerzo reciente.",
+      "Ambos sin debut oficial aún y con plantillas equilibradas en arranque de liga.",
+      "Madrid superior pese a bajas y debut; Espanyol ya sumó pero le falta calidad.",
+      "Getafe reacciona en casa tras goleada; Racing empató pero es visitante difícil.",
+      "Barcelona favorito claro aunque Elche empató; calidad y fichajes marcan diferencia.",
+      "Osasuna sólido en El Sadar; Levante encajó goleada y llega muy tocado.",
+      "Ambos recién ascendidos o similares; partido igualado sin superioridad clara.",
+      "Ambos empataron en debut; partidos de pocos goles y mucho equilibrio.",
+      "Las Palmas ganó y Ceuta encajó 5-1; diferencia de nivel evidente.",
+      "Cádiz más experimentado y empató; Eldense perdió en debut oficial.",
+      "Eibar en Ipurua reacciona mejor; Valladolid perdió y viaja con dudas.",
+      "Castellón ganó en debut; Sabadell empató y visita con menos ritmo.",
+      "Sporting empató en casa; Burgos ganó pero partido muy igualado.",
+      "Tenerife ganó fuera y juega en casa; Almería también sumó pero viaja.",
+      "Atlético favorito en casa tras debut; Villarreal empató pero concede."
+    ]
+  },
+  "claude": {
+    "nombre": "CLAUDE",
+    "signos": ["1", "X", "2", "X", "2", "1", "X", "1", "2", "2", "X", "1", "2", "1", "2-1"],
+    "razones": [
+      "Athletic parte con ventaja en San Mamés pese a mala pretemporada; Sevilla ganó sufriendo con diez.",
+      "Ambos debutan sin haber jugado su liga; equilibrio por pretemporadas discretas de los dos.",
+      "Madrid debuta invicto en pretemporada con cinco fichajes; superior pese al gran inicio perico.",
+      "Getafe cayó 0-3 con expulsión; Racing empató 2-2 mostrando carácter en su regreso.",
+      "Barcelona debuta con plantilla reforzada por Rodri y gran pretemporada; favorito claro ante el Elche.",
+      "Osasuna llega mejor tras buena pretemporada; Levante fue muy gris en su goleada encajada.",
+      "Deportivo empató bien en su debut; Málaga llega justo de descanso tras jugar en Madrid.",
+      "Oviedo empató sin goles; su plantilla de recién descendido pesa más que el Leganés.",
+      "Ceuta encajó cinco goles en su debut; Las Palmas ganó con plantilla de mayor nivel.",
+      "Eldense encajó tres goles fuera; Cádiz empezó sólido con empate a cero sin encajar.",
+      "Ambos encajaron goles en su estreno; equilibrio entre el anfitrión y un Valladolid de más nivel.",
+      "Castellón ganó con buen ritmo fuera de casa; Sabadell solo empató sin marcar goles.",
+      "Burgos ganó con solidez ofensiva; Sporting no marcó en su empate inicial en casa.",
+      "Tenerife golea fuera en su estreno y juega en un campo históricamente complicado como local.",
+      "Atlético estrena plantilla reforzada en casa; Villarreal llega con desgaste tras remontar en la primera jornada."
+    ]
+  }
+}

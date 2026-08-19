@@ -475,11 +475,53 @@ def ensure_jornada_1(conn):
     conn.commit()
 
 
+def _import_compact_prediction_tickets(conn, jornada):
+    """Importa los boletos editoriales de una jornada desde predicciones_JN.json."""
+    candidates = [
+        os.path.join(config.SEED_DATA_DIR, f"predicciones_J{jornada}.json"),
+        os.path.join(config.DATA_DIR, f"predicciones_J{jornada}.json"),
+    ]
+    for path in dict.fromkeys(candidates):
+        if not path or not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                payload = json.load(fh)
+            if int(payload.get("jornada") or 0) != int(jornada):
+                continue
+        except (OSError, ValueError, TypeError, AttributeError):
+            continue
+
+        tickets = []
+        for raw_uid, entry in payload.items():
+            if not isinstance(entry, dict):
+                continue
+            uid = str(raw_uid or "").strip().lower()
+            raw_signs = list(entry.get("signos") or [])
+            if not uid or len(raw_signs) != 15:
+                continue
+            signs = [normalize_prediction_sign(pid, value) for pid, value in enumerate(raw_signs, start=1)]
+            if any(not sign or sign == "-" for sign in signs):
+                continue
+            tickets.append((uid, signs))
+
+        for uid, signs in tickets:
+            conn.executemany(
+                "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+                ((uid, int(jornada), partido_id, sign) for partido_id, sign in enumerate(signs, start=1)),
+            )
+        if tickets:
+            conn.commit()
+        return sum(len(signs) for _, signs in tickets)
+    return 0
+
+
 def ensure_jornada_2(conn):
     updated = ensure_jornada_completa(conn, 2)
-    if updated:
+    imported = _import_compact_prediction_tickets(conn, 2)
+    if updated or imported:
         conn.commit()
-    return updated
+    return updated + imported
 
 
 def ensure_jornada_75(conn):
