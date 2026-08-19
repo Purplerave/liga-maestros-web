@@ -12,7 +12,7 @@ Se recibieron cinco boletos: Gemini, ChatGPT, Copilot, Grok y Claude.
 - Los cinco Plenos al 15 son válidos en formato oficial (`0`, `1`, `2` o `M` por equipo).
 - No hay partidos duplicados ni ausentes.
 - Los datos quedaron normalizados en `data/predicciones_J2_maestros_revision.json`.
-- Todavía no se han importado en la web.
+- Importados en la web junto a La Peña (`ensure_jornada_2()`).
 
 ## Signos normalizados
 

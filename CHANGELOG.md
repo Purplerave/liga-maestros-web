@@ -2,6 +2,17 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-19 — La Peña entra en la Jornada 2
+
+### Añadido
+
+- Diez boletos de La Peña para la J2 (Chipi, Geli, Pepe, Profe, Fortu,
+  Oráculo, Sesudo, Luzia, ErnieBot y Jimmy) en `data/predicciones_J2.json`.
+  `ensure_jornada_2()` los carga al arrancar junto a los cinco Maestros.
+  Los individuales siguen ocultos hasta el cierre; el consenso (10 votos)
+  sí aparece en portada. Pendientes Luna, Fistro y Sonia. Jimmy llegó con
+  tres `0` y un Pleno `M`; se normalizaron a `X` y `M-0`.
+
 ## 2026-08-18 — Comentarista MiMo en el ticker
 
 ### Añadido
