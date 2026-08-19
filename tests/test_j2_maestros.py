@@ -1,12 +1,54 @@
 import json
 import sqlite3
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from liga_maestros.db.migrations import _import_compact_prediction_tickets, ensure_core_tables
+from liga_maestros.db.migrations import (
+    _import_compact_prediction_tickets,
+    ensure_core_tables,
+    ensure_jornada_2,
+    ensure_predicciones_unique_index,
+)
+from liga_maestros.scoring import normalize_prediction_sign
 from liga_maestros.services.payloads.predictions import _load_prediction_reasons
+
+MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot"}
+PENA_9 = {"chipi", "geli", "pepe", "profe", "fortu", "oraculo", "sesudo", "luzia", "erniebot"}
+PENA_PENDING = {"jimmy", "luna", "fistro", "sonia"}
+CHIPI_SIGNOS = ["1", "X", "2", "1", "2", "1", "X", "1", "2", "X", "1", "1", "1", "2", "2-1"]
+FORTU_PLENO = "2-0"
 
 
 def _ticket(sign="1", pleno="2-1"):
     return {"signos": [sign] * 14 + [pleno], "razones": [f"Razón {idx}" for idx in range(1, 16)]}
+
+
+def _load_j2():
+    with open("data/predicciones_J2.json", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _test_app(tmp_path, monkeypatch):
+    import config
+    from liga_maestros import create_app
+    from liga_maestros.routes import liga_data
+
+    monkeypatch.setattr(config, "DB_PATH", str(tmp_path / "j2.db"))
+    monkeypatch.setattr(config, "BOOTSTRAP_DB_PATH", str(tmp_path / "missing.db"))
+    monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(config.PRODUCTION_SEED_PATH))
+    monkeypatch.setattr(config, "DB_BACKUP_DIR", str(tmp_path / "backups"))
+    monkeypatch.setenv("SECRET_KEY", "j2-test-secret")
+    monkeypatch.setenv("WEB_COLLECTOR_ENABLED", "0")
+    monkeypatch.setenv("DB_BACKUP_ENABLED", "0")
+    monkeypatch.setenv("ALLOW_LOCAL_ADMIN", "0")
+    monkeypatch.setenv("TRUSTED_HOSTS", "localhost,127.0.0.1")
+    monkeypatch.setattr(
+        liga_data,
+        "madrid_now",
+        lambda: datetime(2026, 8, 19, 18, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    return create_app()
 
 
 def test_import_compact_prediction_tickets_imports_complete_valid_masters(tmp_path, monkeypatch):
@@ -50,3 +92,93 @@ def test_load_prediction_reasons_falls_back_to_compact_jornada_file(tmp_path, mo
     assert len(reasons["gemini"]) == 15
     assert reasons["gemini"][0] == "Razón 1"
     assert reasons["gemini"][14] == "Razón 15"
+
+
+def test_j2_file_has_five_masters_and_nine_pena_tickets():
+    payload = _load_j2()
+    assert payload["jornada"] == 2
+    tickets = {uid: entry for uid, entry in payload.items() if isinstance(entry, dict) and entry.get("signos")}
+    assert MAESTROS <= set(tickets)
+    assert PENA_9 <= set(tickets)
+    assert PENA_PENDING.isdisjoint(tickets)
+    assert tickets["chipi"]["signos"] == CHIPI_SIGNOS
+    assert tickets["fortu"]["signos"][14] == FORTU_PLENO
+    for uid, entry in tickets.items():
+        signos = entry["signos"]
+        razones = entry.get("razones") or []
+        assert len(signos) == 15, uid
+        assert len(razones) == 15, uid
+        normalized = [normalize_prediction_sign(pid, value) for pid, value in enumerate(signos, start=1)]
+        assert all(sign and sign != "-" for sign in normalized), (uid, normalized)
+
+
+def test_ensure_jornada_2_imports_masters_and_pena():
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    ensure_core_tables(conn)
+    ensure_predicciones_unique_index(conn)
+
+    imported = ensure_jornada_2(conn)
+    assert imported >= 210
+    rows = conn.execute(
+        "SELECT user_id, signo FROM predicciones WHERE jornada = 2 ORDER BY user_id, partido_id"
+    ).fetchall()
+    by_user = {}
+    for row in rows:
+        by_user.setdefault(row["user_id"], []).append(row["signo"])
+    assert MAESTROS | PENA_9 <= set(by_user)
+    assert by_user["chipi"] == CHIPI_SIGNOS
+    assert by_user["chatgpt"][14] == "M-1"
+    assert by_user["fortu"][14] == FORTU_PLENO
+    assert PENA_PENDING.isdisjoint(by_user)
+
+    ensure_jornada_2(conn)
+    again = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 2").fetchone()[0]
+    assert again == len(rows)
+
+
+def test_j2_prediction_reasons_include_pena_explanations():
+    reasons = _load_prediction_reasons(2)
+    assert MAESTROS | PENA_9 <= set(reasons)
+    assert len(reasons["oraculo"]) == 15
+    assert "San Mamés" in reasons["luzia"][0] or "Athletic" in reasons["luzia"][0]
+    assert reasons["erniebot"][14]
+
+
+def test_api_liga_data_j2_hides_pena_tickets_and_exposes_consensus(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    response = app.test_client().get("/api/liga/data?j=2")
+    assert response.status_code == 200
+    payload = response.get_json()
+
+    assert payload["jornada"] == "2"
+    assert payload["partidos"][0]["local"] == "Athletic"
+    assert payload["partidos"][14]["visitante"] == "Villarreal"
+    assert payload["is_locked"] is False
+
+    predicciones = payload["predicciones_actuales"]
+    assert MAESTROS <= set(predicciones)
+    assert PENA_9.isdisjoint(predicciones)
+
+    consenso = payload["consenso_pena"]
+    assert len(consenso) == 14
+    assert all(item["total"] == 9 for item in consenso)
+    assert all(item["fuente"] == "pena" for item in consenso)
+    assert consenso[0]["ganador"] == "1"
+    assert consenso[4]["ganador"] == "2"
+    assert consenso[8]["ganador"] == "2"
+
+    pleno = payload["consenso_pleno_pena"]
+    assert pleno["valid"] == 9
+    assert pleno["exactCounts"]["2-1"] == 7
+    assert pleno["topScore"] == ["2-1", 7]
+
+
+def test_pena_revision_file_matches_compact_tickets():
+    compact = _load_j2()
+    revision = json.loads(Path("data/predicciones_J2_pena_revision.json").read_text(encoding="utf-8"))
+    assert revision["jornada"] == 2
+    assert set(revision["entregados"]) == PENA_9
+    assert set(revision["pendientes"]) == PENA_PENDING
+    for uid, entry in revision["entregados"].items():
+        assert compact[uid]["signos"] == entry["signos"]
