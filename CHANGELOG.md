@@ -2,6 +2,25 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-19 — Portada: boleto de quiniela con una columna por Maestro
+
+### Cambiado
+
+- La portada deja de meter a todos los Maestros en una sola celda
+  «MAESTROS» con pastillas de color (`.cx-mi`) y pasa a un boleto de
+  quiniela de verdad: **una columna por Maestro** (Claude, ChatGPT,
+  Gemini, Grok, Copilot) con el logo distintivo de cada IA arriba
+  (SVG propios en `static/img/maestros/`) y su abreviatura debajo
+  (CLD / GPT / GEM / GRK / COP). Orden = `coverMasterColumns()`
+  filtrando Programa.
+- Las celdas muestran solo el signo 1/X/2 normal en tipografía
+  Rajdhani (sin pastillas ni leyenda aparte). El Pleno (fila 15)
+  admite 2-1 / M-1.
+- La columna «LA PEÑA» (ahora «PEÑA») muestra el signo de consenso
+  ganador por partido — y `consenso_pleno_pena.topScore[0]` en el
+  Pleno — en lugar de los tres porcentajes en cada fila.
+- El panel «MAESTROS · TOP 5» también muestra el logo de cada IA.
+
 ## 2026-08-19 — La Peña entra en la Jornada 2
 
 ### Añadido
