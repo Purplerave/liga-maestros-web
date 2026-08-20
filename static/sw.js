@@ -15,6 +15,7 @@ const PRECACHE_URLS = [
     '/static/css/layout/app_shell.css',
     '/static/css/visual_unification.css',
     '/static/css/cover_hero.css',
+    '/static/css/mobile_v2.css',
     '/static/css/base/typography.css',
     '/static/css/themes/newspaper/shell.css',
     '/static/css/themes/newspaper/page_foundations.css',

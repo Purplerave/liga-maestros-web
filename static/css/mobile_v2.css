@@ -1,0 +1,609 @@
+@layer responsive {
+/* ==========================================================================
+   LIGA DE MAESTROS — EXPERIENCIA MÓVIL (mobile-first real)
+   Capa `responsive`: se declara DESPUÉS de pages/theme/layout en el orden de
+   @layer, por lo que estas reglas ganan a todas las vistas sin tocar su CSS.
+   Puntos clave:
+     1. Scroll nativo (sin doble scroll anidado).
+     2. Bottom navigation fija + cabecera sticky.
+     3. Tipografía legible (piso 12px; base 16px; inputs 16px → sin auto-zoom iOS).
+     4. Touch targets ≥ 44px.
+     5. La Quiniela se convierte en TARJETAS grandes y amables en vez de tabla.
+   ========================================================================== */
+
+@media (max-width: 899px) {
+
+    /* ────────────────────────────────────────────────────────────────
+       1. SHELL: scroll nativo del body, cabecera sticky, nav abajo
+       ──────────────────────────────────────────────────────────────── */
+    html {
+        height: auto;
+        scroll-behavior: smooth;
+    }
+    body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    body.newspaper-ui.quiniela-focus .app-shell {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: 100dvh;
+        max-height: none;
+        overflow: visible;
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    /* El logo de cabecera consume 56px valiosos: lo quitamos en móvil
+       (el título de la topbar ya identifica la marca). */
+    body.newspaper-ui.quiniela-focus .header-brand-panel {
+        display: none;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-shell {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        width: 100%;
+        height: auto;
+        min-height: 54px;
+        padding: 8px 12px;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-context {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-filters {
+        order: 10;
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+        gap: 6px;
+    }
+    /* En móvil sobra ruido: solo acciones esenciales */
+    body.newspaper-ui.quiniela-focus .topbar-actions #refresh-btn,
+    body.newspaper-ui.quiniela-focus .topbar-actions .cmdk-trigger {
+        display: none;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-actions .primary-btn,
+    body.newspaper-ui.quiniela-focus .topbar-actions .icon-btn {
+        min-height: 40px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+        border-radius: 10px;
+    }
+
+    /* Bottom navigation fija (patrón nativo móvil) */
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: space-around;
+        align-items: stretch;
+        height: auto;
+        min-height: 58px;
+        margin: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        border-top: 1px solid rgba(243, 231, 207, 0.24);
+        border-bottom: 0;
+        background: rgba(3, 7, 18, 0.97);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 56px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 5px 2px;
+        border: 0;
+        border-right: 0;
+        background: transparent;
+        border-radius: 0;
+        -webkit-tap-highlight-color: transparent;
+    }
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button .nav-ico {
+        font-size: 1.25rem;
+        line-height: 1;
+        font-style: normal;
+        filter: none;
+    }
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
+        margin: 0;
+        font-size: 0.6rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active {
+        color: #f59e0b;
+        background: rgba(245, 158, 11, 0.12);
+    }
+
+    /* El área principal crece con el contenido y deja hueco para la bottom nav */
+    body.newspaper-ui.quiniela-focus .main-arena {
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 0;
+        width: 100%;
+        overflow: visible;
+        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    }
+    body.newspaper-ui.quiniela-focus .arena-content {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus .site-legal-links {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       2. TIPOGRAFÍA LEGIBLE — piso de 12px, inputs a 16px
+       ──────────────────────────────────────────────────────────────── */
+    body {
+        font-size: 16px;
+    }
+
+    /* Inputs y selects a 16px: evita el auto-zoom de Safari iOS.
+       (Solo los campos de texto; los botones mantienen su tamaño de diseño.) */
+    select,
+    input,
+    textarea {
+        font-size: 16px;
+    }
+    body.newspaper-ui.quiniela-focus .field-group select {
+        height: 44px;
+        min-height: 44px;
+        padding: 0 12px;
+        font-size: 0.95rem;
+    }
+    body.newspaper-ui.quiniela-focus .porra-selector,
+    body.newspaper-ui.quiniela-focus .porra-form input,
+    body.newspaper-ui.quiniela-focus .porra-form button {
+        font-size: 1rem;
+    }
+
+    /* Cabecera */
+    body.newspaper-ui.quiniela-focus .topbar-title {
+        font-size: 0.98rem;
+        line-height: 1.15;
+        white-space: normal;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-kicker {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-user-name,
+    body.newspaper-ui.quiniela-focus .topbar-user-score,
+    body.newspaper-ui.quiniela-focus .topbar-login-btn {
+        font-size: 0.8rem;
+    }
+
+    /* Chips de maestros (Quiniela) */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span:first-child[title] {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .saved-ticket-sign,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick {
+        font-size: 0.85rem;
+        min-height: 30px;
+        min-width: 30px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-breakdown-item small {
+        font-size: 0.68rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-breakdown-item b {
+        font-size: 0.85rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-status {
+        font-size: 0.74rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels span {
+        font-size: 0.75rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels b {
+        font-size: 0.8rem;
+    }
+
+    /* Clasificaciones */
+    body.newspaper-ui.quiniela-focus .full-standings-table {
+        font-size: 0.8rem;
+    }
+    body.newspaper-ui.quiniela-focus .full-standings-table thead th {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus .full-club {
+        font-size: 0.85rem;
+    }
+    body.newspaper-ui.quiniela-focus .form-dot {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus .league-tabs .tab-btn {
+        font-size: 0.8rem;
+        min-height: 44px;
+        padding: 0 14px;
+    }
+    body.newspaper-ui.quiniela-focus .standings-legend {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus .standings-live {
+        font-size: 0.7rem;
+    }
+
+    /* Tarjetas de partido (Directo / Ligas) */
+    body.newspaper-ui.quiniela-focus .league-group-header span {
+        font-size: 0.75rem;
+    }
+    body.newspaper-ui.quiniela-focus .league-group-header strong {
+        font-size: 0.9rem;
+    }
+    body.newspaper-ui.quiniela-focus .match-card .team-cell {
+        font-size: 0.9rem;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       3. TOUCH TARGETS ≥ 44px
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button,
+    body.newspaper-ui.quiniela-focus .league-tabs .tab-btn,
+    body.newspaper-ui.quiniela-focus .primary-btn,
+    body.newspaper-ui.quiniela-focus .login-btn,
+    body.newspaper-ui.quiniela-focus .icon-btn,
+    body.newspaper-ui.quiniela-focus .field-group select,
+    body.newspaper-ui.quiniela-focus .ticket-user-sign-group button.ia-signo {
+        min-height: 44px;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       4. QUINIELA COMO TARJETAS GRANDES (sustituye la tabla)
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table-wrap {
+        width: 100%;
+        min-width: 0;
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        table-layout: auto;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table thead {
+        display: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 10px;
+        width: 100%;
+        padding: 12px 12px;
+        border: 1px solid rgba(56, 189, 248, 0.18);
+        border-radius: 14px;
+        background: rgba(10, 17, 30, 0.72);
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    /* Fila 1: número + partido + marcador/hora */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .match-index-cell {
+        order: 0;
+        flex: 0 0 auto;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .tension-fixture-cell {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-status-cell {
+        order: 2;
+        flex: 0 0 auto;
+        text-align: right;
+    }
+    /* Fila 2: consenso de La Peña a lo ancho */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pena-cell {
+        order: 3;
+        flex: 1 1 100%;
+        width: 100%;
+    }
+    /* Fila 3: chips de los maestros (fluyen y envuelven) */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) {
+        order: 4;
+        flex: 0 0 auto;
+    }
+    /* Fila 4: TU QUINIELA con botones grandes */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-user-cell {
+        order: 5;
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    /* Número del partido */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .match-number {
+        width: 34px;
+        height: 34px;
+        line-height: 34px;
+        font-size: 1.05rem;
+        border-radius: 9px;
+    }
+
+    /* Partido legible con escudos */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
+        width: 100%;
+        min-width: 0;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        column-gap: 6px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
+        font-size: 0.8rem;
+        line-height: 1.1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-crest-pair {
+        grid-template-columns: 26px 8px 26px;
+        gap: 4px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+    }
+
+    /* Marcador / hora */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge {
+        min-width: 52px;
+        min-height: 32px;
+        font-size: 0.85rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
+        display: inline-flex;
+        max-width: 100%;
+        padding: 4px 8px;
+        font-size: 0.74rem;
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* Consenso Peña: 3 columnas 1 / X / 2 */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-breakdown {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 4px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        text-align: center;
+    }
+
+    /* Chips de maestros compactos pero legibles */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        height: auto;
+        min-height: 36px;
+        padding: 3px 7px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip .ia-signo {
+        min-width: 30px;
+        min-height: 30px;
+        line-height: 30px;
+        border-radius: 7px;
+    }
+
+    /* TU QUINIELA: 3 botones grandes y generosos */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .tension-chip-user {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 12px;
+        background: rgba(56, 189, 248, 0.05);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .tension-chip-user > span {
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-sign-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-sign-group button.ia-signo {
+        width: 100%;
+        min-height: 52px;
+        height: 52px;
+        font-size: 1.3rem;
+        font-weight: 900;
+        border-radius: 12px;
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        background: rgba(56, 189, 248, 0.08);
+        color: #e0f2fe;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-sign-group button.ia-signo.active {
+        background: var(--gradient-accent);
+        border-color: #7dd3fc;
+        color: #06121f;
+        box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+    }
+    /* Signo ya guardado (solo lectura): legible y centrado */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .ticket-user-sign {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        font-size: 1.4rem;
+        font-weight: 900;
+        border-radius: 12px;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        color: #e0f2fe;
+    }
+    /* Fila de detalle expandible: se comporta como bloque de ancho completo */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .match-detail-row,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .match-detail-row td {
+        display: block;
+        width: 100%;
+        padding: 0;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       5. PORTADA (periódico): tipografía legible y sin desbordes
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus .cx-boleto-table {
+        font-size: 0.82rem;
+    }
+    body.newspaper-ui.quiniela-focus .cx-boleto-table thead th.cx-r-ia em {
+        font-size: 0.7rem;
+    }
+    body.newspaper-ui.quiniela-focus .cx-news-cat,
+    body.newspaper-ui.quiniela-focus .cx-kpi-big i,
+    body.newspaper-ui.quiniela-focus .cx-cd-block i {
+        font-size: 0.7rem;
+    }
+    /* El boleto puede necesitar scroll interno, pero nunca romper la página */
+    body.newspaper-ui.quiniela-focus .cx-boleto-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: auto;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       6. TARJETAS DE PARTIDO (Directo / Ligas) más limpias
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus .match-card {
+        padding: 12px 14px;
+        border-radius: 14px;
+    }
+    body.newspaper-ui.quiniela-focus .match-card .match-score-badge {
+        min-width: 56px;
+        font-size: 0.95rem;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       7. CLASIFICACIONES: tablas compactas sin desbordar
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus #matches-body.standings-full-mode,
+    body.newspaper-ui.quiniela-focus .full-standings-card {
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus .full-standings-table {
+        table-layout: auto;
+    }
+    /* En pantallas muy estrechas, ocultar columnas de racha/estadísticas
+       menos críticas para que la tabla no desborde horizontalmente. */
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(n+8),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(n+8) {
+        display: none;
+    }
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(2),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(2) {
+        width: auto;
+    }
+    body.newspaper-ui.quiniela-focus .full-club {
+        width: auto;
+        max-width: 44vw;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       8. RUPTURA DE TEXTO: nada debe desbordar el viewport
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus .arena-table-wrap,
+    body.newspaper-ui.quiniela-focus .full-standings-card,
+    body.newspaper-ui.quiniela-focus .league-match-group {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Pantallas muy pequeñas (≤ 480px) */
+@media (max-width: 480px) {
+    body.newspaper-ui.quiniela-focus .topbar-actions .primary-btn {
+        font-size: 0.76rem;
+        padding: 0 10px;
+    }
+    body.newspaper-ui.quiniela-focus .topbar-title {
+        font-size: 0.88rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row {
+        padding: 10px 10px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
+        font-size: 0.72rem;
+    }
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(n+7),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(n+7) {
+        display: none;
+    }
+}
+
+/* Respeta usuarios con sensibilidad al movimiento.
+   `responsive` es la última capa, así que estas reglas ganan por orden de capa. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        transition-duration: 0.01ms;
+    }
+}
+}

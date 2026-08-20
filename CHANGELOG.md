@@ -2,6 +2,32 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-20 — Experiencia móvil: scroll nativo, bottom nav y quiniela en tarjetas
+
+### Añadido
+
+- 📱 **Nueva capa CSS `mobile_v2.css` (`@layer responsive`)** que gana a todas las
+  vistas sin tocar su CSS. Incluye:
+  - **Scroll nativo** del `body` (se elimina el doble scroll anidado del
+    *app shell*); cabecera `sticky` y logo de cabecera oculto en móvil.
+  - **Bottom navigation** fija con *safe area* de iOS (los 6 destinos
+    Portada / Quiniela / Directo / Ligas / Juegos / La Peña como barra inferior
+    táctil de 56px).
+  - **Tipografía legible**: piso de 12px, base 16px e `input`/`select` a 16px
+    (evita el auto-zoom de Safari iOS). Se suben los chips de maestros, el
+    marcador, el consenso de La Peña y las clasificaciones.
+  - **Touch targets ≥ 44px** en nav, pestañas, botones y el selector 1/X/2.
+  - **La Quiniela se convierte en tarjetas grandes** (en vez de tabla): número
+    + partido + marcador arriba, consenso de La Peña en 3 columnas, chips de
+    maestros en una franja y un selector **TU QUINIELA** con 3 botones de 52px.
+
+### Corregido
+
+- Se elimina el `overflow-x` horizontal de las tablas en móvil (Portada,
+  Quiniela, Directo y Ligas) y la franja huérfana 700–1100px de la quiniela.
+- Las clasificaciones ocultan columnas secundarias en pantallas estrechas para
+  no desbordar el viewport.
+
 ## 2026-08-20 — Quiniela: el % de La Peña ya no se recorta
 
 ### Corregido
