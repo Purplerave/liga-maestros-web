@@ -13,15 +13,22 @@
 
 @media (max-width: 899px) {
 
-    /* ────────────────────────────────────────────────────────────────
-       1. SHELL: scroll nativo del body, cabecera sticky, nav abajo
-       ──────────────────────────────────────────────────────────────── */
+    /* ── 1. SHELL: SCROLL NATIVO DEL DOCUMENTO ───────────────────────
+       En escritorio el app-shell es una cuadrícula fija (100vh) con scroll
+       INTERNO en .arena-content. Eso en móvil bloquea el gesto del dedo.
+       Aquí convertimos html/body en el scroller real y quitamos TODOS los
+       topes de altura/overflow del shell. La capa `responsive` se declara
+       DESPUÉS de base/layout/theme/hero/pages, así que estas reglas ganan
+       por orden de @layer. */
     html {
         height: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
         scroll-behavior: smooth;
     }
     body {
         height: auto;
+        min-height: 100vh;
         min-height: 100dvh;
         overflow-x: hidden;
         overflow-y: auto;
@@ -31,6 +38,7 @@
         flex-direction: column;
         width: 100%;
         height: auto;
+        min-height: 100vh;
         min-height: 100dvh;
         max-height: none;
         overflow: visible;
@@ -143,11 +151,15 @@
         background: rgba(245, 158, 11, 0.12);
     }
 
-    /* El área principal crece con el contenido y deja hueco para la bottom nav */
+    /* El área principal crece con el contenido y deja hueco para la bottom nav.
+       Sin altura fija ni overflow: el contenido fluye hacia el body/documento.
+       Se fuerza con la misma especificidad que layout/hero para ganarles por
+       orden de @layer. */
     body.newspaper-ui.quiniela-focus .main-arena {
         flex: 1 1 auto;
         height: auto;
         min-height: 0;
+        max-height: none;
         width: 100%;
         overflow: visible;
         padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
@@ -155,7 +167,9 @@
     body.newspaper-ui.quiniela-focus .arena-content {
         height: auto;
         min-height: 0;
-        overflow: visible;
+        max-height: none;
+        overflow-x: hidden;
+        overflow-y: visible;
     }
     body.newspaper-ui.quiniela-focus .site-legal-links {
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
