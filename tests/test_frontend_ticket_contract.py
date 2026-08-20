@@ -63,6 +63,54 @@ def test_frontend_keeps_doubles_and_pleno_scores_and_reads_league_names():
     }
 
 
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser utility functions")
+def test_ticket_pena_percentages_render_as_visible_breakdown():
+    """La columna Peña muestra 1/X/2 en % sin recortar ni reescalar p1/px/p2."""
+    ticket = TICKET.read_text(encoding="utf-8")
+    compact = (ROOT / "static" / "css" / "pages" / "ticket_compact.css").read_text(encoding="utf-8")
+    newspaper = (ROOT / "static" / "css" / "themes" / "newspaper" / "ticket_compact.css").read_text(encoding="utf-8")
+
+    assert "function penaPercents" in ticket
+    assert "pena-pick-breakdown" in ticket
+    assert "pena-breakdown-item" in ticket
+    assert "p1/total*100" not in ticket.replace(" ", "")
+    assert "Math.round(p1/total*100)" not in ticket
+
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr))" in compact
+    assert ".ticket-pena-cell .pena-pick" in compact
+    assert "height: auto" in compact
+    assert "overflow: visible" in compact
+    assert "min-width: 118px" in compact
+
+    mobile = newspaper.split("@media (max-width: 700px)", 1)[1]
+    assert "grid-column: span 2" in mobile
+    assert ".ticket-pena-cell .pena-pick-breakdown" in mobile
+    assert newspaper.count(".tension-chip .pena-pick small {\n    display: none;") == 0
+
+    script = f"""
+        const fs = require("fs");
+        const vm = require("vm");
+        const context = {{ console, Map, String, Number, Date, JSON, Set, Math }};
+        vm.createContext(context);
+        vm.runInContext(fs.readFileSync({json.dumps(str(UTILS))}, "utf8"), context);
+        vm.runInContext(fs.readFileSync({json.dumps(str(TICKET))}, "utf8"), context);
+        const html = context.renderConsensus({{ ganador: "1", p1: 70, px: 20, p2: 10, total: 10 }}, "-", "NS");
+        console.log(JSON.stringify({{
+            html,
+            has70: html.includes("70%"),
+            has20: html.includes("20%"),
+            has10: html.includes("10%"),
+            scaledWrong: html.includes("700%") || html.includes("7%"),
+            breakdown: html.includes("pena-pick-breakdown"),
+        }}));
+    """
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    payload = json.loads(result.stdout)
+    assert payload["has70"] and payload["has20"] and payload["has10"]
+    assert payload["breakdown"]
+    assert not payload["scaledWrong"]
+
+
 def test_ticket_and_directo_render_a_schedule_instead_of_pending_result_text():
     arena = ARENA.read_text(encoding="utf-8")
     ticket = TICKET.read_text(encoding="utf-8")

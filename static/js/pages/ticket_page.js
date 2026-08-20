@@ -2,9 +2,12 @@
    TICKET PAGE — Vista Quiniela compacta (tension, tabla, peña, pleno)
    ========================================================================== */
 
-function pctTriplet(label, values) {
-    const total = values.reduce((a, b) => a + b, 0) || 1;
-    return values.map(v => Math.round((v / total) * 100));
+function penaPercents(c) {
+    // p1/px/p2 already arrive as 0-100. Do not scale them again.
+    const p1 = Math.max(0, Math.round(Number(c?.p1 || 0)));
+    const px = Math.max(0, Math.round(Number(c?.px || 0)));
+    const p2 = Math.max(0, Math.round(Number(c?.p2 || 0)));
+    return { p1, px, p2 };
 }
 
 function renderMatchInsight(match) {
@@ -16,11 +19,23 @@ function renderMatchDetailGrid(m, c) {
 }
 
 function renderConsensus(c, real, status) {
-    const p1 = Number(c.p1 || 0), px = Number(c.px || 0), p2 = Number(c.p2 || 0);
-    const total = p1 + px + p2 || 1;
+    const { p1, px, p2 } = penaPercents(c);
     const winner = c.ganador || "-";
-    const detail = `1 ${Math.round(p1/total*100)}% · X ${Math.round(px/total*100)}% · 2 ${Math.round(p2/total*100)}%`;
-    return `<span class="pena-pick ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}">${escapeHtml(winner)} <small>${escapeHtml(detail)}</small></span>`;
+    if (!Number(c.total || 0) && p1 + px + p2 <= 0) {
+        return `<span class="pena-pick">—</span>`;
+    }
+    const items = [
+        { sign: "1", pct: p1 },
+        { sign: "X", pct: px },
+        { sign: "2", pct: p2 },
+    ];
+    const peak = Math.max(p1, px, p2);
+    const detail = `1 ${p1}% · X ${px}% · 2 ${p2}%`;
+    const breakdown = items.map(item => {
+        const leader = item.pct === peak && peak > 0 ? " is-leader" : "";
+        return `<em class="pena-breakdown-item${leader}"><b>${item.sign}</b><small>${item.pct}%</small></em>`;
+    }).join("");
+    return `<span class="pena-pick ${hitClass(winner, real, status)}" title="${escapeHtml(detail)}"><span class="pena-pick-breakdown">${breakdown}</span></span>`;
 }
 
 function getPenaHiddenUserIds() {
@@ -40,7 +55,7 @@ function getPenaPlenoSummary(idx = 14) {
 function renderPenaPleno(summary, realScore, status) {
     if (!summary?.total || summary.top === "-") return `<span class="pena-pick">—</span>`;
     const detail = `${summary.top} · ${summary.votes}/${summary.total} votos`;
-    return `<span class="pena-pick ${hitClass(summary.top, realScore, status, true)}" title="${escapeHtml(detail)}">${escapeHtml(summary.top)} <small>${summary.pct}%</small></span>`;
+    return `<span class="pena-pick pena-pick-pleno ${hitClass(summary.top, realScore, status, true)}" title="${escapeHtml(detail)}"><b>${escapeHtml(summary.top)}</b><small>${summary.pct}%</small></span>`;
 }
 
 function renderPenaPlenoDetail(idx = 14) {

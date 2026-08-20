@@ -150,12 +150,18 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .emp
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick {
     display: grid;
     gap: 1px;
+    height: auto;
+    overflow: visible;
     font-size: 1.1rem;
+    line-height: 1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small {
+    display: block;
+    overflow: visible;
     font-size: 0.62rem;
     line-height: 1;
+    white-space: nowrap;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .action-buttons {
