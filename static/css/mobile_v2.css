@@ -18,10 +18,13 @@
        ──────────────────────────────────────────────────────────────── */
     html {
         height: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
         scroll-behavior: smooth;
     }
     body {
         height: auto;
+        min-height: 100vh;
         min-height: 100dvh;
         overflow-x: hidden;
         overflow-y: auto;
@@ -148,6 +151,7 @@
         flex: 1 1 auto;
         height: auto;
         min-height: 0;
+        max-height: none;
         width: 100%;
         overflow: visible;
         padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
@@ -155,10 +159,44 @@
     body.newspaper-ui.quiniela-focus .arena-content {
         height: auto;
         min-height: 0;
+        max-height: none;
         overflow: visible;
     }
     body.newspaper-ui.quiniela-focus .site-legal-links {
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       1.b. SCROLL NATIVO REAL — romper el "scroll interno" de escritorio.
+       `cover_hero.css` y `stable_masthead.css` fuerzan `overflow: hidden`
+       en `.main-arena` y `overflow: auto` + `height: 100%` en `.arena-content`
+       cuando la vista es la portada. Con estos selectores (misma especificidad
+       que los originales, pero en la capa `responsive` y cargados después)
+       garantizamos que en móvil TODO el documento se desplace con el dedo y
+       no haya un contenedor anidado que se coma el gesto.
+       ──────────────────────────────────────────────────────────────── */
+    body.newspaper-ui.quiniela-focus .app-shell,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .app-shell {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        max-height: none;
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus .main-arena,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .main-arena {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+    body.newspaper-ui.quiniela-focus .arena-content,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .arena-content,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content {
+        height: auto;
+        max-height: none;
+        overflow-x: hidden;
+        overflow-y: visible;
     }
 
     /* ────────────────────────────────────────────────────────────────
