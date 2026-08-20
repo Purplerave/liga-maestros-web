@@ -215,8 +215,20 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pic
     gap: 0;
 }
 
-body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small {
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell:not(.ticket-pena-cell) .pena-pick small {
     display: none;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .tension-chip {
+    height: auto;
+    min-height: 18px;
+    overflow: visible;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick small {
+    display: block;
+    overflow: visible;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip-user .action-buttons {
@@ -380,6 +392,52 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pick-cell {
         grid-row: 2;
+    }
+
+    /* 5 maestros + Peña (2 cols for 1/X/2 %) + TU = 8. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pena-cell {
+        grid-column: span 2;
+        overflow: visible;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .tension-chip,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick {
+        width: 100%;
+        height: auto;
+        min-height: 32px;
+        overflow: visible;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-breakdown {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        gap: 1px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item {
+        display: grid;
+        place-content: center;
+        gap: 1px;
+        min-width: 0;
+        color: #9fb1c8;
+        font-style: normal;
+        line-height: 1;
+        text-align: center;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item b {
+        font-size: 0.62rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item small {
+        display: block;
+        font-size: 0.58rem;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item.is-leader {
+        color: #f8c84b;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {

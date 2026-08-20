@@ -2,6 +2,17 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-20 — Quiniela: el % de La Peña ya no se recorta
+
+### Corregido
+
+- 🔴 **En `?view=TICKET` el tanto por ciento de La Peña se veía cortado.** La
+  columna Peña tenía el ancho de un signo 1X2 (chip de 34×27px) y metía
+  `1 45% · X 30% · 2 25%` en una sola línea, con `overflow` y `display:none`
+  en el compacto. Ahora pinta el desglose 1 / X / 2 con los `p1`/`px`/`p2`
+  que ya vienen en tanto por ciento, la columna cabe los tres valores y en
+  móvil Peña ocupa dos huecos de la tarjeta.
+
 ## 2026-08-19 — Portada: boleto de quiniela con una columna por Maestro
 
 ### Cambiado

@@ -1115,11 +1115,23 @@ body.quiniela-focus .tension-chip-user .action-buttons .ia-signo {
 
 body.quiniela-focus .tension-chip .pena-pick {
     min-width: 44px;
+    height: auto;
+    min-height: 20px;
     padding: 1px 4px;
+    overflow: visible;
+    line-height: 1;
+}
+
+body.quiniela-focus .ticket-pena-cell .pena-pick {
+    width: 100%;
+    min-width: 0;
 }
 
 body.quiniela-focus .tension-chip .pena-pick small {
+    display: block;
     font-size: 0.5rem;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 body.quiniela-focus .tension-chip-user .action-buttons {

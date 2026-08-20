@@ -25,8 +25,8 @@ const VIEW_STYLES = {
     SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-7")]],
     QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
     TICKET: [
-        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-5")],
-        ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-8")],
+        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-6")],
+        ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-9")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
     ],
 };
@@ -38,7 +38,7 @@ const VIEW_SCRIPTS = {
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
     QUIZ: [["view-quiz-script", versionedAsset("/static/js/quiz.js", "quiz-2")]],
     TICKET: [
-        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-7")],
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-8")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-2")],
     ],
 };
