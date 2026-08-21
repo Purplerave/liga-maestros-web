@@ -233,7 +233,9 @@ function _mshort(col) {
     return String(col?.label || id || "?").slice(0, 3).toUpperCase();
 }
 function _visibleMasters(cols) {
-    return (cols || []).filter(col => !String(col.id || "").toLowerCase().includes("programa"));
+    // Todas las columnas oficiales del contrato, incluido el Programa (PRG):
+    // su boleto editorial debe verse en la quiniela igual que en la vista TICKET.
+    return cols || [];
 }
 function _upick(i) {
     const s = state.my_signs || [];
