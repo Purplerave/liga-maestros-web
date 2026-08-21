@@ -140,7 +140,11 @@ def main():
     parser = argparse.ArgumentParser(description="Importa una jornada del Programa Quiniela a la web Liga Maestros.")
     parser.add_argument("--jornada", type=int, required=True)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--usar-q15-base", action="store_true", help="Usa la columna base scrapeada de Quiniela15 si no existe salida del programa.")
+    parser.add_argument(
+        "--usar-q15-base",
+        action="store_true",
+        help="Usa la columna base scrapeada de Quiniela15 si no existe salida del programa.",
+    )
     args = parser.parse_args()
     import_jornada(args.jornada, dry_run=args.dry_run, allow_q15_base=args.usar_q15_base)
 
