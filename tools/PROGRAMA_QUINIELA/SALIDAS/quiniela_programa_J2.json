@@ -1,0 +1,83 @@
+{
+  "jornada": 2,
+  "temporada": "2026-2027",
+  "generado_en": "2026-08-21T10:30:00",
+  "version_config": "motor_quinielistico_v4",
+  "nota": "Mejor boleto J2 2026/27 con 3 dobles (contrato P0: 8 columnas, 6,00 EUR) sobre las probabilidades del motor maestro (95,1 % mercado + 4,9 % HGB). Dobles en los 3 partidos de mayor 2ª probabilidad: Getafe-R. Santander (1X), Málaga-Deportivo (12) y Sporting Gijón-Burgos (12). Pleno al 15 con Dixon-Coles (lambdas 1,56/1,54).",
+  "signos": [
+    "1",
+    "1",
+    "2",
+    "1X",
+    "2",
+    "1",
+    "12",
+    "1",
+    "2",
+    "1",
+    "1",
+    "1",
+    "12",
+    "2",
+    "1-1"
+  ],
+  "pleno15": {
+    "signo": "X",
+    "marcador_predicho": "1-1",
+    "top_marcadores": [
+      {
+        "score": "1-1",
+        "prob": 0.11
+      },
+      {
+        "score": "2-1",
+        "prob": 0.08
+      },
+      {
+        "score": "1-2",
+        "prob": 0.08
+      }
+    ],
+    "goles_local": {
+      "0": 0.21,
+      "1": 0.33,
+      "2": 0.26,
+      "M": 0.21
+    },
+    "goles_visitante": {
+      "0": 0.21,
+      "1": 0.33,
+      "2": 0.25,
+      "M": 0.20
+    },
+    "seleccion": {
+      "local": "1",
+      "visitante": "1",
+      "alternativa_local": "2",
+      "alternativa_visitante": "2",
+      "confianza": 0.11,
+      "nota": "Alternativa sugerida si el segundo bucket está a menos de 0.10 del primero."
+    },
+    "buckets": [
+      "0",
+      "1",
+      "2",
+      "M"
+    ]
+  },
+  "contrato": {
+    "contract_version": "2026-08-04",
+    "doubles": 3,
+    "columns_per_ticket": 8,
+    "price_per_column": 0.75,
+    "max_cost": 6.0
+  },
+  "aciertos_esperados": 7.96,
+  "probabilidades_exactas": {
+    "p_ge_10": 0.196,
+    "p_ge_11": 0.0749,
+    "p_ge_12": 0.0201,
+    "p_ge_13": 0.0033,
+    "p_ge_14": 0.0003
+  }
+}

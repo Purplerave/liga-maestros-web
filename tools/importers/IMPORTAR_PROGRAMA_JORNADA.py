@@ -26,8 +26,14 @@ def load_json(path):
 
 
 def load_horarios(jornada):
-    path = ROOT / "data" / f"horarios_J{jornada}.json"
-    return load_json(path) if path.exists() else {}
+    candidates = [
+        Path(config.SEED_DATA_DIR) / f"horarios_J{jornada}.json",
+        Path(config.DATA_DIR) / f"horarios_J{jornada}.json",
+    ]
+    for path in dict.fromkeys(candidates):
+        if path.exists():
+            return load_json(path)
+    return {}
 
 
 def backup_db():
