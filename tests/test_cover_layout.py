@@ -75,7 +75,7 @@ def test_cover_masters_use_column_logos_and_plain_signs():
     assert "masterHeads" in cover
     # El Programa (PRG) es una columna oficial más del boleto: su columna no
     # debe filtrarse en la portada (los datos llegan en predicciones_actuales).
-    assert "!String(col.id || \"\").toLowerCase().includes(\"programa\")" not in cover
+    assert '!String(col.id || "").toLowerCase().includes("programa")' not in cover
     # Las pastillas de color y la celda única desaparecen del boleto.
     assert "cx-r-masters" not in cover
     assert "cx-mi-shape" not in cover

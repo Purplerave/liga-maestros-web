@@ -32,6 +32,7 @@ def _ns_match_still_open(fecha):
     except ValueError:
         return True
 
+
 # Temporada publicada 2026/27. La quiniela publicada reinicia su numeración
 # en J1 (LaLiga: 38 jornadas; se deja margen hasta 42 por boletos extra).
 # Las jornadas 51-76 conservadas en la BD pertenecen al periodo de pruebas
