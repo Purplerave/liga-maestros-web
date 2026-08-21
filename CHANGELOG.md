@@ -2,6 +2,23 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-21 — El Programa entra en la Jornada 2
+
+### Añadido
+
+- Boleto del **Programa Quiniela Maestro** para la Jornada 2 (2026-27) en
+  `tools/PROGRAMA_QUINIELA/`: 15 partidos con cuotas y porcentajes Q15/LAE/APU
+  (`DATOS/QUINIELA15_J2.json`), la columna del motor con 3 dobles y pleno al 15
+  (`SALIDAS/quiniela_programa_J2.json`) y el consenso por partido
+  (`DATOS/PROBABILIDADES_J2.json`). Importable con
+  `IMPORTAR_PROGRAMA_JORNADA.py --jornada 2`.
+
+### Corregido
+
+- `IMPORTAR_PROGRAMA_JORNADA.py` leía los horarios desde `tools/importers/data/`
+  (inexistente), por lo que los partidos del Programa se volcaban sin fecha/hora.
+  Ahora resuelve `data/horarios_J{jornada}.json` desde `SEED_DATA_DIR`/`DATA_DIR`.
+
 ## 2026-08-20 — Experiencia móvil: scroll nativo, bottom nav y quiniela en tarjetas
 
 ### Añadido
