@@ -154,6 +154,7 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
         }
         const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]")?.dataset.matchIdx, 10);
         if (Number.isNaN(idx)) return;
+        if (!Array.isArray(state.my_signs)) state.my_signs = Array(15).fill("-");
         if (btn.dataset.pleno) {
             openPlenoModal(idx);
             return;

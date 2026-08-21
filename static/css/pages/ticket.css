@@ -483,13 +483,29 @@ body.quiniela-focus .tension-row td {
     padding-inline: 3px;
 }
 
+/* Selector 1X2: una sola fila estable. El render actual usa
+   .ticket-user-sign-group; .action-buttons se conserva para las reglas del
+   tema y para evitar que cada boton herede width: 100% y se apile. */
+.tension-chip-user .ticket-user-sign-group,
 .tension-chip-user .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
     gap: 2px;
 }
 
+.tension-chip-user .ticket-user-sign-group .ia-signo,
 .tension-chip-user .action-buttons .ia-signo {
-    width: 22px;
-    min-width: 22px;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+.tension-chip-user .ticket-pleno-sign-group .pleno-main-btn {
+    grid-column: 1 / -1;
+    min-width: 100%;
 }
 
 .tension-chip-program .ia-signo {
