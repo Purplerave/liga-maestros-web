@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +73,9 @@ def test_cover_masters_use_column_logos_and_plain_signs():
     assert "cx-r-ia" in cover
     assert "cx-ia-sign" in cover
     assert "masterHeads" in cover
+    # El Programa (PRG) es una columna oficial más del boleto: su columna no
+    # debe filtrarse en la portada (los datos llegan en predicciones_actuales).
+    assert "!String(col.id || \"\").toLowerCase().includes(\"programa\")" not in cover
     # Las pastillas de color y la celda única desaparecen del boleto.
     assert "cx-r-masters" not in cover
     assert "cx-mi-shape" not in cover
@@ -79,6 +83,50 @@ def test_cover_masters_use_column_logos_and_plain_signs():
     css = COVER_CSS.read_text(encoding="utf-8")
     assert ".cx-mi-logo" in css
     assert ".cx-ia-sign" in css
+
+
+def test_cover_boleto_includes_programa_column():
+    """La quiniela de la portada muestra la columna del Programa (PRG).
+
+    El contrato de participantes lista 6 columnas oficiales y `_visibleMasters`
+    debe devolverlas todas: si el Programa se filtra, sus 15 signos quedan
+    visibles solo en la vista TICKET y la portada los oculta.
+    """
+    import shutil
+    import subprocess
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("Node is required to exercise cover helpers")
+
+    script = """
+        const fs = require("fs");
+        const vm = require("vm");
+        const ctx = { console, Map, Set, String, Number, Date, JSON, Math,
+            document: { body: { dataset: { assetsV: "test" } } } };
+        vm.createContext(ctx);
+        vm.runInContext(fs.readFileSync("static/js/pages/cover_page.js", "utf8"), ctx);
+        ctx.state = { data: { participant_contract: { visible_ai_columns: [
+            { id: "programa", label: "PROG", name: "Programa" },
+            { id: "claude", label: "CLAU", name: "Claude" },
+            { id: "grok", label: "GROK", name: "Grok" },
+            { id: "chatgpt", label: "GPT", name: "ChatGPT" },
+            { id: "copilot", label: "COP", name: "Copilot" },
+            { id: "gemini", label: "GEM", name: "Gemini" }
+        ] } } };
+        const visible = ctx._visibleMasters(ctx.coverMasterColumns());
+        console.log(JSON.stringify({
+            ids: visible.map(c => c.id),
+            short: ctx._mshort({ id: "programa", label: "Programa" }),
+            tone: ctx._mtone({ id: "programa", label: "Programa" })
+        }));
+    """
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    payload = json.loads(result.stdout)
+    assert payload["ids"] == ["programa", "claude", "grok", "chatgpt", "copilot", "gemini"]
+    assert payload["short"] == "PRG"
+    assert payload["tone"] == "is-programa"
 
 
 def test_porra_bonus_copy_is_short_and_consistent():

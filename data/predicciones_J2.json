@@ -2,7 +2,45 @@
   "jornada": 2,
   "temporada": "2026-2027",
   "generado_en": "2026-08-19T12:00:00+02:00",
-  "nota": "Boletos de los cinco Maestros y diez peñistas aportados para la Jornada 2. Pendientes Luna, Fistro y Sonia. Jimmy: signos 0 de los partidos 8/11/13 normalizados a X; Pleno M normalizado a M-0.",
+  "nota": "Boletos de los cinco Maestros y diez peñistas aportados para la Jornada 2. Pendientes Luna, Fistro y Sonia. Jimmy: signos 0 de los partidos 8/11/13 normalizados a X; Pleno M normalizado a M-0. Boleto del Programa (motor v4, 3 dobles) volcado desde tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J2.json.",
+  "programa": {
+    "signos": [
+      "1",
+      "1",
+      "2",
+      "1X",
+      "2",
+      "1",
+      "12",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1",
+      "12",
+      "2",
+      "1-1"
+    ],
+    "nombre": "PROGRAMA",
+    "razones": [
+      "Motor v4: 1 con 55% (X 26%, 2 18%).",
+      "Motor v4: 1 con 40%, partido abierto (X y 2 a 30%).",
+      "Motor v4: 2 con 66% (1 solo 13%).",
+      "Motor v4: doble 1X (44% + 32%) por la 2ª probabilidad alta.",
+      "Motor v4: 2 con 72% (1 11%).",
+      "Motor v4: 1 con 52% (X 27%, 2 21%).",
+      "Motor v4: doble 12 (38% + 31%) en duelo sin favorito claro.",
+      "Motor v4: 1 con 50% (X 29%, 2 21%).",
+      "Motor v4: 2 con 40%, mercado muy repartido (1 y X a 30%).",
+      "Motor v4: 1 con 41% (X 30%, 2 29%).",
+      "Motor v4: 1 con 43% (X 30%, 2 27%).",
+      "Motor v4: 1 con 60% (X 23%, 2 17%).",
+      "Motor v4: doble 12 (37% + 32%) con X a 31%.",
+      "Motor v4: 2 con 41% (1 y X a 29%).",
+      "Pleno al 15: 1-1 por Dixon-Coles (lambdas 1,56/1,54; 11%)."
+    ],
+    "puntos_jornada": 0
+  },
   "gemini": {
     "nombre": "GEMINI",
     "signos": [

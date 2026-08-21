@@ -13,12 +13,13 @@ from liga_maestros.db.migrations import (
 from liga_maestros.scoring import normalize_prediction_sign
 from liga_maestros.services.payloads.predictions import _load_prediction_reasons
 
-MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot"}
+MAESTROS = {"gemini", "claude", "grok", "chatgpt", "copilot", "programa"}
 PENA_10 = {"chipi", "geli", "pepe", "profe", "fortu", "oraculo", "sesudo", "luzia", "erniebot", "jimmy"}
 PENA_PENDING = {"luna", "fistro", "sonia"}
 CHIPI_SIGNOS = ["1", "X", "2", "1", "2", "1", "X", "1", "2", "X", "1", "1", "1", "2", "2-1"]
 JIMMY_SIGNOS = ["2", "X", "1", "2", "2", "2", "1", "X", "1", "1", "X", "1", "X", "2", "M-0"]
 FORTU_PLENO = "2-0"
+PROGRAMA_SIGNOS = ["1", "1", "2", "1X", "2", "1", "12", "1", "2", "1", "1", "1", "12", "2", "1-1"]
 
 
 def _ticket(sign="1", pleno="2-1"):
@@ -95,7 +96,7 @@ def test_load_prediction_reasons_falls_back_to_compact_jornada_file(tmp_path, mo
     assert reasons["gemini"][14] == "Razón 15"
 
 
-def test_j2_file_has_five_masters_and_ten_pena_tickets():
+def test_j2_file_has_six_masters_and_ten_pena_tickets():
     payload = _load_j2()
     assert payload["jornada"] == 2
     tickets = {uid: entry for uid, entry in payload.items() if isinstance(entry, dict) and entry.get("signos")}
@@ -105,6 +106,7 @@ def test_j2_file_has_five_masters_and_ten_pena_tickets():
     assert tickets["chipi"]["signos"] == CHIPI_SIGNOS
     assert tickets["jimmy"]["signos"] == JIMMY_SIGNOS
     assert tickets["fortu"]["signos"][14] == FORTU_PLENO
+    assert tickets["programa"]["signos"] == PROGRAMA_SIGNOS
     for uid, entry in tickets.items():
         signos = entry["signos"]
         razones = entry.get("razones") or []
@@ -133,6 +135,7 @@ def test_ensure_jornada_2_imports_masters_and_pena():
     assert by_user["jimmy"] == JIMMY_SIGNOS
     assert by_user["chatgpt"][14] == "M-1"
     assert by_user["fortu"][14] == FORTU_PLENO
+    assert by_user["programa"] == PROGRAMA_SIGNOS
     assert PENA_PENDING.isdisjoint(by_user)
 
     ensure_jornada_2(conn)
@@ -143,6 +146,8 @@ def test_ensure_jornada_2_imports_masters_and_pena():
 def test_j2_prediction_reasons_include_pena_explanations():
     reasons = _load_prediction_reasons(2)
     assert MAESTROS | PENA_10 <= set(reasons)
+    assert len(reasons["programa"]) == 15
+    assert "Motor v4" in reasons["programa"][0]
     assert len(reasons["oraculo"]) == 15
     assert "San Mamés" in reasons["luzia"][0] or "Athletic" in reasons["luzia"][0]
     assert reasons["erniebot"][14]
@@ -162,6 +167,8 @@ def test_api_liga_data_j2_hides_pena_tickets_and_exposes_consensus(tmp_path, mon
     predicciones = payload["predicciones_actuales"]
     assert MAESTROS <= set(predicciones)
     assert PENA_10.isdisjoint(predicciones)
+    assert predicciones["programa"]["signos"] == PROGRAMA_SIGNOS
+    assert len(predicciones["programa"]["motivos"]) == 15
 
     consenso = payload["consenso_pena"]
     assert len(consenso) == 14

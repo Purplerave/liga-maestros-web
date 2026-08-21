@@ -6,6 +6,32 @@ con datos históricos o de preparación haga que cada endpoint elija una
 jornada distinta.
 """
 
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+MADRID_TZ = ZoneInfo("Europe/Madrid")
+
+
+def _madrid_today():
+    return datetime.now(MADRID_TZ).date()
+
+
+def _ns_match_still_open(fecha):
+    """True si un partido sin empezar mantiene su jornada abierta.
+
+    Un NS con fecha en el pasado (aplazado sin nueva fecha o resultado que el
+    scraper aún no ha recogido) no debe mantener activa una jornada que ya no
+    se puede firmar: bloquearía la promoción automática a la siguiente. NS sin
+    fecha o con fecha de hoy/futura sigue contando como jornada abierta.
+    """
+    text = str(fecha or "").strip()
+    if not text or text == "-":
+        return True
+    try:
+        return date.fromisoformat(text[:10]) >= _madrid_today()
+    except ValueError:
+        return True
+
 # Temporada publicada 2026/27. La quiniela publicada reinicia su numeración
 # en J1 (LaLiga: 38 jornadas; se deja margen hasta 42 por boletos extra).
 # Las jornadas 51-76 conservadas en la BD pertenecen al periodo de pruebas
@@ -36,9 +62,10 @@ def resolve_active_jornada(conn):
     """Return the jornada currently editable and displayed as active.
 
     Temporada 2026/27: J1..42. Devuelve la **primera jornada abierta** (con
-    al menos un partido en NS). Así J1 sigue activa mientras se pueda firmar,
-    y la web promociona a J2, J3... automáticamente cuando J1 ya está
-    terminada (sin NS). Ignora 75/76.
+    al menos un partido en NS cuya fecha no haya quedado atrás). Así J1 sigue
+    activa mientras se pueda firmar, y la web promociona a J2, J3...
+    automáticamente cuando J1 ya está terminada (sin NS o solo con NS
+    caducados, p. ej. aplazados sin nueva fecha). Ignora 75/76.
     """
     try:
         rows = conn.execute("SELECT jornada FROM resultados GROUP BY jornada HAVING COUNT(*) > 0").fetchall()
@@ -46,11 +73,11 @@ def resolve_active_jornada(conn):
         if jornadas:
             for j in jornadas:
                 try:
-                    ns = conn.execute(
-                        "SELECT 1 FROM resultados WHERE jornada = ? AND UPPER(COALESCE(status,'')) IN ('NS','SCHEDULED','') LIMIT 1",
+                    ns_rows = conn.execute(
+                        "SELECT fecha FROM resultados WHERE jornada = ? AND UPPER(COALESCE(status,'')) IN ('NS','SCHEDULED','')",
                         (j,),
-                    ).fetchone()
-                    if ns:
+                    ).fetchall()
+                    if any(_ns_match_still_open(row["fecha"]) for row in ns_rows):
                         return j
                 except Exception:
                     return j
