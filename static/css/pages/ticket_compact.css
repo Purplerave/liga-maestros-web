@@ -218,7 +218,8 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-heading,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell {
-        width: 76px;
+        /* Tres controles 1/X/2 + separacion real, sin invadir columnas vecinas. */
+        width: 104px;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
@@ -414,14 +415,15 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons {
         display: grid;
-        grid-template-columns: repeat(3, 28px);
-        justify-content: center;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        min-width: 0;
         gap: 3px;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons .ia-signo {
-        width: 28px;
-        min-width: 28px;
+        width: 100%;
+        min-width: 0;
         height: 28px;
         min-height: 28px;
         padding: 0;

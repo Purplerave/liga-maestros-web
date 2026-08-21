@@ -91,7 +91,11 @@ function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
         const shown = exactScore && mySign === "-" ? "Elegir" : (mySign === "-" ? "—" : mySign);
         return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(shown)}</b>`;
     }
-    return `<div class="ticket-user-sign-group" data-match-idx="${idx}">${["1", "X", "2"].map(sign => `<button class="ia-signo clickable ${mySign === sign ? "active" : ""}" data-sign="${sign}" type="button">${sign}</button>`).join("")}</div>`;
+    if (exactScore) {
+        const label = mySign === "-" ? "Elegir" : mySign;
+        return `<div class="ticket-user-sign-group ticket-pleno-sign-group" data-match-idx="${idx}"><button class="ia-signo clickable pleno-main-btn ${mySign === "-" ? "" : "active"}" data-pleno="true" data-match-idx="${idx}" type="button" aria-label="Elegir resultado del Pleno al 15">${escapeHtml(label)}</button></div>`;
+    }
+    return `<div class="ticket-user-sign-group action-buttons" data-match-idx="${idx}" role="group" aria-label="Pronostico del partido ${idx + 1}">${["1", "X", "2"].map(sign => `<button class="ia-signo clickable ${mySign === sign ? "active" : ""}" data-sign="${sign}" type="button" aria-label="Marcar ${sign} en el partido ${idx + 1}" aria-pressed="${mySign === sign ? "true" : "false"}">${sign}</button>`).join("")}</div>`;
 }
 
 function ticketCommentTime(value) {
@@ -186,20 +190,9 @@ function renderArenaTensionBody(matches) {
         </tr>${state.expandedMatch === idx ? `<tr class="match-detail-row"><td colspan="${predictorColumns.length + 5}">${renderMatchDetailGrid(m, c)}</td></tr>` : ""}`;
     }).join("");
 
-    document.querySelectorAll(".ticket-user-sign-group button.ia-signo.clickable").forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            const group = btn.closest(".ticket-user-sign-group");
-            const idx = Number(group?.dataset.matchIdx);
-            const sign = btn.dataset.sign;
-            if (Number.isNaN(idx) || !sign) return;
-            if (!state.my_signs) state.my_signs = Array(15).fill("-");
-            state.my_signs[idx] = sign;
-            group.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.sign === sign));
-            checkQuinielaCompletion();
-            if (typeof saveMyTicketDebounced === "function") saveMyTicketDebounced();
-        };
-    });
+    // La seleccion se gestiona en el listener delegado de events.js. Mantener un
+    // unico manejador evita que el mismo clic marque y desmarque el signo al
+    // propagarse, que hacia parecer que los botones no funcionaban.
     checkQuinielaCompletion();
 }
 
