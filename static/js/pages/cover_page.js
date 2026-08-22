@@ -605,22 +605,18 @@ function renderNewspaperCoverPageV3() {
         </section>
     `;
 
-    const newsItems = state.data?.news_briefing?.items || [];
+    const newsRows = typeof normalizeNewsRows === "function"
+        ? normalizeNewsRows(state.newsRadar || {})
+        : [];
     const newsHtml = `
         <section class="cx-panel cx-news cx-accent-pink">
             <header class="cx-pn-head">
                 <span class="cx-pn-eyebrow">ÚLTIMA HORA</span>
-                <a class="cx-pn-meta" href="#" data-page-action="NEWS">Ver todas →</a>
+                <a class="cx-pn-meta" href="/?view=NEWS_PAGE" data-page-action="NEWS">Ver todas →</a>
             </header>
             <div class="cx-pn-body" id="cover-news-content">
-                ${newsItems.length
-                    ? newsItems.slice(0, 4).map(n => `
-                        <a class="cx-news-item" href="${escapeHtml(n.url || "#")}">
-                            <span class="cx-news-cat">${escapeHtml(n.category || "•")}</span>
-                            <span class="cx-news-text">${escapeHtml(n.title || "")}</span>
-                            <span class="cx-news-time">${escapeHtml(n.time || "")}</span>
-                        </a>
-                    `).join("")
+                ${newsRows.length && typeof renderNewsRows === "function"
+                    ? renderNewsRows(newsRows, { limit: 4 })
                     : '<div class="cx-empty">Cargando últimas noticias…</div>'}
             </div>
         </section>

@@ -530,38 +530,173 @@ function shareTicket() {
     }).catch(() => showToast("No se pudo copiar el pronostico.", "error"));
 }
 
-async function loadNewsBriefing() {
-    const target = qs("cover-news-content");
-    if (!target) return;
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch("/api/noticias/radar", { signal: controller.signal });
-        clearTimeout(timeout);
-        if (!res.ok) { target.innerHTML = '<span class="cp-empty">Sin novedades</span>'; return; }
-        const data = await res.json();
-        const novedades = Array.isArray(data.novedades) ? data.novedades : [];
-        const bajas = Array.isArray(data.bajas) ? data.bajas : [];
-        if (!novedades.length && !bajas.length) {
-            target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
-            return;
-        }
-        const newsHtml = novedades.map(item => {
-            const category = escapeHtml(String(item.categoria || "noticia").toUpperCase());
-            const text = escapeHtml(item.texto || "");
-            const source = escapeHtml(item.source || "");
-            const link = escapeHtml(item.link || "#");
-            return `<a class="cp-news-row" href="${link}" target="_blank" rel="noopener noreferrer"><span class="cp-news-category">${category}</span><strong>${text}</strong><small>${source}</small></a>`;
-        }).join("");
-        const injuriesHtml = bajas.slice(0, 3).map(item => {
-            const status = escapeHtml(String(item.estado || "baja").toUpperCase());
-            const player = escapeHtml(item.jugador || "");
-            const team = escapeHtml(item.equipo || "");
-            const note = escapeHtml(item.nota || "");
-            return `<div class="cp-news-row is-availability"><span class="cp-news-category">${status}</span><strong>${player} · ${team}</strong><small>${note}</small></div>`;
-        }).join("");
-        target.innerHTML = newsHtml + injuriesHtml;
-    } catch (error) {
-        target.innerHTML = '<span class="cp-empty">Sin novedades de momento</span>';
+const NEWS_SOURCE_SHORT = {
+    "mundo deportivo": "MD",
+    mundodeportivo: "MD",
+    marca: "MARCA",
+    as: "AS",
+    sport: "SPORT",
+    laliga: "LIGA",
+    "la liga": "LIGA",
+};
+
+function newsTimeLabel(publishedAt) {
+    const raw = String(publishedAt || "").trim();
+    if (!raw) return "";
+    const parsed = new Date(raw.includes("T") ? raw : raw.replace(" ", "T"));
+    if (Number.isNaN(parsed.getTime())) {
+        const clock = raw.match(/\b(\d{2}:\d{2})\b/);
+        return clock ? clock[1] : raw.slice(0, 16);
     }
+    const hhmm = `${String(parsed.getHours()).padStart(2, "0")}:${String(parsed.getMinutes()).padStart(2, "0")}`;
+    const today = new Date();
+    if (parsed.toDateString() === today.toDateString()) return hhmm;
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    if (parsed.toDateString() === yesterday.toDateString()) return `ayer ${hhmm}`;
+    return `${String(parsed.getDate()).padStart(2, "0")}/${String(parsed.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function newsCategoryLabel(value) {
+    const raw = String(value || "noticia").trim();
+    if (!raw) return "NOTICIA";
+    const short = NEWS_SOURCE_SHORT[raw.toLowerCase()];
+    return (short || raw).toUpperCase();
+}
+
+function normalizeNewsRows(payload) {
+    const data = payload && typeof payload === "object" ? payload : {};
+    const novedades = Array.isArray(data.novedades) ? data.novedades : [];
+    const bajas = Array.isArray(data.bajas) ? data.bajas : [];
+    const items = Array.isArray(data.items) ? data.items : [];
+    const rows = [];
+    const pushRow = row => {
+        const title = String(row.title || "").trim();
+        if (!title) return;
+        rows.push({
+            category: newsCategoryLabel(row.category),
+            title,
+            time: row.time || "",
+            url: row.url || "",
+            kind: row.kind || "rss",
+        });
+    };
+    if (novedades.length) {
+        novedades.forEach(item => pushRow({
+            category: item.categoria || item.source || "noticia",
+            title: item.texto || item.title || "",
+            time: newsTimeLabel(item.published_at),
+            url: item.link || "",
+            kind: "novedad",
+        }));
+    } else {
+        items.forEach(item => pushRow({
+            category: item.source || item.category || "noticia",
+            title: item.title || "",
+            time: newsTimeLabel(item.published_at || item.time),
+            url: item.link || item.url || "",
+            kind: "rss",
+        }));
+    }
+    bajas.forEach(item => {
+        const who = [item.jugador, item.equipo].filter(Boolean).join(" · ");
+        const note = String(item.nota || "").trim();
+        pushRow({
+            category: item.estado || "baja",
+            title: note ? `${who} — ${note}` : who,
+            time: "",
+            url: item.link || "",
+            kind: "baja",
+        });
+    });
+    return rows;
+}
+
+function renderNewsRows(rows, options = {}) {
+    const limit = Number.isFinite(options.limit) ? options.limit : rows.length;
+    return rows.slice(0, Math.max(0, limit)).map(row => {
+        const extra = row.kind === "baja" ? " is-availability" : "";
+        const cat = escapeHtml(row.category || "•");
+        const title = escapeHtml(row.title || "");
+        const time = escapeHtml(row.time || "");
+        const inner = `<span class="cx-news-cat">${cat}</span><span class="cx-news-text">${title}</span><span class="cx-news-time">${time}</span>`;
+        if (row.url) {
+            return `<a class="cx-news-item${extra}" href="${escapeHtml(row.url)}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+        }
+        return `<div class="cx-news-item${extra}">${inner}</div>`;
+    }).join("");
+}
+
+function newsEmptyHtml(message) {
+    return `<div class="cx-empty">${escapeHtml(message)}</div>`;
+}
+
+async function fetchNewsRadar(force = false) {
+    const freshEnough = !force
+        && state.newsRadar
+        && Date.now() - Number(state.newsRadarFetchedAt || 0) < 60000;
+    if (freshEnough) return state.newsRadar;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+        const res = await fetch("/api/noticias/radar", { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        state.newsRadar = data;
+        state.newsRadarFetchedAt = Date.now();
+        return data;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+function paintNewsTargets(rows, message = "Sin novedades de momento") {
+    const empty = newsEmptyHtml(message);
+    const cover = qs("cover-news-content");
+    const page = qs("news-page-content");
+    if (cover) cover.innerHTML = rows.length ? renderNewsRows(rows, { limit: 4 }) : empty;
+    if (page) page.innerHTML = rows.length ? renderNewsRows(rows) : empty;
+}
+
+async function loadNewsBriefing() {
+    const cover = qs("cover-news-content");
+    const page = qs("news-page-content");
+    if (!cover && !page) return;
+    const cached = normalizeNewsRows(state.newsRadar || {});
+    if (cached.length) paintNewsTargets(cached);
+    try {
+        const data = await fetchNewsRadar();
+        const rows = normalizeNewsRows(data);
+        paintNewsTargets(rows);
+    } catch {
+        if (!cached.length) paintNewsTargets([], "Sin novedades de momento");
+    }
+}
+
+function renderNewsPage() {
+    const rows = normalizeNewsRows(state.newsRadar || {});
+    const fetched = state.newsRadar?.fetched_at ? `Act. ${escapeHtml(String(state.newsRadar.fetched_at))}` : "PRENSA";
+    return `<div class="cx cx-news-page">
+        <header class="cx-top">
+            <div class="cx-top-left">
+                <div class="cx-top-id">
+                    <span class="cx-top-eyebrow">RADAR DE PRENSA</span>
+                    <h1 class="cx-top-title">ÚLTIMA HORA</h1>
+                </div>
+            </div>
+            <div class="cx-top-right">
+                <span class="cx-pn-meta">${fetched}</span>
+                <a class="cx-cta-primary" href="/" data-page-action="ALL">← PORTADA</a>
+            </div>
+        </header>
+        <section class="cx-panel cx-news cx-accent-pink" aria-label="Últimas noticias">
+            <header class="cx-pn-head">
+                <span class="cx-pn-eyebrow">TITULARES</span>
+                <span class="cx-pn-meta">${rows.length ? `${rows.length} NOTICIA${rows.length === 1 ? "" : "S"}` : "CARGANDO"}</span>
+            </header>
+            <div class="cx-pn-body" id="news-page-content">
+                ${rows.length ? renderNewsRows(rows) : newsEmptyHtml("Cargando últimas noticias…")}
+            </div>
+        </section>
+    </div>`;
 }

@@ -32,7 +32,7 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-69")]],
+    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-70")]],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
@@ -120,6 +120,7 @@ function currentMainView() {
     if (state.currentFilter === "LIVE") return "LIVE";
     if (state.currentFilter === "SNAKE_PAGE") return "SNAKE";
     if (state.currentFilter === "QUIZ_PAGE") return "QUIZ";
+    if (state.currentFilter === "NEWS_PAGE") return "NEWS";
     if (state.currentFilter === "TICKET") return "TICKET";
     if (state.currentFilter && state.currentFilter !== "ALL") return "LEAGUES";
     return "ALL";
@@ -179,6 +180,13 @@ async function openNewspaperPage(page) {
     }
     if (target === "QUIZ") {
         state.currentFilter = "QUIZ_PAGE";
+        state.contestView = "MATCHES";
+        syncUrlState();
+        renderArena();
+        return;
+    }
+    if (target === "NEWS") {
+        state.currentFilter = "NEWS_PAGE";
         state.contestView = "MATCHES";
         syncUrlState();
         renderArena();

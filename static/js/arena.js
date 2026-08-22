@@ -71,6 +71,7 @@ function renderArena() {
     document.body.classList.toggle("newspaper-standings-active", isStandingsPage());
     document.body.classList.toggle("newspaper-snake-active", isSnakePage());
     document.body.classList.toggle("newspaper-quiz-active", isQuizPage());
+    document.body.classList.toggle("newspaper-news-active", isNewsPage());
     document.body.classList.toggle("newspaper-contest-active", isContestPage() && !isProfilePage());
     document.body.classList.toggle("newspaper-live-active", isLiveOrLeaguePage());
     document.body.classList.toggle("newspaper-profile-active", isProfilePage());
@@ -101,6 +102,15 @@ function renderArena() {
     if (state.currentFilter === "STANDINGS_FULL" || state.currentFilter === "STANDINGS_PRIMERA" || state.currentFilter === "STANDINGS_SEGUNDA") {
         container.className = "arena-content standings-full-mode";
         container.innerHTML = renderFullStandingsPage();
+        return;
+    }
+
+    if (state.currentFilter === "NEWS_PAGE") {
+        container.className = "arena-content newspaper-feature-page newspaper-news-mode";
+        container.innerHTML = typeof renderNewsPage === "function"
+            ? renderNewsPage()
+            : `<div class="empty-state">Cargando noticias...</div>`;
+        loadNewsBriefing();
         return;
     }
 
