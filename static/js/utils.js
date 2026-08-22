@@ -308,6 +308,16 @@ function fixtureScheduleDisplay(match) {
     return formatSmartDate(fecha, hora);
 }
 
+/* El horario ("lun 17/08 19:00h") no cabe en una sola linea dentro de la celda
+   de la quiniela: se parte en dia y hora para pintarlo en dos lineas y que la
+   hora nunca quede recortada. */
+function fixtureScheduleParts(match) {
+    const label = String(fixtureScheduleDisplay(match) || "").trim();
+    const parsed = /^(.*?)\s*(\d{1,2}:\d{2}h?)$/.exec(label);
+    if (!parsed) return { day: label, time: "", label };
+    return { day: parsed[1].trim(), time: parsed[2], label };
+}
+
 function hasUnconfirmedFixtureResult(match) {
     const display = String(match?.marcador || match?.score || "").toLowerCase();
     return display.includes("pendiente de resultado") && !scoreOnly(display);

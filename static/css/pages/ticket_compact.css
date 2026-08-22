@@ -195,11 +195,11 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena
         min-width: 0;
     }
 
-    /* La columna tiene que caber la etiqueta mas larga que se muestra aqui,
-       un horario completo tipo "lun 17/08 19:00h", no solo un marcador. */
+    /* El horario va en dos lineas (dia / hora), asi que la columna solo tiene
+       que caber el marcador y la hora, no "lun 17/08 19:00h" seguido. */
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-heading,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell {
-        width: 124px;
+        width: 98px;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-predictor-heading,
@@ -281,38 +281,39 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena
         text-align: center;
     }
 
-    /* El marcador es corto ("2-1") y puede ir en caja fija; el horario
-       ("lun 17/08 19:00h") es largo y variable, asi que su caja se adapta al
-       texto en vez de recortarlo o dejarlo salir fuera del recuadro. */
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge,
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
+    /* El marcador es corto ("2-1") y cabe en caja fija; el horario va apilado
+       (dia arriba, hora abajo) para que nunca se recorte. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        max-width: 100%;
+        width: 84px;
+        min-width: 84px;
+        height: 24px;
         min-height: 24px;
         padding: 0 6px;
         font-size: 0.68rem;
         white-space: nowrap;
     }
 
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge {
-        width: 84px;
-        min-width: 84px;
-        height: 24px;
-    }
-
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .tension-status {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule {
         width: auto;
         min-width: 0;
-        height: auto;
-        font-size: 0.64rem;
-        letter-spacing: 0;
-        /* La columna esta dimensionada para el horario completo; esto es solo
-           la red de seguridad para que el texto jamas se salga del recuadro. */
-        overflow: hidden;
-        text-overflow: ellipsis;
+        max-width: 100%;
+        padding: 2px 7px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-day {
+        font-size: 0.56rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-time {
+        font-size: 0.78rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule.is-pending {
+        font-size: 0.6rem;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip {
