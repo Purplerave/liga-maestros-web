@@ -256,6 +256,9 @@ function getNextLeagueMatch() {
 }
 
 function hasSavedTicket() {
+    // Señal del servidor (payload de /api/liga/data): aunque la hidratación de
+    // predicciones no encuentre la clave del usuario, sabemos que guardó.
+    if (state.data?.ticket_guardado) return true;
     return state.server_signs.some(sign => sign && sign !== "-");
 }
 

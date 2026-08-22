@@ -38,7 +38,7 @@ const VIEW_SCRIPTS = {
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
     QUIZ: [["view-quiz-script", versionedAsset("/static/js/quiz.js", "quiz-2")]],
     TICKET: [
-        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-8")],
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-9")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-2")],
     ],
 };

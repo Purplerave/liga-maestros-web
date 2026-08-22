@@ -44,3 +44,18 @@ def test_pleno_uses_the_exact_score_picker_instead_of_1x2():
     assert 'data-pleno="true"' in ticket
     assert 'class="ticket-user-sign-group ticket-pleno-sign-group"' in ticket
     assert "grid-column: 1 / -1" in TICKET_CSS.read_text(encoding="utf-8")
+
+
+def test_saved_ticket_stays_in_the_row_instead_of_showing_the_1x2_picker():
+    ticket = TICKET_JS.read_text(encoding="utf-8")
+    events = EVENTS_JS.read_text(encoding="utf-8")
+
+    # El selector 1X2 solo se pinta sin quiniela guardada o en modo edicion;
+    # con la quiniela guardada la fila muestra el signo en solo lectura.
+    assert "(state.editMode || state.draftDirty || !hasSavedTicket())" in ticket
+    assert 'class="ia-signo ticket-user-sign ${stateClass} active' in ticket
+    assert '"empty-user-pick"' in ticket
+    assert '"saved-ticket-sign"' in ticket
+    # El listener delegado tampoco debe permitir editar un boleto ya guardado.
+    assert "hasSavedTicket() && !state.editMode && !state.draftDirty" in events
+    assert "Editar quiniela" in events

@@ -115,6 +115,7 @@ class LigaDataPayload(_StrictBase):
     jornadas_disponibles: list[int] = Field(default_factory=list)
     today_madrid: str = ""
     is_locked: bool = False
+    ticket_guardado: bool = False
     edit_deadline: str = ""
     kickoff_at: str = ""
     partidos: list[MatchPayload] = Field(default_factory=list)

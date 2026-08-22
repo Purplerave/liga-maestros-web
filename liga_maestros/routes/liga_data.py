@@ -56,6 +56,16 @@ def get_liga_data():
             current_user_id=user.get("id"),
             reveal_all=is_locked,
         )
+        # Señal explícita de "ya guardó la quiniela de esta jornada". El frontend
+        # la usa para mostrar el boleto en solo lectura (sin selector 1X2) aunque
+        # la hidratación de predicciones no encuentre la clave del usuario.
+        ticket_guardado = False
+        if user.get("id"):
+            row = conn.execute(
+                "SELECT COUNT(*) AS c FROM predicciones WHERE user_id = ? AND jornada = ?",
+                (str(user.get("id")), str(jornada)),
+            ).fetchone()
+            ticket_guardado = bool(row and row["c"] > 0)
 
         participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
         trash_talk = _build_trash_talk_payload(
@@ -71,6 +81,7 @@ def get_liga_data():
             "jornadas_disponibles": jornadas_disponibles,
             "today_madrid": today_madrid(),
             "is_locked": is_locked,
+            "ticket_guardado": ticket_guardado,
             "edit_deadline": _format_dt(close_info.get("close_at")),
             "kickoff_at": _format_dt(close_info.get("first_kickoff")),
             "partidos": partidos,
