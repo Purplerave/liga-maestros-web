@@ -152,5 +152,14 @@
     "puntos_totales": 0,
     "activo": true,
     "descripcion": "Participante de La Pena."
+  },
+  {
+    "id": "sonia2",
+    "nombre": "Sonia2",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Segunda columna de la quiniela de Sonia (La Pena)."
   }
 ]

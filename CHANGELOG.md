@@ -2,6 +2,19 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-22 — Sonia y Sonia2 completan La Peña en la Jornada 2
+
+### Añadido
+
+- Dos columnas humanas de La Peña para la J2 en `data/predicciones_J2.json`:
+  `sonia` (columna 1) y `sonia2` (columna 2), con el pleno `2-1` en ambas.
+- `sonia2` queda registrada como participante de La Peña en
+  `data/ECOSISTEMA_PARTICIPANTES.json` y `data/PARTICIPANTES_MAESTROS.json`,
+  por lo que sus signos entran en el consenso de La Peña (12 votos) y en el
+  ranking.
+- `docs/REVISION_PENA_J2.md` y `data/predicciones_J2_pena_revision.json`
+  actualizados: pendientes Luna y Fistro.
+
 ## 2026-08-21 — El Programa entra en la Jornada 2
 
 ### Añadido

@@ -1,17 +1,18 @@
 # Revisión de La Peña — Jornada 2
 
-Fecha de revisión: 19/08/2026.
+Fecha de revisión: 19/08/2026 (Sonia y Sonia2 añadidas el 22/08/2026).
 
 ## Resumen
 
-Se recibieron diez boletos de La Peña: Chipi (DeepSeek), Geli (Z.AI/GLM),
+Se recibieron doce boletos de La Peña: Chipi (DeepSeek), Geli (Z.AI/GLM),
 Pepe (Perplexity), Profe (Meta), Fortu (Mistral), Oráculo (Qwen), Sesudo
-(Kimi), Luzia, ErnieBot (Baidu) y Jimmy (ChatJimmy).
+(Kimi), Luzia, ErnieBot (Baidu), Jimmy (ChatJimmy) y las dos columnas de
+Sonia (`sonia` y `sonia2`).
 
-- Los diez contienen exactamente 15 partidos.
+- Los doce contienen exactamente 15 partidos.
 - El orden coincide con el boleto J2 del repositorio.
 - Los signos 1–14 quedan en `1`, `X` o `2` tras normalizar a Jimmy.
-- Los diez Plenos al 15 son válidos (`0`, `1`, `2` o `M` por equipo).
+- Los doce Plenos al 15 son válidos (`0`, `1`, `2` o `M` por equipo).
 - Los datos quedaron en `data/predicciones_J2.json` junto a los Maestros.
 - `ensure_jornada_2()` los importa al arrancar.
 
@@ -23,7 +24,6 @@ No se inventaron boletos ausentes.
 |---|---|
 | Luna | No se recibió boleto. |
 | Fistro | No se recibió boleto. |
-| Sonia | Participante humana; rellena en la web o se añade cuando lo envíe. |
 | MrPurple | Usuario humano; rellena su quiniela en la web. |
 
 ## Signos normalizados
@@ -40,6 +40,8 @@ No se inventaron boletos ausentes.
 | Luzia | 1 | 1 | 2 | X | 2 | 1 | 1 | X | 2 | 2 | 1 | 1 | X | 2 | 2-1 |
 | ErnieBot | 1 | X | 2 | 1 | 2 | 1 | X | 1 | 2 | X | 1 | 1 | X | 2 | 2-1 |
 | Jimmy | 2 | X | 1 | 2 | 2 | 2 | 1 | X | 1 | 1 | X | 1 | X | 2 | M-0 |
+| Sonia | 1 | 2 | 1 | 1 | 2 | X | 2 | X | 2 | X | 1 | X | 1 | 1 | 2-1 |
+| Sonia2 | 1 | 2 | 1 | 1 | 2 | 1 | 2 | 2 | 2 | X | 1 | 1 | 1 | 1 | 2-1 |
 
 ## Incidencias de Jimmy
 
@@ -54,35 +56,32 @@ inválidos para que el importador no lo descarte.
    Eibar–Villarreal, «El curso»). Se respetó el orden 1–15.
 4. Varias explicaciones contradicen el signo. Se conservó el signo aportado.
 
-## Consenso provisional (10 votos)
+## Consenso provisional (12 votos)
 
 Coincidencia total:
 
 - 5: Barcelona gana.
-- 12: Castellón gana.
+- 12: Castellón gana (11 de 12, con Sonia marcando X).
 
 Mayorías claras:
 
-- 1: `1` por 9–1.
-- 2: `X` por 6–4.
-- 3: `2` por 8–1–1.
-- 6: `1` por 9–1.
-- 7: `X` por 7–2–1.
-- 9: `2` por 9–1.
-- 10: `X` por 5–4–1.
-- 11: `1` por 9–1.
-- 13: `X` por 6–3–1.
-- 14: `2` por 7–2–1.
-- Pleno: `2-1` por 7 votos; Geli `1-1`, Fortu `2-0` y Jimmy `M-0`.
+- 1: `1` por 11–1.
+- 2: `X` por 6–4–2.
+- 3: `2` por 8–3–1.
+- 4: `1` por 6–4–2.
+- 6: `1` por 10–1–1.
+- 7: `X` por 7–3–2.
+- 8: `X` por 6–5–1.
+- 9: `2` por 11–1.
+- 10: `X` por 7–4–1.
+- 11: `1` por 11–1.
+- 13: `X` por 6–5–1.
+- 14: `2` por 7–3–2.
+- Pleno: `2-1` por 9 votos; Geli `1-1`, Fortu `2-0` y Jimmy `M-0`.
 
-Empates:
+Columna de consenso simple:
 
-- 4, Getafe–Racing: `1` = 4, `X` = 4, `2` = 2.
-- 8, Oviedo–Leganés: `1` = 5, `X` = 5.
-
-Columna de consenso simple, deshaciendo empates a favor del local:
-
-`1, X, 2, 1, 2, 1, X, 1, 2, X, 1, 1, X, 2, 2-1`
+`1, X, 2, 1, 2, 1, X, X, 2, X, 1, 1, X, 2, 2-1`
 
 ## Privacidad
 
