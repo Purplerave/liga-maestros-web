@@ -38,3 +38,14 @@ def test_save_validates_all_picks_and_recovers_an_expired_csrf_token():
     assert "state.csrfToken = statusPayload.csrf_token" in save
     assert "Quiniela guardada correctamente." in save
     assert "finally" in save
+
+
+def test_server_announces_a_saved_ticket_so_the_picker_stays_hidden():
+    state_js = (ROOT / "static" / "js" / "state.js").read_text(encoding="utf-8")
+    route = (ROOT / "liga_maestros" / "routes" / "liga_data.py").read_text(encoding="utf-8")
+
+    assert "ticket_guardado" in state_js
+    assert "if (state.data?.ticket_guardado) return true;" in state_js
+    assert '"ticket_guardado": ticket_guardado' in route
+    # Tras guardar, el cliente marca la señal inmediatamente (no espera al refresh).
+    assert "state.data.ticket_guardado = true" in APP.read_text(encoding="utf-8")

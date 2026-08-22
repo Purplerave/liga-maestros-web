@@ -337,6 +337,7 @@ async function savePredictions() {
         clearDraft();
         state.my_signs = [...savedSigns];
         state.server_signs = [...savedSigns];
+        if (state.data) state.data.ticket_guardado = true;
         state.editMode = false;
         hydrateHero();
         renderArena();
