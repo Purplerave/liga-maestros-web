@@ -14,6 +14,15 @@ function renderMatchInsight(match) {
     return "";
 }
 
+/* Antes el horario iba dentro de una pildora redondeada y "lun 17/08 19:00h" se
+   cortaba. Ahora el dia y la hora van apilados en dos lineas: la hora es lo
+   importante, se lee grande y entera, y el dia queda encima como apoyo. */
+function renderFixtureSchedule(match) {
+    const { day, time, label } = fixtureScheduleParts(match);
+    if (!time) return `<span class="fixture-schedule is-pending" title="${escapeHtml(label)}">${escapeHtml(label)}</span>`;
+    return `<span class="fixture-schedule" title="${escapeHtml(label)}">${day ? `<small class="fixture-schedule-day">${escapeHtml(day)}</small>` : ""}<b class="fixture-schedule-time">${escapeHtml(time)}</b></span>`;
+}
+
 function renderMatchDetailGrid(m, c) {
     return `<div class="match-detail-grid"><div class="empty-state">Detalle del partido</div></div>`;
 }
@@ -174,9 +183,8 @@ function renderArenaTensionBody(matches) {
             liveMatch ? "is-live-row" : (isFinished ? "is-finished-row" : ""),
             splitMatch ? "is-split-row" : ""
         ].filter(Boolean).join(" ");
-        const statusText = scheduledMatch ? score : "";
         const scoreBadge = scheduledMatch
-            ? ""
+            ? renderFixtureSchedule(m)
             : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(m, liveMatch)}>${escapeHtml(scoreText)}</span>`;
         const penaChip = isPleno
             ? renderTensionPenaChip(renderPenaPleno(getPenaPlenoSummary(idx), m.marcador, m.status), "Peña")
@@ -191,7 +199,7 @@ function renderArenaTensionBody(matches) {
         return `<tr class="tension-row ${rowClass}" data-ticket-row="${idx}">
             <td class="match-index-cell"><span class="match-number">${idx + 1}</span></td>
             <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante, m.logo_local, m.logo_visitante)}</div></td>
-            <td class="ticket-status-cell" data-ticket-status>${scoreBadge}${statusText ? `<span class="tension-status">${escapeHtml(statusText)}</span>` : ""}</td>
+            <td class="ticket-status-cell" data-ticket-status>${scoreBadge}</td>
             ${predictorCells}
             <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
             <td class="ticket-pick-cell ticket-user-cell"${isPleno ? ` title="Elegir resultado del Pleno al 15" data-pleno-label="${plenoLabel}"` : ""}><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
@@ -221,7 +229,7 @@ function patchTicketArena() {
         const statusCell = row.querySelector("[data-ticket-status]");
         if (!statusCell) continue;
         statusCell.innerHTML = scheduledMatch
-            ? `<span class="tension-status">${escapeHtml(score)}</span>`
+            ? renderFixtureSchedule(match)
             : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(match, liveMatch)}>${escapeHtml(scoreText)}</span>`;
         row.classList.toggle("is-live-row", liveMatch);
         row.classList.toggle("is-finished-row", isFinished);

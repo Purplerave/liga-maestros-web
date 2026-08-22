@@ -127,3 +127,58 @@ def test_live_cards_keep_a_distinct_group_for_each_competition():
     assert 'data-competition="${escapeHtml(group.key)}"' in arena
     assert "const expectedCompetitions = new Set(matches.map(competitionLabel));" in arena
     assert 'renderGroupedMatchCards(matches, state.currentFilter !== "LIVE")' in arena
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser utility functions")
+def test_ticket_kickoff_time_is_stacked_and_never_clipped():
+    """La hora de la quiniela se pinta en dos lineas (dia / hora), sin recortes."""
+    script = f"""
+        const fs = require("fs");
+        const vm = require("vm");
+        const context = {{ console, Map, String, Number, Date, JSON, Set, Math }};
+        vm.createContext(context);
+        vm.runInContext(fs.readFileSync({json.dumps(str(UTILS))}, "utf8"), context);
+        vm.runInContext(fs.readFileSync({json.dumps(str(TICKET))}, "utf8"), context);
+        context.state = {{ data: {{ today_madrid: "2026-08-22" }} }};
+        console.log(JSON.stringify({{
+            otherDay: context.fixtureScheduleParts({{ fecha_raw: "2026-08-17", hora: "19:00" }}),
+            sameDay: context.fixtureScheduleParts({{ fecha_raw: "2026-08-22", hora: "17:00" }}),
+            unknown: context.fixtureScheduleParts({{}}),
+            otherDayHtml: context.renderFixtureSchedule({{ fecha_raw: "2026-08-17", hora: "19:00" }}),
+            sameDayHtml: context.renderFixtureSchedule({{ fecha_raw: "2026-08-22", hora: "17:00" }}),
+            unknownHtml: context.renderFixtureSchedule({{}}),
+        }}));
+    """
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    payload = json.loads(result.stdout)
+
+    # El dia y la hora viajan separados para poder apilarlos sin cortar texto.
+    assert payload["otherDay"] == {"day": "lun 17/08", "time": "19:00h", "label": "lun 17/08 19:00h"}
+    assert payload["sameDay"] == {"day": "", "time": "17:00h", "label": "17:00h"}
+    assert payload["unknown"]["time"] == ""
+
+    assert 'class="fixture-schedule-day">lun 17/08<' in payload["otherDayHtml"]
+    assert 'class="fixture-schedule-time">19:00h<' in payload["otherDayHtml"]
+    # Un partido de hoy solo necesita la hora: nada de dia vacio ocupando sitio.
+    assert "fixture-schedule-day" not in payload["sameDayHtml"]
+    assert 'class="fixture-schedule-time">17:00h<' in payload["sameDayHtml"]
+    assert "is-pending" in payload["unknownHtml"]
+
+    # El horario ya no usa la pildora de ancho fijo que lo recortaba.
+    ticket = TICKET.read_text(encoding="utf-8")
+    assert "tension-status" not in ticket
+
+    css_files = [
+        ROOT / "static" / "css" / "pages" / "ticket.css",
+        ROOT / "static" / "css" / "pages" / "ticket_compact.css",
+        ROOT / "static" / "css" / "themes" / "newspaper" / "ticket_compact.css",
+        ROOT / "static" / "css" / "mobile_v2.css",
+    ]
+    for path in css_files:
+        text = path.read_text(encoding="utf-8")
+        assert "tension-status" not in text, f"{path.name} still styles the clipped kickoff pill"
+
+    base = css_files[0].read_text(encoding="utf-8")
+    schedule_block = base.split(".fixture-schedule {", 1)[1].split("}", 1)[0]
+    assert "display: inline-grid" in schedule_block
+    assert "text-overflow: ellipsis" not in schedule_block
