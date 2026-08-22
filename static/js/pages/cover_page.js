@@ -188,6 +188,31 @@ function _fitName(name, maxLen) {
     const s = String(name).trim();
     return s.length > maxLen ? s.slice(0, maxLen - 1) + "…" : s;
 }
+function _liveMinuteLabel(match) {
+    const candidates = [match?.minuto_live, match?.minuto, match?.minute, match?.time];
+    for (const raw of candidates) {
+        const clean = String(raw ?? "").trim();
+        if (!clean || clean === "-" || clean === "—") continue;
+        if (/^(HT|DESC|DESCANSO|HALF)/i.test(clean)) return "Desc.";
+        const parsed = clean.match(/\d{1,3}/);
+        if (parsed) return `${parsed[0]}'`;
+        return clean;
+    }
+    const numeric = typeof matchMinuteValue === "function" ? matchMinuteValue(match) : 0;
+    if (numeric > 0) return `${numeric}'`;
+    return (typeof liveStage === "function" && liveStage(match) === "HT") ? "Desc." : "LIVE";
+}
+function _liveScoreText(match) {
+    if (typeof liveScoreDisplay === "function") {
+        return liveScoreDisplay(match, match?.marcador_base || match?.score || match?.marcador || "—") || "—";
+    }
+    if (typeof scoreOnly === "function") return scoreOnly(match?.marcador || match?.score) || match?.marcador_base || "—";
+    return match?.marcador_base || match?.score || match?.marcador || "—";
+}
+function _liveTeamLabel(name, maxLen) {
+    const label = typeof getShortName === "function" ? getShortName(name) : name;
+    return _fitName(label, maxLen || 12);
+}
 function _mtone(col) {
     if (!col) return "is-default";
     const id = String(col.id || col.label || "").toLowerCase();
@@ -342,11 +367,11 @@ function renderNewspaperCoverPageV3() {
     const penaVoters = penaVote.penistas;
 
     const tickerItems = liveMatches.map(m => {
-        const home = _abbr(m.local, 3);
-        const away = _abbr(m.visitante, 3);
-        const score = m.marcador || m.score || m.resultado || "—";
-        const minute = m.minuto || m.minute || "—";
-        return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}'</b> ${home} <em>${escapeHtml(String(score || "—"))}</em> ${away}</span>`;
+        const home = _liveTeamLabel(m.local, 11);
+        const away = _liveTeamLabel(m.visitante, 11);
+        const score = _liveScoreText(m);
+        const minute = _liveMinuteLabel(m);
+        return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
     }).join("");
     const comentarista = state.data?.comentarista || {};
     const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
@@ -513,18 +538,18 @@ function renderNewspaperCoverPageV3() {
 
     function liveCard(match) {
         if (!match) return "";
-        const homeFull = typeof getShortName === "function" ? getShortName(match.local) : match.local;
-        const awayFull = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
-        const score = match.marcador || match.score || match.resultado || "—";
-        const minute = match.minuto || match.minute || "0";
+        const homeFull = _liveTeamLabel(match.local, 12);
+        const awayFull = _liveTeamLabel(match.visitante, 12);
+        const score = _liveScoreText(match);
+        const minute = _liveMinuteLabel(match);
         return `
             <div class="cx-live-card" data-page-action="LIVE">
                 <span class="cx-live-pulse"></span>
-                <span class="cx-live-min">${escapeHtml(String(minute))}'</span>
+                <span class="cx-live-min">${escapeHtml(String(minute))}</span>
                 <div class="cx-live-match">
-                    <span class="cx-live-team is-home">${escapeHtml(_fitName(homeFull, 12))}</span>
+                    <span class="cx-live-team is-home">${escapeHtml(homeFull)}</span>
                     <span class="cx-live-score">${escapeHtml(String(score))}</span>
-                    <span class="cx-live-team is-away">${escapeHtml(_fitName(awayFull, 12))}</span>
+                    <span class="cx-live-team is-away">${escapeHtml(awayFull)}</span>
                 </div>
             </div>
         `;

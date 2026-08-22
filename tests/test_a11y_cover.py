@@ -1,5 +1,6 @@
 """Tests de accesibilidad y performance (P2 4.x)."""
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,10 +75,17 @@ def test_cover_uses_real_data_not_invented():
         assert forbidden not in cover, f"marcador hardcodeado {forbidden!r} en cover_page.js"
 
 
+def _cache_bust_version(text: str, asset: str) -> int:
+    """Extrae la versión del cache-bust de un asset (ej. cover-page-68 -> 68)."""
+    match = re.search(re.escape(asset) + r"-(\d+)", text)
+    return int(match.group(1)) if match else 0
+
+
 def test_cover_version_bumped_after_change():
     """El cache-bust de la portada debe haber sido bumpeado para invalidar la caché."""
     nav = (ROOT / "static" / "js" / "navigation.js").read_text(encoding="utf-8")
     template = TEMPLATE.read_text(encoding="utf-8")
-    # Tras los cambios, ambos deben apuntar al menos a 68
-    assert "cover-page-68" in nav
-    assert "cover-hero-68" in template
+    # Tras los cambios, ambos deben apuntar al menos a 68 (nunca un valor exacto fijo,
+    # porque un bump legítimo a la versión 69+ también debe pasar).
+    assert _cache_bust_version(nav, "cover-page") >= 68
+    assert _cache_bust_version(template, "cover-hero") >= 68
