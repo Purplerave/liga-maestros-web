@@ -155,6 +155,11 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
         const idx = Number.parseInt(btn.dataset.matchIdx || btn.closest("[data-match-idx]")?.dataset.matchIdx, 10);
         if (Number.isNaN(idx)) return;
         if (!Array.isArray(state.my_signs)) state.my_signs = Array(15).fill("-");
+        // Si la quiniela ya esta guardada, el selector 1X2 no debe poder tocar
+        // los signos: primero hay que pulsar "Editar quiniela".
+        if ((btn.dataset.sign || btn.dataset.pleno) && hasSavedTicket() && !state.editMode && !state.draftDirty) {
+            return showToast('Tu quiniela ya esta guardada. Pulsa "Editar quiniela" para modificarla.', "error");
+        }
         if (btn.dataset.pleno) {
             openPlenoModal(idx);
             return;

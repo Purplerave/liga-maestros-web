@@ -87,9 +87,12 @@ function checkQuinielaCompletion() {
 
 function renderMyCell(idx, mySign, real, status, canEdit, exactScore = false) {
     if (!canEdit) {
+        // Quiniela guardada (o jornada cerrada): el signo se muestra en la fila
+        // como solo lectura; nunca un selector 1X2 abierto.
         // An empty pleno is not a real 0-0 pick; prompt the user to choose instead.
         const shown = exactScore && mySign === "-" ? "Elegir" : (mySign === "-" ? "—" : mySign);
-        return `<b class="ia-signo ticket-user-sign active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(shown)}</b>`;
+        const stateClass = mySign === "-" ? "empty-user-pick" : "saved-ticket-sign";
+        return `<b class="ia-signo ticket-user-sign ${stateClass} active ${hitClass(mySign, real, status, exactScore)}">${escapeHtml(shown)}</b>`;
     }
     if (exactScore) {
         const label = mySign === "-" ? "Elegir" : mySign;
@@ -145,7 +148,12 @@ function renderArenaTensionBody(matches) {
 
     const preds = state.data?.predicciones_actuales || state.data?.predicciones || {};
     const consenso = state.data?.consenso_pena || [];
-    const canEdit = Boolean(state.user) && String(state.data?.jornada) === String(state.data?.max_jornada) && !state.data?.is_locked;
+    const canEdit = Boolean(state.user)
+        && String(state.data?.jornada) === String(state.data?.max_jornada)
+        && !state.data?.is_locked
+        // Con la quiniela ya guardada el selector 1X2 solo se muestra al pulsar
+        // "Editar quiniela" (editMode) o si hay cambios sin guardar (draftDirty).
+        && (state.editMode || state.draftDirty || !hasSavedTicket());
 
     tbody.innerHTML = matches.map((m, idx) => {
         const isPleno = idx === 14;
