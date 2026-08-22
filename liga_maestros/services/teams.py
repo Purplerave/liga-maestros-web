@@ -45,6 +45,8 @@ def public_contest_name(uid, users):
         "luzia": "LUZIA",
         "luna": "LUNA",
         "erniebot": "ERNIEBOT",
+        "sonia": "SONIA",
+        "sonia2": "SONIA2",
     }
     if uid in names:
         return names[uid]

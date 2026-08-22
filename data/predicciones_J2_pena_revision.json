@@ -11,10 +11,12 @@
     "sesudo": {"origen": "Kimi", "signos": ["1", "X", "2", "X", "2", "1", "X", "1", "2", "X", "1", "1", "X", "2", "2-1"]},
     "luzia": {"origen": "LuzIA", "signos": ["1", "1", "2", "X", "2", "1", "1", "X", "2", "2", "1", "1", "X", "2", "2-1"]},
     "erniebot": {"origen": "Baidu ERNIE", "signos": ["1", "X", "2", "1", "2", "1", "X", "1", "2", "X", "1", "1", "X", "2", "2-1"]},
-    "jimmy": {"origen": "ChatJimmy", "signos": ["2", "X", "1", "2", "2", "2", "1", "X", "1", "1", "X", "1", "X", "2", "M-0"]}
+    "jimmy": {"origen": "ChatJimmy", "signos": ["2", "X", "1", "2", "2", "2", "1", "X", "1", "1", "X", "1", "X", "2", "M-0"]},
+    "sonia": {"origen": "Quiniela propia de la usuaria Sonia", "signos": ["1", "2", "1", "1", "2", "X", "2", "X", "2", "X", "1", "X", "1", "1", "2-1"]},
+    "sonia2": {"origen": "Quiniela propia de la usuaria Sonia, columna 2", "signos": ["1", "2", "1", "1", "2", "1", "2", "2", "2", "X", "1", "1", "1", "1", "2-1"]}
   },
-  "pendientes": ["luna", "fistro", "sonia"],
-  "nota_pendientes": "Sonia y MrPurple rellenan en la web. Luna y Fistro no se recibieron en esta entrega.",
+  "pendientes": ["luna", "fistro"],
+  "nota_pendientes": "Luna y Fistro no se recibieron en esta entrega. Sonia aportó sus dos columnas; MrPurple rellena en la web.",
   "incidencias": {
     "jimmy": [
       "Partidos 8, 11 y 13 llegaron con signo 0; se normalizaron a X como en J1.",
@@ -22,26 +24,23 @@
       "Varios nombres de rival no coinciden con el boleto oficial; se respetó el orden 1-15."
     ]
   },
-  "consenso_simple": ["1", "X", "2", "1", "2", "1", "X", "1", "2", "X", "1", "1", "X", "2", "2-1"],
-  "empates_consenso": {
-    "4": {"1": 4, "X": 4, "2": 2},
-    "8": {"1": 5, "X": 5, "2": 0}
-  },
+  "consenso_simple": ["1", "X", "2", "1", "2", "1", "X", "X", "2", "X", "1", "1", "X", "2", "2-1"],
+  "empates_consenso": {},
   "votacion": {
-    "1": {"1": 9, "X": 0, "2": 1},
-    "2": {"1": 4, "X": 6, "2": 0},
-    "3": {"1": 1, "X": 1, "2": 8},
-    "4": {"1": 4, "X": 4, "2": 2},
-    "5": {"1": 0, "X": 0, "2": 10},
-    "6": {"1": 9, "X": 0, "2": 1},
-    "7": {"1": 2, "X": 7, "2": 1},
-    "8": {"1": 5, "X": 5, "2": 0},
-    "9": {"1": 1, "X": 0, "2": 9},
-    "10": {"1": 1, "X": 5, "2": 4},
-    "11": {"1": 9, "X": 1, "2": 0},
-    "12": {"1": 10, "X": 0, "2": 0},
-    "13": {"1": 3, "X": 6, "2": 1},
-    "14": {"1": 1, "X": 2, "2": 7},
-    "15": {"2-1": 7, "1-1": 1, "2-0": 1, "M-0": 1}
+    "1": {"1": 11, "X": 0, "2": 1},
+    "2": {"1": 4, "X": 6, "2": 2},
+    "3": {"1": 3, "X": 1, "2": 8},
+    "4": {"1": 6, "X": 4, "2": 2},
+    "5": {"1": 0, "X": 0, "2": 12},
+    "6": {"1": 10, "X": 1, "2": 1},
+    "7": {"1": 2, "X": 7, "2": 3},
+    "8": {"1": 5, "X": 6, "2": 1},
+    "9": {"1": 1, "X": 0, "2": 11},
+    "10": {"1": 1, "X": 7, "2": 4},
+    "11": {"1": 11, "X": 1, "2": 0},
+    "12": {"1": 11, "X": 1, "2": 0},
+    "13": {"1": 5, "X": 6, "2": 1},
+    "14": {"1": 3, "X": 2, "2": 7},
+    "15": {"2-1": 9, "1-1": 1, "2-0": 1, "M-0": 1}
   }
 }

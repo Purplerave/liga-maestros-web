@@ -2,7 +2,7 @@
   "jornada": 2,
   "temporada": "2026-2027",
   "generado_en": "2026-08-19T12:00:00+02:00",
-  "nota": "Boletos de los cinco Maestros y diez peñistas aportados para la Jornada 2. Pendientes Luna, Fistro y Sonia. Jimmy: signos 0 de los partidos 8/11/13 normalizados a X; Pleno M normalizado a M-0. Boleto del Programa (motor v4, 3 dobles) volcado desde tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J2.json.",
+  "nota": "Boletos de los cinco Maestros y doce peñistas aportados para la Jornada 2. Sonia aporta la columna 1 y Sonia2 la columna 2. Pendientes Luna y Fistro. Jimmy: signos 0 de los partidos 8/11/13 normalizados a X; Pleno M normalizado a M-0. Boleto del Programa (motor v4, 3 dobles) volcado desde tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J2.json.",
   "programa": {
     "signos": [
       "1",
@@ -609,6 +609,48 @@
       "Partidos 8, 11 y 13 llegaron con signo 0; se normalizaron a X como en J1.",
       "Pleno llegó como M; se guardó M-0 (Atlético 3 o más, visitante no aportado).",
       "Varios nombres de rival no coinciden con el boleto oficial; se respetó el orden 1-15."
+    ]
+  },
+  "sonia": {
+    "nombre": "SONIA",
+    "origen": "Quiniela propia de la usuaria Sonia",
+    "signos": [
+      "1",
+      "2",
+      "1",
+      "1",
+      "2",
+      "X",
+      "2",
+      "X",
+      "2",
+      "X",
+      "1",
+      "X",
+      "1",
+      "1",
+      "2-1"
+    ]
+  },
+  "sonia2": {
+    "nombre": "SONIA2",
+    "origen": "Quiniela propia de la usuaria Sonia, columna 2",
+    "signos": [
+      "1",
+      "2",
+      "1",
+      "1",
+      "2",
+      "1",
+      "2",
+      "2",
+      "2",
+      "X",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2-1"
     ]
   }
 }
