@@ -25,6 +25,8 @@ const state = {
     selectedContestMonth: "",
     selectedContestJornada: "",
     newspaperPage: "ALL",
+    newsRadar: null,
+    newsRadarFetchedAt: 0,
     refreshErrorNotifiedAt: 0,
     snake: {
         running: false,
@@ -45,6 +47,7 @@ const state = {
 
 const initialView = new URLSearchParams(window.location.search).get("view");
 if (initialView) state.currentFilter = ["MATCHES", "PANEL"].includes(initialView) ? "ALL" : initialView;
+if (initialView === "NEWS") state.currentFilter = "NEWS_PAGE";
 const initialContest = new URLSearchParams(window.location.search).get("contest");
 if (initialContest) state.contestView = initialContest;
 if (state.currentFilter === "CONTEST") {
@@ -116,6 +119,8 @@ function hydrateHero() {
                     ? "Juegos"
                     : state.currentFilter === "QUIZ_PAGE"
                         ? "Quiz"
+                : state.currentFilter === "NEWS_PAGE"
+                    ? "Última hora"
                 : state.currentFilter === "LIVE"
                     ? "Partidos en directo"
                         : state.currentFilter === "STANDINGS_FULL"
@@ -437,6 +442,10 @@ function isQuizPage() {
     return state.contestView === "MATCHES" && state.currentFilter === "QUIZ_PAGE";
 }
 
+function isNewsPage() {
+    return state.contestView === "MATCHES" && state.currentFilter === "NEWS_PAGE";
+}
+
 function isContestPage() {
     return state.contestView !== "MATCHES";
 }
@@ -444,6 +453,6 @@ function isContestPage() {
 function isLiveOrLeaguePage() {
     return state.contestView === "MATCHES" && (
         state.currentFilter === "LIVE" ||
-        (state.currentFilter && !["ALL", "TICKET", "SNAKE_PAGE", "QUIZ_PAGE"].includes(state.currentFilter) && !String(state.currentFilter).startsWith("STANDINGS_"))
+        (state.currentFilter && !["ALL", "TICKET", "SNAKE_PAGE", "QUIZ_PAGE", "NEWS_PAGE"].includes(state.currentFilter) && !String(state.currentFilter).startsWith("STANDINGS_"))
     );
 }

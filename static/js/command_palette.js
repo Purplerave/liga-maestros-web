@@ -30,6 +30,7 @@ const CommandPalette = {
             ["SNAKE", "Juegos", "Snake Gol, Arkanoid e Invaders", "🎮"],
             ["CONTEST", "La Peña", "Rankings, premios y palmares", "🏆"],
             ["QUIZ", "Quiz", "Preguntas de la jornada", "❓"],
+            ["NEWS", "Última hora", "Titulares del radar de prensa", "🗞️"],
         ];
 
         const list = pages.map(([page, title, desc, icon]) => ({

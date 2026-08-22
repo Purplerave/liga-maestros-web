@@ -2,6 +2,20 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-22 — Noticias de nuevo en la portada
+
+### Corregido
+
+- 🔴 **El panel «ÚLTIMA HORA» de la portada no mostraba titulares.** El radar
+  RSS (`/api/noticias/radar`) ya devolvía `items` de Marca y el resto de
+  fuentes, pero el frontend solo pintaba `novedades` y `bajas` del boletín IA.
+  Con `AI_NEWS_ENABLED=0` esas listas van vacías y la portada se quedaba en
+  «Cargando últimas noticias…» / «Sin novedades de momento». Ahora se pintan
+  los titulares del radar (y el boletín, si está activo) con las clases
+  `.cx-news-*` de la portada.
+- «Ver todas →» ya no recarga la portada: abre una vista `NEWS` con el listado
+  completo y enlaces a la pieza original.
+
 ## 2026-08-22 — Sonia y Sonia2 completan La Peña en la Jornada 2
 
 ### Añadido

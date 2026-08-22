@@ -108,6 +108,7 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("matches-body")?.addEventListener("click", event => {
         const pageBtn = event.target.closest("[data-page-action]");
         if (pageBtn) {
+            event.preventDefault();
             openNewspaperPage(pageBtn.dataset.pageAction);
             return;
         }
