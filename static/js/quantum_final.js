@@ -540,21 +540,9 @@ const NEWS_SOURCE_SHORT = {
     "la liga": "LIGA",
 };
 
-function newsTimeLabel(publishedAt) {
-    const raw = String(publishedAt || "").trim();
-    if (!raw) return "";
-    const parsed = new Date(raw.includes("T") ? raw : raw.replace(" ", "T"));
-    if (Number.isNaN(parsed.getTime())) {
-        const clock = raw.match(/\b(\d{2}:\d{2})\b/);
-        return clock ? clock[1] : raw.slice(0, 16);
-    }
-    const hhmm = `${String(parsed.getHours()).padStart(2, "0")}:${String(parsed.getMinutes()).padStart(2, "0")}`;
-    const today = new Date();
-    if (parsed.toDateString() === today.toDateString()) return hhmm;
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    if (parsed.toDateString() === yesterday.toDateString()) return `ayer ${hhmm}`;
-    return `${String(parsed.getDate()).padStart(2, "0")}/${String(parsed.getMonth() + 1).padStart(2, "0")}`;
+function newsTimeLabel() {
+    // Hora/fecha ocultada a proposito: el usuario pide que el texto quepa y este bien resumido.
+    return "";
 }
 
 function newsCategoryLabel(value) {
@@ -614,12 +602,15 @@ function normalizeNewsRows(payload) {
 
 function renderNewsRows(rows, options = {}) {
     const limit = Number.isFinite(options.limit) ? options.limit : rows.length;
+    const showTime = Boolean(options.showTime);
     return rows.slice(0, Math.max(0, limit)).map(row => {
         const extra = row.kind === "baja" ? " is-availability" : "";
         const cat = escapeHtml(row.category || "•");
         const title = escapeHtml(row.title || "");
-        const time = escapeHtml(row.time || "");
-        const inner = `<span class="cx-news-cat">${cat}</span><span class="cx-news-text">${title}</span><span class="cx-news-time">${time}</span>`;
+        const time = showTime ? escapeHtml(row.time || "") : "";
+        const inner = time
+            ? `<span class="cx-news-cat">${cat}</span><span class="cx-news-text">${title}</span><span class="cx-news-time">${time}</span>`
+            : `<span class="cx-news-cat">${cat}</span><span class="cx-news-text">${title}</span>`;
         if (row.url) {
             return `<a class="cx-news-item${extra}" href="${escapeHtml(row.url)}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
         }
