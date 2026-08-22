@@ -11,7 +11,7 @@ from .client import ai_enabled, chat
 
 logger = logging.getLogger(__name__)
 
-CACHE_SCOPE = "boletin-v2"
+CACHE_SCOPE = "boletin-v3"
 MAX_NOTICIAS = 10
 MIN_INTERVAL_SECONDS = int(os.getenv("AI_NEWS_MIN_INTERVAL_SECONDS", "7200"))
 CATEGORIAS = {"fichaje", "baja", "alineacion", "forma", "club", "partido", "otro"}
@@ -20,12 +20,13 @@ SYSTEM_PROMPT = """Eres el redactor breve de Liga de Maestros.
 Recibes noticias deportivas RSS verificadas, cada una con un id.
 
 Devuelve SOLO JSON:
-{"novedades":[{"id":1,"texto":"Resumen factual de una linea","categoria":"fichaje"}],
+{"novedades":[{"id":1,"texto":"Resumen factual muy corto","categoria":"fichaje"}],
  "bajas":[{"id":2,"jugador":"Nombre","equipo":"Equipo","estado":"baja","nota":"motivo breve"}]}
 
 Reglas:
 - Elige entre 3 y 6 novedades realmente utiles y actuales.
-- `texto` debe tener como maximo 18 palabras y no repetir el titular literalmente.
+- `texto` debe tener MAXIMO 14 palabras, ideal 10-12. Sin fecha ni hora.
+- Resume el hecho clave, no copies el titular literal. Debe caber en 2 lineas de UI.
 - `categoria`: fichaje, baja, alineacion, forma, club, partido u otro.
 - El id debe pertenecer a una noticia recibida. No mezcles dos noticias.
 - No inventes hechos, fechas, jugadores ni equipos.
@@ -71,12 +72,16 @@ def _validar_novedades(crudas, noticias):
         vistos.add(source_id)
         if categoria not in CATEGORIAS:
             categoria = "otro"
+        # Limitar a 14 palabras y 140 chars para que quepa en 2 lineas
+        palabras = texto.split()
+        if len(palabras) > 14:
+            texto = " ".join(palabras[:14])
         resultado.append(
             {
-                "texto": texto[:180],
+                "texto": texto[:140],
                 "categoria": categoria,
                 "source": fuente.get("source") or "",
-                "published_at": fuente.get("published_at") or "",
+                "published_at": "",  # no mostramos fecha/hora segun peticion
                 "link": fuente.get("link") or "",
                 "title": fuente.get("title") or "",
             }
