@@ -127,12 +127,8 @@ def build_live_matches(partidos, team_logos, standings_db=None):
 
 def _match_pair_key(match):
     """Team-pair identity key, robust across the two payload shapes."""
-    home = normalize_team_key(
-        match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
-    )
-    away = normalize_team_key(
-        match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
-    )
+    home = normalize_team_key(match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"))
+    away = normalize_team_key(match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"))
     if not home or not away:
         return ""
     return f"{home}|{away}"
