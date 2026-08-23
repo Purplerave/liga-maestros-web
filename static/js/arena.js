@@ -196,7 +196,11 @@ function renderArena() {
             : `<div class="empty-state">No hay partidos disponibles en esta competicion.</div>`;
         return;
     }
-    container.innerHTML = renderGroupedMatchCards(matches, state.currentFilter !== "LIVE");
+    // En Directo, los comentarios de la IA abren la pagina encima de los partidos.
+    const comentaristaHtml = state.currentFilter === "LIVE" && typeof directComentaristaHtml === "function"
+        ? directComentaristaHtml()
+        : "";
+    container.innerHTML = comentaristaHtml + renderGroupedMatchCards(matches, state.currentFilter !== "LIVE");
 }
 function renderGroupedMatchCards(matches, singleCompetition = false) {
     if (!Array.isArray(matches) || !matches.length) return "";
@@ -239,6 +243,10 @@ function patchLiveArena() {
     const container = qs("matches-body");
     if (!container) return false;
 
+    // Los comentarios del directo se parchean aparte: pueden llegar en un
+    // refresco en el que las tarjetas no han cambiado.
+    if (typeof patchDirectComentarista === "function") patchDirectComentarista();
+
     const matches = getLiveLeagueMatches();
     const expectedCompetitions = new Set(matches.map(competitionLabel));
     const renderedCompetitions = new Set(
@@ -266,6 +274,10 @@ function patchLiveArena() {
         scoreNode.dataset.liveMatch = String(match.id || "");
         scoreNode.dataset.liveMinute = String(matchMinuteValue(match) || "");
         scoreNode.dataset.liveStage = liveStage(match) || "LIVE";
+        // El chip del minuto se actualiza igual que el marcador, sin repintar la vista.
+        const minuteNode = card.querySelector("[data-live-minute-label]");
+        const nextMinute = liveMinuteLabel(match) || "EN DIRECTO";
+        if (minuteNode && minuteNode.textContent !== nextMinute) minuteNode.textContent = nextMinute;
         card.classList.add("is-live");
         card.classList.remove("is-finished");
     }
@@ -284,6 +296,9 @@ function renderMatchCard(match) {
         : live
             ? liveScoreDisplay(match, "-")
             : (match.marcador || match.score || match.scores?.score || "-");
+    // El minuto ("63'", "Descanso") va en su chip bajo el marcador: en directo
+    // es el dato que dice si el partido esta empezando o muriendo.
+    const minute = live ? (liveMinuteLabel(match) || "EN DIRECTO") : "";
 
     const cardClass = live ? "is-live" : (finished ? "is-finished" : "");
 
@@ -293,6 +308,7 @@ function renderMatchCard(match) {
                 ${teamCell(home, "left", teamLogo(match, "home"))}
                 <div class="card-score-area">
                     <div class="match-score-badge ${live ? "is-live-score" : (scheduled ? "is-scheduled-time" : "")}"${live ? " data-live-score" : ""}${liveScoreAttrs(match, live)}>${escapeHtml(score)}</div>
+                    ${minute ? `<span class="card-live-minute" data-live-minute-label>${escapeHtml(minute)}</span>` : ""}
                 </div>
                 ${teamCell(away, "right", teamLogo(match, "away"))}
             </div>

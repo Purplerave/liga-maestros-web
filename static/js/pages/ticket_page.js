@@ -173,7 +173,9 @@ function renderArenaTensionBody(matches) {
         const scheduledMatch = needsFixtureSchedule(m);
         const liveMatch = isMatchLiveNow(m) && !scheduledMatch;
         const score = scheduledMatch ? fixtureScheduleDisplay(m) : (m.marcador || m.score || "-");
-        const scoreText = liveMatch ? liveScoreDisplay(m, score) : score;
+        // En directo, el marcador lleva el minuto pegado ("2-1 · 63'"): sin
+        // salir de la quiniela se ve si el partido va lejos del final.
+        const scoreText = liveMatch ? liveScoreWithMinute(m, score) : score;
         const isFinished = isFinishedStatus(m.status) || isImplicitlyFinished(m);
         const values = [Number(c.p1 || 0), Number(c.px || 0), Number(c.p2 || 0)].sort((a, b) => b - a);
         const splitMatch = idx !== 14 && !isFinished && values[0] > 0 && values[0] - values[1] <= 12;
@@ -225,7 +227,7 @@ function patchTicketArena() {
         const liveMatch = isMatchLiveNow(match) && !scheduledMatch;
         const isFinished = isFinishedStatus(match.status) || isImplicitlyFinished(match);
         const score = scheduledMatch ? fixtureScheduleDisplay(match) : (match.marcador || match.score || "-");
-        const scoreText = liveMatch ? liveScoreDisplay(match, score) : score;
+        const scoreText = liveMatch ? liveScoreWithMinute(match, score) : score;
         const statusCell = row.querySelector("[data-ticket-status]");
         if (!statusCell) continue;
         statusCell.innerHTML = scheduledMatch

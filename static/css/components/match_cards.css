@@ -197,6 +197,29 @@
     animation: live-score-glow 2s ease-in-out infinite;
 }
 
+/* Minuto del directo ("63'", "Descanso") bajo el marcador de la tarjeta. */
+.card-live-minute {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #4ade80;
+    font-family: var(--font-data);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.card-live-minute::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: live-pulse 1.5s ease-in-out infinite;
+}
+
 @keyframes live-score-glow {
     0%,
     100% {
