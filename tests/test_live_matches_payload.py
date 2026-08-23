@@ -185,6 +185,91 @@ def test_live_without_provider_updates_for_thirty_minutes_is_closed(monkeypatch)
     assert league_matches.build_all_league_matches("", [], {}, {})[0]["status"] == "STALE"
 
 
+def test_same_match_from_quiniela_and_panel_is_not_duplicated_in_directo(monkeypatch):
+    """El directo mostraba el mismo partido dos veces: una en su grupo real
+    (LA LIGA, copia del panel externo con id numerico) y otra en FRIENDLIES
+    (copia de la quiniela con id ``quiniela-*``), porque la dedup solo
+    comparaba ids y cada fuente usa ids distintos para el mismo partido.
+    """
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-23")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 23, 20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 777,
+                "fixture_id": 777,
+                "status": "IN PLAY",
+                "time": "55",
+                "added": "2026-08-23 19:00:00",
+                "scheduled": "19:00",
+                "score": "1 - 0",
+                "competition_name": "LA LIGA",
+                "home": {"name": "Celta"},
+                "away": {"name": "Osasuna"},
+            }
+        ],
+    )
+    partidos = [
+        {
+            "id": 3,
+            "local": "Celta",
+            "visitante": "Osasuna",
+            "status": "LIVE",
+            "minuto": "55",
+            "marcador": "1-0 (55')",
+            "fecha_raw": "2026-08-23",
+            "hora": "19:00",
+            "logo_local": "",
+            "logo_visitante": "",
+        }
+    ]
+    standings_db = {"primera": {"CELTA DE VIGO": {}, "OSASUNA": {}}, "segunda": {}}
+
+    matches = league_matches.build_live_matches(partidos, {}, standings_db)
+
+    assert len(matches) == 1, "el mismo partido no puede salir dos veces en DIRECTO"
+    assert matches[0]["competition_name"] == "LA LIGA", "la copia ganadora lleva su liga real, no FRIENDLIES"
+
+
+def test_quiniela_live_match_keeps_its_real_competition(monkeypatch):
+    """Sin standings_db el partido de la quiniela se etiquetaba FRIENDLIES y
+    abria un grupo fantasma en DIRECTO; con el standings_db de la ruta debe
+    conservar su liga aunque no exista copia en el panel externo."""
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-23")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 23, 20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    monkeypatch.setattr(league_matches, "_load_external_matches", lambda: [])
+    partidos = [
+        {
+            "id": 7,
+            "local": "Celta",
+            "visitante": "Osasuna",
+            "status": "LIVE",
+            "minuto": "55",
+            "marcador": "1-0 (55')",
+            "fecha_raw": "2026-08-23",
+            "hora": "19:00",
+            "logo_local": "",
+            "logo_visitante": "",
+        }
+    ]
+    standings_db = {"primera": {"CELTA DE VIGO": {}, "OSASUNA": {}}, "segunda": {}}
+
+    matches = league_matches.build_live_matches(partidos, {}, standings_db)
+
+    assert len(matches) == 1
+    assert matches[0]["competition_name"] == "LA LIGA"
+
+
 def test_genuine_live_match_with_fresh_data_stays_in_directo(monkeypatch):
     monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-08-16")
     monkeypatch.setattr(

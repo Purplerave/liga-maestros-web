@@ -595,7 +595,8 @@ function compactTensionLabel(label) {
 }
 
 function matchPairKey(match) {
-    const home = normalizeName(match.local || match.home_name || "");
-    const away = normalizeName(match.visitante || match.away_name || "");
+    const home = normalizeName(match.local || match.home_name || match.home?.name || "");
+    const away = normalizeName(match.visitante || match.away_name || match.away?.name || "");
+    if (!home && !away) return "";
     return `${home}-${away}`;
 }

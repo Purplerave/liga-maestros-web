@@ -228,9 +228,15 @@ function getLiveLeagueMatches() {
         }
         return isLiveMatch(m);
     }).forEach(match => {
-        const home = String(match.local || match.home_name || match.home?.name || "").toUpperCase();
-        const away = String(match.visitante || match.away_name || match.away?.name || "").toUpperCase();
-        const key = String(match.fixture_id || match.id || `${home}|${away}`);
+        // Clave por pareja de equipos (no por id): el partido de la quiniela y
+        // su copia en all_league_matches tienen ids distintos ("3" vs
+        // "quiniela-1-3") y por id el mismo salia dos veces en DIRECTO.
+        const home = normalizeName(match.local || match.home_name || match.home?.name || "");
+        const away = normalizeName(match.visitante || match.away_name || match.away?.name || "");
+        const key = (home && away)
+            ? `${home}|${away}`
+            : String(match.fixture_id || match.id || "");
+        if (!key) return;
         // Si ya existe y el nuevo es más fresco (tiene gol o minuto), sobrescribe
         if (!matchesById.has(key)) {
             matchesById.set(key, match);
