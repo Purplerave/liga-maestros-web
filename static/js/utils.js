@@ -401,6 +401,32 @@ function liveStage(match) {
     return "LIVE";
 }
 
+/* Minuto de un partido en juego, listo para pintar: "63'", "DESCANSO" o ""
+   cuando no hay nada fiable (el proveedor todavia no mando minuto). */
+function liveMinuteLabel(match) {
+    if (!match) return "";
+    if (liveStage(match) === "HT") return "DESCANSO";
+    const candidates = [match.minuto_live, match.minuto, match.minute, match.time];
+    for (const raw of candidates) {
+        const clean = String(raw ?? "").trim();
+        if (!clean || clean === "-" || clean === "—") continue;
+        if (/^(HT|DESC|DESCANSO|HALF)/i.test(clean)) return "DESCANSO";
+        const digits = clean.match(/\d{1,3}/);
+        if (digits) return `${digits[0]}'`;
+    }
+    // Ultimo recurso: el marcador de la quiniela lleva el minuto pegado ("2-1 (63')").
+    const embedded = matchMinuteValue(match);
+    return embedded ? `${embedded}'` : "";
+}
+
+/* Marcador + minuto en una sola pieza para las celdas en directo: "2-1 · 63'". */
+function liveScoreWithMinute(match, fallbackScore = "") {
+    const score = liveScoreDisplay(match, fallbackScore);
+    const minute = liveMinuteLabel(match);
+    if (!minute) return score;
+    return `${score} · ${minute === "DESCANSO" ? "Desc." : minute}`;
+}
+
 function liveScoreAttrs(match, live) {
     if (!live) return "";
     return ` data-live-match="${match.id || ""}" data-live-minute="${matchMinuteValue(match)}" data-live-stage="${liveStage(match)}"`;

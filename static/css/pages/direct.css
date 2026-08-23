@@ -1,4 +1,106 @@
 @layer pages {
+/* Comentarista IA: sus frases abren la pagina de Directo, encima de los
+   partidos. Ocupa todo el ancho del grid de competiciones. */
+.live-grouped-grid .direct-comentarista {
+    grid-column: 1 / -1;
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-left: 3px solid rgba(56, 189, 248, 0.65);
+    border-radius: 8px;
+    background:
+        radial-gradient(360px 120px at 0% 0%, rgba(56, 189, 248, 0.1), transparent 70%),
+        rgba(7, 12, 22, 0.86);
+    padding: 12px 16px 10px;
+    animation: card-enter 0.3s ease backwards;
+}
+
+.direct-comentarista-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #e2e8f0;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.direct-comentarista-head small {
+    padding: 1px 6px;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 4px;
+    color: #38d9ff;
+    font: 800 0.58rem var(--font-data);
+    letter-spacing: 0.1em;
+    vertical-align: middle;
+}
+
+.direct-comentarista-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #38d9ff;
+    animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+.direct-comentarista-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.direct-comentarista-item {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) 1fr;
+    gap: 4px 14px;
+    padding: 8px 10px;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.16);
+}
+
+.direct-comentarista-item:last-child {
+    border-bottom: 0;
+}
+
+.direct-comentarista-meta {
+    color: #94a3b8;
+    font: 700 0.64rem var(--font-data);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-self: center;
+}
+
+.direct-comentarista-meta b {
+    color: #38d9ff;
+}
+
+.direct-comentarista-meta em {
+    color: #4ade80;
+    font-style: normal;
+}
+
+.direct-comentarista-texto {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+@media (max-width: 620px) {
+    .direct-comentarista-item {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .direct-comentarista-texto {
+        font-size: 0.86rem;
+    }
+}
+
 /* Estado de la pagina Directo cuando no hay partidos en juego. */
 body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-empty-page {
     display: grid;
