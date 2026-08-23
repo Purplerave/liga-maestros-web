@@ -129,6 +129,104 @@ def test_cover_boleto_includes_programa_column():
     assert payload["tone"] == "is-programa"
 
 
+def test_cover_boleto_shows_finished_scores_not_only_kickoff():
+    """Portada: partidos finalizados pintan el marcador, no solo la hora."""
+    cover = COVER_JS.read_text(encoding="utf-8")
+    css = COVER_CSS.read_text(encoding="utf-8")
+
+    assert "function _whenLabel" in cover
+    assert "function _whenCell" in cover
+    assert "function _finished" in cover
+    assert "HORA / RES" in cover
+    assert ">HORA</th>" not in cover
+    assert "is-ft-score" in cover
+    assert "is-live-score" in cover
+    assert "RESULTADOS" in cover
+    assert "cx-ticker-item is-ft" in cover
+    assert ".cx-r-when.is-ft-score" in css
+    assert ".cx-up-card.is-ft" in css
+
+
+def test_cover_when_label_switches_from_schedule_to_score():
+    """Un partido FT muestra 2-1; uno NS sigue mostrando el horario."""
+    import shutil
+    import subprocess
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("Node is required to exercise cover helpers")
+
+    script = r"""
+        const fs = require("fs");
+        const vm = require("vm");
+        const ctx = {
+            console, Map, Set, String, Number, Date, JSON, Math,
+            document: { body: { dataset: { assetsV: "test" } } },
+            escapeHtml(value) { return String(value ?? ""); },
+            state: { data: { partidos: [] } },
+            isFinishedStatus(status) {
+                return ["FT", "FINISHED", "TERMINADO"].includes(String(status || "").toUpperCase());
+            },
+            isImplicitlyFinished() { return false; },
+            isExpiredLiveMatch() { return false; },
+            isMatchLiveNow(m) { return String(m.status || "").toUpperCase() === "LIVE"; },
+            isLiveStatus(status) { return String(status || "").toUpperCase() === "LIVE"; },
+            needsFixtureSchedule(m) { return String(m.status || "").toUpperCase() === "NS"; },
+            scoreOnly(value) {
+                const m = String(value || "").match(/^(\d+\s*[-–]\s*\d+)/);
+                return m ? m[1].replace(/\s/g, "") : null;
+            },
+            liveScoreDisplay(m) { return m.marcador_base || `${m.goles_local}-${m.goles_visitante}`; },
+            liveScoreWithMinute(m, fallback) {
+                return m.minuto_live ? `${fallback} · ${m.minuto_live}'` : fallback;
+            },
+            fixtureScheduleDisplay(m) { return m.hora ? `${m.hora}h` : "Horario por confirmar"; },
+        };
+        vm.createContext(ctx);
+        vm.runInContext(fs.readFileSync("static/js/pages/cover_page.js", "utf8"), ctx);
+        const ft = {
+            id: 1, local: "Barça", visitante: "Getafe",
+            status: "FT", hora: "16:00", kickoff: "16:00",
+            goles_local: 2, goles_visitante: 1,
+            marcador: "2-1", marcador_base: "2-1", signo_actual: "1",
+        };
+        const live = {
+            id: 2, local: "Madrid", visitante: "Sevilla",
+            status: "LIVE", hora: "18:30",
+            goles_local: 0, goles_visitante: 0,
+            marcador: "0-0 (67')", marcador_base: "0-0",
+            minuto_live: "67", signo_actual: "X",
+        };
+        const ns = {
+            id: 3, local: "Betis", visitante: "Valencia",
+            status: "NS", hora: "21:00", kickoff: "21:00",
+            marcador: "domingo 21:00h", marcador_base: "",
+        };
+        console.log(JSON.stringify({
+            ftKind: ctx._whenKind(ft),
+            ftLabel: ctx._whenLabel(ft),
+            ftCell: ctx._whenCell(ft),
+            liveKind: ctx._whenKind(live),
+            liveLabel: ctx._whenLabel(live),
+            nsKind: ctx._whenKind(ns),
+            nsLabel: ctx._whenLabel(ns),
+        }));
+    """
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    payload = json.loads(result.stdout)
+    assert payload["ftKind"] == "finished"
+    assert payload["ftLabel"] == "2-1"
+    assert "is-ft-score" in payload["ftCell"]
+    assert "2-1" in payload["ftCell"]
+    assert "16:00" not in payload["ftCell"]
+    assert payload["liveKind"] == "live"
+    assert "0-0" in payload["liveLabel"]
+    assert "67" in payload["liveLabel"]
+    assert payload["nsKind"] == "scheduled"
+    assert "21:00" in payload["nsLabel"]
+
+
 def test_porra_bonus_copy_is_short_and_consistent():
     files = (PORRA_JS, PORRA_ROUTE, COVER_JS)
     combined = "\n".join(path.read_text(encoding="utf-8") for path in files)

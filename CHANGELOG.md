@@ -2,6 +2,17 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-23 — Resultados en la portada
+
+### Cambiado
+
+- La columna **HORA** del boleto de portada pasa a **HORA / RES**: si el
+  partido ya ha terminado (o va en directo) se pinta el marcador, no solo
+  el horario. Los partidos pendientes siguen mostrando día y hora.
+- El ticker de arriba y el panel derecho también recogen los finalizados
+  (`FT 2-1`) además de los que están en juego, así la portada se actualiza
+  con los resultados sin ir a Quiniela o Directo.
+
 ## 2026-08-22 — Noticias de nuevo en la portada
 
 ### Corregido

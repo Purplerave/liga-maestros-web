@@ -3,9 +3,10 @@
    - Centro: tabla de 15 filas (1 por partido) con una columna por Maestro
      (logo arriba, signo 1/X/2 normal, sin pastillas de color) y una
      columna PEÑA con el signo de consenso.
-   - Ticker de goles arriba (banda fina animada).
-   - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO
-     (solo partidos de la quiniela), PORRA +2, ULTIMA HORA.
+   - Ticker de goles arriba (banda fina animada) con directo y finalizados.
+   - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO,
+     RESULTADOS/PROXIMOS, PORRA +2, ULTIMA HORA.
+   - Columna HORA / RES: horario si falta, marcador si el partido ya tiene resultado.
    - Header minimo: countdown + progreso + boton Firmar.
    Tipografia: Rajdhani (titular), Outfit (UI), JetBrains Mono (datos).
    Tokens: gold #fbbf24, cyan #38bdf8, surfaces oscuros.
@@ -271,12 +272,57 @@ function _upick(i) {
 function _live(m) {
     if (!m) return false;
     if (typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(m)) return false;
+    if (typeof isMatchLiveNow === "function") return isMatchLiveNow(m);
     if (typeof isLiveStatus === "function" && isLiveStatus(m.status)) return true;
     if (typeof isLiveMatch === "function" && isLiveMatch(m)) return true;
     return false;
 }
+function _finished(m) {
+    if (!m) return false;
+    if (typeof isFinishedStatus === "function" && isFinishedStatus(m.status)) return true;
+    if (typeof isImplicitlyFinished === "function" && isImplicitlyFinished(m)) return true;
+    if (typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(m)) return true;
+    return false;
+}
+function _hasScore(m) {
+    if (!m) return false;
+    if (m.goles_local != null && m.goles_visitante != null) return true;
+    if (m.marcador_base && String(m.marcador_base).trim()) return true;
+    if (typeof scoreOnly === "function") return Boolean(scoreOnly(m.marcador || m.score));
+    return Boolean(String(m.marcador || m.score || "").match(/\d+\s*[-–]\s*\d+/));
+}
+function _whenKind(m) {
+    if (!m) return "empty";
+    const scheduled = typeof needsFixtureSchedule === "function"
+        ? needsFixtureSchedule(m)
+        : (!_hasScore(m) && !_live(m));
+    if (_live(m) && !scheduled) return "live";
+    if ((_finished(m) || _hasScore(m)) && !scheduled) return "finished";
+    return "scheduled";
+}
+function _whenLabel(m) {
+    const kind = _whenKind(m);
+    if (kind === "live") {
+        if (typeof liveScoreWithMinute === "function") {
+            return liveScoreWithMinute(m, _liveScoreText(m));
+        }
+        const score = _liveScoreText(m);
+        const minute = _liveMinuteLabel(m);
+        return minute && minute !== "LIVE" ? `${score} · ${minute}` : score;
+    }
+    if (kind === "finished") return _liveScoreText(m);
+    if (typeof fixtureScheduleDisplay === "function") return fixtureScheduleDisplay(m);
+    return m?.hora || m?.kickoff || m?.marcador || "";
+}
+function _whenCell(m) {
+    const kind = _whenKind(m);
+    const label = _whenLabel(m) || "—";
+    const kindClass = kind === "live" ? " is-live-score" : (kind === "finished" ? " is-ft-score" : " is-schedule");
+    return `<td class="cx-r-when${kindClass}" data-cover-when="${kind}">${escapeHtml(String(label))}</td>`;
+}
 function _closed(m) {
     if (!m) return false;
+    if (_finished(m) && _hasScore(m)) return true;
     const r = String(m.signo_actual || "").toUpperCase();
     return ["1", "X", "2"].includes(r);
 }
@@ -366,12 +412,19 @@ function renderNewspaperCoverPageV3() {
     const consensusPct2 = penaVote.p2;
     const penaVoters = penaVote.penistas;
 
-    const tickerItems = liveMatches.map(m => {
+    const finishedMatches = matches.filter(m => _finished(m) && _hasScore(m));
+    const tickerLiveItems = liveMatches.map(m => {
         const home = _liveTeamLabel(m.local, 11);
         const away = _liveTeamLabel(m.visitante, 11);
         const score = _liveScoreText(m);
         const minute = _liveMinuteLabel(m);
         return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
+    }).join("");
+    const tickerFtItems = finishedMatches.map(m => {
+        const home = _liveTeamLabel(m.local, 11);
+        const away = _liveTeamLabel(m.visitante, 11);
+        const score = _liveScoreText(m);
+        return `<span class="cx-ticker-item is-ft"><i class="cx-ticker-dot is-ft"></i><b>FT</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
     }).join("");
     const comentarista = state.data?.comentarista || {};
     const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
@@ -381,11 +434,12 @@ function renderNewspaperCoverPageV3() {
         const contexto = `${local}${c.marcador ? ` ${String(c.marcador)} ` : "–"}${visitante}`;
         return `<span class="cx-ticker-item is-comentario"><i class="cx-ticker-dot is-comentario"></i><b>COMENTARISTA</b> ${escapeHtml(String(c.texto || ""))} <em>${escapeHtml(contexto)}</em></span>`;
     }).join("");
-    const trackItems = tickerItems + comentarioItems;
-    const tickerHtml = liveCount ? `
+    const trackItems = tickerLiveItems + tickerFtItems + comentarioItems;
+    const tickerLabel = liveCount ? "⚽ EN DIRECTO" : (finishedMatches.length ? "⚽ RESULTADOS" : "");
+    const tickerHtml = trackItems ? `
         <div class="cx-ticker" role="status" aria-live="polite">
             <div class="cx-ticker-track">
-                <span class="cx-ticker-label">⚽ EN DIRECTO</span>
+                <span class="cx-ticker-label">${tickerLabel}</span>
                 ${trackItems}
                 ${trackItems}
             </div>
@@ -448,7 +502,6 @@ function renderNewspaperCoverPageV3() {
         const isLive = _live(match);
         const isClosed = _closed(match);
         const realSign = String(match.signo_actual || "").toUpperCase();
-        const when = match.hora || match.kickoff || "";
 
         let pickClass = "";
         if (pick) {
@@ -489,7 +542,7 @@ function renderNewspaperCoverPageV3() {
                 <td class="cx-r-team is-home" title="${escapeHtml(homeFull)}">${escapeHtml(_fitName(homeFull, 14))}</td>
                 <td class="cx-r-vs">vs</td>
                 <td class="cx-r-team is-away" title="${escapeHtml(awayFull)}">${escapeHtml(_fitName(awayFull, 14))}</td>
-                <td class="cx-r-when">${escapeHtml(String(when))}</td>
+                ${_whenCell(match)}
                 <td class="cx-r-pick">${pick ? `<span class="cx-r-pick-val">${escapeHtml(pick)}</span>` : `<span class="cx-r-pick-val is-empty">—</span>`}</td>
                 ${maestroCells}
                 ${penaCell}
@@ -524,7 +577,7 @@ function renderNewspaperCoverPageV3() {
                         <tr>
                             <th class="cx-r-num">Nº</th>
                             <th colspan="3" class="cx-r-teams-head">PARTIDO</th>
-                            <th class="cx-r-when">HORA</th>
+                            <th class="cx-r-when">HORA / RES</th>
                             <th class="cx-r-pick">TÚ</th>
                             ${masterHeads}
                             <th class="cx-r-ia is-pena" title="Consenso de La Peña"><em>PEÑA</em></th>
@@ -570,25 +623,45 @@ function renderNewspaperCoverPageV3() {
         </section>
     `;
 
-    const upcoming = matches.filter(m => !_live(m) && !_closed(m)).slice(0, 5);
+    const finishedCards = finishedMatches.slice(-5).reverse();
+    const upcoming = matches.filter(m => !_live(m) && !_finished(m)).slice(0, 5);
+    const jornadaCards = [
+        ...finishedCards.map(m => {
+            const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
+            const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
+            const score = _liveScoreText(m);
+            return `
+                <div class="cx-up-card is-ft">
+                    <span class="cx-up-when">${escapeHtml(String(score))}</span>
+                    <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>FT</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
+                </div>
+            `;
+        }),
+        ...upcoming.map(m => {
+            const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
+            const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
+            const when = typeof fixtureScheduleDisplay === "function"
+                ? fixtureScheduleDisplay(m)
+                : (m.hora || m.kickoff || "");
+            return `
+                <div class="cx-up-card">
+                    <span class="cx-up-when">${escapeHtml(String(when))}</span>
+                    <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
+                </div>
+            `;
+        }),
+    ];
+    const jornadaTitle = finishedCards.length && upcoming.length
+        ? "JORNADA"
+        : (finishedCards.length ? "RESULTADOS" : "PRÓXIMOS");
     const upcomingHtml = `
         <section class="cx-panel cx-upcoming cx-accent-cyan">
             <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow">PRÓXIMOS</span>
-                <span class="cx-pn-meta">${upcoming.length}</span>
+                <span class="cx-pn-eyebrow">${jornadaTitle}</span>
+                <span class="cx-pn-meta">${jornadaCards.length}</span>
             </header>
             <div class="cx-pn-body">
-                ${upcoming.length ? upcoming.map(m => {
-                    const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
-                    const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
-                    const when = m.hora || m.kickoff || "";
-                    return `
-                        <div class="cx-up-card">
-                            <span class="cx-up-when">${escapeHtml(String(when))}</span>
-                            <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
-                        </div>
-                    `;
-                }).join("") : '<div class="cx-empty">Sin partidos próximos</div>'}
+                ${jornadaCards.length ? jornadaCards.join("") : '<div class="cx-empty">Sin partidos próximos</div>'}
             </div>
         </section>
     `;
