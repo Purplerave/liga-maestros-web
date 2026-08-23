@@ -238,6 +238,7 @@ def test_accented_panel_competition_still_shows_the_live_score():
     assert rows["CD Castellón"] == {"live": "1-0", "playing": True}
     assert rows["R. Sociedad B"] == {"live": "0-1", "playing": True}
 
+
 def _live_directo_script(partidos, all_league_matches, live_matches):
     """Run ``getLiveLeagueMatches`` in a bare VM with a controlled clock.
 
