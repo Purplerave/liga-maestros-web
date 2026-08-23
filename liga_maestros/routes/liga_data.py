@@ -42,7 +42,7 @@ def get_liga_data():
         standings, standings_db = build_standings_payload(conn, partidos)
         persist_standings(conn, standings)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
-        live_matches = build_live_matches(partidos, team_logos)
+        live_matches = build_live_matches(partidos, team_logos, standings_db)
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
         multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = str(matchday_played(standings) or "")

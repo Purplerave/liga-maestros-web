@@ -93,23 +93,49 @@ def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     return _add_team_logos(all_league_matches, team_logos)
 
 
-def build_live_matches(partidos, team_logos):
-    """Return genuinely live matches, never expired provider snapshots."""
+def build_live_matches(partidos, team_logos, standings_db=None):
+    """Return genuinely live matches, never expired provider snapshots.
+
+    The same fixture reaches this payload from two sources with different ids:
+    the quiniela row in the DB (id ``quiniela-*``) and the external provider
+    panel (numeric fixture id). Deduplicating by id alone let both through, so
+    DIRECTO showed the same match twice — once in its real league group and
+    once mislabelled. Matches are therefore merged by team pair as well, and
+    the quiniela copy wins so the competition label stays consistent with the
+    rest of the app.
+    """
     external_live = [match for match in _close_stale_live_matches(_load_external_matches()) if _is_live_match(match)]
     quiniela_live = [
         match
-        for match in _close_stale_live_matches(_build_quiniela_league_matches("", partidos, {}))
+        for match in _close_stale_live_matches(_build_quiniela_league_matches("", partidos, standings_db or {}))
         if _is_live_match(match)
     ]
-    matches_by_id = {}
-    for match in external_live + quiniela_live:
-        key = str(match.get("fixture_id") or match.get("id") or "").strip()
-        if not key:
-            home = normalize_team_key(match.get("local") or (match.get("home") or {}).get("name"))
-            away = normalize_team_key(match.get("visitante") or (match.get("away") or {}).get("name"))
-            key = f"{home}|{away}"
-        matches_by_id[key] = match
-    return _add_team_logos(list(matches_by_id.values()), team_logos)
+    merged = []
+    seen_keys = set()
+    seen_pairs = set()
+    for match in quiniela_live + external_live:
+        pair = _match_pair_key(match)
+        key = str(match.get("fixture_id") or match.get("id") or "").strip() or pair
+        if not key or key in seen_keys or (pair and pair in seen_pairs):
+            continue
+        seen_keys.add(key)
+        if pair:
+            seen_pairs.add(pair)
+        merged.append(match)
+    return _add_team_logos(merged, team_logos)
+
+
+def _match_pair_key(match):
+    """Team-pair identity key, robust across the two payload shapes."""
+    home = normalize_team_key(
+        match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
+    )
+    away = normalize_team_key(
+        match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
+    )
+    if not home or not away:
+        return ""
+    return f"{home}|{away}"
 
 
 def _add_team_logos(matches, team_logos):

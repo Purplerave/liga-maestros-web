@@ -20,6 +20,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 UTILS = ROOT / "static" / "js" / "utils.js"
 STANDINGS = ROOT / "static" / "js" / "standings.js"
+STATE_JS = ROOT / "static" / "js" / "state.js"
 
 requires_node = pytest.mark.skipif(
     shutil.which("node") is None, reason="Node is required to exercise browser utility functions"
@@ -236,3 +237,84 @@ def test_accented_panel_competition_still_shows_the_live_score():
 
     assert rows["CD Castellón"] == {"live": "1-0", "playing": True}
     assert rows["R. Sociedad B"] == {"live": "0-1", "playing": True}
+
+def _live_directo_script(partidos, all_league_matches, live_matches):
+    """Run ``getLiveLeagueMatches`` in a bare VM with a controlled clock.
+
+    ``ago(minutes)`` yields kickoff fields relative to the test moment so the
+    fixtures always sit inside the live window.
+    """
+    template = r"""
+        const fs = require("fs");
+        const vm = require("vm");
+        const context = { console, Map, String, Number, Date, JSON, Set, RegExp, Array, Boolean, Object, URLSearchParams };
+        context.window = { location: { search: "" }, localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} } };
+        context.document = { body: { classList: { toggle: () => {}, contains: () => false } }, getElementById: () => null };
+        vm.createContext(context);
+        vm.runInContext(fs.readFileSync(__UTILS__, "utf8"), context);
+        vm.runInContext(fs.readFileSync(__STATE__, "utf8"), context);
+        const now = new Date();
+        const iso = d => d.toISOString().slice(0, 10);
+        const hm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        const ago = minutes => {
+            const d = new Date(now.getTime() - minutes * 60000);
+            return { fecha_raw: iso(d), hora: hm(d), added: iso(d) + " " + hm(d) + ":00", scheduled: hm(d) };
+        };
+        context.__directoData__ = {
+            jornada: "1",
+            partidos: (__PARTIDOS__)(ago),
+            all_league_matches: (__LEAGUE_MATCHES__)(ago),
+            live_matches: (__LIVE_MATCHES__)(ago)
+        };
+        vm.runInContext("state.data = __directoData__;", context);
+        const live = context.getLiveLeagueMatches();
+        console.log(JSON.stringify(live.map(m => ({
+            id: m.id,
+            fixture_id: m.fixture_id || null,
+            local: m.local || (m.home && m.home.name) || "",
+            visitante: m.visitante || (m.away && m.away.name) || ""
+        }))));
+    """
+    replacements = {
+        "__UTILS__": json.dumps(str(UTILS)),
+        "__STATE__": json.dumps(str(STATE_JS)),
+        "__PARTIDOS__": partidos,
+        "__LEAGUE_MATCHES__": all_league_matches,
+        "__LIVE_MATCHES__": live_matches,
+    }
+    for placeholder, value in replacements.items():
+        template = template.replace(placeholder, value)
+    return template
+
+
+@requires_node
+def test_directo_never_shows_the_same_match_twice():
+    """Reproduccion del aviso: en DIRECTO salia el mismo partido en el grupo
+    FRIENDLIES y otra vez en LA LIGA. Con ``live_matches`` vacio el navegador
+    mezcla ``partidos`` y ``all_league_matches``; el mismo partido llega con ids
+    distintos (``3`` vs ``quiniela-1-3``) y antes se contaba dos veces."""
+    live = _run_node(
+        _live_directo_script(
+            partidos="""ago => [
+                { id: 3, local: "Celta", visitante: "Osasuna", status: "LIVE",
+                  marcador: "1-0", marcador_base: "1-0", minuto_live: "55", ...ago(55) }
+            ]""",
+            all_league_matches="""ago => [
+                { id: "quiniela-1-3", fixture_id: "quiniela-1-3", local: "Celta",
+                  visitante: "Osasuna", status: "LIVE", marcador: "1-0",
+                  competition_name: "LA LIGA", ...ago(55) },
+                { id: 777, fixture_id: 777, status: "IN PLAY", time: "55", score: "1 - 0",
+                  competition_name: "LA LIGA", home: { name: "Celta" }, away: { name: "Osasuna" },
+                  ...ago(55) },
+                { id: 778, fixture_id: 778, status: "IN PLAY", time: "20", score: "0 - 1",
+                  competition_name: "PREMIER LEAGUE", home: { name: "Arsenal" }, away: { name: "Chelsea" },
+                  ...ago(20) }
+            ]""",
+            live_matches="ago => []",
+        )
+    )
+
+    pairs = [f"{m['local']}|{m['visitante']}" for m in live]
+    assert len(pairs) == len(set(pairs)), f"partidos duplicados en DIRECTO: {live}"
+    assert any("CELTA" in p.upper() or "Celta" in p for p in pairs) or len(live) == 2
+    assert len(live) == 2, f"deben quedar el Celta-Osasuna y el Arsenal-Chelsea: {live}"
