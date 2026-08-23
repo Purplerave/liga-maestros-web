@@ -126,6 +126,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena { overflow: 
     background: var(--cx-gold);
     box-shadow: 0 0 6px var(--cx-gold);
 }
+.cx-ticker-item.is-ft b { color: var(--cx-muted); }
+.cx-ticker-dot.is-ft {
+    background: var(--cx-green);
+    box-shadow: 0 0 6px var(--cx-green);
+    animation: none;
+}
 
 .cx-top {
     display: grid;
@@ -496,6 +502,8 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     font-size: 0.72rem;
 }
 .cx-up-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cx-up-card.is-ft .cx-up-when { color: var(--cx-text); }
+.cx-up-card.is-ft .cx-up-match i { color: var(--cx-green); font-weight: 700; }
 .cx-up-match { color: var(--cx-text); font-family: "Outfit", sans-serif; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cx-up-match b { font-weight: 700; }
 .cx-up-match i { font-style: normal; color: var(--cx-dim); margin: 0 3px; }
@@ -638,7 +646,7 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     white-space: nowrap;
 }
 .cx-boleto-table thead th.cx-r-num { text-align: center; width: 36px; }
-.cx-boleto-table thead th.cx-r-when { text-align: center; width: 50px; }
+.cx-boleto-table thead th.cx-r-when { text-align: center; width: 78px; }
 .cx-boleto-table thead th.cx-r-pick { text-align: center; width: 64px; color: var(--cx-gold); }
 .cx-boleto-table thead th.cx-r-ia { text-align: center; width: 42px; color: var(--cx-muted); }
 .cx-boleto-table thead th.cx-r-ia .cx-mi-logo { display: block; margin: 0 auto 3px; object-fit: contain; }
@@ -667,7 +675,9 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-r-team.is-home { text-align: right; padding-right: 4px; }
 .cx-r-team.is-away { text-align: left; padding-left: 4px; }
 .cx-r-vs { color: var(--cx-dim); font-family: "JetBrains Mono", monospace; font-size: 0.65rem; text-transform: uppercase; text-align: center; width: 28px; padding: 0 2px; }
-.cx-r-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); text-align: center; font-variant-numeric: tabular-nums; width: 50px; }
+.cx-r-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); text-align: center; font-variant-numeric: tabular-nums; width: 78px; white-space: nowrap; }
+.cx-r-when.is-ft-score { color: var(--cx-text); font-weight: 800; }
+.cx-r-when.is-live-score { color: #6ee7b7; font-weight: 800; }
 .cx-r-pick { text-align: center; width: 64px; }
 .cx-r-pick-val {
     display: inline-flex;
