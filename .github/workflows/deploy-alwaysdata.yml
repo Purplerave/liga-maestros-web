@@ -160,16 +160,41 @@ jobs:
           cd "$HOME_DIR/current"
           PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
 
-          # Importar quiniela(s) del Programa presentes en la release
-          # (importador idempotente: DELETE+INSERT por jornada)
+          # Importar quiniela(s) del Programa presentes en la release.
+          # Usa el MISMO entorno que la web (.env -> runtime) para tocar la
+          # BD viva; importador idempotente (DELETE+INSERT).
+          LASTJ=""
           for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J*.json; do
-            if [ -e "$f" ]; then
-              JNUM="$(basename "$f" | tr -dc '0-9')"
-              echo "Importando quiniela del Programa: jornada $JNUM"
-              PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" \
-                tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$JNUM" || true
-            fi
+            [ -e "$f" ] || continue
+            LASTJ="$(basename "$f" | tr -dc '0-9')"
+            echo "== Importando quiniela del Programa: jornada $LASTJ =="
+            set -a
+            [ -f "$HOME_DIR/runtime/app.env" ] && . "$HOME_DIR/runtime/app.env"
+            set +a
+            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" \
+              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$LASTJ" || true
           done
+          if [ -n "$LASTJ" ]; then
+            set -a
+            [ -f "$HOME_DIR/runtime/app.env" ] && . "$HOME_DIR/runtime/app.env"
+            set +a
+            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" - "$LASTJ" <<'PY'
+import json, os, sys
+import config
+
+j = int(sys.argv[1])
+p = os.path.join(config.DATA_DIR, "ESTADO_MAESTRO_ACTUAL.json")
+try:
+    est = json.load(open(p, encoding="utf-8"))
+except Exception:
+    est = {}
+est.update({"jornada_actual": j, "jornada": j,
+            "titulo": "Jornada %d - Liga de Maestros" % j,
+            "fase": "en_curso"})
+json.dump(est, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+print("ESTADO jornada_activa ->", j)
+PY
+          fi
 
           # Force-update standings JSON files for new season
           cp -f "$RELEASE/data/STANDINGS_LALIGA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_LALIGA_BASE.json"
