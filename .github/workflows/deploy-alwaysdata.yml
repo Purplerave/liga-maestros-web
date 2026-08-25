@@ -168,17 +168,17 @@ jobs:
             [ -e "$f" ] || continue
             LASTJ="$(basename "$f" | tr -dc '0-9')"
             echo "== Importando quiniela del Programa: jornada $LASTJ =="
-            set -a
-            [ -f "$HOME_DIR/runtime/app.env" ] && . "$HOME_DIR/runtime/app.env"
-            set +a
-            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" \
+            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+            DATA_DIR="$HOME_DIR/runtime" \
+            PYTHONPATH="$HOME_DIR/current" \
+              "$HOME_DIR/venv/bin/python" \
               tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$LASTJ" || true
           done
           if [ -n "$LASTJ" ]; then
-            set -a
-            [ -f "$HOME_DIR/runtime/app.env" ] && . "$HOME_DIR/runtime/app.env"
-            set +a
-            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" - "$LASTJ" <<'PY'
+            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+            DATA_DIR="$HOME_DIR/runtime" \
+            PYTHONPATH="$HOME_DIR/current" \
+              "$HOME_DIR/venv/bin/python" - "$LASTJ" <<'PY'
             import json, os, sys
             import config
 
@@ -193,7 +193,7 @@ jobs:
                         "fase": "en_curso"})
             json.dump(est, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
             print("ESTADO jornada_activa ->", j)
-          PY
+PY
           fi
 
           # Force-update standings JSON files for new season
