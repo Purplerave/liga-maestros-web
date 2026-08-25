@@ -193,7 +193,7 @@ jobs:
                         "fase": "en_curso"})
             json.dump(est, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
             print("ESTADO jornada_activa ->", j)
-PY
+          PY
           fi
 
           # Force-update standings JSON files for new season
