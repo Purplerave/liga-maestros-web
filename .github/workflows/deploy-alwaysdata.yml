@@ -160,6 +160,17 @@ jobs:
           cd "$HOME_DIR/current"
           PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
 
+          # Importar quiniela(s) del Programa presentes en la release
+          # (importador idempotente: DELETE+INSERT por jornada)
+          for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J*.json; do
+            if [ -e "$f" ]; then
+              JNUM="$(basename "$f" | tr -dc '0-9')"
+              echo "Importando quiniela del Programa: jornada $JNUM"
+              PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" \
+                tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$JNUM" || true
+            fi
+          done
+
           # Force-update standings JSON files for new season
           cp -f "$RELEASE/data/STANDINGS_LALIGA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_LALIGA_BASE.json"
           cp -f "$RELEASE/data/STANDINGS_SEGUNDA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_SEGUNDA_BASE.json"
