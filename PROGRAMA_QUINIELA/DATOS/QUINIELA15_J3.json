@@ -1,0 +1,80 @@
+{
+  "jornada": 3,
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Levante",
+      "visitante": "Betis"
+    },
+    {
+      "num": 2,
+      "local": "R. Sociedad",
+      "visitante": "Espanyol"
+    },
+    {
+      "num": 3,
+      "local": "Sevilla",
+      "visitante": "At. Madrid"
+    },
+    {
+      "num": 4,
+      "local": "Real Madrid",
+      "visitante": "Malaga"
+    },
+    {
+      "num": 5,
+      "local": "Deportivo",
+      "visitante": "Valencia"
+    },
+    {
+      "num": 6,
+      "local": "Celta",
+      "visitante": "Athletic"
+    },
+    {
+      "num": 7,
+      "local": "Osasuna",
+      "visitante": "Getafe"
+    },
+    {
+      "num": 8,
+      "local": "Albacete",
+      "visitante": "Real Oviedo"
+    },
+    {
+      "num": 9,
+      "local": "Cadiz",
+      "visitante": "Valladolid"
+    },
+    {
+      "num": 10,
+      "local": "Cordoba",
+      "visitante": "Granada"
+    },
+    {
+      "num": 11,
+      "local": "Athletic Club",
+      "visitante": "Las Planas"
+    },
+    {
+      "num": 12,
+      "local": "Eibar",
+      "visitante": "Espanyol"
+    },
+    {
+      "num": 13,
+      "local": "Alaves Gloriosas",
+      "visitante": "Valencia Fem"
+    },
+    {
+      "num": 14,
+      "local": "Real Madrid W",
+      "visitante": "Atletico Madrid W"
+    },
+    {
+      "num": 15,
+      "local": "Barcelona",
+      "visitante": "Rayo Vallecano"
+    }
+  ]
+}
