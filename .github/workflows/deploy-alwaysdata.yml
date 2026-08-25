@@ -178,22 +178,8 @@ jobs:
             DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
             DATA_DIR="$HOME_DIR/runtime" \
             PYTHONPATH="$HOME_DIR/current" \
-              "$HOME_DIR/venv/bin/python" - "$LASTJ" <<'PY'
-            import json, os, sys
-            import config
-
-            j = int(sys.argv[1])
-            p = os.path.join(config.DATA_DIR, "ESTADO_MAESTRO_ACTUAL.json")
-            try:
-                est = json.load(open(p, encoding="utf-8"))
-            except Exception:
-                est = {}
-            est.update({"jornada_actual": j, "jornada": j,
-                        "titulo": "Jornada %d - Liga de Maestros" % j,
-                        "fase": "en_curso"})
-            json.dump(est, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-            print("ESTADO jornada_activa ->", j)
-PY
+              "$HOME_DIR/venv/bin/python" \
+              tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$LASTJ"
           fi
 
           # Force-update standings JSON files for new season
