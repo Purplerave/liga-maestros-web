@@ -1,16 +1,16 @@
 {
-    "jornada_actual": 76,
-    "titulo": "Jornada 76 - Liga de Maestros",
-    "fase": "en_curso",
-    "ultima_actualizacion": "10/08/2026 11:30",
-    "jornada": 76,
-    "ranking_actual": {
-        "programa": {
-            "puntos_jornada": 0,
-            "puntos_vivos": 0,
-            "puntos_acumulados": 0,
-            "puntos_totales_web": 0,
-            "display_puntos": "0"
-        }
+  "jornada_actual": 3,
+  "titulo": "Jornada 3 - Liga de Maestros",
+  "fase": "en_curso",
+  "ultima_actualizacion": "25/08/2026",
+  "jornada": 3,
+  "ranking_actual": {
+    "programa": {
+      "puntos_jornada": 0,
+      "puntos_vivos": 0,
+      "puntos_acumulados": 0,
+      "puntos_totales_web": 0,
+      "display_puntos": "0"
     }
+  }
 }
