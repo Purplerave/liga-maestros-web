@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       SECRET_KEY: deploy-validation-secret
@@ -163,23 +164,26 @@ jobs:
           # Importar quiniela(s) del Programa presentes en la release.
           # Usa el MISMO entorno que la web (.env -> runtime) para tocar la
           # BD viva; importador idempotente (DELETE+INSERT).
-          LASTJ=""
+          # Importar SOLO la jornada MAXIMA del Programa (la nueva). Reimportar
+          # jornadas viejas borraria sus resultados ya jugados.
+          MAXJ=""
           for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J*.json; do
             [ -e "$f" ] || continue
-            LASTJ="$(basename "$f" | tr -dc '0-9')"
-            echo "== Importando quiniela del Programa: jornada $LASTJ =="
-            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
-            DATA_DIR="$HOME_DIR/runtime" \
-            PYTHONPATH="$HOME_DIR/current" \
-              "$HOME_DIR/venv/bin/python" \
-              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$LASTJ" || true
+            J="$(basename "$f" | tr -dc '0-9')"
+            if [ -z "$MAXJ" ] || [ "$J" -gt "$MAXJ" ]; then MAXJ="$J"; fi
           done
-          if [ -n "$LASTJ" ]; then
+          if [ -n "$MAXJ" ]; then
+            echo "== Importando quiniela del Programa: jornada $MAXJ (solo la maxima) =="
             DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
             DATA_DIR="$HOME_DIR/runtime" \
             PYTHONPATH="$HOME_DIR/current" \
               "$HOME_DIR/venv/bin/python" \
-              tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$LASTJ"
+              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$MAXJ" || true
+            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+            DATA_DIR="$HOME_DIR/runtime" \
+            PYTHONPATH="$HOME_DIR/current" \
+              "$HOME_DIR/venv/bin/python" \
+              tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$MAXJ"
           fi
 
           # Force-update standings JSON files for new season
@@ -258,3 +262,49 @@ jobs:
             sleep 5
           done
           exit 1
+
+  restaurar-emergencia:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      ALWAYSDATA_HOST: ssh-ligademaestros.alwaysdata.net
+      ALWAYSDATA_USER: ligademaestros
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALWAYSDATA_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.ALWAYSDATA_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Subir herramienta de restauracion
+        run: |
+          scp tools/ops/RESTAURAR_RESULTADOS_BACKUP.py \
+            "$ALWAYSDATA_USER@$ALWAYSDATA_HOST:/home/ligademaestros/current/tools/ops/"
+
+      - name: Dry-run restauracion J1-J2 desde backup previo al borrado
+        run: |
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "bash -s" <<'REMOTE'
+          cd /home/ligademaestros/current
+          DB_PATH=/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db \
+          DATA_DIR=/home/ligademaestros/runtime \
+          PYTHONPATH=/home/ligademaestros/current \
+            /home/ligademaestros/venv/bin/python \
+            tools/ops/RESTAURAR_RESULTADOS_BACKUP.py --jornadas 1,2 --dry-run
+          REMOTE
+
+      - name: Restaurar de verdad
+        run: |
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "bash -s" <<'REMOTE'
+          cd /home/ligademaestros/current
+          DB_PATH=/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db \
+          DATA_DIR=/home/ligademaestros/runtime \
+          PYTHONPATH=/home/ligademaestros/current \
+            /home/ligademaestros/venv/bin/python \
+            tools/ops/RESTAURAR_RESULTADOS_BACKUP.py --jornadas 1,2
+          REMOTE
