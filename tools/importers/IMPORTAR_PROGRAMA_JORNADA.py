@@ -43,7 +43,7 @@ def backup_db():
     return backup
 
 
-def import_jornada(jornada, dry_run=False, allow_q15_base=False):
+def import_jornada(jornada, dry_run=False, allow_q15_base=False, force=False):
     q15_path = PROGRAMA_DIR / "DATOS" / f"QUINIELA15_J{jornada}.json"
     programa_path = PROGRAMA_DIR / "SALIDAS" / f"quiniela_programa_J{jornada}.json"
     q15_base_path = PROGRAMA_DIR / "SALIDAS" / f"quiniela_programa_J{jornada}_q15_base.json"
@@ -67,6 +67,17 @@ def import_jornada(jornada, dry_run=False, allow_q15_base=False):
         raise ValueError(f"QUINIELA15_J{jornada}.json debe traer 15 partidos y trae {len(partidos)}.")
     if len(signos) != 15:
         raise ValueError(f"quiniela_programa_J{jornada}.json debe traer 15 signos y trae {len(signos)}.")
+
+    # SEGURIDAD: no tocar una jornada que ya tiene resultados reales
+    conn_chk = sqlite3.connect(DB_PATH)
+    jugados = conn_chk.execute(
+        "SELECT COUNT(*) FROM resultados WHERE jornada=? AND goles_local IS NOT NULL",
+        (jornada,)).fetchone()[0]
+    conn_chk.close()
+    if jugados and not force:
+        raise SystemExit(
+            f"SEGURIDAD: la J{jornada} ya tiene {jugados} partidos con resultado. "
+            "Importarla borraria esos datos. Repite con --forzar solo si estas seguro.")
 
     if dry_run:
         print(f"DRY RUN J{jornada}")
@@ -145,8 +156,14 @@ def main():
         action="store_true",
         help="Usa la columna base scrapeada de Quiniela15 si no existe salida del programa.",
     )
+    parser.add_argument(
+        "--forzar",
+        action="store_true",
+        help="Permite reimportar aunque la jornada ya tenga resultados.",
+    )
     args = parser.parse_args()
-    import_jornada(args.jornada, dry_run=args.dry_run, allow_q15_base=args.usar_q15_base)
+    import_jornada(args.jornada, dry_run=args.dry_run, allow_q15_base=args.usar_q15_base,
+                   force=args.forzar)
 
 
 if __name__ == "__main__":
