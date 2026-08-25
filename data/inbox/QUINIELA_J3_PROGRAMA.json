@@ -1,0 +1,185 @@
+{
+  "tipo": "quiniela_programa",
+  "jornada": 3,
+  "publicado": "2026-08-25T22:25:28",
+  "fuente": "PROGRAMAQUINIELA::RUN_SEMANA_COMPLETA",
+  "bote_eur": 1300000.0,
+  "cierre": "2026-08-29T17:00:00",
+  "casillas": [
+    {
+      "numero": 1,
+      "partido": "Levante - Betis",
+      "signo_programa": "2",
+      "pleno": false
+    },
+    {
+      "numero": 2,
+      "partido": "R. Sociedad - Espanyol",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 3,
+      "partido": "Sevilla - At. Madrid",
+      "signo_programa": "2",
+      "pleno": false
+    },
+    {
+      "numero": 4,
+      "partido": "Real Madrid - Malaga",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 5,
+      "partido": "Deportivo - Valencia",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 6,
+      "partido": "Celta - Athletic",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 7,
+      "partido": "Osasuna - Getafe",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 8,
+      "partido": "Albacete - Real Oviedo",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 9,
+      "partido": "Cadiz - Valladolid",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 10,
+      "partido": "Cordoba - Granada",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 11,
+      "partido": "Athletic Club - Las Planas",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 12,
+      "partido": "Eibar - Espanyol",
+      "signo_programa": "2",
+      "pleno": false
+    },
+    {
+      "numero": 13,
+      "partido": "Alaves Gloriosas - Valencia Fem",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 14,
+      "partido": "Real Madrid W - Atletico Madrid W",
+      "signo_programa": "1",
+      "pleno": false
+    },
+    {
+      "numero": 15,
+      "partido": "Barcelona - Rayo Vallecano",
+      "signo_programa": "M-0",
+      "pleno": true,
+      "top3_pleno": null
+    }
+  ],
+  "apuesta_recomendada": {
+    "politica_cobertura": {
+      "columnas": [
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 9e-06
+        },
+        {
+          "signos": "1 1 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 8e-06
+        },
+        {
+          "signos": "2 1 2 1 2 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 X 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "1 1 2 1 2 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 2 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 2 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 1 M-1",
+          "peso": 7e-06
+        }
+      ],
+      "coste_eur": 6.0,
+      "p_acierto_total": 5.8e-05
+    },
+    "politica_ev_parimutuel": {
+      "columnas": [
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 9e-06
+        },
+        {
+          "signos": "1 1 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 8e-06
+        },
+        {
+          "signos": "2 1 2 1 2 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 X 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "1 1 2 1 2 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 2 2 1 1 1 1 1 1 1 1 2 1 1 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 2 M-0",
+          "peso": 7e-06
+        },
+        {
+          "signos": "2 1 2 1 1 1 1 1 1 1 1 2 1 1 M-1",
+          "peso": 7e-06
+        }
+      ],
+      "coste_eur": 6.0,
+      "p_acierto_total": 5.8e-05,
+      "ev_eur": 69.59,
+      "supuestos": [
+        "modelo de publico = p^(1/T) normalizado",
+        "co-ganadores = kappa * masa_publica_columna",
+        "sin cuotas de cierre (D3 pendiente)"
+      ]
+    }
+  }
+}
