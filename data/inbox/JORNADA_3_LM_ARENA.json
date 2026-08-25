@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "jornada": 3,
+  "fuente": {
+    "agente": "Programa Quiniela",
+    "fecha_entrega": "2026-08-25",
+    "documento_origen": "RUN_SEMANA_COMPLETA :: doble motor DC + optimizador"
+  },
+  "partidos": [
+    {
+      "id": 1,
+      "local": "Levante",
+      "visitante": "Betis"
+    },
+    {
+      "id": 2,
+      "local": "R. Sociedad",
+      "visitante": "Espanyol"
+    },
+    {
+      "id": 3,
+      "local": "Sevilla",
+      "visitante": "At. Madrid"
+    },
+    {
+      "id": 4,
+      "local": "Real Madrid",
+      "visitante": "Malaga"
+    },
+    {
+      "id": 5,
+      "local": "Deportivo",
+      "visitante": "Valencia"
+    },
+    {
+      "id": 6,
+      "local": "Celta",
+      "visitante": "Athletic"
+    },
+    {
+      "id": 7,
+      "local": "Osasuna",
+      "visitante": "Getafe"
+    },
+    {
+      "id": 8,
+      "local": "Albacete",
+      "visitante": "Real Oviedo"
+    },
+    {
+      "id": 9,
+      "local": "Cadiz",
+      "visitante": "Valladolid"
+    },
+    {
+      "id": 10,
+      "local": "Cordoba",
+      "visitante": "Granada"
+    },
+    {
+      "id": 11,
+      "local": "Athletic Club",
+      "visitante": "Las Planas"
+    },
+    {
+      "id": 12,
+      "local": "Eibar",
+      "visitante": "Espanyol"
+    },
+    {
+      "id": 13,
+      "local": "Alaves Gloriosas",
+      "visitante": "Valencia Fem"
+    },
+    {
+      "id": 14,
+      "local": "Real Madrid W",
+      "visitante": "Atletico Madrid W"
+    },
+    {
+      "id": 15,
+      "local": "Barcelona",
+      "visitante": "Rayo Vallecano"
+    }
+  ],
+  "pronosticos": [
+    {
+      "participante_id": "programa",
+      "nombre_publico": "Mi Programa",
+      "ia_origen": "Programa Quiniela",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "M-0"
+      ],
+      "origen": "PANEL_QUINIELA v2"
+    }
+  ],
+  "incidencias": [
+    {
+      "participante": "Mi Programa",
+      "problema": "Casilla 15 = pleno exacto regla LAE (16 signos), pronostico M-0"
+    }
+  ]
+}
