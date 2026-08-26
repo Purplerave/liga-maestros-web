@@ -1,0 +1,31 @@
+{
+  "jornada": 3,
+  "temporada": "2026-2027",
+  "generado_en": null,
+  "nota": "Predicciones recibidas para J3. Se publican solo boletos con 14 signos y Pleno valido. CHATJIMMY y BAIDU quedan pendientes: faltan signos del partido 14 y BAIDU contiene XXX en el partido 8.",
+  "fuentes": {
+    "origen": "Entrega manual del usuario",
+    "recibido_en": "2026-08-26",
+    "prediccion_cutoff_at": null,
+    "timestamps_por_cuota": "no_auditado"
+  },
+  "gemini": {"nombre": "GEMINI", "origen": "Gemini", "signos": ["2", "1", "X", "1", "X", "2", "X", "1", "X", "2", "1", "1", "2", "X", "M-0"]},
+  "copilot": {"nombre": "COPILOT", "origen": "Copilot", "signos": ["2", "2", "1", "1", "X", "X", "2", "X", "1", "2", "1", "X", "2", "X", "M-0"]},
+  "claude": {"nombre": "CLAUDE", "origen": "Claude", "signos": ["2", "2", "1", "1", "X", "1", "X", "1", "1", "X", "1", "X", "X", "X", "M-0"]},
+  "grok": {"nombre": "GROK", "origen": "Grok", "signos": ["2", "X", "1", "1", "X", "1", "2", "X", "1", "2", "1", "2", "2", "1", "2-0"]},
+  "chatgpt": {"nombre": "CHATGPT", "origen": "ChatGPT", "signos": ["2", "2", "1", "1", "X", "1", "X", "2", "1", "2", "1", "1", "1", "1", "M-0"]},
+  "arena": {"nombre": "ARENA", "origen": "Arena", "signos": ["2", "1", "2", "1", "1", "1", "1", "X", "1", "X", "1", "1", "2", "1", "M-0"]},
+  "fortu": {"nombre": "MISTRAL", "origen": "Mistral", "signos": ["2", "1", "2", "1", "2", "X", "1", "1", "X", "1", "1", "1", "2", "1", "M-1"]},
+  "oraculo": {"nombre": "QWEN", "origen": "Qwen", "signos": ["2", "1", "X", "1", "2", "X", "1", "X", "X", "1", "X", "1", "2", "2", "M-1"]},
+  "falcon": {"nombre": "FALCON", "origen": "Falcon", "signos": ["1", "1", "X", "1", "X", "1", "1", "1", "2", "1", "X", "1", "X", "1", "M-1"]},
+  "sesudo": {"nombre": "SESUDO", "origen": "Kimi/Sesudo", "signos": ["2", "1", "2", "1", "X", "2", "X", "1", "X", "2", "1", "X", "2", "1", "M-1"]},
+  "pepe": {"nombre": "PERPLEXITY", "origen": "Perplexity", "signos": ["2", "1", "X", "1", "X", "X", "1", "1", "X", "2", "1", "X", "2", "1", "2-0"]},
+  "luzia": {"nombre": "LUZIA", "origen": "LuzIA", "signos": ["2", "1", "2", "1", "2", "X", "1", "X", "1", "X", "1", "1", "2", "1", "M-0"]},
+  "profe": {"nombre": "META", "origen": "Meta AI", "signos": ["2", "1", "1", "1", "1", "2", "1", "X", "1", "1", "1", "X", "1", "1", "M-1"]},
+  "chipi": {"nombre": "DEEPSEEK", "origen": "DeepSeek", "signos": ["2", "1", "1", "1", "1", "1", "1", "X", "X", "X", "1", "2", "2", "1", "2-1"]},
+  "geli": {"nombre": "GLM5", "origen": "GLM5", "signos": ["2", "X", "1", "1", "2", "2", "1", "X", "1", "1", "X", "1", "2", "1", "M-1"]},
+  "pendientes": {
+    "jimmy": {"nombre": "CHATJIMMY", "motivo": "Solo hay 13 signos; falta el partido 14."},
+    "erniebot": {"nombre": "BAIDU", "motivo": "Solo hay 13 signos; el partido 8 aparece como XXX y falta el partido 14."}
+  }
+}

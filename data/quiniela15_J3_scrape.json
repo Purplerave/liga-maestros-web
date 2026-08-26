@@ -1,0 +1,24 @@
+{
+  "jornada": 3,
+  "temporada": "2026-2027",
+  "scraped_at": null,
+  "source_url": null,
+  "source": "Fixture J3 aportado en el entorno local; pendiente de URL oficial verificable",
+  "partidos": [
+    {"num": 1, "local": "Levante", "visitante": "Betis"},
+    {"num": 2, "local": "R. Sociedad", "visitante": "Espanyol"},
+    {"num": 3, "local": "Sevilla", "visitante": "At. Madrid"},
+    {"num": 4, "local": "Real Madrid", "visitante": "Málaga"},
+    {"num": 5, "local": "Deportivo", "visitante": "Valencia"},
+    {"num": 6, "local": "Celta", "visitante": "Athletic"},
+    {"num": 7, "local": "Osasuna", "visitante": "Getafe"},
+    {"num": 8, "local": "Albacete", "visitante": "Real Oviedo"},
+    {"num": 9, "local": "Cádiz", "visitante": "Valladolid"},
+    {"num": 10, "local": "Córdoba", "visitante": "Granada"},
+    {"num": 11, "local": "Athletic Club (F)", "visitante": "Las Planas (F)"},
+    {"num": 12, "local": "Eibar (F)", "visitante": "Espanyol (F)"},
+    {"num": 13, "local": "Alavés", "visitante": "Valencia (F)"},
+    {"num": 14, "local": "Real Madrid (F)", "visitante": "At. Madrid (F)"},
+    {"num": 15, "local": "Barcelona", "visitante": "Rayo"}
+  ]
+}
