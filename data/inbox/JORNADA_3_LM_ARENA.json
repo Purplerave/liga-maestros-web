@@ -2,9 +2,9 @@
   "schema_version": 1,
   "jornada": 3,
   "fuente": {
-    "agente": "Programa Quiniela",
+    "agente": "Import manual J3",
     "fecha_entrega": "2026-08-25",
-    "documento_origen": "RUN_SEMANA_COMPLETA :: doble motor DC + optimizador"
+    "documento_origen": "Chat + peña"
   },
   "partidos": [
     {
@@ -25,7 +25,7 @@
     {
       "id": 4,
       "local": "Real Madrid",
-      "visitante": "Malaga"
+      "visitante": "Málaga"
     },
     {
       "id": 5,
@@ -49,12 +49,12 @@
     },
     {
       "id": 9,
-      "local": "Cadiz",
+      "local": "Cádiz",
       "visitante": "Valladolid"
     },
     {
       "id": 10,
-      "local": "Cordoba",
+      "local": "Córdoba",
       "visitante": "Granada"
     },
     {
@@ -69,25 +69,415 @@
     },
     {
       "id": 13,
-      "local": "Alaves Gloriosas",
-      "visitante": "Valencia Fem"
+      "local": "Alavés",
+      "visitante": "Valencia"
     },
     {
       "id": 14,
-      "local": "Real Madrid W",
-      "visitante": "Atletico Madrid W"
+      "local": "Real Madrid",
+      "visitante": "At. Madrid"
     },
     {
       "id": 15,
       "local": "Barcelona",
-      "visitante": "Rayo Vallecano"
+      "visitante": "Rayo"
     }
   ],
   "pronosticos": [
     {
+      "participante_id": "gemini",
+      "nombre_publico": "Gemini",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "X",
+        "2",
+        "1",
+        "1",
+        "2",
+        "X",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "copilot",
+      "nombre_publico": "Copilot",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "2",
+        "1",
+        "1",
+        "X",
+        "X",
+        "2",
+        "X",
+        "1",
+        "2",
+        "1",
+        "X",
+        "2",
+        "X",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "claude",
+      "nombre_publico": "Claude",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "2",
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "X",
+        "X",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "grok",
+      "nombre_publico": "Grok",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "X",
+        "1",
+        "1",
+        "X",
+        "1",
+        "2",
+        "X",
+        "1",
+        "2",
+        "1",
+        "2",
+        "2",
+        "1",
+        "2-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "chatgpt",
+      "nombre_publico": "ChatGPT",
+      "grupo": "maestro",
+      "signos": [
+        "2",
+        "2",
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "arena",
+      "nombre_publico": "Arena",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "2",
+        "1",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "fistro",
+      "nombre_publico": "Fistro",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "X",
+        "1",
+        "1",
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "oraculo",
+      "nombre_publico": "Oráculo",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "X",
+        "1",
+        "2",
+        "X",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "2",
+        "2",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "fortu",
+      "nombre_publico": "Fortu",
+      "grupo": "pena",
+      "signos": [
+        "1",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "sesudo",
+      "nombre_publico": "Sesudo",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "jimmy",
+      "nombre_publico": "Jimmy",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "X",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "pepe",
+      "nombre_publico": "Pepe",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "X",
+        "1",
+        "1",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "1",
+        "2-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "luzia",
+      "nombre_publico": "LuzIA",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "2",
+        "1",
+        "2",
+        "X",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "2",
+        "1",
+        "M-0"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "erniebot",
+      "nombre_publico": "ErnieBot",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "1",
+        "2",
+        "1",
+        "2",
+        "X",
+        "1",
+        "X",
+        "X",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "profe",
+      "nombre_publico": "Profe",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "X",
+        "1",
+        "1",
+        "1",
+        "X",
+        "1",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "chipi",
+      "nombre_publico": "Chipi",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "X",
+        "X",
+        "X",
+        "1",
+        "2",
+        "2",
+        "1",
+        "2-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "geli",
+      "nombre_publico": "Geli",
+      "grupo": "pena",
+      "signos": [
+        "2",
+        "X",
+        "1",
+        "1",
+        "2",
+        "2",
+        "1",
+        "X",
+        "1",
+        "1",
+        "X",
+        "1",
+        "2",
+        "1",
+        "M-1"
+      ],
+      "origen": "J3 import manual"
+    },
+    {
       "participante_id": "programa",
-      "nombre_publico": "Mi Programa",
-      "ia_origen": "Programa Quiniela",
+      "nombre_publico": "Programa",
       "grupo": "maestro",
       "signos": [
         "2",
@@ -106,13 +496,29 @@
         "1",
         "M-0"
       ],
-      "origen": "PANEL_QUINIELA v2"
+      "origen": "J3 import manual"
     }
   ],
   "incidencias": [
     {
-      "participante": "Mi Programa",
-      "problema": "Casilla 15 = pleno exacto regla LAE (16 signos), pronostico M-0"
+      "participante": "oraculo",
+      "problema": "Corregido: sobraba 1 X"
+    },
+    {
+      "participante": "jimmy",
+      "problema": "Corregido: faltaba 1 signo, añadido X"
+    },
+    {
+      "participante": "erniebot",
+      "problema": "Corregido: XXX -> X X"
+    },
+    {
+      "participante": "geli",
+      "problema": "Corregido: sobraba X final"
+    },
+    {
+      "participante": "luna,mrpurple,sonia,sonia2",
+      "problema": "Sin signos recibidos"
     }
   ]
 }
