@@ -191,7 +191,7 @@ function renderArena() {
         } else if (subFilter === "segunda") {
             matches = getTodayLeagueMatches().filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
         } else {
-            matches = getTodayLeagueMatches();
+            matches = getAllTodayLeagueMatches();
         }
 
         container.className = "arena-content arena-grid live-grouped-grid";

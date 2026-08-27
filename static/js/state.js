@@ -195,6 +195,14 @@ function getTodayLeagueMatches() {
     });
 }
 
+function getAllTodayLeagueMatches() {
+    const today = state.data?.today_madrid || "";
+    return getAllLeagueMatches().filter(m => {
+        const d = String(m.added || m.fecha_raw || "").slice(0, 10);
+        return d === today;
+    });
+}
+
 function getBrowsableLeagueMatches() {
     const blockedTokens = [
         "FRIENDL",
