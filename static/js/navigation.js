@@ -232,6 +232,11 @@ function syncUrlState() {
         else url.searchParams.delete("view");
         if (state.contestView && state.contestView !== "MATCHES") url.searchParams.set("contest", state.contestView);
         else url.searchParams.delete("contest");
+        if (state.currentFilter === "LIVE" && state.liveSubFilter && state.liveSubFilter !== "live") {
+            url.searchParams.set("live", state.liveSubFilter);
+        } else {
+            url.searchParams.delete("live");
+        }
         window.history.replaceState({}, "", url.toString());
     } catch {}
 }

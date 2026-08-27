@@ -28,6 +28,7 @@ const state = {
     newsRadar: null,
     newsRadarFetchedAt: 0,
     refreshErrorNotifiedAt: 0,
+    liveSubFilter: new URLSearchParams(window.location.search).get("live") || "live",
     snake: {
         running: false,
         over: false,
@@ -183,6 +184,15 @@ function contestViewTitle(value) {
 
 function getAllLeagueMatches() {
     return state.data?.all_league_matches || [];
+}
+
+function getTodayLeagueMatches() {
+    const today = state.data?.today_madrid || "";
+    return getAllLeagueMatches().filter(m => {
+        const d = String(m.added || m.fecha_raw || "").slice(0, 10);
+        const comp = competitionLabel(m);
+        return d === today && (comp === "LA LIGA" || comp === "SEGUNDA DIVISION");
+    });
 }
 
 function getBrowsableLeagueMatches() {

@@ -130,7 +130,7 @@ function renderArena() {
 
     if (state.currentFilter === "ALL") {
         container.className = "arena-content newspaper-cover-mode";
-        container.innerHTML = renderNewspaperCoverPageV3();
+        container.innerHTML = renderNewspaperCoverPageV3() + renderTodayLeaguesSection();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
         if (typeof startSeasonCountdown === "function") startSeasonCountdown();
@@ -181,26 +181,55 @@ function renderArena() {
         return;
     }
 
+    if (state.currentFilter === "LIVE") {
+        const subFilter = state.liveSubFilter || "live";
+        let matches;
+        if (subFilter === "live") {
+            matches = getLiveLeagueMatches();
+        } else if (subFilter === "primera") {
+            matches = getTodayLeagueMatches().filter(m => competitionLabel(m) === "LA LIGA");
+        } else if (subFilter === "segunda") {
+            matches = getTodayLeagueMatches().filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
+        } else {
+            matches = getTodayLeagueMatches();
+        }
+
+        container.className = "arena-content arena-grid live-grouped-grid";
+        if (matches.length === 0) {
+            container.className = "arena-content direct-empty-page";
+            container.innerHTML = renderDirectEmptyState();
+            return;
+        }
+        const subnavHtml = `
+            <div class="live-subnav" id="live-subnav" aria-label="Filtrar directo">
+                <button type="button" class="${subFilter === 'live' ? 'active' : ''}" data-live-sub="live">En Juego</button>
+                <button type="button" class="${subFilter === 'primera' ? 'active' : ''}" data-live-sub="primera">Primera</button>
+                <button type="button" class="${subFilter === 'segunda' ? 'active' : ''}" data-live-sub="segunda">Segunda</button>
+                <button type="button" class="${subFilter === 'all' ? 'active' : ''}" data-live-sub="all">Todos</button>
+            </div>`;
+        const comentaristaHtml = typeof directComentaristaHtml === "function" ? directComentaristaHtml() : "";
+        container.innerHTML = subnavHtml + comentaristaHtml + renderGroupedMatchCards(matches, false);
+        container.querySelectorAll("[data-live-sub]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                state.liveSubFilter = btn.dataset.liveSub;
+                syncUrlState();
+                renderArena();
+            });
+        });
+        return;
+    }
+
     const allMatches = getBrowsableLeagueMatches();
-    const matches = state.currentFilter === "LIVE"
-        ? getLiveLeagueMatches()
-        : allMatches.filter(m => competitionLabel(m) === state.currentFilter.toUpperCase());
+    const matches = allMatches.filter(m => competitionLabel(m) === state.currentFilter.toUpperCase());
 
     container.className = "arena-content arena-grid live-grouped-grid";
     if (matches.length === 0) {
-        container.className = state.currentFilter === "LIVE"
-            ? "arena-content direct-empty-page"
-            : "arena-content arena-grid";
-        container.innerHTML = state.currentFilter === "LIVE"
-            ? renderDirectEmptyState()
-            : `<div class="empty-state">No hay partidos disponibles en esta competicion.</div>`;
+        container.className = "arena-content arena-grid";
+        container.innerHTML = `<div class="empty-state">No hay partidos disponibles en esta competicion.</div>`;
         return;
     }
-    // En Directo, los comentarios de la IA abren la pagina encima de los partidos.
-    const comentaristaHtml = state.currentFilter === "LIVE" && typeof directComentaristaHtml === "function"
-        ? directComentaristaHtml()
-        : "";
-    container.innerHTML = comentaristaHtml + renderGroupedMatchCards(matches, state.currentFilter !== "LIVE");
+    const comentaristaHtml = typeof directComentaristaHtml === "function" ? directComentaristaHtml() : "";
+    container.innerHTML = comentaristaHtml + renderGroupedMatchCards(matches, false);
 }
 function renderGroupedMatchCards(matches, singleCompetition = false) {
     if (!Array.isArray(matches) || !matches.length) return "";
@@ -240,6 +269,7 @@ function liveMatchDomKey(match) {
 
 function patchLiveArena() {
     if (state.currentFilter !== "LIVE") return false;
+    if ((state.liveSubFilter || "live") !== "live") return false; // solo parchea en vista "En Juego"
     const container = qs("matches-body");
     if (!container) return false;
 
@@ -313,4 +343,29 @@ function renderMatchCard(match) {
                 ${teamCell(away, "right", teamLogo(match, "away"))}
             </div>
         </article>`;
+}
+
+function renderTodayLeaguesSection() {
+    const matches = getTodayLeagueMatches ? getTodayLeagueMatches() : [];
+    if (!matches.length) return "";
+    const primera = matches.filter(m => competitionLabel(m) === "LA LIGA");
+    const segunda = matches.filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
+    if (!primera.length && !segunda.length) return "";
+    return `
+        <section class="today-leagues-section" aria-label="Partidos de hoy en Primera y Segunda">
+            <header class="today-leagues-header">
+                <h2>Partidos de hoy</h2>
+                <span class="today-leagues-count">${primera.length + segunda.length} partidos</span>
+            </header>
+            ${primera.length ? `
+            <div class="today-leagues-group" data-competition="LA LIGA">
+                <h3 class="today-leagues-title">Primera División</h3>
+                <div class="match-card-container">${primera.map(renderMatchCard).join("")}</div>
+            </div>` : ""}
+            ${segunda.length ? `
+            <div class="today-leagues-group" data-competition="SEGUNDA DIVISION">
+                <h3 class="today-leagues-title">Segunda División</h3>
+                <div class="match-card-container">${segunda.map(renderMatchCard).join("")}</div>
+            </div>` : ""}
+        </section>`;
 }
