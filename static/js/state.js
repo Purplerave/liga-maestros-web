@@ -203,6 +203,20 @@ function getAllTodayLeagueMatches() {
     });
 }
 
+function getLeagueMatchesWindow() {
+    const today = state.data?.today_madrid || "";
+    return getAllLeagueMatches()
+        .filter(m => {
+            const d = String(m.added || m.fecha_raw || "").slice(0, 10);
+            return d >= today;
+        })
+        .sort((a, b) => {
+            const da = String(a.added || a.fecha_raw || "");
+            const db = String(b.added || b.fecha_raw || "");
+            return da.localeCompare(db);
+        });
+}
+
 function getBrowsableLeagueMatches() {
     const blockedTokens = [
         "FRIENDL",

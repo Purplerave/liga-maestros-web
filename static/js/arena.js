@@ -187,11 +187,11 @@ function renderArena() {
         if (subFilter === "live") {
             matches = getLiveLeagueMatches();
         } else if (subFilter === "primera") {
-            matches = getTodayLeagueMatches().filter(m => competitionLabel(m) === "LA LIGA");
+            matches = getLeagueMatchesWindow().filter(m => competitionLabel(m) === "LA LIGA");
         } else if (subFilter === "segunda") {
-            matches = getTodayLeagueMatches().filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
+            matches = getLeagueMatchesWindow().filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
         } else {
-            matches = getAllTodayLeagueMatches();
+            matches = getLeagueMatchesWindow();
         }
 
         container.className = "arena-content arena-grid live-grouped-grid";
