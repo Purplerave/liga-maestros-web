@@ -12,6 +12,7 @@ No toca predicciones ni consenso ni ninguna otra jornada.
 
 Uso: python RESTAURAR_RESULTADOS_BACKUP.py --jornadas 1,2 [--dry-run]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -26,8 +27,7 @@ def candidatos() -> list[str]:
     rutas = []
     rutas += glob.glob(os.path.join(config.DATA_DIR, "backups", "*.db"))
     rutas += glob.glob(os.path.join(config.DATA_DIR, "*.bak_import_programa_*.db"))
-    rutas += glob.glob(os.path.join(os.path.dirname(config.DB_PATH),
-                                    "*.bak_import_programa_*.db"))
+    rutas += glob.glob(os.path.join(os.path.dirname(config.DB_PATH), "*.bak_import_programa_*.db"))
     return sorted(set(rutas), key=os.path.getmtime)
 
 
@@ -37,8 +37,8 @@ def tiene_resultados(ruta: str, jornadas: list[int]) -> bool:
         cur = conn.cursor()
         for j in jornadas:
             n = cur.execute(
-                "SELECT COUNT(*) FROM resultados "
-                "WHERE jornada=? AND goles_local IS NOT NULL", (j,)).fetchone()[0]
+                "SELECT COUNT(*) FROM resultados WHERE jornada=? AND goles_local IS NOT NULL", (j,)
+            ).fetchone()[0]
             if n == 0:
                 conn.close()
                 return False
@@ -72,8 +72,8 @@ def main():
         conn = sqlite3.connect(f"file:{donador}?mode=ro", uri=True)
         for j in jornadas:
             filas = conn.execute(
-                "SELECT COUNT(*), SUM(goles_local IS NOT NULL) "
-                "FROM resultados WHERE jornada=?", (j,)).fetchone()
+                "SELECT COUNT(*), SUM(goles_local IS NOT NULL) FROM resultados WHERE jornada=?", (j,)
+            ).fetchone()
             print(f"  J{j}: {filas[0]} partidos ({filas[1]} con goles)")
         conn.close()
         return
@@ -87,10 +87,9 @@ def main():
         sel = ",".join(f"bk.resultados.{c}" for c in cols)
         conn.execute("DELETE FROM resultados WHERE jornada=?", (j,))
         conn.execute(
-            f"INSERT INTO main.resultados ({colsn}) SELECT {sel} "
-            f"FROM bk.resultados WHERE bk.resultados.jornada=?", (j,))
-        restauradas += conn.execute(
-            "SELECT COUNT(*) FROM resultados WHERE jornada=?", (j,)).fetchone()[0]
+            f"INSERT INTO main.resultados ({colsn}) SELECT {sel} FROM bk.resultados WHERE bk.resultados.jornada=?", (j,)
+        )
+        restauradas += conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada=?", (j,)).fetchone()[0]
     conn.commit()
     conn.close()
     print(f"Restauradas {restauradas} filas de resultados para jornadas {jornadas}")

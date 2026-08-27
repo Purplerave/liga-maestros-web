@@ -5,6 +5,7 @@ preservando el resto de claves (ranking, participantes...).
 Uso: python FIJAR_JORNADA_ACTIVA.py --jornada 3
 Requiere entorno de la web (config resuelve DATA_DIR igual que la app).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -24,12 +25,14 @@ def main():
         estado = json.load(open(ruta, encoding="utf-8"))
     except Exception:
         estado = {}
-    estado.update({
-        "jornada_actual": args.jornada,
-        "jornada": args.jornada,
-        "titulo": "Jornada %d - Liga de Maestros" % args.jornada,
-        "fase": "en_curso",
-    })
+    estado.update(
+        {
+            "jornada_actual": args.jornada,
+            "jornada": args.jornada,
+            "titulo": f"Jornada {args.jornada} - Liga de Maestros",
+            "fase": "en_curso",
+        }
+    )
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(estado, f, ensure_ascii=False, indent=2)

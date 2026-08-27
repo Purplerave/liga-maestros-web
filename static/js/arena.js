@@ -229,7 +229,7 @@ function renderArena() {
         return;
     }
     const comentaristaHtml = typeof directComentaristaHtml === "function" ? directComentaristaHtml() : "";
-    container.innerHTML = comentaristaHtml + renderGroupedMatchCards(matches, false);
+    container.innerHTML = comentaristaHtml + renderGroupedMatchCards(matches, state.currentFilter !== "LIVE");
 }
 function renderGroupedMatchCards(matches, singleCompetition = false) {
     if (!Array.isArray(matches) || !matches.length) return "";

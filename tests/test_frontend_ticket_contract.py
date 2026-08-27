@@ -45,7 +45,13 @@ def test_frontend_keeps_doubles_and_pleno_scores_and_reads_league_names():
             hasSegundaGroup: grouped.includes('data-competition="SEGUNDA DIVISION"')
         }}));
     """
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+    )
     payload = json.loads(result.stdout)
 
     assert payload == {
@@ -104,7 +110,13 @@ def test_ticket_pena_percentages_render_as_visible_breakdown():
             breakdown: html.includes("pena-pick-breakdown"),
         }}));
     """
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+    )
     payload = json.loads(result.stdout)
     assert payload["has70"] and payload["has20"] and payload["has10"]
     assert payload["breakdown"]
@@ -149,7 +161,13 @@ def test_ticket_kickoff_time_is_stacked_and_never_clipped():
             unknownHtml: context.renderFixtureSchedule({{}}),
         }}));
     """
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+    )
     payload = json.loads(result.stdout)
 
     # El dia y la hora viajan separados para poder apilarlos sin cortar texto.

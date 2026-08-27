@@ -28,7 +28,13 @@ requires_node = pytest.mark.skipif(
 
 
 def _run_node(script):
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+    )
     return json.loads(result.stdout)
 
 
