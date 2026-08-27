@@ -59,33 +59,32 @@ function patchDirectComentarista() {
 }
 
 function renderDirectEmptyState() {
-    const nextMatch = getNextLeagueMatch();
-    const home = nextMatch?.local || nextMatch?.home_name || nextMatch?.home?.name || "";
-    const away = nextMatch?.visitante || nextMatch?.away_name || nextMatch?.away?.name || "";
-    const kickoff = nextMatch
-        ? formatSmartDate(
-            nextMatch.added || nextMatch.fecha_raw,
-            nextMatch.scheduled || nextMatch.time || nextMatch.hora
-        )
-        : "";
-    const isQuiniela = Boolean(nextMatch && (state.data?.partidos || []).some(m =>
-        String(m.local||"").trim().toLowerCase() === String(home||"").trim().toLowerCase() &&
-        String(m.visitante||"").trim().toLowerCase() === String(away||"").trim().toLowerCase()
-    ));
-    // Si el próximo viene de all_league_matches (no quiniela), no mentir con la etiqueta
-    const label = isQuiniela ? "Próximo partido de la quiniela" : "Próximo partido del día";
-    const nextHtml = nextMatch ? `
-        <div class="direct-empty-next">
-            <span>${label}</span>
-            <strong>${escapeHtml(home)} - ${escapeHtml(away)}</strong>
-            <small>${escapeHtml(kickoff)}</small>
+    const upcoming = (typeof getAllTodayLeagueMatches === "function" ? getAllTodayLeagueMatches() : [])
+        .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")))
+        .sort((a, b) => String(a.added || a.fecha_raw || "").localeCompare(String(b.added || b.fecha_raw || "")))
+        .slice(0, 6);
+    const listHtml = upcoming.length ? `
+        <div class="direct-empty-upcoming">
+            <span class="direct-empty-upcoming-label">Próximos partidos de hoy</span>
+            ${upcoming.map(m => {
+                const home = m.local || m.home_name || (m.home || {}).name || "";
+                const away = m.visitante || m.away_name || (m.away || {}).name || "";
+                const comp = typeof competitionLabel === "function" ? competitionLabel(m) : "";
+                const when = typeof fixtureScheduleDisplay === "function" ? fixtureScheduleDisplay(m) : (m.hora || m.kickoff || "");
+                return `
+                    <div class="direct-empty-up-item">
+                        <span class="direct-empty-up-comp">${escapeHtml(comp)}</span>
+                        <strong>${escapeHtml(home)} - ${escapeHtml(away)}</strong>
+                        <small>${escapeHtml(String(when))}</small>
+                    </div>`;
+            }).join("")}
         </div>` : "";
     return `
         <section class="direct-empty-state">
             <span class="direct-empty-kicker">DIRECTO</span>
             <h2>Ahora mismo no hay partidos en juego</h2>
-            <p>Cuando empiece un partido, aqui veras el marcador y el minuto sin salir de la jornada.</p>
-            ${nextHtml}
+            <p>${upcoming.length ? "Cuando empiece un partido lo verás aquí en vivo. Mientras tanto, estos son los próximos de hoy:" : "Cuando empiece un partido, aquí verás el marcador y el minuto en vivo. No hay más partidos programados para hoy."}</p>
+            ${listHtml}
             <button class="direct-empty-action" type="button" data-page-action="TICKET">Ver la quiniela</button>
         </section>`;
 }

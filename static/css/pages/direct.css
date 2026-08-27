@@ -211,11 +211,60 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     box-shadow: 0 0 0 1px rgba(56, 217, 255, 0.3), inset 0 0 12px rgba(56, 217, 255, 0.08);
 }
 
-/* Sección "Partidos de hoy" en portada */
+/* Sección "Partidos de hoy" en portada (banda destacada tras la cabecera) */
 .today-leagues-section {
-    margin-top: 28px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    margin: 22px 0 8px;
+    padding: 18px 18px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    background:
+        radial-gradient(600px 200px at 0% 0%, rgba(56, 217, 255, 0.08), transparent 70%),
+        rgba(10, 17, 30, 0.6);
+}
+
+.direct-empty-upcoming {
+    width: 100%;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    display: grid;
+    gap: 8px;
+}
+.direct-empty-upcoming-label {
+    color: #38d9ff;
+    font: 800 0.7rem var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.direct-empty-up-item {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+.direct-empty-up-comp {
+    color: #91a1b8;
+    font: 700 0.62rem var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.direct-empty-up-item strong {
+    color: #f1f5f9;
+    font: 600 0.92rem var(--font-ui);
+}
+.direct-empty-up-item small {
+    color: #fbbf24;
+    font: 700 0.74rem var(--font-data);
+}
+@media (max-width: 560px) {
+    .direct-empty-up-item {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
 }
 .today-leagues-header {
     display: flex;

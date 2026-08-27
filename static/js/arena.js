@@ -130,7 +130,7 @@ function renderArena() {
 
     if (state.currentFilter === "ALL") {
         container.className = "arena-content newspaper-cover-mode";
-        container.innerHTML = renderNewspaperCoverPageV3() + renderTodayLeaguesSection();
+        container.innerHTML = renderNewspaperCoverPageV3();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
         if (typeof startSeasonCountdown === "function") startSeasonCountdown();
@@ -138,6 +138,11 @@ function renderArena() {
         if (typeof startCoverScorebar === "function") startCoverScorebar();
         loadPorra();
         loadNewsBriefing();
+        const _grid = container.querySelector(".cx-grid");
+        const _todayBand = renderTodayLeaguesSection();
+        if (_grid && _todayBand) {
+            _grid.insertAdjacentHTML("beforebegin", _todayBand);
+        }
         return;
     }
 
