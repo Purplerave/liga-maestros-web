@@ -356,21 +356,36 @@ function renderTodayLeaguesSection() {
     const primera = matches.filter(m => competitionLabel(m) === "LA LIGA");
     const segunda = matches.filter(m => competitionLabel(m) === "SEGUNDA DIVISION");
     if (!primera.length && !segunda.length) return "";
+    const rowHtml = (m) => {
+        const comp = competitionLabel(m);
+        const home = m.local || m.home_name || (m.home || {}).name || "";
+        const away = m.visitante || m.away_name || (m.away || {}).name || "";
+        const when = typeof liveScoreWithMinute === "function"
+            ? liveScoreWithMinute(m, (typeof fixtureScheduleDisplay === "function" ? fixtureScheduleDisplay(m) : (m.hora || m.kickoff || "")))
+            : (m.hora || m.kickoff || "");
+        const live = isLiveMatch(m) ? " is-live" : "";
+        return `
+            <div class="today-leagues-row${live}" data-competition="${escapeHtml(comp)}">
+                <span class="today-leagues-comp">${escapeHtml(comp === "LA LIGA" ? "1ª" : "2ª")}</span>
+                <span class="today-leagues-teams"><b>${escapeHtml(home)}</b> <i>vs</i> <b>${escapeHtml(away)}</b></span>
+                <span class="today-leagues-when">${escapeHtml(String(when))}</span>
+            </div>`;
+    };
     return `
         <section class="today-leagues-section" aria-label="Partidos de hoy en Primera y Segunda">
             <header class="today-leagues-header">
                 <h2>Partidos de hoy</h2>
-                <span class="today-leagues-count">${primera.length + segunda.length} partidos</span>
+                <a class="today-leagues-more" href="/?view=LIVE&live=primera" data-page-action="LIVE">Ver directo →</a>
             </header>
             ${primera.length ? `
             <div class="today-leagues-group" data-competition="LA LIGA">
                 <h3 class="today-leagues-title">Primera División</h3>
-                <div class="match-card-container">${primera.map(renderMatchCard).join("")}</div>
+                <div class="today-leagues-rows">${primera.map(rowHtml).join("")}</div>
             </div>` : ""}
             ${segunda.length ? `
             <div class="today-leagues-group" data-competition="SEGUNDA DIVISION">
                 <h3 class="today-leagues-title">Segunda División</h3>
-                <div class="match-card-container">${segunda.map(renderMatchCard).join("")}</div>
+                <div class="today-leagues-rows">${segunda.map(rowHtml).join("")}</div>
             </div>` : ""}
         </section>`;
 }
