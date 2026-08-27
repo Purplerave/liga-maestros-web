@@ -502,6 +502,7 @@ function renderNewspaperCoverPageV3() {
         const isLive = _live(match);
         const isClosed = _closed(match);
         const realSign = String(match.signo_actual || "").toUpperCase();
+        const isPlenoRow = i === 14;
 
         let pickClass = "";
         if (pick) {
@@ -518,7 +519,7 @@ function renderNewspaperCoverPageV3() {
             const signEmpty = sign === "-";
             const signHit = isClosed && realSign && sign === realSign;
             const hitClass = signHit ? " is-hit" : "";
-            return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
+            return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}${isPlenoRow ? " is-pleno" : ""}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
         }).join("");
 
         const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
@@ -534,7 +535,7 @@ function renderNewspaperCoverPageV3() {
         }
         const penaEmpty = penaSign === "—" || penaSign === "-";
         const penaHit = isClosed && realSign && penaSign === realSign;
-        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaHit ? " is-hit" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
+        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaHit ? " is-hit" : ""}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
 
         return `
             <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${match.id}">
@@ -650,6 +651,16 @@ function renderNewspaperCoverPageV3() {
             </div>`;
     };
 
+    const _whenParts = (m) => (typeof fixtureScheduleParts === "function"
+        ? fixtureScheduleParts(m)
+        : { day: "", time: "", label: (typeof fixtureScheduleDisplay === "function" ? fixtureScheduleDisplay(m) : (m.hora || m.kickoff || "")) });
+    const _whenMarkup = (parts) => {
+        const time = parts.time || parts.label || "";
+        const day = (parts.day && parts.time) ? parts.day : "";
+        return `<b class="cx-up-time">${escapeHtml(String(time))}</b>${day ? `<small class="cx-up-day">${escapeHtml(String(day))}</small>` : ""}`;
+    };
+    const _finishedMarkup = (score) => `<b class="cx-up-time">${escapeHtml(String(score))}</b>`;
+
     const jornadaCards = [
         ...finishedCards.map(m => {
             const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
@@ -657,7 +668,7 @@ function renderNewspaperCoverPageV3() {
             const score = _liveScoreText(m);
             return `
                 <div class="cx-up-card is-ft">
-                    <span class="cx-up-when">${escapeHtml(String(score))}</span>
+                    <span class="cx-up-when">${_finishedMarkup(score)}</span>
                     <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>FT</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
                 </div>
             `;
@@ -670,7 +681,7 @@ function renderNewspaperCoverPageV3() {
                 : (m.hora || m.kickoff || "");
             return `
                 <div class="cx-up-card">
-                    <span class="cx-up-when">${escapeHtml(String(when))}</span>
+                    <span class="cx-up-when">${_whenMarkup(_whenParts(m))}</span>
                     <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
                 </div>
             `;

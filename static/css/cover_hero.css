@@ -494,15 +494,17 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 
 .cx-up-card {
     display: grid;
-    grid-template-columns: 50px 1fr;
+    grid-template-columns: 56px 1fr;
     gap: 6px;
     align-items: center;
     padding: 4px 4px;
     border-radius: 5px;
     font-size: 0.72rem;
 }
-.cx-up-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); font-weight: 700; font-variant-numeric: tabular-nums; }
-.cx-up-card.is-ft .cx-up-when { color: var(--cx-text); }
+.cx-up-when { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.05; text-align: right; }
+.cx-up-time { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cx-up-card.is-ft .cx-up-time { color: var(--cx-text); }
+.cx-up-day { font-size: 0.55rem; color: var(--cx-dim); font-weight: 600; white-space: nowrap; }
 .cx-up-card.is-ft .cx-up-match i { color: var(--cx-green); font-weight: 700; }
 .cx-up-match { color: var(--cx-text); font-family: "Outfit", sans-serif; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cx-up-match b { font-weight: 700; }
@@ -717,6 +719,7 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-ia-sign.is-empty { color: var(--cx-dim); opacity: 0.45; }
 .cx-ia-sign.is-hit { color: #6ee7b7; text-shadow: 0 0 6px rgba(52, 211, 153, 0.35); }
 .cx-ia-sign.is-pena { color: var(--cx-cyan); }
+.cx-ia-sign.is-pleno { font-size: 0.8rem; white-space: nowrap; min-width: 32px; letter-spacing: -0.01em; }
 
 .cp-arena { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .cp-main { display: block; }
@@ -758,6 +761,7 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-boleto-table thead th.cx-r-ia { width: 34px; }
     .cx-r-ia { padding: 6px 2px; }
     .cx-ia-sign { min-width: 22px; font-size: 0.92rem; padding: 1px 4px; }
+    .cx-ia-sign.is-pleno { font-size: 0.72rem; min-width: 28px; }
     .cx-col { flex-direction: column; }
     .cx-ticker { font-size: 0.7rem; }
 }
