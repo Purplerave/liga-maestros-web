@@ -624,7 +624,32 @@ function renderNewspaperCoverPageV3() {
     `;
 
     const finishedCards = finishedMatches.slice(-5).reverse();
-    const upcoming = matches.filter(m => !_live(m) && !_finished(m)).slice(0, 5);
+    const upcomingQuiniela = matches.filter(m => !_live(m) && !_finished(m)).slice(0, 5);
+
+    // Partidos de hoy de Primera/Segunda que NO están en la quiniela 15.
+    const quinielaKeys = new Set(matches.map(m =>
+        (String(m.local || "").trim() + "|" + String(m.visitante || "").trim()).toLowerCase()));
+    const leagueToday = (typeof getTodayLeagueMatches === "function" ? getTodayLeagueMatches() : [])
+        .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")))
+        .filter(m => {
+            const k = (String(m.local || "").trim() + "|" + String(m.visitante || "").trim()).toLowerCase();
+            return !quinielaKeys.has(k);
+        })
+        .slice(0, 8);
+
+    const leagueCard = (m) => {
+        const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
+        const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
+        const when = typeof fixtureScheduleDisplay === "function"
+            ? fixtureScheduleDisplay(m)
+            : (m.hora || m.kickoff || "");
+        return `
+            <div class="cx-up-card">
+                <span class="cx-up-when">${escapeHtml(String(when))}</span>
+                <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
+            </div>`;
+    };
+
     const jornadaCards = [
         ...finishedCards.map(m => {
             const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
@@ -637,7 +662,7 @@ function renderNewspaperCoverPageV3() {
                 </div>
             `;
         }),
-        ...upcoming.map(m => {
+        ...upcomingQuiniela.map(m => {
             const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
             const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
             const when = typeof fixtureScheduleDisplay === "function"
@@ -650,8 +675,9 @@ function renderNewspaperCoverPageV3() {
                 </div>
             `;
         }),
+        ...leagueToday.map(leagueCard),
     ];
-    const jornadaTitle = finishedCards.length && upcoming.length
+    const jornadaTitle = finishedCards.length && (upcomingQuiniela.length || leagueToday.length)
         ? "JORNADA"
         : (finishedCards.length ? "RESULTADOS" : "PRÓXIMOS");
     const upcomingHtml = `

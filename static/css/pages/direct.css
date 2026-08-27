@@ -211,17 +211,6 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     box-shadow: 0 0 0 1px rgba(56, 217, 255, 0.3), inset 0 0 12px rgba(56, 217, 255, 0.08);
 }
 
-/* Sección "Partidos de hoy" en portada (banda destacada tras la cabecera) */
-.today-leagues-section {
-    margin: 22px 0 8px;
-    padding: 18px 18px 8px;
-    border-radius: 16px;
-    border: 1px solid rgba(56, 189, 248, 0.22);
-    background:
-        radial-gradient(600px 200px at 0% 0%, rgba(56, 217, 255, 0.08), transparent 70%),
-        rgba(10, 17, 30, 0.6);
-}
-
 .direct-empty-upcoming {
     width: 100%;
     margin-top: 22px;
@@ -266,89 +255,7 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
         gap: 2px;
     }
 }
-.today-leagues-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding: 0 4px;
-}
-.today-leagues-header h2 {
-    margin: 0;
-    color: #f8fafc;
-    font: 700 1rem var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-.today-leagues-more {
-    color: #38d9ff;
-    font: 700 0.7rem var(--font-data);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-}
-.today-leagues-more:hover {
-    text-decoration: underline;
-}
-.today-leagues-group {
-    margin-bottom: 14px;
-}
-.today-leagues-title {
-    margin: 0 0 6px;
-    color: #38d9ff;
-    font: 700 0.72rem var(--font-data);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding-left: 4px;
-    border-left: 3px solid #38d9ff;
-}
-.today-leagues-rows {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 6px;
-}
-.today-leagues-row {
-    display: grid;
-    grid-template-columns: 30px 1fr auto;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: rgba(15, 23, 42, 0.55);
-    border: 1px solid rgba(148, 163, 184, 0.08);
-}
-.today-leagues-row.is-live {
-    border-color: rgba(56, 217, 255, 0.4);
-    background: rgba(56, 217, 255, 0.06);
-}
-.today-leagues-comp {
-    color: #64748b;
-    font: 800 0.62rem var(--font-data);
-}
-.today-leagues-teams {
-    color: #cbd5e1;
-    font: 600 0.8rem var(--font-ui);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.today-leagues-teams i {
-    color: #64748b;
-    font-style: normal;
-    margin: 0 4px;
-}
-.today-leagues-when {
-    color: #fbbf24;
-    font: 700 0.7rem var(--font-data);
-    white-space: nowrap;
-}
-.today-leagues-row.is-live .today-leagues-when {
-    color: #38d9ff;
-}
 @media (max-width: 640px) {
-    .today-leagues-rows {
-        grid-template-columns: 1fr;
-    }
     .live-subnav {
         justify-content: center;
     }
