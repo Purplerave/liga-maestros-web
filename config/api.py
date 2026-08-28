@@ -21,7 +21,7 @@ API_FOOTBALL_DAILY_LIMIT = int(os.getenv("API_FOOTBALL_DAILY_LIMIT", "100"))
 API_FOOTBALL_DAILY_RESERVE = int(os.getenv("API_FOOTBALL_DAILY_RESERVE", "10"))
 
 # Feature flags.
-LIVE_SSE_ENABLED = os.getenv("LIVE_SSE_ENABLED", "0").strip().lower() in (
+LIVE_SSE_ENABLED = os.getenv("LIVE_SSE_ENABLED", "1").strip().lower() in (
     "1",
     "true",
     "yes",
