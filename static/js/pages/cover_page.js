@@ -232,6 +232,39 @@ function _liveTeamLabel(name, maxLen) {
     const label = typeof getShortName === "function" ? getShortName(name) : name;
     return _fitName(label, maxLen || 12);
 }
+/* Los partidos del panel externo (Highlightly) llegan con home.name/away.name
+   en lugar de local/visitante; sin esto su nombre se perdia en la portada. */
+function _matchSideName(match, side) {
+    if (!match) return "";
+    if (side === "home") {
+        return String(match.local || match.home_name || (match.home || {}).name || "").trim();
+    }
+    return String(match.visitante || match.away_name || (match.away || {}).name || "").trim();
+}
+function _matchPairKey(match) {
+    return `${_matchSideName(match, "home").toLowerCase()}|${_matchSideName(match, "away").toLowerCase()}`;
+}
+function _liveCompLabel(match) {
+    if (!match) return "";
+    const raw = match.competition_name || (match.competition || {}).name || "";
+    const label = String(raw).trim().toUpperCase();
+    if (!label || label === "OTROS" || label === "FRIENDLIES") return "";
+    const compact = {
+        "LA LIGA": "LALIGA",
+        "SEGUNDA DIVISION": "SEGUNDA",
+        "PREMIER LEAGUE": "PREMIER",
+        "BUNDESLIGA": "BUNDES",
+        "LIGUE 1": "LIGUE 1",
+    };
+    return compact[label] || label.split(/\s+/)[0].slice(0, 8);
+}
+/* Directos de hoy fuera de la quiniela (p. ej. un viernes con Racing - Elche):
+   el backend los sirve en live_matches; sin este refuerzo el panel EN DIRECTO
+   de la portada se queda a cero aunque haya futbol en juego. */
+function _otherLiveMatchesToday(quinielaPairs) {
+    const source = typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : [];
+    return source.filter(m => m && !quinielaPairs.has(_matchPairKey(m)));
+}
 function _mtone(col) {
     if (!col) return "is-default";
     const id = String(col.id || col.label || "").toLowerCase();
@@ -371,7 +404,8 @@ function renderNewspaperCoverPageV3() {
     const predictions = state.data?.predicciones_actuales || {};
     const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
     const userTotal = 15;
-    const liveMatches = matches.filter(_live);
+    const quinielaPairs = new Set(matches.map(_matchPairKey));
+    const liveMatches = [...matches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
     const liveCount = liveMatches.length;
     const bando = coverBandoDetailed();
     const consenso = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
@@ -432,15 +466,15 @@ function renderNewspaperCoverPageV3() {
 
     const finishedMatches = matches.filter(m => _finished(m) && _hasScore(m));
     const tickerLiveItems = liveMatches.map(m => {
-        const home = _liveTeamLabel(m.local, 11);
-        const away = _liveTeamLabel(m.visitante, 11);
+        const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
+        const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
         const score = _liveScoreText(m);
         const minute = _liveMinuteLabel(m);
         return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
     }).join("");
     const tickerFtItems = finishedMatches.map(m => {
-        const home = _liveTeamLabel(m.local, 11);
-        const away = _liveTeamLabel(m.visitante, 11);
+        const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
+        const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
         const score = _liveScoreText(m);
         return `<span class="cx-ticker-item is-ft"><i class="cx-ticker-dot is-ft"></i><b>FT</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
     }).join("");
@@ -610,14 +644,18 @@ function renderNewspaperCoverPageV3() {
 
     function liveCard(match) {
         if (!match) return "";
-        const homeFull = _liveTeamLabel(match.local, 12);
-        const awayFull = _liveTeamLabel(match.visitante, 12);
+        const homeFull = _liveTeamLabel(_matchSideName(match, "home"), 12);
+        const awayFull = _liveTeamLabel(_matchSideName(match, "away"), 12);
         const score = _liveScoreText(match);
         const minute = _liveMinuteLabel(match);
+        const comp = _liveCompLabel(match);
         return `
             <div class="cx-live-card" data-page-action="LIVE">
                 <span class="cx-live-pulse"></span>
-                <span class="cx-live-min">${escapeHtml(String(minute))}</span>
+                <span class="cx-live-mincell">
+                    <span class="cx-live-min">${escapeHtml(String(minute))}</span>
+                    ${comp ? `<span class="cx-live-comp">${escapeHtml(comp)}</span>` : ""}
+                </span>
                 <div class="cx-live-match">
                     <span class="cx-live-team is-home">${escapeHtml(homeFull)}</span>
                     <span class="cx-live-score">${escapeHtml(String(score))}</span>
@@ -636,7 +674,7 @@ function renderNewspaperCoverPageV3() {
             <div class="cx-pn-body">
                 ${liveCount
                     ? liveMatches.slice(0, 4).map(liveCard).join("")
-                    : '<div class="cx-empty">Sin partidos de la quiniela en directo</div>'}
+                    : '<div class="cx-empty">Ahora mismo no hay partidos en directo</div>'}
             </div>
             ${liveCount > 0 ? `<a class="cx-pn-more" href="/directo" data-page-action="LIVE">VER DIRECTO COMPLETO →</a>` : ""}
         </section>
@@ -646,8 +684,7 @@ function renderNewspaperCoverPageV3() {
     const upcomingQuiniela = matches.filter(m => !_live(m) && !_finished(m)).slice(0, 5);
 
     // Partidos de hoy de Primera/Segunda que NO están en la quiniela 15.
-    const quinielaKeys = new Set(matches.map(m =>
-        (String(m.local || "").trim() + "|" + String(m.visitante || "").trim()).toLowerCase()));
+    const quinielaKeys = quinielaPairs;
     const leagueToday = (typeof getTodayLeagueMatches === "function" ? getTodayLeagueMatches() : [])
         .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")))
         .filter(m => {
