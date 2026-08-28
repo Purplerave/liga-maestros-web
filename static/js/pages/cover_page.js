@@ -20,10 +20,28 @@ const _visibilitychange = "visibilitychange";
 let _countdownStarted = false;
 let _seasonCountdownStarted = false;
 const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
-function formatCountdownDigits() { return ""; }
-function startCoverCountdown() {}
-function startSeasonCountdown() {}
-function updateCpScorebar() {}
+function formatCountdownDigits(d, h, m, s) {
+    return `${String(d).padStart(2, "0")}d ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+}
+function startCoverCountdown() {
+    if (_countdownStarted) return;
+    _countdownStarted = true;
+    const el = document.getElementById("cx-cd");
+    if (!el) return;
+    const tick = () => {
+        const c = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
+        if (c.ms <= 0 || state.data?.is_locked) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
+        el.innerHTML = `<span class="cx-cd-block">${String(c.d).padStart(2, "0")}<i>d</i></span><span class="cx-cd-block">${String(c.h).padStart(2, "0")}<i>h</i></span><span class="cx-cd-block">${String(c.m).padStart(2, "0")}<i>m</i></span><span class="cx-cd-block">${String(c.s).padStart(2, "0")}<i>s</i></span>`;
+        el.closest("[data-kpi]")?.classList.toggle("is-urgent", c.urgent);
+    };
+    tick();
+    setInterval(tick, 1000);
+}
+function startSeasonCountdown() {
+    if (_seasonCountdownStarted) return;
+    _seasonCountdownStarted = true;
+}
+function updateCpScorebar() { startCoverScorebar(); }
 function updateCpUrgency() {}
 const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
 const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
