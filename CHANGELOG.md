@@ -2,6 +2,23 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-08-28 — Directos fuera de la quiniela en la portada
+
+### Arreglado
+
+- ⚽ **El panel EN DIRECTO de la portada ya muestra partidos de ligas seguidas
+  que no están en la quiniela.** Con un Racing - Elche de LaLiga en juego en un
+  viernes sin quiniela, el panel se quedaba en «0 PARTIDOS — Sin partidos de la
+  quiniela en directo» y el enlace al directo completo desaparecia: el partido
+  no aparecia en ningun sitio de la portada. Ahora el panel refuerza la lista
+  con los directos de hoy que el backend sirve en `live_matches` (quiniela
+  primero, deduplicados por pareja de equipos y con etiqueta de competicion:
+  LALIGA, SEGUNDA, PREMIER...), el ticker de la portada los incluye y el
+  mensaje vacio ya no habla solo de la quiniela.
+- Las tarjetas y el ticker admiten el formato del panel externo
+  (`home.name`/`away.name`) ademas del formato de la quiniela
+  (`local`/`visitante`).
+
 ## 2026-08-23 — Resultados en la portada
 
 ### Cambiado
