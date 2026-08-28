@@ -1,0 +1,496 @@
+@layer pages {
+/* Quiniela desktop: alta densidad sin ocultar informacion. */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content.table-mode {
+    align-content: start;
+    grid-template-rows: auto auto;
+}
+
+.ticket-porra-strip {
+    display: grid;
+    grid-template-columns: 145px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin: 0 8px 8px;
+    padding: 7px 11px;
+    border: 1px solid rgba(56, 189, 248, 0.24);
+    border-radius: 8px;
+    background: rgba(8, 17, 31, 0.94);
+}
+
+.ticket-porra-heading {
+    display: grid;
+    gap: 2px;
+}
+
+.ticket-porra-heading span {
+    color: #38d9ff;
+    font-size: 0.58rem;
+    font-weight: 900;
+}
+
+.ticket-porra-heading strong {
+    color: #f5c451;
+    font-size: 0.72rem;
+}
+
+.ticket-porra-strip .porra-body {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.9fr) minmax(170px, 0.8fr) minmax(140px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+}
+
+.ticket-porra-strip .porra-selector-label,
+.ticket-porra-strip .porra-match,
+.ticket-porra-strip .porra-saved,
+.ticket-porra-strip .porra-share {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    min-height: 30px;
+    padding: 4px 8px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 7px;
+}
+
+.ticket-porra-strip .porra-selector-label {
+    display: grid;
+    gap: 2px;
+    color: #9fb1c8;
+    font-size: 0.55rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.ticket-porra-strip .porra-selector {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 5px;
+    background: #07111f;
+    color: #f8fafc;
+    font: 700 0.65rem var(--font-data);
+    padding: 3px 5px;
+}
+
+.ticket-porra-strip .porra-match {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+}
+
+.ticket-porra-strip .porra-match strong {
+    overflow: hidden;
+    color: #f8fafc;
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ticket-porra-strip .porra-match em {
+    color: #7dd3fc;
+    font-size: 0.6rem;
+    font-style: normal;
+    text-align: center;
+}
+
+.ticket-porra-strip .porra-form {
+    display: grid;
+    grid-template-columns: 34px 8px 34px 48px;
+    align-items: center;
+    gap: 5px;
+}
+
+.ticket-porra-strip .porra-form input,
+.ticket-porra-strip .porra-form button {
+    width: 100%;
+    height: 28px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 6px;
+    background: #07111f;
+    color: #f8fafc;
+    font: 800 0.72rem var(--font-data);
+    text-align: center;
+}
+
+.ticket-porra-strip .porra-form button {
+    background: #21bff3;
+    color: #04111d;
+    cursor: pointer;
+}
+
+.ticket-porra-strip .porra-share {
+    overflow: hidden;
+}
+
+.ticket-porra-strip .porra-share-total,
+.ticket-porra-strip .porra-share-pill {
+    flex: 0 0 auto;
+    font-size: 0.58rem;
+    white-space: nowrap;
+}
+
+.ticket-porra-strip .porra-share-pill {
+    display: inline-flex;
+    gap: 3px;
+    color: #f5c451;
+}
+
+.ticket-porra-strip .porra-share-pill em {
+    color: #9fb1c8;
+    font-style: normal;
+}
+
+@media (max-width: 900px) {
+    .ticket-porra-strip,
+    .ticket-porra-strip .porra-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Peña percentages must stay fully visible at every ticket density. */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell {
+    overflow: visible;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .tension-chip,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    overflow: visible;
+    grid-template-rows: auto;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick small {
+    display: block;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th {
+        height: 28px;
+        padding: 3px 4px;
+        font-size: 0.59rem;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(1),
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(1) {
+        width: 38px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table th:nth-child(2),
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table td:nth-child(2) {
+        width: 34%;
+        min-width: 0;
+    }
+
+    /* El horario va en dos lineas (dia / hora), asi que la columna solo tiene
+       que caber el marcador y la hora, no "lun 17/08 19:00h" seguido. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-heading,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell {
+        width: 98px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-predictor-heading,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell {
+        width: 5.9%;
+        text-align: center;
+    }
+
+    /* Peña needs room for 1 / X / 2 percentages, not a single 1X2 chip. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-heading,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell {
+        width: 118px;
+        min-width: 118px;
+        overflow: visible;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-heading,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell {
+        /* Tres controles 1/X/2 + separacion real, sin invadir columnas vecinas. */
+        width: 104px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row td {
+        height: 39px;
+        padding: 2px 4px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-number {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 0.72rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-layout {
+        grid-template-columns: minmax(0, 1fr) 70px;
+        gap: 8px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-inline {
+        grid-template-columns: minmax(82px, 1fr) auto minmax(82px, 1fr);
+        column-gap: 7px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.79rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-crest-pair {
+        grid-template-columns: 22px 7px 22px;
+        gap: 3px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .team-badge {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-meta-line .match-score-badge,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table .match-score-badge.is-scheduled-time {
+        width: 68px;
+        min-width: 68px;
+        height: 24px;
+        min-height: 24px;
+        padding: 0 5px;
+        font-size: 0.7rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-consensus-cell {
+        grid-template-rows: 32px;
+        gap: 0;
+        padding: 3px 6px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell {
+        text-align: center;
+    }
+
+    /* El marcador es corto ("2-1") y cabe en caja fija; el horario va apilado
+       (dia arriba, hora abajo) para que nunca se recorte. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .match-score-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 84px;
+        min-width: 84px;
+        height: 24px;
+        min-height: 24px;
+        padding: 0 6px;
+        font-size: 0.68rem;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule {
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+        padding: 2px 7px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-day {
+        font-size: 0.56rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-time {
+        font-size: 0.78rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule.is-pending {
+        font-size: 0.6rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        min-height: 28px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .tension-chip > span:first-child[title] {
+        display: none;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .ia-signo,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .saved-ticket-sign,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .empty-user-pick,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .pena-pick {
+        width: 34px;
+        min-width: 34px;
+        height: 27px;
+        min-height: 27px;
+        padding: 0 3px;
+        font-size: 0.78rem;
+        line-height: 27px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .tension-chip {
+        height: auto;
+        min-height: 32px;
+        overflow: visible;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick {
+        display: grid;
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 32px;
+        padding: 2px 3px;
+        overflow: visible;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick small {
+        display: block;
+        overflow: visible;
+        font-size: 0.62rem;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-breakdown {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        width: 100%;
+        min-width: 0;
+        gap: 2px;
+        padding: 0;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item {
+        display: grid;
+        place-content: center;
+        gap: 2px;
+        min-width: 0;
+        color: #8291a8;
+        font-style: normal;
+        line-height: 1;
+        text-align: center;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item b {
+        font-size: 0.68rem;
+        line-height: 1;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item small {
+        font-size: 0.62rem;
+        letter-spacing: 0;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item.is-leader {
+        color: #f8c84b;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-pleno {
+        grid-auto-flow: row;
+        justify-items: center;
+        gap: 2px;
+        font-size: 0.72rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        min-width: 0;
+        gap: 3px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .action-buttons .ia-signo {
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        min-height: 28px;
+        padding: 0;
+        font-size: 0.82rem;
+    }
+}
+
+/* El escrutinio debe leerse de un vistazo: partido vivo y signo acertado/fallado. */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row td {
+    height: 47px;
+    background: rgba(8, 78, 64, 0.28);
+    border-top: 1px solid rgba(52, 211, 153, 0.34);
+    border-bottom-color: rgba(52, 211, 153, 0.34);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row td:first-child {
+    box-shadow: inset 4px 0 0 #22c55e;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .match-number {
+    width: 29px;
+    height: 29px;
+    border-color: #4ade80;
+    background: rgba(34, 197, 94, 0.14);
+    color: #dcfce7;
+    line-height: 29px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .fixture-name {
+    color: #f0fdf4;
+    font-size: 0.86rem;
+    font-weight: 900;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .team-badge {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row .ticket-status-cell .match-score-badge {
+    height: 31px;
+    min-height: 31px;
+    border-color: #4ade80;
+    background: #12613d;
+    color: #fff;
+    font-size: 0.76rem;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .hit {
+    border-color: #22c55e;
+    background: rgba(21, 128, 61, 0.82);
+    color: #f0fdf4;
+    box-shadow: inset 0 0 0 1px rgba(134, 239, 172, 0.22);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pick-cell .miss {
+    border-color: #ef4444;
+    background: rgba(153, 27, 27, 0.82);
+    color: #fef2f2;
+    box-shadow: inset 0 0 0 1px rgba(252, 165, 165, 0.18);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick.hit .pena-breakdown-item.is-leader,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick.miss .pena-breakdown-item.is-leader {
+    color: inherit;
+}
+}

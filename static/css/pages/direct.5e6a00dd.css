@@ -1,0 +1,262 @@
+@layer pages {
+/* Comentarista IA: sus frases abren la pagina de Directo, encima de los
+   partidos. Ocupa todo el ancho del grid de competiciones. */
+.live-grouped-grid .direct-comentarista {
+    grid-column: 1 / -1;
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-left: 3px solid rgba(56, 189, 248, 0.65);
+    border-radius: 8px;
+    background:
+        radial-gradient(360px 120px at 0% 0%, rgba(56, 189, 248, 0.1), transparent 70%),
+        rgba(7, 12, 22, 0.86);
+    padding: 12px 16px 10px;
+    animation: card-enter 0.3s ease backwards;
+}
+
+.direct-comentarista-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #e2e8f0;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.direct-comentarista-head small {
+    padding: 1px 6px;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 4px;
+    color: #38d9ff;
+    font: 800 0.58rem var(--font-data);
+    letter-spacing: 0.1em;
+    vertical-align: middle;
+}
+
+.direct-comentarista-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #38d9ff;
+    animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+.direct-comentarista-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.direct-comentarista-item {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) 1fr;
+    gap: 4px 14px;
+    padding: 8px 10px;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.16);
+}
+
+.direct-comentarista-item:last-child {
+    border-bottom: 0;
+}
+
+.direct-comentarista-meta {
+    color: #94a3b8;
+    font: 700 0.64rem var(--font-data);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-self: center;
+}
+
+.direct-comentarista-meta b {
+    color: #38d9ff;
+}
+
+.direct-comentarista-meta em {
+    color: #4ade80;
+    font-style: normal;
+}
+
+.direct-comentarista-texto {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+@media (max-width: 620px) {
+    .direct-comentarista-item {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .direct-comentarista-texto {
+        font-size: 0.86rem;
+    }
+}
+
+/* Estado de la pagina Directo cuando no hay partidos en juego. */
+body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-empty-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: start center;
+    width: 100%;
+    max-width: none;
+    padding: clamp(36px, 8vh, 88px) 20px;
+}
+
+.direct-empty-state {
+    display: grid;
+    justify-items: center;
+    width: min(620px, 100%);
+    margin-inline: auto;
+    padding: clamp(28px, 5vw, 48px);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 18px;
+    background:
+        radial-gradient(420px 160px at 50% 0%, rgba(56, 217, 255, 0.1), transparent 70%),
+        rgba(10, 17, 30, 0.86);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+    text-align: center;
+}
+
+.direct-empty-kicker {
+    color: #38d9ff;
+    font: 800 0.68rem var(--font-data);
+}
+
+.direct-empty-state h2 {
+    margin: 10px 0 8px;
+    color: #f8fafc;
+    font: 700 clamp(1.35rem, 3vw, 2rem) var(--font-display);
+}
+
+.direct-empty-state > p {
+    max-width: 50ch;
+    margin: 0;
+    color: #91a1b8;
+    line-height: 1.55;
+}
+
+.direct-empty-next {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.direct-empty-next span,
+.direct-empty-next small {
+    color: #91a1b8;
+    font-size: 0.7rem;
+}
+
+.direct-empty-next strong {
+    color: #f8c84b;
+    font-size: 1rem;
+}
+
+.direct-empty-action {
+    min-height: 38px;
+    margin-top: 20px;
+    padding: 0 20px;
+    border: 1px solid #f59e0b;
+    border-radius: 7px;
+    background: #f59e0b;
+    color: #07111f;
+    font-weight: 800;
+    cursor: pointer;
+}
+}
+
+/* Subnav pills en la pestaña Directo */
+.live-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.live-subnav button {
+    padding: 6px 12px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 20px;
+    background: rgba(10, 17, 30, 0.7);
+    color: #94a3b8;
+    font: 600 0.72rem var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.live-subnav button:hover {
+    border-color: #38d9ff;
+    color: #38d9ff;
+    background: rgba(56, 217, 255, 0.08);
+}
+.live-subnav button.active {
+    border-color: #38d9ff;
+    background: linear-gradient(135deg, rgba(56, 217, 255, 0.18), rgba(56, 189, 248, 0.1));
+    color: #38d9ff;
+    box-shadow: 0 0 0 1px rgba(56, 217, 255, 0.3), inset 0 0 12px rgba(56, 217, 255, 0.08);
+}
+
+.direct-empty-upcoming {
+    width: 100%;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    display: grid;
+    gap: 8px;
+}
+.direct-empty-upcoming-label {
+    color: #38d9ff;
+    font: 800 0.7rem var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.direct-empty-up-item {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+.direct-empty-up-comp {
+    color: #91a1b8;
+    font: 700 0.62rem var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.direct-empty-up-item strong {
+    color: #f1f5f9;
+    font: 600 0.92rem var(--font-ui);
+}
+.direct-empty-up-item small {
+    color: #fbbf24;
+    font: 700 0.74rem var(--font-data);
+}
+@media (max-width: 560px) {
+    .direct-empty-up-item {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}
+@media (max-width: 640px) {
+    .live-subnav {
+        justify-content: center;
+    }
+}

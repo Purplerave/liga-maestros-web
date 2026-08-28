@@ -1,6 +1,9 @@
 """Liga data route: the main data endpoint."""
 
+import hashlib
 import logging
+import time
+from functools import lru_cache
 
 from flask import Blueprint, jsonify, request, session
 
@@ -22,6 +25,31 @@ from ..utils import load_team_logos
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
 
+# Simple in-memory cache for standings (TTL 5 min)
+_STANDINGS_CACHE = {"data": None, "expires": 0, "key": None}
+_STANDINGS_TTL = 300  # seconds
+
+
+def _get_standings_cached(conn, partidos, team_logos):
+    """Return (standings, standings_db) with 5-min TTL cache keyed by jornada+partidos hash."""
+    # Cache key: jornada + hash of partidos IDs + count
+    partido_ids = tuple(sorted(str(p.get("id")) for p in partidos if p.get("id")))
+    cache_key = f"{len(partido_ids)}:{hash(partido_ids)}"
+    now = time.time()
+    if _STANDINGS_CACHE["data"] and now < _STANDINGS_CACHE["expires"] and _STANDINGS_CACHE["key"] == cache_key:
+        return _STANDINGS_CACHE["data"]
+    standings, standings_db = build_standings_payload(conn, partidos)
+    persist_standings(conn, standings)
+    _STANDINGS_CACHE["data"] = (standings, standings_db)
+    _STANDINGS_CACHE["expires"] = now + _STANDINGS_TTL
+    _STANDINGS_CACHE["key"] = cache_key
+    return standings, standings_db
+
+
+def _etag_for(payload):
+    """Generate ETag from payload content hash."""
+    return hashlib.md5(payload.encode()).hexdigest()
+
 
 @bp.route("/api/liga/data")
 def get_liga_data():
@@ -39,8 +67,7 @@ def get_liga_data():
             jornada = str(jornadas_disponibles[0])
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
-        standings, standings_db = build_standings_payload(conn, partidos)
-        persist_standings(conn, standings)
+        standings, standings_db = _get_standings_cached(conn, partidos, team_logos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos, standings_db)
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
@@ -109,7 +136,22 @@ def get_liga_data():
         validated, schema_error = validate_liga_data(response_payload)
         if schema_error:
             logger.info("api_liga_data served with schema drift: %s", schema_error)
-        return jsonify(validated)
+
+        # ETag support
+        response_json = jsonify(validated).get_data(as_text=True)
+        etag = _etag_for(response_json)
+        if_none_match = request.headers.get("If-None-Match")
+        if if_none_match and if_none_match == etag:
+            resp = jsonify({"status": "not_modified"})
+            resp.status_code = 304
+            resp.headers["ETag"] = etag
+            resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
+            return resp
+
+        resp = jsonify(validated)
+        resp.headers["ETag"] = etag
+        resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
+        return resp
     except Exception as exc:
         logger.exception("api_liga_data failed")
         return jsonify({"status": "error", "message": str(exc)}), 500

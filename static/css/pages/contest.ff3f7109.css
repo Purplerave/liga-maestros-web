@@ -1,0 +1,992 @@
+@layer pages {
+/* ==========================================================================
+   CONTEST & AWARDS PAGE — La Peña Compact Layout
+   ========================================================================== */
+
+/* Compact Layout - 2 Columns */
+.contest-section {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.contest-view-tabs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.contest-view-tabs button {
+    min-height: 34px;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 16, 28, 0.72);
+    color: var(--text-muted);
+    font: 700 0.7rem/1 var(--font-ui);
+    cursor: pointer;
+}
+
+.contest-view-tabs button:last-child {
+    border-right: 0;
+}
+
+.contest-view-tabs button:hover {
+    color: var(--text-main);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.contest-view-tabs button.active {
+    color: #07111d;
+    background: var(--accent);
+}
+
+.contest-view {
+    min-width: 0;
+}
+
+.contest-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+}
+
+.contest-compact-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    align-items: stretch;
+}
+
+.contest-compact-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.contest-compact-general {
+    flex: 1;
+}
+
+.contest-compact-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.contest-compact-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.contest-compact-card {
+    background: rgba(10, 16, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 6px 8px;
+    min-width: 0;
+}
+
+.contest-compact-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ver-todos-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8fa4c0;
+    font-size: 0.55rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: var(--font-main);
+}
+
+.ver-todos-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #c5d4e8;
+}
+
+.contest-compact-title {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f8fbff;
+}
+
+.contest-compact-sub {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.contest-compact-card .contest-row {
+    min-height: 20px;
+    padding: 1px 3px;
+    font-size: 0.68rem;
+}
+
+.contest-compact-card .contest-medal {
+    font-size: 0.65rem;
+}
+
+.contest-compact-card .contest-pos {
+    font-size: 0.6rem;
+}
+
+.contest-compact-card .contest-name {
+    font-size: 0.68rem;
+}
+
+.contest-compact-card .contest-points {
+    font-size: 0.62rem;
+    min-width: 35px;
+}
+
+.contest-compact-card .contest-hit-rate {
+    font-size: 0.58rem;
+}
+
+/* Compact Awards */
+.contest-compact-award {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.65rem;
+}
+
+.contest-compact-award:last-child {
+    border-bottom: none;
+}
+
+.contest-compact-award-j {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: var(--font-data);
+    min-width: 28px;
+}
+
+.contest-compact-award-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-main);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contest-compact-award-pts {
+    color: var(--gold);
+    font-weight: 700;
+    font-family: var(--font-data);
+    font-size: 0.6rem;
+}
+
+/* Shared layout used by profile, monthly, history and awards views. */
+.contest-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
+    gap: 10px;
+    align-items: start;
+}
+
+.contest-page.single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.contest-page .contest-card {
+    padding: 12px;
+}
+
+.contest-page .contest-title {
+    font-size: 1rem;
+}
+
+.contest-page .contest-row {
+    min-height: 34px;
+    font-size: 0.78rem;
+    grid-template-columns: 30px minmax(0, 1fr) 54px;
+}
+
+.contest-card {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(10, 16, 28, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.contest-card:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.contest-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 5px;
+    font-family: var(--font-display);
+    color: #f8fbff;
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+.contest-title small {
+    color: var(--text-muted);
+    font-size: 0.58rem;
+}
+
+.contest-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+    font-size: 0.72rem;
+    overflow: hidden;
+    position: relative;
+    transition: background 0.15s ease;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.contest-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contest-row:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.contest-row.is-user {
+    background: rgba(56, 189, 248, 0.1);
+    border-left: 3px solid var(--accent);
+    font-weight: 700;
+}
+
+/* ── New compact card rows ── */
+.contest-rows-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.contest-card-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 64px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s;
+}
+
+.contest-rows-grid.is-wide-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.contest-rows-grid.is-wide-compact .contest-card-row {
+    grid-template-columns: 58px minmax(0, 1fr) 78px;
+    min-height: 32px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.contest-rows-grid.is-wide-compact .ccr-name {
+    font-size: 0.74rem;
+}
+
+.contest-rows-grid.is-wide-compact .ccr-pts {
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    text-align: right;
+}
+
+.contest-ranking-table {
+    width: min(100%, 760px);
+    margin: 0 auto;
+}
+
+.contest-ranking-head {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 78px;
+    gap: 10px;
+    padding: 0 10px 5px;
+    color: #7185a1;
+    font: 800 0.56rem/1 var(--font-ui);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.contest-ranking-head span:first-child {
+    text-align: center;
+}
+
+.contest-ranking-head span:last-child {
+    text-align: right;
+}
+
+.contest-pending-note {
+    margin: 4px 0 10px;
+    padding: 10px 12px;
+    border: 1px dashed rgba(148, 163, 184, 0.18);
+    border-radius: 6px;
+    color: #8fa4c0;
+    font: 700 0.68rem/1.25 var(--font-ui);
+    text-align: center;
+}
+
+.contest-card-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.contest-card-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ccr-rank {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.ccr-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #f0f4f8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ccr-pts {
+    font-family: var(--font-data);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    min-width: 40px;
+    text-align: right;
+}
+
+.contest-card-row.is-user {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.contest-card-row.is-user .ccr-name {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.contest-card-row.is-near-user {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.contest-row.is-near-user {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contest-medal,
+.contest-pos {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.contest-medal {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.contest-pos {
+    color: #9fb7d5;
+    font-size: 0.65rem;
+    font-weight: 800;
+}
+
+.contest-name {
+    flex: 1;
+    color: #f4f7fb;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 0.82rem;
+}
+
+.contest-hit-rate {
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-family: var(--font-data);
+    flex-shrink: 0;
+}
+
+.contest-points {
+    color: var(--gold);
+    font-weight: 900;
+    font-family: var(--font-data);
+    font-size: 0.88rem;
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 42px;
+}
+
+.contest-separator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--accent);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+}
+
+.contest-separator span {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.3;
+}
+
+.contest-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contest-row > span {
+    position: relative;
+    z-index: 1;
+}
+
+.contest-row:last-child {
+    border-bottom: 0;
+}
+
+.contest-row.is-user .contest-name {
+    color: #38d9ff;
+}
+
+/* Awards & Medals */
+.contest-page.awards-page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+}
+
+.awards-head {
+    display: grid;
+    grid-template-columns: minmax(220px, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 54px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.05), rgba(129, 140, 248, 0.03), rgba(10, 16, 28, 0.7));
+    border-bottom: 1px solid rgba(56, 189, 248, 0.08);
+}
+
+.awards-head span {
+    display: block;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.awards-head strong {
+    display: block;
+    color: #f8fbff;
+    font-size: 1rem;
+    line-height: 1.05;
+}
+
+.awards-head p {
+    margin: 0;
+    color: #9fb7d5;
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
+.awards-totals {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 6px 8px;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.awards-totals b {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.awards-totals small {
+    color: #9fb7d5;
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.awards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.award-row {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 38px;
+    gap: 6px;
+    align-items: center;
+    min-height: 26px;
+    font-size: 0.65rem;
+    color: #dbe7f7;
+}
+
+.award-strip {
+    display: grid;
+    gap: 7px;
+}
+
+.award-chip {
+    display: grid;
+    grid-template-columns: 24px 72px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 7px 8px;
+    border: 1px solid rgba(251, 191, 36, 0.12);
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.06), rgba(13, 20, 35, 0.8));
+    transition: var(--transition);
+}
+
+.award-chip:hover {
+    border-color: rgba(251, 191, 36, 0.3);
+    transform: translateX(2px);
+}
+
+.award-chip.gold {
+    border-color: rgba(251, 191, 36, 0.6);
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.14), rgba(13, 20, 35, 0.8));
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.06);
+}
+
+.award-chip.silver {
+    border-color: rgba(148, 163, 184, 0.5);
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), rgba(13, 20, 35, 0.8));
+}
+
+.award-chip.bronze {
+    border-color: rgba(217, 119, 6, 0.5);
+    background: linear-gradient(90deg, rgba(217, 119, 6, 0.1), rgba(13, 20, 35, 0.8));
+}
+
+.award-medal {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(251, 191, 36, 0.16);
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+}
+
+.award-chip strong,
+.award-chip b,
+.award-feature strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.award-chip strong {
+    display: block;
+    color: #f8fafc;
+    font-size: 0.72rem;
+}
+
+.award-chip small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.55rem;
+}
+
+.award-chip b {
+    color: #e8f2ff;
+    font-size: 0.78rem;
+}
+
+.award-chip em,
+.award-feature em {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 900;
+    text-align: right;
+}
+
+.award-picker {
+    display: grid;
+    grid-template-columns: auto minmax(140px, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.award-picker label {
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.award-picker select {
+    min-width: 0;
+    background: rgba(6, 9, 15, 0.8);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    transition: border-color 0.2s ease;
+}
+
+.award-picker select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.award-feature {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 64px;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    background: rgba(56, 189, 248, 0.06);
+}
+
+.award-feature span {
+    color: var(--accent);
+    font-weight: 900;
+}
+
+.award-feature strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.awards-grid .contest-card {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.awards-page .award-chip {
+    grid-template-columns: 28px minmax(70px, 0.45fr) minmax(0, 1fr) 46px;
+    min-height: 44px;
+}
+
+.awards-page .award-feature {
+    grid-template-columns: 72px minmax(120px, 1fr) auto;
+    min-height: 48px;
+}
+
+.awards-history-card {
+    align-self: stretch;
+    grid-column: 1 / -1;
+}
+
+.awards-history-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+}
+
+.awards-history-grid h4 {
+    margin: 0 0 6px;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.awards-history-list {
+    display: grid;
+    gap: 5px;
+}
+
+.award-history-row {
+    display: grid;
+    grid-template-columns: 22px 54px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+    padding: 5px 7px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.52);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    font-size: 0.66rem;
+}
+
+.award-history-row span {
+    color: #9fb7d5;
+    font-weight: 900;
+    text-align: center;
+}
+
+.award-history-row strong {
+    color: #f8fbff;
+}
+
+.award-history-row b {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #dbe7f7;
+}
+
+.award-history-row em {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 900;
+    text-align: right;
+}
+
+@media (max-width: 980px) {
+    .contest-view-tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .awards-head,
+    .awards-grid,
+    .awards-history-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .contest-compact-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Month Selector */
+.contest-month-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 4px;
+    background: rgba(10, 16, 28, 0.6);
+    border-radius: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.month-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.month-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.month-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+
+/* Expand Button */
+.contest-expand-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.contest-expand-btn:hover {
+    background: rgba(56, 189, 248, 0.08);
+    border-color: var(--accent);
+}
+
+/* Full List (hidden by default) */
+.contest-full-list {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.contest-full-list.is-visible {
+    display: block;
+}
+
+@media (max-width: 560px) {
+    .contest-view-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .contest-compact-top {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ==========================================================================
+   LA PEÑA 2026-07 — podio, barras de puntos, héroe mensual/jornada
+   ========================================================================== */
+.contest-card-row {
+    grid-template-columns: 34px auto auto 64px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contest-card-row.is-top1 {
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.16), rgba(251, 191, 36, 0.03));
+    border-color: rgba(251, 191, 36, 0.45);
+}
+.contest-card-row.is-top1 .ccr-rank { color: var(--gold); font-size: 0.82rem; }
+.contest-card-row.is-top1 .ccr-name { font-weight: 800; }
+.contest-card-row.is-top2 {
+    background: linear-gradient(90deg, rgba(203, 213, 225, 0.12), rgba(203, 213, 225, 0.03));
+    border-color: rgba(203, 213, 225, 0.35);
+}
+.contest-card-row.is-top2 .ccr-rank { color: #cbd5e1; }
+.contest-card-row.is-top3 {
+    background: linear-gradient(90deg, rgba(251, 146, 60, 0.12), rgba(251, 146, 60, 0.03));
+    border-color: rgba(251, 146, 60, 0.35);
+}
+.contest-card-row.is-top3 .ccr-rank { color: #fb923c; }
+
+.contest-card-row.is-user {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0.05));
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+.ccr-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+    display: block;
+}
+.ccr-bar i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.55), var(--accent));
+    transition: width 0.5s var(--ease-out, ease);
+}
+.contest-card-row.is-top1 .ccr-bar i {
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.6), var(--gold));
+}
+
+.contest-month-hero {
+    display: grid;
+    gap: 12px;
+}
+
+.contest-month-leader {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 12px 16px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: var(--radius-md, 10px);
+    background:
+        radial-gradient(ellipse 60% 120% at 15% 50%, rgba(251, 191, 36, 0.14), transparent 70%),
+        rgba(10, 16, 28, 0.6);
+}
+.contest-month-leader .cml-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.contest-month-leader strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--gold);
+}
+.contest-month-leader b {
+    margin-left: auto;
+    font-family: var(--font-data);
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.contest-month-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.contest-jornada-selector {
+    max-height: 132px;
+    overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+    .contest-card-row { grid-template-columns: 28px auto auto; }
+    .ccr-bar { display: none; }
+}
+}

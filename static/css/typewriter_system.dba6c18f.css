@@ -1,0 +1,89 @@
+@layer typewriter {
+/* Shared typewriter language. Layout belongs in layout/stable_masthead.css. */
+
+body.newspaper-ui.quiniela-focus {
+    --type-paper: #ede6d6;
+    --type-ink: #28221e;
+    --type-red: #a83226;
+    --type-gold: #d9a928;
+}
+
+body.newspaper-ui.quiniela-focus,
+body.newspaper-ui.quiniela-focus :where(a, abbr, address, article, aside, b, button, caption, cite, code, dd, details, div, dl, dt, em, figcaption, footer, form, h1, h2, h3, h4, h5, h6, header, input, label, legend, li, main, mark, menu, nav, ol, option, output, p, pre, section, select, small, span, strong, summary, table, tbody, td, textarea, tfoot, th, thead, time, tr, ul) {
+    font-family: var(--font-ui);
+}
+
+body.newspaper-ui.quiniela-focus :where(input, select, textarea, button) {
+    font: inherit;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title,
+body.newspaper-ui.quiniela-focus .topbar-kicker,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    font-family: var(--font-ui);
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title {
+    overflow: hidden;
+    color: var(--type-gold);
+    font-size: clamp(1rem, 1.25vw, 1.34rem);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    line-height: 1.05;
+    text-align: left;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-kicker {
+    border-left: 4px solid var(--type-red);
+    background: rgba(168, 50, 38, 0.2);
+    color: var(--type-gold);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover {
+    transform: translateY(-1px);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover {
+    background:
+        repeating-linear-gradient(0deg, rgba(40, 34, 30, 0.035), rgba(40, 34, 30, 0.035) 1px, transparent 1px, transparent 7px),
+        var(--type-paper);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active span,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover span {
+    color: var(--type-ink);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav b {
+    color: var(--type-gold);
+    font-size: 0.72rem;
+    font-weight: 400;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav span {
+    color: rgba(246, 239, 225, 0.9);
+    font-size: 0.76rem;
+    font-weight: 400;
+}
+
+body.newspaper-ui.quiniela-focus .news-card,
+body.newspaper-ui.quiniela-focus .contest-card {
+    background-image:
+        repeating-linear-gradient(0deg, rgba(243, 231, 207, 0.025), rgba(243, 231, 207, 0.025) 1px, transparent 1px, transparent 7px);
+}
+
+body.newspaper-ui.quiniela-focus button {
+    letter-spacing: 0.02em;
+}
+}

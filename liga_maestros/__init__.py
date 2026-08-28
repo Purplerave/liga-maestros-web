@@ -18,6 +18,7 @@ from .db.backups import minimize_backup_personal_data, start_backup_scheduler
 from .db.migrations import run_startup_migrations
 from .middleware.authz import is_admin_or_service_request
 from .middleware.csrf import valid_csrf_request
+from .middleware.security import init_rate_limiter
 from .routes import register_routes
 from .workers.web_collector import start_web_collector
 
@@ -243,5 +244,6 @@ def create_app():
     minimize_backup_personal_data()
     start_backup_scheduler(app)
     start_web_collector(app)
+    init_rate_limiter(app)
 
     return app

@@ -1,0 +1,640 @@
+@layer unification {
+/* ═══════════════════════════════════════════════════════════════
+   VISUAL UNIFICATION — Liga de Maestros
+   ───────────────────────────────────────────────────────────────
+   Este archivo va AL FINAL de la cascada y resuelve los conflictos
+   entre tokens.css (base), newspaper theme (tema) y surface_shape
+   (overrides). Define UNA dirección visual coherente.
+   
+   Dirección: Modern Dark Premium — bordes suaves, glassmorphism
+   sutil, espaciado generoso, tipografía legible.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   1. APP SHELL — Layout limpio y predecible
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .app-shell {
+    grid-template-rows: 66px 38px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 6px;
+    background: var(--bg-main);
+}
+
+/* ──────────────────────────────────────────
+   2. MASTHEAD / BRAND — Panel de logo limpio
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .header-brand-panel {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(13, 20, 35, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 6px 12px;
+}
+
+body.newspaper-ui.quiniela-focus .header-brand-panel::after {
+    display: none;
+}
+
+body.newspaper-ui.quiniela-focus .sidebar-brand-image {
+    width: 96px;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.08));
+    transition: filter 0.3s ease;
+}
+
+body.newspaper-ui.quiniela-focus .sidebar-brand-image:hover {
+    filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.15));
+}
+
+/* ──────────────────────────────────────────
+   3. TOPBAR — La barra superior unificada
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .topbar-shell {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(13, 20, 35, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    padding: 8px 14px;
+    gap: 12px;
+}
+
+/* Eliminar el pseudo-elemento de línea brillante que distrae */
+body.newspaper-ui.quiniela-focus .topbar-shell::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(56, 189, 248, 0.2),
+        rgba(251, 191, 36, 0.12),
+        transparent
+    );
+    height: 1px;
+}
+
+/* Título y kicker — legibles y elegantes */
+body.newspaper-ui.quiniela-focus .topbar-kicker {
+    font-family: var(--font-ui);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-left: 3px solid var(--gold);
+    border-radius: 0;
+    padding: 2px 8px;
+    background: rgba(251, 191, 36, 0.08);
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+    text-shadow: none;
+}
+
+/* ──────────────────────────────────────────
+   4. NAVEGACIÓN — Tabs de página
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .newspaper-page-nav {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    background: rgba(6, 9, 15, 0.95);
+    padding: 4px;
+    gap: 3px;
+    margin: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    border-right: none;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(226, 232, 240, 0.6);
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    min-height: 34px;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    position: relative;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button b {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: inherit;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
+    display: inline;
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: inherit;
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
+    box-shadow: 
+        0 2px 8px rgba(251, 191, 36, 0.1),
+        inset 0 1px 0 rgba(251, 191, 36, 0.15);
+}
+
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active b,
+body.newspaper-ui.quiniela-focus .newspaper-page-nav button.active span {
+    color: #fbbf24;
+}
+
+/* ──────────────────────────────────────────
+   5. BOTONES — Tamaño decente y feedback claro
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 6px 14px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.1));
+    color: var(--accent);
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+}
+
+body.newspaper-ui.quiniela-focus .primary-btn:hover {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(129, 140, 248, 0.18));
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #7dd3fc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);
+}
+
+body.newspaper-ui.quiniela-focus .primary-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+body.newspaper-ui.quiniela-focus .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(13, 20, 35, 0.7);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.newspaper-ui.quiniela-focus .icon-btn:hover {
+    background: rgba(22, 34, 55, 0.9);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+/* Botón Guardar Quiniela — destacado */
+body.newspaper-ui.quiniela-focus .primary-btn#save-quiniela-btn {
+    min-height: 32px;
+    padding: 6px 14px;
+    font-size: 0.7rem;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-color: rgba(251, 191, 36, 0.5);
+    color: #06090f;
+    font-weight: 800;
+}
+
+body.newspaper-ui.quiniela-focus .primary-btn#save-quiniela-btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+}
+
+/* Botón Compartir */
+body.newspaper-ui.quiniela-focus .primary-btn#share-ticket-btn {
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.25);
+    color: var(--accent);
+}
+
+/* ──────────────────────────────────────────
+   6. USER PANEL — Info de usuario legible
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .topbar-user-name {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-main);
+    max-width: 80px;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-user-score {
+    font-size: 0.68rem;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.newspaper-ui.quiniela-focus .topbar-user-score b {
+    font-size: 0.76rem;
+}
+
+body.newspaper-ui.quiniela-focus .compact-logout {
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(13, 20, 35, 0.7);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    transition: all 0.18s ease;
+}
+
+body.newspaper-ui.quiniela-focus .compact-logout:hover {
+    background: rgba(22, 34, 55, 0.9);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    transform: translateY(-1px);
+}
+
+/* ──────────────────────────────────────────
+   7. MAIN ARENA — Zona de contenido
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .main-arena {
+    border-radius: 12px;
+    background: rgba(6, 9, 15, 0.5);
+    overflow: auto;
+}
+
+/* Scrollbar refinado */
+body.newspaper-ui.quiniela-focus .arena-content {
+    scrollbar-color: rgba(139, 157, 195, 0.3) transparent;
+    scrollbar-width: thin;
+}
+
+body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: rgba(139, 157, 195, 0.25);
+    background-clip: padding-box;
+}
+
+body.newspaper-ui.quiniela-focus .arena-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 157, 195, 0.4);
+    background-clip: padding-box;
+}
+
+/* ──────────────────────────────────────────
+   8. CONTEST CARDS — Tarjetas de La Peña
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .contest-card {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(13, 20, 35, 0.7);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.newspaper-ui.quiniela-focus .contest-card:hover {
+    border-color: rgba(251, 191, 36, 0.2);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(251, 191, 36, 0.08);
+}
+
+body.newspaper-ui.quiniela-focus .panel-head h3,
+body.newspaper-ui.quiniela-focus .contest-title span {
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.01em;
+    text-transform: none;
+}
+
+/* ──────────────────────────────────────────
+   9. TABLAS — La Quiniela legible
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .arena-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    background: rgba(8, 13, 23, 0.95);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+body.newspaper-ui.quiniela-focus .arena-table th {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(13, 20, 35, 0.9);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus .tension-row td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.15s ease;
+}
+
+body.newspaper-ui.quiniela-focus .tension-row:hover td {
+    background: rgba(56, 189, 248, 0.03);
+}
+
+body.newspaper-ui.quiniela-focus .fixture-name {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Match number badge */
+body.newspaper-ui.quiniela-focus .match-number {
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--accent);
+    font-family: var(--font-data);
+    font-weight: 800;
+}
+
+/* Score badge */
+body.newspaper-ui.quiniela-focus .match-score-badge {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(13, 20, 35, 0.8);
+    color: var(--accent);
+    font-family: var(--font-data);
+    font-weight: 800;
+}
+
+/* ──────────────────────────────────────────
+   10. FOCUS STATES — Accesibilidad consistente
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus button:focus-visible,
+body.newspaper-ui.quiniela-focus select:focus-visible,
+body.newspaper-ui.quiniela-focus input:focus-visible,
+body.newspaper-ui.quiniela-focus a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ──────────────────────────────────────────
+   11. LEGAL LINKS — Footer discreto pero legible
+   ────────────────────────────────────────── */
+.site-legal-links {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: auto;
+    z-index: auto;
+    justify-self: start;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    background: rgba(6, 9, 15, 0.9);
+    backdrop-filter: blur(12px);
+    padding: 5px 12px;
+    gap: 12px;
+    margin: 0;
+}
+
+.site-legal-links a {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.site-legal-links a:hover {
+    color: var(--accent);
+}
+
+/* ──────────────────────────────────────────
+   12. RESPONSIVE COHESIVO
+   ────────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    body.newspaper-ui.quiniela-focus .app-shell {
+        gap: 4px;
+        padding: 4px;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-title {
+        font-size: 0.9rem;
+    }
+
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+        font-size: 0.72rem;
+        padding: 5px 10px;
+    }
+}
+
+/* Móvil */
+@media (max-width: 899px) {
+    body.newspaper-ui.quiniela-focus .app-shell {
+        grid-template-rows: 56px 52px 42px minmax(0, 1fr) auto;
+        gap: 3px;
+        padding: 3px;
+    }
+
+    body.newspaper-ui.quiniela-focus .header-brand-panel {
+        border-radius: 10px;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-shell {
+        border-radius: 10px;
+        padding: 6px 10px;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-title {
+        font-size: 0.82rem;
+    }
+
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav {
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
+        font-size: 0.68rem;
+        padding: 4px 8px;
+        min-height: 30px;
+    }
+
+    body.newspaper-ui.quiniela-focus .primary-btn {
+        min-height: 30px;
+        padding: 5px 10px;
+        font-size: 0.68rem;
+    }
+
+    body.newspaper-ui.quiniela-focus .icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .site-legal-links {
+        position: static;
+        left: auto;
+        bottom: auto;
+        justify-self: start;
+        padding: 4px 10px;
+        gap: 8px;
+        opacity: 0.75;
+    }
+}
+
+/* ──────────────────────────────────────────
+   13. ANIMACIONES SUTILES
+   ────────────────────────────────────────── */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body.newspaper-ui.quiniela-focus .arena-content > * {
+    animation: fadeSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* ──────────────────────────────────────────
+   14. CONTEST PAGE SPECIFICS
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .contest-view-tabs {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(6, 9, 15, 0.5);
+}
+
+body.newspaper-ui.quiniela-focus .contest-view-tabs button {
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    transition: all 0.18s ease;
+}
+
+body.newspaper-ui.quiniela-focus .contest-view-tabs button:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.newspaper-ui.quiniela-focus .contest-view-tabs button.active {
+    color: var(--bg-main);
+    background: var(--gold);
+    font-weight: 800;
+}
+
+body.newspaper-ui.quiniela-focus .contest-compact-card {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    background: rgba(13, 20, 35, 0.6);
+    transition: border-color 0.2s ease;
+}
+
+body.newspaper-ui.quiniela-focus .contest-compact-card:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ──────────────────────────────────────────
+   15. SELECCIÓN DE JORNADA (SELECT)
+   ────────────────────────────────────────── */
+body.newspaper-ui.quiniela-focus .field-group select {
+    background: rgba(6, 9, 15, 0.9);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.newspaper-ui.quiniela-focus .field-group select:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.newspaper-ui.quiniela-focus .field-group select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    outline: none;
+}
+
+/* ──────────────────────────────────────────
+   16. REDUCED MOTION
+   ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    body.newspaper-ui.quiniela-focus * {
+        animation-duration: 0.01ms;
+        transition-duration: 0.01ms;
+    }
+}
+}

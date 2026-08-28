@@ -1,0 +1,165 @@
+@layer pages {
+@media (max-width: 768px) {
+    .app-shell {
+        padding: 0;
+    }
+    .topbar-shell {
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 6px 8px;
+    }
+    .topbar-actions {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .topbar-actions .primary-btn,
+    .topbar-actions .icon-btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    .topbar-actions .cmdk-trigger {
+        display: none;
+    }
+    .arena-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .arena-table {
+        min-width: 600px;
+        font-size: 13px;
+    }
+    .arena-table th,
+    .arena-table td {
+        padding: 4px 6px;
+    }
+    .match-card {
+        flex-direction: column;
+        gap: 4px;
+    }
+    .match-card .match-teams {
+        font-size: 14px;
+    }
+    .match-card .match-signs {
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+    .match-card .match-signs button {
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 14px;
+    }
+    .sidebar-panel {
+        display: none;
+    }
+    .sidebar-panel.mobile-open {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 80%;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 1000;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-main);
+        overflow-y: auto;
+    }
+    .mobile-menu-btn {
+        display: flex;
+    }
+    .contest-grid {
+        grid-template-columns: 1fr;
+    }
+    .porra-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    .modal-overlay {
+        padding: 8px;
+    }
+    .modal-content {
+        max-width: 95vw;
+        max-height: 90vh;
+    }
+    .ticket-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2px;
+    }
+    .ticket-grid button {
+        min-height: 44px;
+        font-size: 13px;
+    }
+    .header-brand-panel {
+        display: none;
+    }
+    .newspaper-page-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    .newspaper-page-nav a {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    .live-ticker {
+        font-size: 13px;
+    }
+    .live-ticker .match-row {
+        padding: 6px 8px;
+    }
+    .command-palette {
+        width: 95vw;
+        max-width: 95vw;
+    }
+    .command-palette input {
+        font-size: 16px;
+    }
+    #toast-container {
+        top: 8px;
+        right: 8px;
+        left: 8px;
+        width: auto;
+    }
+    .toast {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .arena-table {
+        min-width: 500px;
+        font-size: 12px;
+    }
+    .arena-table th,
+    .arena-table td {
+        padding: 3px 4px;
+    }
+    .ticket-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .porra-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .topbar-actions .primary-btn {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .clickable {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+}
+}

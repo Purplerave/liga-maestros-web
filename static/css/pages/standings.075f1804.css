@@ -1,0 +1,373 @@
+@layer pages {
+/* Clasificaciones de ligas. Perfil y La Pena tienen sus propios estilos. */
+
+#matches-body.standings-full-mode {
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: auto;
+}
+
+.full-standings-page {
+    display: block;
+    width: 100%;
+}
+
+.full-standings-card {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    background: rgba(10, 16, 28, 0.7);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+}
+
+.full-standings-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-main);
+}
+
+.full-standings-head h2 {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    line-height: 1;
+}
+
+.full-standings-head small {
+    color: var(--text-muted);
+    font-size: 0.66rem;
+}
+
+.section-kicker {
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.league-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0;
+    padding: 10px 12px;
+}
+
+.league-tabs .tab-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.4);
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.league-tabs .tab-btn:hover {
+    border-color: rgba(245, 158, 11, 0.2);
+    color: #e2e8f0;
+}
+
+.league-tabs .tab-btn.active {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.league-standings-pane {
+    display: none;
+}
+
+.league-standings-pane.active {
+    display: block;
+}
+
+.full-standings-table {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.68rem;
+}
+
+.full-standings-table th,
+.full-standings-table td {
+    padding: 5px 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    text-align: center;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.full-standings-table tbody tr:hover td {
+    background: rgba(56, 189, 248, 0.02);
+}
+
+.full-standings-table tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.008);
+}
+
+.full-standings-table thead th {
+    padding-bottom: 10px;
+    border-top: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    font-size: 0.58rem;
+    text-transform: uppercase;
+}
+
+.full-standings-table th:nth-child(1),
+.full-standings-table td:nth-child(1) {
+    width: 38px;
+}
+
+.full-standings-table th:nth-child(2),
+.full-standings-table td:nth-child(2) {
+    width: 250px;
+    text-align: left;
+}
+
+.full-standings-table th:nth-child(n+3):nth-child(-n+11),
+.full-standings-table td:nth-child(n+3):nth-child(-n+11) {
+    width: 48px;
+}
+
+.full-standings-table th:nth-child(4),
+.full-standings-table td:nth-child(4) {
+    width: 60px;
+}
+
+.full-standings-table th:nth-child(12),
+.full-standings-table td:nth-child(12) {
+    width: 132px;
+}
+
+.full-club {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 250px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.full-club span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.full-club .team-badge {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+}
+
+.full-pos {
+    color: var(--text-muted);
+    font-weight: 800;
+}
+
+.full-points {
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.form-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.form-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    color: #06101e;
+    font-size: 0.62rem;
+    font-weight: 900;
+}
+
+.form-win { background: var(--gradient-live); }
+.form-draw { background: linear-gradient(135deg, #a3a3a3, #737373); }
+.form-loss { background: var(--gradient-danger); color: #fff; }
+.form-draw { color: #0f0f0f; }
+
+@media (max-width: 900px) {
+    .full-standings-card {
+        max-width: 100%;
+    }
+
+    .full-standings-table th:nth-child(12),
+    .full-standings-table td:nth-child(12) {
+        display: none;
+    }
+
+    .full-standings-table th:nth-child(2),
+    .full-standings-table td:nth-child(2) {
+        width: 190px;
+    }
+
+    .full-club {
+        width: 170px;
+    }
+
+    .full-standings-table th:nth-child(n+3):nth-child(-n+11),
+    .full-standings-table td:nth-child(n+3):nth-child(-n+11) {
+        width: 38px;
+    }
+}
+
+@media (max-width: 600px) {
+    .full-standings-head {
+        align-items: start;
+    }
+
+    .full-standings-head small {
+        max-width: 150px;
+        text-align: right;
+    }
+
+    .league-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .league-tabs .tab-btn {
+        flex: 0 0 auto;
+    }
+
+    .full-standings-table th:nth-child(4),
+    .full-standings-table td:nth-child(4) {
+        display: none;
+    }
+
+    .full-standings-table th:nth-child(2),
+    .full-standings-table td:nth-child(2) {
+        width: 170px;
+    }
+
+    .full-club {
+        width: 150px;
+    }
+
+    .full-standings-table th:nth-child(n+3):nth-child(-n+11),
+    .full-standings-table td:nth-child(n+3):nth-child(-n+11) {
+        width: 34px;
+    }
+}
+
+/* Zonas de la clasificacion: la franja izquierda y el tinte de fondo cuentan
+   el procedimiento de cada liga (Champions/Europa/descenso, ascenso/playoff). */
+.full-standings-table tr.zone-champions td {
+    background: rgba(56, 189, 248, 0.045);
+}
+.full-standings-table tr.zone-champions td:first-child {
+    border-left: 3px solid var(--accent);
+}
+
+.full-standings-table tr.zone-europe td {
+    background: rgba(251, 191, 36, 0.045);
+}
+.full-standings-table tr.zone-europe td:first-child {
+    border-left: 3px solid var(--gold);
+}
+
+.full-standings-table tr.zone-direct td {
+    background: rgba(34, 197, 94, 0.05);
+}
+.full-standings-table tr.zone-direct td:first-child {
+    border-left: 3px solid var(--green);
+}
+
+.full-standings-table tr.zone-playoff td {
+    background: rgba(56, 189, 248, 0.045);
+}
+.full-standings-table tr.zone-playoff td:first-child {
+    border-left: 3px solid var(--accent);
+}
+
+.full-standings-table tr.zone-danger td {
+    background: rgba(239, 68, 68, 0.05);
+}
+.full-standings-table tr.zone-danger td:first-child {
+    border-left: 3px solid var(--red);
+}
+
+/* Leyenda que explica el procedimiento de cada liga. */
+.standings-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-main);
+    color: var(--text-muted);
+    font-size: 0.64rem;
+}
+
+.standings-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.standings-legend .legend-item i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #64748b;
+    flex: 0 0 auto;
+}
+
+.standings-legend .zone-champions i { background: var(--accent); }
+.standings-legend .zone-europe i { background: var(--gold); }
+.standings-legend .zone-direct i { background: var(--green); }
+.standings-legend .zone-playoff i { background: var(--accent); }
+.standings-legend .zone-danger i { background: var(--red); }
+
+/* Marca de partido en juego: informa sin alterar puntos ni posicion. */
+.standings-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--red) 18%, transparent);
+    color: var(--red);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.full-standings-table tr.is-playing .full-points {
+    opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .standings-live {
+        animation: standingsLivePulse 1.6s ease-in-out infinite;
+    }
+}
+
+@keyframes standingsLivePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
