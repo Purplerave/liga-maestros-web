@@ -3,7 +3,6 @@
 import hashlib
 import logging
 import time
-from functools import lru_cache
 
 from flask import Blueprint, jsonify, request, session
 
@@ -48,7 +47,7 @@ def _get_standings_cached(conn, partidos, team_logos):
 
 def _etag_for(payload):
     """Generate ETag from payload content hash."""
-    return hashlib.md5(payload.encode()).hexdigest()
+    return hashlib.md5(payload.encode(), usedforsecurity=False).hexdigest()  # noqa: S324
 
 
 @bp.route("/api/liga/data")
