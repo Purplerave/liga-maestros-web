@@ -497,6 +497,52 @@
         "M-0"
       ],
       "origen": "J3 import manual"
+    },
+    {
+      "participante_id": "sonia",
+      "nombre_publico": "Sonia",
+      "grupo": "pena",
+      "signos": [
+        "1",
+        "X",
+        "2",
+        "X",
+        "1",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2",
+        "2",
+        "M-1"
+      ],
+      "origen": "J3 import manual - Sonia"
+    },
+    {
+      "participante_id": "sonia2",
+      "nombre_publico": "Sonia2",
+      "grupo": "pena",
+      "signos": [
+        "X",
+        "2",
+        "X",
+        "X",
+        "X",
+        "1",
+        "2",
+        "X",
+        "X",
+        "1",
+        "X",
+        "1",
+        "1",
+        "2",
+        "M-1"
+      ],
+      "origen": "J3 import manual - Sonia2"
     }
   ],
   "incidencias": [
@@ -517,8 +563,16 @@
       "problema": "Corregido: sobraba X final"
     },
     {
-      "participante": "luna,mrpurple,sonia,sonia2",
+      "participante": "luna,mrpurple",
       "problema": "Sin signos recibidos"
+    },
+    {
+      "participante": "sonia",
+      "problema": "Añadida J3: 1 X 2 X 1 X 1 X 1 1 1 2 2 2 + M-1"
+    },
+    {
+      "participante": "sonia2",
+      "problema": "Añadida J3: X 2 X X X 1 2 X X 1 X 1 1 2 + M-1"
     }
   ]
 }

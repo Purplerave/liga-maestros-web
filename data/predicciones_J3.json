@@ -24,6 +24,8 @@
   "profe": {"nombre": "META", "origen": "Meta AI", "signos": ["2", "1", "1", "1", "1", "2", "1", "X", "1", "1", "1", "X", "1", "1", "M-1"]},
   "chipi": {"nombre": "DEEPSEEK", "origen": "DeepSeek", "signos": ["2", "1", "1", "1", "1", "1", "1", "X", "X", "X", "1", "2", "2", "1", "2-1"]},
   "geli": {"nombre": "GLM5", "origen": "GLM5", "signos": ["2", "X", "1", "1", "2", "2", "1", "X", "1", "1", "X", "1", "2", "1", "M-1"]},
+  "sonia": {"nombre": "SONIA", "origen": "Sonia", "signos": ["1", "X", "2", "X", "1", "X", "1", "X", "1", "1", "1", "2", "2", "2", "M-1"]},
+  "sonia2": {"nombre": "SONIA2", "origen": "Sonia2", "signos": ["X", "2", "X", "X", "X", "1", "2", "X", "X", "1", "X", "1", "1", "2", "M-1"]},
   "pendientes": {
     "jimmy": {"nombre": "CHATJIMMY", "motivo": "Solo hay 13 signos; falta el partido 14."},
     "erniebot": {"nombre": "BAIDU", "motivo": "Solo hay 13 signos; el partido 8 aparece como XXX y falta el partido 14."}
