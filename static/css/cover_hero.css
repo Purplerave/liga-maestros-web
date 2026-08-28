@@ -35,7 +35,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena { overflow: 
     --cx-line-2: rgba(255, 255, 255, 0.14);
     --cx-text: #f0f4f8;
     --cx-muted: #8b9dc3;
-    --cx-dim: #6b7fa0;
+    --cx-dim: #7a92b8; /* WCAG AA: 4.6:1 sobre #06090f */
 
     --m-claude: #fb923c;
     --m-chatgpt: #34d399;
@@ -627,7 +627,8 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-boleto-bar { width: 130px; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; display: block; }
 .cx-boleto-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--cx-cyan), var(--cx-gold)); transition: width 0.4s ease; }
 
-.cx-boleto-table-wrap { flex: 1 1 auto; overflow: auto; min-height: 0; }
+.cx-boleto-table-wrap { flex: 1 1 auto; overflow: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
+.cx-boleto-table-wrap:focus-within { outline: 2px solid var(--cx-cyan); outline-offset: -2px; }
 .cx-boleto-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
 .cx-boleto-table thead th {
     position: sticky;

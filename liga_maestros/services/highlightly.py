@@ -42,6 +42,7 @@ HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
     item.strip().upper() for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",") if item.strip()
 }
+HIGHLIGHTLY_BUDGET_RESERVE_PCT = float(os.getenv("HIGHLIGHTLY_BUDGET_RESERVE_PCT", "0.10"))
 Q15_EXPECTED_MATCHES = 15
 
 _highlightly_refresh_lock = threading.RLock()
@@ -199,6 +200,15 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
     circuit = get_highlightly_circuit()
     if circuit.get("open"):
         return []
+    # Budget guard: when budget <10%, only fetch critical leagues
+    low_budget = False
+    try:
+        usage = get_highlightly_usage()
+        remaining = int(usage.get("usable_remaining", usage.get("limit", 7500)))
+        limit = int(usage.get("limit", 7500))
+        low_budget = bool(limit and remaining / limit < HIGHLIGHTLY_BUDGET_RESERVE_PCT)
+    except Exception:
+        low_budget = False
     call_limit = HIGHLIGHTLY_MAX_CALLS_PER_REFRESH if max_calls is None else max(0, int(max_calls))
     if call_limit <= 0:
         return []
@@ -221,6 +231,8 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
 
     calls_used = 0
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
+        if low_budget and league_name.upper() not in {"LA LIGA", "SEGUNDA DIVISION"}:
+            continue
         if HIGHLIGHTLY_ACTIVE_LEAGUES and league_name.upper() not in HIGHLIGHTLY_ACTIVE_LEAGUES:
             continue
         if calls_used >= call_limit:

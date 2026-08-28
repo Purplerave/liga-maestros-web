@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "strict": false,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "allowUnusedLabels": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "shared/*": ["static/js/features/shared/*"]
+    }
+  },
+  "include": ["static/js/**/*.js"],
+  "exclude": ["node_modules", "static/js/**/*.min.js", "static/**/*.b322*.js"]
+}

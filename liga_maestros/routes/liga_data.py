@@ -419,3 +419,62 @@ def refresh_everything():
             "message": _refresh_issue_message(status, skipped, failures),
         }
     )
+
+
+# Granular endpoints (FASE 4) — wrappers ligeros sobre /api/liga/data
+@bp.route("/api/liga/standings")
+def get_standings():
+    conn = get_db()
+    try:
+        from ..services.jornada import resolve_active_jornada
+
+        jornada = str(resolve_active_jornada(conn) or "1")
+        team_logos = load_team_logos()
+        partidos = build_jornada_matches(conn, jornada, team_logos)
+        standings, _ = _get_standings_cached(conn, partidos, team_logos)
+        resp = jsonify({"jornada": jornada, "standings": standings, "today_madrid": today_madrid()})
+        resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
+        return resp
+    except Exception as exc:
+        logger.exception("api/liga/standings failed")
+        return jsonify({"status": "error", "message": str(exc)}), 500
+
+
+@bp.route("/api/liga/live")
+def get_live():
+    conn = get_db()
+    try:
+        from ..services.jornada import resolve_active_jornada
+
+        jornada = str(resolve_active_jornada(conn) or "1")
+        team_logos = load_team_logos()
+        partidos = build_jornada_matches(conn, jornada, team_logos)
+        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
+        live_matches = build_live_matches(partidos, team_logos, standings_db)
+        resp = jsonify({"jornada": jornada, "live_matches": live_matches, "today_madrid": today_madrid()})
+        resp.headers["Cache-Control"] = "public, max-age=10, must-revalidate"
+        return resp
+    except Exception as exc:
+        logger.exception("api/liga/live failed")
+        return jsonify({"status": "error", "message": str(exc)}), 500
+
+
+@bp.route("/api/liga/matches")
+def get_matches():
+    conn = get_db()
+    try:
+        from ..services.jornada import resolve_active_jornada
+
+        jornada = str(resolve_active_jornada(conn) or "1")
+        team_logos = load_team_logos()
+        partidos = build_jornada_matches(conn, jornada, team_logos)
+        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
+        all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
+        resp = jsonify(
+            {"jornada": jornada, "partidos": partidos, "all_league_matches": all_league_matches, "today_madrid": today_madrid()}
+        )
+        resp.headers["Cache-Control"] = "public, max-age=30, must-revalidate"
+        return resp
+    except Exception as exc:
+        logger.exception("api/liga/matches failed")
+        return jsonify({"status": "error", "message": str(exc)}), 500
