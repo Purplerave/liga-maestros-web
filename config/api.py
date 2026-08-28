@@ -20,8 +20,9 @@ API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "")
 API_FOOTBALL_DAILY_LIMIT = int(os.getenv("API_FOOTBALL_DAILY_LIMIT", "100"))
 API_FOOTBALL_DAILY_RESERVE = int(os.getenv("API_FOOTBALL_DAILY_RESERVE", "10"))
 
-# Feature flags.
-LIVE_SSE_ENABLED = os.getenv("LIVE_SSE_ENABLED", "1").strip().lower() in (
+# Feature flags. SSE bloquea 1 thread por cliente en gunicorn sync (--threads 8);
+# mantener 0 por defecto y habilitar solo con gevent/eventlet.
+LIVE_SSE_ENABLED = os.getenv("LIVE_SSE_ENABLED", "0").strip().lower() in (
     "1",
     "true",
     "yes",

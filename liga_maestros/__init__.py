@@ -119,6 +119,8 @@ def create_app():
 
     @app.before_request
     def protect_authenticated_writes():
+        # Defensa CSRF global para escrituras autenticadas (predicciones/save, porra,
+        # quiz/submit, comments). SameSite=Lax es capa adicional, no la única.
         if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
             return None
         if not session.get("user"):
