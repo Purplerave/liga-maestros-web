@@ -470,7 +470,12 @@ def get_matches():
         _, standings_db = _get_standings_cached(conn, partidos, team_logos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         resp = jsonify(
-            {"jornada": jornada, "partidos": partidos, "all_league_matches": all_league_matches, "today_madrid": today_madrid()}
+            {
+                "jornada": jornada,
+                "partidos": partidos,
+                "all_league_matches": all_league_matches,
+                "today_madrid": today_madrid(),
+            }
         )
         resp.headers["Cache-Control"] = "public, max-age=30, must-revalidate"
         return resp

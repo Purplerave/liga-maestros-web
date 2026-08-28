@@ -49,9 +49,9 @@ def init_metrics(app):
             usage = get_highlightly_usage()
             lines.append("# HELP highlightly_calls_used Highlightly API calls used today")
             lines.append("# TYPE highlightly_calls_used gauge")
-            lines.append(f'highlightly_calls_used {int(usage.get("calls", 0))}')
-            lines.append(f'highlightly_calls_limit {int(usage.get("limit", 7500))}')
-            lines.append(f'highlightly_calls_remaining {int(usage.get("usable_remaining", usage.get("limit", 7500)))}')
+            lines.append(f"highlightly_calls_used {int(usage.get('calls', 0))}")
+            lines.append(f"highlightly_calls_limit {int(usage.get('limit', 7500))}")
+            lines.append(f"highlightly_calls_remaining {int(usage.get('usable_remaining', usage.get('limit', 7500)))}")
         except Exception:
             pass
         return Response("\n".join(lines) + "\n", mimetype="text/plain; version=0.0.4")

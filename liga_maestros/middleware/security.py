@@ -70,11 +70,13 @@ def rate_limit(max_requests: int = 120, window_seconds: int = 60, paths=None):
 
             if len(recent) >= max_requests:
                 retry_after = int(window_seconds - (now - recent[0])) + 1
-                response = jsonify({
-                    "status": "error",
-                    "error": "Rate limit exceeded",
-                    "retry_after": retry_after,
-                })
+                response = jsonify(
+                    {
+                        "status": "error",
+                        "error": "Rate limit exceeded",
+                        "retry_after": retry_after,
+                    }
+                )
                 response.status_code = 429
                 response.headers["Retry-After"] = str(retry_after)
                 response.headers["X-RateLimit-Limit"] = str(max_requests)
@@ -94,11 +96,13 @@ def rate_limit(max_requests: int = 120, window_seconds: int = 60, paths=None):
             return response
 
         return wrapped
+
     return decorator
 
 
 def init_rate_limiter(app):
     """Initialize rate limiter as a global before_request handler."""
+
     @app.before_request
     def apply_rate_limit():
         # Apply to all /api/* routes
@@ -123,11 +127,13 @@ def init_rate_limiter(app):
 
         if len(recent) >= max_requests:
             retry_after = int(window_seconds - (now - recent[0])) + 1
-            response = jsonify({
-                "status": "error",
-                "error": "Rate limit exceeded",
-                "retry_after": retry_after,
-            })
+            response = jsonify(
+                {
+                    "status": "error",
+                    "error": "Rate limit exceeded",
+                    "retry_after": retry_after,
+                }
+            )
             response.status_code = 429
             response.headers["Retry-After"] = str(retry_after)
             response.headers["X-RateLimit-Limit"] = str(max_requests)
