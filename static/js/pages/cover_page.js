@@ -417,8 +417,8 @@ function renderNewspaperCoverPageV3() {
     const hasRealBando = (bando.humanTotal + bando.aiTotal) > 0;
     const diff = aiAvg - humanAvg;
     const duelLabel = !hasRealBando
-        ? "PRIMERA JORNADA"
-        : (Math.abs(diff) < 0.05 ? "DUELO IGUALADO" : (diff > 0 ? "MÁQUINAS GANANDO" : "LA PEÑA LIDERA"));
+        ? "HUMANO vs MÁQUINA — ¿TE ATREVES?"
+        : (Math.abs(diff) < 0.05 ? "DUELO A MUERTE — EMPATE" : (diff > 0 ? "LAS MÁQUINAS TE HUMILLAN" : "LA PEÑA APLASTA A LA IA"));
 
     const ctaLabel = closed
         ? (saved ? "VER MI QUINIELA" : "VER RESULTADOS")
