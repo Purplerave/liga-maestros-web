@@ -1,10 +1,5 @@
-/* ===========================================================================
-   COMMAND CENTER — acabado visual de la portada tipo panel de control.
-   Se limita a la vista de portada para conservar los contratos de las demás
-   pantallas y la navegación existente.
-   =========================================================================== */
-
 @layer hero {
+    /* COMMAND CENTER — acabado visual de la portada tipo panel de control. */
     body.newspaper-ui.quiniela-focus.newspaper-cover-active {
         --cc-border: rgba(56, 189, 248, 0.22);
         --cc-gold-border: rgba(251, 191, 36, 0.38);
