@@ -1,0 +1,8 @@
+{
+  "title": "Liga de Maestros — CEO",
+  "panels": [
+    {"title": "Latencia p95 /api/liga/data", "targets": [{"expr": "histogram_quantile(0.95, http_request_duration_seconds)"}]},
+    {"title": "Highlightly usado", "targets": [{"expr": "highlightly_calls_used"}]},
+    {"title": "Benchmark IA aciertos", "targets": [{"expr": "benchmark_aciertos"}]}
+  ]
+}
