@@ -1,4 +1,5 @@
-@layer hero {}
+@layer hero {
+}
 /* COMMAND CENTER — acabado visual de la portada tipo panel de control. */
     body.newspaper-ui.quiniela-focus.newspaper-cover-active {
         --cc-border: rgba(56, 189, 248, 0.22);
