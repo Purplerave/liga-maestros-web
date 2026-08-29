@@ -7,6 +7,19 @@ function versionedAsset(path, tag) {
     const version = document.body.dataset.assetsV || "dev";
     return `${path}?v=${encodeURIComponent(version)}-${tag}`;
 }
+// CEO prefetch: Directo <300ms — precarga al hover
+try {
+    document.addEventListener("mouseover", (e) => {
+        const el = e.target.closest('[data-page-action="LIVE"]');
+        if (!el || el.dataset.prefetched) return;
+        el.dataset.prefetched = "1";
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.href = "/api/liga/live";
+        document.head.appendChild(link);
+        fetch("/api/liga/live", { cache: "force-cache" }).catch(() => {});
+    }, { passive: true });
+} catch {}
 
 const VIEW_STYLES = {
     CONTEST: [
