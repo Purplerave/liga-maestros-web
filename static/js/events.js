@@ -170,6 +170,16 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
         state.lastUserEdit = Date.now();
         state.draftDirty = true;
         persistDraft();
+        // CEO funnel 70%: primer pick sin login -> track conversión
+        try {
+            if (!state.user) {
+                const done = state.my_signs.filter(s => s !== "-").length;
+                if (done === 1 && !localStorage.getItem("lm_first_pick_tracked")) {
+                    localStorage.setItem("lm_first_pick_tracked", "1");
+                    if (typeof gtag === "function") gtag("event", "first_pick_anon", { value: 1 });
+                }
+            }
+        } catch {}
         if (typeof checkQuinielaCompletion === "function") checkQuinielaCompletion();
         hydrateHero();
         renderArena();
