@@ -164,4 +164,231 @@
             inset: 4px;
         }
     }
+
+    /* -----------------------------------------------------------------------
+       Desktop shell: la portada ocupa la pantalla como una consola propia.
+       Los botones siguen siendo los originales del app-shell, solo cambian
+       de posición para conservar sus listeners y accesibilidad.
+       ----------------------------------------------------------------------- */
+    @media (min-width: 721px) {
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .app-shell {
+            display: block;
+            position: relative;
+            min-height: 100dvh;
+            height: 100dvh;
+            max-height: none;
+            overflow: hidden;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .header-brand-panel {
+            display: none;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
+            position: fixed;
+            z-index: 20;
+            right: 0;
+            bottom: 0;
+            left: 204px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: auto;
+            height: 76px;
+            min-height: 76px;
+            padding: 10px 24px;
+            border: 1px solid rgba(56, 189, 248, 0.22);
+            border-bottom: 0;
+            border-radius: 10px 0 0 0;
+            background: linear-gradient(180deg, rgba(4, 15, 27, 0.9), rgba(2, 8, 17, 0.98));
+            box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(56, 189, 248, 0.08);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-context,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .user-panel,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cmdk-trigger,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #refresh-btn {
+            display: none;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: auto;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #save-quiniela-btn,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #share-ticket-btn {
+            min-width: 220px;
+            height: 48px;
+            border-radius: 5px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #save-quiniela-btn {
+            color: #ffd86a;
+            border: 1px solid rgba(251, 191, 36, 0.75);
+            background: linear-gradient(180deg, rgba(129, 83, 7, 0.66), rgba(68, 40, 3, 0.85));
+            box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.12), 0 0 20px rgba(251, 191, 36, 0.16);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #share-ticket-btn {
+            color: #61d8ff;
+            border: 1px solid rgba(56, 189, 248, 0.7);
+            background: linear-gradient(180deg, rgba(7, 69, 101, 0.64), rgba(3, 32, 52, 0.88));
+            box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.1), 0 0 20px rgba(56, 189, 248, 0.12);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #save-quiniela-btn:hover,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #share-ticket-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.16);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav {
+            position: fixed;
+            z-index: 21;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+            gap: 10px;
+            width: 190px;
+            height: 100dvh;
+            min-height: 100dvh;
+            padding: 22px 10px;
+            overflow: hidden;
+            border: 0;
+            border-right: 1px solid rgba(56, 189, 248, 0.24);
+            background: linear-gradient(180deg, rgba(3, 15, 27, 0.98), rgba(2, 8, 17, 0.98));
+            box-shadow: 8px 0 28px rgba(0, 0, 0, 0.35), inset -1px 0 0 rgba(56, 189, 248, 0.06);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav::before {
+            content: "LM // COMMAND DECK";
+            display: block;
+            margin: 0 8px 14px;
+            padding: 0 0 14px;
+            color: #55d5ff;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button {
+            display: grid;
+            grid-template-columns: 40px 1fr;
+            align-items: center;
+            min-height: 76px;
+            height: 76px;
+            padding: 10px 12px;
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-radius: 5px;
+            background: linear-gradient(135deg, rgba(7, 29, 47, 0.9), rgba(3, 13, 24, 0.92));
+            color: rgba(210, 232, 245, 0.8);
+            text-align: left;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button .nav-ico {
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            color: #36caff;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.8rem;
+            line-height: 1;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button span {
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button.active {
+            border-color: rgba(251, 191, 36, 0.78);
+            background: linear-gradient(135deg, rgba(108, 69, 5, 0.86), rgba(26, 21, 8, 0.96));
+            color: #ffd65d;
+            box-shadow: inset 3px 0 0 #fbbf24, 0 0 18px rgba(251, 191, 36, 0.15);
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav button.active .nav-ico {
+            color: #ffd65d;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
+            width: 100%;
+            height: 100dvh;
+            max-height: none;
+            margin: 0;
+            padding: 0 0 76px 190px;
+            overflow: auto;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx {
+            min-height: calc(100dvh - 76px);
+            padding: 12px 16px 18px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-grid {
+            grid-template-columns: 220px minmax(620px, 1fr) 270px;
+            gap: 14px;
+            padding: 14px 0 0;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-top {
+            min-height: 86px;
+            padding: 14px 18px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-top-right {
+            gap: 16px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-ticker {
+            margin: 0 -16px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .site-legal-links {
+            display: none;
+        }
+    }
+
+    @media (min-width: 721px) and (max-width: 1280px) {
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .newspaper-page-nav {
+            width: 164px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
+            left: 164px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
+            padding-left: 164px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-grid {
+            grid-template-columns: 190px minmax(520px, 1fr) 220px;
+        }
+
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #save-quiniela-btn,
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active #share-ticket-btn {
+            min-width: 180px;
+        }
+    }
 }
