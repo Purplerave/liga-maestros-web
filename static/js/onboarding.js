@@ -34,7 +34,7 @@
         {
             icon: "\ud83d\udcdd",
             title: "Firma tu quiniela",
-            body: "Elige 1, X o 2 para cada partido de la jornada. Una quiniela simple y ya. Guarda antes de que empiecen los partidos \u2014 \u00a1no se puede cambiar despu\u00e9s!"
+            body: "Elige 1, X o 2 para cada partido de la jornada. Guarda antes de que empiecen los partidos \u2014 \u00a1no se puede cambiar despu\u00e9s!"
         },
         {
             icon: "\ud83c\udfc6",
