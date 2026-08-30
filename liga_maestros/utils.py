@@ -48,14 +48,52 @@ def clean_team_key(value):
     text = "".join(LATIN_TRANSLIT.get(ch, ch) for ch in text)
     text = unicodedata.normalize("NFD", text)
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    # Preserve women's marker (F) before stripping punctuation
+    text = re.sub(r"\(F\)", " F ", text)
     text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
     text = re.sub(r"\b(F C|FC|C F|CF|S A D|SAD|R C D|RCD|C D|CD|U D|UD|S D|SD)\b", "", text).strip()
     text = re.sub(r"\s+", " ", text)
     return text
 
 
+def _is_feminine_raw(value):
+    raw = str(value or "").upper()
+    if "(F)" in raw:
+        return True
+    if "FEMENINO" in raw or "FEMENINA" in raw or " WOMEN" in raw:
+        return True
+    return False
+
+
 def normalize_team_key(value):
     text = clean_team_key(value)
+    # Direct alias
+    if text in TEAM_LOGO_ALIASES:
+        return TEAM_LOGO_ALIASES[text]
+
+    raw_upper = str(value or "").upper()
+    if _is_feminine_raw(raw_upper):
+        # Try F variant
+        candidate_f = f"{text} F".strip() if not text.endswith(" F") else text
+        if candidate_f in TEAM_LOGO_ALIASES:
+            return TEAM_LOGO_ALIASES[candidate_f]
+        candidate_fem = f"{text} FEMENINO".strip()
+        if " FEMENINO" not in text and candidate_fem in TEAM_LOGO_ALIASES:
+            return TEAM_LOGO_ALIASES[candidate_fem]
+        # Base without F
+        base = text[:-2].strip() if text.endswith(" F") else text
+        if base.endswith(" FEMENINO"):
+            base = base[: -len(" FEMENINO")].strip()
+        # Special handling for Las Planas / Badalona
+        if base in ("LAS PLANAS", "LEVANTE LAS PLANAS", "LEVANTE BADALONA", "BADALONA", "FC BADALONA"):
+            return TEAM_LOGO_ALIASES.get("LEVANTE LAS PLANAS", "LEVANTE LAS PLANAS")
+        fem_candidate = f"{base} FEMENINO"
+        if fem_candidate in TEAM_LOGO_ALIASES.values() or fem_candidate in TEAM_LOGO_ALIASES:
+            return TEAM_LOGO_ALIASES.get(fem_candidate, fem_candidate)
+        if base == "ALAVES":
+            if "(F)" in raw_upper or "FEMENINO" in raw_upper:
+                return TEAM_LOGO_ALIASES.get("ALAVES FEMENINO", "ALAVES FEMENINO")
+
     return TEAM_LOGO_ALIASES.get(text, text)
 
 

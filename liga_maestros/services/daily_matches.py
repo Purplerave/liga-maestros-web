@@ -114,22 +114,38 @@ def fetch_today_agenda(date_text=None):
     """Fetch today's fixtures for every followed league (1 call per league)."""
     date_text = date_text or today_madrid()
     matches = []
+    allowed = {
+        "LA LIGA",
+        "SEGUNDA DIVISION",
+        "LIGA F",
+        "LIGA F MOEVE",
+        "PRIMERA DIVISION FEMENINA",
+        "LIGA F FEMENINA",
+    }
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
-        if league_name not in config.STANDINGS_LEAGUES and league_name not in (
-            "LA LIGA",
-            "SEGUNDA DIVISION",
-            "LIGA F",
-            "LIGA F MOEVE",
-        ):
+        if league_name not in config.STANDINGS_LEAGUES and league_name.upper() not in allowed:
             continue
         payload = _api_get(
             "/matches",
             {"date": date_text, "leagueId": league_id, "timezone": "Europe/Madrid", "limit": 100},
         )
+        # Fallback by name for Liga F if ID query empty
+        if (payload is None or not payload.get("data")) and league_name.upper() in allowed:
+            for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina"):
+                fb = _api_get(
+                    "/matches",
+                    {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
+                )
+                if fb and fb.get("data"):
+                    payload = fb
+                    break
         if payload is None:
             continue
         for match in payload.get("data", []):
-            match["_competition_name"] = league_name
+            match["_competition_name"] = league_name if "LIGA F" in league_name.upper() else league_name
+            # Normalize Liga F naming to LIGA F for frontend compact
+            if "FEMENINA" in league_name.upper() or "F MOEVE" in league_name.upper() or league_name.upper() == "LIGA F":
+                match["_competition_name"] = "LIGA F"
             matches.append(match)
     return matches
 
@@ -235,9 +251,24 @@ def backfill_recent_spanish_matches(days=3):
         if date_text in done:
             continue
         day_matches = []
-        for league_name in ("LA LIGA", "SEGUNDA DIVISION"):
+        for league_name in ("LA LIGA", "SEGUNDA DIVISION", "LIGA F"):
             league_id = config.HIGHLIGHTLY_LEAGUES.get(league_name)
             if not league_id:
+                # Try name fallback for Liga F
+                if league_name == "LIGA F":
+                    for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina"):
+                        payload = _api_get(
+                            "/matches",
+                            {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
+                        )
+                        if payload:
+                            for match in payload.get("data", []):
+                                description = str((match.get("state") or {}).get("description") or "").upper()
+                                if not description.startswith("FINISHED") and description not in ("FT", "FULL TIME"):
+                                    continue
+                                match["_competition_name"] = league_name
+                                day_matches.append(match)
+                    continue
                 continue
             payload = _api_get(
                 "/matches",

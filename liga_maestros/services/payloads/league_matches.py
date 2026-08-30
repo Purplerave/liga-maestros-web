@@ -136,7 +136,28 @@ def _match_pair_key(match):
 
 def _add_team_logos(matches, team_logos):
     def logo_for(team_name):
-        return team_logos.get(normalize_team_key(team_name), "")
+        if not team_name:
+            return ""
+        key = normalize_team_key(team_name)
+        logo = team_logos.get(key, "")
+        if logo:
+            return logo
+        # Fallback: strip FEMENINO / F suffix and try base team
+        base = key
+        for suffix in (" FEMENINO", " F"):
+            if base.endswith(suffix):
+                base = base[: -len(suffix)].strip()
+                break
+        if base and base in team_logos:
+            return team_logos[base]
+        # Also try clean base
+        from ...utils import clean_team_key
+
+        clean_base = clean_team_key(base)
+        if clean_base in team_logos:
+            return team_logos[clean_base]
+        # Last resort: try without any feminine marker
+        return team_logos.get(base, "")
 
     for match in matches:
         home_name = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
@@ -208,8 +229,37 @@ def _build_quiniela_league_matches(jornada, partidos, standings_db):
 
 
 def _infer_match_competition(match, standings_db):
-    home_key = normalize_team_key(match.get("local"))
-    away_key = normalize_team_key(match.get("visitante"))
+    home_raw = str(match.get("local") or "")
+    away_raw = str(match.get("visitante") or "")
+    home_key = normalize_team_key(home_raw)
+    away_key = normalize_team_key(away_raw)
+
+    # Liga F detection: explicit (F) marker or feminine canonical
+    feminine_indicators = ("(F)", "FEMENINO", "FEMENINA", " WOMEN")
+    is_feminine_raw = any(ind in f"{home_raw.upper()} {away_raw.upper()}" for ind in feminine_indicators)
+    feminine_canonicals = {
+        "ATHLETIC CLUB FEMENINO",
+        "EIBAR FEMENINO",
+        "ESPANYOL FEMENINO",
+        "VALENCIA FEMENINO",
+        "REAL MADRID FEMENINO",
+        "ATLETICO MADRID FEMENINO",
+        "ALAVES FEMENINO",
+        "LEVANTE LAS PLANAS",
+        "SEVILLA FEMENINO",
+        "GRANADA FEMENINO",
+        "MADRID CFF",
+        "REAL SOCIEDAD FEMENINO",
+        "COSTA ADEJE TENERIFE",
+        "DEPORTIVO ABANCA",
+        "LOGROÑO UNITED",
+    }
+    # If either side is known feminine canonical or raw has (F), it's Liga F
+    if is_feminine_raw or home_key in feminine_canonicals or away_key in feminine_canonicals:
+        # If one side is feminine and the other is ambiguous (e.g. Alaves without marker paired with Valencia F),
+        # treat as Liga F as well - this fixes J3 partido 13
+        return "LIGA F"
+
     if "HYPERMOTION" in home_key or "HYPERMOTION" in away_key:
         return "SEGUNDA DIVISION"
     if home_key in standings_db.get("primera", {}) and away_key in standings_db.get("primera", {}):
