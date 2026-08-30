@@ -9,9 +9,7 @@ from liga_maestros.db.migrations import _import_jornada_resultados, ensure_core_
 
 def _write_results(tmp_path, jornada, resultados):
     path = tmp_path / f"quiniela15_J{jornada}_resultados.json"
-    path.write_text(
-        json.dumps({"jornada": jornada, "resultados": resultados}), encoding="utf-8"
-    )
+    path.write_text(json.dumps({"jornada": jornada, "resultados": resultados}), encoding="utf-8")
 
 
 def test_import_j3_resultados_fills_eibar_femenino(tmp_path, monkeypatch):
@@ -50,15 +48,15 @@ def test_import_j3_resultados_fills_eibar_femenino(tmp_path, monkeypatch):
     assert applied == 1
 
     row = conn.execute(
-        "SELECT goles_local, goles_visitante, status, signo_actual FROM resultados"
-        " WHERE jornada=3 AND partido_id=12"
+        "SELECT goles_local, goles_visitante, status, signo_actual FROM resultados WHERE jornada=3 AND partido_id=12"
     ).fetchone()
     assert tuple(row) == (1, 0, "FT", "1")
 
 
 def test_import_jornada_resultados_idempotent_and_never_overwrites_live(tmp_path, monkeypatch):
-    import liga_maestros.db.migrations as migrations
     import sqlite3
+
+    import liga_maestros.db.migrations as migrations
 
     _write_results(
         tmp_path,
@@ -92,8 +90,9 @@ def test_import_jornada_resultados_idempotent_and_never_overwrites_live(tmp_path
 
 
 def test_import_jornada_resultados_missing_file_is_noop(tmp_path, monkeypatch):
-    import liga_maestros.db.migrations as migrations
     import sqlite3
+
+    import liga_maestros.db.migrations as migrations
 
     monkeypatch.setattr(migrations.config, "SEED_DATA_DIR", str(tmp_path / "vacio"))
     monkeypatch.setattr(migrations.config, "DATA_DIR", str(tmp_path / "missing"))
