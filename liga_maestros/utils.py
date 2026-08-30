@@ -323,20 +323,42 @@ def signo_for_match(partido_id, home_goals, away_goals):
 
 
 def highlightly_status(state):
+    # Highlightly documents state.description values such as "Not started",
+    # "First half", "Second half", "Half time", "Extra time", "Break time",
+    # "Penalties", "In progress", "Finished", "Finished after extra time"...
+    # (see highlightly.net/documentation/football). Normalising every live
+    # variant here is what keeps a live Liga F match from being written as NS.
     desc = str((state or {}).get("description") or "").upper()
+    clock = str((state or {}).get("clock") or "").strip()
     if desc in (
         "FINISHED",
         "ENDED",
         "FT",
+        "FULL TIME",
         "MATCH FINISHED",
         "FINISHED AFTER PENALTIES",
         "FINISHED AFTER EXTRA TIME",
+        "AET",
+        "AP",
+        "AWARDED",
     ) or desc.startswith("FINISHED"):
         return "FT", "Finalizado"
-    if desc in ("FIRST HALF", "SECOND HALF", "LIVE", "IN PLAY"):
-        clock = str((state or {}).get("clock") or "").strip()
+    if desc in (
+        "FIRST HALF",
+        "1ST HALF",
+        "SECOND HALF",
+        "2ND HALF",
+        "LIVE",
+        "IN PLAY",
+        "IN PROGRESS",
+        "EXTRA TIME",
+        "EXTRA TIME HALF TIME",
+        "BREAK TIME",
+        "PENALTIES",
+        "PENALTY SHOOTOUT",
+    ):
         return "LIVE", f"{clock}'" if clock.isdigit() else clock
-    if desc in ("HALF TIME", "HALF TIME BREAK"):
+    if desc in ("HALF TIME", "HALF TIME BREAK", "HALF-TIME", "HT"):
         return "LIVE", "HT"
     return "NS", "NS"
 
