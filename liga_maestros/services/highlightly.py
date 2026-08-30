@@ -45,6 +45,38 @@ HIGHLIGHTLY_ACTIVE_LEAGUES = {
 HIGHLIGHTLY_BUDGET_RESERVE_PCT = float(os.getenv("HIGHLIGHTLY_BUDGET_RESERVE_PCT", "0.10"))
 Q15_EXPECTED_MATCHES = 15
 
+# Liga F league names the provider may return. leagueName queries are more
+# stable than the season-dependent leagueId, so they are the first choice for
+# the guaranteed Liga F fetch (see _append_liga_f_matches).
+_LIGA_F_NAME_VARIANTS = (
+    "Liga F",
+    "Liga F Moeve",
+    "Primera Division Femenina",
+    "Primera División Femenina",
+)
+_FEMININE_ROW_MARKERS = ("(F)", "FEMENINO", "FEMENINA")
+# Canonical keys of Liga F sides, so a fixture stored without the "(F)" marker
+# (e.g. "Las Planas") is still recognised as a women's match.
+_FEMININE_CANONICAL_KEYS = frozenset(
+    {
+        "ATHLETIC CLUB FEMENINO",
+        "EIBAR FEMENINO",
+        "ESPANYOL FEMENINO",
+        "VALENCIA FEMENINO",
+        "REAL MADRID FEMENINO",
+        "ATLETICO MADRID FEMENINO",
+        "ALAVES FEMENINO",
+        "LEVANTE LAS PLANAS",
+        "SEVILLA FEMENINO",
+        "GRANADA FEMENINO",
+        "MADRID CFF",
+        "REAL SOCIEDAD FEMENINO",
+        "COSTA ADEJE TENERIFE",
+        "DEPORTIVO ABANCA",
+        "LOGROÑO UNITED",
+    }
+)
+
 _highlightly_refresh_lock = threading.RLock()
 _highlightly_last_refresh = 0
 _highlightly_refresh_thread = None
@@ -231,6 +263,67 @@ def _highlightly_get_matches(params, headers):
         return []
 
 
+def _quiniela_has_feminine_matches_on_date(conn, jornada, date_text):
+    """True when the active quiniela has a women's fixture on ``date_text``."""
+    if conn is None or jornada is None or not date_text:
+        return False
+    try:
+        rows = conn.execute(
+            "SELECT local, visitante FROM resultados WHERE jornada = ? AND substr(COALESCE(fecha, ''), 1, 10) = ?",
+            (int(jornada), str(date_text)),
+        ).fetchall()
+    except Exception:
+        return False
+    for row in rows:
+        local = str(row["local"] or "")
+        visitante = str(row["visitante"] or "")
+        if any(marker in local.upper() for marker in _FEMININE_ROW_MARKERS) or any(
+            marker in visitante.upper() for marker in _FEMININE_ROW_MARKERS
+        ):
+            return True
+        if (
+            normalize_team_key(local) in _FEMININE_CANONICAL_KEYS
+            or normalize_team_key(visitante) in _FEMININE_CANONICAL_KEYS
+        ):
+            return True
+    return False
+
+
+def _append_liga_f_matches(matches, date_text, headers, needed):
+    """Guarantee Liga F coverage for the quiniela feed.
+
+    The generic ``/matches`` list is paginated (``limit=100``) and on a busy
+    matchday the women's fixtures can fall outside the first page, so the
+    quiniela never sees them live. When the active jornada has a feminine
+    fixture on this date we query Liga F explicitly by name and merge the
+    results (dedup by id). One extra call per date, only when the quiniela
+    actually tracks a women's fixture that day.
+    """
+    if not needed:
+        return matches
+    known_ids = {str(match.get("id")) for match in matches if match.get("id") is not None}
+    for name_variant in _LIGA_F_NAME_VARIANTS:
+        try:
+            extra = _highlightly_get_matches(
+                {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
+                headers,
+            )
+        except Exception:
+            extra = []
+        if not extra:
+            continue
+        for match in extra:
+            match_id = match.get("id")
+            if match_id is not None and str(match_id) in known_ids:
+                continue
+            match["_competition_name"] = "LIGA F"
+            matches.append(match)
+            if match_id is not None:
+                known_ids.add(str(match_id))
+        break
+    return matches
+
+
 def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None):
     circuit = get_highlightly_circuit()
     if circuit.get("open"):
@@ -249,6 +342,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
         return []
     headers = {"x-rapidapi-key": os.getenv("HIGHLIGHTLY_API_KEY", "")}
     matches = []
+    needs_liga_f = _quiniela_has_feminine_matches_on_date(conn, jornada, date_text)
 
     if not HIGHLIGHTLY_ACTIVE_LEAGUES:
         for match in _highlightly_get_matches(
@@ -262,7 +356,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
             league = match.get("league") or {}
             match["_competition_name"] = league.get("name") or ""
             matches.append(match)
-        return matches
+        return _append_liga_f_matches(matches, date_text, headers, needs_liga_f)
 
     calls_used = 0
     # CEO fix: ensure Liga F is always considered critical, even in low budget
@@ -298,7 +392,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
             matches.append(match)
         if get_highlightly_circuit().get("open"):
             break
-    return matches
+    return _append_liga_f_matches(matches, date_text, headers, needs_liga_f)
 
 
 def refresh_dates_for_jornada(conn, jornada=None):
@@ -503,12 +597,16 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
             logo_path = os.path.join(config.DATA_DIR, "TEAM_LOGOS.json")
             update_json_object_locked(logo_path, logos)
 
-        # Check and award porra points after updating results
+        # Check and award porra points after updating results. The `conn` used
+        # above was closed when its `with` block ended, so open a fresh one
+        # (previously this always failed with "Cannot operate on a closed
+        # database" and porra points were never awarded from this path).
         if updates > 0:
             try:
                 from ..routes.porra import check_and_award_porra_points
 
-                check_and_award_porra_points(conn, target_jornada)
+                with get_db() as porra_conn:
+                    check_and_award_porra_points(porra_conn, target_jornada)
             except Exception:
                 logger.exception("Error verificando puntos de porra")
 

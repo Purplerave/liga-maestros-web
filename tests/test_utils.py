@@ -139,6 +139,30 @@ class TestHighlightlyStatus:
         status, minute = highlightly_status({})
         assert status == "NS"
 
+    def test_in_progress_is_live(self):
+        # Highlightly's documented "In progress" state must not become NS.
+        status, minute = highlightly_status({"description": "In progress", "clock": "20"})
+        assert status == "LIVE"
+        assert "20" in minute
+
+    def test_second_half_is_live(self):
+        status, minute = highlightly_status({"description": "Second half", "clock": "67"})
+        assert status == "LIVE"
+        assert "67" in minute
+
+    def test_extra_time_is_live(self):
+        status, minute = highlightly_status({"description": "Extra time", "clock": "105"})
+        assert status == "LIVE"
+
+    def test_half_time_hyphenated(self):
+        status, minute = highlightly_status({"description": "Half-time"})
+        assert status == "LIVE"
+        assert minute == "HT"
+
+    def test_finished_after_extra_time_is_ft(self):
+        status, minute = highlightly_status({"description": "Finished after extra time"})
+        assert status == "FT"
+
 
 class TestSafeWriteReadJson:
     def test_write_and_read(self):
