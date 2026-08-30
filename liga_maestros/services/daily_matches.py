@@ -115,7 +115,12 @@ def fetch_today_agenda(date_text=None):
     date_text = date_text or today_madrid()
     matches = []
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
-        if league_name not in config.STANDINGS_LEAGUES and league_name not in ("LA LIGA", "SEGUNDA DIVISION"):
+        if league_name not in config.STANDINGS_LEAGUES and league_name not in (
+            "LA LIGA",
+            "SEGUNDA DIVISION",
+            "LIGA F",
+            "LIGA F MOEVE",
+        ):
             continue
         payload = _api_get(
             "/matches",

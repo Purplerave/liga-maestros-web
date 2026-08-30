@@ -231,7 +231,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
 
     calls_used = 0
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
-        if low_budget and league_name.upper() not in {"LA LIGA", "SEGUNDA DIVISION"}:
+        if low_budget and league_name.upper() not in {"LA LIGA", "SEGUNDA DIVISION", "LIGA F", "LIGA F MOEVE"}:
             continue
         if HIGHLIGHTLY_ACTIVE_LEAGUES and league_name.upper() not in HIGHLIGHTLY_ACTIVE_LEAGUES:
             continue

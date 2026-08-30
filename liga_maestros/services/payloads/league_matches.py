@@ -274,7 +274,13 @@ def _is_domestic_league_match(match):
 
 def _duplicates_quiniela_match(match, quiniela_pairs):
     competition = (match.get("competition_name") or (match.get("competition") or {}).get("name") or "").upper()
-    if competition not in ("LA LIGA", "SEGUNDA DIVISION"):
+    if competition not in (
+        "LA LIGA",
+        "SEGUNDA DIVISION",
+        "LIGA F",
+        "LIGA F MOEVE",
+        "PRIMERA DIVISION FEMENINA",
+    ):
         return False
     home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
     away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")

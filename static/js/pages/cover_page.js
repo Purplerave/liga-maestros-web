@@ -252,6 +252,9 @@ function _liveCompLabel(match) {
     const compact = {
         "LA LIGA": "LALIGA",
         "SEGUNDA DIVISION": "SEGUNDA",
+        "LIGA F": "LIGA F",
+        "LIGA F MOEVE": "LIGA F",
+        "PRIMERA DIVISION FEMENINA": "LIGA F",
         "PREMIER LEAGUE": "PREMIER",
         "BUNDESLIGA": "BUNDES",
         "LIGUE 1": "LIGUE 1",

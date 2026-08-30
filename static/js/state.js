@@ -186,12 +186,19 @@ function getAllLeagueMatches() {
     return state.data?.all_league_matches || [];
 }
 
+function isSpanishTrackedCompetition(match) {
+    const comp = competitionLabel(match);
+    return comp === "LA LIGA"
+        || comp === "SEGUNDA DIVISION"
+        || comp.includes("LIGA F")
+        || (comp.includes("PRIMERA DIVISI") && comp.includes("FEMEN"));
+}
+
 function getTodayLeagueMatches() {
     const today = state.data?.today_madrid || "";
     return getAllLeagueMatches().filter(m => {
         const d = String(m.added || m.fecha_raw || "").slice(0, 10);
-        const comp = competitionLabel(m);
-        return d === today && (comp === "LA LIGA" || comp === "SEGUNDA DIVISION");
+        return d === today && isSpanishTrackedCompetition(m);
     });
 }
 
