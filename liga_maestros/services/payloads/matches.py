@@ -98,7 +98,22 @@ def _fixture_schedule_label(row, fecha_limpia):
 
 def build_jornada_matches(conn, jornada, team_logos):
     def logo_for(team_name):
-        return team_logos.get(normalize_team_key(team_name), "")
+        if not team_name:
+            return ""
+        key = normalize_team_key(team_name)
+        logo = team_logos.get(key, "")
+        if logo:
+            return logo
+        # Fallback for feminine teams: try base name
+        base = key
+        for suffix in (" FEMENINO", " F"):
+            if base.endswith(suffix):
+                base = base[: -len(suffix)].strip()
+                break
+        if base and base in team_logos:
+            return team_logos[base]
+        # Also try stripping FEMENINO via clean
+        return team_logos.get(base, "")
 
     columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
     updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
@@ -134,31 +149,19 @@ def build_jornada_matches(conn, jornada, team_logos):
         minuto = (r.get("minuto") or "").replace("min. ", "").replace("min.", "").strip()
 
         signo = "-"
-        if (
-            status
-            in (
-                "FT",
-                "LIVE",
-                "FINISHED",
-                "IN PLAY",
-                "HT",
-                "HALF TIME BREAK",
-                "EN JUEGO",
-                "TERMINADO",
-                "STALE",
-                "AET",
-                "PEN",
-                "AWARDED",
-            )
-            and gh is not None
-            and ga is not None
-        ):
+        # CEO fix: si hay goles, siempre calcular signo, incluso si status es NS
+        # (evita que Liga F con resultado pero status desactualizado quede en "-")
+        if gh is not None and ga is not None:
             if gh > ga:
                 signo = "1"
             elif gh < ga:
                 signo = "2"
             else:
                 signo = "X"
+            # Para pleno (id 15) el signo es el marcador exacto, pero mantenemos 1X2 para ranking
+            # El pleno real se calcula en scoring.py
+        # Si no hay goles, mantener "-"
+
 
         fecha_limpia = ""
         if r.get("fecha"):
@@ -170,9 +173,13 @@ def build_jornada_matches(conn, jornada, team_logos):
                 current_year = datetime.now().strftime("%Y")
                 fecha_limpia = str(r["fecha"]).replace(f"{current_year}-", "").replace(f"/{current_year}", "")
 
+        # CEO fix Liga F: si hay goles, mostrar marcador siempre, incluso si status es NS
+        # (evita que resultados femeninos con status desactualizado sigan mostrando horario)
+        has_score = gh is not None and ga is not None
+
         if status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"):
             minuto_num = "".join(ch for ch in minuto if ch.isdigit())
-            marcador_base = f"{gh}-{ga}" if gh is not None and ga is not None else "-:-"
+            marcador_base = f"{gh}-{ga}" if has_score else "-:-"
             if minuto_num:
                 marcador = f"{marcador_base}\u00a0({minuto_num}')"
             elif minuto.upper() in ("HT", "DESCANSO"):
@@ -180,18 +187,23 @@ def build_jornada_matches(conn, jornada, team_logos):
             else:
                 marcador = marcador_base
         elif status in ("NS", "SCHEDULED"):
-            minuto_num = ""
-            marcador_base = ""
-            marcador = _fixture_schedule_label(r, fecha_limpia)
+            if has_score:
+                # Resultado disponible aunque el status siga en NS (caso Liga F con collector desfasado)
+                minuto_num = ""
+                marcador_base = f"{gh}-{ga}"
+                marcador = f"{gh}-{ga}"
+                # Promover status a FT visualmente si hay goles
+                status = "FT"
+            else:
+                minuto_num = ""
+                marcador_base = ""
+                marcador = _fixture_schedule_label(r, fecha_limpia)
         else:
             minuto_num = ""
-            marcador_base = f"{gh}-{ga}" if gh is not None and ga is not None else ""
-            if gh is not None and ga is not None:
+            marcador_base = f"{gh}-{ga}" if has_score else ""
+            if has_score:
                 marcador = f"{gh}-{ga}"
             else:
-                # A stale/final provider state without a score is not a result.
-                # Keep the useful, verifiable fixture time visible until an
-                # actual score arrives instead of showing a vague placeholder.
                 marcador = _fixture_schedule_label(r, fecha_limpia)
 
         partidos.append(

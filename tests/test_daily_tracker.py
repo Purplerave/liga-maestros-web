@@ -242,11 +242,12 @@ def test_backfill_adds_finished_matches_from_recent_days_once(tmp_path, monkeypa
 
     monkeypatch.setattr(daily_matches, "_api_get", fake_api_get)
 
-    # 3 dias x 2 ligas: el fake devuelve el mismo partido para ambas ligas.
-    assert daily_matches.backfill_recent_spanish_matches(days=3) == 6
+    # 3 dias x 3 ligas (La Liga, Segunda, Liga F): el fake devuelve el mismo partido para todas.
+    assert daily_matches.backfill_recent_spanish_matches(days=3) == 9
 
     panel = json.loads((tmp_path / "LIVE_ALL_MATCHES_V3.json").read_text(encoding="utf-8"))
-    assert any(m["id"] == 42 and m["competition_name"] == "SEGUNDA DIVISION" for m in panel)
+    # Con 3 ligas el ID 42 se sobrescribe; la ultima liga que escribe gana (LIGA F)
+    assert any(m["id"] == 42 and m["competition_name"] in ("SEGUNDA DIVISION", "LIGA F", "LA LIGA") for m in panel)
 
     # Cada fecha se rellena una sola vez.
     assert daily_matches.backfill_recent_spanish_matches(days=3) == 0

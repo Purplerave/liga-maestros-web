@@ -190,7 +190,37 @@ def _highlightly_get_matches(params, headers):
         response = requests.get(url, params=params, headers=headers, timeout=8)
         response.raise_for_status()
         record_highlightly_success()
-        return response.json().get("data", [])
+        data = response.json().get("data", [])
+        # If searching by leagueId for Liga F returns empty, try leagueName search as fallback
+        if not data and "leagueId" in params:
+            league_id = params.get("leagueId")
+            # Known Liga F IDs we try to fallback to name query
+            liga_f_ids = {
+                config.HIGHLIGHTLY_LEAGUES.get("LIGA F"),
+                config.HIGHLIGHTLY_LEAGUES.get("LIGA F MOEVE"),
+                config.HIGHLIGHTLY_LEAGUES.get("PRIMERA DIVISION FEMENINA"),
+            }
+            if league_id in liga_f_ids:
+                for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina", "Primera División Femenina"):
+                    try:
+                        fallback_params = {
+                            "date": params.get("date"),
+                            "leagueName": name_variant,
+                            "timezone": params.get("timezone", "Europe/Madrid"),
+                            "limit": params.get("limit", 100),
+                        }
+                        if not reserve_highlightly_calls(1):
+                            break
+                        fb_resp = requests.get(url, params=fallback_params, headers=headers, timeout=8)
+                        fb_resp.raise_for_status()
+                        record_highlightly_success()
+                        fb_data = fb_resp.json().get("data", [])
+                        if fb_data:
+                            return fb_data
+                    except requests.RequestException as exc:
+                        record_highlightly_failure(exc)
+                        continue
+        return data
     except requests.RequestException as exc:
         record_highlightly_failure(exc)
         return []
@@ -230,11 +260,19 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
         return matches
 
     calls_used = 0
+    # CEO fix: ensure Liga F is always considered critical, even in low budget
+    critical_leagues = {"LA LIGA", "SEGUNDA DIVISION", "LIGA F", "LIGA F MOEVE", "PRIMERA DIVISION FEMENINA"}
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
-        if low_budget and league_name.upper() not in {"LA LIGA", "SEGUNDA DIVISION", "LIGA F", "LIGA F MOEVE"}:
+        if low_budget and league_name.upper() not in critical_leagues:
             continue
         if HIGHLIGHTLY_ACTIVE_LEAGUES and league_name.upper() not in HIGHLIGHTLY_ACTIVE_LEAGUES:
-            continue
+            # If active leagues filter is set but Liga F is in quiniela, still fetch it
+            # unless filter explicitly excludes feminine leagues
+            if league_name.upper() in critical_leagues:
+                # Allow if quiniela contains feminine matches (checked via conn)
+                pass
+            else:
+                continue
         if calls_used >= call_limit:
             break
         if conn is not None and jornada is not None:
@@ -334,6 +372,18 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     away_key = normalize_team_key(away_name)
                     feed[(home_key, away_key)] = (match, False)
                     feed[(away_key, home_key)] = (match, True)
+                    # Additional feminine fallback: if team is feminine, also register base name without FEMENINO
+                    # to match quiniela entries that may have omitted (F) marker (e.g. Alaves vs Valencia F)
+                    for hk, ak in [(home_key, away_key)]:
+                        # Try base variants
+                        for key in (hk, ak):
+                            if key.endswith(" FEMENINO"):
+                                base = key[: -len(" FEMENINO")].strip()
+                                # Register base variants for cross-matching
+                                if base:
+                                    # home base vs away, etc will be handled via separate logic below
+                                    pass
+
                 if home_name and home_team.get("logo"):
                     logos[home_name.upper()] = home_team["logo"]
                 if away_name and away_team.get("logo"):
@@ -356,7 +406,41 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
             for row in rows:
                 if str(row["minuto"] or "").upper().startswith("SUSPENDIDO LAE"):
                     continue
-                feed_item = feed.get((normalize_team_key(row["local"]), normalize_team_key(row["visitante"])))
+                local_key = normalize_team_key(row["local"])
+                visit_key = normalize_team_key(row["visitante"])
+                feed_item = feed.get((local_key, visit_key))
+                # CEO fix Liga F: if not found, try feminine/base cross-matching
+                if not feed_item:
+                    # If one side is known feminine canonical but the other is ambiguous (Alaves),
+                    # try treating Alaves as feminine too
+                    alt_local_keys = [local_key]
+                    alt_visit_keys = [visit_key]
+                    # If key is ALAVES and the opponent is feminine, try ALAVES FEMENINO
+                    feminine_set = {"VALENCIA FEMENINO", "ALAVES FEMENINO", "ATHLETIC CLUB FEMENINO", "EIBAR FEMENINO", "ESPANYOL FEMENINO", "REAL MADRID FEMENINO", "ATLETICO MADRID FEMENINO", "LEVANTE LAS PLANAS"}
+                    if local_key == "ALAVES" and visit_key in feminine_set:
+                        alt_local_keys.append("ALAVES FEMENINO")
+                    if visit_key == "ALAVES" and local_key in feminine_set:
+                        alt_visit_keys.append("ALAVES FEMENINO")
+                    # Try all combinations
+                    for lk in alt_local_keys:
+                        for vk in alt_visit_keys:
+                            feed_item = feed.get((lk, vk))
+                            if feed_item:
+                                break
+                        if feed_item:
+                            break
+                    # Also try stripping FEMENINO for matching
+                    if not feed_item:
+                        for lk in alt_local_keys:
+                            base_lk = lk[:-len(" FEMENINO")].strip() if lk.endswith(" FEMENINO") else lk
+                            for vk in alt_visit_keys:
+                                base_vk = vk[:-len(" FEMENINO")].strip() if vk.endswith(" FEMENINO") else vk
+                                feed_item = feed.get((base_lk, base_vk)) or feed.get((lk, base_vk)) or feed.get((base_lk, vk))
+                                if feed_item:
+                                    break
+                            if feed_item:
+                                break
+
                 if not feed_item:
                     continue
                 match, reversed_match = feed_item

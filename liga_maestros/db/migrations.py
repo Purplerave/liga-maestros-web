@@ -170,6 +170,12 @@ def load_scrape_matches(jornada):
     for base_dir in (getattr(config, "SEED_DATA_DIR", ""), getattr(config, "DATA_DIR", ""), os.path.join(config.BASE_DIR, "data")):
         if base_dir:
             candidates.append(os.path.join(base_dir, f"quiniela15_J{jornada}_scrape.json"))
+    # Also prepare horarios candidates (separate file)
+    horarios_candidates = []
+    for base_dir in (getattr(config, "SEED_DATA_DIR", ""), getattr(config, "DATA_DIR", ""), os.path.join(config.BASE_DIR, "data")):
+        if base_dir:
+            horarios_candidates.append(os.path.join(base_dir, f"horarios_J{jornada}.json"))
+
     for path in candidates:
         if not os.path.exists(path):
             continue
@@ -187,6 +193,19 @@ def load_scrape_matches(jornada):
         if len(partidos) < 15:
             continue
         horarios = data.get("horarios") or {}
+        # CEO fix: si el scrape no trae horarios embebidos, leer horarios_J{N}.json externo
+        if not horarios:
+            for h_path in horarios_candidates:
+                if not os.path.exists(h_path):
+                    continue
+                try:
+                    with open(h_path, encoding="utf-8") as fh:
+                        ext_hor = json.load(fh)
+                    if isinstance(ext_hor, dict) and len(ext_hor) >= 10:
+                        horarios = ext_hor
+                        break
+                except Exception:
+                    continue
         matches = []
         for item in partidos[:15]:
             try:
