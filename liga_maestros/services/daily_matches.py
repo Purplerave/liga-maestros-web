@@ -115,8 +115,11 @@ def fetch_today_agenda(date_text=None):
     date_text = date_text or today_madrid()
     matches = []
     allowed = {
-        "LA LIGA", "SEGUNDA DIVISION",
-        "LIGA F", "LIGA F MOEVE", "PRIMERA DIVISION FEMENINA",
+        "LA LIGA",
+        "SEGUNDA DIVISION",
+        "LIGA F",
+        "LIGA F MOEVE",
+        "PRIMERA DIVISION FEMENINA",
         "LIGA F FEMENINA",
     }
     for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():

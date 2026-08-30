@@ -152,6 +152,7 @@ def _add_team_logos(matches, team_logos):
             return team_logos[base]
         # Also try clean base
         from ...utils import clean_team_key
+
         clean_base = clean_team_key(base)
         if clean_base in team_logos:
             return team_logos[clean_base]
@@ -237,11 +238,21 @@ def _infer_match_competition(match, standings_db):
     feminine_indicators = ("(F)", "FEMENINO", "FEMENINA", " WOMEN")
     is_feminine_raw = any(ind in f"{home_raw.upper()} {away_raw.upper()}" for ind in feminine_indicators)
     feminine_canonicals = {
-        "ATHLETIC CLUB FEMENINO", "EIBAR FEMENINO", "ESPANYOL FEMENINO",
-        "VALENCIA FEMENINO", "REAL MADRID FEMENINO", "ATLETICO MADRID FEMENINO",
-        "ALAVES FEMENINO", "LEVANTE LAS PLANAS", "SEVILLA FEMENINO",
-        "GRANADA FEMENINO", "MADRID CFF", "REAL SOCIEDAD FEMENINO",
-        "COSTA ADEJE TENERIFE", "DEPORTIVO ABANCA", "LOGROÑO UNITED",
+        "ATHLETIC CLUB FEMENINO",
+        "EIBAR FEMENINO",
+        "ESPANYOL FEMENINO",
+        "VALENCIA FEMENINO",
+        "REAL MADRID FEMENINO",
+        "ATLETICO MADRID FEMENINO",
+        "ALAVES FEMENINO",
+        "LEVANTE LAS PLANAS",
+        "SEVILLA FEMENINO",
+        "GRANADA FEMENINO",
+        "MADRID CFF",
+        "REAL SOCIEDAD FEMENINO",
+        "COSTA ADEJE TENERIFE",
+        "DEPORTIVO ABANCA",
+        "LOGROÑO UNITED",
     }
     # If either side is known feminine canonical or raw has (F), it's Liga F
     if is_feminine_raw or home_key in feminine_canonicals or away_key in feminine_canonicals:
@@ -256,7 +267,6 @@ def _infer_match_competition(match, standings_db):
     if home_key in standings_db.get("segunda", {}) and away_key in standings_db.get("segunda", {}):
         return "SEGUNDA DIVISION"
     return "FRIENDLIES"
-
 
 
 def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):

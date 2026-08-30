@@ -162,7 +162,6 @@ def build_jornada_matches(conn, jornada, team_logos):
             # El pleno real se calcula en scoring.py
         # Si no hay goles, mantener "-"
 
-
         fecha_limpia = ""
         if r.get("fecha"):
             try:

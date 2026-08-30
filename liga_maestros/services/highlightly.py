@@ -201,7 +201,12 @@ def _highlightly_get_matches(params, headers):
                 config.HIGHLIGHTLY_LEAGUES.get("PRIMERA DIVISION FEMENINA"),
             }
             if league_id in liga_f_ids:
-                for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina", "Primera División Femenina"):
+                for name_variant in (
+                    "Liga F",
+                    "Liga F Moeve",
+                    "Primera Division Femenina",
+                    "Primera División Femenina",
+                ):
                     try:
                         fallback_params = {
                             "date": params.get("date"),
@@ -416,7 +421,16 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     alt_local_keys = [local_key]
                     alt_visit_keys = [visit_key]
                     # If key is ALAVES and the opponent is feminine, try ALAVES FEMENINO
-                    feminine_set = {"VALENCIA FEMENINO", "ALAVES FEMENINO", "ATHLETIC CLUB FEMENINO", "EIBAR FEMENINO", "ESPANYOL FEMENINO", "REAL MADRID FEMENINO", "ATLETICO MADRID FEMENINO", "LEVANTE LAS PLANAS"}
+                    feminine_set = {
+                        "VALENCIA FEMENINO",
+                        "ALAVES FEMENINO",
+                        "ATHLETIC CLUB FEMENINO",
+                        "EIBAR FEMENINO",
+                        "ESPANYOL FEMENINO",
+                        "REAL MADRID FEMENINO",
+                        "ATLETICO MADRID FEMENINO",
+                        "LEVANTE LAS PLANAS",
+                    }
                     if local_key == "ALAVES" and visit_key in feminine_set:
                         alt_local_keys.append("ALAVES FEMENINO")
                     if visit_key == "ALAVES" and local_key in feminine_set:
@@ -432,10 +446,12 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     # Also try stripping FEMENINO for matching
                     if not feed_item:
                         for lk in alt_local_keys:
-                            base_lk = lk[:-len(" FEMENINO")].strip() if lk.endswith(" FEMENINO") else lk
+                            base_lk = lk[: -len(" FEMENINO")].strip() if lk.endswith(" FEMENINO") else lk
                             for vk in alt_visit_keys:
-                                base_vk = vk[:-len(" FEMENINO")].strip() if vk.endswith(" FEMENINO") else vk
-                                feed_item = feed.get((base_lk, base_vk)) or feed.get((lk, base_vk)) or feed.get((base_lk, vk))
+                                base_vk = vk[: -len(" FEMENINO")].strip() if vk.endswith(" FEMENINO") else vk
+                                feed_item = (
+                                    feed.get((base_lk, base_vk)) or feed.get((lk, base_vk)) or feed.get((base_lk, vk))
+                                )
                                 if feed_item:
                                     break
                             if feed_item:
