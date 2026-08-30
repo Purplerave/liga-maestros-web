@@ -201,11 +201,11 @@ function renderArena() {
             return;
         }
         const subnavHtml = `
-            <div class="live-subnav" id="live-subnav" aria-label="Filtrar directo">
-                <button type="button" class="${subFilter === 'live' ? 'active' : ''}" data-live-sub="live">En Juego</button>
-                <button type="button" class="${subFilter === 'primera' ? 'active' : ''}" data-live-sub="primera">Primera</button>
-                <button type="button" class="${subFilter === 'segunda' ? 'active' : ''}" data-live-sub="segunda">Segunda</button>
-                <button type="button" class="${subFilter === 'all' ? 'active' : ''}" data-live-sub="all">Todos</button>
+            <div class="live-subnav" id="live-subnav" role="tablist" aria-label="Filtrar directo">
+                <button type="button" role="tab" aria-selected="${subFilter === 'live' ? 'true' : 'false'}" tabindex="${subFilter === 'live' ? '0' : '-1'}" class="${subFilter === 'live' ? 'active' : ''}" data-live-sub="live">En Juego</button>
+                <button type="button" role="tab" aria-selected="${subFilter === 'primera' ? 'true' : 'false'}" tabindex="${subFilter === 'primera' ? '0' : '-1'}" class="${subFilter === 'primera' ? 'active' : ''}" data-live-sub="primera">Primera</button>
+                <button type="button" role="tab" aria-selected="${subFilter === 'segunda' ? 'true' : 'false'}" tabindex="${subFilter === 'segunda' ? '0' : '-1'}" class="${subFilter === 'segunda' ? 'active' : ''}" data-live-sub="segunda">Segunda</button>
+                <button type="button" role="tab" aria-selected="${subFilter === 'all' ? 'true' : 'false'}" tabindex="${subFilter === 'all' ? '0' : '-1'}" class="${subFilter === 'all' ? 'active' : ''}" data-live-sub="all">Todos</button>
             </div>`;
         const comentaristaHtml = typeof directComentaristaHtml === "function" ? directComentaristaHtml() : "";
         container.innerHTML = subnavHtml + comentaristaHtml + renderGroupedMatchCards(matches, false);
@@ -215,7 +215,31 @@ function renderArena() {
                 syncUrlState();
                 renderArena();
             });
+            btn.addEventListener("keydown", (e) => {
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                e.preventDefault();
+                const tabs = [...container.querySelectorAll('[role="tab"]')];
+                const idx = tabs.indexOf(e.currentTarget);
+                const next = e.key === "ArrowRight" ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+                tabs[next].focus();
+                tabs[next].click();
+            });
         });
+        // Fallback graceful: banner stale si el panel lleva >15 min sin actualizar
+        try {
+            const staleBanner = document.getElementById("stale-banner");
+            if (staleBanner) staleBanner.remove();
+            const panelAge = state.data?._panel_fetched_at ? Date.now() - new Date(state.data._panel_fetched_at).getTime() : 0;
+            if (panelAge > 15 * 60 * 1000) {
+                const mins = Math.round(panelAge / 60000);
+                const banner = document.createElement("div");
+                banner.id = "stale-banner";
+                banner.setAttribute("role", "status");
+                banner.style.cssText = "background:#422006;color:#fde68a;padding:6px 12px;text-align:center;font:600 0.72rem 'JetBrains Mono',monospace;border-bottom:1px solid rgba(251,191,36,0.3)";
+                banner.textContent = `Datos de hace ${mins} min — reconectando…`;
+                container.prepend(banner);
+            }
+        } catch {}
         return;
     }
 

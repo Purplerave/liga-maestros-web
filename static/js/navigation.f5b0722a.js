@@ -7,6 +7,19 @@ function versionedAsset(path, tag) {
     const version = document.body.dataset.assetsV || "dev";
     return `${path}?v=${encodeURIComponent(version)}-${tag}`;
 }
+// CEO prefetch: Directo <300ms — precarga al hover
+try {
+    document.addEventListener("mouseover", (e) => {
+        const el = e.target.closest('[data-page-action="LIVE"]');
+        if (!el || el.dataset.prefetched) return;
+        el.dataset.prefetched = "1";
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.href = "/api/liga/live";
+        document.head.appendChild(link);
+        fetch("/api/liga/live", { cache: "force-cache" }).catch(() => {});
+    }, { passive: true });
+} catch {}
 
 const VIEW_STYLES = {
     CONTEST: [
@@ -16,11 +29,11 @@ const VIEW_STYLES = {
     STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-5")]],
     LIVE: [
         ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-6")],
-        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-4")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
     LEAGUES: [
         ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-6")],
-        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-4")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
     SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-7")]],
     QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
@@ -32,7 +45,7 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-    ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-72")]],
+        ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-73")]],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
