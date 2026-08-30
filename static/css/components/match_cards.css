@@ -10,7 +10,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
     align-content: start;
+    align-items: start;
     gap: 10px;
+}
+
+.live-grouped-grid .league-match-group {
+    height: fit-content;
 }
 
 .league-match-group {
