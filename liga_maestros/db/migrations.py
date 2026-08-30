@@ -304,11 +304,21 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None, force=False):
     return changed
 
 
-def _import_j1_resultados(conn):
+def _import_jornada_resultados(conn, jornada):
+    """Importa resultados oficiales de data/quiniela15_J{N}_resultados.json.
+
+    Generic version of the old J1-only importer: any jornada with a checked-in
+    resultados file gets its finished scores applied by partido_id. Only fills
+    rows that are still empty / not-started / live, so scores already captured
+    by the live panel (Highlightly/LIVE_ALL_MATCHES_V3) are never overwritten.
+    Idempotent: safe to run on every startup/migration.
+    """
+    jornada = int(jornada)
+    fname = f"quiniela15_J{jornada}_resultados.json"
     candidates = [
-        os.path.join(getattr(config, "SEED_DATA_DIR", "") or "", "quiniela15_J1_resultados.json"),
-        os.path.join(getattr(config, "DATA_DIR", "") or "", "quiniela15_J1_resultados.json"),
-        os.path.join(config.BASE_DIR, "data", "quiniela15_J1_resultados.json"),
+        os.path.join(getattr(config, "SEED_DATA_DIR", "") or "", fname),
+        os.path.join(getattr(config, "DATA_DIR", "") or "", fname),
+        os.path.join(config.BASE_DIR, "data", fname),
     ]
     for path in candidates:
         if not path or not os.path.exists(path):
@@ -319,7 +329,7 @@ def _import_j1_resultados(conn):
         except (OSError, ValueError, TypeError):
             continue
         try:
-            if int(data.get("jornada") or 0) != 1:
+            if int(data.get("jornada") or 0) != jornada:
                 continue
         except (TypeError, ValueError):
             continue
@@ -345,18 +355,23 @@ def _import_j1_resultados(conn):
             cursor = conn.execute(
                 """UPDATE resultados SET goles_local = ?, goles_visitante = ?, status = ?,
                    minuto = ?, signo_actual = ?
-                   WHERE jornada = 1 AND partido_id = ?
+                   WHERE jornada = ? AND partido_id = ?
                    AND (goles_local IS NULL OR goles_visitante IS NULL
                         OR status IS NULL
                         OR UPPER(COALESCE(status, '')) IN
                            ('NS','SCHEDULED','','LIVE','IN PLAY','HT','STALE','PENDING_OVERDUE'))""",
-                (gh, ga, status, minuto, signo, pid),
+                (gh, ga, status, minuto, signo, jornada, pid),
             )
             applied += cursor.rowcount
         if applied:
             conn.commit()
         return applied
     return 0
+
+
+def _import_j1_resultados(conn):
+    """Backward-compatible wrapper around the generic importer (J1)."""
+    return _import_jornada_resultados(conn, 1)
 
 
 def _import_j1_pronosticos(conn):
@@ -537,6 +552,7 @@ def _import_compact_prediction_tickets(conn, jornada):
 
 def ensure_jornada_2(conn):
     updated = ensure_jornada_completa(conn, 2)
+    _import_jornada_resultados(conn, 2)
     imported = _import_compact_prediction_tickets(conn, 2)
     if updated or imported:
         conn.commit()
@@ -544,8 +560,11 @@ def ensure_jornada_2(conn):
 
 
 def ensure_jornada_3(conn):
-    """Seed the active 2026-27 Jornada 3 fixture and signed tickets."""
+    """Seed the active 2026-27 Jornada 3 fixture, official results and signed tickets."""
     updated = ensure_jornada_completa(conn, 3)
+    # Aplica marcadores oficiales verificados (p. ej. Eibar (F) 1-0 Espanyol (F)
+    # del 29/08 que el panel en vivo no llego a capturar) por partido_id.
+    _import_jornada_resultados(conn, 3)
     imported = _import_compact_prediction_tickets(conn, 3)
     if updated or imported:
         conn.commit()

@@ -1,0 +1,20 @@
+{
+ "jornada": 3,
+ "temporada": "2026-2027",
+ "fuente": "Resultado oficial Liga F (RDJ/LAE) verificado 30/08/2026. Partido 12 del boleto J3.",
+ "verificado_en": "2026-08-30T11:30:00+02:00",
+ "nota": "El Eibar (F) - Espanyol (F) se jugo el viernes 29/08 a las 17:00 y termino 1-0; el panel en vivo no lo habia capturado, por eso no salia en la quiniela. El resto de marcadores de la J3 llegan por el scraper/panel en vivo; aqui solo el oficial verificado.",
+ "resultados": [
+  {
+   "id": 12,
+   "local": "Eibar (F)",
+   "visitante": "Espanyol (F)",
+   "goles_local": 1,
+   "goles_visitante": 0,
+   "signo": "1",
+   "status": "FT",
+   "minuto": "Finalizado",
+   "fecha": "2026-08-29"
+  }
+ ]
+}
