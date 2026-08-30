@@ -146,9 +146,10 @@ function hydrateHero() {
     }
     const save = qs("save-quiniela-btn");
     if (save) {
-        const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
+        const isLivePage = state.currentFilter === "LIVE";
+        const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked && !isLivePage;
         const hasSaved = hasSavedTicket();
-        save.hidden = !state.user;
+        save.hidden = !state.user || isLivePage;
         save.disabled = !canSave;
         if (!canSave) {
             save.textContent = "Cerrada";
@@ -164,7 +165,8 @@ function hydrateHero() {
     }
     const share = qs("share-ticket-btn");
     if (share) {
-        share.hidden = !state.user;
+        const isLivePage = state.currentFilter === "LIVE";
+        share.hidden = !state.user || isLivePage;
         share.disabled = !state.data.partidos.length;
     }
     updatePicksProgress();
@@ -186,12 +188,19 @@ function getAllLeagueMatches() {
     return state.data?.all_league_matches || [];
 }
 
+function isSpanishTrackedCompetition(match) {
+    const comp = competitionLabel(match);
+    return comp === "LA LIGA"
+        || comp === "SEGUNDA DIVISION"
+        || comp.includes("LIGA F")
+        || (comp.includes("PRIMERA DIVISI") && comp.includes("FEMEN"));
+}
+
 function getTodayLeagueMatches() {
     const today = state.data?.today_madrid || "";
     return getAllLeagueMatches().filter(m => {
         const d = String(m.added || m.fecha_raw || "").slice(0, 10);
-        const comp = competitionLabel(m);
-        return d === today && (comp === "LA LIGA" || comp === "SEGUNDA DIVISION");
+        return d === today && isSpanishTrackedCompetition(m);
     });
 }
 

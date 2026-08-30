@@ -85,7 +85,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena { overflow: 
     align-items: center;
     gap: 24px;
     white-space: nowrap;
-    animation: cxTickerScroll 30s linear infinite;
+    animation: cxTickerScroll 75s linear infinite;
     padding-left: 100%;
 }
 .cx-ticker-label {

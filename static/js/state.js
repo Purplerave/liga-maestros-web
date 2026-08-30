@@ -146,9 +146,10 @@ function hydrateHero() {
     }
     const save = qs("save-quiniela-btn");
     if (save) {
-        const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked;
+        const isLivePage = state.currentFilter === "LIVE";
+        const canSave = Boolean(state.user) && String(state.data.jornada) === String(state.data.max_jornada) && !state.data.is_locked && !isLivePage;
         const hasSaved = hasSavedTicket();
-        save.hidden = !state.user;
+        save.hidden = !state.user || isLivePage;
         save.disabled = !canSave;
         if (!canSave) {
             save.textContent = "Cerrada";
@@ -164,7 +165,8 @@ function hydrateHero() {
     }
     const share = qs("share-ticket-btn");
     if (share) {
-        share.hidden = !state.user;
+        const isLivePage = state.currentFilter === "LIVE";
+        share.hidden = !state.user || isLivePage;
         share.disabled = !state.data.partidos.length;
     }
     updatePicksProgress();

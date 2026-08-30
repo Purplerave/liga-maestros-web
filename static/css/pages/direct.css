@@ -180,6 +180,7 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
 
 /* Subnav pills en la pestaña Directo */
 .live-subnav {
+    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -198,6 +199,8 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     letter-spacing: 0.04em;
     cursor: pointer;
     transition: all 0.15s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .live-subnav button:hover {
     border-color: #38d9ff;

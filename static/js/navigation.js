@@ -29,11 +29,11 @@ const VIEW_STYLES = {
     STANDINGS: [["view-standings-styles", versionedAsset("/static/css/pages/standings.css", "standings-5")]],
     LIVE: [
         ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-6")],
-        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-4")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
     LEAGUES: [
         ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-6")],
-        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-4")],
+        ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
     SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-7")]],
     QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
