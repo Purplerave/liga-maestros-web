@@ -18,7 +18,6 @@ ASSET_GLOBS = [
     "css/pages/*.css",
     "js/*.js",
     "js/pages/*.js",
-    "js/*.js",
 ]
 
 

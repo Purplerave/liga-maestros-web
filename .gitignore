@@ -86,8 +86,12 @@ FIX_*.py
 COMPROBAR_JORNADA.bat
 PUBLICAR_WEB.bat
 data/LIVE_ALL_MATCHES*.json
+data/LIVE_ALL_MATCHES_V3.json
 data/LIVE_TICKER.json
 data/RESULTADOS_LIVE.json
+data/MULTI_STANDINGS.json
+data/API_USAGE*.json
+data/LIVE_COLLECTOR_HEALTH.json.lock
 liga_maestros.db
 
 # Kilo agent config (local only)
