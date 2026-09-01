@@ -91,13 +91,13 @@
     "descripcion": "Alias de La Pena."
   },
   {
-    "id": "kimi",
-    "nombre": "Kimi",
+    "id": "sesudo",
+    "nombre": "Sesudo",
     "tipo": "pena",
     "grupo": "pena",
     "puntos_totales": 14,
     "activo": true,
-    "descripcion": "Alias de La Pena."
+    "descripcion": "Kimi (sesudo) - IA Kimi"
   },
   {
     "id": "pepe",
@@ -161,5 +161,41 @@
     "puntos_totales": 0,
     "activo": true,
     "descripcion": "Segunda columna de la quiniela de Sonia (La Pena)."
+  },
+  {
+    "id": "luzia",
+    "nombre": "Luzia",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Alias de La Pena - Luzia"
+  },
+  {
+    "id": "jimmy",
+    "nombre": "Jimmy",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Alias de La Pena - Jimmy"
+  },
+  {
+    "id": "luna",
+    "nombre": "Luna",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Alias de La Pena - Luna"
+  },
+  {
+    "id": "fistro",
+    "nombre": "Fistro",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Alias de La Pena - Fistro"
   }
 ]

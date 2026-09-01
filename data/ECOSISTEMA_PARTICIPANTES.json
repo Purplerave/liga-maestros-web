@@ -49,8 +49,7 @@
     "erniebot",
     "sonia",
     "sonia2",
-    "arena",
-    "falcon"
+    "arena"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -86,7 +85,6 @@
     "erniebot": "ErnieBot",
     "sonia": "Sonia",
     "sonia2": "Sonia2",
-    "arena": "Arena",
-    "falcon": "Falcon"
+    "arena": "Arena"
   }
 }
