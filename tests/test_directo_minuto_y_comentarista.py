@@ -115,10 +115,18 @@ def test_directo_card_renders_the_minute_chip_under_the_score():
         // Saque hace 80 minutos: un minuto 72 es coherente con el reloj real.
         // (Con el saque en el futuro o con el minuto por delante del tiempo
         // transcurrido, la web descarta el directo por congelado.)
+        // El horario se escribe en hora de Madrid, que es como lo manda el
+        // servidor: con la hora local del navegador el saque se leería
+        // desplazado y el partido parecería arrancar en el futuro.
         const kickoff = new Date(Date.now() - 80 * 60000);
         const pad = n => String(n).padStart(2, "0");
-        const fecha = `${{kickoff.getFullYear()}}-${{pad(kickoff.getMonth() + 1)}}-${{pad(kickoff.getDate())}}`;
-        const hora = `${{pad(kickoff.getHours())}}:${{pad(kickoff.getMinutes())}}`;
+        const madridParts = {{}};
+        for (const part of new Intl.DateTimeFormat("en-GB", {{
+            timeZone: "Europe/Madrid", hour12: false, year: "numeric", month: "2-digit",
+            day: "2-digit", hour: "2-digit", minute: "2-digit"
+        }}).formatToParts(kickoff)) madridParts[part.type] = part.value;
+        const fecha = `${{madridParts.year}}-${{madridParts.month}}-${{madridParts.day}}`;
+        const hora = `${{pad(Number(madridParts.hour) % 24)}}:${{madridParts.minute}}`;
         const card = context.renderMatchCard({{
             id: "quiniela-1-3",
             local: "Celta", visitante: "Osasuna",

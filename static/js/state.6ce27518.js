@@ -248,30 +248,13 @@ function isLiveMatch(match) {
     return status.includes("LIVE") || status === "IN PLAY" || status === "HT" || status === "EN JUEGO";
 }
 
-function getLiveLeagueMatches() {
-    const lm = state.data?.live_matches;
-    const source = (lm && lm.length > 0)
-        ? lm
-        : [...(state.data?.partidos || []), ...getAllLeagueMatches()];
+/* Un mismo partido llega por dos caminos (la fila de la quiniela y su copia en
+   el panel de las ligas) con ids distintos ("3" vs "quiniela-1-3"), asi que la
+   dedup se hace por pareja de equipos: por id el mismo partido salia dos veces
+   en DIRECTO. */
+function dedupeMatchesByPair(matches) {
     const matchesById = new Map();
-    source.filter(m => {
-        const status = String(m.status || "").toUpperCase();
-        if (isLiveStatus(status)) {
-            // SUSPENDED que lleva más de 60 min no se muestra como live
-            if (status === "SUSPENDED") {
-                const ts = parseMatchTimestamp(m);
-                if (ts && Date.now() - ts > 60 * 60 * 1000) return false;
-            }
-            // Regla única de caducidad (isExpiredLiveMatch): además de la edad
-            // máxima descarta el directo imposible (aún no ha empezado) y el
-            // congelado (minuto por delante del tiempo real transcurrido).
-            return !isExpiredLiveMatch(m);
-        }
-        return isLiveMatch(m);
-    }).forEach(match => {
-        // Clave por pareja de equipos (no por id): el partido de la quiniela y
-        // su copia en all_league_matches tienen ids distintos ("3" vs
-        // "quiniela-1-3") y por id el mismo salia dos veces en DIRECTO.
+    (matches || []).forEach(match => {
         const home = normalizeName(match.local || match.home_name || match.home?.name || "");
         const away = normalizeName(match.visitante || match.away_name || match.away?.name || "");
         const key = (home && away)
@@ -290,6 +273,41 @@ function getLiveLeagueMatches() {
         }
     });
     return [...matchesById.values()];
+}
+
+function getLiveLeagueMatches() {
+    const serverLive = state.data?.live_matches;
+    /* El servidor ya decidio QUE partidos estan en juego: lo hace con los datos
+       del proveedor y con el reloj de Madrid, aplicando las reglas de cierre
+       (directo imposible, congelado o sin noticias). El navegador no debe
+       volver a decidirlo con su propio reloj: en Canarias, con el movil en UTC
+       o de viaje, ese segundo filtro leia el saque mas tarde y daba el partido
+       por caducado justo cuando empezaba, vaciando el DIRECTO entero mientras
+       el Celta estaba en juego. Aqui solo se descarta lo que el propio
+       servidor ya marcaria como terminado. */
+    if (serverLive && serverLive.length > 0) {
+        return dedupeMatchesByPair(
+            serverLive.filter(match => !isFinishedStatus(String(match.status || "")))
+        );
+    }
+    /* Sin lista del servidor (payload viejo o sin panel) se deriva en cliente
+       con el mismo criterio, ahora con los horarios leidos en hora de Madrid. */
+    const source = [...(state.data?.partidos || []), ...getAllLeagueMatches()];
+    return dedupeMatchesByPair(source.filter(m => {
+        const status = String(m.status || "").toUpperCase();
+        if (isLiveStatus(status)) {
+            // SUSPENDED que lleva más de 60 min no se muestra como live
+            if (status === "SUSPENDED") {
+                const ts = parseMatchTimestamp(m);
+                if (ts && Date.now() - ts > 60 * 60 * 1000) return false;
+            }
+            // Regla única de caducidad (isExpiredLiveMatch): además de la edad
+            // máxima descarta el directo imposible (aún no ha empezado) y el
+            // congelado (minuto por delante del tiempo real transcurrido).
+            return !isExpiredLiveMatch(m);
+        }
+        return isLiveMatch(m);
+    }));
 }
 
 function hasLiveLeagueMatches() {
