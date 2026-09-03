@@ -19,7 +19,7 @@ from ..services.payloads.standings import build_standings_payload, matchday_play
 from ..services.teams import build_participant_contract
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
 from ..services.trash_talk import build_trash_talk
-from ..utils import load_team_logos
+from ..utils import load_team_logos, normalize_team_key
 
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ def get_liga_data():
             ranking=predictions_payload.get("ranking_maestros", {}),
             participant_contract=participant_contract,
         )
-        comentarista = _build_comentarista_payload(partidos)
+        comentarista = _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
         response_payload = {
             "jornada": jornada,
             "jornada_liga": jornada_liga,
@@ -311,6 +311,45 @@ def _build_comentarista_payload(matches):
         return construir_comentarios(matches)
     except Exception:
         return {"comentarios": [], "generated": False}
+
+
+def _live_matches_for_commentator(partidos, live_matches):
+    """Foto unica de lo que esta en juego: quiniela + las 5 ligas seguidas.
+
+    El directo no depende de la quiniela: un jueves con la Real Sociedad -
+    Celta y el Toulouse - Lille en juego tiene tanto futbol que comentar como
+    un sabado de jornada, aunque ninguno de esos partidos entre en el boleto.
+    Por eso se mezclan las dos fuentes (la quiniela y el panel externo de las
+    ligas) y se normalizan a una unica forma antes de pasarselas a la IA.
+
+    Cuando el mismo partido llega por los dos caminos gana la copia de la
+    quiniela, que es la que usa el resto de la web para nombrar a los equipos.
+    """
+    merged = {}
+
+    def add(match, home, away):
+        home = str(home or "").strip()
+        away = str(away or "").strip()
+        if not home or not away:
+            return
+        key = (normalize_team_key(home), normalize_team_key(away))
+        if key in merged:
+            return
+        merged[key] = {
+            "local": home,
+            "visitante": away,
+            "minuto": str(match.get("minuto") or match.get("time") or "").strip(),
+            "marcador": str(match.get("marcador") or match.get("score") or "").strip(),
+            "status": str(match.get("status") or "").strip(),
+        }
+
+    for match in partidos or []:
+        add(match, match.get("local"), match.get("visitante"))
+    for match in live_matches or []:
+        home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
+        away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
+        add(match, home, away)
+    return list(merged.values())
 
 
 def _refresh_issue_message(status, skipped, failures):

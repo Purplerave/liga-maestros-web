@@ -523,18 +523,97 @@ function formatKickoffShort(fechaRaw, horaRaw) {
     return formatSmartDate(fechaRaw, horaRaw);
 }
 
+/* ==========================================================================
+   RELOJ DE MADRID — la unica zona que vale en esta web
+   --------------------------------------------------------------------------
+   El servidor entrega TODAS las horas (``today_madrid``, ``added``,
+   ``fecha_raw``/``hora``, ``scheduled``, ``edit_deadline``) como texto sin
+   zona ("2026-09-03 21:00:00") ya convertido a hora de Madrid.
+
+   Interpretar ese texto con ``new Date()`` lo leia en la zona del navegador:
+   en Canarias, en un movil en UTC o de viaje, el saque de las 21:00 caia dos
+   horas mas tarde y el partido se veia como futuro. Con eso el filtro de
+   caducidad daba el directo por muerto justo cuando estaba empezando y la
+   pagina de Directo se quedaba en "no hay partidos en juego" con el Celta
+   jugando. Desde aqui, todo instante se interpreta y se pinta en
+   Europe/Madrid, nunca en la zona local del navegador.
+   ========================================================================== */
+const MADRID_TIMEZONE = "Europe/Madrid";
+
+/* Desplazamiento de Madrid respecto a UTC (ms) en un instante dado. */
+function madridOffsetMs(atMs) {
+    try {
+        const parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone: MADRID_TIMEZONE,
+            hour12: false,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        }).formatToParts(new Date(atMs));
+        const value = type => Number((parts.find(part => part.type === type) || {}).value || 0);
+        const asUtc = Date.UTC(
+            value("year"),
+            value("month") - 1,
+            value("day"),
+            value("hour") % 24,
+            value("minute"),
+            value("second"),
+        );
+        return asUtc - (atMs - (atMs % 1000));
+    } catch (error) {
+        return 0;
+    }
+}
+
+/* "Reloj de pared" de Madrid ("2026-09-03", "21:00") -> instante real (ms).
+   Funciona igual en Madrid, en Canarias o en un navegador en UTC. */
+function madridWallClockToMs(dateText, timeText) {
+    const date = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(dateText || "").trim());
+    if (!date) return null;
+    const time = /^(\d{1,2}):(\d{2})/.exec(String(timeText || "").trim());
+    const naiveUtc = Date.UTC(
+        Number(date[1]),
+        Number(date[2]) - 1,
+        Number(date[3]),
+        time ? Number(time[1]) : 12,
+        time ? Number(time[2]) : 0,
+        0,
+    );
+    if (Number.isNaN(naiveUtc)) return null;
+    // El offset depende del instante (CET/CEST, el cambio de hora cae siempre
+    // de madrugada): una segunda pasada deja el calculo exacto.
+    const offset = madridOffsetMs(naiveUtc - madridOffsetMs(naiveUtc));
+    return naiveUtc - offset;
+}
+
+/* Pinta un instante en hora de Madrid, sea cual sea la zona del navegador. */
+function madridFormatMs(atMs, options) {
+    try {
+        return new Intl.DateTimeFormat("es-ES", { timeZone: MADRID_TIMEZONE, ...options }).format(new Date(atMs));
+    } catch (error) {
+        return new Date(atMs).toLocaleString("es-ES");
+    }
+}
+
 function parseMatchTimestamp(match) {
     if (!match) return null;
-    const fecha = match.fecha_raw || match.fecha || match.added || "";
-    const timePart = (match.hora || match.scheduled || match.time || "").toString().replace(/h$/i, "").trim();
-    if (!fecha && !timePart) return null;
-    const isoDate = String(fecha).slice(0, 10);
-    if (!isoDate || isoDate.length < 8) return null;
-    // Combine the ISO date with the kickoff time part into a full timestamp.
-    const ts = timePart
-        ? new Date(`${isoDate}T${timePart}`).getTime()
-        : new Date(`${isoDate}T12:00`).getTime();
-    return Number.isNaN(ts) ? null : ts;
+    const isoDate = String(match.fecha_raw || match.fecha || match.added || "").slice(0, 10);
+    if (isoDate.length < 8) return null;
+    /* `time` es el minuto en las tarjetas en directo ("63", "45+"), no la hora
+       de saque, y una quiniela sin horario manda hora "-": solo se usa el
+       primer campo que tenga forma de hora (HH:MM). Sin hora conocida se
+       devuelve null en vez de inventar las 12:00, que daba por caducado un
+       partido que seguia en juego. */
+    for (const candidate of [match.hora, match.scheduled, match.time]) {
+        const raw = String(candidate ?? "").replace(/h$/i, "").trim();
+        if (!/^\d{1,2}:\d{2}/.test(raw)) continue;
+        const stamp = madridWallClockToMs(isoDate, raw.slice(0, 5));
+        if (stamp !== null) return stamp;
+    }
+    return null;
 }
 
 function isUpcomingScheduledMatch(match, graceMinutes = 15) {

@@ -130,8 +130,22 @@ def _standings_script(partidos, all_league_matches, teams):
         vm.runInContext(fs.readFileSync(__LOGOS__, "utf8"), context);
         context.findTeamLogo = () => "";
         const now = new Date();
-        const iso = d => d.toISOString().slice(0, 10);
-        const hm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        const MADRID_FMT = new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Europe/Madrid", hour12: false,
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+        const madridClock = d => {
+            const p = {};
+            for (const part of MADRID_FMT.formatToParts(d)) p[part.type] = part.value;
+            const hh = String(Number(p.hour) % 24).padStart(2, "0");
+            return { date: `${p.year}-${p.month}-${p.day}`, time: `${hh}:${p.minute}` };
+        };
+        // El servidor manda las horas en hora de Madrid: el reloj de prueba se
+        // escribe en esa zona (no en la del navegador) para reproducir el
+        // payload real. Con la hora local el saque se leeria desplazado.
+        const iso = d => madridClock(d).date;
+        const hm = d => madridClock(d).time;
         const ago = minutes => {
             const d = new Date(now.getTime() - minutes * 60000);
             return { fecha_raw: iso(d), hora: hm(d) };
@@ -261,8 +275,19 @@ def _live_directo_script(partidos, all_league_matches, live_matches):
         vm.runInContext(fs.readFileSync(__UTILS__, "utf8"), context);
         vm.runInContext(fs.readFileSync(__STATE__, "utf8"), context);
         const now = new Date();
-        const iso = d => d.toISOString().slice(0, 10);
-        const hm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        const MADRID_FMT = new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Europe/Madrid", hour12: false,
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+        const madridClock = d => {
+            const p = {};
+            for (const part of MADRID_FMT.formatToParts(d)) p[part.type] = part.value;
+            const hh = String(Number(p.hour) % 24).padStart(2, "0");
+            return { date: `${p.year}-${p.month}-${p.day}`, time: `${hh}:${p.minute}` };
+        };
+        const iso = d => madridClock(d).date;
+        const hm = d => madridClock(d).time;
         const ago = minutes => {
             const d = new Date(now.getTime() - minutes * 60000);
             return { fecha_raw: iso(d), hora: hm(d), added: iso(d) + " " + hm(d) + ":00", scheduled: hm(d) };

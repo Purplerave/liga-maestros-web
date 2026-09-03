@@ -4,7 +4,18 @@ import os
 import time
 from functools import lru_cache
 
-from flask import Blueprint, abort, jsonify, make_response, render_template, request, send_from_directory, session
+from flask import (
+    Blueprint,
+    abort,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+)
 
 import config
 
@@ -48,6 +59,20 @@ def index():
         from markupsafe import escape
 
         return f"La plantilla no se encontro. Jornada actual: {escape(j)}", 500
+
+
+@bp.route("/directo")
+def directo():
+    """Enlace profundo de la página de DIRECTO.
+
+    El panel EN DIRECTO de la portada enlaza a ``/directo`` y ese enlace se
+    comparte y se guarda en favoritos, pero la vista vive dentro de la SPA
+    (``/?view=LIVE``). Sin esta ruta, entrar al directo desde la portada
+    (o desde un enlace compartido) acababa en un 404.
+    """
+    params = request.args.to_dict()
+    params["view"] = "LIVE"
+    return redirect(url_for("main.index", **params))
 
 
 @bp.route("/landing")

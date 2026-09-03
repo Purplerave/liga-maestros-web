@@ -2,6 +2,47 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-03 — El DIRECTO ya no depende de la quiniela ni del reloj del navegador
+
+### Corregido
+
+- 🔴 **«Ahora mismo no hay partidos en juego» con el Celta jugando.** El
+  servidor mandaba el partido en `live_matches` (Real Sociedad - Celta, minuto
+  21) y la clasificación lo marcaba `en_juego`, pero la página de DIRECTO salía
+  vacía. La causa era el reloj del navegador: el servidor entrega todas las
+  horas como texto sin zona ya en hora de Madrid (`added`, `scheduled`,
+  `fecha_raw`/`hora`) y el cliente las metía en `new Date()`, que las lee en la
+  zona local. En Canarias, con el móvil en UTC o de viaje, el saque de las
+  21:00 caía más tarde, el partido parecía futuro y el filtro de caducidad lo
+  descartaba justo al empezar.
+  - `parseMatchTimestamp` interpreta y pinta todo en `Europe/Madrid`
+    (`madridWallClockToMs`, `madridFormatMs`), igual que hace el servidor.
+  - El minuto en juego (`time: "21"`) ya no se confunde con la hora de saque, y
+    una quiniela sin horario (`hora: "-"`) devuelve `null` en vez de inventar
+    las 12:00, que daba el partido por caducado mientras seguía en juego.
+  - Cuando el servidor ya trae `live_matches`, el navegador deja de volver a
+    decidir quién está en juego con su propio reloj: solo descarta lo que el
+    servidor marca como terminado. El criterio local queda como respaldo para
+    cuando esa lista llega vacía.
+  - También se corrige la cuenta atrás de la portada y la ventana de jornada
+    (`matchKickoffTime`), que se descolocaban fuera de la península.
+- **El DIRECTO funciona con las 5 ligas sin quiniela.** El comentarista (MiMo)
+  recibía solo los 15 partidos del boleto: un jueves con la Real Sociedad -
+  Celta y el Toulouse - Lille en juego se quedaba sin comentarios aunque el
+  directo estuviera lleno. Ahora se le pasa la foto completa (quiniela + panel
+  de LaLiga, Segunda, Premier, Bundesliga y Ligue 1), deduplicada por pareja de
+  equipos y con la quiniela primero.
+- **`/directo` ya no es un 404.** El botón «VER DIRECTO COMPLETO →» de la
+  portada enlazaba a una ruta que no existía; ahora redirige a
+  `/?view=LIVE` conservando la jornada de la URL.
+
+### Añadido
+
+- `tests/test_directo_independiente_quiniela.py`: el parte real del 03/09/2026
+  reproducido en seis husos horarios (Madrid, Canarias, Londres, UTC, Nueva
+  York y Tokio), el respaldo sin lista del servidor, la dedup quiniela/panel y
+  el enlace profundo del directo.
+
 ## 2026-08-28 — Directos fuera de la quiniela en la portada
 
 ### Arreglado

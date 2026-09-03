@@ -83,12 +83,25 @@ function setTrashTalkIdx() {}
 function startTrashTalkRotation() {}
 function triggerProgressPop() {}
 function loadSeasonSummary() {}
+/* El cierre de la quiniela llega del servidor en hora de Madrid
+   ("2026-09-05 16:45"). Leerlo con `new Date()` lo interpretaba en la zona del
+   navegador y la cuenta atras se descolocaba horas fuera de la peninsula. */
+function _coverDeadlineMs(raw) {
+    const text = String(raw || "").trim();
+    if (!text) return null;
+    if (typeof madridWallClockToMs === "function") {
+        return madridWallClockToMs(text.slice(0, 10), text.slice(11, 16));
+    }
+    const parsed = Date.parse(text.replace(" ", "T"));
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
 function coverCloseLabel() {
     const raw = state?.data?.edit_deadline || state?.data?.kickoff_at || "";
     if (!raw) return state?.data?.is_locked ? "cerrada" : "abierta";
-    const date = new Date(String(raw).replace(" ", "T"));
-    if (Number.isNaN(date.getTime())) return state?.data?.is_locked ? "cerrada" : "abierta";
-    const diff = date.getTime() - Date.now();
+    const date = _coverDeadlineMs(raw);
+    if (!date) return state?.data?.is_locked ? "cerrada" : "abierta";
+    const diff = date - Date.now();
     if (diff <= 0 || state?.data?.is_locked) return "cerrada";
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
@@ -382,9 +395,9 @@ function _closed(m) {
 }
 function _diffParts(deadline) {
     if (!deadline) return { d: 0, h: 0, m: 0, s: 0, ms: 0, urgent: false };
-    const target = new Date(String(deadline).replace(" ", "T"));
-    if (Number.isNaN(target.getTime())) return { d: 0, h: 0, m: 0, s: 0, ms: 0, urgent: false };
-    const ms = Math.max(0, target.getTime() - Date.now());
+    const target = _coverDeadlineMs(deadline);
+    if (!target) return { d: 0, h: 0, m: 0, s: 0, ms: 0, urgent: false };
+    const ms = Math.max(0, target - Date.now());
     const s = Math.floor(ms / 1000);
     return {
         d: Math.floor(s / 86400),
