@@ -169,10 +169,7 @@ def _add_team_logos(matches, team_logos):
 
 def _is_live_match(match):
     status = str(match.get("status") or "").upper()
-    if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
-        return False
-    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
-    return not match_date or match_date == today_madrid()
+    return is_live_status(status) or "LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")
 
 
 def _load_external_matches():
