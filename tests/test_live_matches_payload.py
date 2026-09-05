@@ -293,3 +293,30 @@ def test_genuine_live_match_with_fresh_data_stays_in_directo(monkeypatch):
 
     assert league_matches.build_all_league_matches("", [], {}, {})[0]["status"] == "IN PLAY"
     assert len(league_matches.build_live_matches([], {})) == 1
+
+
+def test_live_match_different_date_than_today_madrid_is_included(monkeypatch):
+    """Un partido en directo cuyo fecha_raw/added tenga fecha diferente a today_madrid no se descarta."""
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-09-05")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 8, 16, 21, 35, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    partidos = [
+        {
+            "id": 1,
+            "local": "Real Madrid",
+            "visitante": "Barcelona",
+            "status": "LIVE",
+            "minuto": "35",
+            "marcador": "1-0",
+            "fecha_raw": "2026-08-16",
+            "hora": "21:00",
+            "logo_local": "",
+            "logo_visitante": "",
+        }
+    ]
+    matches = league_matches.build_live_matches(partidos, {})
+    assert len(matches) == 1
+    assert matches[0]["local"] == "Real Madrid"
