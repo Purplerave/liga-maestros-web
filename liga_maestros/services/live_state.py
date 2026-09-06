@@ -44,10 +44,20 @@ PENDING_STATUSES = frozenset({"", "NS", "SCHEDULED", "NOT STARTED", "TBD", "POST
 
 # Sin noticias del proveedor durante este tiempo, el directo se cierra.
 NO_UPDATE_TIMEOUT = timedelta(minutes=30)
-# 90 minutos + descanso + prolongacion razonable: pasado esto el partido acabo.
-FULL_MATCH_WINDOW = timedelta(minutes=120)
-# Margen antes del inicio en el que un LIVE aun es creible (retrasos de reloj).
-PREKICKOFF_TOLERANCE = timedelta(minutes=5)
+# Ventana maxima de un partido: retraso de saque (~20') + 90' + descanso (~15')
+# + parajes/VAR (~15') + margen. Con 120' se cerraban como finales partidos
+# que seguian jugandose (saque retrasado o muchas parajes), congelando un
+# marcador parcial como resultado final. 150' no puede cortar un partido real.
+FULL_MATCH_WINDOW = timedelta(minutes=150)
+# Margen antes del inicio en el que un LIVE aun es creible. La quiniela y el
+# proveedor imprimen la hora programada: saques con 10-20' de retraso son
+# rutinarios y un directo confirmado en esa banda es perfectamente real.
+PREKICKOFF_TOLERANCE = timedelta(minutes=20)
+# Tolerancia del minuto emitido frente al reloj: el minuto solo puede correr
+# MAS LENTO que el reloj (descanso, parajes), nunca mas rapido. 15' hacia
+# falsos imposibles con saques retrasados; 30' solo caza snapshots de otro
+# partido.
+MINUTE_CLOCK_TOLERANCE = 30
 # Un partido programado que ya deberia haber acabado y sigue "pendiente".
 PENDING_OVERDUE_AFTER = timedelta(hours=3)
 
@@ -57,6 +67,11 @@ RESET_TO_SCHEDULED = "reset_to_scheduled"
 CLOSE_FINAL = "close_final"
 CLOSE_NO_DATA = "close_no_data"
 PENDING_OVERDUE = "pending_overdue"
+# Snapshot que no se debe escribir ni cerrar: incoherente ahora (p. ej. minuto
+# por delante del reloj con saque retrasado) pero la fila conserva su estado
+# anterior y se reevalua en la siguiente pasada. Nunca congela un marcador
+# parcial disfrazandolo de final.
+SKIP_SNAPSHOT = "skip_snapshot"
 
 # Estado con el que se marca un directo cerrado sin datos suficientes para dar
 # el partido por finalizado oficialmente. La web ya lo trata como terminado.
@@ -114,6 +129,7 @@ def evaluate_match_state(
     minute=None,
     no_update_timeout=NO_UPDATE_TIMEOUT,
     full_match_window=FULL_MATCH_WINDOW,
+    close_minute_ahead=False,
 ):
     """Decide what to do with a match row. Pure function, no IO.
 
@@ -123,6 +139,14 @@ def evaluate_match_state(
     ``last_update_at`` is when a provider last confirmed this row. When it is
     unknown (legacy rows written before the column existed) the freshness rule
     is skipped and only the impossible-state and schedule rules apply.
+
+    ``close_minute_ahead`` elige que hacer con un minuto que va por delante
+    del reloj mientras la ventana sigue abierta. En las filas de la quiniela
+    (default, False) el snapshot no se escribe ni se cierra (SKIP_SNAPSHOT):
+    cerrarlo congelaba marcadores parciales que la web mostraba como resultado
+    final. En el panel externo de solo lectura (True) si se cierra como STALE:
+    es un fallback de pintado sin sello de frescura por partido y el snapshot
+    se reemplaza entero en la siguiente pasada del colector.
     """
     now = _as_naive(now)
     kickoff_at = _as_naive(kickoff_at)
@@ -149,25 +173,34 @@ def evaluate_match_state(
             minute="",
         )
 
-    # 2. Imposible por reloj: el minuto emitido va por delante del tiempo real
-    #    transcurrido desde el inicio (p. ej. minuto 90 a los 10 minutos).
+    # 2. Sin actualizaciones del proveedor: el directo deja de ser creible.
+    #    Se comprueba ANTES que el reloj para que un feed congelado no
+    #    sobreviva 30' sin datos solo porque su minuto parezca coherente.
+    if last_update_at is not None and now - last_update_at >= no_update_timeout:
+        return _decision(CLOSE_NO_DATA, "sin_actualizacion_30min", status=NO_DATA_STATUS, minute=NO_DATA_MINUTE)
+
+    # 3. Imposible por reloj: el minuto emitido va por delante del tiempo real
+    #    transcurrido desde el inicio (p. ej. minuto 90 a los 10 minutos). Con
+    #    la ventana cerrada se finaliza; si la ventana sigue abierta depende
+    #    del contexto: SKIP en la quiniela (no escribir, no cerrar: la fila
+    #    conserva su estado y la siguiente pasada reevalua; un saque retrasado
+    #    30' produce minutos "adelantados" perfectamente legitimos), CLOSE en
+    #    el panel externo de solo lectura.
     if kickoff_at and _minute_ahead_of_clock(minute, kickoff_at, now):
         if now >= kickoff_at + full_match_window:
             return _decision(CLOSE_FINAL, "minuto_imposible_ventana_agotada", status=FINAL_STATUS, minute=FINAL_MINUTE)
-        return _decision(CLOSE_NO_DATA, "minuto_imposible", status=NO_DATA_STATUS, minute=NO_DATA_MINUTE)
+        if close_minute_ahead:
+            return _decision(CLOSE_NO_DATA, "minuto_imposible", status=NO_DATA_STATUS, minute=NO_DATA_MINUTE)
+        return _decision(SKIP_SNAPSHOT, "minuto_por_delante_del_reloj")
 
-    # 3. Ventana maxima de partido agotada: cierre definitivo.
+    # 4. Ventana maxima de partido agotada: cierre definitivo.
     if kickoff_at and now >= kickoff_at + full_match_window:
         return _decision(CLOSE_FINAL, "ventana_de_partido_agotada", status=FINAL_STATUS, minute=FINAL_MINUTE)
-
-    # 4. Sin actualizaciones del proveedor: el directo deja de ser creible.
-    if last_update_at is not None and now - last_update_at >= no_update_timeout:
-        return _decision(CLOSE_NO_DATA, "sin_actualizacion_30min", status=NO_DATA_STATUS, minute=NO_DATA_MINUTE)
 
     return _decision(KEEP, "live_coherente")
 
 
-def _minute_ahead_of_clock(minute, kickoff_at, now, tolerance_minutes=15):
+def _minute_ahead_of_clock(minute, kickoff_at, now, tolerance_minutes=MINUTE_CLOCK_TOLERANCE):
     """True when the broadcast minute cannot fit the elapsed real time.
 
     The clock can only run slower than real time (half-time break, stoppages),

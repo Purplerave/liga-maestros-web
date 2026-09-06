@@ -126,8 +126,12 @@ def parse_detail_datetime(text, now=None):
 
 def fetch_html(url=URL):
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) LigaMaestros/1.0",
-        "Accept-Language": "es-ES,es;q=0.9",
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
     }
     response = requests.get(url, headers=headers, timeout=25)
     response.raise_for_status()

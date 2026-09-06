@@ -19,6 +19,7 @@ from ..utils import (
     parse_db_match_datetime,
     parse_score_text,
     signo_for_match,
+    team_key_variants,
 )
 from .highlightly_limits import (
     get_highlightly_circuit,
@@ -27,7 +28,7 @@ from .highlightly_limits import (
     record_highlightly_success,
     reserve_highlightly_calls,
 )
-from .live_state import closes_live, evaluate_match_state, is_live_status
+from .live_state import KEEP, evaluate_match_state, is_live_status
 from .ticket import madrid_now, today_madrid
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,11 @@ HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").stri
     "yes",
     "on",
 )
-HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "1")))
+# Presupuesto de llamadas por pasada de refresco. Con 1 llamada, una jornada
+# que ocupa varias fechas (vie/sab/dom) solo refrescaba "hoy": los partidos
+# terminados de ayer quedaban para siempre en NS ("no aparecen"). 4 llamadas
+# cubren una jornada tipica de fin de semana (2-3 fechas + garantia Liga F).
+HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "4")))
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
     item.strip().upper() for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",") if item.strip()
 }
@@ -88,6 +93,19 @@ def resolve_jornada(conn, jornada=None):
     raw = str(jornada or "").strip()
     if raw.isdigit():
         return int(raw)
+    # Sin jornada explicita hay que usar la jornada ACTIVA de la temporada
+    # publicada (J1..42), no MAX(jornada): la BD conserva jornadas 51-76 del
+    # periodo de pruebas 2025/26 y con MAX() el sync, el refresco manual y el
+    # refresh-all apuntaban a la quiniela nordica de agosto en vez de a la
+    # jornada en juego.
+    from .jornada import resolve_active_jornada
+
+    try:
+        active = resolve_active_jornada(conn)
+    except Exception:
+        active = None
+    if active:
+        return int(active)
     row = conn.execute("SELECT MAX(jornada) FROM resultados").fetchone()
     return row[0] if row and row[0] is not None else None
 
@@ -419,6 +437,25 @@ def refresh_dates_for_jornada(conn, jornada=None):
     return sorted(dates)
 
 
+def _find_feed_item(feed, local_raw, visitante_raw):
+    """Busca el partido del feed cruzando nombres por variantes.
+
+    El feed esta indexado por pares de claves canonicas del proveedor en
+    ambas orientaciones. Aqui se prueban las variantes de cada lado
+    (canonico, base sin sufijo femenino, base con sufijos F/FEMENINO), de
+    modo que "Barcelona (F)" cruza con "Barcelona Femenino" o
+    "Logrono (F)" con "EDF Logrono" aunque los sufijos de origen difieran.
+    El cruce masculino/femenino sigue siendo imposible: las variantes
+    respetan el genero del nombre original.
+    """
+    for local_variant in team_key_variants(local_raw):
+        for visit_variant in team_key_variants(visitante_raw):
+            item = feed.get((local_variant, visit_variant))
+            if item:
+                return item
+    return None
+
+
 def refresh_current_matches_from_highlightly(force=False, jornada=None):
     global _highlightly_last_refresh
     HIGHLIGHTLY_API_KEY = os.getenv("HIGHLIGHTLY_API_KEY", "")
@@ -441,7 +478,11 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
             calls_left = HIGHLIGHTLY_MAX_CALLS_PER_REFRESH
             dates = refresh_dates_for_jornada(conn, target_jornada)
             today = today_madrid()
-            dates = sorted(dates, key=lambda item: (item != today, item))
+            # Fechas pasadas primero: son partidos terminados que necesitan
+            # recuperar su resultado (catch-up). Con el orden anterior (hoy
+            # primero) y presupuesto bajo, "ayer" nunca recibia llamada y sus
+            # resultados no aparecian aunque se hubiera jugado.
+            dates = sorted(dates)
             for date_text in dates:
                 if calls_left <= 0:
                     break
@@ -471,17 +512,6 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     away_key = normalize_team_key(away_name)
                     feed[(home_key, away_key)] = (match, False)
                     feed[(away_key, home_key)] = (match, True)
-                    # Additional feminine fallback: if team is feminine, also register base name without FEMENINO
-                    # to match quiniela entries that may have omitted (F) marker (e.g. Alaves vs Valencia F)
-                    for hk, ak in [(home_key, away_key)]:
-                        # Try base variants
-                        for key in (hk, ak):
-                            if key.endswith(" FEMENINO"):
-                                base = key[: -len(" FEMENINO")].strip()
-                                # Register base variants for cross-matching
-                                if base:
-                                    # home base vs away, etc will be handled via separate logic below
-                                    pass
 
                 if home_name and home_team.get("logo"):
                     logos[home_name.upper()] = home_team["logo"]
@@ -507,49 +537,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     continue
                 local_key = normalize_team_key(row["local"])
                 visit_key = normalize_team_key(row["visitante"])
-                feed_item = feed.get((local_key, visit_key))
-                # CEO fix Liga F: if not found, try feminine/base cross-matching
-                if not feed_item:
-                    # If one side is known feminine canonical but the other is ambiguous (Alaves),
-                    # try treating Alaves as feminine too
-                    alt_local_keys = [local_key]
-                    alt_visit_keys = [visit_key]
-                    # If key is ALAVES and the opponent is feminine, try ALAVES FEMENINO
-                    feminine_set = {
-                        "VALENCIA FEMENINO",
-                        "ALAVES FEMENINO",
-                        "ATHLETIC CLUB FEMENINO",
-                        "EIBAR FEMENINO",
-                        "ESPANYOL FEMENINO",
-                        "REAL MADRID FEMENINO",
-                        "ATLETICO MADRID FEMENINO",
-                        "LEVANTE LAS PLANAS",
-                    }
-                    if local_key == "ALAVES" and visit_key in feminine_set:
-                        alt_local_keys.append("ALAVES FEMENINO")
-                    if visit_key == "ALAVES" and local_key in feminine_set:
-                        alt_visit_keys.append("ALAVES FEMENINO")
-                    # Try all combinations
-                    for lk in alt_local_keys:
-                        for vk in alt_visit_keys:
-                            feed_item = feed.get((lk, vk))
-                            if feed_item:
-                                break
-                        if feed_item:
-                            break
-                    # Also try stripping FEMENINO for matching
-                    if not feed_item:
-                        for lk in alt_local_keys:
-                            base_lk = lk[: -len(" FEMENINO")].strip() if lk.endswith(" FEMENINO") else lk
-                            for vk in alt_visit_keys:
-                                base_vk = vk[: -len(" FEMENINO")].strip() if vk.endswith(" FEMENINO") else vk
-                                feed_item = (
-                                    feed.get((base_lk, base_vk)) or feed.get((lk, base_vk)) or feed.get((base_lk, vk))
-                                )
-                                if feed_item:
-                                    break
-                            if feed_item:
-                                break
+                feed_item = _find_feed_item(feed, row["local"], row["visitante"])
 
                 if not feed_item:
                     continue
@@ -563,7 +551,9 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
 
                 # Reject incoherent live snapshots (kickoff still ahead, minute
                 # running faster than the clock): writing them is exactly how a
-                # match got stuck at LIVE 90' with a 17:00 kickoff.
+                # match got stuck at LIVE 90' with a 17:00 kickoff. SKIP_SNAPSHOT
+                # (minuto por delante con ventana abierta) tampoco se escribe:
+                # la fila conserva su ultimo estado bueno.
                 if is_live_status(status):
                     decision = evaluate_match_state(
                         status,
@@ -572,7 +562,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                         last_update_at=now.replace(tzinfo=None),
                         minute=minute,
                     )
-                    if closes_live(decision["action"]):
+                    if decision["action"] != KEEP:
                         logger.warning(
                             "Snapshot LIVE incoherente descartado j=%s partido=%s motivo=%s",
                             target_jornada,

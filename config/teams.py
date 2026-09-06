@@ -64,6 +64,11 @@ TEAM_LOGO_ALIASES = {
     "REAL SPORTING DE GIJON": "SPORTING GIJON",
     "REAL SPORTING GIJON": "SPORTING GIJON",
     "SPORTING DE GIJON": "SPORTING GIJON",
+    # La quiniela publica "Sporting"/"Sporting Gijon" para el filial asturiano;
+    # sin estas dos claves el cruce con el proveedor fallaba y el partido
+    # quedaba para siempre sin resultado (J4 2026/27, Sporting - Girona).
+    "SPORTING": "SPORTING GIJON",
+    "SPORTING GIJON": "SPORTING GIJON",
     "REAL VALLADOLID CF": "VALLADOLID",
     "REAL VALLADOLID": "VALLADOLID",
     "VALLADOLID CF": "VALLADOLID",
@@ -263,6 +268,22 @@ TEAM_LOGO_ALIASES = {
     "LOGROÑO UNITED": "LOGROÑO UNITED",
     "DUX LOGRONO": "LOGROÑO UNITED",
     "DUX LOGRONO F": "LOGROÑO UNITED",
+    # La quiniela llama "Edf Logrono" al club que la web conoce como
+    # "Logrono (F)": sin estas claves el cruce por partido_id se descartaba y
+    # el resultado nunca entraba (J4 2026/27, Edf Logrono - Athletic Club (F)).
+    "EDF LOGRONO": "LOGROÑO UNITED",
+    "EDF LOGRONO F": "LOGROÑO UNITED",
+    "EDF LOGRONO FEMENINO": "LOGROÑO UNITED",
+    "LOGRONO": "LOGROÑO UNITED",
+    "LOGRONO F": "LOGROÑO UNITED",
+    "LOGRONO FEMENINO": "LOGROÑO UNITED",
+    # Barca femenino: "Barcelona (F)" quedaba en "BARCELONA F" sin canonico y
+    # no cruzaba con "Barcelona Femenino" del proveedor.
+    "BARCELONA F": "BARCELONA FEMENINO",
+    "BARCELONA FEMENINO": "BARCELONA FEMENINO",
+    "FC BARCELONA F": "BARCELONA FEMENINO",
+    "FC BARCELONA FEMENINO": "BARCELONA FEMENINO",
+    "BARCELONA WOMEN": "BARCELONA FEMENINO",
 }
 
 # Leagues shown in standings tabs.

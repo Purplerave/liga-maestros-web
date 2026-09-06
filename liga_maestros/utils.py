@@ -62,7 +62,51 @@ def _is_feminine_raw(value):
         return True
     if "FEMENINO" in raw or "FEMENINA" in raw or " WOMEN" in raw:
         return True
+    # Proveedores ingleses usan "(W)" / " W" como marcador femenino.
+    if re.search(r"\(W\)(\s|$)", raw) or re.search(r"\sW(\s|$)", raw) or raw.endswith(" W"):
+        return True
     return False
+
+
+def team_key_variants(value):
+    """Variantes de clave de un equipo respetando su genero.
+
+    Devuelve el canonico (``normalize_team_key``), la base sin sufijo
+    femenino y la base con sufijo femenino. Solo se usan para cruzar dos
+    nombres que ya comparten genero (ver ``team_keys_compatible``): asi
+    "Barcelona (F)" (canonico BARCELONA FEMENINO) cruza con
+    "Barcelona Femenino" aunque los sufijos de origen difieran, sin llegar
+    a cruzar nunca el Sevilla masculino con el Sevilla femenino.
+    """
+    key = normalize_team_key(value)
+    base = key
+    for suffix in (" FEMENINO", " F"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)].strip()
+            break
+    variants = {key, base, f"{base} FEMENINO", f"{base} F"}
+    variants.discard("")
+    return variants
+
+
+def team_keys_compatible(a, b):
+    """True si dos nombres pueden referirse al mismo equipo.
+
+    Regla de oro del cruce quiniela <-> proveedor: los canonicos exactos
+    ganan; si difieren, solo se acepta variante de sufijo femenino cuando
+    AMBOS nombres son femeninos (un "(F)" nunca puede casar con el equipo
+    masculino). Evita tanto los falsos negativos ("Edf Logrono" vs
+    "Logrono (F)") como los falsos positivos (Sevilla vs Sevilla (F)).
+    """
+    key_a = normalize_team_key(a)
+    key_b = normalize_team_key(b)
+    if not key_a or not key_b:
+        return False
+    if key_a == key_b:
+        return True
+    if _is_feminine_raw(a) != _is_feminine_raw(b):
+        return False
+    return bool(team_key_variants(a) & team_key_variants(b))
 
 
 def normalize_team_key(value):
