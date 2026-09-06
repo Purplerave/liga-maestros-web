@@ -192,8 +192,7 @@ class TestAplicarResultadosQ15:
 
         assert updates == 11
         rows = {
-            row["partido_id"]: row
-            for row in j4_db.execute("SELECT * FROM resultados WHERE jornada = 4").fetchall()
+            row["partido_id"]: row for row in j4_db.execute("SELECT * FROM resultados WHERE jornada = 4").fetchall()
         }
         # Terminados del sabado y domingo (el "0-5 del barsa" incluido).
         assert (rows[4]["goles_local"], rows[4]["goles_visitante"], rows[4]["status"]) == (0, 5, "FT")
@@ -257,9 +256,7 @@ class TestHorariosReparados:
         migracion debe alinear las filas NS con el horario corregido."""
         from liga_maestros.db import migrations
 
-        horarios_malos = {
-            num: ("2026-09-05", "17:00") if num % 2 else ("2026-09-06", "21:30") for num in DB_J4
-        }
+        horarios_malos = {num: ("2026-09-05", "17:00") if num % 2 else ("2026-09-06", "21:30") for num in DB_J4}
         conn = _conn_j4(horarios=horarios_malos)
         # Un partido ya finalizado con marcador: no se toca.
         conn.execute(
@@ -276,10 +273,7 @@ class TestHorariosReparados:
 
         migrations.ensure_jornada_completa(conn, 4)
 
-        rows = {
-            row["partido_id"]: row
-            for row in conn.execute("SELECT * FROM resultados WHERE jornada = 4").fetchall()
-        }
+        rows = {row["partido_id"]: row for row in conn.execute("SELECT * FROM resultados WHERE jornada = 4").fetchall()}
         # Espanyol - Sevilla: el boleto decia lunes 19:30, es domingo 21:00.
         assert (rows[7]["fecha"], rows[7]["hora"]) == ("2026-09-06", "21:00")
         # Valencia - Barcelona: el boleto decia 17:00, real 16:15.
@@ -297,9 +291,7 @@ class TestRefrescoHighlightly:
         conn = _conn_j4()
         # Sabado terminado sin recoger (status NS sin goles) + domingo en juego.
         for num in (1, 2, 3, 8):
-            conn.execute(
-                "UPDATE resultados SET fecha='2026-09-05' WHERE partido_id = ?", (num,)
-            )
+            conn.execute("UPDATE resultados SET fecha='2026-09-05' WHERE partido_id = ?", (num,))
         conn.commit()
 
         fetched_dates = []
