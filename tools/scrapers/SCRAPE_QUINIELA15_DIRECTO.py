@@ -12,7 +12,16 @@ from liga_maestros import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
-REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0"}
+# Cabeceras de navegador reales: el UA pelado "Mozilla/5.0" es facil de
+# bloquear y dejaba el directo de la quiniela sin datos toda la jornada.
+REQUEST_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+}
 
 
 def fetch_page(url, attempts=3):

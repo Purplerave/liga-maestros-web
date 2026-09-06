@@ -37,6 +37,8 @@ from liga_maestros.services.live_state import (  # noqa: E402
     CLOSE_FINAL,
     FINAL_MINUTE,
     FINAL_STATUS,
+    FULL_MATCH_WINDOW,
+    KEEP,
     NO_UPDATE_TIMEOUT,
     RESET_TO_SCHEDULED,
     closes_live,
@@ -374,7 +376,16 @@ def write_q15_directo_cache(jornada):
         return {"matches": 0, "last_success_per_match": {}}
     started_at = time.time()
     payload = scrape_q15_directo(int(jornada))
-    matches = validate_q15_payload(payload, jornada)
+    try:
+        matches = validate_q15_payload(payload, jornada)
+    except ValueError as exc:
+        # Un boleto con 14 filas parseadas vale mas que cero: la validacion
+        # estricta dejaba la jornada entera sin resultados por una sola fila
+        # que la web de origen cambiara. Se aplica lo parseado y se avisa.
+        matches = payload.get("matches") or []
+        if not matches:
+            raise
+        log_line(f"q15_partial_payload={len(matches)}/15 reason={exc}")
     fetched_at = madrid_now().isoformat(timespec="seconds")
     payload["fetched_at"] = fetched_at
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -452,7 +463,13 @@ def apply_q15_results_to_db(jornada, payload):
             q15_away = utils.normalize_team_key(match.get("visitante"))
             db_home = utils.normalize_team_key(row["local"])
             db_away = utils.normalize_team_key(row["visitante"])
-            if q15_home and q15_away and (q15_home != db_home or q15_away != db_away):
+            # Cruce por nombre tolerante: la quiniela publica "Edf Logrono",
+            # "Sporting Gijon" o "Alaves Femenino" donde la BD guarda
+            # "Logrono (F)", "Sporting" o "Alaves (F)". La igualdad estricta
+            # descartaba el resultado para siempre (partidos que "no salian").
+            if not utils.team_keys_compatible(match.get("local"), row["local"]) or not utils.team_keys_compatible(
+                match.get("visitante"), row["visitante"]
+            ):
                 log_line(
                     "q15_team_mismatch_skipped "
                     f"id={partido_id} q15={match.get('local')}|{match.get('visitante')} "
@@ -472,7 +489,10 @@ def apply_q15_results_to_db(jornada, payload):
                 status = "FT"
             elif q15_status == "STALE":
                 kickoff_at = parse_madrid_datetime(row["fecha"], row["hora"])
-                if not kickoff_at or madrid_now() < kickoff_at + timedelta(minutes=105):
+                # Umbral = ventana completa de partido: con 105' se marcaba FT
+                # un partido aun en juego (saque retrasado, muchas parajes) y
+                # el marcador parcial quedaba congelado como resultado final.
+                if not kickoff_at or madrid_now() < kickoff_at + FULL_MATCH_WINDOW:
                     continue
                 status = "FT"
             else:
@@ -480,7 +500,8 @@ def apply_q15_results_to_db(jornada, payload):
             match_minute = str(match.get("minute") or ("Finalizado" if status == "FT" else "")).strip()
 
             # A provider snapshot must never (re)open an impossible live state,
-            # e.g. LIVE minute 90 on a match that kicks off later today.
+            # e.g. LIVE minute 90 on a match that kicks off later today, nor
+            # overwrite a good row with a skipped/incoherent snapshot.
             if is_live_status(status):
                 decision = evaluate_match_state(
                     status,
@@ -489,7 +510,7 @@ def apply_q15_results_to_db(jornada, payload):
                     last_update_at=now,
                     minute=match_minute,
                 )
-                if closes_live(decision["action"]):
+                if decision["action"] != KEEP:
                     log_line(f"q15_live_incoherente_descartado id={partido_id} reason={decision['reason']}")
                     continue
 

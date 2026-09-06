@@ -42,6 +42,11 @@ def _close_stale_live_match(match):
         last_update_at=_match_updated_at(match),
         minute=match.get("time") or match.get("minute") or match.get("minuto"),
         full_match_window=STALE_LIVE_AFTER,
+        # Panel externo de solo lectura: aqui si se cierra un minuto imposible
+        # (fallback de pintado; el snapshot se reemplaza entero en la siguiente
+        # pasada). Las filas de la quiniela usan el default (SKIP) para no
+        # congelar marcadores parciales como finales.
+        close_minute_ahead=True,
     )
     if not closes_live(decision["action"]):
         return match
