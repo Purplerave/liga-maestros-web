@@ -14,15 +14,72 @@ logger = logging.getLogger(__name__)
 
 _collector_started = False
 _collector_lock = threading.Lock()
+_owner_lock_fh = None
 
 
 def _truthy(value):
     return str(value or "").strip().lower() in ("1", "true", "yes", "on")
 
 
+def _acquire_owner_lock():
+    """Un solo collector por disco: bloquea el fichero y dice si nos toca.
+
+    El collector es un hilo dentro del proceso web. Si el despliegue arranca mas
+    de un worker (gunicorn/uwsgi, o un reinicio con el proceso viejo aun vivo),
+    cada worker duplica las llamadas a la API y se pisan los JSON del panel: la
+    cuota diaria se agota a mitad de la jornada del finde y los resultados dejan de
+    llegar. Con un flock por fichero, el segundo proceso no colecciona.
+
+    Devuelve el manejador abierto (el llamador lo guarda: si se cierra o se deja
+    morir, se suelta el lock) o ``None`` cuando otro proceso ya es el dueno.
+    """
+    try:
+        import fcntl
+    except ImportError:  # Windows (desarrollo): sin flock, un solo collector de todos modos
+        return object()
+
+    import config
+
+    lock_path = os.path.join(config.DATA_DIR, "LIVE_COLLECTOR_OWNER.lock")
+    try:
+        os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+        handle = open(lock_path, "a+")
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return None
+    except Exception:
+        return None
+    try:
+        handle.seek(0)
+        handle.truncate()
+        handle.write(str(os.getpid()))
+        handle.flush()
+    except Exception:
+        pass
+    return handle
+
+
+def _release_owner_lock():
+    global _owner_lock_fh
+    handle = _owner_lock_fh
+    _owner_lock_fh = None
+    if handle is None:
+        return
+    try:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    except Exception:
+        pass
+    try:
+        handle.close()
+    except Exception:
+        pass
+
+
 def start_web_collector(app):
     """Start the background collector when WEB_COLLECTOR_ENABLED=1."""
-    global _collector_started
+    global _collector_started, _owner_lock_fh
     if not _truthy(os.getenv("WEB_COLLECTOR_ENABLED", "0")):
         logger.info("web_collector=disabled")
         return
@@ -32,6 +89,14 @@ def start_web_collector(app):
             logger.info("web_collector=already_running")
             return
         _collector_started = True
+
+    _owner_lock_fh = _acquire_owner_lock()
+    if _owner_lock_fh is None:
+        # Otro proceso del mismo despliegue ya colecciona: no se duplican llamadas
+        # a la API ni escrituras al panel.
+        _collector_started = False
+        logger.info("web_collector=otro_proceso_ya_colecciona")
+        return
 
     interval = int(os.getenv("WEB_COLLECTOR_INTERVAL_SECONDS", "60"))
     highlightly_interval = int(os.getenv("WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS", "60"))
@@ -47,6 +112,15 @@ def start_web_collector(app):
         from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
 
         log_line("web_collector=start")
+        # Cierre de huecos al arrancar: tras un despliegue o un reinicio del
+        # proceso (Alwaysdata lo hace con frecuencia), lo que no se capturo
+        # mientras el collector estaba caido hay que ir a buscarlo YA, no cuando
+        # vuelva a abrir una ventana de partido. Es la diferencia entre "el
+        # sabado no aparece ningun resultado" y que aparezca en 1 minuto.
+        try:
+            run_once(force=True, q15=q15_enabled, highlightly_interval=0)
+        except Exception as exc:
+            logger.warning("web_collector=catchup_failed error=%s", exc)
         logger.info(
             "web_collector=started interval=%s highlightly_interval=%s q15=%s",
             interval,
@@ -71,7 +145,13 @@ def start_web_collector(app):
                 sleep_seconds = max(60, min(interval or 60, 300))
             time.sleep(max(30, int(sleep_seconds)))
 
-    thread = threading.Thread(target=_loop, name="liga-web-collector", daemon=True)
+    def _guarded_loop():
+        try:
+            _loop()
+        finally:
+            _release_owner_lock()
+
+    thread = threading.Thread(target=_guarded_loop, name="liga-web-collector", daemon=True)
     thread.start()
     app.extensions["web_collector_thread"] = thread
     logger.info("web_collector=thread_started")

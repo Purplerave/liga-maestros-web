@@ -24,10 +24,33 @@ from ..services.highlightly import (
     trigger_highlightly_refresh_async,
 )
 from ..services.ticket import validate_q15_payload
-from ..utils import safe_read_json
+from ..utils import MADRID_TZ, safe_read_json
 
 bp = Blueprint("live", __name__)
 logger = logging.getLogger(__name__)
+
+
+def _madrid_from_timestamp(value):
+    """Epoch -> datetime en hora de Madrid.
+
+    El servidor corre en UTC: ``datetime.fromtimestamp(ts)`` sin zona devolvia el
+    reloj de UTC, y «ultima sincronizacion 19:04» queria decir en realidad 21:04
+    en Madrid. Todas las horas que se ensenan pasan por aqui.
+    """
+    try:
+        return datetime.fromtimestamp(float(value), MADRID_TZ)
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _madrid_hm(value):
+    dt = _madrid_from_timestamp(value)
+    return dt.strftime("%H:%M") if dt else "--:--"
+
+
+def _madrid_iso(value):
+    dt = _madrid_from_timestamp(value)
+    return dt.isoformat(timespec="seconds") if dt else ""
 
 
 def _build_q15_cache_status(jornada):
@@ -53,7 +76,7 @@ def _build_q15_cache_status(jornada):
             {
                 "available": True,
                 "ok": received == Q15_EXPECTED_MATCHES,
-                "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
+                "last_sync": _madrid_hm(os.path.getmtime(q15_path)),
                 "matches": received,
                 "matches_received": received,
                 "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
@@ -123,7 +146,7 @@ def sync_status():
         last_sync_source = "none"
         try:
             if os.path.exists(panel_path):
-                last_sync = datetime.fromtimestamp(os.path.getmtime(panel_path)).strftime("%H:%M")
+                last_sync = _madrid_hm(os.path.getmtime(panel_path))
                 last_sync_source = "highlightly"
         except Exception:
             pass
@@ -238,7 +261,7 @@ def manual_live_refresh():
                 "status": "degraded",
                 "started": False,
                 "message": "Circuito Highlightly abierto",
-                "next_retry_at": datetime.fromtimestamp(circuit["open_until"]).isoformat(),
+                "next_retry_at": _madrid_iso(circuit["open_until"]),
             }
         ), 200
     payload = request.get_json(silent=True) or {}
@@ -278,7 +301,7 @@ def live_probe():
                 "matches": received,
                 "matches_expected": Q15_EXPECTED_MATCHES,
                 "matches_received": received,
-                "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
+                "last_sync": _madrid_hm(os.path.getmtime(q15_path)),
                 "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
             }
         except Exception:
@@ -310,9 +333,11 @@ def live_probe():
                 "skipped": highlightly_skipped,
                 "window_enabled": bool(refresh_window.get("enabled")),
                 "reason": refresh_window.get("reason"),
-                "next_retry_at": datetime.fromtimestamp(get_highlightly_circuit()["open_until"]).isoformat()
-                if get_highlightly_circuit().get("open")
-                else "",
+                "next_retry_at": (
+                    _madrid_iso(get_highlightly_circuit()["open_until"])
+                    if get_highlightly_circuit().get("open")
+                    else ""
+                ),
             },
             "api_usage": get_highlightly_usage(),
         }

@@ -537,7 +537,10 @@ def next_sleep_seconds(window, base_interval):
     if window.get("live_now"):
         return max(60, min(int(base_interval or 120), 120))
     if window.get("needs_result_catchup"):
-        return 900
+        # Resultados pendientes: cada 15 min mientras el partido sea reciente (el
+        # finde se cierra esa misma noche) y 3 veces al dia para filas viejas, que
+        # suelen ser aplazados sin fecha nueva.
+        return 900 if window.get("result_catchup_urgent", True) else 6 * 3600
     if not window.get("enabled"):
         next_kickoff = window.get("next_kickoff")
         if next_kickoff and next_kickoff > madrid_now().replace(tzinfo=None) + timedelta(minutes=20):
@@ -617,7 +620,11 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     backup_runtime_state(window=window)
     target_jornada = window.get("jornada") or jornada
     auto_closed = []
-    q15_catchup = bool(q15 and window.get("jornada") and window.get("reason") == "ventana_jornada" and enabled)
+    # "sin_horarios" entra igual: una jornada cuyo scrape no pudo leer el horario
+    # tambien necesita que Quiniela15 confirme los marcadores.
+    q15_catchup = bool(
+        q15 and window.get("jornada") and window.get("reason") in ("ventana_jornada", "sin_horarios") and enabled
+    )
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
         try:

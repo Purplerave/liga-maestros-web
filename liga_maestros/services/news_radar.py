@@ -9,6 +9,7 @@ from defusedxml import ElementTree as ET
 
 import config
 
+from ..services.ticket import madrid_now
 from ..utils import (
     news_relevance_score,
     normalize_news_text,
@@ -21,7 +22,10 @@ from ..utils import (
 
 
 def _is_recent(item, now=None):
-    now = now or datetime.now()
+    # `published_at` llega en hora de Madrid (parse_rfc822_to_iso), asi que la
+    # referencia tiene que ser el mismo reloj: con datetime.now() en un servidor UTC
+    # las noticias de las ultimas 2 horas caian del radar.
+    now = now or madrid_now().replace(tzinfo=None)
     try:
         published = datetime.strptime(item.get("published_at") or "", "%Y-%m-%d %H:%M")
         return now - timedelta(days=7) <= published <= now + timedelta(hours=6)
@@ -97,7 +101,7 @@ def build_news_radar(force=False):
     selected.sort(key=lambda x: (x["published_at"], x["score"]), reverse=True)
     selected = selected[:10]
     payload = {
-        "fetched_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "fetched_at": madrid_now().strftime("%Y-%m-%d %H:%M"),
         "fetched_at_ts": now,
         "items": selected,
         "sources": [feed["name"] for feed in config.NEWS_FEEDS],

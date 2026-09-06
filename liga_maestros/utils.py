@@ -9,10 +9,130 @@ import json
 import os
 import re
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from config import BASE_DIR, DATA_DIR, NEWS_GENERIC_KEYWORDS, NEWS_TEAM_KEYWORDS, TEAM_LOGO_ALIASES
+
+# Unico huso que se muestra al usuario. El servidor (Alwaysdata/Render) corre en
+# UTC, asi que toda hora que se pinta o se compara pasa por aqui; fiarse de
+# ``datetime.now()`` o de un ``strptime`` que no sepa de donde viene el texto es
+# lo que hacia aparecer los partidos con el saque 1-2 horas adelantado.
+MADRID_TZ = ZoneInfo("Europe/Madrid")
+UTC_TZ = ZoneInfo("UTC")
+
+_DATE_ONLY_FORMATS = ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y")
+_DATETIME_ONLY_FORMATS = ("%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S")
+
+
+def madrid_now():
+    """Reloj de Madrid con zona: la unica referencia temporal valida en la app."""
+    return datetime.now(MADRID_TZ)
+
+
+def madrid_today():
+    return madrid_now().strftime("%Y-%m-%d")
+
+
+def to_madrid_naive(value):
+    """Devuelve ``value`` como reloj de pared de Madrid sin zona (naive).
+
+    Acepta texto ISO con o sin sufijo ``Z``, texto con offset, texto sin zona (que
+    por contrato del proyecto ya es hora de Madrid) y epoch en segundos o
+    milisegundos.
+    """
+    if isinstance(value, datetime):
+        dt = value
+    else:
+        dt = parse_provider_datetime(value)
+        if dt is None:
+            return None
+        return dt
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(MADRID_TZ).replace(tzinfo=None)
+    return dt
+
+
+def parse_provider_datetime(value):
+    """Interpreta la marca de tiempo de un proveedor y la pasa a hora de Madrid.
+
+    Highlightly devuelve SIEMPRE UTC (``2026-09-05T19:00:00.000Z``) y solo el
+    parametro ``timezone`` de la query cambia a que dia pertenecen los partidos.
+    Las variantes sin milisegundos (``...T19:00:00Z``) o con offset hacian fallar
+    al ``strptime`` con ``.%fZ`` y el ``except`` devolvia el texto crudo en UTC:
+    el partido de las 21:00 se pintaba a las 19:00 y, en los saques tardios del
+    finde, hasta cambiaba de dia. Aqui se normaliza y se reconvierte siempre.
+    """
+    if isinstance(value, datetime):
+        dt = value
+    else:
+        raw = str(value or "").strip()
+        if not raw:
+            return None
+        if re.fullmatch(r"\d{9,13}", raw):
+            # Epoch en segundos o milisegundos.
+            seconds = int(raw) / 1000.0 if len(raw) >= 13 else float(raw)
+            try:
+                return datetime.fromtimestamp(seconds, MADRID_TZ).astimezone(MADRID_TZ).replace(tzinfo=None)
+            except (OverflowError, OSError, ValueError):
+                return None
+        normalized = raw.replace("Z", "+00:00") if raw.endswith("Z") else raw
+        dt = None
+        try:
+            dt = datetime.fromisoformat(normalized)
+        except ValueError:
+            for fmt in _DATETIME_ONLY_FORMATS + _DATE_ONLY_FORMATS:
+                try:
+                    dt = datetime.strptime(raw[:19], fmt)
+                    break
+                except ValueError:
+                    continue
+        if dt is None:
+            return None
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(MADRID_TZ)
+    return dt.replace(tzinfo=None)
+
+
+def kickoff_datetime(match):
+    """Inicio real (reloj de Madrid, naive) de un partido de cualquier payload.
+
+    Vale tanto para filas de la quiniela (``fecha_raw`` + ``hora``) como para
+    entradas del panel externo (``added``/``scheduled``/``date``). Devuelve None
+    solo cuando de verdad no hay horario conocido: un horario desconocido nunca
+    debe inventarse (inventarlo es lo que daba por muerto un directo en juego).
+    """
+    return parse_any_match_datetime(match)
+
+
+def kickoff_date_text(match):
+    """Dia (YYYY-MM-DD, hora de Madrid) del saque de un partido, o cadena vacia."""
+    if not match:
+        return ""
+    dt = kickoff_datetime(match)
+    if dt is not None:
+        return dt.strftime("%Y-%m-%d")
+    for key in ("fecha_raw", "added"):
+        text = str(match.get(key) or "").strip()
+        if len(text) >= 10 and text[4] in "-/":
+            return text[:10]
+    return ""
+
+
+def day_span_centered_on(today_text, days_before=1, days_after=1):
+    """Ventana de fechas [hoy - dias_before, hoy + dias_after] como textos ISO.
+
+    Los findes de semana el partido del sabado sigue vivo a las 00:30 del domingo
+    y sus resultados se consultan el lunes: comparar el texto de la fecha contra
+    el dia exacto es lo que hacia desaparecer esos partidos del directo.
+    """
+    try:
+        base = datetime.strptime(str(today_text or "")[:10], "%Y-%m-%d")
+    except (TypeError, ValueError):
+        base = datetime.now(MADRID_TZ)
+    start = (base - timedelta(days=max(0, int(days_before)))).strftime("%Y-%m-%d")
+    end = (base + timedelta(days=max(0, int(days_after)))).strftime("%Y-%m-%d")
+    return start, end
 
 
 def runtime_data_path(*parts):
@@ -159,7 +279,7 @@ def build_team_contract():
     short_names = {key: short_team_name(key) for key in keys}
     tokens = {key: team_token(key) for key in keys}
     return {
-        "version": datetime.now().strftime("%Y-%m-%d"),
+        "version": madrid_today(),
         "aliases_resolved": True,
         "logos": logos,
         "aliases": aliases,
@@ -363,22 +483,30 @@ def highlightly_status(state):
     return "NS", "NS"
 
 
-def highlightly_match_to_panel(match):
+def highlightly_match_to_panel(match, updated_at=None):
+    """Foto de un partido del proveedor lista para el panel de directo.
+
+    Todas las horas que salen de aqui son RELOJ DE MADRID sin zona (contrato del
+    proyecto: ``added``/``scheduled``/``fecha_raw``/``hora`` se pintan tal cual).
+    El proveedor habla en UTC, asi que la conversion es obligatoria: sin ella el
+    saque de las 21:00 aparecia a las 19:00 y, en los partidos del finde que
+    empiezan tarde, hasta se iba al dia anterior.
+    """
     state = match.get("state") or {}
     league = match.get("league") or {}
     country = match.get("country") or {}
     competition_name = match.get("_competition_name") or league.get("name") or "Liga"
     status, minute = highlightly_status(state)
     score_text = (state.get("score") or {}).get("current") or ""
-    date_str = match.get("date", "")
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-        dt = dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid"))
-        added_date = dt.strftime("%Y-%m-%d %H:%M:%S")
-        scheduled_time = dt.strftime("%H:%M")
-    except Exception:
-        added_date = date_str
-        scheduled_time = ""
+    kickoff = parse_provider_datetime(match.get("date"))
+    if kickoff is None:
+        # Sin saque fiable no se inventa una hora: se deja vacia y el dia se
+        # deduce del propio ``date`` para no perder el partido del panel.
+        raw_date = str(match.get("date") or "").strip()[:10]
+        kickoff = parse_provider_datetime(raw_date) if len(raw_date) == 10 else None
+    added_date = kickoff.strftime("%Y-%m-%d %H:%M:%S") if kickoff else ""
+    scheduled_time = kickoff.strftime("%H:%M") if kickoff else ""
+    fecha_raw = kickoff.strftime("%Y-%m-%d") if kickoff else ""
     return {
         "id": match.get("id"),
         "fixture_id": match.get("id"),
@@ -401,6 +529,11 @@ def highlightly_match_to_panel(match):
         "country_code": country.get("code") or "",
         "added": added_date,
         "scheduled": scheduled_time,
+        "fecha_raw": fecha_raw,
+        "hora": scheduled_time,
+        # Sellado de frescura: permite aplicar la regla de "el proveedor dejo de
+        # emitir" tambien a las filas del panel, no solo a las de la quiniela.
+        "updated_at": str(updated_at or ""),
     }
 
 
@@ -415,28 +548,57 @@ def parse_db_match_datetime(fecha_value, hora_value):
         return None
 
 
+_TIME_PATTERN = re.compile(r"^(\d{1,2}):(\d{2})")
+
+
+def _match_time_text(value):
+    """Primer ``HH:MM`` util de un campo de hora (rechaza '-', '' y minutos)."""
+    text = str(value or "").strip().rstrip("hH").strip()
+    if not text or text == "-":
+        return ""
+    match = _TIME_PATTERN.match(text)
+    if not match:
+        return ""
+    hour = int(match.group(1))
+    if hour > 23:
+        return ""
+    return f"{hour:02d}:{match.group(2)}"
+
+
+def _looks_like_iso_date(value):
+    text = str(value or "").strip()
+    return len(text) >= 10 and text[:4].isdigit() and text[4] in "-/"
+
+
 def parse_any_match_datetime(match):
-    raw_date = str(match.get("fecha_raw") or "").strip()[:10]
-    raw_time = str(match.get("hora") or match.get("scheduled") or "").strip()[:5]
-    if not raw_date:
-        added = str(match.get("added") or "").strip()
-        if added:
-            raw_date = added[:10]
-            if not raw_time and len(added) >= 16:
-                raw_time = added[11:16]
-    if not raw_date:
-        raw_iso = str(match.get("date") or "").strip()
-        if raw_iso:
-            try:
-                dt = datetime.strptime(raw_iso, "%Y-%m-%dT%H:%M:%S.%fZ")
-                return dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid")).replace(tzinfo=None)
-            except Exception:
-                pass
-    if not raw_date:
+    """Inicio del partido en hora de Madrid (naive) desde cualquier payload.
+
+    Se usan las fechas explicitas de la quiniela si las hay; si no, se interpreta
+    ``added`` (texto de Madrid o ISO UTC del proveedor) y, en ultimo termino, el
+    ``date`` crudo del proveedor. Antes se devolvia ``None`` (o el texto UTC sin
+    convertir) y el partido quedaba fuera de cualquier filtro por dia.
+    """
+    if not match:
         return None
-    if not raw_time:
-        raw_time = "00:00"
-    try:
-        return datetime.strptime(f"{raw_date} {raw_time}", "%Y-%m-%d %H:%M")
-    except Exception:
-        return None
+    raw_date = str(match.get("fecha_raw") or match.get("fecha") or "").strip()[:10]
+    raw_time = _match_time_text(match.get("hora") or match.get("scheduled") or "")
+    if _looks_like_iso_date(raw_date):
+        normalized = parse_provider_datetime(raw_date)
+        if normalized is not None:
+            if not raw_time:
+                return normalized.replace(hour=0, minute=0, second=0, microsecond=0)
+            hour, minute = (int(part) for part in raw_time.split(":"))
+            return normalized.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    for key in ("added", "kickoff", "date", "start_time", "startTime"):
+        value = str(match.get(key) or "").strip()
+        if not value:
+            continue
+        dt = parse_provider_datetime(value)
+        if dt is not None:
+            return dt
+    return None
+
+
+def match_kickoff_datetime(match):
+    """Alias legible de :func:`parse_any_match_datetime` para los filtros."""
+    return parse_any_match_datetime(match)

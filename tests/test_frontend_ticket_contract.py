@@ -39,7 +39,10 @@ def test_frontend_keeps_doubles_and_pleno_scores_and_reads_league_names():
             namedCompetition: context.competitionLabel({{ competition_name: "La Liga" }}),
             objectCompetition: context.competitionLabel({{ competition: {{ name: "Segunda Division" }} }}),
             sameDayFixture: context.fixtureScheduleDisplay({{ fecha_raw: "2026-08-16", hora: "21:30" }}),
-            olderFixture: context.fixtureScheduleDisplay({{ fecha_raw: "2026-08-15", hora: "21:30" }}),
+            // Ayer: el resultado del dia anterior tiene que decir de que dia es, si
+            // no parece que "las horas estan mal" cuando se mira el lunes por la manana.
+            yesterdayFixture: context.fixtureScheduleDisplay({{ fecha_raw: "2026-08-15", hora: "21:30" }}),
+            olderFixture: context.fixtureScheduleDisplay({{ fecha_raw: "2026-08-10", hora: "21:30" }}),
             groupCount: (grouped.match(/league-match-group/g) || []).length,
             hasLaLigaGroup: grouped.includes('data-competition="LA LIGA"'),
             hasSegundaGroup: grouped.includes('data-competition="SEGUNDA DIVISION"')
@@ -62,7 +65,8 @@ def test_frontend_keeps_doubles_and_pleno_scores_and_reads_league_names():
         "namedCompetition": "LA LIGA",
         "objectCompetition": "SEGUNDA DIVISION",
         "sameDayFixture": "21:30h",
-        "olderFixture": "sab 15/08 21:30h",
+        "yesterdayFixture": "Ayer sab 15/08 21:30h",
+        "olderFixture": "lun 10/08 21:30h",
         "groupCount": 2,
         "hasLaLigaGroup": True,
         "hasSegundaGroup": True,

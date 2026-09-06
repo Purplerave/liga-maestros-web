@@ -143,9 +143,11 @@ def quiz_ranking():
     elif tipo == "mensual":
         mes = request.args.get("mes", "").strip()
         if not mes:
-            from datetime import datetime
+            # Cierre de mes en hora de Madrid: con el reloj UTC de servidor,
+            # el quiz del ultimo dia del mes se contaba al mes siguiente.
+            from ..services.ticket import madrid_now
 
-            mes = datetime.now().strftime("%Y-%m")
+            mes = madrid_now().strftime("%Y-%m")
         ranking = get_quiz_ranking_mensual(mes)
         return jsonify(
             {

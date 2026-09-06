@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import time
+from datetime import datetime
 
 from flask import Blueprint, jsonify, request, session
 
@@ -12,7 +13,7 @@ from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
 from ..schemas import validate_liga_data
 from ..services.multi_standings import build_multi_league_standings
-from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
+from ..services.payloads.league_matches import build_all_league_matches, build_live_matches, panel_freshness_stamp
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
@@ -48,6 +49,25 @@ def _get_standings_cached(conn, partidos, team_logos):
 def _etag_for(payload):
     """Generate ETag from payload content hash."""
     return hashlib.md5(payload.encode(), usedforsecurity=False).hexdigest()  # noqa: S324
+
+
+def _panel_freshness():
+    """Ultima foto del proveedor en el panel de directo, en hora de Madrid.
+
+    El navegador ensena «Datos de hace X min — reconectando…» con estos valores.
+    Sin ellos el lector no tiene forma de distinguir «no hay partido» de «el
+    collector lleva dos horas caido», que es justo la confusion que hace parecer
+    que los partidos «no se actualizan».
+    """
+    # La frescura se mide sobre el MISMO fichero del que salieron las filas que se
+    # pintan (panel_source_path), con el barrido de candidatos como respaldo.
+    mtime = panel_freshness_stamp()
+    if mtime is None:
+        return "", None
+    from ..utils import MADRID_TZ
+
+    local = datetime.fromtimestamp(mtime, MADRID_TZ)
+    return local.isoformat(timespec="seconds"), max(0, int(time.time() - mtime))
 
 
 @bp.route("/api/liga/data")
@@ -100,12 +120,18 @@ def get_liga_data():
             participant_contract=participant_contract,
         )
         comentarista = _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
+        panel_fetched_at, panel_age_seconds = _panel_freshness()
         response_payload = {
             "jornada": jornada,
             "jornada_liga": jornada_liga,
             "max_jornada": max_jornada,
             "jornadas_disponibles": jornadas_disponibles,
             "today_madrid": today_madrid(),
+            # Reloj del servidor en hora de Madrid: el navegador nunca debe fiarse
+            # de su propia zona para decidir que es "hoy" o si un dato esta viejo.
+            "now_madrid": madrid_now().isoformat(timespec="seconds"),
+            "panel_fetched_at": panel_fetched_at,
+            "panel_age_seconds": panel_age_seconds,
             "is_locked": is_locked,
             "ticket_guardado": ticket_guardado,
             "edit_deadline": _format_dt(close_info.get("close_at")),

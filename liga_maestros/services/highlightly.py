@@ -4,7 +4,7 @@ import logging
 import os
 import threading
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import requests
 
@@ -38,7 +38,15 @@ HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").stri
     "yes",
     "on",
 )
-HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "1")))
+# Llamadas por pasada del collector. Con 1 (el valor historico) solo se cubria UNA
+# fecha por pasada: en un finde con partidos del viernes al domingo, los resultados
+# del dia anterior se perseguian a razon de una fecha cada 15 minutos y nunca
+# terminaban de llegar. Con 4 se cierra la jornada domestica entera en una pasada
+# (LaLiga, Segunda, Liga F y el reintento por nombre de Liga F).
+HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(1, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "4")))
+HIGHLIGHTLY_MAX_CALLS_CEILING = max(
+    HIGHLIGHTLY_MAX_CALLS_PER_REFRESH, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_CEILING", "12"))
+)
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
     item.strip().upper() for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",") if item.strip()
 }
@@ -84,6 +92,21 @@ _highlightly_refresh_started_at = 0
 _highlightly_thread_management_lock = threading.Lock()
 
 
+def _ordered_leagues():
+    """Ligas en el orden en que el collector las consulta.
+
+    Las competiciones del boleto van primero: con presupuestos de llamadas
+    ajustados, la que estaba al final del dict (Liga F) era la que nunca se
+    refrescaba y sus marcadores no aparecian. El resto (Premier, Bundesliga,
+    Ligue 1, UEFA) se sigue alimentando desde el tracker diario.
+    """
+    priority = ["LA LIGA", "SEGUNDA DIVISION", "LIGA F", "LIGA F MOEVE", "PRIMERA DIVISION FEMENINA"]
+    items = list(config.HIGHLIGHTLY_LEAGUES.items())
+    ordered = [item for item in priority if item in dict(items)]
+    ordered += [name for name, _ in items if name not in ordered]
+    return [(name, config.HIGHLIGHTLY_LEAGUES[name]) for name in ordered]
+
+
 def resolve_jornada(conn, jornada=None):
     raw = str(jornada or "").strip()
     if raw.isdigit():
@@ -92,14 +115,70 @@ def resolve_jornada(conn, jornada=None):
     return row[0] if row and row[0] is not None else None
 
 
+# Estados que ya no admiten resultado. Todo lo demas (NS, LIVE, HT, STALE, '' o
+# el estado que suelte el scraper) sigue necesitando que el proveedor confirme el
+# marcador. STALE se reabre a proposito: es el estado en el que la web cierra un
+# directo congelado y la unica forma de convertirlo en un FT real es volver a
+# preguntar; si no, el partido "no se actualiza" nunca mas.
+FINAL_RESULT_STATUSES = frozenset({"FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED"})
+LIVE_ROW_STATUSES = frozenset({"LIVE", "IN PLAY", "IN_PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET"})
+# Ventana de recuperacion de resultados: el finde se reescribe hasta 7 dias
+# despues (aplazados, cortes del collector, cuotas agotadas el domingo noche).
+RESULT_CATCHUP_MAX_AGE = timedelta(days=7)
+# Mientras el partido sea reciente se persigue cada 15 min; despues, 3 veces al dia.
+RESULT_CATCHUP_URGENT_AFTER = timedelta(hours=48)
+
+
+def _today_start_naive():
+    """Inicio del dia en curso, reloj de Madrid y sin zona (naive)."""
+    return datetime.strptime(today_madrid(), "%Y-%m-%d")
+
+
+def _row_needs_result(row, now=None):
+    status = str(row["status"] or "").strip().upper()
+    if status in FINAL_RESULT_STATUSES:
+        return False
+    if status in ("POSTPONED", "CANCELLED", "SUSPENDED", "ABANDONED"):
+        return False
+    # Ojo: un marcador guardado con status STALE/NS NO es un cierre definitivo.
+    # La web lo pinta como resultado, pero el signo definitivo de la quiniela y el
+    # estado del directo dependen de que el proveedor confirme el FT; si aqui se
+    # diera por bueno, ese partido del finde se quedaria "sin actualizar" para
+    # siempre. El techo de `RESULT_CATCHUP_MAX_AGE` acota el gasto de cuota.
+    kickoff = parse_db_match_datetime(row["fecha"], row["hora"])
+    if kickoff is None:
+        # Sin horario no se puede saber si ya jugo: se pregunta hoy (1 llamada).
+        return True
+    reference = now if now is not None else madrid_now().replace(tzinfo=None)
+    return kickoff <= reference + timedelta(hours=2) and reference - kickoff <= RESULT_CATCHUP_MAX_AGE
+
+
+def _has_open_results(rows, now=None):
+    return any(_row_needs_result(row, now) for row in rows)
+
+
 def compute_refresh_window(conn, jornada=None):
+    """Ventana en la que el collector debe estar preguntando al proveedor.
+
+    La regla antigua era "solo mientras haya un partido en juego o un resultado
+    que perseguir dentro de las 24 horas siguientes al saque". Esa frontera de 24h
+    era el agujero por el que los findes de semana se quedaban sin actualizar: el
+    collector de Alwaysdata duerme cuando el proceso web se reinicia, y al volver
+    el sabado por la noche ya era domingo tarde -> `needs_result_catchup` a False,
+    ventana cerrada y esos resultados no se pedian JAMAS.
+
+    Ahora la ventana permanece abierta mientras quede **cualquier** fila de la
+    jornada sin resultado (hasta `RESULT_CATCHUP_MAX_AGE`) o haya un partido en
+    juego, y además se abre con jornadas cuyos horarios no se pudieron leer, que
+    antes quedaban fuera de todo refresco.
+    """
     target_jornada = resolve_jornada(conn, jornada)
     if not target_jornada:
         return {"enabled": False, "reason": "sin_jornada"}
 
     rows = conn.execute(
         """
-        SELECT fecha, hora, status
+        SELECT fecha, hora, status, goles_local, goles_visitante
         FROM resultados
         WHERE jornada = ?
         ORDER BY partido_id ASC
@@ -109,55 +188,59 @@ def compute_refresh_window(conn, jornada=None):
     if not rows:
         return {"enabled": False, "reason": "sin_partidos", "jornada": target_jornada}
 
-    match_times = [dt for dt in (parse_db_match_datetime(r["fecha"], r["hora"]) for r in rows) if dt]
-    live_now = any(
-        str(r["status"] or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO") for r in rows
+    now = madrid_now().replace(tzinfo=None)
+    match_times = [dt for dt in (parse_db_match_datetime(row["fecha"], row["hora"]) for row in rows) if dt]
+    live_now = any(str(row["status"] or "").upper() in LIVE_ROW_STATUSES for row in rows)
+    has_pending = any(str(row["status"] or "").upper() in ("NS", "SCHEDULED", "NOT STARTED") for row in rows)
+
+    open_rows = [row for row in rows if _row_needs_result(row, now)]
+    needs_result_catchup = bool(open_rows)
+    # Urgente mientras el partido sea reciente: el collector pregunta cada 15 min;
+    # despues baja a 3 pasadas al dia para no comerse la cuota por un aplazado.
+    catchup_is_urgent = any(
+        (kickoff := parse_db_match_datetime(row["fecha"], row["hora"])) is None
+        or now - kickoff <= RESULT_CATCHUP_URGENT_AFTER
+        for row in open_rows
     )
-    has_pending = any(str(r["status"] or "").upper() in ("NS", "SCHEDULED", "NOT STARTED") for r in rows)
-    needs_result_catchup = False
 
     if not match_times:
+        today_start = _today_start_naive()
         return {
-            "enabled": live_now,
-            "reason": "solo_estados",
+            "enabled": bool(live_now or needs_result_catchup),
+            "reason": "sin_horarios",
             "jornada": target_jornada,
             "live_now": live_now,
             "has_pending": has_pending,
+            "needs_result_catchup": needs_result_catchup,
+            "result_catchup_urgent": needs_result_catchup,
+            "first_kickoff": today_start,
+            "last_kickoff": today_start,
+            "next_kickoff": None,
+            "window_start": today_start,
+            "window_end": today_start + timedelta(days=1),
         }
 
     first_kickoff = min(match_times)
     last_kickoff = max(match_times)
-    now = madrid_now().replace(tzinfo=None)
     active_windows = []
-    for row in rows:
+    for row in open_rows:
         kickoff = parse_db_match_datetime(row["fecha"], row["hora"])
         if not kickoff:
-            continue
-        status = str(row["status"] or "").upper()
-        if status in ("FT", "FINISHED", "TERMINADO"):
             continue
         window_start = kickoff - timedelta(minutes=2)
         window_end = kickoff + timedelta(hours=3)
         if window_start <= now <= window_end:
             active_windows.append((window_start, window_end, kickoff))
-        elif kickoff < now <= kickoff + timedelta(hours=24):
-            needs_result_catchup = True
 
     enabled = live_now or bool(active_windows) or needs_result_catchup
+    current_window_start = first_kickoff - timedelta(minutes=2)
+    current_window_end = last_kickoff + timedelta(hours=3)
+    future_times = [dt for dt in match_times if dt >= now]
+    next_kickoff = min(future_times) if future_times else None
     if active_windows:
         current_window_start = min(item[0] for item in active_windows)
         current_window_end = max(item[1] for item in active_windows)
         next_kickoff = min(item[2] for item in active_windows)
-    elif needs_result_catchup:
-        current_window_start = first_kickoff - timedelta(minutes=2)
-        current_window_end = last_kickoff + timedelta(hours=3)
-        future_times = [dt for dt in match_times if dt >= now]
-        next_kickoff = min(future_times) if future_times else None
-    else:
-        current_window_start = first_kickoff - timedelta(minutes=2)
-        current_window_end = last_kickoff + timedelta(hours=3)
-        future_times = [dt for dt in match_times if dt >= now]
-        next_kickoff = min(future_times) if future_times else None
     return {
         "enabled": enabled,
         "reason": "ventana_jornada",
@@ -165,6 +248,7 @@ def compute_refresh_window(conn, jornada=None):
         "live_now": live_now,
         "has_pending": has_pending,
         "needs_result_catchup": needs_result_catchup,
+        "result_catchup_urgent": catchup_is_urgent,
         "first_kickoff": first_kickoff,
         "last_kickoff": last_kickoff,
         "next_kickoff": next_kickoff,
@@ -361,7 +445,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
     calls_used = 0
     # CEO fix: ensure Liga F is always considered critical, even in low budget
     critical_leagues = {"LA LIGA", "SEGUNDA DIVISION", "LIGA F", "LIGA F MOEVE", "PRIMERA DIVISION FEMENINA"}
-    for league_name, league_id in config.HIGHLIGHTLY_LEAGUES.items():
+    for league_name, league_id in _ordered_leagues():
         if low_budget and league_name.upper() not in critical_leagues:
             continue
         if HIGHLIGHTLY_ACTIVE_LEAGUES and league_name.upper() not in HIGHLIGHTLY_ACTIVE_LEAGUES:
@@ -396,6 +480,13 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
 
 
 def refresh_dates_for_jornada(conn, jornada=None):
+    """Fechas que hay que preguntarle al proveedor para cerrar esta jornada.
+
+    Se incluye siempre HOY y, ademas, cualquier dia pasado del boleto mientras
+    quede una fila SIN resultado final. La condicion antigua exigia "sin marcador o
+    en juego", asi que una fila marcada STALE con marcador se quedaba fuera para
+    siempre: ese es el partido del finde que "no se actualiza".
+    """
     today = today_madrid()
     target_jornada = resolve_jornada(conn, jornada)
     dates = {today}
@@ -403,7 +494,7 @@ def refresh_dates_for_jornada(conn, jornada=None):
         return sorted(dates)
     rows = conn.execute(
         """
-        SELECT fecha, status, goles_local, goles_visitante
+        SELECT fecha, status
         FROM resultados WHERE jornada = ?
     """,
         (target_jornada,),
@@ -412,10 +503,11 @@ def refresh_dates_for_jornada(conn, jornada=None):
         fecha = str(row["fecha"] or "").strip()[:10]
         if not fecha or fecha > today:
             continue
-        status = str(row["status"] or "").upper()
-        has_score = row["goles_local"] is not None and row["goles_visitante"] is not None
-        if not has_score or status in ("NS", "SCHEDULED", "NOT STARTED", "LIVE", "IN PLAY", "HT", "EN JUEGO"):
-            dates.add(fecha)
+        if str(row["status"] or "").strip().upper() in FINAL_RESULT_STATUSES:
+            continue
+        dates.add(fecha)
+    # Las filas abiertas sin fecha (horario no legible) se persiguen preguntando
+    # por hoy: es el unico dia que podemos asumir como propio.
     return sorted(dates)
 
 
@@ -438,10 +530,16 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
             target_jornada = resolve_jornada(conn, jornada)
             if not target_jornada:
                 return 0
-            calls_left = HIGHLIGHTLY_MAX_CALLS_PER_REFRESH
             dates = refresh_dates_for_jornada(conn, target_jornada)
             today = today_madrid()
             dates = sorted(dates, key=lambda item: (item != today, item))
+            # Presupuesto de la pasada: alcanza para recorrer todas las fechas
+            # abiertas del boleto (findes de viernes a domingo), sin pasar del
+            # techo que protege la cuota diaria.
+            calls_left = min(
+                HIGHLIGHTLY_MAX_CALLS_CEILING,
+                max(HIGHLIGHTLY_MAX_CALLS_PER_REFRESH, len(dates) * HIGHLIGHTLY_MAX_CALLS_PER_REFRESH),
+            )
             for date_text in dates:
                 if calls_left <= 0:
                     break
@@ -488,7 +586,10 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 if away_name and away_team.get("logo"):
                     logos[away_name.upper()] = away_team["logo"]
 
-            panel_matches = [highlightly_match_to_panel(match) for match in api_matches if match.get("id")]
+            panel_stamp = madrid_now().isoformat(timespec="seconds")
+            panel_matches = [
+                highlightly_match_to_panel(match, updated_at=panel_stamp) for match in api_matches if match.get("id")
+            ]
             if panel_matches:
                 panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
                 update_json_list_by_id_locked(panel_path, panel_matches)

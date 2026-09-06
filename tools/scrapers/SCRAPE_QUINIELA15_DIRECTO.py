@@ -4,6 +4,7 @@ import os
 import re
 import time
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,6 +13,7 @@ from liga_maestros import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
+MADRID_TZ = ZoneInfo("Europe/Madrid")
 REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
@@ -215,7 +217,8 @@ def scrape(jornada):
     return {
         "jornada": int(jornada),
         "source": url,
-        "fetched_at": datetime.now().isoformat(timespec="seconds"),
+        # Hora de Madrid (el servidor corre en UTC y aqui se muestra a las personas).
+        "fetched_at": datetime.now(MADRID_TZ).isoformat(timespec="seconds"),
         "matches": matches,
     }
 

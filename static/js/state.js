@@ -196,34 +196,37 @@ function isSpanishTrackedCompetition(match) {
         || (comp.includes("PRIMERA DIVISI") && comp.includes("FEMEN"));
 }
 
+/* getTodayLeagueMatches / getAllTodayLeagueMatches: "lo de hoy" es lo que el
+   lector espera ver en la portada y en el estado vacio del directo, pero con el
+   cambio de medianoche los partidos del sabado no pueden evaporarse: si HOY no
+   hay nada programado, se ensenan los de AYER (que es exactamente lo que la peña
+   viene a comprobar el domingo por la manana). */
 function getTodayLeagueMatches() {
-    const today = state.data?.today_madrid || "";
-    return getAllLeagueMatches().filter(m => {
-        const d = String(m.added || m.fecha_raw || "").slice(0, 10);
-        return d === today && isSpanishTrackedCompetition(m);
-    });
+    const today = serverTodayMadrid();
+    const matches = getAllLeagueMatches();
+    const forDay = day => sortMatchesByKickoff(
+        matches.filter(m => matchKickoffDateText(m) === day && isSpanishTrackedCompetition(m))
+    );
+    const current = forDay(today);
+    return current.length ? current : forDay(addIsoDays(today, -1));
 }
 
 function getAllTodayLeagueMatches() {
-    const today = state.data?.today_madrid || "";
-    return getAllLeagueMatches().filter(m => {
-        const d = String(m.added || m.fecha_raw || "").slice(0, 10);
-        return d === today;
-    });
+    const today = serverTodayMadrid();
+    const matches = getAllLeagueMatches();
+    const current = matches.filter(m => matchKickoffDateText(m) === today);
+    const pool = current.length ? current : matches.filter(m => matchKickoffDateText(m) === addIsoDays(today, -1));
+    return sortMatchesByKickoff(pool);
 }
 
+/* Los partidos del finde y los de manana, en un unico listado ordenado por saque
+   real (no por texto de fecha: "2026-09-05 21:30" y "2026-09-06" no son
+   comparables). La ventana la decide utils.js con el reloj de Madrid del
+   servidor, de modo que el sabado de madrugada y el lunes por la manana siguen
+   mostrando lo jugado. */
 function getLeagueMatchesWindow() {
-    const today = state.data?.today_madrid || "";
-    return getAllLeagueMatches()
-        .filter(m => {
-            const d = String(m.added || m.fecha_raw || "").slice(0, 10);
-            return d >= today;
-        })
-        .sort((a, b) => {
-            const da = String(a.added || a.fecha_raw || "");
-            const db = String(b.added || b.fecha_raw || "");
-            return da.localeCompare(db);
-        });
+    const bounds = directoDayWindow();
+    return sortMatchesByKickoff(getAllLeagueMatches().filter(match => isRelevantDirectoMatch(match, bounds)));
 }
 
 function getBrowsableLeagueMatches() {

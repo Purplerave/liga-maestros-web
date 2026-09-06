@@ -1,7 +1,5 @@
 """Porra routes: exact-score predictions on any open match chosen by the user."""
 
-from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
@@ -396,7 +394,7 @@ def post_porra():
                 {"status": "error", "message": "Ya cambiaste tu porra una vez. No puedes cambiarla más."}
             ), 400
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = madrid_now().strftime("%Y-%m-%d %H:%M:%S")
         changes = 1 if existing_entry else 0
 
         conn.execute(

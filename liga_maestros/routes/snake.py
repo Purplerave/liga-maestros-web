@@ -1,12 +1,11 @@
 """Snake game routes: scores and leaderboard."""
 
-from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
 from ..db.migrations import ensure_snake_table
 from ..middleware.rate_limit import is_rate_limited
+from ..services.ticket import madrid_now
 
 bp = Blueprint("snake", __name__)
 
@@ -86,7 +85,7 @@ def post_snake_score():
     conn = get_db()
     try:
         ensure_snake_table(conn)
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = madrid_now().strftime("%Y-%m-%d %H:%M:%S")
         conn.execute(
             "INSERT INTO snake_scores (user_id, nombre, score, created_at) VALUES (?, ?, ?, ?)",
             (user.get("id"), (user.get("name") or "Maestro").split(" ")[0], score, now),

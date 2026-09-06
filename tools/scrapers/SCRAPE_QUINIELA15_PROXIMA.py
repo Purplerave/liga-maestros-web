@@ -1,8 +1,10 @@
 import argparse
 import json
 import re
+import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -99,28 +101,152 @@ def resolve_hypermotion_placeholder(name, position_map):
     return position_map.get(int(match.group(1)), name)
 
 
-def parse_detail_datetime(text, now=None):
-    now = now or datetime.now()
-    match = re.search(
-        r"\b(?:lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo)\s+"
-        r"(\d{1,2})\s+([a-záéíóúñ]+)\s+(\d{1,2}:\d{2})h",
-        text,
-        flags=re.I,
-    )
+MADRID_TZ = ZoneInfo("Europe/Madrid")
+
+_WEEKDAY_WORDS = (
+    "lunes",
+    "martes",
+    "miercoles",
+    "jueves",
+    "viernes",
+    "sabado",
+    "domingo",
+    "lun",
+    "mar",
+    "mie",
+    "jue",
+    "vie",
+    "sab",
+    "dom",
+)
+_MONTH_WORDS = "|".join(sorted({re.escape(word) for word in MONTHS}, key=len, reverse=True))
+_HOUR_PATTERN = r"([01]?[0-9]|2[0-4]):([0-5][0-9])"
+
+_DATE_PATTERNS = (
+    # "sábado 22 ago 17:00h" / "sab 22 ago17:00h" / "domingo 6 de septiembre"
+    re.compile(rf"(?:{'|'.join(_WEEKDAY_WORDS)})\s+(\d{{1,2}})\s*(?:º|°)?\s*(?:de\s+)?({_MONTH_WORDS})", re.I),
+    # "22 ago 17:00" sin dia de la semana
+    re.compile(rf"(\d{{1,2}})\s*(?:º|°)?\s*(?:de\s+)?({_MONTH_WORDS})(?=\D|$)", re.I),
+    # "22/08" o "22-08-2026"
+    re.compile(r"(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?", re.I),
+)
+
+
+def _strip_accents(value):
+    return unicodedata.normalize("NFD", str(value or "").lower()).encode("ascii", "ignore").decode()
+
+
+def _resolve_month(token):
+    if not token:
+        return None
+    key = _strip_accents(token).strip().rstrip(".")
+    if key in MONTHS:
+        return MONTHS[key]
+    for name, number in MONTHS.items():
+        if len(key) >= 3 and _strip_accents(name).startswith(key):
+            return number
+    return None
+
+
+def _find_hour(text):
+    """Primera hora HH:MM del detalle, normalizada ('24:00' -> 00:00 del dia despues)."""
+    match = re.search(_HOUR_PATTERN, str(text or ""))
     if not match:
+        return "", False
+    hour, minute = int(match.group(1)), int(match.group(2))
+    if hour == 24:
+        return "00:00", True
+    return f"{hour:02d}:{minute:02d}", False
+
+
+def parse_detail_datetime(text, now=None):
+    """Fecha y hora de saque del detalle de Quiniela15, como reloj de Madrid.
+
+    El horario de la quiniela define el cierre del boleto, la ventana de directo y
+    el dia al que se asocia cada partido, y aqui se perdía casi siempre: el regex
+    exigia «sabado 22 agosto 17:00h» con espacio delante de la hora y sufijo 'h',
+    mientras la pagina escribe «sábado 22 ago17:00h» (abreviatura pegada a la hora).
+    Sin coincidencia devolvia («», «») y la jornada se importaba sin fecha: los
+    partidos del finde quedaban fuera de todo filtro por dia y no se refrescaban.
+
+    Ahora se aceptan las variantes reales del HTML —«21 ago 17:00», «21/08»,
+    «hoy 21:30h», «mañana a las 19:00», «24:00»— y el anio se deduce del reloj de
+    Madrid (no del UTC del servidor, que cambia de anio horas antes).
+    """
+    raw = clean(text)
+    if not raw:
         return "", ""
-    day = int(match.group(1))
-    month = MONTHS.get(match.group(2).lower())
-    hour = match.group(3)
-    if not month:
+    # 'h' final pegada ("17:00h") y "a las" molesto
+    body = re.sub(r"(\d{1,2}:\d{2})\s*h\b", r"\1 ", _strip_accents(raw))
+    body = re.sub(r"\ba las\b", " ", body)
+    if now is None:
+        now = datetime.now(MADRID_TZ)
+    hour, rolls_to_next_day = _find_hour(body)
+    if not hour:
+        return "", ""
+
+    day = month = year_hint = None
+    lowered = body
+    # "2026-08-23 19:00": fecha ISO ya resuelta (la usan los importadores y los
+    # boletos corregidos a mano). Se respeta tal cual, anio incluido.
+    iso = re.search(r"\b(20\d{2})-(\d{1,2})-(\d{1,2})\b", lowered)
+    if iso:
+        try:
+            fixed = datetime(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
+        except ValueError:
+            fixed = None
+        if fixed is not None:
+            if rolls_to_next_day:
+                fixed += timedelta(days=1)
+            return fixed.strftime("%Y-%m-%d"), hour
+    if re.search(r"\bhoy\b", lowered):
+        base = now.date()
+        return base.strftime("%Y-%m-%d"), hour
+    relative = None
+    if re.search(r"\bmanana\b", lowered):
+        relative = now.date() + timedelta(days=1)
+    if relative is not None:
+        return relative.strftime("%Y-%m-%d"), hour
+
+    for pattern in _DATE_PATTERNS:
+        match = pattern.search(lowered)
+        if not match:
+            continue
+        groups = match.groups()
+        try:
+            candidate_day = int(groups[0])
+        except (TypeError, ValueError):
+            continue
+        candidate_month = _resolve_month(groups[1]) if len(groups) > 1 else None
+        if candidate_month is None and len(groups) > 2 and groups[1]:
+            # patron numerico: dia/mes
+            try:
+                candidate_month = int(groups[1])
+            except ValueError:
+                candidate_month = None
+        if not candidate_month or not 1 <= candidate_day <= 31 or not 1 <= candidate_month <= 12:
+            continue
+        day, month = candidate_day, candidate_month
+        if len(groups) > 2 and groups[2]:
+            hint = int(groups[2])
+            year_hint = hint + 2000 if hint < 100 else hint
+        break
+
+    if day is None or month is None:
         return "", hour
-    year = now.year
-    if month < now.month - 6:
-        year += 1
-    date = datetime(year, month, day)
-    if hour == "24:00":
+
+    year = year_hint or now.year
+    if not year_hint:
+        if month < now.month - 6:
+            year += 1
+        elif month > now.month + 6:
+            year -= 1
+    try:
+        date = datetime(year, month, day)
+    except ValueError:
+        return "", hour
+    if rolls_to_next_day:
         date += timedelta(days=1)
-        hour = "00:00"
     return date.strftime("%Y-%m-%d"), hour
 
 
@@ -228,7 +354,9 @@ def scrape_quiz(url=URL):
     return {
         "jornada": jornada,
         "source_url": url,
-        "scraped_at": datetime.now().isoformat(timespec="seconds"),
+        # Sello en hora de Madrid: el resto de la app compara esta marca con
+        # `today_madrid()` para decidir si el boleto sigue siendo fresco.
+        "scraped_at": datetime.now(MADRID_TZ).isoformat(timespec="seconds"),
         "cierre": cierre,
         "partidos": partidos,
         "horarios": horarios,

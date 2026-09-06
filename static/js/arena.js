@@ -225,18 +225,24 @@ function renderArena() {
                 tabs[next].click();
             });
         });
-        // Fallback graceful: banner stale si el panel lleva >15 min sin actualizar
+        /* Aviso de datos caducados. La edad la manda el servidor
+           (`panel_age_seconds`, medida sobre el reloj de Madrid del fichero del
+           panel): antes se calculaba con `new Date(texto)` en el navegador, el
+           desfase de huso la estropeaba y el aviso no salia nunca. Solo se muestra
+           si hay futbol que refrescar (en juego o todavia por jugar): a las 3 de la
+           madrugada, con la jornada cerrada, un "reconectando" permanente era ruido. */
         try {
             const staleBanner = document.getElementById("stale-banner");
             if (staleBanner) staleBanner.remove();
-            const panelAge = state.data?._panel_fetched_at ? Date.now() - new Date(state.data._panel_fetched_at).getTime() : 0;
-            if (panelAge > 15 * 60 * 1000) {
-                const mins = Math.round(panelAge / 60000);
+            const panelAgeSeconds = Number(state.data?.panel_age_seconds || 0);
+            const hasBusiness = matches.some(m => isMatchLiveNow(m) || isUpcomingScheduledMatch(m));
+            if (hasBusiness && panelAgeSeconds > 15 * 60) {
+                const mins = Math.round(panelAgeSeconds / 60);
                 const banner = document.createElement("div");
                 banner.id = "stale-banner";
                 banner.setAttribute("role", "status");
                 banner.style.cssText = "background:#422006;color:#fde68a;padding:6px 12px;text-align:center;font:600 0.72rem 'JetBrains Mono',monospace;border-bottom:1px solid rgba(251,191,36,0.3)";
-                banner.textContent = `Datos de hace ${mins} min — reconectando…`;
+                banner.textContent = `Datos de hace ${mins} min — el directo se está reconectando…`;
                 container.prepend(banner);
             }
         } catch {}

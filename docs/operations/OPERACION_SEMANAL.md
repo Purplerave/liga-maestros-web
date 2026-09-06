@@ -130,6 +130,39 @@ python LIVE_COLLECTOR.py --once --force --jornada N
 En produccion Render, el collector interno se activa con `WEB_COLLECTOR_ENABLED=1`.
 El navegador nunca debe llamar a Highlightly por refrescar la pagina.
 
+### Fin de semana: Directo, horarios y cierre de resultados
+
+Los findes son donde todo esto se rompe, y es lo primero que hay que mirar si un
+sábado o un domingo «no se actualiza» o «faltan los partidos de ayer».
+
+- **Las horas.** El proveedor (Highlightly) responde en UTC; la web guarda y sirve
+  reloj de Madrid sin zona (`added`, `fecha_raw`, `hora`). Si en la web se ve una
+  hora dos horas retrasada, el panel no se está reconvirtiendo: comprobar
+  `data/LIVE_ALL_MATCHES_V3.json` (`added` tiene que decir `21:30:00`, no
+  `19:30:00.000Z`).
+- **El boleto sin horarios.** `python SCRAPE_QUINIELA15_PROXIMA.py --dry-run` tiene
+  que sacar `fecha` y `hora` en las 15 filas. Si salen vacías, el programa se pinta
+  «Horario por confirmar»: el collector sigue refrescando (`reason=sin_horarios`),
+  pero la peña no ve la hora.
+- **Ventana rodada.** El DIRECTO y la portada enseñan ayer..mañana y se estiran a
+  toda la jornada en curso mientras no haya quedado atrás: el lunes se puede
+  revisar el finde, y un partido en juego se ve sea del día que sea (hasta seis
+  horas después de su saque real).
+- **Cierre de resultados.** Mientras quede una fila sin `FT` la ventana sigue
+  abierta: cada 15 minutos si el partido es reciente y tres veces al día si es un
+  aplazado viejo (hasta 7 días). Con el tope de llamadas por pasada
+  (`HIGHLIGHTLY_MAX_CALLS_PER_REFRESH`, 4) las ligas del boleto van primero, así
+  que Liga F no se queda fuera de presupuesto.
+- **Un solo collector por disco.** El worker en proceso y un `LIVE_COLLECTOR.py`
+  lanzado a mano compiten por un `flock` en `DATA_DIR`; el que no lo coge no gasta
+  cuota. Al arrancar, el worker fuerza una pasada de cierre (si el servidor estuvo
+  caído durante el partido, eso recupera el resultado en cuanto vuelve).
+- **Forzar una pasada.** `python LIVE_COLLECTOR.py --once --force --jornada N`.
+- **Caché del navegador.** Tocada una URL de `/static/*` en el HTML, hay que subir
+  el `?v=` correspondiente y el `STATIC_CACHE` de `static/sw.js`; si no, los que
+  tienen la app instalada siguen ejecutando el JS viejo y nada de lo anterior se
+  nota en su pantalla.
+
 ## 5. Despues de la jornada
 
 - Ejecutar auditoria.

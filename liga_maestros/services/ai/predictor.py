@@ -13,9 +13,10 @@ import os
 import sys
 import threading
 import time
-from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from ...utils import madrid_now
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,10 @@ def _compute_predictions(jornada, partidos, history):
         compute_features_for_upcoming,
     )
 
-    features = compute_features_for_upcoming(partidos, history, datetime.now().date())
+    # `hoy` en hora de Madrid: en un servidor UTC, despues de medianoche el
+    # modelo creia que el partido de esa noche era de manana y lo marcaba como
+    # pendiente dos dias.
+    features = compute_features_for_upcoming(partidos, history, madrid_now().date())
     if features.empty:
         return []
 

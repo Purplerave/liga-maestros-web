@@ -27,7 +27,7 @@ import requests
 import config
 
 from ..middleware.json_lock import update_json_list_by_id_locked
-from ..utils import highlightly_match_to_panel
+from ..utils import highlightly_match_to_panel, parse_provider_datetime
 from .highlightly_limits import (
     get_highlightly_circuit,
     record_highlightly_failure,
@@ -45,6 +45,13 @@ HISTORY_PATH_TEMPLATE = "HISTORICO_PARTIDOS_{season}.jsonl"
 
 LIVE_WINDOW_BEFORE = timedelta(minutes=2)
 LIVE_WINDOW_AFTER = timedelta(hours=3)
+# Dias hacia atras que el tracker persigue para cerrar resultados. El finde acaba
+# de madrugada y el collector de Alwaysdata se reinicia con el despliegue o con la
+# inactividad: sin este margen, lo que no se capturo el sabado no se captura nunca.
+BACKFILL_DAYS = max(1, int(os.getenv("DAILY_TRACKER_BACKFILL_DAYS", "4")))
+# Un partido puede estar "en juego" como maximo 90' + descanso + prórroga + penalties.
+PANEL_LIVE_MAX_AGE = timedelta(hours=6)
+FINAL_DESCRIPTIONS = ("FINISHED", "FULL TIME", "FT", "AFTER EXTRA TIME", "AFTER PENALTIES")
 
 
 def _agenda_path(date_text):
@@ -75,6 +82,25 @@ def _save_json(path, payload):
     with open(tmp_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False)
     os.replace(tmp_path, path)
+
+
+def panel_path():
+    return os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
+
+
+def load_panel_matches():
+    matches = _load_json(panel_path(), [])
+    return matches if isinstance(matches, list) else []
+
+
+def _match_date_text(match):
+    """Dia (YYYY-MM-DD, hora de Madrid) al que pertenece un partido del panel."""
+    for key in ("fecha_raw", "added"):
+        text = str(match.get(key) or "").strip()
+        if len(text) >= 10 and text[4] == "-":
+            return text[:10]
+    dt = parse_provider_datetime(match.get("date") or match.get("added") or "")
+    return dt.strftime("%Y-%m-%d") if dt else ""
 
 
 def _load_state():
@@ -180,7 +206,11 @@ def refresh_daily_agenda(force=False):
 
     # Feed the shared live panel so the Directo column knows today's fixtures
     # (status SCHEDULED) even before any of them kicks off.
-    panel_matches = [highlightly_match_to_panel(match) for match in matches if match.get("id")]
+    panel_matches = [
+        highlightly_match_to_panel(match, updated_at=madrid_now().isoformat(timespec="seconds"))
+        for match in matches
+        if match.get("id")
+    ]
     if panel_matches:
         panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
         update_json_list_by_id_locked(panel_path, panel_matches)
@@ -190,13 +220,14 @@ def refresh_daily_agenda(force=False):
 
 
 def _parse_kickoff(raw):
-    try:
-        from zoneinfo import ZoneInfo
+    """Saque del proveedor -> reloj de Madrid sin zona, para cualquier variante.
 
-        dt = datetime.strptime(str(raw), "%Y-%m-%dT%H:%M:%S.%fZ")
-        return dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid")).replace(tzinfo=None)
-    except Exception:
-        return None
+    El formato historico era `2026-09-05T19:00:00.000Z`, pero el proveedor tambien
+    emite `...T19:00:00Z` (sin milisegundos) o con offset. Con `strptime` y `.%fZ`
+    fijos, esas variantes devolvian None: la ventana de directo no se abria y el
+    partido no se refrescaba NUNCA, aunque estuviera jugandose en ese momento.
+    """
+    return parse_provider_datetime(raw)
 
 
 def any_live_window_open(agenda=None):
@@ -214,6 +245,27 @@ def any_live_window_open(agenda=None):
     return False
 
 
+def panel_has_recent_live():
+    """True si el panel aun declara un partido en juego de las ultimas horas.
+
+    Cubre el caso en que la agenda del dia no se pudo leer (o el saque venia en un
+    formato no reconocido) y, por tanto, `any_live_window_open` dice que no hay
+    ventana: el proveedor si que dice que hay partido, y si dejamos de refrescar
+    ahi, el sellado de frescura caduca y el directo se cierra solo a mitad del
+    partido.
+    """
+    now = madrid_now().replace(tzinfo=None)
+    for match in load_panel_matches():
+        status = str(match.get("status") or "").strip().upper()
+        if status not in ("IN PLAY", "LIVE", "HT", "HALF TIME BREAK", "EN JUEGO"):
+            continue
+        kickoff = parse_provider_datetime(match.get("added") or match.get("fecha_raw") or "")
+        if kickoff and now - kickoff > PANEL_LIVE_MAX_AGE:
+            continue
+        return True
+    return False
+
+
 def refresh_live_scores():
     """Refresh today's scores for all followed leagues into the live panel.
 
@@ -221,9 +273,11 @@ def refresh_live_scores():
     their statistics.
     """
     matches = fetch_today_agenda(today_madrid())
+    matches.extend(fetch_open_previous_day_matches())
     if not matches:
         return 0
-    panel_matches = [highlightly_match_to_panel(match) for match in matches if match.get("id")]
+    stamp = madrid_now().isoformat(timespec="seconds")
+    panel_matches = [highlightly_match_to_panel(match, updated_at=stamp) for match in matches if match.get("id")]
     if panel_matches:
         panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
         update_json_list_by_id_locked(panel_path, panel_matches)
@@ -231,63 +285,130 @@ def refresh_live_scores():
     return len(panel_matches)
 
 
-def backfill_recent_spanish_matches(days=3):
+def _is_final_description(match):
+    state = match.get("state") or {}
+    description = str(state.get("description") or "").upper()
+    return any(token in description for token in FINAL_DESCRIPTIONS) or description in ("FT", "TERMINADO")
+
+
+def fetch_day_matches(date_text, leagues=("LA LIGA", "SEGUNDA DIVISION", "LIGA F")):
+    """Partidos de `date_text` para las ligas seguidas por el boleto.
+
+    Devuelve (matches, fallo). `fallo` es True cuando alguna liga no pudo
+    consultarse (cuota agotada, circuito abierto, red): el llamador lo necesita
+    para no dar por "cerrada" una fecha que en realidad no se llego a leer.
+    """
+    collected = []
+    failed = False
+    for league_name in leagues:
+        league_id = config.HIGHLIGHTLY_LEAGUES.get(league_name)
+        payload = None
+        if league_id is not None:
+            payload = _api_get(
+                "/matches",
+                {"date": date_text, "leagueId": league_id, "timezone": "Europe/Madrid", "limit": 100},
+            )
+        if payload is None:
+            # Liga F cambia de id/nomenclatura entre temporadas: se reintenta por nombre.
+            for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina"):
+                payload = _api_get(
+                    "/matches",
+                    {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
+                )
+                if payload:
+                    break
+        if payload is None:
+            failed = True
+            continue
+        for match in payload.get("data", []) or []:
+            if match.get("id") is None:
+                continue
+            match["_competition_name"] = match.get("_competition_name") or league_name
+            collected.append(match)
+    return collected, failed
+
+
+def open_panel_dates(limit=None):
+    """Fechas recientes del panel que todavia no han quedado cerradas.
+
+    Es lo que hace que un partido de AYER siga vivo en el sistema: si la ultima
+    foto que guardamos de ese dia no es FINISHED (por un corte del collector, una
+    cuota agotada el domingo a las 22:00 o un partido que se echo encima de la
+    medianoche), esa fecha se vuelve a preguntar en cada pasada.
+    """
+    limit = BACKFILL_DAYS if limit is None else max(1, int(limit))
+    try:
+        today = datetime.strptime(today_madrid(), "%Y-%m-%d").date()
+    except ValueError:
+        return []
+    pending = set()
+    for match in load_panel_matches():
+        status = str(match.get("status") or "").strip().upper()
+        if status in ("FINISHED", "FT", "TERMINADO"):
+            continue
+        date_text = _match_date_text(match)
+        if not date_text:
+            continue
+        try:
+            day = datetime.strptime(date_text[:10], "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if day >= today or (today - day).days > limit:
+            continue
+        pending.add(day.isoformat())
+    return sorted(pending)
+
+
+def fetch_open_previous_day_matches():
+    """Refresca los dias pasados que quedaron sin cerrar (el caso del finde)."""
+    matches = []
+    for date_text in open_panel_dates():
+        day_matches, _failed = fetch_day_matches(date_text)
+        matches.extend(day_matches)
+    return matches
+
+
+def backfill_recent_spanish_matches(days=None):
     """Rellena el panel con los partidos acabados de los ultimos dias.
 
     El panel solo conserva lo que el tracker vio mientras corria: un partido
     que termino antes de la primera pasada del dia (p. ej. el Castellon en la
     jornada 1) nunca llego al panel y, sin el, la clasificacion no puede
-    calcular su forma ni su racha. Cada fecha se rellena una sola vez y solo
-    para La Liga y Segunda (2 llamadas por dia), guardando unicamente
-    partidos terminados.
+    calcular su forma ni su racha. Cada fecha se rellena hasta que una pasada la
+    lea ENTERA: si la API estaba bloqueada o sin cuota, la fecha NO se marca como
+    procesada (el comportamiento anterior la daba por buena con cero partidos y
+    nunca volvia a intentarse, que es como un finde se quedaba sin resultados).
     """
+    days = BACKFILL_DAYS if days is None else max(1, int(days))
     state = _load_state()
     done = set(state.get("backfilled_dates") or [])
-    today_date = datetime.strptime(today_madrid(), "%Y-%m-%d").date()
+    pending_open = set(open_panel_dates(days))
+    try:
+        today_date = datetime.strptime(today_madrid(), "%Y-%m-%d").date()
+    except ValueError:
+        return 0
     panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
     added = 0
     for offset in range(days, 0, -1):
         date_text = (today_date - timedelta(days=offset)).strftime("%Y-%m-%d")
-        if date_text in done:
+        if date_text in done and date_text not in pending_open:
             continue
-        day_matches = []
-        for league_name in ("LA LIGA", "SEGUNDA DIVISION", "LIGA F"):
-            league_id = config.HIGHLIGHTLY_LEAGUES.get(league_name)
-            if not league_id:
-                # Try name fallback for Liga F
-                if league_name == "LIGA F":
-                    for name_variant in ("Liga F", "Liga F Moeve", "Primera Division Femenina"):
-                        payload = _api_get(
-                            "/matches",
-                            {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
-                        )
-                        if payload:
-                            for match in payload.get("data", []):
-                                description = str((match.get("state") or {}).get("description") or "").upper()
-                                if not description.startswith("FINISHED") and description not in ("FT", "FULL TIME"):
-                                    continue
-                                match["_competition_name"] = league_name
-                                day_matches.append(match)
-                    continue
-                continue
-            payload = _api_get(
-                "/matches",
-                {"date": date_text, "leagueId": league_id, "timezone": "Europe/Madrid", "limit": 100},
-            )
-            if payload is None:
-                continue
-            for match in payload.get("data", []):
-                description = str((match.get("state") or {}).get("description") or "").upper()
-                if not description.startswith("FINISHED") and description not in ("FT", "FULL TIME"):
-                    continue
-                match["_competition_name"] = league_name
-                day_matches.append(match)
-        panel_matches = [highlightly_match_to_panel(match) for match in day_matches if match.get("id")]
+        day_matches, failed = fetch_day_matches(date_text)
+        # Se guardan tambien los que aun no han acabado: el panel tiene que
+        # reflejar el ultimo estado conocido, no solo la foto final.
+        useful = [match for match in day_matches if _is_final_description(match) or date_text in pending_open]
+        panel_matches = [
+            highlightly_match_to_panel(match, updated_at=madrid_now().isoformat(timespec="seconds"))
+            for match in useful
+            if match.get("id")
+        ]
         if panel_matches:
             update_json_list_by_id_locked(panel_path, panel_matches)
             added += len(panel_matches)
+        if failed and not panel_matches:
+            continue
         done.add(date_text)
-        state["backfilled_dates"] = sorted(done)
+        state["backfilled_dates"] = sorted(done)[-30:]
         _save_state(state)
     if added:
         logger.info("Backfill de partidos acabados: %d anadidos al panel", added)
@@ -446,7 +567,10 @@ def run_daily_tick():
         agenda = None
     window_open = any_live_window_open(agenda)
     summary["window_open"] = window_open
-    if window_open:
+    # El panel tambalea si el proveedor dice "en juego" aunque la agenda no lo
+    # confirme: se refresca, pero al ritmo lento para no inflar la cuota.
+    summary["panel_live"] = (not window_open) and panel_has_recent_live()
+    if window_open or summary["panel_live"]:
         try:
             summary["panel"] = refresh_live_scores()
         except Exception:
@@ -484,6 +608,9 @@ def start_daily_tracker(app=None):
             try:
                 summary = run_daily_tick()
                 cleanup_old_agendas()
+                # Ritmo lento fuera de ventana: 15 min sigue siendo mas corto que el
+                # umbral de 30 min con el que la web cierra un directo congelado, asi
+                # que el sellado de frescura del panel nunca caduca por nuestro lado.
                 sleep_seconds = interval_live if summary.get("window_open") else interval_idle
             except Exception:
                 logger.exception("Daily tracker tick failed")

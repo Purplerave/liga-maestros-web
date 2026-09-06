@@ -7,12 +7,15 @@ from zoneinfo import ZoneInfo
 
 import config
 
+from ..utils import madrid_now as _madrid_now
+
 MADRID_TZ = ZoneInfo("Europe/Madrid")
 PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF = int(os.getenv("PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF", "15"))
 
 
 def madrid_now():
-    return datetime.now(MADRID_TZ)
+    """Reloj de Madrid. Vive en ``utils`` para que web, collector y scrapers usen la misma regla."""
+    return _madrid_now()
 
 
 def today_madrid():
@@ -20,14 +23,22 @@ def today_madrid():
 
 
 def parse_madrid_datetime(fecha, hora):
-    fecha = str(fecha or "").strip()[:10]
-    hora = str(hora or "").strip()[:5]
-    if not fecha or not hora or hora == "-":
+    """`fecha`+`hora` (texto de Madrid sin zona) -> datetime consciente de zona.
+
+    Sin hora explicita devuelve None a proposito: quien calcula el cierre del
+    boleto usa entonces el inicio de jornada como referencia (`fallback_count`)
+    en vez de inventarse las 00:00, que cerrarian la quiniela antes de tiempo.
+    """
+    from ..utils import _match_time_text, parse_provider_datetime
+
+    time_text = _match_time_text(hora)
+    if not time_text:
         return None
-    try:
-        return datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID_TZ)
-    except Exception:
+    base = parse_provider_datetime(str(fecha or "").strip()[:10])
+    if base is None:
         return None
+    hour, minute = (int(part) for part in time_text.split(":"))
+    return base.replace(hour=hour, minute=minute, second=0, microsecond=0).replace(tzinfo=MADRID_TZ)
 
 
 def parse_madrid_date_start(fecha):

@@ -301,10 +301,15 @@ function formatSmartDate(fechaRaw, horaRaw) {
 }
 
 function fixtureScheduleDisplay(match) {
-    const fecha = String(match?.fecha_raw || match?.fecha || match?.added || "").slice(0, 10);
+    const fecha = matchKickoffDateText(match) || String(match?.fecha_raw || match?.fecha || match?.added || "").slice(0, 10);
     const hora = String(match?.hora || match?.scheduled || "").replace(/h$/i, "").trim();
-    const serverToday = typeof state !== "undefined" ? String(state.data?.today_madrid || "") : "";
+    const serverToday = serverTodayMadrid();
     if (fecha && serverToday && fecha === serverToday) return hora ? `${hora}h` : "Horario por confirmar";
+    const yesterday = addIsoDays(serverToday, -1);
+    if (fecha && yesterday && fecha === yesterday) {
+        const label = formatSmartDate(fecha, "");
+        return hora ? `Ayer ${label} ${hora}h` : `Ayer ${label}`;
+    }
     return formatSmartDate(fecha, hora);
 }
 
@@ -614,6 +619,133 @@ function parseMatchTimestamp(match) {
         if (stamp !== null) return stamp;
     }
     return null;
+}
+
+/* ==========================================================================
+   VENTANA DE DIAS DEL DIRECTO — por dias no se pierde NINGUN partido
+   ==========================================================================
+   El directo filtraba por "fecha == hoy" (y la ventana por "fecha >= hoy"), de
+   modo que el sabado a las 00:15 desaparecian todos los partidos del sabado y el
+   lunes ya no habia forma de ver el finde. La ventana correcta es rodada:
+   ayer..manana, extendida a toda la jornada en curso mientras no haya quedado
+   atras, y cualquier partido en juego sea del dia que sea. */
+
+const DIRECTO_LOOKBACK_DAYS = 1;
+const DIRECTO_LOOKAHEAD_DAYS = 1;
+
+/* "2026-09-05" para un instante dado, siempre en hora de Madrid. */
+function madridDateText(atMs) {
+    try {
+        // en-CA produce YYYY-MM-DD sin depender de la zona del navegador.
+        return new Intl.DateTimeFormat("en-CA", {
+            timeZone: MADRID_TIMEZONE,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        }).format(new Date(atMs));
+    } catch (error) {
+        return new Date(atMs).toISOString().slice(0, 10);
+    }
+}
+
+/* Sumar dias a una fecha ISO sin tocar husos: aritmetica de calendario pura. */
+function addIsoDays(dateText, days) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dateText || "").trim());
+    if (!match) return "";
+    const base = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    if (Number.isNaN(base)) return "";
+    return new Date(base + Number(days || 0) * 86400000).toISOString().slice(0, 10);
+}
+
+/* "Hoy" segun el servidor (Europe/Madrid). El reloj del navegador no vale: en
+   UTC o de viaje, la jornada entera cambiaría de dia a otra hora. */
+function serverTodayMadrid() {
+    const payload = typeof state !== "undefined" ? state?.data || {} : {};
+    for (const candidate of [payload.today_madrid, String(payload.now_madrid || "").slice(0, 10)]) {
+        const text = String(candidate || "").slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+    }
+    return madridDateText(Date.now());
+}
+
+/* Dia del saque de un partido, sea de la quiniela o del panel externo. */
+function matchKickoffDateText(match) {
+    if (!match) return "";
+    const stamp = parseMatchTimestamp(match);
+    if (stamp !== null && !Number.isNaN(stamp)) return madridDateText(stamp);
+    for (const raw of [match.fecha_raw, match.fecha, match.added]) {
+        const text = String(raw || "").trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(text.slice(0, 10))) return text.slice(0, 10);
+    }
+    const iso = String(match.date || match.kickoff || "").trim();
+    if (iso) {
+        const parsed = Date.parse(iso);
+        if (!Number.isNaN(parsed)) return madridDateText(parsed);
+    }
+    return "";
+}
+
+/* Limites de la ventana del directo, en textos ISO. */
+function directoDayWindow() {
+    const today = serverTodayMadrid();
+    if (!today) return null;
+    let start = addIsoDays(today, -DIRECTO_LOOKBACK_DAYS);
+    let end = addIsoDays(today, DIRECTO_LOOKAHEAD_DAYS);
+    const partidos = (typeof state !== "undefined" && state.data?.partidos) || [];
+    let jornadaStart = null;
+    let jornadaEnd = null;
+    for (const match of partidos) {
+        const text = matchKickoffDateText(match);
+        if (!text) continue;
+        if (jornadaStart === null || text < jornadaStart) jornadaStart = text;
+        if (jornadaEnd === null || text > jornadaEnd) jornadaEnd = text;
+    }
+    // La jornada solo extiende la ventana mientras no haya quedado del todo
+    // atras: asi el lunes sigue viendo el sabado y el domingo, pero una jornada
+    // cerrada hace tres semanas no se queda pegada al directo.
+    if (jornadaEnd !== null && start && jornadaEnd >= start) {
+        if (jornadaStart && jornadaStart < start) start = jornadaStart;
+        if (jornadaEnd > end) end = jornadaEnd;
+    }
+    return { start, end };
+}
+
+/* Orden de trabajo del directo y de la portada: por saque real en hora de Madrid.
+   Comparar textos de fecha no vale ("2026-09-05 21:30" y "2026-09-06" no son del
+   mismo formato segun la fuente). */
+function sortMatchesByKickoff(matches) {
+    return [...(matches || [])].sort((a, b) => {
+        const ka = parseMatchTimestamp(a);
+        const kb = parseMatchTimestamp(b);
+        if (ka !== null && kb !== null) return ka - kb;
+        if (ka !== null) return -1;
+        if (kb !== null) return 1;
+        return String(a?.added || a?.fecha_raw || "").localeCompare(String(b?.added || b?.fecha_raw || ""));
+    });
+}
+
+/* LIVE_GRACE_MS: lo que se le concede a un partido en juego fuera de su dia antes
+   de considerarlo un fila congelada que el proveedor no cerro (un 1-0 del martes
+   que sigue "IN PLAY" cinco dias despues no puede volver al directo). */
+const DIRECTO_LIVE_GRACE_MS = 6 * 60 * 60 * 1000;
+
+function isRelevantDirectoMatch(match, window) {
+    if (!match) return false;
+    const bounds = window || directoDayWindow();
+    const dateText = matchKickoffDateText(match);
+    /* En juego: se ensena aunque no sea "hoy", que es el caso del que se alarga a
+       la madrugada siguiente. Solo se descarta si su propio saque dice que lleva
+       mas de seis horas: entonces es una fila abandonada, no un directo. */
+    if (isLiveStatus(String(match.status || ""))) {
+        if (isExpiredLiveMatch(match)) return false;
+        if (!bounds || !dateText) return true;
+        if (dateText >= bounds.start && dateText <= bounds.end) return true;
+        const stamp = parseMatchTimestamp(match);
+        return stamp !== null && Date.now() - stamp <= DIRECTO_LIVE_GRACE_MS;
+    }
+    if (!bounds) return true;
+    if (!dateText) return true;
+    return dateText >= bounds.start && dateText <= bounds.end;
 }
 
 function isUpcomingScheduledMatch(match, graceMinutes = 15) {

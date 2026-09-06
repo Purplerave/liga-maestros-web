@@ -2,10 +2,10 @@
 
 import json
 import sqlite3
-from datetime import datetime
 
 from ..db.connection import get_db
 from .jornada import current_season_sql
+from .ticket import madrid_now
 
 
 def ensure_quiz_tables(conn):
@@ -129,7 +129,7 @@ def submit_quiz_respuestas(jornada, user_id, nombre, respuestas, tiempo_total_ms
         participation_bonus = 25
         puntos_total += participation_bonus
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = madrid_now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             conn.execute(
                 """

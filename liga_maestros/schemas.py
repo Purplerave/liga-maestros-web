@@ -53,6 +53,16 @@ class ParticipantContract(_StrictBase):
 
 
 class MatchPayload(_StrictBase):
+    """CONTRATO del boleto que consume el navegador.
+
+    Cada campo que `build_jornada_matches` emite tiene que estar declarado aqui:
+    el payload de `/api/liga/data` se reconstruye desde este schema, asi que un
+    campo no declarado se descarta en silencio. Perder `fecha_raw` o
+    `minuto_live` era suficiente para que un partido del sabado dejara de
+    aparecer el domingo (el cliente filtra por dia y no tiene reloj de saque) y
+    para que la hora del boleto se pintara sin dia.
+    """
+
     id: int
     local: str
     visitante: str
@@ -60,12 +70,19 @@ class MatchPayload(_StrictBase):
     goles_visitante: int | None = None
     status: str = "NS"
     fecha: str = ""
+    fecha_raw: str = ""
     hora: str = ""
     minuto: str = ""
+    minuto_live: str = ""
     signo: str = "-"
     signo_actual: str = "-"
     marcador: str = ""
+    marcador_base: str = ""
+    logo_local: str = ""
+    logo_visitante: str = ""
     fecha_limpia: str = ""
+    resultado_pendiente: bool = False
+    updated_at: str = ""
 
     @field_validator("signo", "signo_actual")
     @classmethod
@@ -114,6 +131,9 @@ class LigaDataPayload(_StrictBase):
     max_jornada: int | str = ""
     jornadas_disponibles: list[int] = Field(default_factory=list)
     today_madrid: str = ""
+    now_madrid: str = ""
+    panel_fetched_at: str = ""
+    panel_age_seconds: int | None = None
     is_locked: bool = False
     ticket_guardado: bool = False
     edit_deadline: str = ""

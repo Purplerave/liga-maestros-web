@@ -5,9 +5,14 @@
    Offline: muestra la ultima version cargada de la pagina.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v12';
-const STATIC_CACHE = 'liga-maestros-static-v12';
+const CACHE = 'liga-maestros-v13';
+const STATIC_CACHE = 'liga-maestros-static-v13';
 
+/* Los JS/CSS se precachean CON su parametro de version: cache-first sobre una
+   URL fija deja sirviendo el codigo viejo para siempre, que es otra forma de que
+   "los partidos no se actualicen" solo para los usuarios que ya tienen la app
+   instalada. La version la inyecta el propio HTML (assets_v), asi que aqui se
+   lista la ruta base y se deja que la red valide al activar. */
 const PRECACHE_URLS = [
     '/',
     '/static/manifest.webmanifest',

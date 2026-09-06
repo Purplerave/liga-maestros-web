@@ -16,11 +16,10 @@ import logging
 import os
 import threading
 import time
-from datetime import date
 
 import config
 
-from ...utils import safe_read_json, safe_write_json
+from ...utils import madrid_today, safe_read_json, safe_write_json
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,9 @@ def content_signature(parts):
 
 def get_usage():
     """Llamadas consumidas hoy. El contador se reinicia solo al cambiar el dia."""
-    today = date.today().isoformat()
+    # Dia de Madrid, no del servidor: en UTC el contador de tokens se
+    # reiniciaba a las 02:00 (Madrid) y la cuota de la madrugada se duplicaba.
+    today = madrid_today()
     data = safe_read_json(_usage_path(), {})
     if data.get("date") != today:
         return {

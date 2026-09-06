@@ -1,8 +1,8 @@
 """Short, authenticated comments attached to a contest jornada."""
 
-from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
+
+from liga_maestros.utils import madrid_now
 
 from ..db.connection import get_db
 from ..middleware.csrf import valid_csrf_request
@@ -69,7 +69,9 @@ def post_comment():
         return jsonify({"status": "error", "message": f"Maximo {MAX_COMMENT_LENGTH} caracteres"}), 400
 
     name = " ".join(str(user.get("name") or "Participante").split())[:60]
-    created_at = datetime.now().astimezone().isoformat(timespec="seconds")
+    # Sello con offset de Madrid: el navegador lo interpreta bien y el orden
+    # del hilo coincide con el dia de la jornada (en UTC se atrasaba dos horas).
+    created_at = madrid_now().isoformat(timespec="seconds")
     conn = get_db()
     try:
         cursor = conn.execute(

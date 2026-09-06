@@ -17,6 +17,10 @@
 | `API_FOOTBALL_HOST` | Host de API Football (default: v3.football.api-sports.io) | v3.football.api-sports.io |
 | `API_FOOTBALL_DAILY_LIMIT` | Límite diario de llamadas API Football (default: 100) | 100 |
 | `API_FOOTBALL_DAILY_RESERVE` | Reserva diaria API Football (default: 10) | 10 |
+| `HIGHLIGHTLY_MAX_CALLS_PER_REFRESH` | Llamadas al proveedor por pasada del collector (default: 4; se reparte entre los días abiertos de la jornada) | 4 |
+| `HIGHLIGHTLY_MAX_CALLS_CEILING` | Techo de llamadas en UNA pasada, aunque haya varios días abiertos (default: 12) | 12 |
+| `DAILY_TRACKER_BACKFILL_DAYS` | Días hacia atrás que el tracker diario repasa cuando el panel declara partidos abiertos (default: 4) | 4 |
+| `WEB_COLLECTOR_ENABLED` | Activa el collector en proceso dentro de la web (1 en producción) | 1 |
 
 ## Variables de Google OAuth
 | Variable | Descripción | Ejemplo |

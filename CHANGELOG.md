@@ -2,6 +2,86 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-06 — Finde a finde: horas de Madrid, partidos de ayer y cierre de resultados
+
+Cerradas de raíz las tres averías que se repetían **todos los fines de semana**:
+las horas salían mal, había partidos del sábado que no se actualizaban nunca y, al
+cambiar el día, los partidos del día anterior desaparecían de la web.
+
+### Corregido
+
+- 🔴 **Las horas.** `parse_provider_datetime` (antes: un `strptime` que solo
+  admitía `...T21:00:00.000Z`) reconoce ahora UTC con y sin milisegundos, offsets
+  `+HH:MM`, texto plano de Madrid y epoch en segundos/milisegundos, y reconvierte
+  siempre a reloj de Madrid. Con el formato inesperado el parser devolvía el texto
+  **crudo en UTC**: un saque de las 21:30 se pintaba a las 19:30 y los que
+  empiezan después de las 00:00 UTC cambiaban hasta de día — que es exactamente
+  «faltan los partidos de ayer» visto desde el panel. Si aun así no se puede
+  leer la hora, se deja vacía («Horario por confirmar») en vez de inventarla.
+- 🔴 **Relojes ingenuos barridos.** Ningún `datetime.now()`, `date.today()` ni
+  `fromtimestamp()` sin zona queda ya en `liga_maestros/` (lo vigila un test sobre
+  el AST). El servidor de Alwaysdata corre en UTC, así que el «última
+  sincronización», el `updated_at` del panel, el `fetched_at` del radar de noticias,
+  la cuota diaria de la IA, el sello de los comentarios y los `scraped_at` de los
+  dos scrapers iban dos horas por detrás; en la medianoche, además, cambiaban de
+  día y el partido «de ayer» lo era solo para el reloj del servidor.
+- 🔴 **Los partidos de ayer.** `build_all_league_matches` filtraba por
+  `fecha == hoy` y el navegador, por si faltaba poco, por `fecha >= hoy`. La
+  ventana es ahora rodada (ayer..mañana) y se estira a toda la jornada en curso
+  mientras no haya quedado atrás: el domingo a las 00:15 y el lunes por la mañana
+  se sigue viendo y comprobando lo jugado. Un partido que el proveedor declara en
+  juego se enseña sea del día que sea, salvo que su propio saque lleve más de seis
+  horas (fila congelada, no directo).
+- 🔴 **El contrato de la API.** `validate_liga_data` reconstruye la respuesta desde
+  el schema y se llevaba por delante `fecha_raw`, `minuto_live`, `marcador_base`,
+  los escudos y `updated_at`: sin fecha, el navegador no tenía con qué saber de qué
+  día era un partido. `MatchPayload` declara ya esas claves y un test obliga a que
+  toda clave que escriba el builder esté en el schema.
+- 🔴 **Resultados que no llegaban.** La ventana del collector se cerraba 24 horas
+  después del saque, las filas sin horario no la abrían nunca y `STALE` con
+  marcador se daba por bueno: lo que no se cazó el sábado por la noche ya no se
+  pedía jamás. Ahora la ventana sigue abierta mientras quede una fila sin `FT`
+  (cada 15 minutos si es reciente, tres veces al día para aplazados viejos, hasta
+  siete días), se refrescan **todos los días con partidos abiertos** y el presupuesto
+  por pasada pasa de 1 a 4 llamadas, con las ligas del boleto delante para que Liga
+  F no se quede fuera de presupuesto.
+- 🔴 **Horarios del boleto.** `parse_detail_datetime` del scraper de Quiniela15
+  leía `sábado 22 ago17:00h` (mes abreviado pegado a la hora), `viernes 4/9 19:30h`,
+  `Hoy`/`mañana`, `24:00h` y fechas ISO; antes devolvía vacío y la jornada entera
+  salía sin horas — el `data/horarios_J4.json` de este finde lo demuestra.
+- 🟡 **Un collector por disco.** El worker en proceso y un `LIVE_COLLECTOR.py`
+  lanzado a mano se pisan `DATA_DIR` y la cuota: ahora coordinan con un `flock` y,
+  al arrancar, el worker fuerza una pasada de cierre para recuperar lo que no se
+  pilló mientras el servidor estaba caído (típico del domingo de madrugada).
+- 🟡 **El backfill diario** ya no marca una fecha como procesada si la lectura
+  falló (cuota agotada o circuito abierto el domingo por la noche), que era la otra
+  forma de quedarse el finde sin resultados definitivamente.
+- 🟡 **Aviso de datos caducados**: la edad del panel la manda el servidor
+  (`panel_age_seconds`) y solo se muestra si hay fútbol que refrescar; el navegador
+  ya no la calcula con `new Date(texto sin zona)`, que la estropeaba según el huso.
+
+### Añadido
+
+- `madrid_now()` / `madrid_today()` / `to_madrid_naive()` / `kickoff_datetime()` /
+  `day_span_centered_on()` como núcleo temporal común, y `HIGHLIGHTLY_*` +
+  `DAILY_TRACKER_BACKFILL_DAYS` documentados en `docs/operations`.
+- Ventana de días y orden por saque real en `static/js/utils.js` + `state.js`
+  (`matchKickoffDateText`, `directoDayWindow`, `isRelevantDirectoMatch`,
+  `sortMatchesByKickoff`), y etiqueta `Ayer sábado 05/09 21:30h` en el boleto.
+- 57 tests nuevos (`tests/test_horarios_y_findes_de_semana.py`,
+  `tests/test_directo_ventana_de_dias.py`), incluido un recorrido end-to-end que
+  pasa el payload real de `/api/liga/data` por `utils.js`/`state.js` y por cinco
+  husos de navegador.
+- Runbook de fin de semana en `docs/operations/OPERACION_SEMANAL.md`.
+
+### Despliegue
+
+- Volver a scrapear el boleto de la jornada en curso
+  (`python SCRAPE_QUINIELA15_PROXIMA.py`): las filas que ya están en la BD vienen
+  del parser viejo y salen sin hora hasta que se reimportan.
+- El collector fuerza una pasada de cierre al arrancar el proceso: con eso se
+  recuperan los resultados que no se cazaron mientras la web estaba caída.
+
 ## 2026-09-03 — El DIRECTO ya no depende de la quiniela ni del reloj del navegador
 
 ### Corregido

@@ -2,17 +2,29 @@
 
 import json
 import os
-import re
 from datetime import datetime, timedelta
 
 import config
 
 from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state, is_live_status
 from ...services.ticket import madrid_now, today_madrid
-from ...utils import normalize_team_key, parse_any_match_datetime
+from ...utils import (
+    day_span_centered_on,
+    kickoff_date_text,
+    normalize_team_key,
+    parse_any_match_datetime,
+)
 
 STALE_LIVE_AFTER = timedelta(minutes=120)
 _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
+# Ventana de dias que el directo ensena siempre: el finde acaba de madrugada y
+# los resultados del sabado se miran el domingo (y los del domingo, el lunes).
+DIRECTO_LOOKBACK_DAYS = max(1, int(os.getenv("DIRECTO_LOOKBACK_DAYS", "1")))
+DIRECTO_LOOKAHEAD_DAYS = max(1, int(os.getenv("DIRECTO_LOOKAHEAD_DAYS", "1")))
+# El panel acumula dias; mas alla de esta retencion solo sirve para clasificaciones.
+PANEL_HISTORY_DAYS = max(3, int(os.getenv("PANEL_HISTORY_DAYS", "7")))
+# Un directo que empieza tarde y se ve al dia siguiente sigue siendo "de hoy".
+LIVE_GRACE_AFTER_KICKOFF = timedelta(hours=6)
 
 
 def _close_stale_live_match(match):
@@ -168,30 +180,134 @@ def _add_team_logos(matches, team_logos):
 
 
 def _is_live_match(match):
+    """Un partido esta en juego por su ESTADO, no por la fecha que conste en el payload.
+
+    El filtro anterior exigia ``added == hoy`` y se cargaba todo el finde: el
+    partido del sabado que sigue vivo a las 00:15 del domingo, la fila cuya fecha
+    no se pudo leer al importar el boleto, y cualquier directo que el proveedor
+    reenvia tras el cambio de dia. Quien decide si un directo sigue siendo creible
+    es ``_close_stale_live_match`` (saque imposible, minuto por delante del reloj
+    o proveedor sin noticias), que ya se aplico antes de pasar por aqui.
+    """
     status = str(match.get("status") or "").upper()
+    if not status or status in ("FT", "FINISHED", "TERMINADO", "STALE", "AET", "AWARDED", "POSTPONED"):
+        return False
     if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
         return False
-    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
-    return not match_date or match_date == today_madrid()
+    kickoff = parse_any_match_datetime(match)
+    if kickoff is not None:
+        # Red de seguridad para filas sin sellado de frescura: un directo no
+        # puede durar mas que el partido con margen (prolongacion + penalties).
+        now = madrid_now().replace(tzinfo=None)
+        if now - kickoff > LIVE_GRACE_AFTER_KICKOFF:
+            return False
+        return True
+    match_date = kickoff_date_text(match)
+    if not match_date:
+        return True
+    window_start, _ = _directo_day_window()
+    return match_date >= window_start
 
 
-def _load_external_matches():
-    candidate_match_paths = [
+def _directo_day_window(quiniela_matches=None):
+    """Fechas [inicio, fin] que el directo debe cubrir hoy (texto ISO, hora de Madrid).
+
+    Arranca con la ventana rodante (ayer..manana) y se expande para cubrir TODA
+    la jornada en curso: el lunes por la manana siguen siendo noticia los
+    resultados del sabado y del domingo, y ese era el hueco por el que los
+    partidos "desaparecian" el finde. La jornada solo extiende la ventana mientras
+    su ultimo saque no haya quedado atras del todo, de modo que una jornada ya
+    cerrada hace semanas no inunde el directo.
+    """
+    window_start, window_end = day_span_centered_on(
+        today_madrid(),
+        DIRECTO_LOOKBACK_DAYS,
+        DIRECTO_LOOKAHEAD_DAYS,
+    )
+    datetimes = [dt for dt in (parse_any_match_datetime(match) for match in quiniela_matches or []) if dt]
+    if datetimes:
+        try:
+            rolling_start = datetime.strptime(window_start, "%Y-%m-%d").date()
+        except ValueError:
+            rolling_start = datetimes[0].date()
+        if max(dt.date() for dt in datetimes) >= rolling_start:
+            jornada_start = (min(datetimes) - timedelta(days=1)).strftime("%Y-%m-%d")
+            jornada_end = (max(datetimes) + timedelta(days=1)).strftime("%Y-%m-%d")
+            window_start = min(window_start, jornada_start)
+            window_end = max(window_end, jornada_end)
+    return window_start, window_end
+
+
+def _prune_panel_history(matches):
+    """Recorta el panel a los ultimos dias para que la respuesta no crezca sin tope.
+
+    El historial completo sigue disponible para clasificaciones y forma (esas
+    lecturas van al fichero), pero el payload de la web solo necesita la ventana
+    reciente.
+    """
+    cutoff_start, _ = day_span_centered_on(today_madrid(), PANEL_HISTORY_DAYS, 0)
+    kept = []
+    for match in matches:
+        match_date = kickoff_date_text(match)
+        if not match_date or match_date >= cutoff_start:
+            kept.append(match)
+    return kept
+
+
+# Fichero del que salio la ultima foto leida: la frescura que se ensena en la web
+# tiene que corresponderse con las filas que se estan pintando, no con el fichero
+# mas reciente del disco.
+_panel_source_path = None
+
+
+def panel_candidate_paths():
+    """Rutas donde vive el panel del directo, en el orden en que se consultan."""
+    paths = [
         os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json"),
         os.path.join(config.BASE_DIR, "LIVE_ALL_MATCHES_V3.json"),
         os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES.json"),
+        os.path.join(config.BASE_DIR, "LIVE_ALL_MATCHES.json"),
     ]
     extra_panel_path = os.getenv("LIVE_ALL_MATCHES_EXTRA_PATH", "").strip()
     if extra_panel_path:
-        candidate_match_paths.insert(0, extra_panel_path)
-    for path in candidate_match_paths:
+        paths.insert(0, extra_panel_path)
+    return paths
+
+
+def panel_source_path():
+    return _panel_source_path
+
+
+def panel_freshness_stamp():
+    """`mtime` (epoch) del panel que se esta sirviendo, o None si no hay ninguno."""
+    path = _panel_source_path
+    if path:
+        try:
+            return os.path.getmtime(path)
+        except OSError:
+            pass
+    stamp = None
+    for candidate in panel_candidate_paths():
+        try:
+            current = os.path.getmtime(candidate)
+        except OSError:
+            continue
+        if stamp is None or current > stamp:
+            stamp = current
+    return stamp
+
+
+def _load_external_matches():
+    global _panel_source_path
+    for path in panel_candidate_paths():
         if not os.path.exists(path):
             continue
         try:
             with open(path, encoding="utf-8") as fh:
                 loaded_matches = json.load(fh)
             if loaded_matches:
-                return loaded_matches
+                _panel_source_path = path
+                return _prune_panel_history(loaded_matches)
         except Exception:
             pass
     return []
@@ -270,39 +386,31 @@ def _infer_match_competition(match, standings_db):
 
 
 def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):
-    """Keep external matches that are relevant right now.
+    """Mantiene en el directo lo que todavia interesa al lector de hoy.
 
-    Always keep today's matches (scheduled, live or finished today): a
-    midweek Castellon game must show up in the Directo even when the
-    quiniela is idle. Additionally, during the jornada window keep the
-    matches inside it, as before.
+    Tres criterios unidos por OR, pensados para que NINGUN partido del finde se
+    quede fuera:
+
+    1. su fecha cae dentro de la ventana del directo (ayer..manana, extendida a
+       toda la jornada en curso) -> los resultados del sabado siguen visibles el
+       domingo y los del domingo, el lunes;
+    2. esta en juego, sea cual sea la fecha que conste en el payload;
+    3. no tiene fecha legible: mejor mostrarlo que perderlo, porque una fila sin
+       horario ya se quedaba invisible para todos los filtros.
+
+    El viejo ``match_date == hoy`` era la causa directa de que "los partidos de
+    ayer no aparezcan": en cuanto cambiaba el dia, todo el dia anterior desaparecia
+    del panel y de la clasificacion en vivo.
     """
-    today_str = today_madrid()
-
-    window_start = window_end = None
-    if quiniela_league_matches:
-        quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
-        quiniela_has_live = any(
-            str(m.get("status") or "").upper() in ("LIVE", "IN PLAY", "FT", "FINISHED") for m in quiniela_league_matches
-        )
-        if quiniela_datetimes and quiniela_has_live:
-            window_start = min(quiniela_datetimes) - timedelta(days=1)
-            window_end = max(quiniela_datetimes) + timedelta(days=1)
+    window_start, window_end = _directo_day_window(quiniela_league_matches)
 
     def keep_external_match(match):
-        match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
-        if match_date == today_str:
+        if _is_live_match(match):
             return True
-        dt = parse_any_match_datetime(match)
-        if dt is not None and dt.strftime("%Y-%m-%d") == today_str:
+        match_date = kickoff_date_text(match)
+        if not match_date:
             return True
-        if window_start is not None and dt is not None and window_start <= dt <= window_end:
-            return True
-        raw_status = str(match.get("status") or "").upper()
-        raw_score = str(match.get("score") or match.get("marcador") or "").strip()
-        has_score = bool(re.search(r"\d+\s*-\s*\d+", raw_score))
-        looks_live = raw_status in ("LIVE", "IN PLAY", "HT", "EN JUEGO")
-        return match_date == today_str and (looks_live or has_score)
+        return window_start <= match_date <= window_end
 
     return [match for match in all_league_matches if keep_external_match(match)]
 

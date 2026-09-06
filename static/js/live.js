@@ -59,13 +59,18 @@ function patchDirectComentarista() {
 }
 
 function renderDirectEmptyState() {
-    const upcoming = (typeof getAllTodayLeagueMatches === "function" ? getAllTodayLeagueMatches() : [])
-        .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")))
-        .sort((a, b) => String(a.added || a.fecha_raw || "").localeCompare(String(b.added || b.fecha_raw || "")))
-        .slice(0, 6);
+    /* Sin partidos en juego hay que ensenar la cola del dia, y cuando el dia esta
+       vacio (lunes, martes...) la de la ventana del directo: antes el filtro "solo
+       hoy" dejaba la pagina en blanco justo despues del finde. */
+    const source = typeof getAllTodayLeagueMatches === "function" ? getAllTodayLeagueMatches() : [];
+    const pool = (source.length ? source : (typeof getLeagueMatchesWindow === "function" ? getLeagueMatchesWindow() : []))
+        .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")));
+    const upcoming = sortMatchesByKickoff(pool).slice(0, 6);
+    const upcomingAreToday = upcoming.length
+        && upcoming.every(m => matchKickoffDateText(m) === serverTodayMadrid());
     const listHtml = upcoming.length ? `
         <div class="direct-empty-upcoming">
-            <span class="direct-empty-upcoming-label">Próximos partidos de hoy</span>
+            <span class="direct-empty-upcoming-label">${upcomingAreToday ? "Próximos partidos de hoy" : "Próximos partidos de la jornada"}</span>
             ${upcoming.map(m => {
                 const home = m.local || m.home_name || (m.home || {}).name || "";
                 const away = m.visitante || m.away_name || (m.away || {}).name || "";
@@ -83,7 +88,7 @@ function renderDirectEmptyState() {
         <section class="direct-empty-state">
             <span class="direct-empty-kicker">DIRECTO</span>
             <h2>Ahora mismo no hay partidos en juego</h2>
-            <p>${upcoming.length ? "Cuando empiece un partido lo verás aquí en vivo. Mientras tanto, estos son los próximos de hoy:" : "Cuando empiece un partido, aquí verás el marcador y el minuto en vivo. No hay más partidos programados para hoy."}</p>
+            <p>${upcoming.length ? `Cuando empiece un partido lo verás aquí en vivo. Mientras tanto, estos son los próximos${upcomingAreToday ? " de hoy" : " de la jornada"}:` : "Cuando empiece un partido, aquí verás el marcador y el minuto en vivo. No hay más partidos programados por ahora."}</p>
             ${listHtml}
             <button class="direct-empty-action" type="button" data-page-action="TICKET">Ver la quiniela</button>
         </section>`;

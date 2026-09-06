@@ -3,14 +3,13 @@
 import os
 import threading
 import time
-from datetime import datetime
 
 import config
 
 from ..db.connection import get_db
 from ..middleware.json_lock import write_json_locked
 from ..utils import safe_read_json
-from .ticket import today_madrid
+from .ticket import madrid_now, today_madrid
 
 HIGHLIGHTLY_DAILY_CALL_LIMIT = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_LIMIT", "7500"))
 HIGHLIGHTLY_DAILY_CALL_RESERVE = int(os.getenv("HIGHLIGHTLY_DAILY_CALL_RESERVE", "250"))
@@ -41,7 +40,7 @@ def get_highlightly_circuit():
 
 def record_highlightly_success():
     path = os.path.join(config.DATA_DIR, "HIGHLIGHTLY_CIRCUIT.json")
-    now = datetime.now().isoformat(timespec="seconds")
+    now = madrid_now().isoformat(timespec="seconds")
     with _circuit_lock:
         write_json_locked(
             path,
@@ -74,7 +73,7 @@ def record_highlightly_failure(exc):
                 HIGHLIGHTLY_CIRCUIT_MAX_COOLDOWN_SECONDS,
             )
         open_until = time.time() + cooldown if failures >= HIGHLIGHTLY_CIRCUIT_FAILURE_LIMIT else 0
-        now = datetime.now().isoformat(timespec="seconds")
+        now = madrid_now().isoformat(timespec="seconds")
         write_json_locked(
             circuit["path"],
             {
@@ -143,7 +142,7 @@ def get_highlightly_usage():
                 INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)
                 VALUES (?, ?, ?, ?)
             """,
-                ("highlightly", today, calls, datetime.now().isoformat(timespec="seconds")),
+                ("highlightly", today, calls, madrid_now().isoformat(timespec="seconds")),
             )
             conn.commit()
         else:
@@ -162,7 +161,7 @@ def reserve_highlightly_calls(count=1):
     try:
         ensure_api_usage_table(conn)
         conn.execute("BEGIN IMMEDIATE")
-        now = datetime.now().isoformat(timespec="seconds")
+        now = madrid_now().isoformat(timespec="seconds")
         conn.execute(
             """
             INSERT OR IGNORE INTO api_usage_daily (service, date, calls, updated_at)

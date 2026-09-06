@@ -169,7 +169,7 @@ def build_jornada_matches(conn, jornada, team_logos):
                 dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
                 fecha_limpia = f"{dias[fecha_dt.weekday()]} {fecha_dt.strftime('%d/%m')}"
             except Exception:
-                current_year = datetime.now().strftime("%Y")
+                current_year = today_madrid()[:4]
                 fecha_limpia = str(r["fecha"]).replace(f"{current_year}-", "").replace(f"/{current_year}", "")
 
         # CEO fix Liga F: si hay goles, mostrar marcador siempre, incluso si status es NS
@@ -205,6 +205,7 @@ def build_jornada_matches(conn, jornada, team_logos):
             else:
                 marcador = _fixture_schedule_label(r, fecha_limpia)
 
+        updated_at = str(r.get("updated_at") or "")
         partidos.append(
             {
                 "id": p_id,
@@ -216,11 +217,17 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "status": status,
                 "marcador_base": marcador_base,
                 "minuto_live": minuto_num,
-                "fecha_raw": r.get("fecha", ""),
-                "hora": r.get("hora", "-"),
+                # `fecha` es el alias historicamente consumido por clientes viejos y
+                # `fecha_raw` el que usan los filtros de dia del navegador: ambos
+                # tienen que salir poblados, o el partido desaparece de la ventana.
+                "fecha": str(r.get("fecha") or ""),
+                "fecha_raw": str(r.get("fecha") or ""),
+                "hora": str(r.get("hora") or "-"),
+                "minuto": minuto,
                 "signo_actual": signo,
                 "goles_local": gh,
                 "goles_visitante": ga,
+                "updated_at": updated_at,
                 # Compatibility field for older clients. A fixture never gets a
                 # vague pending-result label: it shows its schedule or a score.
                 "resultado_pendiente": False,
@@ -247,11 +254,15 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "status": "NS",
                 "marcador_base": "",
                 "minuto_live": "",
+                "fecha": "",
                 "fecha_raw": "",
                 "hora": "-",
+                "minuto": "",
                 "signo_actual": "-",
                 "goles_local": None,
                 "goles_visitante": None,
+                "updated_at": "",
+                "resultado_pendiente": False,
             },
         )
         for i in range(1, 16)

@@ -1,12 +1,11 @@
 """Arcade games generic routes: scores and leaderboards."""
 
-from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
 from ..db.migrations import ensure_arcade_table
 from ..middleware.rate_limit import is_rate_limited
+from ..services.ticket import madrid_now
 
 bp = Blueprint("arcade", __name__)
 
@@ -74,7 +73,7 @@ def post_arcade_score(game_id):
     conn = get_db()
     try:
         ensure_arcade_table(conn)
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = madrid_now().strftime("%Y-%m-%d %H:%M:%S")
         nombre = (user.get("name") or "Maestro").split(" ")[0]
         conn.execute(
             "INSERT INTO arcade_scores (game_id, user_id, nombre, score, created_at) VALUES (?, ?, ?, ?, ?)",
