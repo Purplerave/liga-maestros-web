@@ -81,7 +81,15 @@ def signo_for_score(match_id, home_goals, away_goals):
 
 
 def parse_match_title(text):
-    match = re.match(r"^\s*(\d+)\s+(.+?)\s+\([^)]+\)\s*-\s*(.+?)\s+\([^)]+\)", text)
+    # La fuerza15 va entre parentesis Y contiene digitos: (1666.4). El marker
+    # femenino "(F)" tambien va entre parentesis, y la version anterior se lo
+    # tragaba como si fuera la fuerza del visitante: "Barcelona (F) (2017.7)"
+    # llegaba como visitante "Barcelona", el cruce con la BD ("Barcelona (F)")
+    # se descartaba por mezclar masculino/femenino y el resultado del partido
+    # no entraba nunca. Exigir un digito dentro del parentesis distingue la
+    # fuerza15 del genero.
+    fuerza = r"\((?=[^)]*\d)[^)]+\)"
+    match = re.match(rf"^\s*(\d+)\s+(.+?)\s+{fuerza}\s*-\s*(.+?)\s+{fuerza}", text)
     if match:
         return int(match.group(1)), clean(match.group(2)), clean(match.group(3))
     match = re.match(r"^\s*(\d+)\s+(.+?)\s+-\s+(.+?)(?:\s+\d|$)", text)
