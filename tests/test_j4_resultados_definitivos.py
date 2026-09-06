@@ -250,6 +250,56 @@ class TestAplicarResultadosQ15:
         assert row["status"] == "FT"
 
 
+class TestScraperMarcaFemenina:
+    """El scraper no debe perder el "(F)" del visitante femenino.
+
+    quiniela15.com imprime "11 Sevilla (F) (1518.7) - Barcelona (F) (2017.7)".
+    El regex antiguo confundia el "(F)" con el parentesis de la fuerza15 y
+    devolvia visitante "Barcelona": el cruce con la BD ("Barcelona (F)") se
+    descartaba por genero y el resultado no entraba nunca.
+    """
+
+    @staticmethod
+    def _scraper():
+        import importlib.util
+
+        path = ROOT / "tools" / "scrapers" / "SCRAPE_QUINIELA15_DIRECTO.py"
+        spec = importlib.util.spec_from_file_location("scrape_q15_directo_mod", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_visitante_femenino_conserva_su_marca(self):
+        scraper = self._scraper()
+        idx, home, away = scraper.parse_match_title(
+            "11 Sevilla (F) (1518.7) - Barcelona (F) (2017.7) 0 - 4 2 9%|10%|81%"
+        )
+        assert (idx, home, away) == (11, "Sevilla (F)", "Barcelona (F)")
+
+    def test_local_y_visitante_masculinos_sin_cambios(self):
+        scraper = self._scraper()
+        idx, home, away = scraper.parse_match_title("1 Athletic (1666.4) - At. Madrid (1811.1) 3 - 0 1 19%|24%|57%")
+        assert (idx, home, away) == (1, "Athletic", "At. Madrid")
+
+    def test_femenino_sin_fuerza_tambien_se_resuelve(self):
+        scraper = self._scraper()
+        idx, home, away = scraper.parse_match_title("12 Edf Logroño - Athletic Club (F) 0 - 1")
+        assert (idx, home, away) == (12, "Edf Logroño", "Athletic Club (F)")
+
+    def test_resultado_femenino_de_visitante_aplica_en_bd(self, j4_db):
+        """Con el marcador "(F)" intacto, el 0-4 del Barcelona femenino entra."""
+        payload = {
+            "matches": [
+                _q15_match(11, "Sevilla (F)", "Barcelona (F)", "STALE", "", 0, 4),
+            ]
+        }
+        assert collector.apply_q15_results_to_db(4, payload) == 1
+        row = j4_db.execute(
+            "SELECT status, goles_local, goles_visitante FROM resultados WHERE partido_id = 11"
+        ).fetchone()
+        assert (row["status"], row["goles_local"], row["goles_visitante"]) == ("FT", 0, 4)
+
+
 class TestHorariosReparados:
     def test_migracion_corrige_horarios_de_filas_pendientes(self, monkeypatch):
         """La BD en produccion arrastra los horarios malos del boleto; la
