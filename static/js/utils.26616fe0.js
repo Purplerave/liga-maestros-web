@@ -331,9 +331,16 @@ function needsFixtureSchedule(match) {
     return isFinishedStatus(match.status) && !hasScore;
 }
 
+/* Lista canonica de estados en juego, igual que en el servidor
+   (services/live_state.LIVE_STATUSES). Faltaban ET, P e IN_PLAY: un partido en
+   prorroga o con el estado escrito con guion bajo dejaba de contar como
+   directo y desaparecia de la pagina. */
 function isLiveStatus(status) {
-    const raw = String(status || "").toUpperCase();
-    return ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H"].includes(raw);
+    const raw = String(status || "").toUpperCase().trim();
+    return [
+        "LIVE", "IN PLAY", "IN_PLAY", "INPLAY", "HT", "HALF TIME", "HALF TIME BREAK",
+        "EN JUEGO", "1H", "2H", "ET", "P", "PEN LIVE"
+    ].includes(raw);
 }
 
 function isFinishedStatus(status) {
@@ -341,14 +348,20 @@ function isFinishedStatus(status) {
     return ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "STALE", "AWARDED"].includes(raw);
 }
 
-function isExpiredLiveMatch(match, maxAgeMs = 2 * 60 * 60 * 1000) {
+/* Caducidad de un directo en cliente. Los margenes son EXACTAMENTE los del
+   servidor (services/live_state.py): 20 min de tolerancia antes del saque,
+   30 min de desfase de minuto y 150 min de ventana de partido.
+   Con los valores antiguos (5 / 15 / 120 min) el navegador tiraba partidos
+   que el servidor daba por vivos: un saque retrasado o un partido largo
+   vaciaba el DIRECTO mientras el partido se estaba jugando. */
+function isExpiredLiveMatch(match, maxAgeMs = 150 * 60 * 1000) {
     if (!match || !isLiveStatus(match.status)) return false;
     const kickoff = parseMatchTimestamp(match);
     if (!kickoff) return false;
     const elapsedMs = Date.now() - kickoff;
-    if (elapsedMs < -5 * 60 * 1000) return true;
+    if (elapsedMs < -20 * 60 * 1000) return true;
     const minute = matchMinuteValue(match);
-    if (minute > 0 && minute > elapsedMs / 60000 + 15) return true;
+    if (minute > 0 && minute > elapsedMs / 60000 + 30) return true;
     return elapsedMs > maxAgeMs;
 }
 

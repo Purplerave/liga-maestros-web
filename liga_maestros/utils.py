@@ -366,6 +366,50 @@ def signo_for_match(partido_id, home_goals, away_goals):
     return "X"
 
 
+def parse_provider_datetime(raw, to_madrid=True):
+    """Parse a provider timestamp into a naive datetime (Madrid by default).
+
+    El proveedor no siempre emite el mismo formato: unas veces
+    ``2026-09-07T16:15:00.000Z``, otras ``2026-09-07T16:15:00Z``,
+    ``2026-09-07T18:15:00+02:00`` o incluso ``2026-09-07 16:15:00``. El parser
+    antiguo solo aceptaba la variante con milisegundos y una sola 'Z' distinta
+    dejaba la hora de saque en None: sin hora de saque la agenda no abria la
+    ventana de directo y el panel se quedaba en SCHEDULED mientras el partido
+    se jugaba. Aqui se aceptan todas las variantes y se devuelve None solo
+    cuando de verdad no hay fecha.
+    """
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    normalized = text.replace(" ", "T", 1) if " " in text and "T" not in text else text
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    parsed = None
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        for fmt in (
+            "%Y-%m-%dT%H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+        ):
+            try:
+                parsed = datetime.strptime(normalized.split("+")[0], fmt)
+                break
+            except ValueError:
+                continue
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        # Sin zona explicita el proveedor emite UTC.
+        parsed = parsed.replace(tzinfo=ZoneInfo("UTC"))
+    if to_madrid:
+        parsed = parsed.astimezone(ZoneInfo("Europe/Madrid"))
+    return parsed.replace(tzinfo=None)
+
+
 def highlightly_status(state):
     # Highlightly documents state.description values such as "Not started",
     # "First half", "Second half", "Half time", "Extra time", "Break time",
@@ -387,23 +431,43 @@ def highlightly_status(state):
         "AWARDED",
     ) or desc.startswith("FINISHED"):
         return "FT", "Finalizado"
+    if desc in ("HALF TIME", "HALF TIME BREAK", "HALF-TIME", "HT", "DESCANSO"):
+        return "LIVE", "HT"
     if desc in (
         "FIRST HALF",
         "1ST HALF",
+        "1H",
         "SECOND HALF",
         "2ND HALF",
+        "2H",
         "LIVE",
         "IN PLAY",
+        "IN_PLAY",
+        "INPLAY",
         "IN PROGRESS",
+        "PLAYING",
+        "EN JUEGO",
         "EXTRA TIME",
         "EXTRA TIME HALF TIME",
         "BREAK TIME",
         "PENALTIES",
         "PENALTY SHOOTOUT",
+        "PENALTIES SHOOTOUT",
+        "AWAITING EXTRA TIME",
+        "AWAITING PENALTIES",
     ):
         return "LIVE", f"{clock}'" if clock.isdigit() else clock
-    if desc in ("HALF TIME", "HALF TIME BREAK", "HALF-TIME", "HT"):
-        return "LIVE", "HT"
+    # Un reloj en marcha es prueba de directo aunque la descripcion sea una
+    # variante que aun no conocemos: antes cualquier texto nuevo del proveedor
+    # ("2nd Half started", "Second Half - stoppage"...) caia en NS y borraba el
+    # partido del DIRECTO mientras se jugaba.
+    if (
+        clock
+        and clock not in ("0", "-")
+        and not desc.startswith("NOT ")
+        and desc not in ("", "TBD", "POSTPONED", "CANCELLED", "SCHEDULED", "NS")
+    ):
+        return "LIVE", f"{clock}'" if clock.isdigit() else clock
     return "NS", "NS"
 
 
@@ -415,12 +479,11 @@ def highlightly_match_to_panel(match):
     status, minute = highlightly_status(state)
     score_text = (state.get("score") or {}).get("current") or ""
     date_str = match.get("date", "")
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-        dt = dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid"))
+    dt = parse_provider_datetime(date_str)
+    if dt is not None:
         added_date = dt.strftime("%Y-%m-%d %H:%M:%S")
         scheduled_time = dt.strftime("%H:%M")
-    except Exception:
+    else:
         added_date = date_str
         scheduled_time = ""
     return {
@@ -445,7 +508,18 @@ def highlightly_match_to_panel(match):
         "country_code": country.get("code") or "",
         "added": added_date,
         "scheduled": scheduled_time,
+        # Fecha/hora explicitas: sin ellas el cierre de directos y el filtro
+        # "solo partidos de hoy" tenian que adivinar el saque desde `added`.
+        "fecha_raw": added_date[:10] if dt is not None else "",
+        "hora": scheduled_time,
+        # Sello de frescura: es lo que permite distinguir un directo vivo de
+        # una foto congelada del proveedor (regla de los 30 min sin noticias).
+        "updated_at": madrid_now_naive().isoformat(timespec="seconds"),
     }
+
+
+def madrid_now_naive():
+    return datetime.now(ZoneInfo("Europe/Madrid")).replace(tzinfo=None)
 
 
 def parse_db_match_datetime(fecha_value, hora_value):
@@ -469,13 +543,11 @@ def parse_any_match_datetime(match):
             if not raw_time and len(added) >= 16:
                 raw_time = added[11:16]
     if not raw_date:
-        raw_iso = str(match.get("date") or "").strip()
+        raw_iso = str(match.get("date") or match.get("kickoff") or "").strip()
         if raw_iso:
-            try:
-                dt = datetime.strptime(raw_iso, "%Y-%m-%dT%H:%M:%S.%fZ")
-                return dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid")).replace(tzinfo=None)
-            except Exception:
-                pass
+            parsed = parse_provider_datetime(raw_iso)
+            if parsed is not None:
+                return parsed
     if not raw_date:
         return None
     if not raw_time:

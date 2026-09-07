@@ -8,8 +8,11 @@ export function competitionLabel(match) {
 }
 
 export function isLiveStatus(status) {
-    const raw = String(status || "").toUpperCase();
-    return ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P"].includes(raw);
+    const raw = String(status || "").toUpperCase().trim();
+    return [
+        "LIVE", "IN PLAY", "IN_PLAY", "INPLAY", "HT", "HALF TIME", "HALF TIME BREAK",
+        "EN JUEGO", "1H", "2H", "ET", "P", "PEN LIVE"
+    ].includes(raw);
 }
 
 export function isLiveMatch(match) {
@@ -38,8 +41,8 @@ export function isExpiredLiveMatch(match) {
     const kickoff = parseMatchTimestamp(match);
     if (!kickoff) return false;
     const elapsed = now - kickoff;
-    // More than 3 hours after kickoff with no update
-    return elapsed > 3 * 60 * 60 * 1000;
+    // Misma ventana que el servidor (live_state.FULL_MATCH_WINDOW): 150 min.
+    return elapsed > 150 * 60 * 1000;
 }
 
 export function needsFixtureSchedule(match) {

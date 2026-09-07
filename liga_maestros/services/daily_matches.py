@@ -27,7 +27,7 @@ import requests
 import config
 
 from ..middleware.json_lock import update_json_list_by_id_locked
-from ..utils import highlightly_match_to_panel
+from ..utils import highlightly_match_to_panel, parse_provider_datetime
 from .highlightly_limits import (
     get_highlightly_circuit,
     record_highlightly_failure,
@@ -43,8 +43,17 @@ AGENDA_PATH_TEMPLATE = "DAILY_AGENDA_{date}.json"
 STATE_PATH = "DAILY_TRACKER_STATE.json"
 HISTORY_PATH_TEMPLATE = "HISTORICO_PARTIDOS_{season}.jsonl"
 
-LIVE_WINDOW_BEFORE = timedelta(minutes=2)
-LIVE_WINDOW_AFTER = timedelta(hours=3)
+# Ventana de refresco alrededor del saque. El margen previo de 2 minutos era
+# demasiado justo: con un tick cada 15 minutos en reposo, un partido podia
+# llevar 13 minutos jugandose antes del primer refresco (justo lo que se veia
+# como "no aparece el directo"). 20 minutos antes garantizan que la ventana ya
+# este abierta cuando el arbitro pita el inicio.
+LIVE_WINDOW_BEFORE = timedelta(minutes=20)
+# 3h se quedaba corto con saques retrasados y descuentos largos: el refresco
+# moria antes del pitido final y el marcador se congelaba.
+LIVE_WINDOW_AFTER = timedelta(hours=4)
+# Reintento de agenda cuando la del dia esta vacia o envejecida.
+AGENDA_TTL = timedelta(hours=3)
 
 
 def _agenda_path(date_text):
@@ -156,7 +165,15 @@ def refresh_daily_agenda(force=False):
     path = _agenda_path(today)
     state = _load_state()
     if not force and state.get("agenda_date") == today and os.path.exists(path):
-        return _load_json(path, {"date": today, "matches": []})
+        cached = _load_json(path, {"date": today, "matches": []})
+        # Una sola foto al dia no basta: si la primera pasada se hizo antes de
+        # que el proveedor publicara los horarios (o fallo la llamada), la
+        # agenda se quedaba vacia TODO el dia y el DIRECTO nunca se abria.
+        # Se refresca tambien cuando la agenda esta vacia o ya es vieja.
+        fetched_at = parse_provider_datetime(cached.get("fetched_at"), to_madrid=False)
+        age_ok = fetched_at is not None and (madrid_now().replace(tzinfo=None) - fetched_at) < AGENDA_TTL
+        if cached.get("matches") and age_ok:
+            return cached
 
     matches = fetch_today_agenda(today)
     agenda = {
@@ -190,13 +207,13 @@ def refresh_daily_agenda(force=False):
 
 
 def _parse_kickoff(raw):
-    try:
-        from zoneinfo import ZoneInfo
+    """Hora de saque en Madrid, tolerante a los formatos del proveedor.
 
-        dt = datetime.strptime(str(raw), "%Y-%m-%dT%H:%M:%S.%fZ")
-        return dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Madrid")).replace(tzinfo=None)
-    except Exception:
-        return None
+    Antes solo se aceptaba ``...T19:30:00.000Z``: cualquier otra variante
+    devolvia None, la ventana de directo no se abria y los marcadores no se
+    refrescaban aunque el partido estuviese en juego.
+    """
+    return parse_provider_datetime(raw)
 
 
 def any_live_window_open(agenda=None):
@@ -210,6 +227,31 @@ def any_live_window_open(agenda=None):
         if not kickoff:
             continue
         if kickoff - LIVE_WINDOW_BEFORE <= now <= kickoff + LIVE_WINDOW_AFTER:
+            return True
+    return False
+
+
+def _panel_has_live_match():
+    """True si el panel ya tiene algun partido de hoy marcado en juego.
+
+    Red de seguridad frente a la agenda: si por lo que sea la agenda no tiene
+    el partido (horario publicado tarde, fallo puntual de la API, partido
+    aplazado y reprogramado), un directo que ya esta en el panel debe seguir
+    refrescandose en vez de quedarse congelado.
+    """
+    panel_path = os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json")
+    panel = _load_json(panel_path, [])
+    if not isinstance(panel, list):
+        return False
+    today = today_madrid()
+    for match in panel:
+        if not isinstance(match, dict):
+            continue
+        status = str(match.get("status") or "").upper()
+        if status not in ("IN PLAY", "LIVE", "HT", "EN JUEGO"):
+            continue
+        day = str(match.get("fecha_raw") or match.get("added") or "")[:10]
+        if not day or day == today:
             return True
     return False
 
@@ -444,7 +486,7 @@ def run_daily_tick():
     except Exception:
         logger.exception("Daily agenda refresh failed")
         agenda = None
-    window_open = any_live_window_open(agenda)
+    window_open = any_live_window_open(agenda) or _panel_has_live_match()
     summary["window_open"] = window_open
     if window_open:
         try:
@@ -452,6 +494,25 @@ def run_daily_tick():
         except Exception:
             logger.exception("Daily live scores refresh failed")
     return summary
+
+
+def _seconds_until_next_window(agenda=None):
+    """Segundos hasta que se abra la proxima ventana de directo de hoy."""
+    agenda = agenda or _load_json(_agenda_path(today_madrid()), None)
+    if not agenda:
+        return 900
+    now = madrid_now().replace(tzinfo=None)
+    pending = []
+    for match in agenda.get("matches", []):
+        kickoff = _parse_kickoff(match.get("kickoff"))
+        if not kickoff:
+            continue
+        opens_at = kickoff - LIVE_WINDOW_BEFORE
+        if opens_at > now:
+            pending.append((opens_at - now).total_seconds())
+    if not pending:
+        return 900
+    return max(30, min(pending))
 
 
 def cleanup_old_agendas(keep_days=7):
@@ -484,11 +545,19 @@ def start_daily_tracker(app=None):
             try:
                 summary = run_daily_tick()
                 cleanup_old_agendas()
-                sleep_seconds = interval_live if summary.get("window_open") else interval_idle
+                if summary.get("window_open"):
+                    sleep_seconds = interval_live
+                else:
+                    # En reposo no se duerme a ciegas: si el proximo saque cae
+                    # dentro del intervalo, se despierta justo a tiempo. Antes
+                    # un partido podia llevar 15 minutos jugandose antes del
+                    # primer refresco, y eso es exactamente lo que el usuario
+                    # veia como "esta jugando y no aparece el directo".
+                    sleep_seconds = min(interval_idle, _seconds_until_next_window())
             except Exception:
                 logger.exception("Daily tracker tick failed")
                 sleep_seconds = interval_idle
-            time.sleep(sleep_seconds)
+            time.sleep(max(30, int(sleep_seconds)))
 
     thread = threading.Thread(target=_loop, name="liga-daily-tracker", daemon=True)
     thread.start()

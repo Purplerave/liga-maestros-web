@@ -173,10 +173,17 @@ def _add_team_logos(matches, team_logos):
 
 
 def _is_live_match(match):
-    status = str(match.get("status") or "").upper()
-    if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
+    """True cuando el partido esta realmente en juego HOY.
+
+    Se reutiliza la lista canonica de estados (``live_state.LIVE_STATUSES``):
+    la lista local que habia aqui se habia quedado corta y dejaba fuera
+    ``1H``, ``2H``, ``ET`` o ``IN_PLAY``, de modo que un partido en la segunda
+    parte simplemente desaparecia del DIRECTO.
+    """
+    status = str(match.get("status") or "").upper().strip()
+    if not (is_live_status(status) or "LIVE" in status or status in ("HALF TIME BREAK", "IN PLAY")):
         return False
-    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
+    match_date = str(match.get("fecha_raw") or match.get("added") or "")[:10]
     return not match_date or match_date == today_madrid()
 
 
