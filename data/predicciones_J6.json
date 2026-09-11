@@ -1,0 +1,73 @@
+{
+  "jornada": 6,
+  "temporada": "2026-2027",
+  "created_at": "2026-09-11",
+  "fuente": "Entrega chat: columnas de IAs y La Peña J6 (cierre 11/09/2026 20:45)",
+  "gemini": {
+    "nombre": "GEMINI",
+    "signos": ["1", "2", "1", "1X", "1", "1", "1X", "X2", "X", "1", "1", "1", "X", "1", "1-1"]
+  },
+  "chatgpt": {
+    "nombre": "CHATGPT",
+    "signos": ["1", "2", "1X", "2", "1", "1", "2", "X2", "2", "1X", "1", "2", "1", "1", "1-1"]
+  },
+  "copilot": {
+    "nombre": "COPILOT",
+    "signos": ["1", "2", "1", "1X", "1", "X", "2", "X", "1X", "1", "1", "X", "1", "1", "M-1"]
+  },
+  "grok": {
+    "nombre": "GROK",
+    "signos": ["1", "2", "1X", "X2", "1", "X", "1X", "1", "1", "1", "1", "2", "1", "1", "1-1"]
+  },
+  "claude": {
+    "nombre": "CLAUDE",
+    "signos": ["1", "2", "1", "X2", "1", "1", "X2", "X2", "2", "2", "1", "1", "2", "1", "1-1"]
+  },
+  "chipi": {
+    "nombre": "CHIPI (DEEPSEEK)",
+    "fuente_ia": "deepseek",
+    "signos": ["1", "2", "X", "2", "1", "1", "1X", "X2", "X2", "1X", "1", "X2", "1X", "2", "1-1"]
+  },
+  "geli": {
+    "nombre": "GELI (GLM5)",
+    "fuente_ia": "glm5",
+    "signos": ["1", "2", "1", "12", "1", "2", "1", "1", "X", "2", "1", "1", "2", "2", "2-1"]
+  },
+  "pepe": {
+    "nombre": "PEPE (PERPLEXITY)",
+    "fuente_ia": "perplexity",
+    "signos": ["1", "2", "1", "X2", "1", "1X", "X2", "1", "1X", "2", "1", "1", "1", "1", "1-2"]
+  },
+  "profe": {
+    "nombre": "PROFE (META)",
+    "fuente_ia": "meta",
+    "signos": ["1", "X2", "1", "1X", "1", "1", "1X", "1", "1", "X", "1", "1", "1", "1", "1-1"]
+  },
+  "oraculo": {
+    "nombre": "ORACULO (QWEN)",
+    "fuente_ia": "qwen",
+    "signos": ["1", "2", "1", "X2", "1", "1", "1X", "1", "1", "1X", "1", "2", "1", "2", "1-1"]
+  },
+  "erniebot": {
+    "nombre": "ERNIEBOT (BAIDU)",
+    "fuente_ia": "baidu",
+    "signos": ["1", "2", "1", "X2", "1", "1X", "1", "X", "1", "1", "1", "2", "1", "2", "1-M"]
+  },
+  "sesudo": {
+    "nombre": "SESUDO (KIMI)",
+    "fuente_ia": "kimi",
+    "signos": ["1", "2", "1", "1X", "1", "1X", "1", "X", "1", "1", "1", "1X", "1", "1", "1-1"]
+  },
+  "luzia": {
+    "nombre": "LUZIA",
+    "signos": ["1", "2", "1", "1X", "1", "1", "1X", "1", "X", "1", "1", "2", "1", "12", "1-M"]
+  },
+  "arena": {
+    "nombre": "ARENA",
+    "signos": ["1", "2", "1", "X2", "1", "1", "X2", "X2", "X", "1", "1", "1", "1", "1", "1-1"]
+  },
+  "jimmy": {
+    "nombre": "JIMMY",
+    "signos": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "2", "M-2"]
+  }
+}

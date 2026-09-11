@@ -2,6 +2,19 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-11 — Boletos J6: Maestros IA y La Peña
+
+### Añadido
+
+- `data/predicciones_J6.json` con los 15 boletos de la Jornada 6 (cierre
+  11/09/2026 20:45). Se importan solos en el arranque vía
+  `ensure_jornada_6` → `_import_compact_prediction_tickets`.
+  - **Maestros IA:** Gemini, ChatGPT, Copilot, Grok, Claude.
+  - **La Peña:** Chipi (DeepSeek), Geli (GLM5), Pepe (Perplexity),
+    Profe (Meta), Oráculo (Qwen), ErnieBot (Baidu), Sesudo (Kimi), Luzia,
+    Arena y Jimmy. Sus 10 columnas alimentan el consenso de La Peña y el
+    consenso del Pleno al 15.
+
 ## 2026-09-03 — El DIRECTO ya no depende de la quiniela ni del reloj del navegador
 
 ### Corregido
