@@ -2,38 +2,38 @@
   "jornada": 6,
   "source_url": "manual",
   "scraped_at": "2026-09-10T12:00:00",
-  "cierre": "sábado 26 de septiembre a las 16:00",
+  "cierre": "viernes 11 de septiembre a las 20:45",
   "temporada": "2026-2027",
   "partidos": [
     {
       "num": 1,
       "local": "Athletic Club (M)",
       "visitante": "Elche (M)",
-      "fecha": "2026-09-26",
-      "hora": "16:00",
+      "fecha": "2026-09-12",
+      "hora": "18:30",
       "division": "primera"
     },
     {
       "num": 2,
       "local": "Levante (M)",
       "visitante": "Barcelona (M)",
-      "fecha": "2026-09-26",
-      "hora": "18:30",
+      "fecha": "2026-09-13",
+      "hora": "16:15",
       "division": "primera"
     },
     {
       "num": 3,
       "local": "Osasuna (M)",
       "visitante": "Espanyol (M)",
-      "fecha": "2026-09-26",
-      "hora": "21:00",
+      "fecha": "2026-09-12",
+      "hora": "16:15",
       "division": "primera"
     },
     {
       "num": 4,
       "local": "Racing de Santander (M)",
       "visitante": "Alavés (M)",
-      "fecha": "2026-09-27",
+      "fecha": "2026-09-12",
       "hora": "14:00",
       "division": "primera"
     },
@@ -41,23 +41,23 @@
       "num": 5,
       "local": "Real Madrid (M)",
       "visitante": "Rayo Vallecano (M)",
-      "fecha": "2026-09-27",
-      "hora": "16:15",
+      "fecha": "2026-09-12",
+      "hora": "21:00",
       "division": "primera"
     },
     {
       "num": 6,
       "local": "Sevilla (M)",
       "visitante": "Valencia (M)",
-      "fecha": "2026-09-27",
-      "hora": "18:30",
+      "fecha": "2026-09-11",
+      "hora": "21:00",
       "division": "primera"
     },
     {
       "num": 7,
       "local": "Villarreal (M)",
       "visitante": "Betis (M)",
-      "fecha": "2026-09-27",
+      "fecha": "2026-09-14",
       "hora": "21:00",
       "division": "primera"
     },
@@ -65,7 +65,7 @@
       "num": 8,
       "local": "Cádiz (M)",
       "visitante": "Las Palmas (M)",
-      "fecha": "2026-09-26",
+      "fecha": "2026-09-12",
       "hora": "16:15",
       "division": "segunda"
     },
@@ -73,23 +73,23 @@
       "num": 9,
       "local": "Tenerife (M)",
       "visitante": "Leganés (M)",
-      "fecha": "2026-09-26",
-      "hora": "18:30",
+      "fecha": "2026-09-13",
+      "hora": "21:00",
       "division": "segunda"
     },
     {
       "num": 10,
       "local": "R. Valladolid (M)",
       "visitante": "R. Oviedo (M)",
-      "fecha": "2026-09-26",
-      "hora": "21:00",
+      "fecha": "2026-09-13",
+      "hora": "16:15",
       "division": "segunda"
     },
     {
       "num": 11,
       "local": "Alavés (F)",
       "visitante": "Granada (F)",
-      "fecha": "2026-09-27",
+      "fecha": "2026-09-13",
       "hora": "12:00",
       "division": "liga_f"
     },
@@ -97,31 +97,31 @@
       "num": 12,
       "local": "Logroño (F)",
       "visitante": "Valencia (F)",
-      "fecha": "2026-09-27",
-      "hora": "16:00",
+      "fecha": "2026-09-13",
+      "hora": "17:00",
       "division": "liga_f"
     },
     {
       "num": 13,
       "local": "Eibar (F)",
       "visitante": "Badalona W. (F)",
-      "fecha": "2026-09-27",
-      "hora": "18:00",
+      "fecha": "2026-09-13",
+      "hora": "19:30",
       "division": "liga_f"
     },
     {
       "num": 14,
       "local": "Madrid CFF (F)",
       "visitante": "Sevilla (F)",
-      "fecha": "2026-09-27",
-      "hora": "20:00",
+      "fecha": "2026-09-12",
+      "hora": "16:30",
       "division": "liga_f"
     },
     {
       "num": 15,
       "local": "Real Sociedad (M)",
       "visitante": "At. Madrid (M)",
-      "fecha": "2026-09-27",
+      "fecha": "2026-09-13",
       "hora": "21:00",
       "division": "primera",
       "pleno_al_15": true
