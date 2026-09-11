@@ -2,6 +2,37 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-11 (noche) — Los resultados de la quiniela vuelven al boleto (marcador "(M)")
+
+### Corregido
+
+- 🔴 **El boleto se quedaba sin resultados toda la jornada (J6: el
+  Sevilla - Valencia de las 9 no aparecía).** El directo veía el partido
+  (quiniela15: "Sevilla 1-0 Valencia, min. 84"; el panel externo igual), pero
+  la fila de la BD seguía en `NS` y el boleto pintaba horarios en vez de
+  marcadores. Ocurría **con todos los equipos masculinos** de la jornada y
+  venía repitiéndose semana tras semana con el nombre "de moda" de cada boleto
+  (J4 fueron "Sporting"/"Edf Logroño"; J6 es el "(M)").
+  - **Causa:** el boleto J6 mezcla LaLiga y Liga F, así que la importación
+    marcó los equipos masculinos con "(M)" ("Sevilla (M)", "Valencia (M)"...).
+    El cruce de nombres convertía ese marcador en una clave canónica
+    inexistente ("SEVILLA M"): ni quiniela15 ("Sevilla") ni el proveedor
+    ("Sevilla FC") casaban con ella, y `apply_q15_results_to_db` descartaba el
+    resultado (`q15_team_mismatch_skipped`) de los 11 partidos masculinos.
+    También dejaba a esos equipos sin escudo en el boleto.
+  - **Arreglo:** `clean_team_key` elimina el marcador "(M)" (y la palabra
+    "MASCULINO/MASCULINA") igual que preserva el "(F)". "Sevilla (M)" canoniza
+    como "SEVILLA FC" y cruza con quiniela15 y Highlightly. El género sigue
+    protegido: "Sevilla (M)" nunca casa con "Sevilla (F)" ni con
+    "Sevilla Femenino". Los nombres que solo traía el boleto J6 también
+    tienen alias ahora: "R. Valladolid" (→ VALLADOLID) y "Badalona W." (→
+    LEVANTE LAS PLANAS, que es como publica la quiniela a ese club).
+  - **Regresión:** `tests/test_j6_resultados_cruce.py` replica la foto real
+    del viernes 22:51 (15/15 cruces, el 1-0 del minuto 84 entra en la BD y el
+    boleto lo pinta) y comprueba que el cruce masculino/femenino sigue siendo
+    imposible. No hace falta tocar datos en producción: la J6 se rellena sola
+    en la siguiente pasada del colector.
+
 ## 2026-09-11 — Boletos J6: Maestros IA y La Peña
 
 ### Añadido

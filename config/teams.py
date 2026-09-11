@@ -72,6 +72,10 @@ TEAM_LOGO_ALIASES = {
     "REAL VALLADOLID CF": "VALLADOLID",
     "REAL VALLADOLID": "VALLADOLID",
     "VALLADOLID CF": "VALLADOLID",
+    # La quiniela publica "Valladolid" y el boleto importa "R. Valladolid":
+    # sin esta clave el cruce del resultado se descartaba (J6 2026/27,
+    # R. Valladolid - R. Oviedo).
+    "R VALLADOLID": "VALLADOLID",
     "CD LEGANES": "LEGANES",
     "CD MIRANDES": "MIRANDES",
     "SD HUESCA": "HUESCA",
@@ -248,6 +252,12 @@ TEAM_LOGO_ALIASES = {
     "LEVANTE BADALONA F": "LEVANTE LAS PLANAS",
     "FC BADALONA WOMEN": "LEVANTE LAS PLANAS",
     "BADALONA WOMEN": "LEVANTE LAS PLANAS",
+    # El proveedor ingles nombra al club "Badalona W." y el boleto lo importa
+    # tal cual; la quiniela publica "Las Planas (F)". Sin estas claves el
+    # resultado del partido nunca cruzaba (J6 2026/27, Eibar (F) - Badalona W.).
+    "BADALONA W": "LEVANTE LAS PLANAS",
+    "BADALONA W F": "LEVANTE LAS PLANAS",
+    "BADALONA W FEMENINO": "LEVANTE LAS PLANAS",
     "SEVILLA F": "SEVILLA FEMENINO",
     "SEVILLA FC F": "SEVILLA FEMENINO",
     "SEVILLA FEMENINO": "SEVILLA FEMENINO",
