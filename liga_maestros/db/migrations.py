@@ -581,7 +581,7 @@ def ensure_jornada_4(conn):
 
 
 def ensure_jornada_6(conn):
-    """Seed the manually published Jornada 6 fixture (26-27/09/2026)."""
+    """Seed the manually published Jornada 6 fixture (11-14/09/2026)."""
     updated = ensure_jornada_completa(conn, 6)
     imported = _import_compact_prediction_tickets(conn, 6)
     if updated or imported:
