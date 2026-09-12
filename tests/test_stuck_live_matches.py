@@ -23,6 +23,7 @@ from liga_maestros.services.live_state import (
     KEEP,
     PENDING_OVERDUE,
     RESET_TO_SCHEDULED,
+    SKIP_SNAPSHOT,
     evaluate_match_state,
     minute_number,
 )
@@ -46,12 +47,43 @@ class TestEvaluateMatchState:
 
         assert decision["action"] == RESET_TO_SCHEDULED
 
-    def test_minute_ahead_of_real_clock_is_closed_without_inventing_result(self):
-        """Empezo hace 10 minutos pero el proveedor emite el minuto 90."""
+    def test_minute_ahead_of_real_clock_is_skipped_not_frozen(self):
+        """Empezo hace 10 minutos pero el proveedor emite el minuto 90.
+
+        Incidente J4 2026/27 (Valencia - Barcelona): el minuto iba "por
+        delante" del reloj porque el saque real se retraso respecto al horario
+        guardado. Cerrar la fila como STALE congelaba un marcador parcial que
+        la web mostraba como resultado final. Ahora el snapshot no se escribe
+        ni cierra: la fila conserva su estado y la siguiente pasada reevalua.
+        """
         decision = evaluate_match_state("LIVE", NOW - timedelta(minutes=10), NOW, minute="90")
 
-        assert decision["action"] == CLOSE_NO_DATA
-        assert decision["status"] == "STALE"
+        assert decision["action"] == SKIP_SNAPSHOT
+        assert decision["status"] is None
+
+    def test_minute_ahead_with_window_elapsed_finalises(self):
+        """El mismo snapshot imposible, ya con la ventana agotada, cierra FT."""
+        decision = evaluate_match_state("LIVE", NOW - timedelta(minutes=160), NOW, minute="200")
+
+        assert decision["action"] == CLOSE_FINAL
+        assert decision["reason"] == "minuto_imposible_ventana_agotada"
+
+    def test_delayed_kickoff_stays_live_within_tolerances(self):
+        """Saque retrasado 45' (horario del boleto desfasado): LIVE real.
+
+        Con las tolerancias viejas (5'/15') este directo se descartaba como
+        imposible durante casi todo el partido y "no aparecia" hasta el final.
+        El minuto solo puede ir 30' por delante del reloj: 75 <= 100.
+        """
+        decision = evaluate_match_state(
+            "LIVE",
+            NOW - timedelta(minutes=70),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="75",
+        )
+
+        assert decision["action"] == KEEP
 
     def test_no_provider_update_for_thirty_minutes_closes_the_match(self):
         decision = evaluate_match_state(
@@ -77,6 +109,24 @@ class TestEvaluateMatchState:
         assert decision["action"] == KEEP
 
     def test_full_window_elapsed_finalises_the_match(self):
+        """Ventana completa (150'): retraso de saque + 90' + descanso + parajes."""
+        decision = evaluate_match_state(
+            "LIVE",
+            NOW - timedelta(minutes=155),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="90",
+        )
+
+        assert decision["action"] == CLOSE_FINAL
+        assert decision["status"] == "FT"
+
+    def test_match_still_playing_at_125_minutes_is_not_finalised(self):
+        """Un partido con saque retraso y muchas parajes sigue vivo a los 125'.
+
+        Con la ventana antigua (120') esto se cerraba como FT con el marcador
+        parcial: el usuario veia "resultado final" antes del final real.
+        """
         decision = evaluate_match_state(
             "LIVE",
             NOW - timedelta(minutes=125),
@@ -85,8 +135,7 @@ class TestEvaluateMatchState:
             minute="90",
         )
 
-        assert decision["action"] == CLOSE_FINAL
-        assert decision["status"] == "FT"
+        assert decision["action"] == KEEP
 
     def test_half_time_without_updates_is_also_closed(self):
         decision = evaluate_match_state(

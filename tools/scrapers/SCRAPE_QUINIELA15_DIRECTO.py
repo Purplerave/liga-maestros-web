@@ -12,7 +12,16 @@ from liga_maestros import utils
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
-REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0"}
+# Cabeceras de navegador reales: el UA pelado "Mozilla/5.0" es facil de
+# bloquear y dejaba el directo de la quiniela sin datos toda la jornada.
+REQUEST_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+}
 
 
 def fetch_page(url, attempts=3):
@@ -72,7 +81,15 @@ def signo_for_score(match_id, home_goals, away_goals):
 
 
 def parse_match_title(text):
-    match = re.match(r"^\s*(\d+)\s+(.+?)\s+\([^)]+\)\s*-\s*(.+?)\s+\([^)]+\)", text)
+    # La fuerza15 va entre parentesis Y contiene digitos: (1666.4). El marker
+    # femenino "(F)" tambien va entre parentesis, y la version anterior se lo
+    # tragaba como si fuera la fuerza del visitante: "Barcelona (F) (2017.7)"
+    # llegaba como visitante "Barcelona", el cruce con la BD ("Barcelona (F)")
+    # se descartaba por mezclar masculino/femenino y el resultado del partido
+    # no entraba nunca. Exigir un digito dentro del parentesis distingue la
+    # fuerza15 del genero.
+    fuerza = r"\((?=[^)]*\d)[^)]+\)"
+    match = re.match(rf"^\s*(\d+)\s+(.+?)\s+{fuerza}\s*-\s*(.+?)\s+{fuerza}", text)
     if match:
         return int(match.group(1)), clean(match.group(2)), clean(match.group(3))
     match = re.match(r"^\s*(\d+)\s+(.+?)\s+-\s+(.+?)(?:\s+\d|$)", text)

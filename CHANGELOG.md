@@ -2,6 +2,91 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-11 (noche) — Los resultados de la quiniela vuelven al boleto (marcador "(M)")
+
+### Corregido
+
+- 🔴 **El boleto se quedaba sin resultados toda la jornada (J6: el
+  Sevilla - Valencia de las 9 no aparecía).** El directo veía el partido
+  (quiniela15: "Sevilla 1-0 Valencia, min. 84"; el panel externo igual), pero
+  la fila de la BD seguía en `NS` y el boleto pintaba horarios en vez de
+  marcadores. Ocurría **con todos los equipos masculinos** de la jornada y
+  venía repitiéndose semana tras semana con el nombre "de moda" de cada boleto
+  (J4 fueron "Sporting"/"Edf Logroño"; J6 es el "(M)").
+  - **Causa:** el boleto J6 mezcla LaLiga y Liga F, así que la importación
+    marcó los equipos masculinos con "(M)" ("Sevilla (M)", "Valencia (M)"...).
+    El cruce de nombres convertía ese marcador en una clave canónica
+    inexistente ("SEVILLA M"): ni quiniela15 ("Sevilla") ni el proveedor
+    ("Sevilla FC") casaban con ella, y `apply_q15_results_to_db` descartaba el
+    resultado (`q15_team_mismatch_skipped`) de los 11 partidos masculinos.
+    También dejaba a esos equipos sin escudo en el boleto.
+  - **Arreglo:** `clean_team_key` elimina el marcador "(M)" (y la palabra
+    "MASCULINO/MASCULINA") igual que preserva el "(F)". "Sevilla (M)" canoniza
+    como "SEVILLA FC" y cruza con quiniela15 y Highlightly. El género sigue
+    protegido: "Sevilla (M)" nunca casa con "Sevilla (F)" ni con
+    "Sevilla Femenino". Los nombres que solo traía el boleto J6 también
+    tienen alias ahora: "R. Valladolid" (→ VALLADOLID) y "Badalona W." (→
+    LEVANTE LAS PLANAS, que es como publica la quiniela a ese club).
+  - **Regresión:** `tests/test_j6_resultados_cruce.py` replica la foto real
+    del viernes 22:51 (15/15 cruces, el 1-0 del minuto 84 entra en la BD y el
+    boleto lo pinta) y comprueba que el cruce masculino/femenino sigue siendo
+    imposible. No hace falta tocar datos en producción: la J6 se rellena sola
+    en la siguiente pasada del colector.
+
+## 2026-09-11 — Boletos J6: Maestros IA y La Peña
+
+### Añadido
+
+- `data/predicciones_J6.json` con los 15 boletos de la Jornada 6 (cierre
+  11/09/2026 20:45). Se importan solos en el arranque vía
+  `ensure_jornada_6` → `_import_compact_prediction_tickets`.
+  - **Maestros IA:** Gemini, ChatGPT, Copilot, Grok, Claude.
+  - **La Peña:** Chipi (DeepSeek), Geli (GLM5), Pepe (Perplexity),
+    Profe (Meta), Oráculo (Qwen), ErnieBot (Baidu), Sesudo (Kimi), Luzia,
+    Arena y Jimmy. Sus 10 columnas alimentan el consenso de La Peña y el
+    consenso del Pleno al 15.
+
+## 2026-09-03 — El DIRECTO ya no depende de la quiniela ni del reloj del navegador
+
+### Corregido
+
+- 🔴 **«Ahora mismo no hay partidos en juego» con el Celta jugando.** El
+  servidor mandaba el partido en `live_matches` (Real Sociedad - Celta, minuto
+  21) y la clasificación lo marcaba `en_juego`, pero la página de DIRECTO salía
+  vacía. La causa era el reloj del navegador: el servidor entrega todas las
+  horas como texto sin zona ya en hora de Madrid (`added`, `scheduled`,
+  `fecha_raw`/`hora`) y el cliente las metía en `new Date()`, que las lee en la
+  zona local. En Canarias, con el móvil en UTC o de viaje, el saque de las
+  21:00 caía más tarde, el partido parecía futuro y el filtro de caducidad lo
+  descartaba justo al empezar.
+  - `parseMatchTimestamp` interpreta y pinta todo en `Europe/Madrid`
+    (`madridWallClockToMs`, `madridFormatMs`), igual que hace el servidor.
+  - El minuto en juego (`time: "21"`) ya no se confunde con la hora de saque, y
+    una quiniela sin horario (`hora: "-"`) devuelve `null` en vez de inventar
+    las 12:00, que daba el partido por caducado mientras seguía en juego.
+  - Cuando el servidor ya trae `live_matches`, el navegador deja de volver a
+    decidir quién está en juego con su propio reloj: solo descarta lo que el
+    servidor marca como terminado. El criterio local queda como respaldo para
+    cuando esa lista llega vacía.
+  - También se corrige la cuenta atrás de la portada y la ventana de jornada
+    (`matchKickoffTime`), que se descolocaban fuera de la península.
+- **El DIRECTO funciona con las 5 ligas sin quiniela.** El comentarista (MiMo)
+  recibía solo los 15 partidos del boleto: un jueves con la Real Sociedad -
+  Celta y el Toulouse - Lille en juego se quedaba sin comentarios aunque el
+  directo estuviera lleno. Ahora se le pasa la foto completa (quiniela + panel
+  de LaLiga, Segunda, Premier, Bundesliga y Ligue 1), deduplicada por pareja de
+  equipos y con la quiniela primero.
+- **`/directo` ya no es un 404.** El botón «VER DIRECTO COMPLETO →» de la
+  portada enlazaba a una ruta que no existía; ahora redirige a
+  `/?view=LIVE` conservando la jornada de la URL.
+
+### Añadido
+
+- `tests/test_directo_independiente_quiniela.py`: el parte real del 03/09/2026
+  reproducido en seis husos horarios (Madrid, Canarias, Londres, UTC, Nueva
+  York y Tokio), el respaldo sin lista del servidor, la dedup quiniela/panel y
+  el enlace profundo del directo.
+
 ## 2026-08-28 — Directos fuera de la quiniela en la portada
 
 ### Arreglado

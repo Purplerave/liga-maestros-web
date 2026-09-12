@@ -55,13 +55,29 @@ vm.runInContext(`
     };
 `, sandbox);
 
-// Kickoff "now - offsetMinutes" en hora LOCAL (parseMatchTimestamp pega la
-// cadena con new Date(...), que la interpreta en la zona del navegador).
-function kickoffLocal(offsetMinutes) {
-    const d = new Date(Date.now() - offsetMinutes * 60000);
-    const pad = n => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+// El servidor manda los horarios en hora de Madrid (no en la del navegador):
+// el reloj de prueba tiene que escribirse en esa zona para reproducir el
+// payload real. Si se usase la hora local, el partido se leería desplazado
+// (y en Canarias o con el equipo en UTC, como futuro).
+const MADRID_FMT = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Madrid", hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+});
+function madridClock(atMs) {
+    const p = {};
+    for (const part of MADRID_FMT.formatToParts(new Date(atMs))) p[part.type] = part.value;
+    const hh = String(Number(p.hour) % 24).padStart(2, "0");
+    return {
+        date: `${p.year}-${p.month}-${p.day}`,
+        time: `${hh}:${p.minute}`,
+        full: `${p.year}-${p.month}-${p.day} ${hh}:${p.minute}:${p.second}`,
+    };
 }
+function kickoffMadrid(offsetMinutes) {
+    return madridClock(Date.now() - offsetMinutes * 60000).full;
+}
+
 
 function quinielaMatch(id, local, visitante, fecha, hora, status) {
     return {
@@ -81,8 +97,8 @@ function externalMatch(id, home, away, kickoffOffsetMin, { status = "IN PLAY", s
         status,
         time,
         score,
-        added: kickoffLocal(kickoffOffsetMin),
-        scheduled: kickoffLocal(kickoffOffsetMin).slice(11, 16),
+        added: kickoffMadrid(kickoffOffsetMin),
+        scheduled: kickoffMadrid(kickoffOffsetMin).slice(11, 16),
         competition: { name: "LA LIGA" },
         competition_name: "LA LIGA",
         country: "Spain",
@@ -112,7 +128,7 @@ CASES = r"""
     const elche = externalMatch(1336376293, "Racing Santander", "Elche", 30);
     const html = renderCover({
         jornada: 3,
-        today_madrid: kickoffLocal(30).slice(0, 10),
+        today_madrid: kickoffMadrid(30).slice(0, 10),
         is_locked: false,
         partidos,
         all_league_matches: [externalMatch(1336371187, "Alaves", "Villarreal", -60, { status: "SCHEDULED", score: "", time: "NS" }), elche],
@@ -136,7 +152,7 @@ CASES = r"""
     }
     const html = renderCover({
         jornada: 3,
-        today_madrid: kickoffLocal(30).slice(0, 10),
+        today_madrid: kickoffMadrid(30).slice(0, 10),
         is_locked: false,
         partidos,
         all_league_matches: [],
@@ -156,11 +172,11 @@ CASES = r"""
     for (let i = 1; i <= 15; i++) {
         partidos.push(quinielaMatch(i, `Equipo${i}`, `Rival${i}`, "2026-08-29", "17:00", "NS"));
     }
-    partidos[2] = quinielaMatch(3, "Levante", "Betis", kickoffLocal(20).slice(0, 10), kickoffLocal(20).slice(11, 16), "LIVE");
+    partidos[2] = quinielaMatch(3, "Levante", "Betis", kickoffMadrid(20).slice(0, 10), kickoffMadrid(20).slice(11, 16), "LIVE");
     const proveedor = externalMatch(999, "Levante", "Betis", 20);
     const html = renderCover({
         jornada: 3,
-        today_madrid: kickoffLocal(30).slice(0, 10),
+        today_madrid: kickoffMadrid(30).slice(0, 10),
         is_locked: false,
         partidos,
         all_league_matches: [proveedor],

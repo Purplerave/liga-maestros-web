@@ -1,6 +1,6 @@
 /** Shared match state helpers. */
 
-import { normalizeTeamKey } from "./utils.js";
+import { madridFormatMs, madridWallClockToMs, normalizeTeamKey } from "./utils.js";
 
 export function competitionLabel(match) {
     const comp = match?.competition?.name || match?.competition_name || "";
@@ -53,14 +53,18 @@ export function needsFixtureSchedule(match) {
 
 export function parseMatchTimestamp(match) {
     const raw = match?.added || match?.fecha_raw || match?.hora_raw || match?.kickoff;
-    if (!raw) return null;
-    try {
-        const dateStr = String(raw).replace(" ", "T");
-        const dt = new Date(dateStr);
-        return Number.isNaN(dt.getTime()) ? null : dt.getTime();
-    } catch {
-        return null;
+    const isoDate = String(raw ?? "").slice(0, 10);
+    if (isoDate.length < 8) return null;
+    // `time` es el minuto en directo ("63"), no la hora de saque, y una
+    // quiniela sin horario manda hora "-": solo vale lo que tenga forma de
+    // hora (HH:MM). Sin hora conocida, null en vez de inventar las 12:00.
+    for (const candidate of [match?.hora, match?.scheduled, match?.time]) {
+        const clock = String(candidate ?? "").replace(/h$/i, "").trim();
+        if (!/^\d{1,2}:\d{2}/.test(clock)) continue;
+        const stamp = madridWallClockToMs(isoDate, clock.slice(0, 5));
+        if (stamp !== null) return stamp;
     }
+    return null;
 }
 
 export function matchMinuteValue(match) {
@@ -87,15 +91,11 @@ export function fixtureScheduleParts(match) {
     if (!match) return { day: "", time: "", label: "" };
     const dateStr = match?.added || match?.fecha_raw || match?.fecha || "";
     if (!dateStr) return { day: "", time: "", label: match?.hora || match?.kickoff || "" };
-    try {
-        const dt = new Date(String(dateStr).replace(" ", "T"));
-        if (Number.isNaN(dt.getTime())) throw new Error("Invalid date");
-        const day = dt.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(/\./g, "");
-        const time = dt.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-        return { day, time, label: `${day} ${time}` };
-    } catch {
-        return { day: "", time: "", label: match?.hora || match?.kickoff || "" };
-    }
+    const ts = parseMatchTimestamp(match);
+    if (!ts) return { day: "", time: "", label: match?.hora || match?.kickoff || "" };
+    const day = madridFormatMs(ts, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(/\./g, "");
+    const time = madridFormatMs(ts, { hour: "2-digit", minute: "2-digit" });
+    return { day, time, label: `${day} ${time}` };
 }
 
 export function liveScoreDisplay(match, fallback) {
