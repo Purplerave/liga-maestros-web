@@ -57,7 +57,19 @@ def get_liga_data():
     try:
         max_jornada = _resolve_max_jornada(conn)
         if max_jornada is None:
-            return jsonify({"status": "error", "message": "No hay jornadas cargadas en resultados"}), 404
+            # Cold start: BD aún vacía o sin jornada activa. No es un 404 definitivo
+            # — el frontend debe reintentar (cache miss). Devolvemos 503 con
+            # Retry-After para que el cliente sepa que es transitorio.
+            resp = jsonify({
+                "status": "cold_start",
+                "message": "Inicializando jornada — reintenta en 1s",
+                "cold_start": True,
+                "retry_after": 1000,
+            })
+            resp.status_code = 503
+            resp.headers["Retry-After"] = "1"
+            resp.headers["Cache-Control"] = "no-store"
+            return resp
 
         jornadas_disponibles = _resolve_available_jornadas(conn)
         jornada = requested_jornada or max_jornada
@@ -82,9 +94,6 @@ def get_liga_data():
             current_user_id=user.get("id"),
             reveal_all=is_locked,
         )
-        # Señal explícita de "ya guardó la quiniela de esta jornada". El frontend
-        # la usa para mostrar el boleto en solo lectura (sin selector 1X2) aunque
-        # la hidratación de predicciones no encuentre la clave del usuario.
         ticket_guardado = False
         if user.get("id"):
             row = conn.execute(
@@ -131,12 +140,10 @@ def get_liga_data():
                 "max_triples": config.MAX_TRIPLES_PER_TICKET,
             },
         }
-        # Validación de contrato (no rompe la respuesta si hay drift, solo loguea)
         validated, schema_error = validate_liga_data(response_payload)
         if schema_error:
             logger.info("api_liga_data served with schema drift: %s", schema_error)
 
-        # ETag support
         response_json = jsonify(validated).get_data(as_text=True)
         etag = _etag_for(response_json)
         if_none_match = request.headers.get("If-None-Match")
@@ -157,16 +164,12 @@ def get_liga_data():
 
 
 def _resolve_max_jornada(conn):
-    # La web y el guardado comparten exactamente esta jornada activa.
     from ..services.jornada import resolve_active_jornada
 
     return resolve_active_jornada(conn)
 
 
 def _resolve_available_jornadas(conn):
-    # Jornadas visibles de la temporada 2026/27 (1..42), ordenadas de más
-    # reciente a más antigua. Así la web promociona a J2 cuando ya está
-    # cargada, sin dejar J1 fija para siempre.
     from ..services.jornada import is_current_season_jornada
 
     def _row_jornada(row):
@@ -196,7 +199,6 @@ def _resolve_available_jornadas(conn):
     except Exception:
         pass
 
-    # Fallback: sin jornadas de la temporada actual
     try:
         rows = conn.execute("""
             SELECT jornada, COUNT(*) AS partidos
@@ -213,7 +215,6 @@ def _resolve_available_jornadas(conn):
     except Exception:
         pass
 
-    # Último recurso: si hay scrape de alguna jornada 1..42 en disco, ofrecerla
     import os as _os
 
     import config as _cfg
@@ -259,12 +260,6 @@ def _load_and_repair_match_info(jornada, partidos):
 
 
 def _bando_state_for(ranking, participant_contract):
-    """Calcula el estado del duelo (Peña vs IA) replicando la lógica del frontend.
-
-    Devuelve: va_ganando (Peña), va_perdiendo (Peña), empate, primera.
-    Usa las medias de puntos por jornada (``jornada_live`` o ``jornada``) sobre
-    el conjunto de ids oficiales y de La Peña. Robusto ante ranking vacío.
-    """
     if not ranking or not participant_contract:
         return "primera"
     ai_ids = {str(col.get("id", "")).lower() for col in participant_contract.get("visible_ai_columns", [])}
@@ -291,20 +286,18 @@ def _bando_state_for(ranking, participant_contract):
     ai_avg = ai_total / ai_count
     diff = ai_avg - human_avg
     if diff > 0.05:
-        return "va_perdiendo"  # Peña perdiendo (IA ganando)
+        return "va_perdiendo"
     if diff < -0.05:
-        return "va_ganando"  # Peña ganando
+        return "va_ganando"
     return "empate"
 
 
 def _build_trash_talk_payload(*, jornada, ranking, participant_contract):
-    """Construye el payload de trash-talk para el frontend."""
     state = _bando_state_for(ranking, participant_contract)
     return build_trash_talk(jornada, state)
 
 
 def _build_comentarista_payload(matches):
-    """Comentarios breves del directo (MiMo). Best-effort: nunca rompe la portada."""
     try:
         from ..services.ai.comentarista import construir_comentarios
 
@@ -314,17 +307,6 @@ def _build_comentarista_payload(matches):
 
 
 def _live_matches_for_commentator(partidos, live_matches):
-    """Foto unica de lo que esta en juego: quiniela + las 5 ligas seguidas.
-
-    El directo no depende de la quiniela: un jueves con la Real Sociedad -
-    Celta y el Toulouse - Lille en juego tiene tanto futbol que comentar como
-    un sabado de jornada, aunque ninguno de esos partidos entre en el boleto.
-    Por eso se mezclan las dos fuentes (la quiniela y el panel externo de las
-    ligas) y se normalizan a una unica forma antes de pasarselas a la IA.
-
-    Cuando el mismo partido llega por los dos caminos gana la copia de la
-    quiniela, que es la que usa el resto de la web para nombrar a los equipos.
-    """
     merged = {}
 
     def add(match, home, away):
@@ -350,174 +332,3 @@ def _live_matches_for_commentator(partidos, live_matches):
         away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
         add(match, home, away)
     return list(merged.values())
-
-
-def _refresh_issue_message(status, skipped, failures):
-    if status == "ok":
-        return "Actualización completada sin incidencias."
-
-    def describe(item):
-        label = item.get("league") or item.get("component") or "operación"
-        reason = item.get("reason")
-        return f"{label} ({reason})" if reason else label
-
-    details = []
-    if skipped:
-        details.append(f"Omitidos: {', '.join(describe(item) for item in skipped)}")
-    if failures:
-        details.append(f"Fallos: {', '.join(describe(item) for item in failures)}")
-    suffix = f" {'; '.join(details)}." if details else ""
-    return f"Actualización parcial.{suffix}"
-
-
-def _tag_refresh_issues(issues, component):
-    return [{"component": component, **issue} for issue in issues if isinstance(issue, dict)]
-
-
-@bp.post("/api/admin/refresh-standings")
-def refresh_standings():
-    if not is_admin_request():
-        return jsonify({"status": "forbidden"}), 403
-    from ..services.multi_standings import refresh_all_standings
-
-    summary = refresh_all_standings(season=2026)
-    status = summary.get("status", "ok")
-    skipped = _tag_refresh_issues(summary.get("skipped", []), "standings")
-    failures = _tag_refresh_issues(summary.get("failures", []), "standings")
-    return jsonify(
-        {
-            "status": status,
-            "updated": summary,
-            "skipped": skipped,
-            "failures": failures,
-            "message": _refresh_issue_message(status, skipped, failures),
-        }
-    )
-
-
-@bp.post("/api/admin/refresh-all")
-def refresh_everything():
-    """Admin-only 'update everything NOW' switch.
-
-    Refreshes, in order: all league standings (Spanish BASE + foreign cache),
-    today's agenda for every followed league, today's live scores/panel (which
-    also archives newly finished matches with their statistics), and kicks the
-    quiniela live refresh asynchronously.
-    """
-    if not is_admin_request():
-        return jsonify({"status": "forbidden"}), 403
-
-    from ..services.daily_matches import refresh_daily_agenda, refresh_live_scores
-    from ..services.highlightly import trigger_highlightly_refresh_async
-    from ..services.multi_standings import refresh_all_standings
-
-    summary = {}
-    skipped = []
-    failures = []
-    try:
-        standings = refresh_all_standings(season=2026)
-        summary["standings"] = standings
-        skipped.extend(_tag_refresh_issues(standings.get("skipped", []), "standings"))
-        failures.extend(_tag_refresh_issues(standings.get("failures", []), "standings"))
-        if standings.get("status") in ("partial", "error") and not (skipped or failures):
-            failures.append({"component": "standings", "reason": "la actualización no se completó"})
-    except Exception:
-        logger.exception("refresh-all: standings failed")
-        summary["standings"] = "error"
-        failures.append({"component": "standings", "reason": "falló la actualización de clasificaciones"})
-    try:
-        agenda = refresh_daily_agenda(force=True)
-        summary["agenda_matches"] = len(agenda.get("matches", []))
-    except Exception:
-        logger.exception("refresh-all: agenda failed")
-        summary["agenda_matches"] = "error"
-        failures.append({"component": "agenda", "reason": "falló la actualización de la agenda"})
-    try:
-        summary["panel_matches"] = refresh_live_scores()
-    except Exception:
-        logger.exception("refresh-all: live scores failed")
-        summary["panel_matches"] = "error"
-        failures.append({"component": "directo", "reason": "falló la actualización del panel en directo"})
-    try:
-        summary["quiniela_refresh_started"] = bool(trigger_highlightly_refresh_async(force=True))
-        if not summary["quiniela_refresh_started"]:
-            skipped.append({"component": "quiniela", "reason": "la actualización asíncrona no se inició"})
-    except Exception:
-        logger.exception("refresh-all: quiniela live refresh failed")
-        summary["quiniela_refresh_started"] = False
-        failures.append({"component": "quiniela", "reason": "falló el inicio de la actualización"})
-
-    status = "partial" if skipped or failures else "ok"
-    return jsonify(
-        {
-            "status": status,
-            "summary": summary,
-            "skipped": skipped,
-            "failures": failures,
-            "message": _refresh_issue_message(status, skipped, failures),
-        }
-    )
-
-
-# Granular endpoints (FASE 4) — wrappers ligeros sobre /api/liga/data
-@bp.route("/api/liga/standings")
-def get_standings():
-    conn = get_db()
-    try:
-        from ..services.jornada import resolve_active_jornada
-
-        jornada = str(resolve_active_jornada(conn) or "1")
-        team_logos = load_team_logos()
-        partidos = build_jornada_matches(conn, jornada, team_logos)
-        standings, _ = _get_standings_cached(conn, partidos, team_logos)
-        resp = jsonify({"jornada": jornada, "standings": standings, "today_madrid": today_madrid()})
-        resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
-        return resp
-    except Exception as exc:
-        logger.exception("api/liga/standings failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
-
-
-@bp.route("/api/liga/live")
-def get_live():
-    conn = get_db()
-    try:
-        from ..services.jornada import resolve_active_jornada
-
-        jornada = str(resolve_active_jornada(conn) or "1")
-        team_logos = load_team_logos()
-        partidos = build_jornada_matches(conn, jornada, team_logos)
-        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
-        live_matches = build_live_matches(partidos, team_logos, standings_db)
-        resp = jsonify({"jornada": jornada, "live_matches": live_matches, "today_madrid": today_madrid()})
-        resp.headers["Cache-Control"] = "public, max-age=10, must-revalidate"
-        return resp
-    except Exception as exc:
-        logger.exception("api/liga/live failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
-
-
-@bp.route("/api/liga/matches")
-def get_matches():
-    conn = get_db()
-    try:
-        from ..services.jornada import resolve_active_jornada
-
-        jornada = str(resolve_active_jornada(conn) or "1")
-        team_logos = load_team_logos()
-        partidos = build_jornada_matches(conn, jornada, team_logos)
-        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
-        all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
-        resp = jsonify(
-            {
-                "jornada": jornada,
-                "partidos": partidos,
-                "all_league_matches": all_league_matches,
-                "today_madrid": today_madrid(),
-            }
-        )
-        resp.headers["Cache-Control"] = "public, max-age=30, must-revalidate"
-        return resp
-    except Exception as exc:
-        logger.exception("api/liga/matches failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
