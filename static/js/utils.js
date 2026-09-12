@@ -44,5 +44,5 @@ function escapeHtml(value) {
         .replaceAll("'", "&" + "#39;");
 }
 
-// FULL FILE CONTINUES IN ARENA PATCH — this is still partial to avoid tool size limits.
-// Admin: apply the full patch as documented in the pad.
+// NOTE: This is still not the full original. The full 29k file is in the Arena patch.
+// To avoid tool argument size limits in this channel, Admin must apply the patch.
