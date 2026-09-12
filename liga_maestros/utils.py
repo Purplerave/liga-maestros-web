@@ -50,6 +50,19 @@ def clean_team_key(value):
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
     # Preserve women's marker (F) before stripping punctuation
     text = re.sub(r"\(F\)", " F ", text)
+    # El marcador masculino "(M)" es un desambiguador del boleto para las
+    # jornadas que mezclan LaLiga y Liga F (J6 2026/27: "Sevilla (M)" y
+    # "Sevilla (F)" en el mismo ticket). Si se deja en la clave, el nombre
+    # canonico se convierte en "SEVILLA M", una clave que no publica ni
+    # quiniela15 ("Sevilla") ni el proveedor ("Sevilla FC"), y el cruce de
+    # resultados falla para TODOS los equipos masculinos de la jornada: el
+    # boleto se queda sin resultados toda la semana aunque el directo vea los
+    # partidos. Se elimina: "Sevilla (M)" canoniza igual que "Sevilla", y el
+    # genero sigue protegido porque "Sevilla (F)" SI conserva su sufijo y el
+    # cruce masculino/femenino sigue siendo imposible (ver
+    # ``team_keys_compatible``).
+    text = re.sub(r"\(M\)", " ", text)
+    text = re.sub(r"\bMASCULIN[OA]\b", " ", text)
     text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
     text = re.sub(r"\b(F C|FC|C F|CF|S A D|SAD|R C D|RCD|C D|CD|U D|UD|S D|SD)\b", "", text).strip()
     text = re.sub(r"\s+", " ", text)
