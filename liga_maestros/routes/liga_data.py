@@ -27,6 +27,22 @@ logger = logging.getLogger(__name__)
 # Simple in-memory cache for standings (TTL 5 min)
 _STANDINGS_CACHE = {"data": None, "expires": 0, "key": None}
 _STANDINGS_TTL = 300  # seconds
+_COLD_START_RETRY_AFTER = 2
+
+
+def _cold_start_response(message="Los datos de la jornada aún se están preparando."):
+    """Return a retryable response while the first live snapshot is warming."""
+    response = jsonify(
+        {
+            "status": "cold_start",
+            "code": "COLD_START",
+            "message": message,
+        }
+    )
+    response.status_code = 503
+    response.headers["Retry-After"] = str(_COLD_START_RETRY_AFTER)
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 def _get_standings_cached(conn, partidos, team_logos):
@@ -57,7 +73,7 @@ def get_liga_data():
     try:
         max_jornada = _resolve_max_jornada(conn)
         if max_jornada is None:
-            return jsonify({"status": "error", "message": "No hay jornadas cargadas en resultados"}), 404
+            return _cold_start_response()
 
         jornadas_disponibles = _resolve_available_jornadas(conn)
         jornada = requested_jornada or max_jornada
@@ -66,6 +82,8 @@ def get_liga_data():
             jornada = str(jornadas_disponibles[0])
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
+        if len(partidos) < 15:
+            return _cold_start_response("La jornada todavía no tiene sus 15 partidos disponibles.")
         standings, standings_db = _get_standings_cached(conn, partidos, team_logos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos, standings_db)
