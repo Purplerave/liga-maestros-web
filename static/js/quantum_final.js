@@ -5,6 +5,31 @@
    ========================================================================== */
 
 // --- refreshData: orquestacion principal de datos y render ---
+async function fetchLigaDataWithRetry(url) {
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const response = await fetch(url);
+        if (response.status !== 503) return response;
+
+        let payload = null;
+        try {
+            payload = await response.clone().json();
+        } catch {
+            // Keep the original response available to the caller below.
+        }
+        const retryable = payload?.status === "cold_start" || payload?.code === "COLD_START";
+        if (!retryable || attempt === maxAttempts) return response;
+
+        const retryAfter = Number.parseInt(response.headers.get("Retry-After") || "", 10);
+        const fallbackDelay = 500 * attempt;
+        const delay = Number.isFinite(retryAfter)
+            ? Math.min(5000, Math.max(250, retryAfter * 1000))
+            : fallbackDelay;
+        await new Promise(resolve => window.setTimeout(resolve, delay));
+    }
+    return fetch(url);
+}
+
 async function refreshData(options = {}) {
     if (options.auto && Date.now() - state.lastUserEdit < 12000) return;
     const preserveLocalTicket = Boolean(options.auto && (state.editMode || state.draftDirty));
@@ -19,7 +44,7 @@ async function refreshData(options = {}) {
             : fetch("/api/user/status");
         const [userRes, dataRes] = await Promise.all([
             userRequest,
-            fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`)
+            fetchLigaDataWithRetry(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`)
         ]);
         if (userRes) {
             if (!userRes.ok) throw new Error(`User API ${userRes.status}`);
