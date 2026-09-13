@@ -32,13 +32,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from liga_maestros.services.highlightly import _find_feed_item  # noqa: E402
 from liga_maestros.utils import (  # noqa: E402
     clean_team_key,
     load_team_logos,
     normalize_team_key,
     team_keys_compatible,
 )
-from liga_maestros.services.highlightly import _find_feed_item  # noqa: E402
 from tools.ops import LIVE_COLLECTOR as collector  # noqa: E402
 
 MADRID = ZoneInfo("Europe/Madrid")
@@ -228,14 +228,10 @@ class TestAplicarResultadosQ15:
         assert row["signo_actual"] == "1"
 
     def test_resultado_final_se_aplica_y_se_sella(self, j6_db):
-        collector.apply_q15_results_to_db(
-            6, {"matches": [_q15_match(6, "LIVE", "84'", 1, 0)]}
-        )
+        collector.apply_q15_results_to_db(6, {"matches": [_q15_match(6, "LIVE", "84'", 1, 0)]})
         collector.madrid_now = lambda: datetime(2026, 9, 11, 23, 5, tzinfo=MADRID)
 
-        updates = collector.apply_q15_results_to_db(
-            6, {"matches": [_q15_match(6, "FT", "", 2, 1)]}
-        )
+        updates = collector.apply_q15_results_to_db(6, {"matches": [_q15_match(6, "FT", "", 2, 1)]})
 
         assert updates == 1
         row = j6_db.execute("SELECT * FROM resultados WHERE jornada = 6 AND partido_id = 6").fetchone()

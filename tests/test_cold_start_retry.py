@@ -37,7 +37,7 @@ def test_frontend_retries_cold_start_and_honours_retry_after():
     source = (Path(__file__).resolve().parents[1] / "static/js/quantum_final.js").read_text(encoding="utf-8")
 
     assert "fetchLigaDataWithRetry" in source
-    assert 'response.status !== 503' in source
+    assert "response.status !== 503" in source
     assert 'payload?.status === "cold_start"' in source
     assert 'response.headers.get("Retry-After")' in source
     assert "maxAttempts = 3" in source

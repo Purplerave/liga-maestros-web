@@ -2,6 +2,70 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-13 — El DIRECTO deja de caerse cuando hay partidos en juego
+
+### Corregido
+
+- 🔴 **El service worker cortaba a los 4 segundos cualquier respuesta de la API
+  y se inventaba un 503.** Medido en producción a las 14:47 (J6, Celta - Málaga
+  en juego) vía `/metrics`: `/api/liga/data` costaba **1,31 s de media**
+  (3 peticiones, 3,94 s acumulados) y `/api/noticias/radar` **4,28 s** en una
+  sola petición. Al pasar de 4 s, el SW devolvía
+  `503 {"status":"error","message":"Offline"}` con el servidor perfectamente
+  vivo: la portada pintaba «No se pudo cargar la Arena (HTTP 503)» y cada
+  refresco del directo se descartaba en silencio (`if (!response.ok) return`),
+  así que el marcador y el minuto se quedaban congelados justo cuando había
+  fútbol. Ahora el tope es una red de seguridad de **30 s** y la respuesta
+  sintética se marca como reintentable (`504` + `status: network_error`), que
+  ya no se confunde con el `cold_start` del backend.
+- 🔴 **El reintento de la carga inicial solo cubría el `cold_start`.** El 503
+  sintético del SW no se reintentaba nunca y la página se quedaba muerta hasta
+  recargar a mano (por eso «seguía sin funcionar» después del arreglo del
+  12/09). `fetchLigaDataWithRetry` reintenta ahora cualquier 503/504
+  reintentable **y** los cortes de red (3 intentos, espera creciente, honrando
+  `Retry-After`), y si aun así falla la carga se reintenta sola hasta 4 veces
+  con un botón «Reintentar ahora» cableado por evento (la CSP es
+  `script-src 'self'`: un `onclick` inline no se ejecuta).
+- 🔴 **El comentarista (MiMo) llamaba a la IA dentro de la petición.**
+  `/api/liga/data` se quedaba esperando hasta `AI_TIMEOUT_SECONDS` (10 s) por
+  proveedor, con 2 reintentos y 3 proveedores: el peor caso eran minutos de
+  petición bloqueada, y solo ocurría **con partidos en juego**, que es cuando
+  dispara el comentarista. La web usa ahora `comentarios_para_web()`, que sirve
+  lo que haya en caché al instante y encarga la generación a un hilo
+  (single-flight, con la misma cadencia y cuota). `construir_comentarios()`
+  sigue ahí para el colector, los scripts y los tests.
+- ⚡ **`/api/liga/data` es ~4× más rápido** (perfil local con el payload real de
+  producción, 126 KB: **110 ms → 26 ms**; por HTTP, 28 ms). Dos culpables:
+  `load_team_logos()` volvía a parsear ~100 KB de JSON y a canonicalizar ~600
+  nombres **en cada petición** (45 % del tiempo) y `clean_team_key()` se
+  invocaba 8.770 veces por petición con 6 `re.sub` cada una (52 %). Los escudos
+  se cachean por `mtime_ns` + tamaño del fichero (un scrape nuevo entra sin
+  reiniciar) y la limpieza de nombres va memoizada. En Alwaysdata esto es pasar
+  de ~1,3 s a ~0,3 s, lejos de cualquier tope.
+- **Un refresco fallido del directo ya no cuesta 30 segundos.** `refreshLiveSnapshot`
+  informa de si llegó o no y el poll siguiente se programa a los 6 s cuando
+  falla, en vez de esperar al ciclo normal: un gol no llega con medio minuto de
+  retraso porque una petición se perdiera.
+
+### Verificado (sin cambios, quedan como estaban)
+
+- El cruce de nombres quiniela15 ↔ BD de la J6 sigue siendo **15/15**, incluidos
+  los casos que se habían roto antes: «Edf Logroño» ↔ «Logroño (F)»,
+  «Las Planas (F)» ↔ «Badalona W. (F)», «Valladolid» ↔ «R. Valladolid (M)».
+- El colector y el scrape de quiniela15 funcionan: a las 14:47 la caché
+  `quiniela15_directo_J6.json` tenía 15/15 partidos y el panel externo servía
+  el Celta - Málaga (45') y el Sporting - Eldense (descanso) en `live_matches`.
+- `/metrics`: 330 llamadas Highlightly de 7.500 (4 %).
+
+### Nota
+
+- `static/js/*.HASH.js` (los gemelos con hash de `build.py`) siguen desincronizados
+  de sus fuentes, pero las plantillas cargan los ficheros sin hash con
+  `?v=<mtime>`, así que no afectan al despliegue. `build.py` regenera ambos.
+- `tests/test_cold_start_retry.py` y `tests/test_j6_resultados_cruce.py` no
+  pasaban `ruff check`/`ruff format` y tenían el CI en rojo desde el 12/09;
+  se han reformateado sin tocar su contenido.
+
 ## 2026-09-11 (noche) — Los resultados de la quiniela vuelven al boleto (marcador "(M)")
 
 ### Corregido

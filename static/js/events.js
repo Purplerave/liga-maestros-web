@@ -269,7 +269,10 @@ function standingsSignature(data) {
 }
 
 async function refreshLiveSnapshot() {
-    if (!state.data || document.hidden) return;
+    /* Devuelve false cuando el refresco no llego (red, 504 del service
+       worker, servidor ocupado): quien programa el siguiente poll lo hace
+       antes para no perder un gol entero durante 30 segundos. */
+    if (!state.data || document.hidden) return true;
     try {
         const liveSignature = data => [
             ...(data?.partidos || []),
@@ -289,9 +292,9 @@ async function refreshLiveSnapshot() {
         const previousResults = resultsSignature(state.data);
         const previousStandings = standingsSignature(state.data);
         const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
-        if (!response.ok) return;
+        if (!response.ok) return false;
         const freshData = await response.json();
-        if (String(freshData.jornada || "") !== String(state.jornada || "")) return;
+        if (String(freshData.jornada || "") !== String(state.jornada || "")) return true;
         const nextSignature = liveSignature(freshData);
         const nextResults = resultsSignature(freshData);
         const nextStandings = standingsSignature(freshData);
@@ -304,13 +307,13 @@ async function refreshLiveSnapshot() {
         const changed = previousSignature !== nextSignature
             || previousResults !== nextResults
             || previousStandings !== nextStandings;
-        if (!changed) return;
+        if (!changed) return true;
         // La Peña se recalcula con cada resultado cerrado.
         if (previousResults !== nextResults && typeof ensureContestData === "function") {
             try { await ensureContestData({ force: true }); } catch { /* no bloquea el repintado */ }
         }
-        if (state.currentFilter === "LIVE" && patchLiveArena()) return;
-        if (state.currentFilter === "TICKET" && patchTicketArena()) return;
+        if (state.currentFilter === "LIVE" && patchLiveArena()) return true;
+        if (state.currentFilter === "TICKET" && patchTicketArena()) return true;
         const pageX = window.scrollX;
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
@@ -320,8 +323,10 @@ async function refreshLiveSnapshot() {
         const nextTable = qs("matches-body")?.querySelector(".arena-table-wrap");
         if (nextTable) nextTable.scrollLeft = tableScroll;
         loadPorra();
+        return true;
     } catch (error) {
         console.warn("No se pudo refrescar el directo", error);
+        return false;
     }
 }
 
@@ -379,6 +384,10 @@ function matchKickoffTime(match) {
     return madridWallClockToMs(date, time);
 }
 
+/* Espera corta tras un refresco fallido: suficiente para no martillear un
+   servidor lento, bastante menos que los 30 s del poll normal. */
+const LIVE_FAILURE_RETRY_MS = 6000;
+
 function scheduleLivePoll(delay = livePollDelay()) {
     if (liveRefreshTimer) window.clearTimeout(liveRefreshTimer);
     if (document.hidden) {
@@ -387,8 +396,8 @@ function scheduleLivePoll(delay = livePollDelay()) {
     }
     liveRefreshTimer = window.setTimeout(async () => {
         liveRefreshTimer = null;
-        await refreshLiveSnapshot();
-        scheduleLivePoll();
+        const refreshed = await refreshLiveSnapshot();
+        scheduleLivePoll(refreshed ? undefined : LIVE_FAILURE_RETRY_MS);
     }, delay);
 }
 
