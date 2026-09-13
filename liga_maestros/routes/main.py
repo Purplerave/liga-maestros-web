@@ -109,6 +109,8 @@ def static_files(filename):
         cache_control = "no-store, no-cache, must-revalidate, max-age=0"
     response = send_from_directory(static_root, normalized, conditional=True)
     response.headers["Cache-Control"] = cache_control
+    if normalized == "sw.js":
+        response.headers["Service-Worker-Allowed"] = "/"
     return response
 
 
