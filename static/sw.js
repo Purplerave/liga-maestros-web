@@ -5,8 +5,18 @@
    Offline: muestra la ultima version cargada de la pagina.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v12';
-const STATIC_CACHE = 'liga-maestros-static-v12';
+const CACHE = 'liga-maestros-v13';
+const STATIC_CACHE = 'liga-maestros-static-v13';
+
+/* Tope de espera para la API. Era de 4000 ms y eso rompía el DIRECTO: en
+   producción /api/liga/data tarda ~1,3 s de media con picos por encima de 4 s
+   (reconstrucción de clasificaciones, arranque en frío, llamada a la IA) y
+   /api/noticias/radar se iba a 4,3 s. Al superar el tope, el SW inventaba un
+   503 {"status":"error"} con el servidor perfectamente vivo: la portada
+   pintaba «No se pudo cargar la Arena» y los refrescos del directo se
+   descartaban en silencio. 30 s es una red de seguridad contra cuelgues
+   reales, no un filtro de rendimiento. */
+const API_TIMEOUT_MS = 30000;
 
 const PRECACHE_URLS = [
     '/',
@@ -77,7 +87,7 @@ self.addEventListener('fetch', event => {
             event.respondWith(fetch(request));
             return;
         }
-        event.respondWith(networkWithTimeout(request, 4000));
+        event.respondWith(networkWithTimeout(request, API_TIMEOUT_MS));
         return;
     }
 
@@ -146,15 +156,24 @@ async function networkFirst(request) {
     }
 }
 
-async function networkWithTimeout(request, timeoutMs = 4000) {
+async function networkWithTimeout(request, timeoutMs = API_TIMEOUT_MS) {
     const timeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout')), timeoutMs)
     );
     try {
         return await Promise.race([fetch(request), timeout]);
     } catch {
-        return new Response(JSON.stringify({ status: 'error', message: 'Offline' }), {
-            status: 503,
+        /* Respuesta sintética: solo se fabrica cuando la red falla de verdad o
+           cuando el servidor lleva 30 s sin responder. Se marca como
+           reintentable (504 + status network_error) para que la web vuelva a
+           pedirlo en vez de dar la página por muerta, y nunca confunde con el
+           503 cold_start que emite el backend al arrancar. */
+        return new Response(JSON.stringify({
+            status: 'network_error',
+            message: 'Sin respuesta del servidor',
+            retryable: true
+        }), {
+            status: 504,
             headers: {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-store'

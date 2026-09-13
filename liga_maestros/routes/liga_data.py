@@ -322,11 +322,17 @@ def _build_trash_talk_payload(*, jornada, ranking, participant_contract):
 
 
 def _build_comentarista_payload(matches):
-    """Comentarios breves del directo (MiMo). Best-effort: nunca rompe la portada."""
-    try:
-        from ..services.ai.comentarista import construir_comentarios
+    """Comentarios breves del directo (MiMo). Best-effort: nunca rompe la portada.
 
-        return construir_comentarios(matches)
+    Usa la variante no bloqueante: la llamada a la IA se hace en un hilo y esta
+    petición sirve lo que ya hay en caché. Generar dentro del ciclo de petición
+    retenía /api/liga/data hasta un minuto (timeout por proveedor x reintentos)
+    justo cuando había partidos en juego, que es cuando el comentarista dispara.
+    """
+    try:
+        from ..services.ai.comentarista import comentarios_para_web
+
+        return comentarios_para_web(matches)
     except Exception:
         return {"comentarios": [], "generated": False}
 

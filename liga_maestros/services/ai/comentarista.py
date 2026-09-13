@@ -23,11 +23,17 @@ Por qué es barato (y por qué no te deja sin créditos)
 
 Nunca lanza: si no hay key, cuota o red, devuelve ``{"comentarios": []}`` y la
 web sigue funcionando exactamente igual.
+
+Y nunca bloquea una petición: la web llama a :func:`comentarios_para_web`, que
+sirve la caché y encarga la generación a un hilo. ``construir_comentarios``
+(variante bloqueante) queda para el colector, los scripts y los tests.
 """
 
 import json
 import logging
 import os
+import threading
+import time
 
 import config
 
@@ -177,29 +183,8 @@ def _normalizar_cache(payload):
     return comentarios if comentarios else None
 
 
-def construir_comentarios(matches):
-    """Genera 1-3 frases de comentarista para la foto actual del directo.
-
-    Devuelve ``{"comentarios": [...], "generated": bool}``. ``generated`` es True
-    solo cuando se ha hecho una llamada nueva a la IA en esta invocación.
-    """
-    vacio = {"comentarios": [], "generated": False}
-    if not ai_enabled():
-        return vacio
-
-    entrada = _preparar_entrada(_live_matches(matches))
-    if not entrada:
-        return vacio
-
-    firma = _firma(entrada)
-    cacheado = _normalizar_cache(cache_get(CACHE_SCOPE, firma))
-    if cacheado is not None:
-        return {"comentarios": cacheado, "generated": False}
-
-    reciente = _normalizar_cache(cache_get_latest(CACHE_SCOPE, MIN_INTERVAL_SECONDS))
-    if reciente is not None:
-        return {"comentarios": reciente, "generated": False}
-
+def _generar(entrada, firma, reciente=None):
+    """Llamada a la IA + validación + caché. Bloqueante: nadie la sirve en una petición."""
     if not reserve_call():
         # Cuota diaria agotada: degradar a lo último que tengamos (hasta 24h) o nada.
         ultimo = _normalizar_cache(cache_get_latest(CACHE_SCOPE, 86400))
@@ -225,3 +210,111 @@ def construir_comentarios(matches):
     comentarios = _filtrar_repetidos(_validar_comentarios(crudo.get("comentarios"), entrada))
     cache_set(CACHE_SCOPE, firma, {"comentarios": comentarios})
     return {"comentarios": comentarios, "generated": bool(comentarios)}
+
+
+def construir_comentarios(matches):
+    """Genera 1-3 frases de comentarista para la foto actual del directo.
+
+    Devuelve ``{"comentarios": [...], "generated": bool}``. ``generated`` es True
+    solo cuando se ha hecho una llamada nueva a la IA en esta invocación.
+
+    Ojo: esta variante **bloquea** hasta ``AI_TIMEOUT_SECONDS`` por proveedor y
+    reintento. Está aquí para el colector, los scripts y los tests; la web usa
+    :func:`comentarios_para_web`, que nunca espera a la IA.
+    """
+    vacio = {"comentarios": [], "generated": False}
+    if not ai_enabled():
+        return vacio
+
+    entrada = _preparar_entrada(_live_matches(matches))
+    if not entrada:
+        return vacio
+
+    firma = _firma(entrada)
+    cacheado = _normalizar_cache(cache_get(CACHE_SCOPE, firma))
+    if cacheado is not None:
+        return {"comentarios": cacheado, "generated": False}
+
+    reciente = _normalizar_cache(cache_get_latest(CACHE_SCOPE, MIN_INTERVAL_SECONDS))
+    if reciente is not None:
+        return {"comentarios": reciente, "generated": False}
+
+    return _generar(entrada, firma, reciente)
+
+
+# --- Variante no bloqueante (la que sirve /api/liga/data) -------------------
+#
+# La llamada a la IA vivía dentro del ciclo de petición: con partidos en juego
+# el comentarista disparaba y /api/liga/data se quedaba esperando hasta 10 s por
+# proveedor (x2 reintentos sin response_format, x3 proveedores). El service
+# worker cortaba esa respuesta a los 4 s y el DIRECTO —justo cuando había
+# fútbol— pintaba un fallo o se congelaba. Ahora la petición sirve lo que haya
+# en caché y deja la generación encargada a un hilo.
+
+_refresco_lock = threading.Lock()
+_refresco_en_curso = False
+_ultimo_intento = 0.0
+# Espera mínima entre intentos fallidos: si la IA no responde, no se relanza en
+# cada petición (el directo hace una cada 30 s por cliente).
+REINTENTO_SEGUNDOS = 60
+
+
+def _reset_estado_refresco():
+    """Deja el single-flight como al arrancar (tests)."""
+    global _refresco_en_curso, _ultimo_intento
+    with _refresco_lock:
+        _refresco_en_curso = False
+        _ultimo_intento = 0.0
+
+
+def _programar_refresco(entrada, firma):
+    """Encarga la generación a un hilo. True si se llegó a lanzar."""
+    global _refresco_en_curso, _ultimo_intento
+    with _refresco_lock:
+        if _refresco_en_curso:
+            return False
+        ahora = time.monotonic()
+        if ahora - _ultimo_intento < REINTENTO_SEGUNDOS:
+            return False
+        _refresco_en_curso = True
+        _ultimo_intento = ahora
+
+    def _trabajo():
+        global _refresco_en_curso
+        try:
+            _generar(entrada, firma)
+        except Exception:
+            logger.warning("comentarista: refresco en segundo plano fallido", exc_info=True)
+        finally:
+            with _refresco_lock:
+                _refresco_en_curso = False
+
+    threading.Thread(target=_trabajo, name="comentarista-ia", daemon=True).start()
+    return True
+
+
+def comentarios_para_web(matches):
+    """Frases del directo sin esperar nunca a la IA.
+
+    Devuelve ``{"comentarios": [...], "generated": False}`` con lo último que se
+    generó (la firma actual, o las frases más recientes dentro de la cadencia) y
+    programa un refresco en segundo plano cuando toca generar.
+    """
+    vacio = {"comentarios": [], "generated": False}
+    if not ai_enabled():
+        return vacio
+
+    entrada = _preparar_entrada(_live_matches(matches))
+    if not entrada:
+        return vacio
+
+    firma = _firma(entrada)
+    cacheado = _normalizar_cache(cache_get(CACHE_SCOPE, firma))
+    if cacheado is not None:
+        return {"comentarios": cacheado, "generated": False}
+
+    reciente = _normalizar_cache(cache_get_latest(CACHE_SCOPE, MIN_INTERVAL_SECONDS))
+    if reciente is None:
+        _programar_refresco(entrada, firma)
+    ultimo = reciente or _normalizar_cache(cache_get_latest(CACHE_SCOPE, 86400))
+    return {"comentarios": ultimo or [], "generated": False}

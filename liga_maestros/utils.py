@@ -10,6 +10,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
+from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 from config import BASE_DIR, DATA_DIR, NEWS_GENERIC_KEYWORDS, NEWS_TEAM_KEYWORDS, TEAM_LOGO_ALIASES
@@ -43,8 +44,9 @@ LATIN_TRANSLIT = {
 }
 
 
-def clean_team_key(value):
-    text = str(value or "").upper()
+@lru_cache(maxsize=8192)
+def _clean_team_key_memo(text_in):
+    text = text_in.upper()
     text = "".join(LATIN_TRANSLIT.get(ch, ch) for ch in text)
     text = unicodedata.normalize("NFD", text)
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
@@ -67,6 +69,18 @@ def clean_team_key(value):
     text = re.sub(r"\b(F C|FC|C F|CF|S A D|SAD|R C D|RCD|C D|CD|U D|UD|S D|SD)\b", "", text).strip()
     text = re.sub(r"\s+", " ", text)
     return text
+
+
+def clean_team_key(value):
+    """Clave limpia de un equipo (sin acentos, sin formas jurídicas, sin (M)).
+
+    Es una función pura de cadenas, pero se invoca miles de veces por petición
+    (cada cruce quiniela/proveedor y cada escudo del panel la usa) y cada
+    llamada son 6 ``re.sub`` + normalización Unicode. Con la memoización el
+    payload del directo deja de gastar la mitad de su CPU repitiendo las mismas
+    20 claves de siempre.
+    """
+    return _clean_team_key_memo(str(value or ""))
 
 
 def _is_feminine_raw(value):
@@ -187,9 +201,31 @@ def team_token(value):
     return token[:2] or "--"
 
 
+_TEAM_LOGOS_CACHE_KEY: tuple[tuple[str, int, int], tuple[str, int, int]] | None = None
+_TEAM_LOGOS_CACHE: dict[str, str] = {}
+
+
+def _file_stamp(path: str) -> tuple[str, int, int]:
+    """Identidad de un fichero en disco (ruta + mtime_ns + tamaño)."""
+    try:
+        info = os.stat(path)
+        return (path, info.st_mtime_ns, info.st_size)
+    except OSError:
+        return (path, 0, 0)
+
+
 def load_team_logos():
+    global _TEAM_LOGOS_CACHE_KEY
     logos_path = runtime_data_path("TEAM_LOGOS.json")
     manifest_path = os.path.join(BASE_DIR, "static", "img", "team_logos", "manifest.json")
+    # Son ~100 KB de JSON y ~600 canonicalizaciones de nombre EN CADA petición
+    # (el perfil de rendimiento de /api/liga/data lo colocaba como la mitad del
+    # tiempo de respuesta). La caché se invalida sola en cuanto cambia
+    # cualquiera de los dos ficheros, así que un scrape nuevo de escudos entra
+    # al vuelo sin reiniciar la app.
+    cache_key = (_file_stamp(logos_path), _file_stamp(manifest_path))
+    if _TEAM_LOGOS_CACHE_KEY == cache_key and _TEAM_LOGOS_CACHE:
+        return dict(_TEAM_LOGOS_CACHE)
     logos = {}
     try:
         if os.path.exists(logos_path):
@@ -204,6 +240,9 @@ def load_team_logos():
                 if not url.startswith("static/"):
                     url = f"static/{url}"
                 logos[normalize_team_key(name)] = f"/{url}"
+        _TEAM_LOGOS_CACHE_KEY = cache_key
+        _TEAM_LOGOS_CACHE.clear()
+        _TEAM_LOGOS_CACHE.update(logos)
         return logos
     except Exception:
         return logos

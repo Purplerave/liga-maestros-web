@@ -5,11 +5,56 @@
    ========================================================================== */
 
 // --- refreshData: orquestacion principal de datos y render ---
+let initialLoadAttempts = 0;
+const INITIAL_LOAD_MAX_RETRIES = 4;
+
+/* Reintentos de la carga inicial. Dos fallos del servidor son distintos y los
+   dos se reintentan:
+   - 503 cold_start: la jornada todavía se está poblando (backend).
+   - 504 network_error: el service worker se rindió esperando (red/cuelgue).
+   Antes solo se reintentaba el cold_start, así que cualquier respuesta lenta
+   dejaba la página clavada en «No se pudo cargar la Arena» hasta recargar a
+   mano, justo lo que se veía cuando el DIRECTO "no funcionaba" con partidos en
+   juego. */
+function ligaDataRetryDelay(response, attempt) {
+    let retryAfter = NaN;
+    if (response) {
+        try {
+            retryAfter = Number.parseInt(response.headers.get("Retry-After") || "", 10);
+        } catch {
+            retryAfter = NaN;
+        }
+    }
+    if (Number.isFinite(retryAfter) && retryAfter > 0) {
+        return Math.min(5000, Math.max(250, retryAfter * 1000));
+    }
+    return Math.min(5000, 600 * attempt);
+}
+
+function isRetryableLigaDataFailure(response, payload) {
+    if (!response) return true;
+    if (response.status !== 503 && response.status !== 504) return false;
+    if (payload === null || payload === undefined) return true;
+    return payload?.status === "cold_start"
+        || payload?.code === "COLD_START"
+        || payload?.status === "network_error"
+        || payload?.retryable === true;
+}
+
 async function fetchLigaDataWithRetry(url) {
     const maxAttempts = 3;
+    let lastResponse = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-        const response = await fetch(url);
-        if (response.status !== 503) return response;
+        let response;
+        try {
+            response = await fetch(url, { cache: "no-store" });
+        } catch (networkError) {
+            if (attempt === maxAttempts) throw networkError;
+            await new Promise(resolve => window.setTimeout(resolve, ligaDataRetryDelay(null, attempt)));
+            continue;
+        }
+        lastResponse = response;
+        if (response.status !== 503 && response.status !== 504) return response;
 
         let payload = null;
         try {
@@ -17,17 +62,10 @@ async function fetchLigaDataWithRetry(url) {
         } catch {
             // Keep the original response available to the caller below.
         }
-        const retryable = payload?.status === "cold_start" || payload?.code === "COLD_START";
-        if (!retryable || attempt === maxAttempts) return response;
-
-        const retryAfter = Number.parseInt(response.headers.get("Retry-After") || "", 10);
-        const fallbackDelay = 500 * attempt;
-        const delay = Number.isFinite(retryAfter)
-            ? Math.min(5000, Math.max(250, retryAfter * 1000))
-            : fallbackDelay;
-        await new Promise(resolve => window.setTimeout(resolve, delay));
+        if (!isRetryableLigaDataFailure(response, payload) || attempt === maxAttempts) return response;
+        await new Promise(resolve => window.setTimeout(resolve, ligaDataRetryDelay(response, attempt)));
     }
-    return fetch(url);
+    return lastResponse || fetch(url, { cache: "no-store" });
 }
 
 async function refreshData(options = {}) {
@@ -54,6 +92,7 @@ async function refreshData(options = {}) {
         }
         if (!dataRes.ok) throw new Error(`Data API ${dataRes.status}`);
         state.data = await dataRes.json();
+        initialLoadAttempts = 0;
         logoAliasIndex = null;
         logoCache.clear();
         state.jornada = String(state.data.jornada || state.jornada);
@@ -100,10 +139,29 @@ async function refreshData(options = {}) {
             return;
         }
         const body = qs("matches-body");
+        // Una carga inicial fallida no es un callejon sin salida: el servidor
+        // puede estar arrancando o haber tardado de mas una vez. Se reintenta
+        // solo (espera creciente) antes de rendirse y pedir recarga manual.
+        initialLoadAttempts += 1;
+        if (!state.data && initialLoadAttempts <= INITIAL_LOAD_MAX_RETRIES) {
+            if (body) {
+                body.innerHTML = `<div class="empty-state">Cargando el directo&#8230; Reintentando (${initialLoadAttempts}/${INITIAL_LOAD_MAX_RETRIES}).</div>`;
+            }
+            window.setTimeout(() => {
+                refreshData(options).catch(retryError => console.warn("Reintento de carga fallido", retryError));
+            }, 2000 * initialLoadAttempts);
+            return;
+        }
         if (body) {
             const status = error?.status || error?.response?.status;
             const message = error?.message || error?.statusText || "Error desconocido";
-            body.innerHTML = `<div class="empty-state">No se pudo cargar la Arena (HTTP ${status || "?"}). ${escapeHtml(message)}. Revisa que Flask y la base de datos esten activos.</div>`;
+            body.innerHTML = `<div class="empty-state">No se pudo cargar el directo (HTTP ${status || "?"}). ${escapeHtml(message)}. <button class="direct-empty-action" type="button" data-reload-arena="1">Reintentar ahora</button></div>`;
+            // La CSP es `script-src 'self'` (sin unsafe-inline): los onclick
+            // inline no se ejecutan, así que el botón se cablea aquí.
+            body.querySelector("[data-reload-arena]")?.addEventListener("click", () => {
+                initialLoadAttempts = 0;
+                refreshData(options).catch(retryError => console.warn("Reintento manual fallido", retryError));
+            });
         }
     }
 }
