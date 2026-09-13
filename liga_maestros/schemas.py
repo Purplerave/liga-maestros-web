@@ -143,7 +143,48 @@ class LigaDataPayload(_StrictBase):
     ticket_policy: dict[str, Any] = Field(default_factory=dict)
 
 
+class LigaDataSlimPayload(_StrictBase):
+    """Schema de la variante ligera de ``/api/liga/data`` (``?slim=1``).
+
+    El poll del directo solo necesita lo que puede cambiar en 30 segundos:
+    marcadores, estado de los partidos, clasificaciones y comentarista. Todo lo
+    que depende del historico de predicciones (participantes, consenso,
+    ranking, trash talk) se queda fuera: el frontend lo conserva de la carga
+    completa anterior y solo vuelve a pedirlo cuando algo de verdad cambia.
+    """
+
+    slim: bool = True
+    jornada: int | str
+    jornada_liga: str = ""
+    max_jornada: int | str = ""
+    today_madrid: str = ""
+    is_locked: bool = False
+    ticket_guardado: bool = False
+    edit_deadline: str = ""
+    kickoff_at: str = ""
+    partidos: list[MatchPayload] = Field(default_factory=list)
+    all_league_matches: list[Any] = Field(default_factory=list)
+    live_matches: list[Any] = Field(default_factory=list)
+    standings: dict[str, Any] = Field(default_factory=dict)
+    multi_league_standings: dict[str, Any] = Field(default_factory=dict)
+    comentarista: ComentaristaPayload = Field(default_factory=ComentaristaPayload)
+
+
 # ---- Helper de validación -------------------------------------------------
+
+
+def _validate_with(model: type[BaseModel], payload: Any, label: str) -> tuple[dict[str, Any], str | None]:
+    try:
+        validated = model.model_validate(payload)
+        return validated.model_dump(exclude_none=False), None
+    except ValidationError as exc:
+        # Truncamos el detalle para no spammear logs
+        problems = exc.errors()[:5]
+        summary = "; ".join(f"{'.'.join(str(p) for p in err['loc'])}: {err['type']}" for err in problems)
+        logger.warning("payload %s no encaja con schema: %s", label, summary)
+        if isinstance(payload, dict):
+            return payload, summary
+        return {}, summary
 
 
 def validate_liga_data(payload: Any) -> tuple[dict[str, Any], str | None]:
@@ -153,14 +194,9 @@ def validate_liga_data(payload: Any) -> tuple[dict[str, Any], str | None]:
     respuesta) para que el frontend pueda seguir funcionando con un fallback.
     El error_msg es None si todo va bien.
     """
-    try:
-        validated = LigaDataPayload.model_validate(payload)
-        return validated.model_dump(exclude_none=False), None
-    except ValidationError as exc:
-        # Truncamos el detalle para no spammear logs
-        problems = exc.errors()[:5]
-        summary = "; ".join(f"{'.'.join(str(p) for p in err['loc'])}: {err['type']}" for err in problems)
-        logger.warning("liga_data payload no encaja con schema: %s", summary)
-        if isinstance(payload, dict):
-            return payload, summary
-        return {}, summary
+    return _validate_with(LigaDataPayload, payload, "liga_data")
+
+
+def validate_liga_data_slim(payload: Any) -> tuple[dict[str, Any], str | None]:
+    """Igual que :func:`validate_liga_data` para la variante ``?slim=1``."""
+    return _validate_with(LigaDataSlimPayload, payload, "liga_data_slim")

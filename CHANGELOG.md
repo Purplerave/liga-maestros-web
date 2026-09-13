@@ -2,6 +2,26 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-13 — El DIRECTO ya no pide el payload entero cada 30 segundos
+
+### Rendimiento
+
+- ⚡ **El poll del DIRECTO usa `?slim=1`.** Cada cliente refrescaba el directo
+  pidiendo `/api/liga/data` **completo** cada 30 s (45 s en ventana de jornada).
+  Medido sobre `DATOS/LIGA_MAESTROS_PRO.db`, el 60 % de ese trabajo
+  (6,5 ms de 10,8 ms) era recalcular predicciones, consenso de la Peña, pleno y
+  **ranking de maestros**: nada de eso cambia en una ventana de 30 s. Con la
+  variante ligera el poll cuesta **3,28 ms en vez de 10,19 ms (-68 % CPU)** y
+  37,7 KB en vez de 46,2 KB.
+- ⚡ **Un poll sin novedades son 0 bytes.** El endpoint ya emitía `ETag`, pero
+  el poll no lo usaba. Ahora manda `If-None-Match` y el servidor responde
+  `304`: ni un byte de payload, y en el navegador no se repinta nada.
+- 🔧 Si cambia un resultado, la clasificación o el cierre del boleto, el
+  frontend vuelve a por el payload completo (que es quien trae el ranking en
+  vivo, el consenso y las predicciones reveladas). Cada 4 polls sin novedades
+  se resincroniza en silencio, sin repintar, para que el consenso de la Peña no
+  se quede atrás. Sin `?slim=1` la respuesta es exactamente la de antes.
+
 ## 2026-09-13 — El DIRECTO deja de caerse cuando hay partidos en juego
 
 ### Corregido

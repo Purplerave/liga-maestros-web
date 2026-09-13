@@ -16,6 +16,17 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 
 - Rama principal: `main`.
 - Ultimos arreglos aplicados:
+  - En esta revision (poll ligero del DIRECTO, 2026-09-13):
+    - `/api/liga/data?slim=1` sirve solo lo volatil (marcadores, estado,
+      clasificaciones, comentarista) y deja de reconstruir predicciones,
+      consenso, ranking y trash talk: **-68 % de CPU** por poll medido sobre
+      `DATOS/LIGA_MAESTROS_PRO.db`.
+    - `validate_liga_data_slim()` protege el contrato de la variante ligera.
+    - `static/js/events.js` pide `?slim=1` con `If-None-Match`: un poll sin
+      novedades son **0 bytes** (304) y lo volatil se mezcla sobre el payload
+      completo anterior en vez de sustituirlo. Si cambia un resultado o se
+      cierra el boleto, vuelve a pedir el payload completo.
+    - Detalle y mediciones: `docs/ai/RELEVO_POLL_LIGERO_2026-09-13.md`.
   - En esta revision frontend:
     - auto-refresh de `quantum_final.js` conserva la Arena si falla una actualizacion en segundo plano.
   - En esta revision:
@@ -62,6 +73,7 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 - `DATOS/LIGA_MAESTROS_PRO.db`: SQLite base beta.
 - `schema.sql`: snapshot del esquema SQLite actual para migraciones y recuperacion.
 - `tests/test_scoring.py`: pruebas de scoring critico.
+- `tests/test_liga_data_slim.py`: contrato de la variante ligera `?slim=1`.
 - `.github/workflows/ci.yml`: checks automaticos.
 
 ## Verificacion local
