@@ -268,6 +268,43 @@ function standingsSignature(data) {
         .join("|");
 }
 
+/* El poll del directo pide la variante ligera del payload (``?slim=1``): solo
+   lo que puede cambiar en 30 s (marcadores, estado, clasificaciones,
+   comentarista). Cada ``LIVE_HEAVY_SYNC_POLLS`` polls sin cambios se hace
+   ademas una recarga silenciosa de las partes pesadas (ranking en vivo,
+   consenso de la Pena, predicciones) para que no se queden detras. */
+const LIVE_HEAVY_SYNC_POLLS = 4;
+const LIVE_VOLATILE_KEYS = [
+    "partidos",
+    "all_league_matches",
+    "live_matches",
+    "standings",
+    "multi_league_standings",
+];
+let liveSnapshotEtag = null;
+let liveSnapshotEtagJornada = "";
+let liveIdlePolls = 0;
+
+async function syncHeavyPayload(jornada) {
+    /* Refresca en silencio las partes pesadas de ``state.data``: sin repintar
+       y sin tocar lo volatil, que ya llego en el payload ligero. */
+    try {
+        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(jornada)}`, { cache: "no-store" });
+        if (!response.ok) return false;
+        const fullData = await response.json();
+        if (String(fullData.jornada || "") !== String(state.jornada || "")) return false;
+        // Se descarta lo volatil: de eso ya se encargo el payload ligero y
+        // podria ser mas reciente que esta respuesta.
+        const pesado = { ...fullData };
+        LIVE_VOLATILE_KEYS.forEach(key => delete pesado[key]);
+        state.data = { ...state.data, ...pesado };
+        return true;
+    } catch (error) {
+        console.warn("No se pudo resincronizar el ranking", error);
+        return false;
+    }
+}
+
 async function refreshLiveSnapshot() {
     /* Devuelve false cuando el refresco no llego (red, 504 del service
        worker, servidor ocupado): quien programa el siguiente poll lo hace
@@ -291,26 +328,75 @@ async function refreshLiveSnapshot() {
         const previousSignature = liveSignature(state.data);
         const previousResults = resultsSignature(state.data);
         const previousStandings = standingsSignature(state.data);
-        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
+        const jornada = String(state.jornada || "");
+        const headers = {};
+        /* Con el ETag del snapshot anterior un poll sin novedades cuesta
+           cero bytes: el servidor responde 304 y aqui no se repinta nada. */
+        if (liveSnapshotEtag && liveSnapshotEtagJornada === jornada) {
+            headers["If-None-Match"] = liveSnapshotEtag;
+        }
+        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(jornada)}&slim=1`, {
+            cache: "no-store",
+            headers
+        });
+        if (response.status === 304) return true;
         if (!response.ok) return false;
         const freshData = await response.json();
+        liveSnapshotEtag = response.headers.get("ETag") || null;
+        liveSnapshotEtagJornada = jornada;
         if (String(freshData.jornada || "") !== String(state.jornada || "")) return true;
         const nextSignature = liveSignature(freshData);
         const nextResults = resultsSignature(freshData);
         const nextStandings = standingsSignature(freshData);
-        state.data = freshData;
-        logoAliasIndex = null;
-        logoCache.clear();
         // Un partido que termina deja de ser "live": si solo mirasemos los
         // partidos en juego, el resultado final y la clasificacion nunca se
         // repintarian. Por eso tambien se comparan marcadores y clasificacion.
-        const changed = previousSignature !== nextSignature
-            || previousResults !== nextResults
-            || previousStandings !== nextStandings;
-        if (!changed) return true;
+        const resultsChanged = previousResults !== nextResults;
+        const standingsChanged = previousStandings !== nextStandings;
+        const changed = previousSignature !== nextSignature || resultsChanged || standingsChanged;
+        // Cerrar el boleto revela las predicciones de todos: tambien exige
+        // volver a por el payload completo.
+        const lockChanged = Boolean(freshData.is_locked) !== Boolean(state.data.is_locked)
+            || Boolean(freshData.ticket_guardado) !== Boolean(state.data.ticket_guardado);
+        if (freshData.slim) {
+            // El payload ligero no trae participantes, consenso ni ranking:
+            // se mezcla sobre la carga completa anterior en vez de sustituirla.
+            const volatil = { ...freshData };
+            delete volatil.slim;
+            state.data = { ...state.data, ...volatil };
+        } else {
+            // Backend sin ?slim=1 (version antigua desplegada): sigue mandando
+            // el payload completo y se comporta exactamente como antes.
+            state.data = freshData;
+        }
+        logoAliasIndex = null;
+        logoCache.clear();
+        if (!changed && !lockChanged) {
+            if (freshData.slim) {
+                // Sin novedades no se repinta nada; lo pesado se resincroniza
+                // cada varios polls para que el consenso no se quede atras.
+                liveIdlePolls += 1;
+                if (liveIdlePolls >= LIVE_HEAVY_SYNC_POLLS) {
+                    liveIdlePolls = 0;
+                    void syncHeavyPayload(jornada);
+                }
+            }
+            return true;
+        }
+        liveIdlePolls = 0;
         // La Peña se recalcula con cada resultado cerrado.
-        if (previousResults !== nextResults && typeof ensureContestData === "function") {
+        if (resultsChanged && typeof ensureContestData === "function") {
             try { await ensureContestData({ force: true }); } catch { /* no bloquea el repintado */ }
+        }
+        /* El ranking en vivo, el consenso y las predicciones dependen de los
+           resultados: cuando algo cambia de verdad se pide el payload
+           completo, que ademas repinta con el parche barato si la vista lo
+           permite. Sin ?slim=1 no hace falta: ya viene todo. */
+        if (freshData.slim && (resultsChanged || standingsChanged || lockChanged)) {
+            if (typeof refreshData === "function") {
+                refreshData({ auto: true }).catch(error => console.warn("No se pudo recargar el payload completo", error));
+            }
+            return true;
         }
         if (state.currentFilter === "LIVE" && patchLiveArena()) return true;
         if (state.currentFilter === "TICKET" && patchTicketArena()) return true;

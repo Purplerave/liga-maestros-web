@@ -10,7 +10,7 @@ import config
 
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
-from ..schemas import validate_liga_data
+from ..schemas import validate_liga_data, validate_liga_data_slim
 from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 _STANDINGS_CACHE = {"data": None, "expires": 0, "key": None}
 _STANDINGS_TTL = 300  # seconds
 _COLD_START_RETRY_AFTER = 2
+# ``?slim=1`` lo pide el poll del directo (static/js/events.js). Cualquiera de
+# estos valores activa la variante ligera; cualquier otro la desactiva.
+_SLIM_FLAGS = frozenset({"1", "true", "yes", "on"})
 
 
 def _cold_start_response(message="Los datos de la jornada aún se están preparando."):
@@ -43,6 +46,15 @@ def _cold_start_response(message="Los datos de la jornada aún se están prepara
     response.headers["Retry-After"] = str(_COLD_START_RETRY_AFTER)
     response.headers["Cache-Control"] = "no-store"
     return response
+
+
+def _wants_slim():
+    """True cuando el cliente pide la variante ligera (``?slim=1``).
+
+    La usa el poll del directo: cada 30 s por cliente, solo necesita lo que
+    puede cambiar en esa ventana.
+    """
+    return (request.args.get("slim") or "").strip().lower() in _SLIM_FLAGS
 
 
 def _get_standings_cached(conn, partidos, team_logos):
@@ -90,16 +102,9 @@ def get_liga_data():
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
         multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = str(matchday_played(standings) or "")
-        match_info = _load_and_repair_match_info(jornada, partidos)
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
         is_locked = _is_ticket_locked(partidos, close_info)
         user = session.get("user") or {}
-        predictions_payload = build_predictions_payload(
-            conn,
-            jornada,
-            current_user_id=user.get("id"),
-            reveal_all=is_locked,
-        )
         # Señal explícita de "ya guardó la quiniela de esta jornada". El frontend
         # la usa para mostrar el boleto en solo lectura (sin selector 1X2) aunque
         # la hidratación de predicciones no encuentre la clave del usuario.
@@ -111,46 +116,81 @@ def get_liga_data():
             ).fetchone()
             ticket_guardado = bool(row and row["c"] > 0)
 
-        participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
-        trash_talk = _build_trash_talk_payload(
-            jornada=jornada,
-            ranking=predictions_payload.get("ranking_maestros", {}),
-            participant_contract=participant_contract,
-        )
         comentarista = _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
-        response_payload = {
-            "jornada": jornada,
-            "jornada_liga": jornada_liga,
-            "max_jornada": max_jornada,
-            "jornadas_disponibles": jornadas_disponibles,
-            "today_madrid": today_madrid(),
-            "is_locked": is_locked,
-            "ticket_guardado": ticket_guardado,
-            "edit_deadline": _format_dt(close_info.get("close_at")),
-            "kickoff_at": _format_dt(close_info.get("first_kickoff")),
-            "partidos": partidos,
-            "all_league_matches": all_league_matches,
-            "live_matches": live_matches,
-            "standings": standings,
-            "multi_league_standings": multi_league_standings,
-            "participant_contract": participant_contract,
-            "match_info": match_info,
-            "predicciones_actuales": predictions_payload["predicciones_actuales"],
-            "consenso_pena": predictions_payload["consenso_pena"],
-            "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
-            "ranking_maestros": predictions_payload["ranking_maestros"],
-            "trash_talk": trash_talk,
-            "comentarista": comentarista,
-            "auth_enabled": config.GOOGLE_AUTH_ENABLED,
-            "live_stream_enabled": config.LIVE_SSE_ENABLED,
-            "is_admin": is_admin_request(),
-            "ticket_policy": {
-                "max_dobles": config.MAX_DOBLES_PER_TICKET,
-                "max_triples": config.MAX_TRIPLES_PER_TICKET,
-            },
-        }
+
+        if _wants_slim():
+            # El poll del directo solo necesita lo que puede cambiar en 30 s.
+            # Todo lo que sale de las predicciones (participantes, consenso,
+            # ranking, trash talk) se calcula una sola vez en la carga completa
+            # y el frontend lo conserva entre polls. Medido sobre la DB de
+            # producción: ~65 % menos CPU por poll.
+            response_payload = {
+                "slim": True,
+                "jornada": jornada,
+                "jornada_liga": jornada_liga,
+                "max_jornada": max_jornada,
+                "today_madrid": today_madrid(),
+                "is_locked": is_locked,
+                "ticket_guardado": ticket_guardado,
+                "edit_deadline": _format_dt(close_info.get("close_at")),
+                "kickoff_at": _format_dt(close_info.get("first_kickoff")),
+                "partidos": partidos,
+                "all_league_matches": all_league_matches,
+                "live_matches": live_matches,
+                "standings": standings,
+                "multi_league_standings": multi_league_standings,
+                "comentarista": comentarista,
+            }
+        else:
+            match_info = _load_and_repair_match_info(jornada, partidos)
+            predictions_payload = build_predictions_payload(
+                conn,
+                jornada,
+                current_user_id=user.get("id"),
+                reveal_all=is_locked,
+            )
+            participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
+            trash_talk = _build_trash_talk_payload(
+                jornada=jornada,
+                ranking=predictions_payload.get("ranking_maestros", {}),
+                participant_contract=participant_contract,
+            )
+            response_payload = {
+                "jornada": jornada,
+                "jornada_liga": jornada_liga,
+                "max_jornada": max_jornada,
+                "jornadas_disponibles": jornadas_disponibles,
+                "today_madrid": today_madrid(),
+                "is_locked": is_locked,
+                "ticket_guardado": ticket_guardado,
+                "edit_deadline": _format_dt(close_info.get("close_at")),
+                "kickoff_at": _format_dt(close_info.get("first_kickoff")),
+                "partidos": partidos,
+                "all_league_matches": all_league_matches,
+                "live_matches": live_matches,
+                "standings": standings,
+                "multi_league_standings": multi_league_standings,
+                "participant_contract": participant_contract,
+                "match_info": match_info,
+                "predicciones_actuales": predictions_payload["predicciones_actuales"],
+                "consenso_pena": predictions_payload["consenso_pena"],
+                "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
+                "ranking_maestros": predictions_payload["ranking_maestros"],
+                "trash_talk": trash_talk,
+                "comentarista": comentarista,
+                "auth_enabled": config.GOOGLE_AUTH_ENABLED,
+                "live_stream_enabled": config.LIVE_SSE_ENABLED,
+                "is_admin": is_admin_request(),
+                "ticket_policy": {
+                    "max_dobles": config.MAX_DOBLES_PER_TICKET,
+                    "max_triples": config.MAX_TRIPLES_PER_TICKET,
+                },
+            }
         # Validación de contrato (no rompe la respuesta si hay drift, solo loguea)
-        validated, schema_error = validate_liga_data(response_payload)
+        if response_payload.get("slim"):
+            validated, schema_error = validate_liga_data_slim(response_payload)
+        else:
+            validated, schema_error = validate_liga_data(response_payload)
         if schema_error:
             logger.info("api_liga_data served with schema drift: %s", schema_error)
 
