@@ -161,7 +161,13 @@ def compute_refresh_window(conn, jornada=None):
         elif kickoff < now <= kickoff + timedelta(hours=24):
             needs_result_catchup = True
 
-    enabled = live_now or bool(active_windows) or needs_result_catchup
+    all_finished = all(str(r["status"] or "").upper() in ("FT", "FINISHED", "TERMINADO") for r in rows)
+    if all_finished:
+        needs_result_catchup = False
+        enabled = False
+    else:
+        enabled = live_now or bool(active_windows) or needs_result_catchup
+
     if active_windows:
         current_window_start = min(item[0] for item in active_windows)
         current_window_end = max(item[1] for item in active_windows)
@@ -461,6 +467,12 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
     HIGHLIGHTLY_API_KEY = os.getenv("HIGHLIGHTLY_API_KEY", "")
     if not HIGHLIGHTLY_REFRESH_ENABLED or not HIGHLIGHTLY_API_KEY:
         return 0
+    if not force:
+        with get_db() as conn:
+            target_j = resolve_jornada(conn, jornada)
+            win = compute_refresh_window(conn, target_j)
+            if not win.get("enabled"):
+                return 0
     now = time.time()
     with _highlightly_thread_management_lock:
         if not force and now - _highlightly_last_refresh < 35:
@@ -615,6 +627,12 @@ def trigger_highlightly_refresh_async(force=False, jornada=None):
         return False
     if get_highlightly_circuit().get("open"):
         return False
+    if not force:
+        with get_db() as conn:
+            target_j = resolve_jornada(conn, jornada)
+            win = compute_refresh_window(conn, target_j)
+            if not win.get("enabled"):
+                return False
     now = time.time()
     with _highlightly_thread_management_lock:
         if not force and now - _highlightly_last_refresh < 35:
