@@ -25,7 +25,11 @@ def test_compute_refresh_window_all_finished(monkeypatch):
     app = create_app()
     with app.app_context():
         with get_db() as conn:
-            conn.execute("INSERT OR REPLACE INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora) VALUES (999, 1, 'A', 'B', 'FT', '2026-09-01', '12:00')")
-            conn.execute("INSERT OR REPLACE INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora) VALUES (999, 2, 'C', 'D', 'FT', '2026-09-01', '14:00')")
+            conn.execute(
+                "INSERT OR REPLACE INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora) VALUES (999, 1, 'A', 'B', 'FT', '2026-09-01', '12:00')"
+            )
+            conn.execute(
+                "INSERT OR REPLACE INTO resultados (jornada, partido_id, local, visitante, status, fecha, hora) VALUES (999, 2, 'C', 'D', 'FT', '2026-09-01', '14:00')"
+            )
             win = compute_refresh_window(conn, 999)
             assert win["enabled"] is False
