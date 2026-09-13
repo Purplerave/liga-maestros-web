@@ -87,6 +87,29 @@ def test_liga_data_minimal_passes():
     assert len(validated["partidos"]) == 1
 
 
+def test_liga_data_accepts_the_active_jornada_and_pleno_summary_shapes():
+    """The no-query route emits an integer jornada and an object pleno summary."""
+    s = _schemas()
+    payload = {
+        "jornada": 6,
+        "partidos": [_min_partido()],
+        "consenso_pleno_pena": {
+            "valid": 12,
+            "invalid": 0,
+            "exactCounts": {"2-1": 9},
+            "homeBuckets": {"0": 1, "1": 5, "2": 6, "M": 0},
+            "awayBuckets": {"0": 3, "1": 7, "2": 2, "M": 0},
+            "topScore": ["2-1", 9],
+        },
+    }
+
+    validated, err = s.validate_liga_data(payload)
+
+    assert err is None
+    assert validated["jornada"] == 6
+    assert validated["consenso_pleno_pena"]["topScore"] == ["2-1", 9]
+
+
 def test_liga_data_drift_is_reported_but_not_fatal():
     s = _schemas()
     # Simulamos un payload que rompe el schema: jornada falta

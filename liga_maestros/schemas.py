@@ -109,7 +109,11 @@ class LigaDataPayload(_StrictBase):
     Si en el futuro se añade un campo, basta con extender este modelo.
     """
 
-    jornada: str
+    # ``jornada`` is an integer when the route falls back to the active
+    # jornada, but a string when it comes from ``?j=``.  Both are part of the
+    # public JSON contract, so the schema must not report drift for a normal
+    # request without a query parameter.
+    jornada: int | str
     jornada_liga: str = ""
     max_jornada: int | str = ""
     jornadas_disponibles: list[int] = Field(default_factory=list)
@@ -127,7 +131,9 @@ class LigaDataPayload(_StrictBase):
     match_info: dict[str, Any] = Field(default_factory=dict)
     predicciones_actuales: dict[str, Any] = Field(default_factory=dict)
     consenso_pena: list[Any] = Field(default_factory=list)
-    consenso_pleno_pena: list[Any] = Field(default_factory=list)
+    # The pleno consensus is a summary object (valid/invalid, buckets and
+    # topScore), not the per-match list used by ``consenso_pena``.
+    consenso_pleno_pena: dict[str, Any] = Field(default_factory=dict)
     ranking_maestros: dict[str, Any] = Field(default_factory=dict)
     trash_talk: TrashTalkPayload = Field(default_factory=TrashTalkPayload)
     comentarista: ComentaristaPayload = Field(default_factory=ComentaristaPayload)

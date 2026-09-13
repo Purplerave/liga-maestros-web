@@ -90,11 +90,11 @@ desplegar, con un partido en juego:
 4. Si `MIMO_API_KEY` está activa, las frases del comentarista aparecen con hasta
    10 min de retraso (cadencia) pero **sin** frenar la página.
 
-## Cabos sueltos (no tocados en este cambio)
+## Cabos sueltos
 
-- `validate_liga_data` registra *schema drift* en cada petición
-  (`jornada: string_type; consenso_pleno_pena: list_type`): la validación no
-  aporta nada hoy y se descarta al payload original. Conviene alinear el schema.
+- **Resuelto en la revisión de Arena (2026-09-13):** `validate_liga_data` ya
+  acepta la `jornada` entera que emite la ruta sin `?j=` y el resumen objeto de
+  `consenso_pleno_pena`; el test de contrato evita que vuelva el drift.
 - `static/js/contest.js:117` tiene un `onclick` inline: con
   `script-src 'self'` ese botón «Entrar con Google» no hace nada.
 - `/api/live/ticker` sirve un `LIVE_TICKER.json` que nadie escribe en este repo
