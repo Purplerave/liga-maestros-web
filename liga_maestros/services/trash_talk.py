@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from typing import Any
 
 import config
 
@@ -24,24 +25,25 @@ _VALID_STATES = ("va_ganando", "va_perdiendo", "empate", "primera")
 _MASTER_IDS = ("programa", "claude", "grok", "chatgpt", "copilot", "gemini")
 
 
-def _load_bank():
+def _load_bank() -> dict[str, Any]:
     """Carga el banco de frases desde seed o runtime. Robusto ante fichero ausente."""
     path = os.path.join(config.SEED_DATA_DIR, "MAESTROS_TRASH_TALK.json")
     if not os.path.exists(path):
         path = os.path.join(config.DATA_DIR, "MAESTROS_TRASH_TALK.json")
     try:
         with open(path, encoding="utf-8") as fh:
-            return json.load(fh)
+            data = json.load(fh)
+            return data if isinstance(data, dict) else {"frases": {}, "replicas_pena": {}}
     except (OSError, ValueError) as exc:
         logger.warning("MAESTROS_TRASH_TALK.json no disponible: %s", exc)
         return {"frases": {}, "replicas_pena": {}}
 
 
-def _pick(lines, seed: int):
+def _pick(lines: list[str], seed: int) -> str:
     """Elige una frase del banco de forma estable por seed. Robusto ante listas vacías."""
     if not lines:
         return ""
-    return lines[seed % len(lines)]
+    return str(lines[seed % len(lines)])
 
 
 def _seed_for(jornada: str, maestro: str) -> int:
@@ -81,7 +83,7 @@ def pena_replica(bando_state: str, jornada: str) -> str:
     return _pick(lines, _seed_for(jornada, "pena-replica"))
 
 
-def build_trash_talk(jornada, bando_state):
+def build_trash_talk(jornada: Any, bando_state: str) -> dict[str, Any]:
     """Devuelve el payload completo para el frontend.
 
     Devuelve un dict con la frase de cada maestro (mismo orden que ``_MASTER_IDS``)

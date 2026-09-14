@@ -10,7 +10,7 @@ from flask import g, jsonify, request
 
 # In-memory rate limit store (per-process, good enough for single-instance deploy)
 # Lock needed: gunicorn --workers 1 --threads 8 ya es multi-thread.
-_RATE_LIMIT_STORE = defaultdict(list)
+_RATE_LIMIT_STORE: defaultdict[str, list[float]] = defaultdict(list)
 _RATE_LIMIT_LOCK = threading.Lock()
 
 

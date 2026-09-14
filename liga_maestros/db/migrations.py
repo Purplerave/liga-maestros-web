@@ -2,6 +2,7 @@
 import json
 import os
 import sqlite3
+from typing import Any
 
 import config
 
@@ -624,8 +625,8 @@ def ensure_porra_points_upgrade(conn):
     return
 
 
-J75_FALLBACK_MATCHES = []
-J76_FALLBACK_MATCHES = []
+J75_FALLBACK_MATCHES: list[Any] = []
+J76_FALLBACK_MATCHES: list[Any] = []
 
 
 def run_startup_migrations():

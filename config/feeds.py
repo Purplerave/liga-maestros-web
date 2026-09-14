@@ -2,7 +2,7 @@
 
 import os
 
-from . import DATA_DIR
+from .paths import DATA_DIR
 
 NEWS_CACHE_PATH = os.path.join(DATA_DIR, "RADAR_NOTICIAS.json")
 NEWS_REFRESH_SECONDS = int(os.getenv("NEWS_REFRESH_SECONDS", "900"))
