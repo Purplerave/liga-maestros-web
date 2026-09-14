@@ -15,6 +15,8 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 ## Estado actual
 
 - Rama principal: `main`.
+- Coordinación entre IA / Pad propio:
+  - Migrado desde ScratchThePad al pad propio servido en `https://ai-bridge.alwaysdata.net/pad/` (lectura API: `GET .../pad/api/<id>`, escritura API: `POST .../pad/api/<id>?mode=append` con cabecera `X-Pad-Key`, vistas web: `/pad/#mesa` y `/pad/read/mesa`). Detalle: `docs/ai/RELEVO_PAD_CASA_2026-09-14.md`.
 - Ultimos arreglos aplicados:
   - En esta revision (poll ligero del DIRECTO, 2026-09-13):
     - `/api/liga/data?slim=1` sirve solo lo volatil (marcadores, estado,
