@@ -6,8 +6,8 @@ from collections import Counter
 from flask import g, request
 
 # In-memory counters (per-process)
-REQUEST_COUNTER = Counter()
-REQUEST_DURATION = Counter()  # sum of durations, count gives avg
+REQUEST_COUNTER: Counter[tuple[str, str, str]] = Counter()
+REQUEST_DURATION: Counter[tuple[str, str]] = Counter()  # sum of durations, count gives avg
 HIGHLIGHTLY_USAGE = {"calls": 0, "limit": 7500, "remaining": 7500}
 
 
