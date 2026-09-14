@@ -129,11 +129,12 @@ def test_comentarios_para_web_no_llama_a_la_ia_en_la_peticion(monkeypatch):
 
     assert resultado == {"comentarios": [], "generated": False}
     assert transcurrido < 0.5, f"la petición esperó a la IA {transcurrido:.2f} s"
-    # La generación queda encargada a un hilo, no perdida.
-    deadline = time.monotonic() + 5
-    while not llamadas and time.monotonic() < deadline:
-        time.sleep(0.02)
-    assert llamadas, "el refresco en segundo plano no llegó a lanzarse"
+    # La generación queda encargada a un hilo, no perdida: join determinista
+    # en vez de polling (flaky en CI cargado).
+    hilo = comentarista._ultimo_hilo
+    assert hilo is not None, "el refresco en segundo plano no llegó a lanzarse"
+    hilo.join(timeout=10)
+    assert llamadas, "el hilo arrancó pero no llamó a la IA"
 
 
 def test_refresco_en_segundo_plano_es_single_flight(monkeypatch):
