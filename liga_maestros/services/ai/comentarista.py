@@ -254,6 +254,7 @@ def construir_comentarios(matches):
 _refresco_lock = threading.Lock()
 _refresco_en_curso = False
 _ultimo_intento = 0.0
+_ultimo_hilo: threading.Thread | None = None
 # Espera mínima entre intentos fallidos: si la IA no responde, no se relanza en
 # cada petición (el directo hace una cada 30 s por cliente).
 REINTENTO_SEGUNDOS = 60
@@ -261,15 +262,16 @@ REINTENTO_SEGUNDOS = 60
 
 def _reset_estado_refresco():
     """Deja el single-flight como al arrancar (tests)."""
-    global _refresco_en_curso, _ultimo_intento
+    global _refresco_en_curso, _ultimo_intento, _ultimo_hilo
     with _refresco_lock:
         _refresco_en_curso = False
         _ultimo_intento = 0.0
+        _ultimo_hilo = None
 
 
 def _programar_refresco(entrada, firma):
     """Encarga la generación a un hilo. True si se llegó a lanzar."""
-    global _refresco_en_curso, _ultimo_intento
+    global _refresco_en_curso, _ultimo_intento, _ultimo_hilo
     with _refresco_lock:
         if _refresco_en_curso:
             return False
@@ -289,7 +291,9 @@ def _programar_refresco(entrada, firma):
             with _refresco_lock:
                 _refresco_en_curso = False
 
-    threading.Thread(target=_trabajo, name="comentarista-ia", daemon=True).start()
+    hilo = threading.Thread(target=_trabajo, name="comentarista-ia", daemon=True)
+    hilo.start()
+    _ultimo_hilo = hilo
     return True
 
 
