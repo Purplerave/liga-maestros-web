@@ -8,14 +8,16 @@
 const CACHE = 'liga-maestros-v13';
 const STATIC_CACHE = 'liga-maestros-static-v13';
 
-/* Tope de espera para la API. Era de 4000 ms y eso rompía el DIRECTO: en
-   producción /api/liga/data tarda ~1,3 s de media con picos por encima de 4 s
-   (reconstrucción de clasificaciones, arranque en frío, llamada a la IA) y
-   /api/noticias/radar se iba a 4,3 s. Al superar el tope, el SW inventaba un
-   503 {"status":"error"} con el servidor perfectamente vivo: la portada
-   pintaba «No se pudo cargar la Arena» y los refrescos del directo se
-   descartaban en silencio. 30 s es una red de seguridad contra cuelgues
-   reales, no un filtro de rendimiento. */
+/* Tope de espera para la API. Era de 4000 ms, y con ese tope cualquier
+   respuesta por encima de 4 s se convertía en un 503 inventado con el servidor
+   vivo: en producción /api/liga/data medía 1,31 s de media y /api/noticias/radar
+   4,28 s (/metrics, 13/09 con la J6 en juego).
+
+   Ese código no llegó a morder porque este SW se registra en /static/sw.js y su
+   scope es /static/: ni '/' ni '/api/*' pasan por aquí (ver la nota de
+   docs/ai/RELEVO_DIRECTO_2026-09-13.md). Se deja arreglado igualmente —30 s es
+   una red de seguridad contra cuelgues reales, no un filtro de rendimiento—
+   porque en cuanto alguien amplíe el scope a '/' volvería a romper el directo. */
 const API_TIMEOUT_MS = 30000;
 
 const PRECACHE_URLS = [

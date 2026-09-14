@@ -57,46 +57,51 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 
 ### Corregido
 
-- 🔴 **El service worker cortaba a los 4 segundos cualquier respuesta de la API
-  y se inventaba un 503.** Medido en producción a las 14:47 (J6, Celta - Málaga
-  en juego) vía `/metrics`: `/api/liga/data` costaba **1,31 s de media**
-  (3 peticiones, 3,94 s acumulados) y `/api/noticias/radar` **4,28 s** en una
-  sola petición. Al pasar de 4 s, el SW devolvía
-  `503 {"status":"error","message":"Offline"}` con el servidor perfectamente
-  vivo: la portada pintaba «No se pudo cargar la Arena (HTTP 503)» y cada
-  refresco del directo se descartaba en silencio (`if (!response.ok) return`),
-  así que el marcador y el minuto se quedaban congelados justo cuando había
-  fútbol. Ahora el tope es una red de seguridad de **30 s** y la respuesta
-  sintética se marca como reintentable (`504` + `status: network_error`), que
-  ya no se confunde con el `cold_start` del backend.
-- 🔴 **El reintento de la carga inicial solo cubría el `cold_start`.** El 503
-  sintético del SW no se reintentaba nunca y la página se quedaba muerta hasta
-  recargar a mano (por eso «seguía sin funcionar» después del arreglo del
-  12/09). `fetchLigaDataWithRetry` reintenta ahora cualquier 503/504
-  reintentable **y** los cortes de red (3 intentos, espera creciente, honrando
-  `Retry-After`), y si aun así falla la carga se reintenta sola hasta 4 veces
-  con un botón «Reintentar ahora» cableado por evento (la CSP es
-  `script-src 'self'`: un `onclick` inline no se ejecuta).
-- 🔴 **El comentarista (MiMo) llamaba a la IA dentro de la petición.**
+- 🔴 **El comentarista (MiMo) llamaba a la IA dentro del ciclo de petición.**
   `/api/liga/data` se quedaba esperando hasta `AI_TIMEOUT_SECONDS` (10 s) por
-  proveedor, con 2 reintentos y 3 proveedores: el peor caso eran minutos de
+  proveedor, con 2 reintentos y 3 proveedores: el peor caso era un minuto de
   petición bloqueada, y solo ocurría **con partidos en juego**, que es cuando
-  dispara el comentarista. La web usa ahora `comentarios_para_web()`, que sirve
-  lo que haya en caché al instante y encarga la generación a un hilo
-  (single-flight, con la misma cadencia y cuota). `construir_comentarios()`
+  dispara el comentarista (`/api/ai/status` confirma `enabled: true` en
+  producción). Con la web preguntando cada 30 s por cliente, esas peticiones se
+  apilaban y se comían los workers. Ahora la ruta usa `comentarios_para_web()`,
+  que sirve lo que haya en caché al instante y encarga la generación a un hilo
+  *single-flight* (misma cadencia de 10 min y misma cuota). `construir_comentarios()`
   sigue ahí para el colector, los scripts y los tests.
+- 🔴 **El frontend no reintentaba nada que no fuera `cold_start`.** El arreglo
+  del 12/09 solo cubría `status === "cold_start"`: cualquier otra respuesta
+  lenta o fallida dejaba la portada clavada en «No se pudo cargar la Arena»
+  hasta recargar a mano (por eso «seguía sin funcionar» con el PR #116 ya
+  desplegado), y `refreshLiveSnapshot` descartaba el fallo en silencio
+  (`if (!response.ok) return`) y esperaba 30 s al ciclo siguiente.
+  `fetchLigaDataWithRetry` reintenta ahora cualquier 503/504 reintentable **y**
+  los cortes de red (3 intentos, espera creciente, honrando `Retry-After`), la
+  carga inicial se reintenta sola hasta 4 veces y ofrece un botón «Reintentar
+  ahora» cableado por evento (la CSP es `script-src 'self'`: un `onclick`
+  inline no se ejecuta).
 - ⚡ **`/api/liga/data` es ~4× más rápido** (perfil local con el payload real de
   producción, 126 KB: **110 ms → 26 ms**; por HTTP, 28 ms). Dos culpables:
   `load_team_logos()` volvía a parsear ~100 KB de JSON y a canonicalizar ~600
   nombres **en cada petición** (45 % del tiempo) y `clean_team_key()` se
   invocaba 8.770 veces por petición con 6 `re.sub` cada una (52 %). Los escudos
   se cachean por `mtime_ns` + tamaño del fichero (un scrape nuevo entra sin
-  reiniciar) y la limpieza de nombres va memoizada. En Alwaysdata esto es pasar
-  de ~1,3 s a ~0,3 s, lejos de cualquier tope.
+  reiniciar) y la limpieza de nombres va memoizada. En producción el endpoint
+  medía **1,31 s de media** (`/metrics`, 3 peticiones / 3,94 s) con la J6 en
+  juego, así que cada refresco del directo costaba más que el propio poll.
 - **Un refresco fallido del directo ya no cuesta 30 segundos.** `refreshLiveSnapshot`
   informa de si llegó o no y el poll siguiente se programa a los 6 s cuando
   falla, en vez de esperar al ciclo normal: un gol no llega con medio minuto de
   retraso porque una petición se perdiera.
+- ⚠️ **La guillotina de 4 s del service worker estaba armada, pero inactiva.**
+  `static/sw.js` cortaba todo `/api/` GET a los 4000 ms y fabricaba
+  `503 {"status":"error","message":"Offline"}` con el servidor vivo —y
+  `/api/noticias/radar` medía **4,28 s**, por encima del tope—. No llegó a
+  morder porque el SW se registra en `/static/sw.js`, así que su *scope* es
+  `/static/` y ni `/` ni `/api/*` pasan por él (antes del PR #116 ni siquiera se
+  registraba: el `<script>` inline lo bloqueaba la CSP). Se corrige igualmente
+  (tope de **30 s** y respuesta sintética reintentable, `504` +
+  `status: network_error`, que ya no se confunde con el `cold_start` del
+  backend) porque en cuanto alguien amplíe el *scope* a `/` volvería a romper el
+  directo. Cachés `v12` → `v13` para que los clientes descarguen el SW nuevo.
 
 ### Verificado (sin cambios, quedan como estaban)
 
@@ -106,10 +111,29 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 - El colector y el scrape de quiniela15 funcionan: a las 14:47 la caché
   `quiniela15_directo_J6.json` tenía 15/15 partidos y el panel externo servía
   el Celta - Málaga (45') y el Sporting - Eldense (descanso) en `live_matches`.
-- `/metrics`: 330 llamadas Highlightly de 7.500 (4 %).
+- `/api/ai/status`: `enabled: true` en producción → el comentarista sí llamaba a
+  la IA dentro de la petición (era el caso peor, no una sospecha).
+- `/metrics`: 330 llamadas Highlightly de 7.500 (4 %) a las 14:47; 608 tras el
+  despliegue.
+
+### Desplegado
+
+PR #117 → `main` (`73f6998`) a las 15:22, workflow **Deploy Alwaysdata** en
+verde (1 m 24 s). Comprobado en producción: `/api/live/health` con
+`build_sha 73f6998…` y `/static/sw.js` sirviendo ya `liga-maestros-v13` con
+`API_TIMEOUT_MS = 30000`.
 
 ### Nota
 
+- ⚠️ **El service worker está registrado con *scope* `/static/`.** Se registra en
+  `/static/sw.js` sin opción `scope`, así que no controla `/` ni `/api/*`: ni la
+  estrategia offline del HTML ni el tope de la API llegan a ejecutarse. Antes
+  del PR #116 ni siquiera se registraba (el `<script>` inline lo bloqueaba la
+  CSP), así que nunca hubo un SW zombie en `/`. Para activarlo de verdad hace
+  falta `navigator.serviceWorker.register(swUrl, { scope: '/' })` **y** la
+  cabecera `Service-Worker-Allowed: /` en la respuesta de `/static/sw.js`.
+  Pendiente de decisión: da offline real, pero mete al SW en el camino de todas
+  las peticiones de la app.
 - `static/js/*.HASH.js` (los gemelos con hash de `build.py`) siguen desincronizados
   de sus fuentes, pero las plantillas cargan los ficheros sin hash con
   `?v=<mtime>`, así que no afectan al despliegue. `build.py` regenera ambos.
