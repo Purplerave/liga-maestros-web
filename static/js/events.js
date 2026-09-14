@@ -417,11 +417,27 @@ async function refreshLiveSnapshot() {
 }
 
 
+/* La paleta de comandos y las señales UX llegan con `late_assets.js`
+   (Frente 2: fuera del camino critico). Hasta que ese modulo carga,
+   `window.CommandPalette` y `window.UXSignals` no existen, asi que el inicio
+   se intenta dos veces como maximo: aqui (por si el navegador ya los tenia en
+   cache) y cuando el cargador avisa con `liga:late-ready`. Nunca bloquea el
+   arranque de la portada. */
+let shellExtrasReady = false;
+function initShellExtras() {
+    if (shellExtrasReady) return true;
+    if (!window.CommandPalette && !window.UXSignals) return false;
+    try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
+    try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
+    shellExtrasReady = true;
+    return true;
+}
+document.addEventListener("liga:late-ready", () => initShellExtras());
+
 document.addEventListener("DOMContentLoaded", async () => {
     bindEvents();
     initMicroInteractions();
-    try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
-    try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
+    initShellExtras();
     await refreshData();
     startLiveUpdates();
     showWelcomeOnboarding();

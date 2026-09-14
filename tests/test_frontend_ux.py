@@ -20,12 +20,21 @@ SW = ROOT / "static" / "sw.js"
 COMMAND_PALETTE_CSS = ROOT / "static" / "css" / "components" / "command_palette.css"
 MATCH_CARDS_CSS = ROOT / "static" / "css" / "components" / "match_cards.css"
 QUANTUM_JS = ROOT / "static" / "js" / "quantum_final.js"
+LATE_ASSETS = ROOT / "static" / "js" / "late_assets.js"
 
 INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)(?![^>]*type\s*=\s*\"application/ld\+json\")[^>]*>", re.IGNORECASE)
 
 NEW_ASSETS = (
     "static/css/components/command_palette.css",
     "static/css/components/ux_signals.css",
+    "static/js/command_palette.js",
+    "static/js/ux_signals.js",
+    "static/js/sw_register.js",
+)
+
+# Frente 2 (2026-09-14): estos tres no pintan la portada, asi que el shell los
+# carga con late_assets.js en vez de servirlos como etiquetas bloqueantes.
+LATE_WIRED_ASSETS = (
     "static/js/command_palette.js",
     "static/js/ux_signals.js",
     "static/js/sw_register.js",
@@ -49,8 +58,15 @@ def test_new_frontend_assets_exist():
 
 def test_shell_wires_command_palette_and_ux_signals():
     template = TEMPLATE.read_text(encoding="utf-8")
+    late = LATE_ASSETS.read_text(encoding="utf-8")
     for asset in NEW_ASSETS:
-        assert f"filename='{asset.removeprefix('static/')}'" in template, f"{asset} not referenced in shell"
+        if asset in LATE_WIRED_ASSETS:
+            # Fuera del camino critico de la portada (Frente 2): el shell los
+            # sirve a traves de late_assets.js, no como etiqueta en el HTML.
+            assert f'"/{asset}"' in late, f"{asset} not declared in late_assets.js"
+        else:
+            assert f"filename='{asset.removeprefix('static/')}'" in template, f"{asset} not referenced in shell"
+    assert "filename='js/late_assets.js'" in template, "the late loader is not wired in the shell"
     assert 'id="cmdk-trigger"' in template, "the palette needs a visible, discoverable trigger"
 
 

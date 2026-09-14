@@ -2,6 +2,37 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-14 — La PORTADA descarga menos antes de pintar (Frente 2)
+
+### Rendimiento
+
+- ⚡ **Nueve módulos salen del camino crítico.** `analytics`, `sound_manager`,
+  `confetti`, `ticket_image`, `post_jornada`, `onboarding`, `command_palette`,
+  `ux_signals` y `sw_register` ya no van como etiquetas en el HTML: los carga el
+  nuevo `static/js/late_assets.js` cuando el hilo principal está libre
+  (`requestIdleCallback`, tope 3 s), al terminar la carga o **en cuanto el
+  usuario interactúa**. Descargas en paralelo, ejecución en orden y aviso
+  final con el evento `liga:late-ready` para que `events.js` inicialice la
+  paleta de comandos y las señales UX cuando lleguen.
+- ⚡ **Google Fonts deja de bloquear el primer pintado.** Pasa a
+  `<link rel="preload" as="style">` y se promociona a hoja de estilo desde
+  `late_assets.js`. Se conserva un `<noscript>` con la hoja original para
+  navegadores sin JS.
+- ⚡ **`onboarding.css` y `components/post_jornada.css`** también se cargan
+  fuera del camino crítico: ninguna de las dos pinta el primer pantallazo.
+- 🔧 **`tokens.css` ya no se descarga dos veces**: la precarga apuntaba a
+  `v=…-tokens-2` y la hoja a `v=…-tokens-3`, así que el navegador la pedía dos
+  veces. Misma versión en las dos. Eliminado además el `preconnect` repetido a
+  `fonts.gstatic.com`.
+- 📉 **Medido en local** (misma DB, jornada abierta): de 27 a **24** hojas
+  bloqueantes, de 17 a **9** scripts en el shell, de 1 a **0** hojas de
+  terceros bloqueantes y el camino crítico baja de **108,9 KB gzip a 87,8 KB
+  (-19 %)**, con ~9 peticiones menos antes del primer pintado.
+- 🧪 Presupuesto fijado en `tests/test_portada_critical_path.py` (hojas ≤ 25,
+  fuentes no bloqueantes, `tokens.css` con una sola versión y los módulos
+  diferidos declarados en `late_assets.js`, no en el shell). Detalle del frente
+  y siguientes pasos en `docs/ai/RELEVO_FRENTE2_PORTADA_2026-09-14.md`.
+
 ## 2026-09-13 — El DIRECTO ya no pide el payload entero cada 30 segundos
 
 ### Rendimiento
