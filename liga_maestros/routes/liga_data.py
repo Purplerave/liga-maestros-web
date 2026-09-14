@@ -10,7 +10,7 @@ import config
 
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
-from ..schemas import validate_liga_data, validate_liga_data_slim
+from ..schemas import validate_liga_data, validate_liga_data_first, validate_liga_data_slim
 from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
@@ -55,6 +55,15 @@ def _wants_slim():
     puede cambiar en esa ventana.
     """
     return (request.args.get("slim") or "").strip().lower() in _SLIM_FLAGS
+
+
+def _wants_first():
+    """True cuando el cliente pide la primera pintura (``?first=1``).
+
+    Solo lo mínimo para firmar la quiniela; el resto llega después con
+    la carga completa. Pensado para el móvil.
+    """
+    return (request.args.get("first") or "").strip().lower() in _SLIM_FLAGS
 
 
 def _get_standings_cached(conn, partidos, team_logos):
@@ -118,7 +127,25 @@ def get_liga_data():
 
         comentarista = _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
 
-        if _wants_slim():
+        if _wants_first():
+            # Primera pintura: solo lo necesario para firmar. Sin predicciones,
+            # ranking, trash talk, standings ni comentarista.
+            response_payload = {
+                "first": True,
+                "jornada": jornada,
+                "max_jornada": max_jornada,
+                "today_madrid": today_madrid(),
+                "is_locked": is_locked,
+                "ticket_guardado": ticket_guardado,
+                "edit_deadline": _format_dt(close_info.get("close_at")),
+                "kickoff_at": _format_dt(close_info.get("first_kickoff")),
+                "partidos": partidos,
+                "ticket_policy": {
+                    "max_dobles": config.MAX_DOBLES_PER_TICKET,
+                    "max_triples": config.MAX_TRIPLES_PER_TICKET,
+                },
+            }
+        elif _wants_slim():
             # El poll del directo solo necesita lo que puede cambiar en 30 s.
             # Todo lo que sale de las predicciones (participantes, consenso,
             # ranking, trash talk) se calcula una sola vez en la carga completa
@@ -187,7 +214,9 @@ def get_liga_data():
                 },
             }
         # Validación de contrato (no rompe la respuesta si hay drift, solo loguea)
-        if response_payload.get("slim"):
+        if response_payload.get("first"):
+            validated, schema_error = validate_liga_data_first(response_payload)
+        elif response_payload.get("slim"):
             validated, schema_error = validate_liga_data_slim(response_payload)
         else:
             validated, schema_error = validate_liga_data(response_payload)
