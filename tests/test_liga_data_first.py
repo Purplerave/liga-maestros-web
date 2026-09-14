@@ -14,8 +14,6 @@ from __future__ import annotations
 
 from test_liga_data_slim import _seed_open_jornada, _spy, _test_app
 
-from liga_maestros.routes import liga_data
-
 FIRST_KEYS = {
     "first",
     "jornada",
