@@ -170,6 +170,25 @@ class LigaDataSlimPayload(_StrictBase):
     comentarista: ComentaristaPayload = Field(default_factory=ComentaristaPayload)
 
 
+class LigaDataFirstPayload(_StrictBase):
+    """Schema de la primera pintura (``?first=1``): lo mínimo para firmar.
+
+    Sin predicciones, ranking, trash talk, standings ni comentarista: eso
+    llega después con la carga completa. Pensado para el móvil.
+    """
+
+    first: bool = True
+    jornada: int | str
+    max_jornada: int | str = ""
+    today_madrid: str = ""
+    is_locked: bool = False
+    ticket_guardado: bool = False
+    edit_deadline: str = ""
+    kickoff_at: str = ""
+    partidos: list[MatchPayload] = Field(default_factory=list)
+    ticket_policy: dict[str, Any] = Field(default_factory=dict)
+
+
 # ---- Helper de validación -------------------------------------------------
 
 
@@ -200,3 +219,8 @@ def validate_liga_data(payload: Any) -> tuple[dict[str, Any], str | None]:
 def validate_liga_data_slim(payload: Any) -> tuple[dict[str, Any], str | None]:
     """Igual que :func:`validate_liga_data` para la variante ``?slim=1``."""
     return _validate_with(LigaDataSlimPayload, payload, "liga_data_slim")
+
+
+def validate_liga_data_first(payload: Any) -> tuple[dict[str, Any], str | None]:
+    """Igual que :func:`validate_liga_data` para la variante ``?first=1``."""
+    return _validate_with(LigaDataFirstPayload, payload, "liga_data_first")
