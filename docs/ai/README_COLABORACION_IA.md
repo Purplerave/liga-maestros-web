@@ -18,6 +18,27 @@ Este archivo es el punto de entrada para que otra IA revise el repo publico y pr
 - Coordinación entre IA / Pad propio:
   - Migrado desde ScratchThePad al pad propio servido en `https://ai-bridge.alwaysdata.net/pad/` (lectura API: `GET .../pad/api/<id>`, escritura API: `POST .../pad/api/<id>?mode=append` con cabecera `X-Pad-Key`, vistas web: `/pad/#mesa` y `/pad/read/mesa`). Detalle: `docs/ai/RELEVO_PAD_CASA_2026-09-14.md`.
 - Ultimos arreglos aplicados:
+  - En esta revision (coordinacion de pad, 2026-09-14):
+    - Merge de #125 (rama de Jules): paths de config extraidos a `config/paths.py`
+      (cero importaciones circulares) y anotaciones tipadas; `mypy liga_maestros`
+      pasa con 0 errores (74 archivos). Verificado en local antes del merge:
+      `pytest -q` y `ruff check .` en verde.
+    - El contenido de #118 (correccion documental del DIRECTO: el SW nunca
+      intercepto la API por su scope `/static/`) entro por #126 via tres-way
+      merge contra el base del PR, porque la rama de #118 era huorfana (ver
+      trampa abajo). #118 cerrado como superseded.
+  - **Trampa: ramas previas al purga del historial son "unrelated histories".**
+    Las ramas creadas antes de la limpieza de historial de main (p. ej. las de
+    #114/#118) no tienen ancestro comun con `main` actual: `git rebase` y el
+    merge directo fallan aunque GitHub muestre el diff del PR con normalidad
+    (#118 quedaba CONFLICTING por eso, no por cambios en conflicto).
+    Procedimiento que funciona (usado en #126):
+    1. `gh pr diff <n>` para el diff neto (solo toca los archivos del PR).
+    2. Base real: `gh api repos/Purplerave/liga-maestros-web/pulls/<n> --jq .base.sha`.
+    3. Tres-way merge por archivo: `git merge-file <nuestro> <de-la-base> <de-la-cabecera>`
+       y resolver los conflictos puntuales conservando los hechos nuevos de main.
+    4. Mergear ese resultado desde la rama propia y cerrar el PR antiguo
+       como superseded con explicacion.
   - En esta revision (poll ligero del DIRECTO, 2026-09-13):
     - `/api/liga/data?slim=1` sirve solo lo volatil (marcadores, estado,
       clasificaciones, comentarista) y deja de reconstruir predicciones,
