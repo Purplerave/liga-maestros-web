@@ -44,9 +44,13 @@
     <link rel="manifest" href="{{ url_for('main.static_files', filename='manifest.webmanifest', v=assets_v) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-2') }}">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    {# Frente 2: las fuentes de Google NO bloquean el primer pintado. Van como
+       `preload` y `late_assets.js` las promociona a hoja de estilo cuando el
+       HTML ya esta parseado. Sin JS las sirve el <noscript> de abajo. #}
+    <link rel="preload" as="style" id="lm-webfonts" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+    {# La precarga y la hoja de estilo deben compartir version: con `v` distinto
+       el navegador descargaba tokens.css dos veces. #}
+    <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
     <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
@@ -67,13 +71,14 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-2') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/post_jornada.css', v=assets_v ~ '-pj-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/match_cards.css', v=assets_v ~ '-match-cards-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_responsive.css', v=assets_v ~ '-mobile-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/onboarding.css', v=assets_v ~ '-onboarding-1') }}">
+    {# onboarding.css y components/post_jornada.css salen del camino critico:
+       los carga late_assets.js cuando el hilo principal esta libre. #}
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_enhancements.css', v=assets_v ~ '-visual-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_v2.css', v=assets_v ~ '-mobile-v2-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/command_center.css', v=assets_v ~ '-command-center-1') }}">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
     <a href="#matches-body" class="skip-link">Saltar al contenido principal</a>
@@ -157,7 +162,6 @@
     </div>
     <div id="toast-container"></div>
     <script defer src="{{ url_for('main.static_files', filename='js/utils.js', v=assets_v ~ '-utils-11') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/analytics.js', v=assets_v ~ '-analytics-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/state.js', v=assets_v ~ '-state-12') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/logos.js', v=assets_v ~ '-logos-1') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/navigation.js', v=assets_v ~ '-navigation-14') }}"></script>
@@ -165,14 +169,12 @@
     <script defer src="{{ url_for('main.static_files', filename='js/arena.js', v=assets_v ~ '-arena-14') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-15') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-44') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/confetti.js', v=assets_v ~ '-confetti-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/ticket_image.js', v=assets_v ~ '-ticket-image-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/sound_manager.js', v=assets_v ~ '-sound-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/command_palette.js', v=assets_v ~ '-cmdk-4') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/ux_signals.js', v=assets_v ~ '-ux-signals-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/post_jornada.js', v=assets_v ~ '-pj-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/onboarding.js', v=assets_v ~ '-onboarding-1') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/sw_register.js', v=assets_v ~ '-sw-register-2') }}"
+    {# Frente 2: analytics, confeti, imagen del boleto, sonidos, paleta de
+       comandos, señales UX, post-jornada, onboarding y service worker NO van
+       en el camino critico. Los carga late_assets.js en cuanto el hilo
+       principal esta libre o el usuario interactua, y avisa con
+       `liga:late-ready`. #}
+    <script defer src="{{ url_for('main.static_files', filename='js/late_assets.js', v=assets_v ~ '-late-assets-1') }}"
             data-sw-url="{{ url_for('main.static_files', filename='sw.js', v=assets_v) }}"></script>
 </body>
 </html>
