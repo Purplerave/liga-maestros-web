@@ -1,0 +1,130 @@
+{
+  "jornada": 7,
+  "source_url": "https://www.quiniela15.com/pronostico-quiniela",
+  "scraped_at": "2026-09-15T10:00:00",
+  "cierre": "martes 15 de septiembre a las 19:00",
+  "temporada": "2026-2027",
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Rayo Vallecano (M)",
+      "visitante": "Espanyol (M)",
+      "fecha": "2026-09-15",
+      "hora": "19:00",
+      "division": "primera"
+    },
+    {
+      "num": 2,
+      "local": "Alavés (M)",
+      "visitante": "Valencia (M)",
+      "fecha": "2026-09-15",
+      "hora": "20:00",
+      "division": "primera"
+    },
+    {
+      "num": 3,
+      "local": "Elche (M)",
+      "visitante": "Real Madrid (M)",
+      "fecha": "2026-09-15",
+      "hora": "21:30",
+      "division": "primera"
+    },
+    {
+      "num": 4,
+      "local": "At. Madrid (M)",
+      "visitante": "Osasuna (M)",
+      "fecha": "2026-09-16",
+      "hora": "19:00",
+      "division": "primera"
+    },
+    {
+      "num": 5,
+      "local": "Deportivo (M)",
+      "visitante": "Sevilla (M)",
+      "fecha": "2026-09-16",
+      "hora": "19:00",
+      "division": "primera"
+    },
+    {
+      "num": 6,
+      "local": "Barcelona (M)",
+      "visitante": "Racing de Santander (M)",
+      "fecha": "2026-09-16",
+      "hora": "21:30",
+      "division": "primera"
+    },
+    {
+      "num": 7,
+      "local": "Levante (M)",
+      "visitante": "Athletic Club (M)",
+      "fecha": "2026-09-16",
+      "hora": "21:30",
+      "division": "primera"
+    },
+    {
+      "num": 8,
+      "local": "Betis (M)",
+      "visitante": "Getafe (M)",
+      "fecha": "2026-09-17",
+      "hora": "19:00",
+      "division": "primera"
+    },
+    {
+      "num": 9,
+      "local": "Omonia Nicosia (M)",
+      "visitante": "Celta (M)",
+      "fecha": "2026-09-16",
+      "hora": "18:45",
+      "division": "europa"
+    },
+    {
+      "num": 10,
+      "local": "Milan (M)",
+      "visitante": "Benfica (M)",
+      "fecha": "2026-09-16",
+      "hora": "21:00",
+      "division": "europa"
+    },
+    {
+      "num": 11,
+      "local": "Anderlecht (M)",
+      "visitante": "Lyon (M)",
+      "fecha": "2026-09-16",
+      "hora": "21:00",
+      "division": "europa"
+    },
+    {
+      "num": 12,
+      "local": "Celtic (M)",
+      "visitante": "Ferencváros (M)",
+      "fecha": "2026-09-17",
+      "hora": "21:00",
+      "division": "europa"
+    },
+    {
+      "num": 13,
+      "local": "Viktoria Plzen (M)",
+      "visitante": "Union St. Gilloise (M)",
+      "fecha": "2026-09-17",
+      "hora": "21:00",
+      "division": "europa"
+    },
+    {
+      "num": 14,
+      "local": "Real Sociedad (M)",
+      "visitante": "Bournemouth (M)",
+      "fecha": "2026-09-17",
+      "hora": "21:00",
+      "division": "europa"
+    },
+    {
+      "num": 15,
+      "local": "Málaga (M)",
+      "visitante": "Villarreal (M)",
+      "fecha": "2026-09-17",
+      "hora": "21:30",
+      "division": "primera",
+      "pleno_al_15": true
+    }
+  ]
+}
