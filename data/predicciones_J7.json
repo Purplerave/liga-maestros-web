@@ -3,6 +3,10 @@
   "temporada": "2026-2027",
   "created_at": "2026-09-15",
   "fuente": "Entrega chat: columnas de IAs y La Peña J7 (cierre 15/09/2026 19:00)",
+  "programa": {
+    "nombre": "PROGRAMA",
+    "signos": ["X2", "1", "2", "1", "1X", "1", "2", "1", "2", "1", "2", "1", "1", "1X", "2-1"]
+  },
   "gemini": {
     "nombre": "GEMINI",
     "signos": ["1", "1", "2", "1", "1X", "1", "2", "1", "2", "1X", "2", "1", "X", "1X", "1-2"]
