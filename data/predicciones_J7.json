@@ -1,0 +1,79 @@
+{
+  "jornada": 7,
+  "temporada": "2026-2027",
+  "created_at": "2026-09-15",
+  "fuente": "Entrega chat: columnas de IAs y La Peña J7 (cierre 15/09/2026 19:00)",
+  "gemini": {
+    "nombre": "GEMINI",
+    "signos": ["1", "1", "2", "1", "1X", "1", "2", "1", "2", "1X", "2", "1", "X", "1X", "1-2"]
+  },
+  "chatgpt": {
+    "nombre": "CHATGPT",
+    "signos": ["X2", "1", "2", "1", "X2", "1", "2", "1", "X2", "X", "2", "1", "2", "1", "1-3"]
+  },
+  "copilot": {
+    "nombre": "COPILOT",
+    "signos": ["1", "1X", "2", "1", "1X", "1", "2", "1", "2", "1", "1X", "1", "1", "1", "2-1"]
+  },
+  "grok": {
+    "nombre": "GROK",
+    "signos": ["1X", "1", "2", "1", "X", "1", "X2", "1", "2", "1X", "2", "1", "X", "1", "0-1"]
+  },
+  "claude": {
+    "nombre": "CLAUDE",
+    "signos": ["1X", "1", "2", "1", "1X", "1", "2", "1", "2", "1X", "2", "1", "1", "1", "1-2"]
+  },
+  "chipi": {
+    "nombre": "CHIPI (DEEPSEEK)",
+    "fuente_ia": "deepseek",
+    "signos": ["1", "1", "2", "1", "1X", "1", "X2", "1", "X2", "1X", "2", "1", "1X", "2", "1-2"]
+  },
+  "geli": {
+    "nombre": "GELI (GLM5)",
+    "fuente_ia": "glm5",
+    "signos": ["1", "1", "2", "1", "X2", "1", "2", "1X", "2", "1", "2", "1", "2", "X2", "0-2"]
+  },
+  "pepe": {
+    "nombre": "PEPE (PERPLEXITY)",
+    "fuente_ia": "perplexity",
+    "signos": ["1", "1", "2", "1", "1X", "1", "X2", "1", "2", "1X", "X", "1", "2", "X", "1-1"]
+  },
+  "profe": {
+    "nombre": "PROFE (META)",
+    "fuente_ia": "meta",
+    "signos": ["X2", "1", "2", "1", "1X", "1", "2", "1", "2", "1", "2", "1", "1", "1X", "2-1"]
+  },
+  "oraculo": {
+    "nombre": "ORACULO (QWEN)",
+    "fuente_ia": "qwen",
+    "signos": ["1", "1X", "2", "1", "X2", "1", "2", "1", "2", "1X", "2", "1", "1", "1", "1-2"]
+  },
+  "fortu": {
+    "nombre": "FORTU (MISTRAL)",
+    "fuente_ia": "mistral",
+    "signos": ["X", "1", "2", "1", "X2", "1", "2", "1", "2", "1X", "2", "1", "1X", "1", "0-2"]
+  },
+  "erniebot": {
+    "nombre": "ERNIEBOT (BAIDU)",
+    "fuente_ia": "baidu",
+    "signos": ["1", "X2", "2", "1", "X2", "1", "1", "X", "X2", "1", "1", "1", "1", "1", "1-2"]
+  },
+  "fistro": {
+    "nombre": "FISTRO (MANUS AI)",
+    "fuente_ia": "manus",
+    "signos": ["X2", "1", "2", "1", "1X", "1", "2", "1", "X", "X2", "2", "1", "X", "X", "1-2"]
+  },
+  "luzia": {
+    "nombre": "LUZIA",
+    "signos": ["1X", "1", "2", "1", "X2", "1", "2", "1", "2", "1", "X", "1", "1", "1X", "M-1"]
+  },
+  "arena": {
+    "nombre": "ARENA",
+    "signos": ["1X", "1", "2", "1", "1X", "1", "2", "1", "X", "1", "2", "1", "2", "1", "0-1"]
+  },
+  "jimmy": {
+    "nombre": "JIMMY",
+    "fuente_ia": "chatjimmy",
+    "signos": ["1", "X", "2", "1", "X", "1", "X", "1", "2", "1", "2", "1", "2", "1", "1-1"]
+  }
+}
