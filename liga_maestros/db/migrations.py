@@ -17,6 +17,9 @@ def ensure_core_tables(conn):
             id TEXT PRIMARY KEY, nombre TEXT, email TEXT,
             puntos_acumulados INTEGER DEFAULT 0, notificaciones INTEGER DEFAULT 1, peso REAL DEFAULT 1.0
         );
+        INSERT INTO usuarios (id, nombre, email, puntos_acumulados, notificaciones, peso)
+        VALUES ('programa', 'Programa', NULL, 0, 1, 1.0)
+        ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre;
         CREATE TABLE IF NOT EXISTS resultados (
             jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT,
             goles_local INTEGER, goles_visitante INTEGER, status TEXT, fecha DATE, hora TEXT,
