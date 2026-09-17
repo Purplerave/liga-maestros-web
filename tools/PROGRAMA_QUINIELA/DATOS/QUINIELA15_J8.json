@@ -1,0 +1,21 @@
+{
+  "jornada": 8,
+  "temporada": "2026-2027",
+  "partidos": [
+    {"num": 1, "local": "Osasuna", "visitante": "Rayo Vallecano"},
+    {"num": 2, "local": "Athletic Club", "visitante": "Deportivo Alavés"},
+    {"num": 3, "local": "Sevilla", "visitante": "FC Barcelona"},
+    {"num": 4, "local": "Getafe", "visitante": "Málaga"},
+    {"num": 5, "local": "Deportivo", "visitante": "Real Betis"},
+    {"num": 6, "local": "Villarreal", "visitante": "Levante"},
+    {"num": 7, "local": "Valencia", "visitante": "Real Sociedad"},
+    {"num": 8, "local": "Andorra FC", "visitante": "Sporting de Gijón"},
+    {"num": 9, "local": "CD Castellón", "visitante": "CD Tenerife"},
+    {"num": 10, "local": "CD Leganés", "visitante": "Granada CF"},
+    {"num": 11, "local": "Atlético de Madrid (F)", "visitante": "DUX Logroño (F)"},
+    {"num": 12, "local": "SD Eibar (F)", "visitante": "Athletic Club (F)"},
+    {"num": 13, "local": "Real Madrid (F)", "visitante": "Valencia CF (F)"},
+    {"num": 14, "local": "Costa Adeje Tenerife (F)", "visitante": "Sevilla FC (F)"},
+    {"num": 15, "local": "Atlético de Madrid", "visitante": "Real Madrid"}
+  ]
+}

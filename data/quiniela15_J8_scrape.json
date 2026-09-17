@@ -1,0 +1,24 @@
+{
+  "jornada": 8,
+  "source_url": "https://www.pizarra15.es/jornada-8/",
+  "scraped_at": "2026-09-17T00:00:00+02:00",
+  "cierre": "sábado 19 de septiembre de 2026 antes del primer partido",
+  "temporada": "2026-2027",
+  "partidos": [
+    {"num": 1, "local": "Osasuna", "visitante": "Rayo Vallecano", "fecha": "2026-09-19", "hora": "14:00", "division": "primera"},
+    {"num": 2, "local": "Athletic Club", "visitante": "Deportivo Alavés", "fecha": "2026-09-19", "hora": "16:15", "division": "primera"},
+    {"num": 3, "local": "Sevilla", "visitante": "FC Barcelona", "fecha": "2026-09-19", "hora": "21:00", "division": "primera"},
+    {"num": 4, "local": "Getafe", "visitante": "Málaga", "fecha": "2026-09-20", "hora": "14:00", "division": "primera"},
+    {"num": 5, "local": "Deportivo", "visitante": "Real Betis", "fecha": "2026-09-20", "hora": "18:30", "division": "primera"},
+    {"num": 6, "local": "Villarreal", "visitante": "Levante", "fecha": "2026-09-20", "hora": "18:30", "division": "primera"},
+    {"num": 7, "local": "Valencia", "visitante": "Real Sociedad", "fecha": "2026-09-20", "hora": "21:00", "division": "primera"},
+    {"num": 8, "local": "Andorra FC", "visitante": "Sporting de Gijón", "fecha": "2026-09-19", "hora": "16:15", "division": "segunda"},
+    {"num": 9, "local": "CD Castellón", "visitante": "CD Tenerife", "fecha": "2026-09-19", "hora": "18:30", "division": "segunda"},
+    {"num": 10, "local": "CD Leganés", "visitante": "Granada CF", "fecha": "2026-09-20", "hora": "21:00", "division": "segunda"},
+    {"num": 11, "local": "Atlético de Madrid (F)", "visitante": "DUX Logroño (F)", "fecha": "2026-09-19", "hora": "18:00", "division": "liga_f"},
+    {"num": 12, "local": "SD Eibar (F)", "visitante": "Athletic Club (F)", "fecha": "2026-09-20", "hora": "18:00", "division": "liga_f"},
+    {"num": 13, "local": "Real Madrid (F)", "visitante": "Valencia CF (F)", "fecha": "2026-09-19", "hora": "20:30", "division": "liga_f"},
+    {"num": 14, "local": "Costa Adeje Tenerife (F)", "visitante": "Sevilla FC (F)", "fecha": "2026-09-20", "hora": "12:00", "division": "liga_f"},
+    {"num": 15, "local": "Atlético de Madrid", "visitante": "Real Madrid", "fecha": "2026-09-20", "hora": "16:15", "division": "primera", "pleno_al_15": true}
+  ]
+}

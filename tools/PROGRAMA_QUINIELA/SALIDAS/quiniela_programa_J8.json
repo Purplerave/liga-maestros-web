@@ -1,0 +1,12 @@
+{
+  "jornada": 8,
+  "temporada": "2026-2027",
+  "generado_en": "2026-09-17T00:00:00+02:00",
+  "version_config": "motor_quinielistico_v4",
+  "nota": "Mejor boleto del Programa J8 con exactamente 3 dobles: partidos 1, 7 y 12. Coste: 8 columnas.",
+  "signos": ["1X", "1", "2", "1", "2", "1", "1X", "1", "1", "1", "1", "1X", "1", "1", "1-1"],
+  "dobles": [1, 7, 12],
+  "n_dobles": 3,
+  "n_columnas": 8,
+  "coste_euros": 6.0
+}
