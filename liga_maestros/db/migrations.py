@@ -597,6 +597,9 @@ def ensure_jornada_7(conn):
     """Seed the manually published Jornada 7 fixture (15-17/09/2026)."""
     updated = ensure_jornada_completa(conn, 7)
     imported = _import_compact_prediction_tickets(conn, 7)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
 
 
 def ensure_jornada_8(conn):
