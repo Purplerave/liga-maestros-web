@@ -33,8 +33,11 @@ from .feeds import (  # noqa: E402
     NEWS_TEAM_KEYWORDS,
 )
 from .game import (  # noqa: E402
+    CURRENT_SEASON_ID,
+    CURRENT_SEASON_START_YEAR,
     MAX_DOBLES_PER_TICKET,
     MAX_TRIPLES_PER_TICKET,
+    SEASON_RESET_MARKER,
 )
 from .paths import (
     BASE_DIR,
@@ -112,6 +115,9 @@ __all__ = [
     # Game policy
     "MAX_DOBLES_PER_TICKET",
     "MAX_TRIPLES_PER_TICKET",
+    "CURRENT_SEASON_START_YEAR",
+    "CURRENT_SEASON_ID",
+    "SEASON_RESET_MARKER",
     # Teams
     "TEAM_LOGO_ALIASES",
     "STANDINGS_LEAGUES",

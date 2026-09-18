@@ -20,9 +20,40 @@ def _truthy(value):
     return str(value or "").strip().lower() in ("1", "true", "yes", "on")
 
 
+def _try_acquire_leader_lock():
+    """File-based leader election for single-instance workers.
+
+    With gunicorn --workers 1 this is a no-op. If someone scales to >1 worker
+    only the first process to grab the lock runs schedulers; the rest log
+    `leader_skipped` and return. This prevents duplicate collectors/backups
+    competing for SQLite.
+    """
+    import fcntl
+
+    try:
+        import config as _cfg
+
+        lock_path = os.path.join(_cfg.DATA_DIR, ".collector_leader.lock")
+        os.makedirs(os.path.dirname(lock_path) or ".", exist_ok=True)
+        fh = open(lock_path, "a+", encoding="utf-8")  # noqa: SIM115
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            fh.close()
+            return None
+        # Keep file handle alive for the lifetime of the process
+        return fh
+    except Exception:
+        # If fcntl not available (Windows) or any error, fall back to single-process guard
+        return True
+
+
+_leader_lock_handle = None
+
+
 def start_web_collector(app):
     """Start the background collector when WEB_COLLECTOR_ENABLED=1."""
-    global _collector_started
+    global _collector_started, _leader_lock_handle
     if not _truthy(os.getenv("WEB_COLLECTOR_ENABLED", "0")):
         logger.info("web_collector=disabled")
         return
@@ -32,6 +63,15 @@ def start_web_collector(app):
             logger.info("web_collector=already_running")
             return
         _collector_started = True
+
+    # Leader election: only one gunicorn worker should run schedulers
+    _leader_lock_handle = _try_acquire_leader_lock()
+    if _leader_lock_handle is None:
+        logger.info("web_collector=leader_skipped another worker is leader")
+        return
+    if _leader_lock_handle is not True:
+        # keep handle in app extensions so it isn't garbage-collected
+        app.extensions["collector_leader_lock"] = _leader_lock_handle
 
     interval = int(os.getenv("WEB_COLLECTOR_INTERVAL_SECONDS", "60"))
     highlightly_interval = int(os.getenv("WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS", "60"))
@@ -88,6 +128,8 @@ def start_web_collector(app):
         from datetime import datetime, timedelta
         from zoneinfo import ZoneInfo
 
+        import config as _season_config
+
         from ..services.multi_standings import refresh_all_standings
 
         madrid = ZoneInfo("Europe/Madrid")
@@ -116,15 +158,16 @@ def start_web_collector(app):
 
         time.sleep(30)  # Wait for app to start
         # Refresh once on boot so a redeploy never leaves stale tables.
+        season = getattr(_season_config, "CURRENT_SEASON_START_YEAR", 2026)
         try:
-            summary = refresh_all_standings(season=2026)
+            summary = refresh_all_standings(season=season)
             logger.info("Standings refreshed on boot: %s", summary)
         except Exception:
             logger.exception("Boot standings refresh failed")
         while True:
             time.sleep(seconds_until_next_slot())
             try:
-                summary = refresh_all_standings(season=2026)
+                summary = refresh_all_standings(season=season)
                 logger.info("Standings refreshed: %s", summary)
             except Exception:
                 logger.exception("Standings refresh failed")

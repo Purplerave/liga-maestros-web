@@ -150,16 +150,70 @@ def sync_status():
     return jsonify(payload)
 
 
-@bp.route("/api/live/health")
-def live_health():
-    import sys
-
-    start = time.time()
-    conn = get_db()
+def _get_build_sha() -> str:
+    release_path = os.path.join(config.BASE_DIR, ".release-sha")
     try:
-        target_jornada = resolve_jornada(conn, request.args.get("j"))
-    finally:
-        conn.close()
+        with open(release_path, encoding="utf-8") as release_file:
+            return release_file.read().strip() or "unknown"
+    except OSError:
+        return "local"
+
+
+def _check_readiness(target_jornada_override=None):
+    """Collect readiness signals without leaking internals to public callers."""
+    build_sha = _get_build_sha()
+    target_jornada = None
+    db_ok = False
+    schema_ok = False
+    fixtures_ok = False
+    jornada_partidos = 0
+    db_size_mb = 0.0
+
+    # Resolve jornada (requires DB)
+    try:
+        conn = get_db()
+        try:
+            target_jornada = resolve_jornada(conn, target_jornada_override)
+        finally:
+            conn.close()
+    except Exception:
+        target_jornada = None
+
+    # DB connectivity + basic schema check
+    try:
+        conn2 = get_db()
+        try:
+            conn2.execute("SELECT 1")
+            db_ok = True
+            # schema: core tables exist
+            try:
+                conn2.execute("SELECT COUNT(*) FROM resultados LIMIT 1")
+                conn2.execute("SELECT COUNT(*) FROM predicciones LIMIT 1")
+                schema_ok = True
+            except Exception:
+                schema_ok = False
+            if os.path.exists(config.DB_PATH):
+                try:
+                    db_size_mb = round(os.path.getsize(config.DB_PATH) / (1024 * 1024), 2)
+                except Exception:
+                    db_size_mb = 0.0
+            # fixtures: active jornada has 15 partidos
+            if target_jornada is not None and db_ok and schema_ok:
+                try:
+                    jornada_partidos = conn2.execute(
+                        "SELECT COUNT(*) FROM resultados WHERE jornada = ?", (target_jornada,)
+                    ).fetchone()[0]
+                    fixtures_ok = jornada_partidos == 15
+                except Exception:
+                    fixtures_ok = False
+                    jornada_partidos = 0
+        finally:
+            conn2.close()
+    except Exception:
+        db_ok = False
+        schema_ok = False
+
+    # Collector health (admin only detail, but we compute age for readiness hint)
     health_path = os.path.join(config.DATA_DIR, "LIVE_COLLECTOR_HEALTH.json")
     exists = os.path.exists(health_path)
     health = safe_read_json(health_path, {}) if exists else {}
@@ -169,28 +223,86 @@ def live_health():
             age_seconds = int(time.time() - os.path.getmtime(health_path))
         except Exception:
             age_seconds = None
-    release_path = os.path.join(config.BASE_DIR, ".release-sha")
-    build_sha = "local"
-    try:
-        with open(release_path, encoding="utf-8") as release_file:
-            build_sha = release_file.read().strip() or "unknown"
-    except OSError:
-        pass
-    db_ok = False
-    db_size_mb = 0.0
-    try:
-        conn2 = get_db()
+
+    ready = bool(db_ok and schema_ok and target_jornada is not None and fixtures_ok)
+    return {
+        "build_sha": build_sha,
+        "target_jornada": target_jornada,
+        "db_ok": db_ok,
+        "db_size_mb": db_size_mb,
+        "schema_ok": schema_ok,
+        "fixtures_ok": fixtures_ok,
+        "jornada_partidos": jornada_partidos,
+        "ready": ready,
+        "health": health,
+        "health_exists": exists,
+        "age_seconds": age_seconds,
+    }
+
+
+@bp.route("/health/live")
+def health_live():
+    """Liveness: process is responding (no DB dependency)."""
+    return jsonify({"status": "ok", "build_sha": _get_build_sha()})
+
+
+@bp.route("/health/ready")
+def health_ready():
+    """Readiness: 200 only if DB, schema and active jornada with 15 fixtures are OK."""
+    info = _check_readiness(request.args.get("j"))
+    payload = {
+        "status": "ok" if info["ready"] else "error",
+        "build_sha": info["build_sha"],
+        "db": {"ok": info["db_ok"]},
+        "jornada_activa": info["target_jornada"],
+        "checks": {
+            "db": info["db_ok"],
+            "schema": info["schema_ok"],
+            "jornada": info["target_jornada"] is not None,
+            "fixtures": info["fixtures_ok"],
+            "fixtures_count": info["jornada_partidos"],
+        },
+    }
+    if is_admin_request():
+        import sys
+
         try:
-            conn2.execute("SELECT 1")
-            db_ok = True
-            db_path = config.DB_PATH
-            if os.path.exists(db_path):
-                db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2)
-        finally:
-            conn2.close()
-    except Exception:
-        pass
-    uptime_s = int(time.time() - start) if start else None
+            from importlib.metadata import version as get_version
+
+            flask_ver = get_version("flask")
+        except Exception:
+            flask_ver = "unknown"
+        payload.update(
+            {
+                "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "flask": flask_ver,
+                "db_size_mb": info["db_size_mb"],
+                "collector": {
+                    "running": (info["health"] or {}).get("status") == "ok",
+                    "last_tick_s": info["age_seconds"],
+                },
+                "collector_detail": info["health"] or {"status": "missing"},
+                "health_file": info["health_exists"],
+                "age_seconds": info["age_seconds"],
+                "q15_cache": _build_q15_cache_status(info["target_jornada"]),
+                "api_usage": get_highlightly_usage(),
+                "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
+            }
+        )
+    resp = jsonify(payload)
+    if not info["ready"]:
+        resp.status_code = 503
+    return resp
+
+
+@bp.route("/health/admin")
+def health_admin():
+    """Detailed diagnostics — admin only."""
+    if not is_admin_or_service_request():
+        return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
+    info = _check_readiness(request.args.get("j"))
+    import sys
+
     try:
         from importlib.metadata import version as get_version
 
@@ -198,29 +310,82 @@ def live_health():
     except Exception:
         flask_ver = "unknown"
     payload = {
-        "status": "ok",
-        "build_sha": build_sha,
+        "status": "ok" if info["ready"] else "error",
+        "build_sha": info["build_sha"],
         "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         "flask": flask_ver,
-        "db": {"ok": db_ok, "size_mb": db_size_mb},
-        "jornada_activa": target_jornada,
+        "db": {"ok": info["db_ok"], "size_mb": info["db_size_mb"]},
+        "jornada_activa": info["target_jornada"],
+        "checks": {
+            "db": info["db_ok"],
+            "schema": info["schema_ok"],
+            "jornada": info["target_jornada"] is not None,
+            "fixtures": info["fixtures_ok"],
+            "fixtures_count": info["jornada_partidos"],
+        },
+        "collector": {
+            "running": (info["health"] or {}).get("status") == "ok",
+            "last_tick_s": info["age_seconds"],
+        },
+        "collector_detail": info["health"] or {"status": "missing"},
+        "health_file": info["health_exists"],
+        "age_seconds": info["age_seconds"],
+        "q15_cache": _build_q15_cache_status(info["target_jornada"]),
+        "api_usage": get_highlightly_usage(),
+        "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
+    }
+    resp = jsonify(payload)
+    if not info["ready"]:
+        resp.status_code = 503
+    return resp
+
+
+@bp.route("/api/live/health")
+def live_health():
+    """Public health — backward compatible alias to readiness, but now honest.
+
+    Returns 503 when DB is not OK or active jornada is missing/incomplete.
+    Public callers see only minimal fields; admin callers see detailed telemetry.
+    """
+    info = _check_readiness(request.args.get("j"))
+    payload = {
+        "status": "ok" if info["ready"] else "error",
+        "build_sha": info["build_sha"],
+        "db": {"ok": info["db_ok"]},
+        "jornada_activa": info["target_jornada"],
     }
     if is_admin_request():
+        import sys
+
+        try:
+            from importlib.metadata import version as get_version
+
+            flask_ver = get_version("flask")
+        except Exception:
+            flask_ver = "unknown"
         payload.update(
             {
+                "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "flask": flask_ver,
+                "db_size_mb": info["db_size_mb"],
                 "collector": {
-                    "running": (health or {}).get("status") == "ok",
-                    "last_tick_s": age_seconds,
+                    "running": (info["health"] or {}).get("status") == "ok",
+                    "last_tick_s": info["age_seconds"],
                 },
-                "collector_detail": health or {"status": "missing"},
-                "health_file": exists,
-                "age_seconds": age_seconds,
-                "q15_cache": _build_q15_cache_status(target_jornada),
+                "collector_detail": info["health"] or {"status": "missing"},
+                "health_file": info["health_exists"],
+                "age_seconds": info["age_seconds"],
+                "q15_cache": _build_q15_cache_status(info["target_jornada"]),
                 "api_usage": get_highlightly_usage(),
                 "highlightly_circuit": {k: v for k, v in get_highlightly_circuit().items() if k != "path"},
             }
         )
-    return jsonify(payload)
+        # Keep legacy keys for backwards compat: db.size_mb inside db object
+        payload["db"] = {"ok": info["db_ok"], "size_mb": info["db_size_mb"]}
+    resp = jsonify(payload)
+    if not info["ready"]:
+        resp.status_code = 503
+    return resp
 
 
 @bp.route("/api/live/refresh", methods=["POST"])

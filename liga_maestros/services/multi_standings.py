@@ -60,7 +60,7 @@ def _save_cache(leagues):
     try:
         _write_json_atomic(
             CACHE_PATH,
-            {"season": "2026-27", "leagues": leagues, "updated_at": time.time()},
+            {"season": config.CURRENT_SEASON_ID, "leagues": leagues, "updated_at": time.time()},
         )
         return True
     except Exception:
@@ -124,8 +124,10 @@ def _issue(league, code, reason, **details):
     return {"league": league, "code": code, "reason": reason, **details}
 
 
-def refresh_external_standings(season=2026):
+def refresh_external_standings(season=None):
     """Refresh the external cache only when called by an operator or worker."""
+    if season is None:
+        season = config.CURRENT_SEASON_START_YEAR
     external = RefreshResult()
     for name, lid in config.STANDINGS_LEAGUES.items():
         try:
@@ -137,7 +139,7 @@ def refresh_external_standings(season=2026):
         if not teams:
             external.skipped.append(_issue(name, "no_data", "Highlightly no devolvió datos (API, cuota o temporada)"))
             continue
-        external.append({"name": name, "teams": teams, "source": "highlightly", "season": "2026-27"})
+        external.append({"name": name, "teams": teams, "source": "highlightly", "season": config.CURRENT_SEASON_ID})
     if external and _save_cache(external) is False:
         external.failures.append(_issue("ligas internacionales", "write_error", "no se pudo guardar la caché"))
     return external
@@ -148,12 +150,14 @@ def _result_diagnostics(result, attribute):
     return list(diagnostics) if diagnostics else []
 
 
-def refresh_all_standings(season=2026):
+def refresh_all_standings(season=None):
     """Daily full refresh: Spanish leagues (BASE files) + foreign leagues (cache).
 
     The returned diagnostics make omissions visible to admin callers while the
     ``spanish`` and ``external`` keys retain their original list-based contract.
     """
+    if season is None:
+        season = config.CURRENT_SEASON_START_YEAR
     spanish_result = refresh_spanish_standings(season=season)
     external_result = refresh_external_standings(season=season)
     spanish = list(spanish_result)
@@ -234,8 +238,10 @@ def _match_spanish_teams(category, teams):
     return matched, None
 
 
-def refresh_spanish_standings(season=2026):
+def refresh_spanish_standings(season=None):
     """Fetch La Liga and Segunda standings from Highlightly and update BASE files."""
+    if season is None:
+        season = config.CURRENT_SEASON_START_YEAR
     spanish_leagues = {
         "primera": (
             "LA LIGA",
@@ -273,7 +279,7 @@ def refresh_spanish_standings(season=2026):
                 _issue(
                     label,
                     "roster_mismatch",
-                    "la plantilla normalizada no coincide con la oficial 2026-27",
+                    f"la plantilla normalizada no coincide con la oficial {config.CURRENT_SEASON_ID}",
                     **mismatch,
                 )
             )

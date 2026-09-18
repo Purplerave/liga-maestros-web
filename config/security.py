@@ -15,12 +15,12 @@ SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() 
     "on",
 )
 
-# Host validation.
+# Host validation — includes both production targets (Alwaysdata + Render).
 TRUSTED_HOSTS = [
     item.strip()
     for item in os.getenv(
         "TRUSTED_HOSTS",
-        "ligademaestros.alwaysdata.net,localhost,127.0.0.1",
+        "ligademaestros.alwaysdata.net,liga-maestros.onrender.com,localhost,127.0.0.1",
     ).split(",")
     if item.strip()
 ]

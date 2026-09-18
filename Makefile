@@ -10,14 +10,16 @@ jornada:
 
 demo:
 	@echo "=== DEMO VIERNES — Métricas CEO ==="
-	@curl -s https://ligademaestros.alwaysdata.net/metrics | grep -E "http_requests_total|highlightly_calls|http_request_duration"
+	@echo "Metrics (requiere ADMIN_API_SECRET):"
+	@curl -s -H "X-Admin-Secret: $${ADMIN_API_SECRET:-}" https://ligademaestros.alwaysdata.net/metrics | grep -E "http_requests_total|highlightly_calls|http_request_duration" || echo "(metrics 403 sin secret — usar ADMIN_API_SECRET)"
 	@curl -s https://ligademaestros.alwaysdata.net/api/live/health | python -m json.tool
-	@echo "Portada p95: $$(curl -s -w '%{time_total}' -o /dev/null https://ligademaestros.alwaysdata.net/api/liga/data | awk '{print $$1*1000 \"ms\"}')"
-	@echo "Conversión portada: revisa /metrics -> http_requests_total path=/ path=/app"
+	@echo "Portada latency (1 sample, ver p95 en /metrics histogram): $$(curl -s -w '%{time_total}' -o /dev/null https://ligademaestros.alwaysdata.net/api/liga/data | awk '{print $$1*1000 \"ms\"}')"
+	@echo "Readiness: curl https://ligademaestros.alwaysdata.net/health/ready | jq .checks"
+	@echo "Liveness:  curl https://ligademaestros.alwaysdata.net/health/live"
 
 metrics:
-	curl -s https://ligademaestros.alwaysdata.net/metrics | head -30
+	curl -s -H "X-Admin-Secret: $${ADMIN_API_SECRET:-}" https://ligademaestros.alwaysdata.net/metrics | head -30 || echo "metrics requiere X-Admin-Secret"
 
 test:
 	python -m pytest -q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py
-	python -m pytest tests/test_ensure_jornada_completa.py tests/test_production_readiness.py -v -o 'addopts=' || true
+	python -m pytest tests/test_ensure_jornada_completa.py tests/test_production_readiness.py -v -o 'addopts='
