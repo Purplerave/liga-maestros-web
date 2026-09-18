@@ -215,5 +215,14 @@
     "puntos_totales": 0,
     "activo": true,
     "descripcion": "Nuevo participante de La Pena en Jornada 8."
+  },
+  {
+    "id": "agentek",
+    "nombre": "AgenteK",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Nuevo participante de La Pena en Jornada 8."
   }
 ]

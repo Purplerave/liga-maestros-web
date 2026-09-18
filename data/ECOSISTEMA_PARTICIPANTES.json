@@ -51,7 +51,8 @@
     "sonia2",
     "arena",
     "gstudio",
-    "muse"
+    "muse",
+    "agentek"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -88,6 +89,7 @@
     "sonia2": "Sonia2",
     "arena": "Arena",
     "gstudio": "GSTUDIO",
-    "muse": "MUSE"
+    "muse": "MUSE",
+    "agentek": "AgenteK"
   }
 }
