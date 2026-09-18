@@ -197,5 +197,23 @@
     "puntos_totales": 0,
     "activo": true,
     "descripcion": "Alias de La Pena - Fistro"
+  },
+  {
+    "id": "gstudio",
+    "nombre": "GSTUDIO",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Nuevo participante de La Pena en Jornada 8."
+  },
+  {
+    "id": "muse",
+    "nombre": "MUSE",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Nuevo participante de La Pena en Jornada 8."
   }
 ]
