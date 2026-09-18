@@ -31,7 +31,8 @@
     "grok",
     "chatgpt",
     "copilot",
-    "gemini"
+    "gemini",
+    "jules"
   ],
   "pena_aliases": [
     "mrpurple",
@@ -69,6 +70,7 @@
     "chatgpt": "ChatGPT",
     "copilot": "Copilot",
     "gemini": "Gemini",
+    "jules": "Jules",
     "mrpurple": "MrPurple",
     "geli": "Geli",
     "pepe": "Pepe",
