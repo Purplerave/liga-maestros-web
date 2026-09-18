@@ -63,6 +63,15 @@
     "descripcion": "Analisis IA de Google."
   },
   {
+    "id": "jules",
+    "nombre": "Jules",
+    "tipo": "maestro",
+    "grupo": "maestros",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Analista deportivo de elite y predictor matematico."
+  },
+  {
     "id": "mrpurple",
     "nombre": "MrPurple",
     "tipo": "pena",

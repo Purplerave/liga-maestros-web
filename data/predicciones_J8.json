@@ -11,5 +11,10 @@
     "nombre": "PROGRAMA",
     "origen": "Programa Quiniela Maestro",
     "signos": ["1X", "1", "2", "1", "2", "1", "1X", "1", "1", "1", "1", "1X", "1", "1", "1-1"]
+  },
+  "jules": {
+    "nombre": "JULES",
+    "origen": "Analista Deportivo y Predictor Matematico",
+    "signos": ["1", "1", "2", "1", "X", "1", "X", "1", "1", "1", "1", "2", "1", "1", "1-1"]
   }
 }
