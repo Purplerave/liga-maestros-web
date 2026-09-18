@@ -15,7 +15,7 @@
     "origen": "Programa Quiniela Maestro",
     "signos": ["1X", "1", "2", "1", "2", "1", "1X", "1", "1", "1", "1", "1X", "1", "1", "1-1"]
   },
-  "copilot": {"nombre": "COPILOT", "signos": ["1X", "1", "2", "1", "X2", "1", "2", "1", "1", "1", "1", "X2", "1", "1", "X2"]},
+  "copilot": {"nombre": "COPILOT", "signos": ["1X", "1", "2", "1", "X2", "1", "2", "1", "1", "1", "1", "X2", "1", "1", "1-2"]},
   "geli": {"nombre": "GELI (GLM5)", "fuente_ia": "glm5", "signos": ["1", "1", "2", "1", "2", "1", "1", "2", "1", "1", "1", "2", "1", "1", "1-1"]},
   "chipi": {"nombre": "CHIPI (DEEPSEEK)", "fuente_ia": "deepseek", "signos": ["1", "1", "2", "1", "X", "1", "X", "X", "1", "1", "1", "2", "1", "1", "1-2"]},
   "pepe": {"nombre": "PEPE (PERPLEXITY)", "fuente_ia": "perplexity", "signos": ["1", "1", "2", "1", "2", "1", "X", "X", "1", "1", "1", "X", "1", "1", "1-0"]},
