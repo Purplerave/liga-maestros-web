@@ -4,7 +4,7 @@ import hashlib
 import logging
 import time
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, g, jsonify, request, session
 
 import config
 
@@ -238,9 +238,9 @@ def get_liga_data():
         resp.headers["ETag"] = etag
         resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
         return resp
-    except Exception as exc:
+    except Exception:
         logger.exception("api_liga_data failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return jsonify({"status": "error", "message": "No se pudo procesar la solicitud", "request_id": getattr(g, "request_id", "")}), 500
 
 
 def _resolve_max_jornada(conn):
@@ -473,7 +473,7 @@ def refresh_standings():
         return jsonify({"status": "forbidden"}), 403
     from ..services.multi_standings import refresh_all_standings
 
-    summary = refresh_all_standings(season=2026)
+    summary = refresh_all_standings(season=config.CURRENT_SEASON_START_YEAR)
     status = summary.get("status", "ok")
     skipped = _tag_refresh_issues(summary.get("skipped", []), "standings")
     failures = _tag_refresh_issues(summary.get("failures", []), "standings")
@@ -508,7 +508,7 @@ def refresh_everything():
     skipped = []
     failures = []
     try:
-        standings = refresh_all_standings(season=2026)
+        standings = refresh_all_standings(season=config.CURRENT_SEASON_START_YEAR)
         summary["standings"] = standings
         skipped.extend(_tag_refresh_issues(standings.get("skipped", []), "standings"))
         failures.extend(_tag_refresh_issues(standings.get("failures", []), "standings"))
@@ -566,9 +566,9 @@ def get_standings():
         resp = jsonify({"jornada": jornada, "standings": standings, "today_madrid": today_madrid()})
         resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
         return resp
-    except Exception as exc:
+    except Exception:
         logger.exception("api/liga/standings failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return jsonify({"status": "error", "message": "No se pudo procesar la solicitud", "request_id": getattr(g, "request_id", "")}), 500
 
 
 @bp.route("/api/liga/live")
@@ -585,9 +585,9 @@ def get_live():
         resp = jsonify({"jornada": jornada, "live_matches": live_matches, "today_madrid": today_madrid()})
         resp.headers["Cache-Control"] = "public, max-age=10, must-revalidate"
         return resp
-    except Exception as exc:
+    except Exception:
         logger.exception("api/liga/live failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return jsonify({"status": "error", "message": "No se pudo procesar la solicitud", "request_id": getattr(g, "request_id", "")}), 500
 
 
 @bp.route("/api/liga/matches")
@@ -611,6 +611,6 @@ def get_matches():
         )
         resp.headers["Cache-Control"] = "public, max-age=30, must-revalidate"
         return resp
-    except Exception as exc:
+    except Exception:
         logger.exception("api/liga/matches failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return jsonify({"status": "error", "message": "No se pudo procesar la solicitud", "request_id": getattr(g, "request_id", "")}), 500

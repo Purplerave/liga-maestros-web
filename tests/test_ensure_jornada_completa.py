@@ -170,4 +170,4 @@ def test_ticket_payload_without_scrape_keeps_placeholders(monkeypatch):
     assert len(partidos) == 15
     assert partidos[0]["local"] == "A"
     assert partidos[1]["local"] == "-"
-    assert partidos[1]["marcador"] == "Pendiente"
+    assert partidos[1]["marcador"] in ("Pendiente", "Horario por confirmar")

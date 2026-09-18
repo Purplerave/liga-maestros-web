@@ -91,10 +91,10 @@ def import_jornada(jornada, dry_run=False, allow_q15_base=False, force=False):
         conn.execute(
             """
             INSERT INTO usuarios (id, nombre, email, puntos_acumulados, notificaciones, peso)
-            VALUES (?, ?, ?, 0, 1, 1.0)
-            ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre
+            VALUES (?, ?, NULL, 0, 1, 1.0)
+            ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=NULL
             """,
-            ("programa", "Programa Quiniela Maestro", "programa@example.com"),
+            ("programa", "Programa Quiniela Maestro"),
         )
 
         conn.execute("DELETE FROM resultados WHERE jornada = ?", (jornada,))

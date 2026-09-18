@@ -14,7 +14,7 @@ import config
 
 logger = logging.getLogger(__name__)
 
-from .db.backups import minimize_backup_personal_data, start_backup_scheduler
+from .db.backups import start_backup_scheduler
 from .db.migrations import run_startup_migrations
 from .middleware.authz import is_admin_or_service_request
 from .middleware.csrf import valid_csrf_request
@@ -244,7 +244,10 @@ def create_app():
         return render_template("errors/500.html"), 500
 
     run_startup_migrations()
-    minimize_backup_personal_data()
+    # Backups are immutable — never rewrite historical files on boot.
+    # Personal data minimization for backups happens at creation time via
+    # minimize_stored_personal_data() on the live DB; retained files are
+    # verified but never mutated here.
     start_backup_scheduler(app)
     start_web_collector(app)
     init_rate_limiter(app)

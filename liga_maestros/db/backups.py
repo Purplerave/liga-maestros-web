@@ -152,7 +152,16 @@ def prune_s3_backups():
 
 
 def minimize_backup_personal_data():
-    """Remove legacy stored emails from retained SQLite backups."""
+    """[DEPRECATED on boot] Remove legacy stored emails from retained SQLite backups.
+
+    Historical backups are now treated as immutable. This helper is kept for
+    manual one-off sanitization (e.g. `python -m liga_maestros.db.backups`)
+    but is **no longer called during `create_app()`** — mutating retained
+    backups on every boot violates immutability and adds I/O to the
+    request path. New backups are already minimized via
+    `minimize_stored_personal_data()` on the live DB at creation time.
+    """
+    logger.warning("minimize_backup_personal_data is deprecated for boot — use manual invocation only")
     cleaned = 0
     for path in list_backups():
         conn = sqlite3.connect(path, timeout=20)
@@ -178,6 +187,32 @@ def start_backup_scheduler(app=None):
         return None
     if _backup_thread and _backup_thread.is_alive():
         return _backup_thread
+
+    # Leader election: don't start a second scheduler if another worker is leader
+    if app is not None and not app.extensions.get("collector_leader_lock"):
+        # Check if web_collector already determined leadership
+        try:
+            import fcntl
+
+            lock_path = os.path.join(config.DATA_DIR, ".collector_leader.lock")
+            # If lock file exists and is locked, we are not the leader
+            # Best-effort: try non-blocking lock; if we can't acquire, skip
+            fh_test = open(lock_path, "a+", encoding="utf-8")  # noqa: SIM115
+            try:
+                fcntl.flock(fh_test, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(fh_test, fcntl.LOCK_UN)
+                fh_test.close()
+            except BlockingIOError:
+                fh_test.close()
+                logger.info("backup_scheduler=leader_skipped")
+                return None
+            except Exception:
+                try:
+                    fh_test.close()
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
     interval = max(900, int(os.getenv("DB_BACKUP_INTERVAL_SECONDS", "21600")))
 
