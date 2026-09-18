@@ -24,7 +24,7 @@ def _route_label() -> str:
     # Flask sets url_rule only after routing succeeds
     rule = getattr(request, "url_rule", None)
     if rule is not None:
-        return rule.rule
+        return str(rule.rule)
     path = request.path or "__unmatched__"
     if path.startswith("/static/"):
         return "/static/*"
@@ -42,7 +42,10 @@ def init_metrics(app):
         try:
             route = _route_label()
             # Bounded cardinality guard
-            if len(REQUEST_COUNTER) < _MAX_CARDINALITY or (request.method, route, str(response.status_code)) in REQUEST_COUNTER:
+            if (
+                len(REQUEST_COUNTER) < _MAX_CARDINALITY
+                or (request.method, route, str(response.status_code)) in REQUEST_COUNTER
+            ):
                 REQUEST_COUNTER[(request.method, route, str(response.status_code))] += 1
             if hasattr(g, "metrics_start"):
                 dur = time.perf_counter() - g.metrics_start

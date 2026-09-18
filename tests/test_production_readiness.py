@@ -34,7 +34,9 @@ def test_jornada_75_seed_imports_fixture_and_pronosticos():
     pred_count = conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 75").fetchone()[0]
     assert pred_count >= 0
     if pred_count:
-        user_ids = {r[0] for r in conn.execute("SELECT DISTINCT user_id FROM predicciones WHERE jornada = 75").fetchall()}
+        user_ids = {
+            r[0] for r in conn.execute("SELECT DISTINCT user_id FROM predicciones WHERE jornada = 75").fetchall()
+        }
         # programa ticket is expected when seed provides it, but not required for fixture completeness
         assert "programa" in user_ids or len(user_ids) >= 1
 
