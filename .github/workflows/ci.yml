@@ -37,9 +37,8 @@ jobs:
       - name: Format check with ruff
         run: ruff format --check .
 
-      - name: Type check with mypy (informativo)
-        run: |
-          mypy liga_maestros || echo "::warning::mypy found type issues — see logs (will be blocking after 2026-10-01)"
+      - name: Type check with mypy (bloqueante)
+        run: mypy liga_maestros
 
       - name: Dependency security audit
         run: pip-audit -r requirements.lock --progress-spinner off 2>/dev/null || pip-audit -r requirements.txt --progress-spinner off
@@ -71,8 +70,8 @@ jobs:
           done
 
       - name: Tests (unit + integration, sin readiness)
-        run: python -m pytest -q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py --cov=liga_maestros --cov-report=term-missing --cov-fail-under=50 2>&1 | tail -50
-        # coverage 50% initial threshold (audit asks 80% — ramp up after adding E2E)
+        run: python -m pytest -q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py --cov=liga_maestros --cov-report=term-missing --cov-fail-under=65 2>&1 | tail -50
+        # coverage 65% threshold
 
       - name: Production readiness (bloqueante)
         run: |

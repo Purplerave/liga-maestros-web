@@ -12,8 +12,9 @@ updates:
     commit-message:
       prefix: "deps"
     groups:
-      dev-dependencies:
-        dependency-type: "development"
+      python-dependencies:
+        patterns:
+          - "*"
         update-types:
           - "minor"
           - "patch"
@@ -29,3 +30,10 @@ updates:
       - "ci"
     commit-message:
       prefix: "ci"
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

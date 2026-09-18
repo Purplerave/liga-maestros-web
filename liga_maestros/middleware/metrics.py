@@ -1,7 +1,7 @@
 """Prometheus metrics middleware — bounded cardinality, protected endpoint."""
 
 import time
-from collections import Counter
+from collections import Counter, defaultdict, deque
 
 from flask import g, request
 
@@ -9,9 +9,20 @@ from flask import g, request
 REQUEST_COUNTER: Counter[tuple[str, str, str]] = Counter()
 REQUEST_DURATION: Counter[tuple[str, str]] = Counter()  # sum of durations
 REQUEST_DURATION_COUNT: Counter[tuple[str, str]] = Counter()
+REQUEST_LATENCIES: dict[tuple[str, str], deque[float]] = defaultdict(lambda: deque(maxlen=100))
 HIGHLIGHTLY_USAGE = {"calls": 0, "limit": 7500, "remaining": 7500}
 
 _MAX_CARDINALITY = 500  # prevent unbounded growth from arbitrary paths
+
+
+def _percentile(samples: list[float], p: float) -> float:
+    """Calcula el percentil p (0..1) sobre una lista de muestras de latencia."""
+    if not samples:
+        return 0.0
+    sorted_s = sorted(samples)
+    idx = int(len(sorted_s) * p)
+    idx = min(idx, len(sorted_s) - 1)
+    return sorted_s[idx]
 
 
 def _route_label() -> str:
@@ -49,9 +60,11 @@ def init_metrics(app):
                 REQUEST_COUNTER[(request.method, route, str(response.status_code))] += 1
             if hasattr(g, "metrics_start"):
                 dur = time.perf_counter() - g.metrics_start
-                if len(REQUEST_DURATION) < _MAX_CARDINALITY or (request.method, route) in REQUEST_DURATION:
-                    REQUEST_DURATION[(request.method, route)] += dur
-                    REQUEST_DURATION_COUNT[(request.method, route)] += 1
+                key = (request.method, route)
+                if len(REQUEST_DURATION) < _MAX_CARDINALITY or key in REQUEST_DURATION:
+                    REQUEST_DURATION[key] += dur
+                    REQUEST_DURATION_COUNT[key] += 1
+                    REQUEST_LATENCIES[key].append(dur)
         except Exception:
             pass
         return response
@@ -82,16 +95,37 @@ def init_metrics(app):
         for (method, path), cnt in REQUEST_DURATION_COUNT.items():
             safe_path = path.replace("\\", "\\\\").replace('"', '\\"')
             lines.append(f'http_request_duration_seconds_count{{method="{method}",path="{safe_path}"}} {cnt}')
-        # Highlightly budget — only exposed via authenticated metrics
+        lines.append("# HELP http_request_duration_seconds_percentiles Latency percentiles in seconds")
+        lines.append("# TYPE http_request_duration_seconds_percentiles gauge")
+        for (method, path), samples in REQUEST_LATENCIES.items():
+            if not samples:
+                continue
+            safe_path = path.replace("\\", "\\\\").replace('"', '\\"')
+            sample_list = list(samples)
+            p50 = _percentile(sample_list, 0.50)
+            p90 = _percentile(sample_list, 0.90)
+            p95 = _percentile(sample_list, 0.95)
+            lines.append(f'http_request_duration_seconds_p50{{method="{method}",path="{safe_path}"}} {p50:.6f}')
+            lines.append(f'http_request_duration_seconds_p90{{method="{method}",path="{safe_path}"}} {p90:.6f}')
+            lines.append(f'http_request_duration_seconds_p95{{method="{method}",path="{safe_path}"}} {p95:.6f}')
+        # Highlightly budget & circuit breaker — only exposed via authenticated metrics
         try:
-            from ..services.highlightly import get_highlightly_usage
+            from ..services.highlightly import get_highlightly_circuit, get_highlightly_usage
 
             usage = get_highlightly_usage()
+            circuit = get_highlightly_circuit()
             lines.append("# HELP highlightly_calls_used Highlightly API calls used today")
             lines.append("# TYPE highlightly_calls_used gauge")
             lines.append(f"highlightly_calls_used {int(usage.get('calls', 0))}")
             lines.append(f"highlightly_calls_limit {int(usage.get('limit', 7500))}")
-            lines.append(f"highlightly_calls_remaining {int(usage.get('usable_remaining', usage.get('limit', 7500)))}")
+            usable = int(usage.get("usable_remaining", usage.get("limit", 7500)))
+            lines.append(f"highlightly_calls_remaining {usable}")
+            lines.append(f"highlightly_quota_warning {1 if usable < 500 else 0}")
+
+            lines.append("# HELP highlightly_circuit_open Highlightly circuit breaker status (1 open, 0 closed)")
+            lines.append("# TYPE highlightly_circuit_open gauge")
+            lines.append(f"highlightly_circuit_open {1 if circuit.get('open') else 0}")
+            lines.append(f"highlightly_circuit_failures {int(circuit.get('failures', 0))}")
         except Exception:
             pass
         return Response("\n".join(lines) + "\n", mimetype="text/plain; version=0.0.4")

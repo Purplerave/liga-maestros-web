@@ -7,10 +7,13 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
+.coverage
 .venv/
 venv/
 env/
 .mimocode/
+verification/
 
 # Local logs and generated runtime state
 *.log
