@@ -59,6 +59,11 @@ config/DATOS/
 config/data/
 config/__pycache__/
 
+# Generated hashed assets from build.py
+static/**/*.????????.css
+static/**/*.????????.js
+static/manifest.json
+
 # Temporary screenshots and visual QA artifacts
 /*.png
 tmp_*.png
