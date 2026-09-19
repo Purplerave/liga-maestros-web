@@ -64,20 +64,6 @@ def _build_q15_cache_status(jornada):
     return status
 
 
-@bp.route("/api/live/ticker")
-def get_live_ticker():
-    ticker_path = os.path.join(config.DATA_DIR, "LIVE_TICKER.json")
-    if not os.path.exists(ticker_path):
-        ticker_path = os.path.join(config.BASE_DIR, "LIVE_TICKER.json")
-    if os.path.exists(ticker_path):
-        try:
-            with open(ticker_path, encoding="utf-8") as f:
-                return jsonify(json.load(f))
-        except Exception:
-            pass
-    return jsonify({"matches": []})
-
-
 @bp.route("/api/q15/directo")
 def q15_directo():
     jornada = (request.args.get("j") or request.args.get("jornada") or "").strip()
