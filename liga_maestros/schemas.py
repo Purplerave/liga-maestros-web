@@ -60,19 +60,28 @@ class MatchPayload(_StrictBase):
     goles_visitante: int | None = None
     status: str = "NS"
     fecha: str = ""
+    fecha_raw: str = ""
     hora: str = ""
     minuto: str = ""
+    minuto_live: str = ""
     signo: str = "-"
     signo_actual: str = "-"
     marcador: str = ""
+    marcador_base: str = ""
     fecha_limpia: str = ""
+    logo_local: str = ""
+    logo_visitante: str = ""
+    resultado_pendiente: bool = False
 
     @field_validator("signo", "signo_actual")
     @classmethod
     def _signo_in_set(cls, v: str) -> str:
-        if v not in {"1", "X", "2", "-"}:
-            return "-"
-        return v
+        if v in {"1", "X", "2", "-"}:
+            return v
+        import re
+        if re.match(r"^[0-9M][-–][0-9M]$", v, re.I):
+            return v
+        return "-"
 
 
 class TrashTalkPayload(_StrictBase):

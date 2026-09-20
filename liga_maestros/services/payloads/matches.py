@@ -148,11 +148,13 @@ def build_jornada_matches(conn, jornada, team_logos):
         status = r.get("status") or "NS"
         minuto = (r.get("minuto") or "").replace("min. ", "").replace("min.", "").strip()
 
-        signo = "-"
+        signo = r.get("signo_actual") or "-"
         # CEO fix: si hay goles, siempre calcular signo, incluso si status es NS
         # (evita que Liga F con resultado pero status desactualizado quede en "-")
         if gh is not None and ga is not None:
-            if gh > ga:
+            if p_id == 15:
+                signo = f"{gh}-{ga}"
+            elif gh > ga:
                 signo = "1"
             elif gh < ga:
                 signo = "2"
@@ -160,7 +162,6 @@ def build_jornada_matches(conn, jornada, team_logos):
                 signo = "X"
             # Para pleno (id 15) el signo es el marcador exacto, pero mantenemos 1X2 para ranking
             # El pleno real se calcula en scoring.py
-        # Si no hay goles, mantener "-"
 
         fecha_limpia = ""
         if r.get("fecha"):
@@ -177,6 +178,23 @@ def build_jornada_matches(conn, jornada, team_logos):
         has_score = gh is not None and ga is not None
 
         if status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"):
+            kickoff_dt = parse_db_match_datetime(r.get("fecha"), r.get("hora"))
+            if kickoff_dt:
+                now_madrid = madrid_now().replace(tzinfo=None)
+                elapsed_secs = (now_madrid - kickoff_dt).total_seconds()
+                if 0 <= elapsed_secs <= 135 * 60:
+                    elapsed_mins = int(elapsed_secs // 60)
+                    if elapsed_mins <= 45:
+                        calc_min = f"{max(1, elapsed_mins)}'"
+                    elif elapsed_mins <= 60:
+                        calc_min = "Descanso"
+                    elif elapsed_mins <= 105:
+                        calc_min = f"{min(90, elapsed_mins - 15)}'"
+                    else:
+                        calc_min = "90+5'"
+                    if not minuto:
+                        minuto = calc_min
+
             minuto_num = "".join(ch for ch in minuto if ch.isdigit())
             marcador_base = f"{gh}-{ga}" if has_score else "-:-"
             if minuto_num:
@@ -215,10 +233,14 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "marcador": marcador,
                 "status": status,
                 "marcador_base": marcador_base,
+                "minuto": minuto,
                 "minuto_live": minuto_num,
+                "fecha": r.get("fecha", ""),
                 "fecha_raw": r.get("fecha", ""),
                 "hora": r.get("hora", "-"),
+                "signo": signo,
                 "signo_actual": signo,
+                "fecha_limpia": fecha_limpia,
                 "goles_local": gh,
                 "goles_visitante": ga,
                 # Compatibility field for older clients. A fixture never gets a
@@ -246,12 +268,17 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "marcador": "Horario por confirmar",
                 "status": "NS",
                 "marcador_base": "",
+                "minuto": "",
                 "minuto_live": "",
+                "fecha": "",
                 "fecha_raw": "",
                 "hora": "-",
+                "signo": "-",
                 "signo_actual": "-",
+                "fecha_limpia": "",
                 "goles_local": None,
                 "goles_visitante": None,
+                "resultado_pendiente": False,
             },
         )
         for i in range(1, 16)

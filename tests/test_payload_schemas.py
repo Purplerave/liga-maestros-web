@@ -142,3 +142,40 @@ def test_match_status_defaults_to_ns():
     m = s.MatchPayload.model_validate({"id": 1, "local": "A", "visitante": "B"})
     assert m.status == "NS"
     assert m.signo == "-"
+
+
+def test_match_payload_preserves_extended_fields():
+    s = _schemas()
+    m = s.MatchPayload.model_validate(
+        {
+            "id": 15,
+            "local": "Atlético de Madrid",
+            "visitante": "Real Madrid",
+            "fecha_raw": "2026-09-20",
+            "minuto_live": "25",
+            "marcador_base": "0-0",
+            "logo_local": "/static/img/team_logos/ATLETICO_MADRID.png",
+            "logo_visitante": "/static/img/team_logos/REAL_MADRID.png",
+            "resultado_pendiente": False,
+            "signo": "0-0",
+            "signo_actual": "0-0",
+        }
+    )
+    dumped = m.model_dump()
+    assert dumped["fecha_raw"] == "2026-09-20"
+    assert dumped["minuto_live"] == "25"
+    assert dumped["marcador_base"] == "0-0"
+    assert dumped["logo_local"] == "/static/img/team_logos/ATLETICO_MADRID.png"
+    assert dumped["logo_visitante"] == "/static/img/team_logos/REAL_MADRID.png"
+    assert dumped["resultado_pendiente"] is False
+    assert dumped["signo"] == "0-0"
+    assert dumped["signo_actual"] == "0-0"
+
+
+def test_match_signo_accepts_pleno_scores():
+    s = _schemas()
+    for pleno_score in ("0-0", "1-0", "2-1", "M-1", "0-M", "M-M"):
+        m = s.MatchPayload.model_validate({**_min_partido(), "signo": pleno_score, "signo_actual": pleno_score})
+        assert m.signo == pleno_score
+        assert m.signo_actual == pleno_score
+

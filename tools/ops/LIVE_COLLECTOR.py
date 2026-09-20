@@ -375,7 +375,19 @@ def write_q15_directo_cache(jornada):
     if not jornada:
         return {"matches": 0, "last_success_per_match": {}}
     started_at = time.time()
-    payload = scrape_q15_directo(int(jornada))
+    try:
+        payload = scrape_q15_directo(int(jornada))
+    except Exception as exc:
+        path = DATA_DIR / f"quiniela15_directo_J{int(jornada)}.json"
+        if path.exists():
+            log_line(f"q15_scrape_failed_fallback_to_cache: {exc}")
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    payload = json.load(fh)
+            except Exception:
+                raise exc
+        else:
+            raise exc
     try:
         matches = validate_q15_payload(payload, jornada)
     except ValueError as exc:

@@ -82,6 +82,11 @@ def get_live_ticker():
 def q15_directo():
     jornada = (request.args.get("j") or request.args.get("jornada") or "").strip()
     if not jornada.isdigit():
+        with get_db() as conn:
+            j_resolved = resolve_jornada(conn)
+            if j_resolved:
+                jornada = str(j_resolved)
+    if not jornada.isdigit():
         return jsonify({"matches": []})
     path = os.path.join(config.DATA_DIR, f"quiniela15_directo_J{jornada}.json")
     if not os.path.exists(path):

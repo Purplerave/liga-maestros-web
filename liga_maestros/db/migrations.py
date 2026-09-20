@@ -633,6 +633,7 @@ def ensure_jornada_7(conn):
 def ensure_jornada_8(conn):
     """Seed the manually published Jornada 8 fixture and editorial tickets."""
     updated = ensure_jornada_completa(conn, 8)
+    _import_jornada_resultados(conn, 8)
     imported = _import_compact_prediction_tickets(conn, 8)
     if updated or imported:
         conn.commit()
