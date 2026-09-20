@@ -109,14 +109,20 @@ async function refreshData(options = {}) {
         }
 
         await ensureViewAssets(currentMainView());
-        const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && patchLiveArena());
+        const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && typeof patchLiveArena === "function" && patchLiveArena());
         const patchedTicketView = Boolean(
             options.auto
             && state.currentFilter === "TICKET"
             && typeof patchTicketArena === "function"
             && patchTicketArena()
         );
-        if (patchedLiveView || patchedTicketView) return;
+        const patchedCoverView = Boolean(
+            options.auto
+            && state.currentFilter === "ALL"
+            && typeof patchCoverPage === "function"
+            && patchCoverPage()
+        );
+        if (patchedLiveView || patchedTicketView || patchedCoverView) return;
 
         hydrateJornadaNav();
         hydrateUserSigns({ preserveLocalTicket });
