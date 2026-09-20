@@ -267,13 +267,26 @@ function standingsSignature(data) {
             .join(","))
         .join("|");
 }
+function consensoSignature(data) {
+    const cons = data?.consenso_pena || [];
+    return cons.map(c => `${c.id}:${c.ganador||""}:${c.p1||0}:${c.px||0}:${c.p2||0}:${c.total||0}`).join("|") + "|" + JSON.stringify(data?.consenso_pleno_pena||{});
+}
+function rankingSignature(data) {
+    const r = data?.ranking_maestros || {};
+    return Object.entries(r).map(([k,v]) => `${k}:${v.total||0}:${v.jornada||0}:${v.jornada_live||0}`).sort().join("|");
+}
+function newsSignature(data) {
+    // No esta en payload slim, pero si cambia en full payload se detecta via ranking/consenso sync
+    return "";
+}
 
 /* El poll del directo pide la variante ligera del payload (``?slim=1``): solo
    lo que puede cambiar en 30 s (marcadores, estado, clasificaciones,
    comentarista). Cada ``LIVE_HEAVY_SYNC_POLLS`` polls sin cambios se hace
    ademas una recarga silenciosa de las partes pesadas (ranking en vivo,
-   consenso de la Pena, predicciones) para que no se queden detras. */
-const LIVE_HEAVY_SYNC_POLLS = 4;
+   consenso de la Pena, predicciones) para que no se queden detras.
+   v2: 2 polls en ventana de jornada para que el consenso no se quede atras. */
+const LIVE_HEAVY_SYNC_POLLS = 2;
 const LIVE_VOLATILE_KEYS = [
     "partidos",
     "all_league_matches",
@@ -328,6 +341,8 @@ async function refreshLiveSnapshot() {
         const previousSignature = liveSignature(state.data);
         const previousResults = resultsSignature(state.data);
         const previousStandings = standingsSignature(state.data);
+        const previousConsenso = consensoSignature(state.data);
+        const previousRanking = rankingSignature(state.data);
         const jornada = String(state.jornada || "");
         const headers = {};
         /* Con el ETag del snapshot anterior un poll sin novedades cuesta
@@ -348,12 +363,16 @@ async function refreshLiveSnapshot() {
         const nextSignature = liveSignature(freshData);
         const nextResults = resultsSignature(freshData);
         const nextStandings = standingsSignature(freshData);
+        const nextConsenso = consensoSignature({ ...state.data, ...freshData });
+        const nextRanking = rankingSignature({ ...state.data, ...freshData });
         // Un partido que termina deja de ser "live": si solo mirasemos los
         // partidos en juego, el resultado final y la clasificacion nunca se
         // repintarian. Por eso tambien se comparan marcadores y clasificacion.
         const resultsChanged = previousResults !== nextResults;
         const standingsChanged = previousStandings !== nextStandings;
-        const changed = previousSignature !== nextSignature || resultsChanged || standingsChanged;
+        const consensoChanged = previousConsenso !== nextConsenso;
+        const rankingChanged = previousRanking !== nextRanking;
+        const changed = previousSignature !== nextSignature || resultsChanged || standingsChanged || consensoChanged || rankingChanged;
         // Cerrar el boleto revela las predicciones de todos: tambien exige
         // volver a por el payload completo.
         const lockChanged = Boolean(freshData.is_locked) !== Boolean(state.data.is_locked)
@@ -398,8 +417,9 @@ async function refreshLiveSnapshot() {
             }
             return true;
         }
-        if (state.currentFilter === "LIVE" && patchLiveArena()) return true;
-        if (state.currentFilter === "TICKET" && patchTicketArena()) return true;
+        if (state.currentFilter === "LIVE" && typeof patchLiveArena === "function" && patchLiveArena()) return true;
+        if (state.currentFilter === "TICKET" && typeof patchTicketArena === "function" && patchTicketArena()) return true;
+        if (state.currentFilter === "ALL" && typeof patchCoverPage === "function" && patchCoverPage()) return true;
         const pageX = window.scrollX;
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
@@ -459,8 +479,10 @@ function livePollDelay() {
     // una jornada (desde 10 min antes del primer saque hasta que todos han
     // terminado): si solo mirasemos "hay algo en vivo" el primer gol del dia
     // podia tardar dos minutos en aparecer.
+    // v2: en idle (sin jornada) 60s en vez de 180s para que el consenso y
+    // noticias no parezcan congelados.
     if (hasLiveLeagueMatches()) return 30000;
-    return isJornadaWindowOpen() ? 45000 : 180000;
+    return isJornadaWindowOpen() ? 40000 : 60000;
 }
 
 function isJornadaWindowOpen() {
