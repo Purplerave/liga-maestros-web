@@ -16,6 +16,7 @@ Checks:
 import argparse
 import glob
 import os
+import re
 import sys
 
 import config
@@ -25,6 +26,11 @@ from liga_maestros.services.payloads.matches import build_jornada_matches
 from liga_maestros.utils import load_team_logos
 
 VALID_SIGNS = {"1", "X", "2", "1X", "X2", "12"}
+
+# El partido 15 (pleno al 15) se firma como marcador exacto ("1-2", "0-0", ...),
+# no como signo 1X2: es la convención de todos los boletos J1-J9 y de las
+# columnas de la peña en data/predicciones_J*.json.
+PLENO_15_SCORE = re.compile(r"^\d{1,2}-\d{1,2}$")
 
 
 def validar_jornada(jornada: int, strict: bool = False) -> bool:
@@ -65,6 +71,8 @@ def validar_jornada(jornada: int, strict: bool = False) -> bool:
             ).fetchall()
             for idx, row in enumerate(signos, 1):
                 s = str(row[0] or "").strip().upper()
+                if idx == 15 and PLENO_15_SCORE.match(s):
+                    continue
                 if s not in VALID_SIGNS:
                     errors.append(f"J{jornada} P{idx}: signo programa inválido '{s}'")
 

@@ -1,0 +1,21 @@
+{
+  "jornada": 9,
+  "temporada": "2026-2027",
+  "partidos": [
+    {"num": 1, "local": "Ceuta", "visitante": "R. Sociedad B"},
+    {"num": 2, "local": "Granada", "visitante": "Andorra FC"},
+    {"num": 3, "local": "Celta Fortuna", "visitante": "Sabadell"},
+    {"num": 4, "local": "Tenerife", "visitante": "Cádiz"},
+    {"num": 5, "local": "Valladolid", "visitante": "Córdoba"},
+    {"num": 6, "local": "Mallorca", "visitante": "Almería"},
+    {"num": 7, "local": "Burgos", "visitante": "Eldense"},
+    {"num": 8, "local": "Eibar", "visitante": "Las Palmas"},
+    {"num": 9, "local": "R. Oviedo", "visitante": "Sporting"},
+    {"num": 10, "local": "Leganés", "visitante": "Castellón"},
+    {"num": 11, "local": "Ath. Club (F)", "visitante": "At. Madrid (F)"},
+    {"num": 12, "local": "Valencia (F)", "visitante": "Tenerife (F)"},
+    {"num": 13, "local": "Sevilla (F)", "visitante": "Eibar (F)"},
+    {"num": 14, "local": "Deportivo (F)", "visitante": "Espanyol (F)"},
+    {"num": 15, "local": "Inglaterra", "visitante": "España"}
+  ]
+}
