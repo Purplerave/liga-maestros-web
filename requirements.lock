@@ -20,9 +20,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 jmespath==1.1.0
 MarkupSafe==3.0.3
-numpy==2.4.6
 packaging==26.3
-pandas==3.0.6
 pycparser==3.0
 pydantic==2.13.5
 pydantic_core==2.46.5

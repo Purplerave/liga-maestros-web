@@ -2,31 +2,10 @@
   "jornada": 9,
   "temporada": "2026-2027",
   "created_at": "2026-09-22",
-  "fuente": "Entrega Jornada 9; columnas IA y Peña recibidas antes del cierre (26 sept 14:00)",
-  "gemini": {"nombre": "GEMINI", "signos": ["1", "1", "X", "1", "1", "X", "1", "2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "grok": {"nombre": "GROK", "signos": ["1", "1", "1", "X", "1", "1", "1", "2", "X", "1", "X", "1", "1", "2", "1-2"]},
-  "claude": {"nombre": "CLAUDE", "signos": ["1", "1", "1", "X", "1", "1", "1", "X", "1", "1", "1", "1", "1", "X", "1-1"]},
-  "chatgpt": {
-    "nombre": "CHATGPT",
-    "signos": ["1", "1", "1", "X", "1", "X", "1", "2", "X", "1", "X", "1", "1", "1", "1-1"]
-  },
+  "fuente": "Entrega Jornada 9; solo columna del Programa (cierre 26 sept 14:00)",
   "programa": {
     "nombre": "PROGRAMA",
     "origen": "Programa Quiniela Maestro",
     "signos": ["1", "1", "1", "1X", "1", "1", "1", "X2", "1X", "1", "1", "1", "1", "1", "1-2"]
-  },
-  "copilot": {"nombre": "COPILOT", "signos": ["1X", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "geli": {"nombre": "GELI (GLM5)", "fuente_ia": "glm5", "signos": ["1", "1", "1", "1", "1", "1", "1", "X", "1X", "1", "1", "1", "1", "1", "1-2"]},
-  "chipi": {"nombre": "CHIPI (DEEPSEEK)", "fuente_ia": "deepseek", "signos": ["1", "1", "1", "1X", "1", "X", "1", "2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "pepe": {"nombre": "PEPE (PERPLEXITY)", "fuente_ia": "perplexity", "signos": ["1", "1", "1", "1", "1", "1", "1", "X", "1", "1", "1", "1", "1", "X", "1-1"]},
-  "profe": {"nombre": "PROFE (META)", "fuente_ia": "meta", "signos": ["1", "1", "1", "2", "1", "1", "1", "X", "1X", "1", "1", "1", "1", "1", "1-2"]},
-  "sesudo": {"nombre": "SESUDO (KIMI)", "fuente_ia": "kimi", "signos": ["1", "1", "X", "1", "1", "1", "1", "2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "erniebot": {"nombre": "ERNIEBOT (BAIDU)", "fuente_ia": "baidu", "signos": ["1", "1", "1", "X", "1", "1", "1", "X", "1", "1", "X", "1", "1", "1", "0-1"]},
-  "jimmy": {"nombre": "JIMMY", "signos": ["X", "1", "1", "X", "1", "1", "X", "X", "X", "1", "1", "1", "1", "1", "1-1"]},
-  "luzia": {"nombre": "LUZIA", "signos": ["1", "1", "1", "1", "1", "1", "1", "X", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "arena": {"nombre": "ARENA", "signos": ["1", "1", "1", "1X", "1", "1", "1", "2", "1", "1", "1", "1", "1", "X", "1-2"]},
-  "gstudio": {"nombre": "GSTUDIO", "signos": ["1", "1", "1", "1", "1", "1", "1", "X2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "oraculo": {"nombre": "QWEN", "fuente_ia": "qwen", "signos": ["1X", "1", "1", "1", "X", "1", "1", "2", "1", "1", "1", "1", "1", "1", "1-2"]},
-  "muse": {"nombre": "MUSE", "signos": ["1", "1", "1", "X", "1", "1", "1", "1", "2", "1", "1", "1", "1", "1", "1-1"]},
-  "agentek": {"nombre": "AgenteK", "signos": ["X", "1", "1", "1", "X", "2", "1", "X", "1X", "1", "X", "1", "1", "1", "1-1"]}
+  }
 }
