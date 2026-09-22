@@ -1,15 +1,15 @@
-1. VPS Vaasa - Inter Turku
-2. TPS Turku - IFK Mariehamn
-3. AC Oulu - Ilves Tampere
-4. FC Lahti - FF Jaro
-5. IF Gnistan - KuPS Kuopio
-6. Fredrikstad - Sandefjord
-7. Start - Viking
-8. Molde FK - Sarpsborg
-9. KFUM Oslo - Kristiansund
-10. Aalesunds FK - Tromsø IL
-11. Brann - Rosenborg
-12. Häcken - Kalmar FF
-13. IFK Göteborg - Degerfors IF
-14. Brommapojkarna - Malmoe
-15. Pleno al 15: AIK - Orgryte IS
+1. Ceuta - R. Sociedad B
+2. Granada - Andorra FC
+3. Celta Fortuna - Sabadell
+4. Tenerife - Cádiz
+5. Valladolid - Córdoba
+6. Mallorca - Almería
+7. Burgos - Eldense
+8. Eibar - Las Palmas
+9. R. Oviedo - Sporting
+10. Leganés - Castellón
+11. Ath. Club (F) - At. Madrid (F)
+12. Valencia (F) - Tenerife (F)
+13. Sevilla (F) - Eibar (F)
+14. Deportivo (F) - Espanyol (F)
+15. Pleno al 15: Inglaterra - España

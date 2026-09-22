@@ -267,9 +267,62 @@ function standingsSignature(data) {
             .join(","))
         .join("|");
 }
+function consensoSignature(data) {
+    const cons = data?.consenso_pena || [];
+    return cons.map(c => `${c.id}:${c.ganador||""}:${c.p1||0}:${c.px||0}:${c.p2||0}:${c.total||0}`).join("|") + "|" + JSON.stringify(data?.consenso_pleno_pena||{});
+}
+function rankingSignature(data) {
+    const r = data?.ranking_maestros || {};
+    return Object.entries(r).map(([k,v]) => `${k}:${v.total||0}:${v.jornada||0}:${v.jornada_live||0}`).sort().join("|");
+}
+function newsSignature(data) {
+    // No esta en payload slim, pero si cambia en full payload se detecta via ranking/consenso sync
+    return "";
+}
+
+/* El poll del directo pide la variante ligera del payload (``?slim=1``): solo
+   lo que puede cambiar en 30 s (marcadores, estado, clasificaciones,
+   comentarista). Cada ``LIVE_HEAVY_SYNC_POLLS`` polls sin cambios se hace
+   ademas una recarga silenciosa de las partes pesadas (ranking en vivo,
+   consenso de la Pena, predicciones) para que no se queden detras.
+   v2: 2 polls en ventana de jornada para que el consenso no se quede atras. */
+const LIVE_HEAVY_SYNC_POLLS = 2;
+const LIVE_VOLATILE_KEYS = [
+    "partidos",
+    "all_league_matches",
+    "live_matches",
+    "standings",
+    "multi_league_standings",
+];
+let liveSnapshotEtag = null;
+let liveSnapshotEtagJornada = "";
+let liveIdlePolls = 0;
+
+async function syncHeavyPayload(jornada) {
+    /* Refresca en silencio las partes pesadas de ``state.data``: sin repintar
+       y sin tocar lo volatil, que ya llego en el payload ligero. */
+    try {
+        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(jornada)}`, { cache: "no-store" });
+        if (!response.ok) return false;
+        const fullData = await response.json();
+        if (String(fullData.jornada || "") !== String(state.jornada || "")) return false;
+        // Se descarta lo volatil: de eso ya se encargo el payload ligero y
+        // podria ser mas reciente que esta respuesta.
+        const pesado = { ...fullData };
+        LIVE_VOLATILE_KEYS.forEach(key => delete pesado[key]);
+        state.data = { ...state.data, ...pesado };
+        return true;
+    } catch (error) {
+        console.warn("No se pudo resincronizar el ranking", error);
+        return false;
+    }
+}
 
 async function refreshLiveSnapshot() {
-    if (!state.data || document.hidden) return;
+    /* Devuelve false cuando el refresco no llego (red, 504 del service
+       worker, servidor ocupado): quien programa el siguiente poll lo hace
+       antes para no perder un gol entero durante 30 segundos. */
+    if (!state.data || document.hidden) return true;
     try {
         const liveSignature = data => [
             ...(data?.partidos || []),
@@ -288,29 +341,85 @@ async function refreshLiveSnapshot() {
         const previousSignature = liveSignature(state.data);
         const previousResults = resultsSignature(state.data);
         const previousStandings = standingsSignature(state.data);
-        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`, { cache: "no-store" });
-        if (!response.ok) return;
+        const previousConsenso = consensoSignature(state.data);
+        const previousRanking = rankingSignature(state.data);
+        const jornada = String(state.jornada || "");
+        const headers = {};
+        /* Con el ETag del snapshot anterior un poll sin novedades cuesta
+           cero bytes: el servidor responde 304 y aqui no se repinta nada. */
+        if (liveSnapshotEtag && liveSnapshotEtagJornada === jornada) {
+            headers["If-None-Match"] = liveSnapshotEtag;
+        }
+        const response = await fetch(`/api/liga/data?j=${encodeURIComponent(jornada)}&slim=1`, {
+            cache: "no-store",
+            headers
+        });
+        if (response.status === 304) return true;
+        if (!response.ok) return false;
         const freshData = await response.json();
-        if (String(freshData.jornada || "") !== String(state.jornada || "")) return;
+        liveSnapshotEtag = response.headers.get("ETag") || null;
+        liveSnapshotEtagJornada = jornada;
+        if (String(freshData.jornada || "") !== String(state.jornada || "")) return true;
         const nextSignature = liveSignature(freshData);
         const nextResults = resultsSignature(freshData);
         const nextStandings = standingsSignature(freshData);
-        state.data = freshData;
-        logoAliasIndex = null;
-        logoCache.clear();
+        const nextConsenso = consensoSignature({ ...state.data, ...freshData });
+        const nextRanking = rankingSignature({ ...state.data, ...freshData });
         // Un partido que termina deja de ser "live": si solo mirasemos los
         // partidos en juego, el resultado final y la clasificacion nunca se
         // repintarian. Por eso tambien se comparan marcadores y clasificacion.
-        const changed = previousSignature !== nextSignature
-            || previousResults !== nextResults
-            || previousStandings !== nextStandings;
-        if (!changed) return;
+        const resultsChanged = previousResults !== nextResults;
+        const standingsChanged = previousStandings !== nextStandings;
+        const consensoChanged = previousConsenso !== nextConsenso;
+        const rankingChanged = previousRanking !== nextRanking;
+        const changed = previousSignature !== nextSignature || resultsChanged || standingsChanged || consensoChanged || rankingChanged;
+        // Cerrar el boleto revela las predicciones de todos: tambien exige
+        // volver a por el payload completo.
+        const lockChanged = Boolean(freshData.is_locked) !== Boolean(state.data.is_locked)
+            || Boolean(freshData.ticket_guardado) !== Boolean(state.data.ticket_guardado);
+        if (freshData.slim) {
+            // El payload ligero no trae participantes, consenso ni ranking:
+            // se mezcla sobre la carga completa anterior en vez de sustituirla.
+            const volatil = { ...freshData };
+            delete volatil.slim;
+            state.data = { ...state.data, ...volatil };
+        } else {
+            // Backend sin ?slim=1 (version antigua desplegada): sigue mandando
+            // el payload completo y se comporta exactamente como antes.
+            state.data = freshData;
+        }
+        logoAliasIndex = null;
+        logoCache.clear();
+        if (!changed && !lockChanged) {
+            if (freshData.slim) {
+                // Sin novedades no se repinta nada; lo pesado se resincroniza
+                // cada varios polls para que el consenso no se quede atras.
+                liveIdlePolls += 1;
+                if (liveIdlePolls >= LIVE_HEAVY_SYNC_POLLS) {
+                    liveIdlePolls = 0;
+                    void syncHeavyPayload(jornada);
+                }
+            }
+            return true;
+        }
+        liveIdlePolls = 0;
         // La Peña se recalcula con cada resultado cerrado.
-        if (previousResults !== nextResults && typeof ensureContestData === "function") {
+        if (resultsChanged && typeof ensureContestData === "function") {
             try { await ensureContestData({ force: true }); } catch { /* no bloquea el repintado */ }
         }
-        if (state.currentFilter === "LIVE" && patchLiveArena()) return;
-        if (state.currentFilter === "TICKET" && patchTicketArena()) return;
+        /* El ranking en vivo, el consenso y las predicciones dependen de los
+           resultados: cuando algo cambia de verdad se pide el payload
+           completo, que ademas repinta con el parche barato si la vista lo
+           permite. Sin ?slim=1 no hace falta: ya viene todo. */
+        if (freshData.slim && (resultsChanged || standingsChanged || lockChanged)) {
+            if (typeof refreshData === "function") {
+                refreshData({ auto: true }).catch(error => console.warn("No se pudo recargar el payload completo", error));
+            }
+            return true;
+        }
+        if (state.currentFilter === "LIVE" && typeof patchLiveArena === "function" && patchLiveArena()) return true;
+        if (state.currentFilter === "TICKET" && typeof patchTicketArena === "function" && patchTicketArena()) return true;
+        if (state.currentFilter === "ALL" && typeof patchCoverPage === "function" && patchCoverPage()) return true;
         const pageX = window.scrollX;
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
@@ -320,17 +429,35 @@ async function refreshLiveSnapshot() {
         const nextTable = qs("matches-body")?.querySelector(".arena-table-wrap");
         if (nextTable) nextTable.scrollLeft = tableScroll;
         loadPorra();
+        return true;
     } catch (error) {
         console.warn("No se pudo refrescar el directo", error);
+        return false;
     }
 }
 
 
+/* La paleta de comandos y las señales UX llegan con `late_assets.js`
+   (Frente 2: fuera del camino critico). Hasta que ese modulo carga,
+   `window.CommandPalette` y `window.UXSignals` no existen, asi que el inicio
+   se intenta dos veces como maximo: aqui (por si el navegador ya los tenia en
+   cache) y cuando el cargador avisa con `liga:late-ready`. Nunca bloquea el
+   arranque de la portada. */
+let shellExtrasReady = false;
+function initShellExtras() {
+    if (shellExtrasReady) return true;
+    if (!window.CommandPalette && !window.UXSignals) return false;
+    try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
+    try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
+    shellExtrasReady = true;
+    return true;
+}
+document.addEventListener("liga:late-ready", () => initShellExtras());
+
 document.addEventListener("DOMContentLoaded", async () => {
     bindEvents();
     initMicroInteractions();
-    try { window.CommandPalette?.init(); } catch (error) { console.warn("[cmdk] init fallido", error); }
-    try { window.UXSignals?.init(); } catch (error) { console.warn("[ux] init fallido", error); }
+    initShellExtras();
     await refreshData();
     startLiveUpdates();
     showWelcomeOnboarding();
@@ -352,8 +479,10 @@ function livePollDelay() {
     // una jornada (desde 10 min antes del primer saque hasta que todos han
     // terminado): si solo mirasemos "hay algo en vivo" el primer gol del dia
     // podia tardar dos minutos en aparecer.
+    // v2: en idle (sin jornada) 60s en vez de 180s para que el consenso y
+    // noticias no parezcan congelados.
     if (hasLiveLeagueMatches()) return 30000;
-    return isJornadaWindowOpen() ? 45000 : 180000;
+    return isJornadaWindowOpen() ? 40000 : 60000;
 }
 
 function isJornadaWindowOpen() {
@@ -379,6 +508,10 @@ function matchKickoffTime(match) {
     return madridWallClockToMs(date, time);
 }
 
+/* Espera corta tras un refresco fallido: suficiente para no martillear un
+   servidor lento, bastante menos que los 30 s del poll normal. */
+const LIVE_FAILURE_RETRY_MS = 6000;
+
 function scheduleLivePoll(delay = livePollDelay()) {
     if (liveRefreshTimer) window.clearTimeout(liveRefreshTimer);
     if (document.hidden) {
@@ -387,8 +520,8 @@ function scheduleLivePoll(delay = livePollDelay()) {
     }
     liveRefreshTimer = window.setTimeout(async () => {
         liveRefreshTimer = null;
-        await refreshLiveSnapshot();
-        scheduleLivePoll();
+        const refreshed = await refreshLiveSnapshot();
+        scheduleLivePoll(refreshed ? undefined : LIVE_FAILURE_RETRY_MS);
     }, delay);
 }
 
