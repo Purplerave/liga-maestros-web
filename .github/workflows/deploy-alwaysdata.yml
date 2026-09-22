@@ -62,25 +62,29 @@ jobs:
           CURRENT="$(readlink -f "$HOME_DIR/current" 2>/dev/null || true)"
           mkdir -p "$RELEASES"
 
-          # Failed extractions never receive .release-sha and are always disposable.
+          # Incomplete releases (lacking .release-sha or venv/.venv-ok) are disposable.
           find "$RELEASES" -mindepth 1 -maxdepth 1 -type d | while read -r release; do
-            if [ "$release" != "$CURRENT" ] && [ ! -f "$release/.release-sha" ]; then
-              rm -rf -- "$release"
+            if [ "$release" != "$CURRENT" ]; then
+              if [ ! -f "$release/.release-sha" ] || [ ! -f "$release/venv/.venv-ok" ]; then
+                rm -rf -- "$release"
+              fi
             fi
           done
 
-          # Keep the active release plus the two newest complete rollback copies.
+          # Keep the active release plus the newest complete rollback copy.
           kept=0
           find "$RELEASES" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
             | sort -nr | cut -d' ' -f2- | while read -r release; do
               [ "$release" = "$CURRENT" ] && continue
-              [ -f "$release/.release-sha" ] || continue
+              { [ -f "$release/.release-sha" ] && [ -f "$release/venv/.venv-ok" ]; } || continue
               kept=$((kept + 1))
-              if [ "$kept" -gt 2 ]; then
+              if [ "$kept" -gt 1 ]; then
                 rm -rf -- "$release"
               fi
             done
 
+          rm -rf "$HOME_DIR/.cache/pip"
+          find "$HOME_DIR/runtime/backups" -type f -mtime +7 -delete 2>/dev/null || true
           find "$HOME_DIR" -maxdepth 1 -type f -name 'deploy-*.tar' -delete
           df -h "$HOME_DIR"
           du -sh "$RELEASES" "$HOME_DIR/runtime" 2>/dev/null || true
@@ -150,7 +154,6 @@ jobs:
           mkdir -p "$RELEASE" "$HOME_DIR/runtime/data" "$HOME_DIR/runtime/backups"
           tar -xf "$ARCHIVE" -C "$RELEASE"
           rm "$ARCHIVE"
-          printf '%s\n' "$SHA" > "$RELEASE/.release-sha"
           ln -sfn "$HOME_DIR/runtime/app.env" "$RELEASE/.env"
 
           # Per-release venv for reproducible rollbacks (audit fix #5)
@@ -162,7 +165,9 @@ jobs:
           if [ ! -x "$RELEASE/venv/bin/python" ]; then
             python3 -m venv "$RELEASE/venv"
           fi
-          "$RELEASE/venv/bin/python" -m pip install --disable-pip-version-check -q -r "$REQ_FILE"
+          "$RELEASE/venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -q -r "$REQ_FILE"
+          touch "$RELEASE/venv/.venv-ok"
+          printf '%s\n' "$SHA" > "$RELEASE/.release-sha"
           # Keep a compatibility symlink at the old shared location for health scripts that expect it
           ln -sfn "$RELEASE/venv" "$HOME_DIR/venv"
 
