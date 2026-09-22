@@ -1,0 +1,12 @@
+{
+  "jornada": 9,
+  "temporada": "2026-2027",
+  "generado_en": "2026-09-22T00:00:00+02:00",
+  "version_config": "motor_quinielistico_v4",
+  "nota": "Mejor boleto del Programa J9 con exactamente 3 dobles: partidos 4 (Tenerife-Cádiz), 8 (Eibar-Las Palmas) y 9 (derbi asturiano R. Oviedo-Sporting). Coste: 8 columnas. Pleno al 15: Inglaterra-España 1-2.",
+  "signos": ["1", "1", "1", "1X", "1", "1", "1", "X2", "1X", "1", "1", "1", "1", "1", "1-2"],
+  "dobles": [4, 8, 9],
+  "n_dobles": 3,
+  "n_columnas": 8,
+  "coste_euros": 6.0
+}
