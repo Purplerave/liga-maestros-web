@@ -9,7 +9,7 @@
     if (!("serviceWorker" in navigator)) return;
     const swUrl = document.currentScript?.dataset.swUrl || "/static/sw.js";
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register(swUrl).catch(error => {
+        navigator.serviceWorker.register(swUrl, { scope: "/" }).catch(error => {
             console.warn("[SW] Registro fallido:", error);
         });
     });
