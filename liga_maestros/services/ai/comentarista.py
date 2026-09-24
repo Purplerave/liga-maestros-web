@@ -253,7 +253,7 @@ def construir_comentarios(matches):
 
 _refresco_lock = threading.Lock()
 _refresco_en_curso = False
-_ultimo_intento = 0.0
+_ultimo_intento: float | None = None
 _ultimo_hilo: threading.Thread | None = None
 # Espera mínima entre intentos fallidos: si la IA no responde, no se relanza en
 # cada petición (el directo hace una cada 30 s por cliente).
@@ -265,7 +265,7 @@ def _reset_estado_refresco():
     global _refresco_en_curso, _ultimo_intento, _ultimo_hilo
     with _refresco_lock:
         _refresco_en_curso = False
-        _ultimo_intento = 0.0
+        _ultimo_intento = None
         _ultimo_hilo = None
 
 
@@ -276,7 +276,7 @@ def _programar_refresco(entrada, firma):
         if _refresco_en_curso:
             return False
         ahora = time.monotonic()
-        if ahora - _ultimo_intento < REINTENTO_SEGUNDOS:
+        if _ultimo_intento is not None and ahora - _ultimo_intento < REINTENTO_SEGUNDOS:
             return False
         _refresco_en_curso = True
         _ultimo_intento = ahora
