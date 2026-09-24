@@ -611,6 +611,15 @@ def ensure_jornada_8(conn):
     return updated + imported
 
 
+def ensure_jornada_9(conn):
+    """Seed the manually supplied Jornada 9 prediction tickets."""
+    updated = ensure_jornada_completa(conn, 9)
+    imported = _import_compact_prediction_tickets(conn, 9)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     conn.commit()
@@ -709,6 +718,11 @@ def run_startup_migrations():
             except Exception as e:
                 import sys
                 print(f"[migration] ensure_jornada_8 failed (non-fatal): {e}", file=sys.stderr)
+            try:
+                ensure_jornada_9(conn)
+            except Exception as e:
+                import sys
+                print(f"[migration] ensure_jornada_9 failed (non-fatal): {e}", file=sys.stderr)
             from ..services.season_rosters import sync_runtime_standings_files
             try:
                 sync_runtime_standings_files()
