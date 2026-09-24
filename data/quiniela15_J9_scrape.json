@@ -1,0 +1,24 @@
+{
+  "jornada": 9,
+  "source_url": "https://www.quiniela15.com/pronostico-quiniela",
+  "scraped_at": "2026-09-22T00:00:00+02:00",
+  "cierre": "viernes 26 de septiembre de 2026 a las 14:00",
+  "temporada": "2026-2027",
+  "partidos": [
+    {"num": 1, "local": "Ceuta", "visitante": "R. Sociedad B", "fecha": "2026-09-26", "hora": "14:00", "division": "segunda"},
+    {"num": 2, "local": "Granada", "visitante": "Andorra FC", "fecha": "2026-09-26", "hora": "16:15", "division": "segunda"},
+    {"num": 3, "local": "Celta Fortuna", "visitante": "Sabadell", "fecha": "2026-09-26", "hora": "18:30", "division": "segunda"},
+    {"num": 4, "local": "Tenerife", "visitante": "Cádiz", "fecha": "2026-09-26", "hora": "18:30", "division": "segunda"},
+    {"num": 5, "local": "Valladolid", "visitante": "Córdoba", "fecha": "2026-09-27", "hora": "14:00", "division": "segunda"},
+    {"num": 6, "local": "Mallorca", "visitante": "Almería", "fecha": "2026-09-27", "hora": "16:15", "division": "segunda"},
+    {"num": 7, "local": "Burgos", "visitante": "Eldense", "fecha": "2026-09-27", "hora": "18:30", "division": "segunda"},
+    {"num": 8, "local": "Eibar", "visitante": "Las Palmas", "fecha": "2026-09-27", "hora": "18:30", "division": "segunda"},
+    {"num": 9, "local": "R. Oviedo", "visitante": "Sporting", "fecha": "2026-09-27", "hora": "21:00", "division": "segunda"},
+    {"num": 10, "local": "Leganés", "visitante": "Castellón", "fecha": "2026-09-28", "hora": "20:30", "division": "segunda"},
+    {"num": 11, "local": "Ath. Club (F)", "visitante": "At. Madrid (F)", "fecha": "2026-09-27", "hora": "12:00", "division": "liga_f"},
+    {"num": 12, "local": "Valencia (F)", "visitante": "Tenerife (F)", "fecha": "2026-09-27", "hora": "12:00", "division": "liga_f"},
+    {"num": 13, "local": "Sevilla (F)", "visitante": "Eibar (F)", "fecha": "2026-09-27", "hora": "16:00", "division": "liga_f"},
+    {"num": 14, "local": "Deportivo (F)", "visitante": "Espanyol (F)", "fecha": "2026-09-27", "hora": "18:00", "division": "liga_f"},
+    {"num": 15, "local": "Inglaterra", "visitante": "España", "fecha": "2026-09-26", "hora": "20:45", "division": "internacional", "pleno_al_15": true}
+  ]
+}

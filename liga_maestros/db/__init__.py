@@ -10,11 +10,13 @@ _migrations.J76_FALLBACK_MATCHES = J76_FALLBACK_MATCHES
 
 def _ensure_jornada_75(conn):
     _migrations.ensure_jornada_completa(conn, 75, fallback_matches=J75_FALLBACK_MATCHES, force=True)
+    _migrations._import_jornada_resultados(conn, 75)
     conn.commit()
 
 
 def _ensure_jornada_76(conn):
     _migrations.ensure_jornada_completa(conn, 76, fallback_matches=J76_FALLBACK_MATCHES)
+    _migrations._import_jornada_resultados(conn, 76)
     conn.commit()
 
 

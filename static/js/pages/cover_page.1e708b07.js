@@ -584,9 +584,10 @@ function renderNewspaperCoverPageV3() {
         const maestroCells = visibleMasters.map(col => {
             const signs = coverPredictionSigns(predictions[col.id]);
             const sign = signs[i] || "-";
-            const signEmpty = sign === "-";
-            const signHit = isClosed && realSign && sign === realSign;
-            const hitClass = signHit ? " is-hit" : "";
+            const signEmpty = sign === "-" || sign === "—";
+            const signHit = isClosed && realSign && !signEmpty && String(sign).toUpperCase() === String(realSign).toUpperCase();
+            const signMiss = isClosed && realSign && !signEmpty && !signHit;
+            const hitClass = signHit ? " is-hit" : (signMiss ? " is-miss" : "");
             return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}${isPlenoRow ? " is-pleno" : ""}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
         }).join("");
 
@@ -602,8 +603,10 @@ function renderNewspaperCoverPageV3() {
             }
         }
         const penaEmpty = penaSign === "—" || penaSign === "-";
-        const penaHit = isClosed && realSign && penaSign === realSign;
-        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaHit ? " is-hit" : ""}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
+        const penaHit = isClosed && realSign && !penaEmpty && String(penaSign).toUpperCase() === String(realSign).toUpperCase();
+        const penaMiss = isClosed && realSign && !penaEmpty && !penaHit;
+        const penaState = penaHit ? " is-hit" : (penaMiss ? " is-miss" : "");
+        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaState}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
 
         return `
             <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${match.id}">
@@ -891,4 +894,244 @@ function renderNewspaperCoverPageV3() {
             </section>
         </section>
     </div>`;
+
+/* ==========================================================================
+   PATCH COVER — Actualizacion quirurgica sin parpadeo
+   Evita el repintado completo de la portada cuando solo cambian marcadores,
+   clasificaciones o consenso. Se llama desde refreshLiveSnapshot y refreshData.
+   Devuelve true si pudo parchear, false si hay que hacer render completo.
+   ========================================================================== */
+function _coverFindRowByIdx(idx) {
+    return document.querySelector(`.cx-boleto-table tbody tr[data-match-idx="${idx}"], .cx-boleto-table tbody tr:nth-child(${idx+1})`);
+}
+function _coverFindRowById(id) {
+    if (!id) return null;
+    return document.querySelector(`.cx-boleto-table tbody tr[data-match-id="${CSS.escape(String(id))}"]`);
+}
+function _coverPatchWhenCell(match, cell) {
+    if (!cell || !match) return false;
+    const kind = _whenKind(match);
+    const label = _whenLabel(match) || "—";
+    const kindClass = kind === "live" ? " is-live-score" : (kind === "finished" ? " is-ft-score" : " is-schedule");
+    const newClass = `cx-r-when${kindClass}`;
+    const newText = String(label);
+    if (cell.textContent.trim() === newText && cell.className === newClass && cell.dataset.coverWhen === kind) return false;
+    cell.textContent = newText;
+    cell.className = newClass;
+    cell.dataset.coverWhen = kind;
+    cell.classList.add("is-updating");
+    setTimeout(() => cell.classList.remove("is-updating"), 600);
+    return true;
+}
+function patchCoverPage() {
+    try {
+        if (typeof state === "undefined" || !state.data) return false;
+        if (typeof isCoverPage === "function" && !isCoverPage()) return false;
+        const cx = document.querySelector(".cx");
+        if (!cx) return false;
+        const matches = (state.data.partidos || []).slice(0, 15);
+        if (!matches.length) return false;
+        const predictions = state.data.predicciones_actuales || {};
+        const consenso = Array.isArray(state.data.consenso_pena) ? state.data.consenso_pena : [];
+        const plenoConsenso = state.data.consenso_pleno_pena || {};
+        const masterCols = coverMasterColumns();
+        const visibleMasters = _visibleMasters(masterCols);
+        // 1) Ticker — reconstruir solo si cambio el contenido
+        const quinielaPairs = new Set(matches.map(_matchPairKey));
+        const liveMatches = [...matches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
+        const liveCount = liveMatches.length;
+        const finishedMatches = matches.filter(m => _finished(m) && _hasScore(m));
+        const comentarista = state.data.comentarista || {};
+        const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
+        const tickerTrack = cx.querySelector(".cx-ticker-track");
+        if (tickerTrack) {
+            const buildTickerItems = () => {
+                const liveItems = liveMatches.map(m => {
+                    const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
+                    const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
+                    const score = _liveScoreText(m);
+                    const minute = _liveMinuteLabel(m);
+                    return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
+                }).join("");
+                const ftItems = finishedMatches.map(m => {
+                    const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
+                    const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
+                    const score = _liveScoreText(m);
+                    return `<span class="cx-ticker-item is-ft"><i class="cx-ticker-dot is-ft"></i><b>FT</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
+                }).join("");
+                const commItems = comentarios.map(c => {
+                    const local = _abbr(c.local, 3);
+                    const visitante = _abbr(c.visitante, 3);
+                    const contexto = `${local}${c.marcador ? ` ${String(c.marcador)} ` : "–"}${visitante}`;
+                    return `<span class="cx-ticker-item is-comentario"><i class="cx-ticker-dot is-comentario"></i><b>COMENTARISTA</b> ${escapeHtml(String(c.texto || ""))} <em>${escapeHtml(contexto)}</em></span>`;
+                }).join("");
+                return liveItems + ftItems + commItems;
+            };
+            const newTrackItems = buildTickerItems();
+            const tickerLabel = liveCount ? "⚽ EN DIRECTO" : (finishedMatches.length ? "⚽ RESULTADOS" : "");
+            const labelEl = cx.querySelector(".cx-ticker-label");
+            if (labelEl && labelEl.textContent !== tickerLabel) labelEl.textContent = tickerLabel;
+            // Solo si el contenido cambio de verdad
+            const currentSig = tickerTrack.dataset.sig || "";
+            const newSig = `${liveCount}|${finishedMatches.length}|${comentarios.length}|${newTrackItems.length}`;
+            if (currentSig !== newSig || !tickerTrack.dataset.sig) {
+                const full = `<span class="cx-ticker-label">${escapeHtml(tickerLabel)}</span>${newTrackItems}${newTrackItems}`;
+                // Evitar parpadeo: solo si hay cambio
+                if (tickerTrack.innerHTML.length !== full.length || tickerTrack.textContent.length < 10) {
+                    tickerTrack.innerHTML = full;
+                }
+                tickerTrack.dataset.sig = newSig;
+            }
+        }
+        // 2) KPIs superiores — PEÑA vs IA, TU quiniela
+        const bando = coverBandoDetailed();
+        const humanAvg = bando.humanAvg || 0;
+        const aiAvg = bando.aiAvg || 0;
+        const penaEl = cx.querySelector(".cx-kpi-num.is-pena");
+        const iaEl = cx.querySelector(".cx-kpi-num.is-ia");
+        if (penaEl) {
+            const newVal = humanAvg.toFixed(1).replace(/\.0$/, "");
+            if (penaEl.textContent !== newVal) penaEl.textContent = newVal;
+        }
+        if (iaEl) {
+            const newVal = aiAvg.toFixed(1).replace(/\.0$/, "");
+            if (iaEl.textContent !== newVal) iaEl.textContent = newVal;
+        }
+        const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
+        const doneEl = cx.querySelector("#cx-done");
+        const statusEl = cx.querySelector(".cx-boleto-status b");
+        const barEl = cx.querySelector(".cx-boleto-bar i");
+        const kpiBarEl = cx.querySelector(".cx-kpi-bar i");
+        if (doneEl && doneEl.textContent !== String(userDone)) doneEl.textContent = String(userDone);
+        if (statusEl && statusEl.textContent !== String(userDone)) statusEl.textContent = String(userDone);
+        if (barEl) {
+            const w = `${((userDone/15)*100).toFixed(1)}%`;
+            if (barEl.style.width !== w) barEl.style.width = w;
+        }
+        if (kpiBarEl) {
+            const w = `${((userDone/15)*100).toFixed(1)}%`;
+            if (kpiBarEl.style.width !== w) kpiBarEl.style.width = w;
+        }
+        // 3) Boleto — parchear cada fila sin recrear la tabla
+        const tbody = cx.querySelector(".cx-boleto-table tbody");
+        if (tbody) {
+            const rows = [...tbody.querySelectorAll("tr.cx-row")];
+            matches.forEach((match, idx) => {
+                const row = rows[idx] || _coverFindRowById(match.id);
+                if (!row) return;
+                const isLive = _live(match);
+                const isClosed = _closed(match);
+                const realSign = String(match.signo_actual || "").toUpperCase();
+                const pick = _upick(idx);
+                // clases de fila
+                row.classList.toggle("is-live", !!isLive);
+                row.classList.toggle("is-closed", !!isClosed);
+                if (pick) {
+                    if (realSign && pick === realSign) {
+                        row.classList.add("is-hit");
+                        row.classList.remove("is-miss");
+                    } else if (realSign) {
+                        row.classList.add("is-miss");
+                        row.classList.remove("is-hit");
+                    } else {
+                        row.classList.remove("is-hit", "is-miss");
+                    }
+                }
+                // HORA / RES
+                const whenCell = row.querySelector(".cx-r-when");
+                if (whenCell) _coverPatchWhenCell(match, whenCell);
+                // Signos IA
+                visibleMasters.forEach((col, colIdx) => {
+                    const signs = coverPredictionSigns(predictions[col.id]);
+                    const sign = signs[idx] || "-";
+                    const td = row.querySelectorAll(".cx-r-ia")[colIdx];
+                    if (!td) return;
+                    const span = td.querySelector(".cx-ia-sign");
+                    if (!span) return;
+                    if (span.textContent.trim() !== String(sign)) {
+                        span.textContent = String(sign);
+                        span.classList.add("is-updating");
+                        setTimeout(() => span.classList.remove("is-updating"), 600);
+                    }
+                    const empty = sign === "-" || sign === "—";
+                    span.classList.toggle("is-empty", !!empty);
+                    const hit = isClosed && realSign && !empty && String(sign).toUpperCase() === realSign;
+                    const miss = isClosed && realSign && !empty && !hit;
+                    span.classList.toggle("is-hit", !!hit);
+                    span.classList.toggle("is-miss", !!miss);
+                });
+                // Peña
+                const penaTd = row.querySelector(".cx-r-ia.is-pena");
+                if (penaTd) {
+                    const span = penaTd.querySelector(".cx-ia-sign");
+                    if (span) {
+                        const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
+                        let penaSign = "—";
+                        if (idx === 14) {
+                            if (plenoConsenso.topScore && plenoConsenso.topScore[0]) penaSign = String(plenoConsenso.topScore[0]);
+                        } else if (rowCons) {
+                            if (String(rowCons.ganador || "").trim() && String(rowCons.ganador).trim() !== "-") {
+                                penaSign = String(rowCons.ganador).trim();
+                            } else if (Number(rowCons.total || 0) > 0 && coverPenaReading(rowCons)) {
+                                penaSign = coverPenaReading(rowCons).sign || "—";
+                            }
+                        }
+                        if (span.textContent.trim() !== String(penaSign)) {
+                            span.textContent = String(penaSign);
+                            span.classList.add("is-updating");
+                            setTimeout(() => span.classList.remove("is-updating"), 600);
+                        }
+                        const empty = penaSign === "—" || penaSign === "-";
+                        span.classList.toggle("is-empty", !!empty);
+                        const hit = isClosed && realSign && !empty && String(penaSign).toUpperCase() === realSign;
+                        const miss = isClosed && realSign && !empty && !hit;
+                        span.classList.toggle("is-hit", !!hit);
+                        span.classList.toggle("is-miss", !!miss);
+                    }
+                }
+            });
+        }
+        // 4) Live panel — solo si cambia el numero de partidos
+        const livePanelBody = cx.querySelector(".cx-live .cx-pn-body");
+        if (livePanelBody) {
+            const existingCount = livePanelBody.querySelectorAll(".cx-live-card").length;
+            if (existingCount !== liveCount) {
+                // Re-render ligero del panel live
+                const cardsHtml = liveMatches.slice(0,4).map(m => {
+                    const homeFull = _liveTeamLabel(_matchSideName(m, "home"), 12);
+                    const awayFull = _liveTeamLabel(_matchSideName(m, "away"), 12);
+                    const score = _liveScoreText(m);
+                    const minute = _liveMinuteLabel(m);
+                    const comp = _liveCompLabel(m);
+                    return `<div class="cx-live-card" data-page-action="LIVE"><span class="cx-live-pulse"></span><span class="cx-live-mincell"><span class="cx-live-min">${escapeHtml(String(minute))}</span>${comp ? `<span class="cx-live-comp">${escapeHtml(comp)}</span>` : ""}</span><div class="cx-live-match"><span class="cx-live-team is-home">${escapeHtml(homeFull)}</span><span class="cx-live-score">${escapeHtml(String(score))}</span><span class="cx-live-team is-away">${escapeHtml(awayFull)}</span></div></div>`;
+                }).join("") || '<div class="cx-empty">Ahora mismo no hay partidos en directo</div>';
+                livePanelBody.innerHTML = cardsHtml;
+            } else {
+                // Parchear solo marcadores y minutos
+                livePanelBody.querySelectorAll(".cx-live-card").forEach((card, i) => {
+                    const m = liveMatches[i];
+                    if (!m) return;
+                    const scoreEl = card.querySelector(".cx-live-score");
+                    const minEl = card.querySelector(".cx-live-min");
+                    const newScore = _liveScoreText(m);
+                    const newMin = _liveMinuteLabel(m);
+                    if (scoreEl && scoreEl.textContent !== String(newScore)) scoreEl.textContent = String(newScore);
+                    if (minEl && minEl.textContent !== String(newMin)) minEl.textContent = String(newMin);
+                });
+            }
+            const metaEl = cx.querySelector(".cx-live .cx-pn-meta");
+            if (metaEl) {
+                const newMeta = `${liveCount} PARTIDO${liveCount===1?"":"S"}`;
+                if (metaEl.textContent !== newMeta) metaEl.textContent = newMeta;
+            }
+        }
+        // 5) No forzamos re-render de standings/voto para no parpadear — se actualizan en el siguiente full render si hace falta
+        // Devolvemos true: parche aplicado, no hace falta render completo
+        return true;
+    } catch (e) {
+        console.warn("[cover] patch failed, fallback to full render", e);
+        return false;
+    }
+}
+
 }

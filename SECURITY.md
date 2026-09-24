@@ -1,6 +1,6 @@
 # Seguridad de Liga de Maestros
 
-Ultima revision: 2026-08-14
+Ultima revision: 2026-09-18
 
 ## Datos protegidos
 
@@ -46,8 +46,9 @@ puede ofrecer Flask y exige rotar credenciales.
 - SQLite fuera de las versiones inmutables, permisos `0600`, WAL, backups
   rotativos y `integrity_check`.
 - CI bloqueante para tests, dependencias vulnerables y material sensible rastreado.
-- Repositorio privado, permisos de Actions en solo lectura, acciones permitidas
-  restringidas y cada dependencia de CI fijada a un commit oficial verificado.
+- Repositorio público, permisos de Actions en solo lectura, acciones permitidas
+  restringidas, cada dependencia de CI fijada a SHA verificado y rama `main`
+  protegida (no force-push, no borrado, requiere CI verde y rama actualizada).
 - Alertas y correcciones automaticas de Dependabot activadas.
 
 ## Hallazgos corregidos en julio de 2026
@@ -65,7 +66,11 @@ puede ofrecer Flask y exige rotar credenciales.
 8. Se reescribieron las ramas, se fijaron las Actions por SHA y se restringio la
    cadena de suministro del despliegue. El 18 de julio de 2026 se solicito a
    GitHub Support la purga de referencias internas de la PR #1 mediante el
-   ticket #4581722; permanece pendiente hasta que GitHub confirme el borrado.
+   ticket #4581722. Tras la apertura del repositorio como público (septiembre
+   2026) se verificó que los objetos antiguos no son accesibles vía clon
+   ni vía API; el endpoint histórico por SHA devuelve 404. Revisión
+   confirmada el 18/09/2026 con `git log --all --full-history` y escaneo
+   Gitleaks/TruffleHog sin hallazgos.
 
 ## Hallazgos corregidos en agosto de 2026
 
@@ -77,6 +82,21 @@ puede ofrecer Flask y exige rotar credenciales.
    reserva usa un UPSERT condicional atomico y el esquema se crea al arrancar.
 4. SSE queda desactivado por defecto en Gunicorn sincrono y el cliente degrada a
    polling acotado para no agotar los threads del servicio.
+
+## Hallazgos corregidos en septiembre de 2026
+
+1. Health check separado en `live`/`ready`: `/health/live` verifica proceso,
+   `/health/ready` exige DB, esquema y jornada válida y devuelve 503 si falla;
+   el despliegue verifica `db.ok`, `build_sha` y payload real de `/api/liga/data`.
+2. Despliegue atómico con rollback automático y validación bloqueante del
+   importador del Programa (`|| true` eliminado).
+3. Métricas con cardinalidad acotada (`url_rule` en lugar de `path` crudo),
+   endpoint `/metrics` protegido y sin exposición de paths arbitrarios.
+4. Entorno virtual por release y lock reproducible de dependencias (`requirements.lock`).
+5. Migraciones versionadas con tabla `schema_migrations` y fallo bloqueante
+   (sin `try/except` silencioso en jornadas).
+6. Temporada configurable centralizada en `config/game.py` (`CURRENT_SEASON_START_YEAR`).
+7. Errores públicos genéricos con `request_id` y detalle solo en logs/Sentry.
 
 ## Operacion segura
 
@@ -107,8 +127,10 @@ puede ofrecer Flask y exige rotar credenciales.
   lanzamiento oficial; no deben quedar campos `Pendiente de configurar`.
 - GitHub puede conservar temporalmente objetos antiguos tras reescribir el
   historial. La base retirada no esta en ramas ni tags y el repositorio es
-  privado. El objeto antiguo continua accesible por SHA mientras GitHub procesa
-  el ticket #4581722 para retirar la referencia interna y sus vistas en cache.
-- GitHub no permite activar reglas de proteccion de rama en este repositorio
-  privado personal sin un plan compatible; CI y despliegue siguen siendo
-  obligatorios, pero el propietario conserva capacidad de `force-push`.
+  público desde septiembre de 2026. La purga del ticket #4581722 fue verificada
+  el 18/09/2026: el objeto antiguo no es recuperable por SHA y los escaneos
+  con Gitleaks/TruffleHog no reportan secretos.
+- La rama `main` está protegida mediante ruleset (sin force-push ni borrado,
+  requiere PR, CI verde y rama actualizada). El propietario conserva capacidad
+  de administración para emergencias, auditada vía `CODEOWNERS` y entorno
+  `production`.

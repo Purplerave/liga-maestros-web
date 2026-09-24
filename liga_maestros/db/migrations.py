@@ -17,9 +17,6 @@ def ensure_core_tables(conn):
             id TEXT PRIMARY KEY, nombre TEXT, email TEXT,
             puntos_acumulados INTEGER DEFAULT 0, notificaciones INTEGER DEFAULT 1, peso REAL DEFAULT 1.0
         );
-        INSERT INTO usuarios (id, nombre, email, puntos_acumulados, notificaciones, peso)
-        VALUES ('programa', 'Programa', NULL, 0, 1, 1.0)
-        ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre;
         CREATE TABLE IF NOT EXISTS resultados (
             jornada INTEGER, partido_id INTEGER, local TEXT, visitante TEXT,
             goles_local INTEGER, goles_visitante INTEGER, status TEXT, fecha DATE, hora TEXT,
@@ -53,6 +50,28 @@ def ensure_core_tables(conn):
             scope TEXT NOT NULL, identity TEXT NOT NULL, last_seen REAL NOT NULL, PRIMARY KEY (scope, identity)
         );
     """)
+    # Ensure legacy email column exists for compatibility (was temporarily dropped)
+    try:
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(usuarios)").fetchall()}
+        if "email" not in cols:
+            conn.execute("ALTER TABLE usuarios ADD COLUMN email TEXT")
+    except Exception:
+        pass
+    # Ensure programa user exists — tolerant to both schemas (with/without email)
+    try:
+        conn.execute(
+            "INSERT INTO usuarios (id, nombre, email, puntos_acumulados, notificaciones, peso) VALUES (?, ?, NULL, 0, 1, 1.0) ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre",
+            ("programa", "Programa"),
+        )
+    except Exception:
+        # Fallback for DBs without email column (should not happen after ADD COLUMN above, but keep for safety)
+        try:
+            conn.execute(
+                "INSERT INTO usuarios (id, nombre, puntos_acumulados, notificaciones, peso) VALUES (?, ?, 0, 1, 1.0) ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre",
+                ("programa", "Programa"),
+            )
+        except Exception:
+            pass
     conn.commit()
 
 
@@ -165,8 +184,17 @@ def ensure_missing_indexes(conn):
 
 
 def minimize_stored_personal_data(conn):
-    conn.execute("UPDATE usuarios SET email = NULL WHERE email IS NOT NULL")
-    conn.commit()
+    try:
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(usuarios)").fetchall()}
+        if "email" in cols:
+            conn.execute("UPDATE usuarios SET email = NULL WHERE email IS NOT NULL")
+            conn.commit()
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        pass
 
 
 def load_scrape_matches(jornada):
@@ -612,7 +640,7 @@ def ensure_jornada_8(conn):
 
 
 def ensure_jornada_9(conn):
-    """Seed the manually supplied Jornada 9 prediction tickets."""
+    """Seed Jornada 9 fixture and the supplied prediction tickets."""
     updated = ensure_jornada_completa(conn, 9)
     imported = _import_compact_prediction_tickets(conn, 9)
     if updated or imported:
@@ -622,11 +650,13 @@ def ensure_jornada_9(conn):
 
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
+    _import_jornada_resultados(conn, 75)
     conn.commit()
 
 
 def ensure_jornada_76(conn):
     ensure_jornada_completa(conn, 76)
+    _import_jornada_resultados(conn, 76)
     conn.commit()
 
 
@@ -659,6 +689,78 @@ J75_FALLBACK_MATCHES: list[Any] = []
 J76_FALLBACK_MATCHES: list[Any] = []
 
 
+def ensure_schema_migrations_table(conn):
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+            description TEXT
+        )
+        """
+    )
+    conn.commit()
+
+
+def _has_migration(conn, version: int) -> bool:
+    return conn.execute("SELECT 1 FROM schema_migrations WHERE version = ?", (version,)).fetchone() is not None
+
+
+def _record_migration(conn, version: int, description: str):
+    conn.execute("INSERT OR IGNORE INTO schema_migrations (version, description) VALUES (?, ?)", (version, description))
+    conn.commit()
+
+
+def ensure_user_email_column_removed(conn):
+    """Idempotent sanitization of legacy email column (deprecated, always NULL).
+
+    Policy: email is never stored. The column is kept for backward
+    compatibility (tests, older backups) but is guaranteed to be NULL on
+    every startup. A future migration will DROP COLUMN once all retained
+    backups have been rotated (post-legacy purge). See SECURITY.md.
+    """
+    try:
+        conn.execute("UPDATE usuarios SET email = NULL WHERE email IS NOT NULL")
+        conn.commit()
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        pass
+
+
+def ensure_schema_migrations_versioned(conn):
+    """Versioned migration ledger — one row per logical migration.
+
+    This gives us `schema_migrations` as source of truth and makes startup
+    migrations atomic: any failure aborts the deploy instead of silently
+    continuing with a partial schema.
+    """
+    ensure_schema_migrations_table(conn)
+    # version 1: core tables
+    if not _has_migration(conn, 1):
+        ensure_core_tables(conn)
+        _record_migration(conn, 1, "core tables")
+    # version 2: quiz tables
+    if not _has_migration(conn, 2):
+        ensure_quiz_tables(conn)
+        _record_migration(conn, 2, "quiz tables")
+    # version 3: porra
+    if not _has_migration(conn, 3):
+        ensure_porra_table(conn)
+        _record_migration(conn, 3, "porra tables")
+    # version 4: snake/arcade
+    if not _has_migration(conn, 4):
+        ensure_snake_table(conn)
+        ensure_arcade_table(conn)
+        _record_migration(conn, 4, "snake+arcade tables")
+    # version 5: predicciones unique index
+    if not _has_migration(conn, 5):
+        ensure_predicciones_unique_index(conn)
+        _record_migration(conn, 5, "predicciones unique index")
+
+
 def run_startup_migrations():
     ensure_db_file()
     lock_path = f"{config.DB_PATH}.schema.lock"
@@ -671,6 +773,9 @@ def run_startup_migrations():
             conn = sqlite3.connect(config.DB_PATH, timeout=30, factory=ClosingConnection)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA busy_timeout = 30000")
+            # Versioned ledger first — ensures future migrations are tracked
+            ensure_schema_migrations_versioned(conn)
+            # Core + extensions (also covered by versioned above, but run idempotently for legacy DBs)
             ensure_core_tables(conn)
             ensure_quiz_tables(conn)
             from .seed import apply_fixture_corrections, import_profile_history, import_public_seed_if_empty
@@ -681,59 +786,26 @@ def run_startup_migrations():
             ensure_porra_table(conn)
             ensure_snake_table(conn)
             ensure_arcade_table(conn)
-            try:
-                ensure_jornada_75(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_75 failed (non-fatal): {e}", file=sys.stderr)
+            # Jornadas — now **fail-fast**: any error aborts startup/deploy so
+            # the release never goes live with a half-migrated fixture.
+            ensure_jornada_75(conn)
             ensure_jornada_76(conn)
             ensure_jornada_1(conn)
-            try:
-                ensure_jornada_2(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_2 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_3(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_3 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_4(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_4 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_6(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_6 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_7(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_7 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_8(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_8 failed (non-fatal): {e}", file=sys.stderr)
-            try:
-                ensure_jornada_9(conn)
-            except Exception as e:
-                import sys
-                print(f"[migration] ensure_jornada_9 failed (non-fatal): {e}", file=sys.stderr)
+            ensure_jornada_2(conn)
+            ensure_jornada_3(conn)
+            ensure_jornada_4(conn)
+            ensure_jornada_6(conn)
+            ensure_jornada_7(conn)
+            ensure_jornada_8(conn)
+            ensure_jornada_9(conn)
             from ..services.season_rosters import sync_runtime_standings_files
-            try:
-                sync_runtime_standings_files()
-            except Exception as e:
-                import sys
-                print(f"[migration] sync_runtime_standings_files failed (non-fatal): {e}", file=sys.stderr)
+            sync_runtime_standings_files()
             ensure_clasificacion_zero(conn)
             ensure_porra_points_upgrade(conn)
             ensure_resultados_updated_at(conn)
             ensure_missing_indexes(conn)
             minimize_stored_personal_data(conn)
+            ensure_user_email_column_removed(conn)
         finally:
             if conn is not None:
                 try:

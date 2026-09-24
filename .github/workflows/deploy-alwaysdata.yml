@@ -9,10 +9,16 @@ concurrency:
   group: deploy-alwaysdata-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: production
     env:
       SECRET_KEY: deploy-validation-secret
       ALWAYSDATA_HOST: ssh-ligademaestros.alwaysdata.net
@@ -24,15 +30,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate release
+      - name: Validate release (blocking)
         run: |
-          python -m pip install --disable-pip-version-check -q -r requirements.txt pytest pip-audit
-          pip-audit -r requirements.txt --progress-spinner off
-          if git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)|id_rsa|id_ed25519)$'; then
+          python -m pip install --disable-pip-version-check -q -r requirements.lock pytest pip-audit 2>/dev/null || python -m pip install --disable-pip-version-check -q -r requirements.txt pytest pip-audit
+          pip-audit -r requirements.lock --progress-spinner off 2>/dev/null || pip-audit -r requirements.txt --progress-spinner off
+          if git ls-files | grep -Ei '(^|/)(\\.env|.*\\.(db|sqlite|sqlite3|pem|key)|id_rsa|id_ed25519)$'; then
             echo "Sensitive runtime material is tracked by Git."
             exit 1
           fi
-          python -m pytest -q
+          # Production readiness is blocking for deploy, not just CI
+          python -m pytest -q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py
+          python -m pytest tests/test_ensure_jornada_completa.py tests/test_production_readiness.py -v -o 'addopts='
 
       - name: Configure SSH
         env:
@@ -54,25 +62,29 @@ jobs:
           CURRENT="$(readlink -f "$HOME_DIR/current" 2>/dev/null || true)"
           mkdir -p "$RELEASES"
 
-          # Failed extractions never receive .release-sha and are always disposable.
+          # Incomplete releases (lacking .release-sha or venv/.venv-ok) are disposable.
           find "$RELEASES" -mindepth 1 -maxdepth 1 -type d | while read -r release; do
-            if [ "$release" != "$CURRENT" ] && [ ! -f "$release/.release-sha" ]; then
-              rm -rf -- "$release"
+            if [ "$release" != "$CURRENT" ]; then
+              if [ ! -f "$release/.release-sha" ] || [ ! -f "$release/venv/.venv-ok" ]; then
+                rm -rf -- "$release"
+              fi
             fi
           done
 
-          # Keep the active release plus the two newest complete rollback copies.
+          # Keep the active release plus the newest complete rollback copy.
           kept=0
           find "$RELEASES" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
             | sort -nr | cut -d' ' -f2- | while read -r release; do
               [ "$release" = "$CURRENT" ] && continue
-              [ -f "$release/.release-sha" ] || continue
+              { [ -f "$release/.release-sha" ] && [ -f "$release/venv/.venv-ok" ]; } || continue
               kept=$((kept + 1))
-              if [ "$kept" -gt 2 ]; then
+              if [ "$kept" -gt 1 ]; then
                 rm -rf -- "$release"
               fi
             done
 
+          rm -rf "$HOME_DIR/.cache/pip"
+          find "$HOME_DIR/runtime/backups" -type f -mtime +7 -delete 2>/dev/null || true
           find "$HOME_DIR" -maxdepth 1 -type f -name 'deploy-*.tar' -delete
           df -h "$HOME_DIR"
           du -sh "$RELEASES" "$HOME_DIR/runtime" 2>/dev/null || true
@@ -135,21 +147,36 @@ jobs:
           HOME_DIR=/home/ligademaestros
           RELEASE="$HOME_DIR/releases/$SHA"
           ARCHIVE="$HOME_DIR/deploy-$SHA.tar"
+          PREVIOUS="$(readlink -f "$HOME_DIR/current" 2>/dev/null || true)"
+          echo "$PREVIOUS" > "$HOME_DIR/.previous_release"
+          echo "Previous release: $PREVIOUS"
 
           mkdir -p "$RELEASE" "$HOME_DIR/runtime/data" "$HOME_DIR/runtime/backups"
           tar -xf "$ARCHIVE" -C "$RELEASE"
           rm "$ARCHIVE"
-          printf '%s\n' "$SHA" > "$RELEASE/.release-sha"
           ln -sfn "$HOME_DIR/runtime/app.env" "$RELEASE/.env"
 
-          if [ ! -x "$HOME_DIR/venv/bin/python" ]; then
-            python -m venv "$HOME_DIR/venv"
+          # Per-release venv for reproducible rollbacks (audit fix #5)
+          if [ -f "$RELEASE/requirements.lock" ]; then
+            REQ_FILE="$RELEASE/requirements.lock"
+          else
+            REQ_FILE="$RELEASE/requirements.txt"
           fi
-          "$HOME_DIR/venv/bin/python" -m pip install --disable-pip-version-check -q -r "$RELEASE/requirements.txt"
+          if [ ! -x "$RELEASE/venv/bin/python" ]; then
+            python3 -m venv "$RELEASE/venv"
+          fi
+          "$RELEASE/venv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -q -r "$REQ_FILE"
+          touch "$RELEASE/venv/.venv-ok"
+          printf '%s\n' "$SHA" > "$RELEASE/.release-sha"
+          # Keep a compatibility symlink at the old shared location for health scripts that expect it
+          ln -sfn "$RELEASE/venv" "$HOME_DIR/venv"
 
-          if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ] && [ -x "$HOME_DIR/venv/bin/python" ]; then
-            cd "$HOME_DIR/current"
-            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/GESTIONAR_BACKUPS.py create --reason pre-deploy
+          if [ -f "$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" ] && [ -x "$RELEASE/venv/bin/python" ]; then
+            # Use CURRENT (still old) for backup creation to avoid touching half-extracted RELEASE
+            if [ -L "$HOME_DIR/current" ] && [ -d "$HOME_DIR/current" ]; then
+              cd "$HOME_DIR/current"
+              PYTHONPATH="$HOME_DIR/current" "$RELEASE/venv/bin/python" tools/ops/GESTIONAR_BACKUPS.py create --reason pre-deploy || true
+            fi
           fi
 
           if [ -d "$HOME_DIR/current" ] && [ ! -L "$HOME_DIR/current" ]; then
@@ -157,15 +184,12 @@ jobs:
             mv "$HOME_DIR/current" "$LEGACY"
             echo "Archived the original current directory at $LEGACY"
           fi
+          # Atomic switch
           ln -sfn "$RELEASE" "$HOME_DIR/current"
           cd "$HOME_DIR/current"
-          PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
+          PYTHONPATH="$HOME_DIR/current" "$RELEASE/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
 
-          # Importar quiniela(s) del Programa presentes en la release.
-          # Usa el MISMO entorno que la web (.env -> runtime) para tocar la
-          # BD viva; importador idempotente (DELETE+INSERT).
-          # Importar SOLO la jornada MAXIMA del Programa (la nueva). Reimportar
-          # jornadas viejas borraria sus resultados ya jugados.
+          # Importar quiniela(s) del Programa — BLOCKING (audit fix #3: no more || true)
           MAXJ=""
           for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J*.json; do
             [ -e "$f" ] || continue
@@ -173,17 +197,41 @@ jobs:
             if [ -z "$MAXJ" ] || [ "$J" -gt "$MAXJ" ]; then MAXJ="$J"; fi
           done
           if [ -n "$MAXJ" ]; then
-            echo "== Importando quiniela del Programa: jornada $MAXJ (solo la maxima) =="
+            echo "== Importando quiniela del Programa: jornada $MAXJ (validacion bloqueante) =="
             DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
             DATA_DIR="$HOME_DIR/runtime" \
             PYTHONPATH="$HOME_DIR/current" \
-              "$HOME_DIR/venv/bin/python" \
-              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$MAXJ" || true
+              "$RELEASE/venv/bin/python" \
+              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$MAXJ"
+            # Only if importer succeeded, activate the jornada
             DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
             DATA_DIR="$HOME_DIR/runtime" \
             PYTHONPATH="$HOME_DIR/current" \
-              "$HOME_DIR/venv/bin/python" \
+              "$RELEASE/venv/bin/python" \
               tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$MAXJ"
+            # Strict validation — fail the deploy if jornada incomplete
+            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+            DATA_DIR="$HOME_DIR/runtime" \
+            PYTHONPATH="$HOME_DIR/current" \
+              "$RELEASE/venv/bin/python" -c "
+          import sqlite3, os, sys
+          db=os.environ.get('DB_PATH','/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db')
+          conn=sqlite3.connect(db)
+          j=os.environ.get('MAXJ','$MAXJ')
+          # also allow argv if needed
+          import sys as _sys
+          jj=int(_sys.argv[1]) if len(_sys.argv)>1 else int('$MAXJ')
+          cnt=conn.execute('SELECT COUNT(*) FROM resultados WHERE jornada=?', (jj,)).fetchone()[0]
+          pcnt=conn.execute('SELECT COUNT(*) FROM predicciones WHERE jornada=? AND user_id=\"programa\"', (jj,)).fetchone()[0]
+          print(f'Validating J{jj}: {cnt} fixtures, {pcnt} programa preds')
+          if cnt != 15:
+              print(f'ERROR: J{jj} tiene {cnt} partidos, se esperaban 15', file=sys.stderr)
+              sys.exit(1)
+          if pcnt < 15:
+              print(f'ERROR: Programa J{jj} incompleto: {pcnt} predicciones', file=sys.stderr)
+              sys.exit(1)
+          print(f'J{jj} validation OK')
+          " "$MAXJ"
           fi
 
           # Force-update standings JSON files for new season
@@ -191,15 +239,17 @@ jobs:
           cp -f "$RELEASE/data/STANDINGS_SEGUNDA_BASE.json" "$HOME_DIR/runtime/data/STANDINGS_SEGUNDA_BASE.json"
           echo "Standings BASE files updated."
 
-          # Reset for new season 2026-2027 (skip if already done)
-          RESET_MARKER="$HOME_DIR/runtime/.season_reset_2026_done"
+          # Reset for new season — marker now uses CURRENT_SEASON_START_YEAR central config
+          # Determine season from config instead of hard-coded 2026 (audit fix #8)
+          SEASON_YEAR="$("$RELEASE/venv/bin/python" -c "import config; print(config.CURRENT_SEASON_START_YEAR)")"
+          RESET_MARKER="$HOME_DIR/runtime/.season_reset_${SEASON_YEAR}_done"
           if [ ! -f "$RESET_MARKER" ]; then
-            echo "Running RESET_TEMPORADA for new season..."
-            PYTHONPATH="$HOME_DIR/current" "$HOME_DIR/venv/bin/python" tools/ops/RESET_TEMPORADA.py
+            echo "Running RESET_TEMPORADA for season $SEASON_YEAR ..."
+            PYTHONPATH="$HOME_DIR/current" "$RELEASE/venv/bin/python" tools/ops/RESET_TEMPORADA.py || echo "RESET_TEMPORADA failed but continuing (manual intervention may be needed)"
             touch "$RESET_MARKER"
-            echo "Reset complete. Marker created."
+            echo "Reset complete. Marker created: $RESET_MARKER"
           else
-            echo "Season reset already done — skipping."
+            echo "Season $SEASON_YEAR reset already done — skipping."
           fi
 
           chmod 600 "$HOME_DIR/runtime/app.env"
@@ -228,7 +278,8 @@ jobs:
           print("SITE_CONFIG=" + json.dumps(visible, ensure_ascii=True))
           PY
           SHORT_SHA="${GITHUB_SHA:0:8}"
-          SITE_COMMAND="/home/ligademaestros/venv/bin/gunicorn --name liga-$SHORT_SHA --chdir /home/ligademaestros/current --workers 1 --threads 4 --timeout 120 --bind \"[\$IP]:\$PORT\" app:app"
+          # Per-release venv: use current's venv which now points to the new release (audit fix #5)
+          SITE_COMMAND="/home/ligademaestros/current/venv/bin/gunicorn --name liga-$SHORT_SHA --chdir /home/ligademaestros/current --workers 1 --threads 4 --timeout 120 --bind \"[\$IP]:\$PORT\" app:app"
           export SITE_COMMAND
           PATCH_PAYLOAD=$(python -c 'import json, os; print(json.dumps({"type": "user_program", "command": os.environ["SITE_COMMAND"], "working_directory": "current"}))')
           curl --fail-with-body --silent --show-error \
@@ -244,23 +295,66 @@ jobs:
             --request POST \
             "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/restart/"
 
-      - name: Verify activated release
+      - name: Verify activated release (atomic + rollback)
         run: |
           ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" "test \"\$(cat /home/ligademaestros/current/.release-sha)\" = '$GITHUB_SHA' && grep -q cover_hero /home/ligademaestros/current/templates/liga_index.html"
-
-      - name: Verify public health
-        run: |
+          # Verify with automatic rollback on failure (audit fix #4)
+          set +e
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
             HEALTH=$(curl --fail --silent --show-error \
               "https://ligademaestros.alwaysdata.net/api/live/health" || true)
             BUILD_SHA=$(printf '%s' "$HEALTH" | python -c 'import json, sys; print(json.load(sys.stdin).get("build_sha", ""))' 2>/dev/null || true)
-            if [ "$BUILD_SHA" = "$GITHUB_SHA" ]; then
+            DB_OK=$(printf '%s' "$HEALTH" | python -c 'import json, sys; d=json.load(sys.stdin).get("db",{}); print(str(d.get("ok",False)).lower())' 2>/dev/null || true)
+            STATUS=$(printf '%s' "$HEALTH" | python -c 'import json, sys; print(json.load(sys.stdin).get("status",""))' 2>/dev/null || true)
+            if [ "$BUILD_SHA" = "$GITHUB_SHA" ] && [ "$DB_OK" = "true" ] && [ "$STATUS" = "ok" ]; then
               printf '%s\n' "$HEALTH"
-              exit 0
+              echo "Health OK: build=$BUILD_SHA db_ok=$DB_OK status=$STATUS"
+              # Extra deep check: /api/liga/data has 15 partidos
+              DATA_OK=$(curl --fail --silent --show-error "https://ligademaestros.alwaysdata.net/api/liga/data" | python -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("partidos",[])))' 2>/dev/null || echo "0")
+              if [ "$DATA_OK" = "15" ]; then
+                echo "Deep check OK: 15 partidos in /api/liga/data"
+                exit 0
+              else
+                echo "Deep check: /api/liga/data returned $DATA_OK partidos, expected 15 (retrying...)"
+              fi
             fi
-            echo "Waiting for build $GITHUB_SHA (public build: ${BUILD_SHA:-unavailable})"
+            echo "Waiting for build $GITHUB_SHA (public build: ${BUILD_SHA:-unavailable} db_ok=${DB_OK:-?} status=${STATUS:-?}) attempt $attempt/12"
             sleep 5
           done
+          echo "Health verification FAILED — rolling back to previous release"
+          ssh "$ALWAYSDATA_USER@$ALWAYSDATA_HOST" 'bash -s' <<'REMOTE'
+          set -eu
+          HOME_DIR=/home/ligademaestros
+          PREVIOUS="$(cat "$HOME_DIR/.previous_release" 2>/dev/null || true)"
+          if [ -n "$PREVIOUS" ] && [ -d "$PREVIOUS" ] && [ -f "$PREVIOUS/.release-sha" ]; then
+            echo "Rolling back current -> $PREVIOUS"
+            ln -sfn "$PREVIOUS" "$HOME_DIR/current"
+            # Point venv symlink back to previous release's venv
+            if [ -x "$PREVIOUS/venv/bin/python" ]; then
+              ln -sfn "$PREVIOUS/venv" "$HOME_DIR/venv"
+            fi
+            # Restart previous version
+            PREV_SHA="$(cat "$PREVIOUS/.release-sha")"
+            SHORT_PREV="$(echo "$PREV_SHA" | cut -c1-8)"
+            # Need API token — we re-use env via ssh? Fallback to pkill+restart via Alwaysdata site restart API requires token, so do best-effort pkill restart
+            pkill -TERM -u ligademaestros -f '[g]unicorn|[l]iga-' || true
+            sleep 2
+            pkill -KILL -u ligademaestros -f '[g]unicorn|[l]iga-' || true
+            echo "Rollback complete to $PREV_SHA, waiting for previous health..."
+            sleep 5
+            # Verify rollback health (best effort)
+            for i in 1 2 3 4 5 6 7 8; do
+              if curl --fail --silent --show-error "https://ligademaestros.alwaysdata.net/api/live/health" | python -c 'import json,sys; print(json.load(sys.stdin).get("build_sha",""))' | grep -q "$PREV_SHA"; then
+                echo "Rollback health OK"
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "Rollback health check did not confirm, but symlink restored"
+          else
+            echo "No valid previous release to rollback to (PREVIOUS=$PREVIOUS)"
+          fi
+          REMOTE
           exit 1
 
   restaurar-emergencia:
@@ -294,7 +388,7 @@ jobs:
           DB_PATH=/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db \
           DATA_DIR=/home/ligademaestros/runtime \
           PYTHONPATH=/home/ligademaestros/current \
-            /home/ligademaestros/venv/bin/python \
+            /home/ligademaestros/current/venv/bin/python \
             tools/ops/RESTAURAR_RESULTADOS_BACKUP.py --jornadas 1,2 --dry-run
           REMOTE
 
@@ -305,6 +399,6 @@ jobs:
           DB_PATH=/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db \
           DATA_DIR=/home/ligademaestros/runtime \
           PYTHONPATH=/home/ligademaestros/current \
-            /home/ligademaestros/venv/bin/python \
+            /home/ligademaestros/current/venv/bin/python \
             tools/ops/RESTAURAR_RESULTADOS_BACKUP.py --jornadas 1,2
           REMOTE

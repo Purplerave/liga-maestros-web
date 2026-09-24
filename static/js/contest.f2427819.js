@@ -114,7 +114,7 @@ function renderNewSeasonPenaPlaceholder() {
             </div>
             <div style="margin-top:14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
                 <button type="button" class="cp-primary" data-page-action="TICKET" style="min-height:32px; padding:0 18px; border-radius:999px; border:1px solid rgba(245,181,63,0.9); background:#f5b53f; color:#111827; font-weight:800; cursor:pointer;">Jugar la Quiniela J1</button>
-                <button type="button" class="cp-secondary" onclick="window.location.href='/login/google'" style="min-height:32px; padding:0 18px; border-radius:999px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:#e6eaf0; font-weight:700; cursor:pointer;">Entrar con Google</button>
+                <a href="/login/google" class="cp-secondary" style="display:inline-flex; align-items:center; justify-content:center; text-decoration:none; min-height:32px; padding:0 18px; border-radius:999px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:#e6eaf0; font-weight:700; cursor:pointer;">Entrar con Google</a>
             </div>
             <small style="display:block; margin-top:10px; color:#6b7a93; font-size:0.62rem;">¿Aún no estás registrado? Entra y deja tu quiniela lista antes del pitido inicial. La Peña te está esperando.</small>
         </div>
