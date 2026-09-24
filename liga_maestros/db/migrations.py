@@ -640,7 +640,7 @@ def ensure_jornada_8(conn):
 
 
 def ensure_jornada_9(conn):
-    """Seed Jornada 9 (26-28/09/2026) - Ceuta vs R. Sociedad B, etc."""
+    """Seed Jornada 9 fixture and the supplied prediction tickets."""
     updated = ensure_jornada_completa(conn, 9)
     imported = _import_compact_prediction_tickets(conn, 9)
     if updated or imported:
