@@ -31,16 +31,22 @@ jobs:
           python-version: "3.11"
 
       - name: Validate release (blocking)
+        shell: bash
         run: |
+          set -o pipefail
           python -m pip install --disable-pip-version-check -q -r requirements.lock pytest pip-audit 2>/dev/null || python -m pip install --disable-pip-version-check -q -r requirements.txt pytest pip-audit
-          pip-audit -r requirements.lock --progress-spinner off 2>/dev/null || pip-audit -r requirements.txt --progress-spinner off
-          if git ls-files | grep -Ei '(^|/)(\\.env|.*\\.(db|sqlite|sqlite3|pem|key)|id_rsa|id_ed25519)$'; then
+          pip-audit -r requirements.lock --progress-spinner off
+          if git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'; then
             echo "Sensitive runtime material is tracked by Git."
+            git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'
             exit 1
           fi
           # Production readiness is blocking for deploy, not just CI
           python -m pytest -q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py
           python -m pytest tests/test_ensure_jornada_completa.py tests/test_production_readiness.py -v -o 'addopts='
+          # La puerta de arriba valida fixtures de la jornada 75 (Finlandia 2025-26),
+          # que ya no alimenta el concurso. Esta valida la jornada que está en juego.
+          python -m pytest tests/test_jornada_vigente_gate.py -v -o 'addopts='
 
       - name: Configure SSH
         env:

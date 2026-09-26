@@ -12,11 +12,9 @@
     "noImplicitAny": false,
     "allowUnusedLabels": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "shared/*": ["static/js/features/shared/*"]
-    }
+    "baseUrl": "."
   },
+
   "include": ["static/js/**/*.js"],
   "exclude": ["node_modules", "static/js/**/*.min.js", "static/**/*.b322*.js"]
 }

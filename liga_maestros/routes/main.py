@@ -123,7 +123,7 @@ def juegos_files(filename):
 def season_summary():
     import json as _json
 
-    summary_path = os.path.join(config.DATA_DIR, "season_2025_2026_summary.json")
+    summary_path = os.path.join(config.DATA_DIR, config.season_summary_filename())
     if not os.path.isfile(summary_path):
         return jsonify({"status": "not_found"}), 404
     try:

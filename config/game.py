@@ -27,4 +27,15 @@ def _compute_current_season_start_year() -> int:
 
 CURRENT_SEASON_START_YEAR = _compute_current_season_start_year()
 CURRENT_SEASON_ID = f"{CURRENT_SEASON_START_YEAR}-{str(CURRENT_SEASON_START_YEAR + 1)[-2:]}"
+PREVIOUS_SEASON_ID = f"{CURRENT_SEASON_START_YEAR - 1}-{str(CURRENT_SEASON_START_YEAR)[-2:]}"
 SEASON_RESET_MARKER = f".season_reset_{CURRENT_SEASON_START_YEAR}_done"
+
+
+def season_summary_filename(season_id: str | None = None) -> str:
+    """Canonical name of the season summary file, e.g. `season_2026_2027_summary.json`.
+
+    Centralised so the endpoint and `tools/ops/RESET_TEMPORADA.py` cannot drift
+    apart and end up serving the previous season's numbers.
+    """
+    season = (season_id or CURRENT_SEASON_ID).replace("-", "_")
+    return f"season_{season}_summary.json"
