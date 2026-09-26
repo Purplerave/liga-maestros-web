@@ -57,7 +57,8 @@
     "gpt6_sol_search_max",
     "claude_sonnet_5",
     "manus_j9",
-    "ernie_j9"
+    "ernie_j9",
+    "pavo"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -100,6 +101,7 @@
     "gpt6_sol_search_max": "GPT-6 Sol Search Max",
     "claude_sonnet_5": "Claude Sonnet 5",
     "manus_j9": "Manus",
-    "ernie_j9": "Ernie"
+    "ernie_j9": "Ernie",
+    "pavo": "Pavo"
   }
 }

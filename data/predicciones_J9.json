@@ -2,7 +2,7 @@
   "jornada": 9,
   "temporada": "2026-2027",
   "created_at": "2026-09-24",
-  "fuente": "Pronosticos Jornada 9 aportados por el usuario; incluye Maestros IA y La Pena",
+  "fuente": "Pronosticos Jornada 9 aportados por el usuario; incluye Maestros IA, La Pena y Pavo AI (https://app.pavo-ai.work)",
   "gemini": {"nombre": "GEMINI", "signos": ["1", "1", "X", "1", "1", "1", "1", "1", "1", "1", "X", "1", "1", "X", "1-2"]},
   "gstudio": {"nombre": "GSTUDIO", "signos": ["1", "1", "X", "1", "1", "1", "1", "X", "X", "1", "2", "2", "1", "1", "1-1"]},
   "chatgpt": {"nombre": "GPT", "signos": ["1", "1", "2", "1", "1", "1", "1", "1", "X", "2", "2", "2", "1", "X", "1-1"]},
@@ -21,6 +21,7 @@
   "manus_j9": {"nombre": "Manus", "signos": ["X", "1", "X", "1", "X", "1", "1", "1", "X", "2", "X", "X", "X", "X", "1-1"]},
   "ernie_j9": {"nombre": "Ernie", "signos": ["2", "1", "X", "1", "1", "1", "1", "1", "1", "1", "X", "1", "1", "X", "1-2"]},
   "agentek": {"nombre": "Agente K", "signos": ["2", "1", "2", "1", "1", "1", "1", "1", "1", "2", "2", "1", "1", "1", "1-1"]},
+  "pavo": {"nombre": "Pavo", "fuente": "https://app.pavo-ai.work", "signos": ["X", "1", "X", "1", "1", "1", "1", "1", "X", "2", "1", "X", "X", "X", "0-1"]},
   "muse": {"nombre": "Muse AI", "signos": ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2", "1", "1", "2", "2", "1-1"]},
   "arena": {"nombre": "Arena", "signos": ["2", "1", "2", "1", "X", "1", "1", "1", "X", "2", "2", "2", "1", "1", "1-1"]},
   "programa": {"nombre": "PROGRAMA", "origen": "Programa Quiniela Maestro", "actualizado": "2026-09-26", "nota": "3 dobles (P1, P5, P14) = 8 columnas, 6 EUR; 7.45 aciertos esperados, P10+ 13.0%", "signos": ["12", "1", "2", "1", "12", "1", "1", "1", "1", "2", "2", "2", "1", "1X", "1-1"]}
