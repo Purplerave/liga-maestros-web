@@ -62,10 +62,7 @@ def partidos_j9(tmp_path_factory):
     módulo, y dejarlo puesto contaminaría el resto de la suite.
     """
     tmp = tmp_path_factory.mktemp("escudos")
-    originals = {
-        nombre: getattr(config, nombre)
-        for nombre in ("DB_PATH", "BOOTSTRAP_DB_PATH", "PRODUCTION_SEED_PATH")
-    }
+    originals = {nombre: getattr(config, nombre) for nombre in ("DB_PATH", "BOOTSTRAP_DB_PATH", "PRODUCTION_SEED_PATH")}
     config.DB_PATH = str(tmp / "escudos.db")
     config.BOOTSTRAP_DB_PATH = str(tmp / "missing.db")
     config.PRODUCTION_SEED_PATH = str(tmp / "missing-seed.json")
