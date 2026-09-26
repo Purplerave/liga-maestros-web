@@ -393,6 +393,30 @@ function _closed(m) {
     const r = String(m.signo_actual || "").toUpperCase();
     return ["1", "X", "2"].includes(r);
 }
+/* Un doble es un acierto si el signo real cae dentro del: "12" con resultado
+   1 es ACIERTO, no fallo. La portada comparaba con igualdad estricta y
+   marcaba como fallo justo los dobles del programa (12 en P1, 1X, X2...), que
+   es lo que mas se rompia al contar aciertos y fallos. El pleno se compara
+   por marcador exacto (3+ es "M"), igual que scoring.py en el backend. */
+function _coverSignHit(sign, realSign, isPleno) {
+    const prediction = String(sign || "-").trim().toUpperCase();
+    const result = String(realSign || "-").trim().toUpperCase();
+    if (!prediction || prediction === "-" || !result || result === "-") return false;
+    if (typeof isHitSign === "function") return !!isHitSign(sign, realSign, !!isPleno);
+    if (isPleno && typeof plenoScoreKey === "function") {
+        const pick = plenoScoreKey(prediction);
+        const actual = plenoScoreKey(result);
+        return !!pick && !!actual && pick === actual;
+    }
+    return prediction.includes(result);
+}
+function _coverRealRef(match, isPleno) {
+    // En el pleno la referencia es el marcador exacto, no el 1X2: el signo del
+    // pleno es el resultado y con 1X2 la fila nunca podia acertar.
+    if (!isPleno) return String(match?.signo_actual || "").toUpperCase();
+    const score = String(match?.marcador_base || match?.marcador || "").trim();
+    return score || String(match?.signo_actual || "").toUpperCase();
+}
 function _diffParts(deadline) {
     if (!deadline) return { d: 0, h: 0, m: 0, s: 0, ms: 0, urgent: false };
     const target = _coverDeadlineMs(deadline);
@@ -571,10 +595,11 @@ function renderNewspaperCoverPageV3() {
         const isClosed = _closed(match);
         const realSign = String(match.signo_actual || "").toUpperCase();
         const isPlenoRow = i === 14;
+        const realRef = _coverRealRef(match, isPlenoRow);
 
         let pickClass = "";
         if (pick) {
-            if (realSign && pick === realSign) pickClass = " is-hit";
+            if (realSign && _coverSignHit(pick, realRef, isPlenoRow)) pickClass = " is-hit";
             else if (realSign) pickClass = " is-miss";
             else pickClass = " is-signed";
         }
@@ -585,7 +610,7 @@ function renderNewspaperCoverPageV3() {
             const signs = coverPredictionSigns(predictions[col.id]);
             const sign = signs[i] || "-";
             const signEmpty = sign === "-" || sign === "—";
-            const signHit = isClosed && realSign && !signEmpty && String(sign).toUpperCase() === String(realSign).toUpperCase();
+            const signHit = isClosed && realSign && !signEmpty && _coverSignHit(sign, realRef, isPlenoRow);
             const signMiss = isClosed && realSign && !signEmpty && !signHit;
             const hitClass = signHit ? " is-hit" : (signMiss ? " is-miss" : "");
             return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}${isPlenoRow ? " is-pleno" : ""}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
@@ -603,7 +628,7 @@ function renderNewspaperCoverPageV3() {
             }
         }
         const penaEmpty = penaSign === "—" || penaSign === "-";
-        const penaHit = isClosed && realSign && !penaEmpty && String(penaSign).toUpperCase() === String(realSign).toUpperCase();
+        const penaHit = isClosed && realSign && !penaEmpty && _coverSignHit(penaSign, realRef, isPlenoRow);
         const penaMiss = isClosed && realSign && !penaEmpty && !penaHit;
         const penaState = penaHit ? " is-hit" : (penaMiss ? " is-miss" : "");
         const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaState}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
@@ -1022,12 +1047,14 @@ function patchCoverPage() {
                 const isLive = _live(match);
                 const isClosed = _closed(match);
                 const realSign = String(match.signo_actual || "").toUpperCase();
+                const isPlenoRow = idx === 14;
+                const realRef = _coverRealRef(match, isPlenoRow);
                 const pick = _upick(idx);
                 // clases de fila
                 row.classList.toggle("is-live", !!isLive);
                 row.classList.toggle("is-closed", !!isClosed);
                 if (pick) {
-                    if (realSign && pick === realSign) {
+                    if (realSign && _coverSignHit(pick, realRef, isPlenoRow)) {
                         row.classList.add("is-hit");
                         row.classList.remove("is-miss");
                     } else if (realSign) {
@@ -1055,7 +1082,7 @@ function patchCoverPage() {
                     }
                     const empty = sign === "-" || sign === "—";
                     span.classList.toggle("is-empty", !!empty);
-                    const hit = isClosed && realSign && !empty && String(sign).toUpperCase() === realSign;
+                    const hit = isClosed && realSign && !empty && _coverSignHit(sign, realRef, isPlenoRow);
                     const miss = isClosed && realSign && !empty && !hit;
                     span.classList.toggle("is-hit", !!hit);
                     span.classList.toggle("is-miss", !!miss);
@@ -1083,7 +1110,7 @@ function patchCoverPage() {
                         }
                         const empty = penaSign === "—" || penaSign === "-";
                         span.classList.toggle("is-empty", !!empty);
-                        const hit = isClosed && realSign && !empty && String(penaSign).toUpperCase() === realSign;
+                        const hit = isClosed && realSign && !empty && _coverSignHit(penaSign, realRef, isPlenoRow);
                         const miss = isClosed && realSign && !empty && !hit;
                         span.classList.toggle("is-hit", !!hit);
                         span.classList.toggle("is-miss", !!miss);

@@ -1,6 +1,12 @@
+import shutil
+import subprocess
 from pathlib import Path
 
-UTILS_JS = Path(__file__).resolve().parents[1] / "static" / "js" / "utils.js"
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+UTILS_JS = ROOT / "static" / "js" / "utils.js"
+SIGN_CHECK_JS = Path(__file__).resolve().parent / "js" / "check_sign_hits.js"
 
 
 def test_frontend_hit_rendering_uses_multiple_sign_matching():
@@ -10,6 +16,27 @@ def test_frontend_hit_rendering_uses_multiple_sign_matching():
     assert "prediction.includes(result)" in source
     assert 'return standardSignMatches(sign, real) ? "hit" : "miss";' in source
     assert "return standardSignMatches(sign, real);" in source
+
+
+def test_cover_doubles_are_hits_not_misses():
+    """La portada comparaba con igualdad estricta: un 12 con resultado 1 salia
+    como fallo, que es el doble que el usuario pusio en P1 y ya le habia salido
+    mal. Ejecuta los helpers reales en node: 12/1X/X2, el pleno por marcador y
+    los signos vacios.
+    """
+    if shutil.which("node") is None:
+        pytest.skip("node no disponible")
+
+    proc = subprocess.run(
+        ["node", str(SIGN_CHECK_JS)],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "OK" in proc.stdout
 
 
 def test_next_match_timestamp_combines_date_and_kickoff_time():
