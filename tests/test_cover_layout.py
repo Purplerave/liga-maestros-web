@@ -8,6 +8,34 @@ PORRA_JS = ROOT / "static" / "js" / "quantum_final.js"
 PORRA_ROUTE = ROOT / "liga_maestros" / "routes" / "porra.py"
 
 
+def test_cover_pick_cell_shows_the_sign_without_glyphs():
+    """La columna TU se leia regular: con un doble el signo se cortaba y las
+    columnas de los Maestros llevaban una raya diagonal que parecia una "x".
+
+    El acierto y el fallo se avisan con color y fondo, nunca con un glifo o una
+    tachadura pegados encima del signo.
+    """
+    css = COVER_CSS.read_text(encoding="utf-8")
+
+    # Ni un glifo pegado al signo de la quiniela del usuario...
+    assert "is-hit .cx-r-pick-val::after" not in css
+    assert "is-miss .cx-r-pick-val::after" not in css
+    # ...ni una raya atravesando el signo de los Maestros o La Pena.
+    assert "is-miss::before" not in css
+    # La casilla del signo tiene que hospedar un doble ("12") sin recorte.
+    assert ".cx-r-pick { text-align: center; width: 74px; }" in css
+    assert "min-width: 34px;" in css
+    assert "white-space: nowrap;" in css
+
+
+def test_cover_pick_cell_contrast_is_readable():
+    css = COVER_CSS.read_text(encoding="utf-8")
+
+    assert "rgba(239, 68, 68, 0.26)" in css  # fondo del fallo con alpha suficiente
+    assert "color: #fff1f2;" in css  # texto del fallo sobre fondo rojo
+    assert "color: #052e16;" in css  # texto del acierto sobre verde
+
+
 def test_cover_fills_lower_panel_with_useful_journey_actions():
     """Portada v14: comando compacto + tablero 3 cartas + ops."""
     cover = COVER_JS.read_text(encoding="utf-8")
