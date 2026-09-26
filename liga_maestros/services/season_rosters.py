@@ -12,7 +12,7 @@ import time
 
 import config
 
-SEASON_ID = "2026-27"
+SEASON_ID = config.CURRENT_SEASON_ID
 COMPLETED_SEASON_PJ = 30
 
 # Names keep the existing Spanish display style so logos/aliases still match.

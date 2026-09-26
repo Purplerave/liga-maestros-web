@@ -99,8 +99,11 @@ data/API_USAGE*.json
 data/LIVE_COLLECTOR_HEALTH.json.lock
 liga_maestros.db
 
+# Salida de tools/audit/AUDITAR_JORNADA_LIGA_MAESTROS.py: se regenera en cada
+# ejecucion contra la BD local, asi que no es fuente de verdad.
+data/auditorias/
+
 # Kilo agent config (local only)
 dev.md
 
-dev.md
 data/MIMO_COMENTARISTA_EMITIDOS.json

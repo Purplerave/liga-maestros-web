@@ -47,7 +47,7 @@ def save_season_summary(conn):
         ],
     }
 
-    out_path = os.path.join(config.DATA_DIR, "season_2025_2026_summary.json")
+    out_path = os.path.join(config.DATA_DIR, config.season_summary_filename())
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
     print(f"Season summary saved to {out_path}")
@@ -124,7 +124,7 @@ def main():
 
         print("=== RESET COMPLETE ===")
         print(f"Database: {config.DB_PATH}")
-        print(f"Summary: {os.path.join(config.DATA_DIR, 'season_2025_2026_summary.json')}")
+        print(f"Summary: {os.path.join(config.DATA_DIR, config.season_summary_filename())}")
 
     finally:
         conn.close()

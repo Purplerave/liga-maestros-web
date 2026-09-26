@@ -1,18 +1,42 @@
 import argparse
 import json
 import sqlite3
+import sys
 from datetime import datetime
 from pathlib import Path
 
-import config
-from liga_maestros import utils
-from liga_maestros.scoring import pleno_score_key, score_prediction
+# `parents[2]`: la raíz del repo. Antes era `Path(__file__).resolve().parent`
+# (= `tools/audit/`), así que los JSON de `data/` no se encontraban, `load_json`
+# devolvía `{}` y el script imprimía "✅ payload íntegros" mientras se saltaba 4 de
+# sus 7 grupos de comprobación.
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
-BASE_DIR = Path(__file__).resolve().parent
+# `python tools/audit/<script>.py` pone `tools/audit/` en sys.path, no la raíz, así
+# que `import config` reventaba con ModuleNotFoundError. El script no se podía
+# ejecutar de ninguna forma.
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+import config  # noqa: E402
+from liga_maestros import utils  # noqa: E402
+from liga_maestros.scoring import pleno_score_key, score_prediction  # noqa: E402
+
 DB_PATH = Path(config.DB_PATH)
-ROLES_PATH = BASE_DIR / "data" / "ECOSISTEMA_PARTICIPANTES.json"
-LOGOS_PATH = BASE_DIR / "data" / "TEAM_LOGOS.json"
-OUT_DIR = BASE_DIR / "data" / "auditorias"
+ROLES_PATH = ROOT_DIR / "data" / "ECOSISTEMA_PARTICIPANTES.json"
+OUT_DIR = ROOT_DIR / "data" / "auditorias"
+
+
+def connect_readonly(path: Path) -> sqlite3.Connection:
+    """Abre la BD en solo lectura.
+
+    `sqlite3.connect()` crea el fichero si no existe, así que sobre un checkout
+    limpio la auditoría "funcionaba" contra una BD vacía y escribía `J0_estado.json`.
+    """
+    if not path.is_file():
+        print(f"Base de datos no encontrada: {path}", file=sys.stderr)
+        print("Nada que auditar. No se crea ninguna BD nueva.", file=sys.stderr)
+        raise SystemExit(2)
+    return sqlite3.connect(f"file:{path}?mode=ro", uri=True)
 
 
 def load_json(path, default):
@@ -96,8 +120,24 @@ def fetch_rows(conn, query, args=()):
 def detect_jornada(conn, requested):
     if requested:
         return int(requested)
+    # No usar MAX(jornada): la BD conserva las jornadas 75/76 del periodo de
+    # pruebas nordico 2025-26, así que MAX() auditaba J76 (VPS Vaasa, AIK...)
+    # en vez de la jornada que está en juego. Mismo criterio que
+    # `services.highlightly.resolve_jornada`.
+    from liga_maestros.services.jornada import resolve_active_jornada
+
+    try:
+        active = resolve_active_jornada(conn)
+    except Exception:
+        active = None
+
+    if active:
+        return int(active)
+
     row = conn.execute("SELECT MAX(jornada) AS jornada FROM resultados").fetchone()
-    return int(row["jornada"]) if row and row["jornada"] is not None else 0
+    if not row or row["jornada"] is None:
+        raise SystemExit("La base de datos no contiene ninguna jornada. Nada que auditar.")
+    return int(row["jornada"])
 
 
 def build_audit(jornada):
@@ -108,7 +148,7 @@ def build_audit(jornada):
     obsolete_ids = set(canonical_id(uid) for uid in roles.get("ids_obsoletos", []))
     logos = utils.load_team_logos()
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect_readonly(DB_PATH)
     conn.row_factory = sqlite3.Row
     jornada = detect_jornada(conn, jornada)
 
@@ -231,10 +271,16 @@ def build_audit(jornada):
                 triples.append(partido_id)
         return doubles, triples
 
+    # El presupuesto de dobles se valida contra el mismo límite que aplica el
+    # backend al guardar (`predictions.py:51`), no contra los dobles del programa.
+    # Antes exigía igualdad exacta con los del programa y eso producía 22 avisos
+    # ("X tiene 0 dobles; esperado 3") por un boleto que era perfectamente legal.
     reference_doubles, _ = count_double_and_triples(
         preds_by_user.get("programa") or preds_by_user.get("consejo_ias") or {}
     )
-    expected_pena_doubles = reference_doubles if reference_doubles else 2
+    programa_budget_note = ""
+    if reference_doubles:
+        programa_budget_note = f"El programa usa {reference_doubles} dobles."
 
     pena_budget_warnings = []
     for uid, status in prediction_status.items():
@@ -244,8 +290,10 @@ def build_audit(jornada):
         doubles, triples = count_double_and_triples(signs)
         if triples:
             pena_budget_warnings.append(f"{status['name']} tiene triples en partidos {triples}.")
-        if doubles != expected_pena_doubles:
-            pena_budget_warnings.append(f"{status['name']} tiene {doubles} dobles; esperado {expected_pena_doubles}.")
+        if doubles > config.MAX_DOBLES_PER_TICKET:
+            pena_budget_warnings.append(
+                f"{status['name']} tiene {doubles} dobles; el máximo es {config.MAX_DOBLES_PER_TICKET}."
+            )
 
     critical = []
     warnings = []
@@ -281,6 +329,8 @@ def build_audit(jornada):
     if pleno_warnings:
         warnings.append(f"Pleno con formato no Quiniela: {pleno_warnings}.")
     warnings.extend(pena_budget_warnings)
+    if programa_budget_note:
+        warnings.append(programa_budget_note)
     if logo_missing:
         warnings.append(f"Escudos sin resolver: {sorted(set(logo_missing))}.")
     if len(consensus_rows) not in (0, 14, 15):
