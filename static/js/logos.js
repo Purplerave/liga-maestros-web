@@ -17,7 +17,7 @@ function teamLogo(match, side) {
     const direct = side === "home"
         ? (match.logo_local || match.home_logo || match.home?.logo || "")
         : (match.logo_visitante || match.away_logo || match.away?.logo || "");
-    return direct || fixedTeamLogo(teamName);
+    return direct || findTeamLogo(teamName);
 }
 
 function fixedTeamLogo(name) {
@@ -150,8 +150,19 @@ function getLogoAliasIndex() {
 }
 
 function logoBadge(name, logo) {
-    if (logo) {
-        return `<span class="team-badge has-logo"><img src="${escapeHtml(logo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="24" height="24"></span>`;
+    /* Sin logo explicito hay que resolverlo por nombre. teamLogo() ya lo hacia,
+       pero logoBadge no: con el escudo vacio caia directamente al token de texto y
+       todos los fixtures del TICKET se pintaban como iniciales, porque
+       MatchPayload no declaraba logo_local/logo_visitante y extra="ignore" los
+       descartaba al serializar.
+
+       Se entra por findTeamLogo(), que es el punto de entrada publico del modulo
+       (fixedTeamLogo es su interior): asi el cache de logos sigue siendo un
+       detalle de logos.js y los tests pueden aislarlo. */
+    const src = logo || findTeamLogo(name);
+
+    if (src) {
+        return `<span class="team-badge has-logo"><img src="${escapeHtml(src)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="24" height="24"></span>`;
     }
     return `<span class="team-badge">${escapeHtml(teamToken(name))}</span>`;
 }

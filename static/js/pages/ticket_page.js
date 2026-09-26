@@ -237,11 +237,14 @@ function patchTicketArena() {
     return true;
 }
 
-function ensureQ15Directo() {
-    return Promise.resolve(false);
-}
+/* ensureQ15Directo() y loadPorra() viven en quantum_final.js, que se carga en el
+   shell inicial. Este archivo se carga despues, bajo demanda, al entrar en la
+   vista TICKET: como ambos son scripts clasicos, una declaracion `function` de
+   nivel superior aqui pisa el binding global de quantum_final.js.
 
-function loadPorra() {
-    const body = qs("ticket-porra-body");
-    if (body) body.innerHTML = `<div class="empty-state">Porra de la jornada</div>`;
-}
+   Con los stubs queInvoke () => Promise.resolve(false) y loadPorra() pintando un
+   placeholder, abrir la vista TICKET dejaba muerta la porra y el Q15 directo
+   para el resto de la sesion: arena.js y events.js siguen llamando a loadPorra(),
+   pero obtenian el placeholder; y loadPorra() real (quantum_final.js:193) es la
+   que pinta a la vez #porra-body y #ticket-porra-body y la que recibe el
+   partidoId del selector, que el stub ignoraba. */

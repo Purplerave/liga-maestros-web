@@ -214,6 +214,46 @@ def _file_stamp(path: str) -> tuple[str, int, int]:
         return (path, 0, 0)
 
 
+#: Clave femenina canonica -> clave del club cuyo escudo se reutiliza.
+#: Solo afecta al mapa de imagenes, nunca a la identificacion de equipos.
+FEMALE_LOGO_FALLBACK = {
+    "ATHLETIC CLUB FEMENINO": "ATHLETIC CLUB",
+    "ATLETICO MADRID FEMENINO": "ATLETICO MADRID",
+    "DEPORTIVO ABANCA": "DEPORTIVO LA CORUNA",
+    "ESPANYOL FEMENINO": "RCD ESPANYOL",
+}
+
+
+def _apply_female_logo_fallback(logos):
+    """Rellena de escudos las variantes femeninas usando el escudo del club.
+
+    `TEAM_LOGO_ALIASES` mantiene deliberadamente aparte las variantes femeninas
+    ("ATHLETIC CLUB F" -> "ATHLETIC CLUB FEMENINO", no -> "ATHLETIC CLUB") porque
+    `team_keys_compatible` no debe dejar que un "(F)" cruce con el equipo
+    masculino: mezclarlos contaminaría la clasificación. Esa regla se respeta.
+
+    Lo que falta es el fichero: el manifest trae 298 escudos y ninguno femenino,
+    así que los cuatro equipos femeninos de la J9 ("Ath. Club (F)", "At. Madrid
+    (F)", "Deportivo (F)", "Espanyol (F)") se quedaban sin imagen y su fixture
+    caía al token de texto. Como el escudo es el del mismo club, aquí solo se
+    completa el mapa de imágenes, sin tocar la semántica de identidades.
+
+    El vínculo es explícito y no un heurístico sobre el nombre: "DEPORTIVO ABANCA"
+    y "ESPANYOL" son familias canónicas distintas de "DEPORTIVO LA CORUNA" y
+    "RCD ESPANYOL" en la tabla de alias, así que quitar el sufijo "FEMENINO" no
+    basta para llegar al escudo.
+    """
+    for female_key, club_key in FEMALE_LOGO_FALLBACK.items():
+        logo = logos.get(female_key) or logos.get(club_key)
+        if logo:
+            logos[female_key] = logo
+            # Y a todas las formas en que la tabla de alias llama a ese equipo
+            # femenino, para que el mapa resuelva directamente.
+            for alias_key, canonical_key in TEAM_LOGO_ALIASES.items():
+                if canonical_key == female_key:
+                    logos.setdefault(normalize_team_key(alias_key), logo)
+
+
 def load_team_logos():
     global _TEAM_LOGOS_CACHE_KEY
     logos_path = runtime_data_path("TEAM_LOGOS.json")
@@ -241,6 +281,7 @@ def load_team_logos():
                     url = f"static/{url}"
                 logos[normalize_team_key(name)] = f"/{url}"
         _TEAM_LOGOS_CACHE_KEY = cache_key
+        _apply_female_logo_fallback(logos)
         _TEAM_LOGOS_CACHE.clear()
         _TEAM_LOGOS_CACHE.update(logos)
         return logos
