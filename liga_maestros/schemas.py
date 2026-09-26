@@ -62,6 +62,12 @@ class MatchPayload(_StrictBase):
     fecha: str = ""
     hora: str = ""
     minuto: str = ""
+    # Alias que el frontend lee de forma preferente. Sin declararlos aqui
+    # `extra="ignore"` los borraba del payload y ni la fecha ni el minuto en
+    # vivo llegaban al navegador.
+    minuto_live: str = ""
+    fecha_raw: str = ""
+    marcador_base: str = ""
     signo: str = "-"
     signo_actual: str = "-"
     marcador: str = ""

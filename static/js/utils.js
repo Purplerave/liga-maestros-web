@@ -288,14 +288,14 @@ function normalizeName(text) {
 function formatSmartDate(fechaRaw, horaRaw) {
     if (!fechaRaw && !horaRaw) return "Horario pendiente";
     const h = (horaRaw || "").toString().replace(/h$/i, "").trim();
-    if (!fechaRaw) return h ? `${h}h` : "Horario pendiente";
+    if (!fechaRaw) return h || "Horario pendiente";
     try {
         const d = new Date(String(fechaRaw).slice(0, 10) + "T12:00:00");
-        if (isNaN(d.getTime())) return h ? `${h}h` : String(fechaRaw);
+        if (isNaN(d.getTime())) return h || String(fechaRaw);
         const label = `${d.getDate()}/${d.getMonth() + 1}`;
         return h ? `${label} ${h}` : label;
     } catch {
-        return h ? `${h}h` : String(fechaRaw || "");
+        return h || String(fechaRaw || "");
     }
 }
 

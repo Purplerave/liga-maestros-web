@@ -215,7 +215,14 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "marcador": marcador,
                 "status": status,
                 "marcador_base": marcador_base,
+                "minuto": minuto,
                 "minuto_live": minuto_num,
+                # El esquema de la API (MatchPayload) declara "fecha" y
+                # "fecha_limpia": si el builder no las emite, se quedan en ""
+                # y el frontend pierde el dia del partido. "fecha_raw" se
+                # mantiene por compatibilidad con los lectores que ya lo usan.
+                "fecha": r.get("fecha", ""),
+                "fecha_limpia": fecha_limpia,
                 "fecha_raw": r.get("fecha", ""),
                 "hora": r.get("hora", "-"),
                 "signo_actual": signo,
@@ -246,7 +253,10 @@ def build_jornada_matches(conn, jornada, team_logos):
                 "marcador": "Horario por confirmar",
                 "status": "NS",
                 "marcador_base": "",
+                "minuto": "",
                 "minuto_live": "",
+                "fecha": "",
+                "fecha_limpia": "",
                 "fecha_raw": "",
                 "hora": "-",
                 "signo_actual": "-",
