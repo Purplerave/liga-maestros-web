@@ -72,6 +72,11 @@ class MatchPayload(_StrictBase):
     signo_actual: str = "-"
     marcador: str = ""
     fecha_limpia: str = ""
+    # El frontend los lee (logos.js:17-20, ticket_page.js:201). Sin declararlos aqui
+    # `extra="ignore"` los borraba al serializar y el fixture caia al token de texto
+    # en lugar de al escudo.
+    logo_local: str = ""
+    logo_visitante: str = ""
 
     @field_validator("signo", "signo_actual")
     @classmethod

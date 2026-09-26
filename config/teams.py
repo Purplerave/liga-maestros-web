@@ -209,6 +209,9 @@ TEAM_LOGO_ALIASES = {
     "R SOCIEDAD II": "REAL SOCIEDAD B",
     # Liga F / Femenina - canonical forms
     "ATHLETIC CLUB F": "ATHLETIC CLUB FEMENINO",
+    # "Ath. Club (F)" es como lo llama la J9. Su forma corta no estaba, y la
+    # masculina si ("ATH CLUB" -> "ATHLETIC CLUB"), asi que se quedaba sin escudo.
+    "ATH CLUB F": "ATHLETIC CLUB FEMENINO",
     "ATHLETIC CLUB FEMENINO": "ATHLETIC CLUB FEMENINO",
     "ATHLETIC CLUB WOMEN": "ATHLETIC CLUB FEMENINO",
     "ATHLETIC FEMENINO": "ATHLETIC CLUB FEMENINO",

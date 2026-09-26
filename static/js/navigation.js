@@ -94,7 +94,13 @@ function loadScriptOnce(id, src) {
         const script = document.createElement("script");
         script.id = id;
         script.src = src;
-        script.async = true;
+        /* `async = false` a proposito: VIEW_SCRIPTS es una lista ordenada y este
+           helper se lanza en paralelo con Promise.all, asi que con async = true el
+           orden de ejecucion dependia de cual respuesta llegase antes. TICKET
+           carga ticket_page.js y pleno_modal.js, y el segundo pinta el modal que
+           el primero invoca. Con async = false descargan en paralelo pero ejecutan
+           en orden de insercion, igual que hace late_assets.js. */
+        script.async = false;
         script.addEventListener("load", () => {
             script.dataset.loaded = "true";
             resolve();
