@@ -1,10 +1,12 @@
 """Jornada 9 fixtures must reach both the cover and ticket payload on time."""
 
 import sqlite3
+from datetime import timedelta
 
 from liga_maestros.db.migrations import ensure_core_tables, ensure_jornada_9
 from liga_maestros.schemas import MatchPayload
 from liga_maestros.services.payloads.matches import build_jornada_matches
+from liga_maestros.services.ticket import madrid_now
 
 EXPECTED = [
     (1, "2026-09-26", "14:00"),
@@ -94,13 +96,19 @@ def test_j9_display_shows_only_the_time_today_and_date_time_later():
 
 def test_j9_live_minute_reaches_the_api():
     """`minuto_live` lo lee el frontend el primero; no debe perderse."""
+    # El estado LIVE se evalua contra el reloj (`_display_safe_row`): una hora de
+    # partido fija hacia dias envejece el test y lo convierte en FT. Se planta la
+    # hora de inicio 67 minutos antes de "ahora" para que el snapshot sea
+    # coherente se ejecute el test cuando se ejecute.
+    kickoff = madrid_now().replace(tzinfo=None) - timedelta(minutes=67)
     with sqlite3.connect(":memory:") as conn:
         conn.row_factory = sqlite3.Row
         ensure_core_tables(conn)
         ensure_jornada_9(conn)
         conn.execute(
             "UPDATE resultados SET status='LIVE', minuto='67', goles_local=1, "
-            "goles_visitante=0 WHERE jornada=9 AND partido_id=1"
+            "goles_visitante=0, fecha=?, hora=? WHERE jornada=9 AND partido_id=1",
+            (kickoff.strftime("%Y-%m-%d"), kickoff.strftime("%H:%M")),
         )
         conn.commit()
 
