@@ -292,9 +292,8 @@ function formatSmartDate(fechaRaw, horaRaw) {
     try {
         const d = new Date(String(fechaRaw).slice(0, 10) + "T12:00:00");
         if (isNaN(d.getTime())) return h ? `${h}h` : String(fechaRaw);
-        const dias = ["dom", "lun", "mar", "mie", "jue", "vie", "sab"];
-        const label = `${dias[d.getDay()]} ${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-        return h ? `${label} ${h}h` : label;
+        const label = `${d.getDate()}/${d.getMonth() + 1}`;
+        return h ? `${label} ${h}` : label;
     } catch {
         return h ? `${h}h` : String(fechaRaw || "");
     }
@@ -304,13 +303,12 @@ function fixtureScheduleDisplay(match) {
     const fecha = String(match?.fecha_raw || match?.fecha || match?.added || "").slice(0, 10);
     const hora = String(match?.hora || match?.scheduled || "").replace(/h$/i, "").trim();
     const serverToday = typeof state !== "undefined" ? String(state.data?.today_madrid || "") : "";
-    if (fecha && serverToday && fecha === serverToday) return hora ? `${hora}h` : "Horario por confirmar";
+    if (fecha && serverToday && fecha === serverToday) return hora || "Horario por confirmar";
     return formatSmartDate(fecha, hora);
 }
 
-/* El horario ("lun 17/08 19:00h") no cabe en una sola linea dentro de la celda
-   de la quiniela: se parte en dia y hora para pintarlo en dos lineas y que la
-   hora nunca quede recortada. */
+/* El horario ("26/9 19:00") se parte en fecha y hora dentro de la quiniela;
+   para los partidos de hoy se devuelve solo la hora. */
 function fixtureScheduleParts(match) {
     const label = String(fixtureScheduleDisplay(match) || "").trim();
     const parsed = /^(.*?)\s*(\d{1,2}:\d{2}h?)$/.exec(label);

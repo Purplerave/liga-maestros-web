@@ -93,8 +93,15 @@ export function fixtureScheduleParts(match) {
     if (!dateStr) return { day: "", time: "", label: match?.hora || match?.kickoff || "" };
     const ts = parseMatchTimestamp(match);
     if (!ts) return { day: "", time: "", label: match?.hora || match?.kickoff || "" };
-    const day = madridFormatMs(ts, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(/\./g, "");
+    const dateKey = String(dateStr).slice(0, 10);
+    const todayParts = new Intl.DateTimeFormat("en", {
+        timeZone: "Europe/Madrid", year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(Date.now());
+    const todayValues = Object.fromEntries(todayParts.map(part => [part.type, part.value]));
+    const todayKey = `${todayValues.year}-${todayValues.month}-${todayValues.day}`;
     const time = madridFormatMs(ts, { hour: "2-digit", minute: "2-digit" });
+    if (dateKey === todayKey) return { day: "", time, label: time };
+    const day = madridFormatMs(ts, { day: "numeric", month: "numeric" });
     return { day, time, label: `${day} ${time}` };
 }
 

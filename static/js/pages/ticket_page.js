@@ -14,9 +14,7 @@ function renderMatchInsight(match) {
     return "";
 }
 
-/* Antes el horario iba dentro de una pildora redondeada y "lun 17/08 19:00h" se
-   cortaba. Ahora el dia y la hora van apilados en dos lineas: la hora es lo
-   importante, se lee grande y entera, y el dia queda encima como apoyo. */
+/* La fecha (si el partido no es hoy) y la hora se apilan y no se truncan. */
 function renderFixtureSchedule(match) {
     const { day, time, label } = fixtureScheduleParts(match);
     if (!time) return `<span class="fixture-schedule is-pending" title="${escapeHtml(label)}">${escapeHtml(label)}</span>`;

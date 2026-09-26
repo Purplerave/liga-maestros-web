@@ -219,7 +219,7 @@ def test_kickoff_is_read_in_madrid_time_not_in_the_browser_zone():
     # por caducado (y por tanto fuera del DIRECTO) mientras estaba en juego.
     assert result["minutoNoSeUsaComoHora"] is None
     assert result["sinHorario"] is None
-    assert result["horario"] == "21:00h"
+    assert result["horario"] == "21:00"
 
 
 @requires_node

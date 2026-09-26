@@ -61,8 +61,8 @@ def test_frontend_keeps_doubles_and_pleno_scores_and_reads_league_names():
         "plenoBucket": "M-1",
         "namedCompetition": "LA LIGA",
         "objectCompetition": "SEGUNDA DIVISION",
-        "sameDayFixture": "21:30h",
-        "olderFixture": "sab 15/08 21:30h",
+        "sameDayFixture": "21:30",
+        "olderFixture": "15/8 21:30",
         "groupCount": 2,
         "hasLaLigaGroup": True,
         "hasSegundaGroup": True,
@@ -171,15 +171,15 @@ def test_ticket_kickoff_time_is_stacked_and_never_clipped():
     payload = json.loads(result.stdout)
 
     # El dia y la hora viajan separados para poder apilarlos sin cortar texto.
-    assert payload["otherDay"] == {"day": "lun 17/08", "time": "19:00h", "label": "lun 17/08 19:00h"}
-    assert payload["sameDay"] == {"day": "", "time": "17:00h", "label": "17:00h"}
+    assert payload["otherDay"] == {"day": "17/8", "time": "19:00", "label": "17/8 19:00"}
+    assert payload["sameDay"] == {"day": "", "time": "17:00", "label": "17:00"}
     assert payload["unknown"]["time"] == ""
 
-    assert 'class="fixture-schedule-day">lun 17/08<' in payload["otherDayHtml"]
-    assert 'class="fixture-schedule-time">19:00h<' in payload["otherDayHtml"]
+    assert 'class="fixture-schedule-day">17/8<' in payload["otherDayHtml"]
+    assert 'class="fixture-schedule-time">19:00<' in payload["otherDayHtml"]
     # Un partido de hoy solo necesita la hora: nada de dia vacio ocupando sitio.
     assert "fixture-schedule-day" not in payload["sameDayHtml"]
-    assert 'class="fixture-schedule-time">17:00h<' in payload["sameDayHtml"]
+    assert 'class="fixture-schedule-time">17:00<' in payload["sameDayHtml"]
     assert "is-pending" in payload["unknownHtml"]
 
     # El horario ya no usa la pildora de ancho fijo que lo recortaba.
