@@ -23,5 +23,5 @@
   "agentek": {"nombre": "Agente K", "signos": ["2", "1", "2", "1", "1", "1", "1", "1", "1", "2", "2", "1", "1", "1", "1-1"]},
   "muse": {"nombre": "Muse AI", "signos": ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2", "1", "1", "2", "2", "1-1"]},
   "arena": {"nombre": "Arena", "signos": ["2", "1", "2", "1", "X", "1", "1", "1", "X", "2", "2", "2", "1", "1", "1-1"]},
-  "programa": {"nombre": "PROGRAMA", "origen": "Programa Quiniela Maestro", "signos": ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2", "1", "1X", "1X", "1X", "1-1"]}
+  "programa": {"nombre": "PROGRAMA", "origen": "Programa Quiniela Maestro", "actualizado": "2026-09-26", "nota": "3 dobles (P1, P5, P14) = 8 columnas, 6 EUR; 7.45 aciertos esperados, P10+ 13.0%", "signos": ["12", "1", "2", "1", "12", "1", "1", "1", "1", "2", "2", "2", "1", "1X", "1-1"]}
 }
