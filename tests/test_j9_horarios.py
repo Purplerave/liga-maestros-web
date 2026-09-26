@@ -5,7 +5,6 @@ import sqlite3
 from liga_maestros.db.migrations import ensure_core_tables, ensure_jornada_9
 from liga_maestros.services.payloads.matches import build_jornada_matches
 
-
 EXPECTED = [
     (1, "2026-09-26", "14:00"),
     (2, "2026-09-26", "16:15"),
@@ -34,7 +33,4 @@ def test_j9_schedule_is_persisted_and_served_to_the_cover_and_ticket():
         payload = build_jornada_matches(conn, 9, {})
 
     assert len(payload) == 15
-    assert [
-        (match["id"], match["fecha_raw"], match["hora"])
-        for match in payload
-    ] == EXPECTED
+    assert [(match["id"], match["fecha_raw"], match["hora"]) for match in payload] == EXPECTED
