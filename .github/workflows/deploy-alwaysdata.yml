@@ -197,18 +197,33 @@ jobs:
             if [ -z "$MAXJ" ] || [ "$J" -gt "$MAXJ" ]; then MAXJ="$J"; fi
           done
           if [ -n "$MAXJ" ]; then
-            echo "== Importando quiniela del Programa: jornada $MAXJ (validacion bloqueante) =="
-            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
-            DATA_DIR="$HOME_DIR/runtime" \
-            PYTHONPATH="$HOME_DIR/current" \
-              "$RELEASE/venv/bin/python" \
-              tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$MAXJ"
-            # Only if importer succeeded, activate the jornada
-            DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
-            DATA_DIR="$HOME_DIR/runtime" \
-            PYTHONPATH="$HOME_DIR/current" \
-              "$RELEASE/venv/bin/python" \
-              tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$MAXJ"
+            # Una jornada CON resultados en vivo no se puede reimportar: el importer
+            # borra los resultados de la jornada. Antes esto tumbaba el deploy entero
+            # (y con el, el reinicio de la app) en cuanto jugaba un partido.
+            JUGADOS="$("$RELEASE/venv/bin/python" -c "
+          import os, sqlite3
+          db=os.environ.get('DB_PATH','/home/ligademaestros/runtime/LIGA_MAESTROS_PRO.db')
+          conn=sqlite3.connect(db)
+          print(conn.execute('SELECT COUNT(*) FROM resultados WHERE jornada=? AND goles_local IS NOT NULL', ('$MAXJ',)).fetchone()[0])
+          " || echo 0)"
+            if [ "${JUGADOS:-0}" -gt 0 ]; then
+              echo "AVISO: la J$MAXJ ya tiene $JUGADOS partidos con resultado."
+              echo "Se OMITE la importacion del Programa para no borrar resultados en vivo."
+              echo "Los boletos editoriales (incl. PROGRAMA) se sincronizan al arrancar la app desde data/predicciones_J$MAXJ.json."
+            else
+              echo "== Importando quiniela del Programa: jornada $MAXJ (validacion bloqueante) =="
+              DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+              DATA_DIR="$HOME_DIR/runtime" \
+              PYTHONPATH="$HOME_DIR/current" \
+                "$RELEASE/venv/bin/python" \
+                tools/importers/IMPORTAR_PROGRAMA_JORNADA.py --jornada "$MAXJ"
+              # Only if importer succeeded, activate the jornada
+              DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
+              DATA_DIR="$HOME_DIR/runtime" \
+              PYTHONPATH="$HOME_DIR/current" \
+                "$RELEASE/venv/bin/python" \
+                tools/importers/FIJAR_JORNADA_ACTIVA.py --jornada "$MAXJ"
+            fi
             # Strict validation — fail the deploy if jornada incomplete
             DB_PATH="$HOME_DIR/runtime/LIGA_MAESTROS_PRO.db" \
             DATA_DIR="$HOME_DIR/runtime" \
