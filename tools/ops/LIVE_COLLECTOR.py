@@ -47,6 +47,8 @@ from liga_maestros.services.live_state import (  # noqa: E402
 )
 
 DATA_DIR = Path(config.DATA_DIR)
+# Suelo de seguridad para aceptar el FT de la quiniela15 (ver apply_q15_results_to_db).
+Q15_MIN_FT_WINDOW = timedelta(minutes=60)
 LOG_PATH = DATA_DIR / "LIVE_COLLECTOR.log"
 HEALTH_PATH = DATA_DIR / "LIVE_COLLECTOR_HEALTH.json"
 BACKUP_DIR = DATA_DIR / "backups"
@@ -486,6 +488,15 @@ def apply_q15_results_to_db(jornada, payload):
             elif q15_status in ("HT", "HALF TIME BREAK"):
                 status = "HT"
             elif q15_status in ("FT", "FINISHED", "TERMINADO"):
+                # La quiniela15 solo enseña marcador sin parpadeo cuando el
+                # partido ha acabado, asi que el FT ya no se deduce por reloj.
+                # Suelo de seguridad: un FT antes de este margen casi siempre es
+                # un partido suspendido o un parpadeo que se ha caido, y cerrarlo
+                # congelaria un marcador parcial como resultado definitivo.
+                kickoff_at = parse_madrid_datetime(row["fecha"], row["hora"])
+                if kickoff_at and madrid_now() < kickoff_at + Q15_MIN_FT_WINDOW:
+                    log_line(f"q15_ft_demasiado_pronto id={partido_id} kickoff={row['fecha']} {row['hora']}")
+                    continue
                 status = "FT"
             elif q15_status == "STALE":
                 kickoff_at = parse_madrid_datetime(row["fecha"], row["hora"])

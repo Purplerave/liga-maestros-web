@@ -68,12 +68,42 @@ def has_final_signal(text):
     return bool(re.search(r"\b(finalizado|terminado|final|ft|fin)\b", value, flags=re.I))
 
 
-def status_for_q15(score_home, score_away, minute, text):
+# La quiniela15 no escribe la palabra "finalizado" en ningun sitio: mientras el
+# partido corre, el marcador late (clase `blink_me`) y la celda de minuto dice
+# "min. 67'". En cuanto acaba, desaparecen el parpadeo y el minuto y solo queda
+# el marcador. Antes se deducía el final por reloj (`FULL_MATCH_WINDOW`, 2h30
+# despues del saque) y la fila se quedaba STALE con el ultimo marcador en vivo.
+_Q15_LIVE_CLASS = re.compile(r"\bblink", flags=re.I)
+
+
+def q15_row_live_markup(row):
+    """True si la fila muestra el marcador parpadeando (partido en juego)."""
+    return bool(row.select("[class*=blink]"))
+
+
+def q15_row_is_scheduled_placeholder(row):
+    """True si la celda de marcador es la fecha de juego, no un resultado."""
+    cells = row.find_all("td")
+    if len(cells) < 3:
+        return False
+    score_cell = cells[2]
+    if score_cell.select_one(".matchdate"):
+        return True
+    return parse_score(score_cell.get_text(" ", strip=True)) == (None, None)
+
+
+def status_for_q15(score_home, score_away, minute, text, live_markup=False, scheduled_placeholder=False):
     if minute:
         return "HT" if str(minute).lower().startswith("descanso") else "LIVE"
+    if live_markup:
+        return "LIVE"
     if score_home is None or score_away is None:
         return "NS"
-    return "FT" if has_final_signal(text) else "STALE"
+    if scheduled_placeholder:
+        return "NS"
+    # Marcador sin parpadeo y sin minuto: la quiniela15 solo enseña el
+    # resultado cuando el partido ya ha acabado.
+    return "FT"
 
 
 def signo_for_score(match_id, home_goals, away_goals):
@@ -158,7 +188,14 @@ def parse_main_row(row):
     if not minute:
         minute = parse_live_minute(row.get_text(" ", strip=True))
     row_text = row.get_text(" ", strip=True)
-    status = status_for_q15(score_home, score_away, minute, row_text)
+    status = status_for_q15(
+        score_home,
+        score_away,
+        minute,
+        row_text,
+        live_markup=q15_row_live_markup(row),
+        scheduled_placeholder=q15_row_is_scheduled_placeholder(row),
+    )
     return {
         "id": index,
         "local": home,
@@ -200,7 +237,14 @@ def scrape(jornada):
             minute = parse_live_minute(main_cells[3].get_text(" ", strip=True))
         if not minute:
             minute = parse_live_minute(prev.get_text(" ", strip=True) if prev else "")
-        status = status_for_q15(score_home, score_away, minute, prev.get_text(" ", strip=True) if prev else "")
+        status = status_for_q15(
+            score_home,
+            score_away,
+            minute,
+            prev.get_text(" ", strip=True) if prev else "",
+            live_markup=q15_row_live_markup(prev) if prev else False,
+            scheduled_placeholder=q15_row_is_scheduled_placeholder(prev) if prev else False,
+        )
         text = clean(detail.get_text(" ", strip=True))
         referee = ""
         coaches = ""

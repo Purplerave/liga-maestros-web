@@ -238,8 +238,11 @@ class TestAplicarResultadosQ15:
         assert (row["goles_local"], row["goles_visitante"], row["status"]) == (2, 1, "FT")
         assert row["minuto"] == "Finalizado"
 
-    def test_femeninas_siguen_cruzando(self, j6_db):
+    def test_femeninas_siguen_cruzando(self, j6_db, monkeypatch):
         """El arreglo del "(M)" no puede romper el cruce de Liga F."""
+        # La J6 se juega del 11 al 14; el reloj se pone al final de la jornada
+        # para que un FT reciente no choque con el suelo de seguridad de 60 min.
+        monkeypatch.setattr(collector, "madrid_now", lambda: datetime(2026, 9, 14, 23, 0, tzinfo=MADRID))
         payload = {
             "matches": [
                 _q15_match(11, "FT", "", 2, 0),
@@ -251,3 +254,20 @@ class TestAplicarResultadosQ15:
         updates = collector.apply_q15_results_to_db(6, payload)
 
         assert updates == 3
+
+    def test_ft_antes_del_saque_se_ignora(self, j6_db):
+        """Un FT de un partido que aun no ha saqueado no se escribe nunca.
+
+        La quiniela15 marca FT cuando el marcador deja de parpadear; si el
+        partido no ha empezado, ese marcador es una foto vieja o un partido
+        suspendido. Cerrar aqui congelaria un marcador parcial como final.
+        """
+        # NOW = 11/09 22:55 y el partido 13 kicks off el 13/09 19:30.
+        payload = {"matches": [_q15_match(13, "FT", "", 1, 3)]}
+
+        updates = collector.apply_q15_results_to_db(6, payload)
+
+        assert updates == 0
+        row = j6_db.execute("SELECT * FROM resultados WHERE jornada = 6 AND partido_id = 13").fetchone()
+        assert row["goles_local"] is None
+        assert row["status"] != "FT"
