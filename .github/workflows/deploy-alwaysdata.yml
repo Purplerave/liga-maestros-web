@@ -160,6 +160,16 @@ jobs:
           mkdir -p "$RELEASE" "$HOME_DIR/runtime/data" "$HOME_DIR/runtime/backups"
           tar -xf "$ARCHIVE" -C "$RELEASE"
           rm "$ARCHIVE"
+
+          # El nombre de la cache del service worker tiene que cambiar en cada
+          # release. Si no, el navegador reutiliza el sw.js viejo (que se sirve con
+          # no-store, asi que lo revalida, pero su 'activate' nunca borra la cache
+          # anterior) y los usuarios se quedan con la estrategia de siempre.
+          # El 'activate' del propio SW borra las caches liga-maestros-* antiguas.
+          V="${SHA:0:8}"
+          sed -i -E "s/liga-maestros-(static-)?v[0-9]+/liga-maestros-\1v${V}/g" "$RELEASE/static/sw.js"
+          echo "Service worker cache: v${V}"
+
           ln -sfn "$HOME_DIR/runtime/app.env" "$RELEASE/.env"
 
           # Per-release venv for reproducible rollbacks (audit fix #5)

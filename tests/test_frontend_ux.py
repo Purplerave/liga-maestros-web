@@ -85,9 +85,17 @@ def test_service_worker_cache_names_are_bumped_together():
 def test_service_worker_never_caches_api_or_post_requests():
     """Dynamic/private API data and writes must bypass Cache Storage."""
     sw = SW.read_text(encoding="utf-8")
-    api_block = sw.split("if (path.startsWith('/api/'))", 1)[1].split("// Archivos estaticos", 1)[0]
-    assert "request.method !== 'GET'" in api_block
-    assert "fetch(request)" in api_block
+    handler = sw.split("addEventListener('fetch'", 1)[1]
+    api_block = handler.split("if (path.startsWith('/api/'))", 1)[1].split("// Archivos estaticos", 1)[0]
+
+    # El guardia de metodo va ANTES de cualquier reparto por ruta, no dentro de
+    # la rama de la API: si solo cubren /api/, un POST a /cuenta/eliminar cae en
+    # el networkFirst por defecto, y cache.put() con request no-GET lanza
+    # TypeError -> "Offline". Ese fue un fallo real.
+    guard = handler.split("if (path.startsWith('/api/'))", 1)[0]
+    assert re.search(r"if\s*\(request\.method\s*!==\s*'GET'\)\s*return", guard), (
+        "el guardia de metodo tiene que ir antes del reparto por ruta"
+    )
     assert "networkWithTimeout(request" in api_block
     assert "API_CACHE" not in sw
     assert "caches.open" not in sw.split("async function networkWithTimeout", 1)[1]
