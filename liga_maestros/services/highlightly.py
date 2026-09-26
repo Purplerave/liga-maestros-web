@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 import threading
 import time
 from datetime import timedelta
@@ -81,6 +82,50 @@ _FEMININE_CANONICAL_KEYS = frozenset(
         "LOGROÑO UNITED",
     }
 )
+# States that confirm a final score. STALE is deliberately absent: a row frozen
+# with a partial score is exactly what needs an explicit re-query.
+_CONFIRMED_FINAL_STATUSES = frozenset(
+    {
+        "FT",
+        "FINISHED",
+        "TERMINADO",
+        "AET",
+        "PEN",
+        "AWARDED",
+        "FINISHED AFTER EXTRA TIME",
+        "FINISHED AFTER PENALTIES",
+    }
+)
+# Male competitions the quiniela mixes. They need an explicit per-league query
+# when the active jornada has an unconfirmed result: the generic /matches page
+# is capped at 100 rows and a match that has just finished drops out of the
+# first page, so its row kept the last live score forever (Ceuta 1-1 STALE).
+_PENDING_LEAGUE_NAMES = ("SEGUNDA DIVISION", "LA LIGA")
+# Legal-form tokens that carry no identity: the quiniela writes "Ceuta" where
+# the provider writes "AD Ceuta FC". They are dropped before the fuzzy feed
+# lookup, which is only accepted when it is unambiguous.
+_CORE_NOISE_TOKENS = frozenset(
+    {
+        "AD",
+        "CF",
+        "FC",
+        "CD",
+        "UD",
+        "SD",
+        "RC",
+        "R",
+        "CP",
+        "CV",
+        "SAD",
+        "CLUB",
+        "DEPORTIVO",
+        "SPORTING",
+    }
+)
+# How long after kickoff a match without a confirmed result is still polled.
+# Covers the weekend chain (Fri -> Sat -> Sun) without burning quota on rows
+# that need manual intervention.
+HIGHLIGHTLY_PENDING_WINDOW_HOURS = float(os.getenv("HIGHLIGHTLY_PENDING_WINDOW_HOURS", "30"))
 
 _highlightly_refresh_lock = threading.RLock()
 _highlightly_last_refresh = 0
@@ -313,7 +358,84 @@ def _quiniela_has_feminine_matches_on_date(conn, jornada, date_text):
     return False
 
 
-def _append_liga_f_matches(matches, date_text, headers, needed):
+def _quiniela_has_pending_matches_on_date(conn, jornada, date_text, now=None):
+    """True when the active jornada has a kickoff-passed match on ``date_text``
+    whose final result is still unconfirmed.
+
+    ``STALE`` and rows without goals count as pending on purpose: a match frozen
+    with a partial score is precisely the case that needs an explicit query.
+    """
+    if conn is None or jornada is None or not date_text:
+        return False
+    now = now or madrid_now().replace(tzinfo=None)
+    earliest = now - timedelta(hours=HIGHLIGHTLY_PENDING_WINDOW_HOURS)
+    try:
+        rows = conn.execute(
+            """
+            SELECT status, goles_local, goles_visitante, fecha, hora
+            FROM resultados
+            WHERE jornada = ? AND substr(COALESCE(fecha, ''), 1, 10) = ?
+            """,
+            (int(jornada), str(date_text)),
+        ).fetchall()
+    except Exception:
+        return False
+    for row in rows:
+        status = str(row["status"] or "").upper()
+        has_score = row["goles_local"] is not None and row["goles_visitante"] is not None
+        if has_score and status in _CONFIRMED_FINAL_STATUSES:
+            continue
+        try:
+            kickoff = parse_db_match_datetime(row["fecha"], row["hora"])
+        except Exception:
+            kickoff = None
+        if kickoff is None or kickoff > now or kickoff < earliest:
+            continue
+        return True
+    return False
+
+
+def _merge_unique_matches(matches, extra, competition_name):
+    known_ids = {str(match.get("id")) for match in matches if match.get("id") is not None}
+    for match in extra or []:
+        match_id = match.get("id")
+        if match_id is not None and str(match_id) in known_ids:
+            continue
+        match["_competition_name"] = competition_name
+        matches.append(match)
+        if match_id is not None:
+            known_ids.add(str(match_id))
+    return matches
+
+
+def _append_priority_league_matches(matches, date_text, headers, league_names, budget=0):
+    """Explicit per-league fetch for the competitions the quiniela follows.
+
+    The generic ``/matches`` list is paginated (``limit=100``) and on a busy
+    matchday a match that has just finished falls outside the first page, so the
+    quiniela never saw its final score and the row kept the last live one. One
+    extra call per competition, only while the active jornada still has an
+    unconfirmed result, recovers it.
+    """
+    for league_name in league_names or ():
+        if budget <= 0:
+            break
+        league_id = config.HIGHLIGHTLY_LEAGUES.get(league_name)
+        if not league_id:
+            continue
+        budget -= 1
+        _merge_unique_matches(
+            matches,
+            _highlightly_get_matches(
+                {"date": date_text, "leagueId": league_id, "timezone": "Europe/Madrid", "limit": 100},
+                headers,
+            ),
+            league_name,
+        )
+    return matches
+
+
+def _append_liga_f_matches(matches, date_text, headers, needed, budget=None):
     """Guarantee Liga F coverage for the quiniela feed.
 
     The generic ``/matches`` list is paginated (``limit=100``) and on a busy
@@ -325,8 +447,9 @@ def _append_liga_f_matches(matches, date_text, headers, needed):
     """
     if not needed:
         return matches
-    known_ids = {str(match.get("id")) for match in matches if match.get("id") is not None}
     for name_variant in _LIGA_F_NAME_VARIANTS:
+        if budget is not None and budget <= 0:
+            break
         try:
             extra = _highlightly_get_matches(
                 {"date": date_text, "leagueName": name_variant, "timezone": "Europe/Madrid", "limit": 100},
@@ -334,16 +457,11 @@ def _append_liga_f_matches(matches, date_text, headers, needed):
             )
         except Exception:
             extra = []
+        if budget is not None:
+            budget -= 1
         if not extra:
             continue
-        for match in extra:
-            match_id = match.get("id")
-            if match_id is not None and str(match_id) in known_ids:
-                continue
-            match["_competition_name"] = "LIGA F"
-            matches.append(match)
-            if match_id is not None:
-                known_ids.add(str(match_id))
+        _merge_unique_matches(matches, extra, "LIGA F")
         break
     return matches
 
@@ -367,6 +485,7 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
     headers = {"x-rapidapi-key": os.getenv("HIGHLIGHTLY_API_KEY", "")}
     matches = []
     needs_liga_f = _quiniela_has_feminine_matches_on_date(conn, jornada, date_text)
+    has_pending = _quiniela_has_pending_matches_on_date(conn, jornada, date_text)
 
     if not HIGHLIGHTLY_ACTIVE_LEAGUES:
         for match in _highlightly_get_matches(
@@ -380,7 +499,15 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
             league = match.get("league") or {}
             match["_competition_name"] = league.get("name") or ""
             matches.append(match)
-        return _append_liga_f_matches(matches, date_text, headers, needs_liga_f)
+        # La llamada generica ya consumio una unidad del presupuesto de la pasada.
+        budget = max(0, call_limit - 1)
+        if needs_liga_f:
+            before = int(get_highlightly_usage().get("calls", 0))
+            matches = _append_liga_f_matches(matches, date_text, headers, True, budget=budget)
+            budget = max(0, budget - max(0, int(get_highlightly_usage().get("calls", 0)) - before))
+        if has_pending:
+            matches = _append_priority_league_matches(matches, date_text, headers, _PENDING_LEAGUE_NAMES, budget=budget)
+        return matches
 
     calls_used = 0
     # CEO fix: ensure Liga F is always considered critical, even in low budget
@@ -416,7 +543,13 @@ def fetch_highlightly_matches(date_text, conn=None, jornada=None, max_calls=None
             matches.append(match)
         if get_highlightly_circuit().get("open"):
             break
-    return _append_liga_f_matches(matches, date_text, headers, needs_liga_f)
+    return _append_liga_f_matches(
+        matches,
+        date_text,
+        headers,
+        needs_liga_f,
+        budget=max(0, call_limit - calls_used),
+    )
 
 
 def refresh_dates_for_jornada(conn, jornada=None):
@@ -443,7 +576,17 @@ def refresh_dates_for_jornada(conn, jornada=None):
     return sorted(dates)
 
 
-def _find_feed_item(feed, local_raw, visitante_raw):
+def _core_team_key(value):
+    """Tokens of a team name without legal-form noise ("AD Ceuta FC" -> CEUTA)."""
+    tokens = [
+        token
+        for token in re.split(r"[^A-Z0-9]+", str(value or "").upper())
+        if token and token not in _CORE_NOISE_TOKENS
+    ]
+    return tuple(sorted(tokens))
+
+
+def _find_feed_item(feed, local_raw, visitante_raw, core_feed=None):
     """Busca el partido del feed cruzando nombres por variantes.
 
     El feed esta indexado por pares de claves canonicas del proveedor en
@@ -453,13 +596,31 @@ def _find_feed_item(feed, local_raw, visitante_raw):
     "Logrono (F)" con "EDF Logrono" aunque los sufijos de origen difieran.
     El cruce masculino/femenino sigue siendo imposible: las variantes
     respetan el genero del nombre original.
+
+    Segundo nivel: si el cruce canonico falla, se ignora la forma juridica
+    ("Ceuta" <-> "AD Ceuta FC", "R. Sociedad" <-> "Real Sociedad"). Solo se
+    acepta si ese par no es ambiguo dentro del feed, para no cruzar el
+    partido equivocado.
     """
     for local_variant in team_key_variants(local_raw):
         for visit_variant in team_key_variants(visitante_raw):
             item = feed.get((local_variant, visit_variant))
             if item:
                 return item
-    return None
+    if not core_feed:
+        return None
+    local_core = _core_team_key(local_raw)
+    visit_core = _core_team_key(visitante_raw)
+    if not local_core or not visit_core:
+        return None
+    candidates = {}
+    for orientation in ((local_core, visit_core), (visit_core, local_core)):
+        for item in core_feed.get(orientation, []):
+            candidates[item[0].get("id")] = item
+    if len(candidates) != 1:
+        # 0 = no hay cruce; >1 = ambiguo, no se escribe nada.
+        return None
+    return next(iter(candidates.values()))
 
 
 def refresh_current_matches_from_highlightly(force=False, jornada=None):
@@ -513,6 +674,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 calls_left -= max(0, int(usage_after or 0) - int(usage_before or 0))
 
             feed = {}
+            core_feed = {}
             logos = {}
             for match in api_matches:
                 home_team = match.get("homeTeam") or {}
@@ -524,6 +686,11 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     away_key = normalize_team_key(away_name)
                     feed[(home_key, away_key)] = (match, False)
                     feed[(away_key, home_key)] = (match, True)
+                    home_core = _core_team_key(home_name)
+                    away_core = _core_team_key(away_name)
+                    if home_core and away_core:
+                        core_feed.setdefault((home_core, away_core), []).append((match, False))
+                        core_feed.setdefault((away_core, home_core), []).append((match, True))
 
                 if home_name and home_team.get("logo"):
                     logos[home_name.upper()] = home_team["logo"]
@@ -549,7 +716,7 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                     continue
                 local_key = normalize_team_key(row["local"])
                 visit_key = normalize_team_key(row["visitante"])
-                feed_item = _find_feed_item(feed, row["local"], row["visitante"])
+                feed_item = _find_feed_item(feed, row["local"], row["visitante"], core_feed)
 
                 if not feed_item:
                     continue

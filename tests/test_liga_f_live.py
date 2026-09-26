@@ -26,6 +26,9 @@ def _patch_env(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DATA_DIR", str(tmp_path))
     monkeypatch.setattr(config, "DB_PATH", str(tmp_path / "pro.db"))
     monkeypatch.setenv("HIGHLIGHTLY_API_KEY", "test-key")
+    # El .env local deja el refresco apagado y la constante se lee al importar,
+    # asi que sin esto el test depende de la maquina donde se ejecuta.
+    monkeypatch.setattr(highlightly, "HIGHLIGHTLY_REFRESH_ENABLED", True)
 
 
 def _sample_match(match_id, league="Liga F", desc="Second half", clock="67", score="1 - 0"):
