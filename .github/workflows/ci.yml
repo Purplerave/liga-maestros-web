@@ -78,6 +78,11 @@ jobs:
           for f in "${files[@]}"; do
             node --check "$f"
           done
+          # Segunda pasada con el parser de V8: unlike `node --check`, este
+          # lista todos los ficheros rotos de una vez en vez de parar en el
+          # primero, y es el que se ejecuta tambien en local (donde
+          # `node --check` devuelve 0 siempre).
+          node --experimental-vm-modules tools/js/check_syntax.js
 
       - name: Tests (unit + integration, sin readiness)
         shell: bash
