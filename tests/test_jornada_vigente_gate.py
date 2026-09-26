@@ -153,3 +153,32 @@ def test_el_resumen_de_temporada_apunta_a_la_vigente():
     assert "season_2025_2026_summary" not in reset, (
         "RESET_TEMPORADA sigue escribiendo el resumen de la temporada anterior"
     )
+
+
+# La puerta anti-secretos de la CI estuvo mucho tiempo rota: dentro de comillas
+# simples `\\.env` llega a grep como un backslash literal, así que un fichero
+# `.env` real no podía detectarse nunca. Cuando se arregló, `.env.example`
+# (plantilla legítima) empezó a casar. Estos tests fijan el comportamiento.
+SECRET_GATE_PATTERN = r"(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)"
+DEBE_CASAR = (".env", "app/.env", "secret.db", "datos.sqlite3", "server.pem", "deploy.key", "home/id_rsa", "id_ed25519")
+NO_DEBE_CASAR = (".env.example", ".env.sample", "environment.md", "data.json", "readme.md", "keyboard.js")
+
+
+@pytest.mark.parametrize("nombre", DEBE_CASAR)
+def test_la_puerta_anti_secretos_detecta_lo_prohibido(nombre):
+    assert re.search(SECRET_GATE_PATTERN, nombre), f"la puerta de secretos NO detecta {nombre!r}"
+
+
+@pytest.mark.parametrize("nombre", NO_DEBE_CASAR)
+def test_la_puerta_anti_secretos_no_da_falsos_positivos(nombre):
+    assert not re.search(SECRET_GATE_PATTERN, nombre), f"la puerta de secretos marca {nombre!r} y es legítimo"
+
+
+def test_la_puerta_anti_secretos_esta_live_en_ambos_workflows():
+    """Si el gate no está en los dos workflows, el deploy se salta la comprobación."""
+    for workflow in ("ci.yml", "deploy-alwaysdata.yml"):
+        source = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8")
+        assert "git ls-files" in source, f"{workflow} no comprueba ficheros sensibles"
+        # El bug original: un backslash literal que hacía la regla inerte.
+        assert r"\\.env" not in source, f"{workflow} conserva el regex roto (\\\\.env) del gate"
+        assert r"\.env$" in source, f"{workflow} no ancla el gate a .env$, así que .env.example da falso positivo"

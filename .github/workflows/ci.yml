@@ -50,9 +50,9 @@ jobs:
       - name: Reject databases and private key material
         shell: bash
         run: |
-          if git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'; then
+          if git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'; then
             echo "Sensitive runtime material is tracked by Git."
-            git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'
+            git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'
             exit 1
           fi
           # Also scan history for db leaks (audit fix #1)

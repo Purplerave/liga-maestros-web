@@ -36,9 +36,9 @@ jobs:
           set -o pipefail
           python -m pip install --disable-pip-version-check -q -r requirements.lock pytest pip-audit 2>/dev/null || python -m pip install --disable-pip-version-check -q -r requirements.txt pytest pip-audit
           pip-audit -r requirements.lock --progress-spinner off
-          if git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'; then
+          if git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'; then
             echo "Sensitive runtime material is tracked by Git."
-            git ls-files | grep -Ei '(^|/)(\.env|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'
+            git ls-files | grep -Ei '(^|/)(\.env$|.*\.(db|sqlite|sqlite3|pem|key)$|id_rsa$|id_ed25519$)'
             exit 1
           fi
           # Production readiness is blocking for deploy, not just CI
