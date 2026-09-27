@@ -361,7 +361,16 @@ function showWelcomeOnboarding() {
     // El onboarding multi-paso vive en onboarding.js para no duplicar el modal.
 }
 
+// Cerrojo del guardado. Antes la guarda era `if (saveButton?.disabled) return`,
+// que no protege: `hydrateHero()` vuelve a pintar el boton (y su `disabled` se
+// pierde) mientras la peticion sigue viva, asi que el segundo POST salia. Con
+// dos POST en vuelo, el backend borra y reinserta, y el que llega ultimo manda:
+// si el usuario cambiaba un signo mientras guardaba, el boleto nuevo se perdia
+// en silencio. El cerrojo vive en el modulo, no en el DOM.
+let guardadoEnCurso = false;
+
 async function savePredictions() {
+    if (guardadoEnCurso) return;
     if (!state.user) return showToast("Entra con Google para guardar.", "error");
     if (!state.data || String(state.data.jornada) !== String(state.data.max_jornada) || state.data.is_locked) {
         return showToast("Esta jornada ya esta cerrada.", "error");
@@ -383,6 +392,7 @@ async function savePredictions() {
 
     const saveButton = qs("save-quiniela-btn");
     if (saveButton?.disabled) return;
+    guardadoEnCurso = true;
     if (saveButton) {
         saveButton.disabled = true;
         saveButton.setAttribute("aria-busy", "true");
@@ -450,12 +460,14 @@ async function savePredictions() {
         showToast(message, "error");
         if (typeof SoundManager !== "undefined" && SoundManager.playError) SoundManager.playError();
     } finally {
+        guardadoEnCurso = false;
         if (saveButton) {
             saveButton.removeAttribute("aria-busy");
             hydrateHero();
         }
     }
 }
+
 
 async function adminRefreshAll() {
     if (!state.user?.is_admin && !state.data?.is_admin) return showToast("Solo admin.", "error");

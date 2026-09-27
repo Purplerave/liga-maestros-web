@@ -14,6 +14,7 @@ from ...services.teams import (
     is_live_scored_status,
     is_scored_status,
     prediction_source_priority,
+    signo_desde_goles,
 )
 
 
@@ -284,7 +285,7 @@ def _build_result_maps(conn, jornada):
     rows = conn.execute("""
         SELECT jornada, partido_id, signo_actual, goles_local, goles_visitante, status
         FROM resultados
-        WHERE signo_actual IS NOT NULL AND signo_actual != '-'
+        WHERE signo_actual IS NOT NULL OR (goles_local IS NOT NULL AND goles_visitante IS NOT NULL)
     """).fetchall()
     for row in rows:
         status = row["status"]
@@ -295,6 +296,15 @@ def _build_result_maps(conn, jornada):
         real = row["signo_actual"]
         if int(row["partido_id"] or 0) == 15 and row["goles_local"] is not None and row["goles_visitante"] is not None:
             real = f"{int(row['goles_local'])}-{int(row['goles_visitante'])}"
+        else:
+            # Si la columna cruda no trae signo, se deriva del marcador antes de
+            # descartar el partido: es lo que hace el front y lo que evita que un
+            # collector que dejo '-' con goles puesta haga puntuar 0 al usuario.
+            real = (
+                real if real not in (None, "", "-") else signo_desde_goles(row["goles_local"], row["goles_visitante"])
+            )
+        if real in (None, "", "-"):
+            continue
         key = (int(row["jornada"]), int(row["partido_id"]))
         if is_final:
             final_res_map[key] = real

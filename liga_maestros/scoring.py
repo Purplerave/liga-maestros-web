@@ -10,7 +10,11 @@ import re
 
 def pleno_score_key(value):
     raw = str(value or "").strip().upper().replace(" ", "")
-    match = re.search(r"([0-9M]+)-([0-9M]+)", raw)
+    # Anclado al principio, igual que el `scoreOnly` de `static/js/utils.js`.
+    # Sin anclar, un marcador con prefijo ("AET 2-1") lo aceptaba el backend y lo
+    # rechazaba el front: el mismo partido contaba como acierto en el ranking y
+    # como fallo en la pantalla, sin que hubiera forma de saber cual era el bueno.
+    match = re.match(r"([0-9M]+)-([0-9M]+)", raw)
     if not match:
         return ""
 

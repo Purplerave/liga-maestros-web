@@ -160,6 +160,26 @@ def is_live_scored_status(status):
     return str(status or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")
 
 
+def signo_desde_goles(goles_local, goles_visitante):
+    """1, X o 2 a partir del marcador, o None si aun no hay goles.
+
+    Vive aqui, y no duplicado en cada consumidor, porque el signo se deriva de
+    tres sitios que tienen que contar lo mismo: el payload que pinta los
+    partidos, el mapa que puntua el ranking y el que puntua La Peña. Cuando cada
+    uno aplica su propia regla, un collector que deja `signo_actual` en '-' con el
+    marcador ya puesto hace que el front marque acierto y el ranking sume 0.
+    """
+    if goles_local is None or goles_visitante is None:
+        return None
+    local = int(goles_local)
+    visitante = int(goles_visitante)
+    if local > visitante:
+        return "1"
+    if local < visitante:
+        return "2"
+    return "X"
+
+
 def build_participant_contract():
     seed_path = os.path.join(config.SEED_DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")
     runtime_path = os.path.join(config.DATA_DIR, "ECOSISTEMA_PARTICIPANTES.json")

@@ -16,7 +16,7 @@ from ..services.payloads.league_matches import build_all_league_matches, build_l
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
-from ..services.teams import build_participant_contract
+from ..services.teams import build_participant_contract, is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
 from ..services.trash_talk import build_trash_talk
 from ..utils import load_team_logos, normalize_team_key
@@ -112,7 +112,7 @@ def get_liga_data():
         multi_league_standings = {"leagues": multi_league_leagues}
         jornada_liga = str(matchday_played(standings) or "")
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
-        is_locked = _is_ticket_locked(partidos, close_info)
+        is_locked = _is_ticket_locked(partidos, close_info, _raw_match_statuses(conn, jornada))
         user = session.get("user") or {}
         # Señal explícita de "ya guardó la quiniela de esta jornada". El frontend
         # la usa para mostrar el boleto en solo lectura (sin selector 1X2) aunque
@@ -226,17 +226,25 @@ def get_liga_data():
         # ETag support
         response_json = jsonify(validated).get_data(as_text=True)
         etag = _etag_for(response_json)
+        # Esta respuesta es POR USUARIO: `ticket_guardado`, `is_locked`,
+        # `predicciones_actuales` e `is_admin` dependen de la sesion. Servirla con
+        # `public` hacia que un CDN o un proxy compartido guardara el body y se lo
+        # devolviera a otro usuario: el boleto de A servido a B. `private`+vary
+        # Cookie lo prohibe y `no-cache` conserva el 304 por ETag, que es justo lo
+        # que hace falta con un boleto que cambia a mitad de jornada.
         if_none_match = request.headers.get("If-None-Match")
         if if_none_match and if_none_match == etag:
             resp = jsonify({"status": "not_modified"})
             resp.status_code = 304
             resp.headers["ETag"] = etag
-            resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
+            resp.headers["Cache-Control"] = "private, no-cache, must-revalidate"
+            resp.headers["Vary"] = "Cookie"
             return resp
 
         resp = jsonify(validated)
         resp.headers["ETag"] = etag
-        resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
+        resp.headers["Cache-Control"] = "private, no-cache, must-revalidate"
+        resp.headers["Vary"] = "Cookie"
         return resp
     except Exception:
         logger.exception("api_liga_data failed")
@@ -322,10 +330,50 @@ def _resolve_available_jornadas(conn):
     return [1]
 
 
-def _is_ticket_locked(partidos, close_info):
+def _raw_match_statuses(conn, jornada):
+    """Estados tal y como estan en la tabla, sin el autoreparado de
+    `build_jornada_matches`.
+
+    Ese autoreparado existe para no pintar un partido fantasma en vivo cuando el
+    collector se quedó colgado, asi que es correcto para la pantalla. El problema
+    es que `POST /api/predicciones/save` lee la tabla cruda: si un LIVE con el
+    saque en el futuro se rebaja a NS para mostrarlo, el front invita a firmar y
+    el guardado responde 403. El usuario pierde los 15 signos sin aviso, y sin
+    este dato el bloqueo no puede saberlo.
+    """
+    try:
+        filas = conn.execute("SELECT status FROM resultados WHERE jornada = ?", (str(jornada),)).fetchall()
+    except Exception:  # pragma: no cover - defensivo: sin dato crudo, no se bloquea de mas
+        logger.warning("No se pudieron leer los estados crudos de la jornada %s", jornada, exc_info=True)
+        return []
+    return [fila["status"] for fila in filas if fila["status"]]
+
+
+def _is_ticket_locked(partidos, close_info, estados_crudos=()):
+    """El boleto se bloquea con los MISMOS estados que acepta el guardado.
+
+    Tres fallos se acumulaban aqui:
+
+    1. Se comparaba contra una lista a mano, `("LIVE", "FT", "FINISHED")`, que se
+       quedaba corta: el guardado cierra con `is_scored_status` o
+       `is_live_scored_status`, que ademas reconocen IN PLAY, HT, HALF TIME BREAK,
+       EN JUEGO y TERMINADO. Con cualquiera de esos el front habria pintado el
+       selector 1X2 editable y el guardado devolveria 403.
+    2. Solo se miraba el status ya autoreparado del payload (ver
+       `_raw_match_statuses`): un LIVE con el saque en el futuro se pinta como NS,
+       el front ofrece firmar y el guardado lo rechaza.
+    3. La comprobacion por estado era mas laxa que la del guardado. Cuando el
+       horario no se puede interpretar `close_at` es None y el tiempo no bloquea
+       nada, asi que el estado es la unica red.
+
+    Ante la duda, cerrar. Perder una quiniela cuesta mucho mas que dejar un
+    partido sin firmar.
+    """
     close_at = close_info.get("close_at")
     close_started = bool(close_at and madrid_now() >= close_at)
-    match_started = any((match.get("status") or "") in ("LIVE", "FT", "FINISHED") for match in partidos)
+    estados = [match.get("status") for match in partidos]
+    estados.extend(estados_crudos or ())
+    match_started = any(is_scored_status(estado) or is_live_scored_status(estado) for estado in estados)
     return close_started or match_started
 
 
