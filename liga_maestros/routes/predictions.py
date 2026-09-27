@@ -25,6 +25,29 @@ class GuardadoIncompletoError(Exception):
     """
 
 
+class QuinielaCerradaError(Exception):
+    """La jornada se cerro entre la comprobacion y la escritura.
+
+    Se lanza DENTRO de la transaccion, con los estados releidos bajo el lock de
+    escritura. Comprobarlo antes dejaba la ventana de la carrera: dos guardados
+    concurrentes pasaban los dos el control y el segundo, que tomaba el lock
+    despues, borraba los signos del primero.
+    """
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
+
+def _motivo_de_cierre(rows, close_at):
+    """Mensaje de cierre si la jornada ya no admite cambios, o None si sigue abierta."""
+    if close_at and madrid_now() >= close_at:
+        return f"La quiniela ya esta cerrada: el cierre era el {close_at.strftime('%d/%m %H:%M')}."
+    if any(is_scored_status(row["status"]) or is_live_scored_status(row["status"]) for row in rows):
+        return "La quiniela ya esta cerrada: empezo el primer partido."
+    return None
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -79,17 +102,12 @@ def save_predictions():
             return jsonify({"status": "error", "message": "La jornada no tiene 15 partidos validos."}), 400
         close_info = compute_ticket_close_info(rows, source=f"save_predictions_j{target_jornada}")
         close_at = close_info["close_at"]
-        already_closed = bool(close_at and madrid_now() >= close_at)
-        already_closed = already_closed or any(
-            is_scored_status(row["status"]) or is_live_scored_status(row["status"]) for row in rows
-        )
-        if already_closed:
-            if close_at:
-                close_label = close_at.strftime("%d/%m %H:%M")
-                message = f"La quiniela ya esta cerrada: el cierre era el {close_label}."
-            else:
-                message = "La quiniela ya esta cerrada: empezo el primer partido."
-            return jsonify({"status": "error", "message": message}), 403
+        # Comprobacion rapida antes de tomar el lock de escritura. NO es la que
+        # protege: entre aqui y el BEGIN otro guardado (o el collector) puede
+        # cerrar la jornada, asi que se repite dentro de la transaccion.
+        motivo_cierre = _motivo_de_cierre(rows, close_at)
+        if motivo_cierre:
+            return jsonify({"status": "error", "message": motivo_cierre}), 403
 
         def escribir_y_verificar():
             """Transaccion de escritura completa: borra, inserta y relee.
@@ -99,6 +117,17 @@ def save_predictions():
             milisegundos del collector era un fallo evitible.
             """
             begin_immediate_with_retry(conn)
+            # El cierre se vuelve a comprobar aqui, releendo los estados bajo el
+            # lock de escritura. Es el unico sitio donde el control y la escritura
+            # son atomicos: comprobarlo antes dejaba que dos guardados concurrentes
+            # pasaron ambos el filtro y el ultimo machacase al primero.
+            filas = conn.execute(
+                "SELECT status FROM resultados WHERE jornada = ? ORDER BY partido_id",
+                (target_jornada,),
+            ).fetchall()
+            motivo = _motivo_de_cierre(filas, close_at)
+            if motivo:
+                raise QuinielaCerradaError(motivo)
             conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, target_jornada))
             insert_tuples = [
                 (uid, target_jornada, i, signo) for i, signo in enumerate(normalized_signs, 1) if signo != "-"
@@ -137,6 +166,11 @@ def save_predictions():
                 return jsonify(
                     {"status": "error", "message": "No se pudo verificar el guardado completo de la quiniela."}
                 ), 500
+            except QuinielaCerradaError as cierre:
+                # No se reintenta: la jornada esta cerrada, un intento mas solo
+                # gastaria el lock de escritura para acabar con el mismo 403.
+                conn.rollback()
+                return jsonify({"status": "error", "message": cierre.message}), 403
             except Exception as exc:  # noqa: BLE001
                 # `rollback()` sin transaccion abierta es un no-op, asi que se puede
                 # llamar siempre: cubre tanto el lock de BEGIN como un fallo a mitad.

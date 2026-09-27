@@ -8,7 +8,13 @@ from typing import Any
 from ..db.connection import get_db
 from ..scoring import score_prediction
 from .jornada import current_season_sql
-from .teams import canonical_contest_id, is_scored_status, public_contest_name
+from .teams import (
+    canonical_contest_id,
+    is_live_scored_status,
+    is_scored_status,
+    public_contest_name,
+    signo_desde_goles,
+)
 
 Q15_EXPECTED_MATCHES = 15
 
@@ -111,13 +117,18 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
 
     result_rows = conn.execute("""
         SELECT jornada, partido_id, local, visitante, signo_actual, goles_local, goles_visitante, fecha, status
-        FROM resultados WHERE signo_actual IS NOT NULL AND signo_actual != '-'
+        FROM resultados
+        WHERE signo_actual IS NOT NULL OR (goles_local IS NOT NULL AND goles_visitante IS NOT NULL)
     """).fetchall()
     results = {}
     jornada_dates = {}
     match_labels = {}
     for row in result_rows:
-        if not is_scored_status(row["status"]):
+        # Se cuentan los partidos EN JUEGO igual que los finalizados. Antes solo
+        # contaba `is_scored_status`, mientras que el TICKET puntua con final o
+        # live: el mismo usuario veia un numero de aciertos en la quiniela y otro
+        # distinto en La Peña, sin que nada en la interfaz explicara la diferencia.
+        if not (is_scored_status(row["status"]) or is_live_scored_status(row["status"])):
             continue
         jornada = int(row["jornada"])
         partido_id = int(row["partido_id"])
@@ -125,6 +136,12 @@ def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
         real = row["signo_actual"]
         if partido_id == 15 and row["goles_local"] is not None and row["goles_visitante"] is not None:
             real = f"{int(row['goles_local'])}-{int(row['goles_visitante'])}"
+        else:
+            real = (
+                real if real not in (None, "", "-") else signo_desde_goles(row["goles_local"], row["goles_visitante"])
+            )
+        if real in (None, "", "-"):
+            continue
         results[key] = real
         jornada_dates.setdefault(jornada, str(row["fecha"] or "")[:10])
         match_labels[key] = {"local": row["local"] or "", "visitante": row["visitante"] or ""}

@@ -214,9 +214,75 @@ Revision hecha sin navegador ni dispositivo, contra el fuente. Tres fallos reale
 
 **Lo que ya estaba bien** y no se ha tocado: el `meta viewport` (con `viewport-fit=cover`), el manifest PWA, `apple-touch-icon`, los botones de signo a 52px y `mobile_v2.css`, que ya aplicaba bien el patron `vh`/`dvh`.
 
-**Tests:** `tests/test_movil.py`, 36 tests. Al no haber navegador en la CI se trabaja sobre el fuente, y se ha comprobado uno a uno que **fallan al revertir cada arreglo**. Dos de ellos nacieron verdes por error del propio test y estan corregidos: uno comprobaba `dvh` en global (pasaba con una sola altura corregida de cinco) y otro parseaba selectores sin quitar comentarios.
+**Tests:** `tests/test_movil.py`, 35 tests. Al no haber navegador en la CI se trabaja sobre el fuente, y se ha comprobado uno a uno que **fallan al revertir cada arreglo**. Dos de ellos nacieron verdes por error del propio test y estan corregidos: uno comprobaba `dvh` en global (pasaba con una sola altura corregida de cinco) y otro parseaba selectores sin quitar comentarios.
 
 **Sin verificar:** no hay navegador automatizado ni telefono fisico, y `image.png` no se pudo inspeccionar. Queda pendiente de confirmar en un dispositivo real que el modal del pleno se ve bien y que Confirmar es alcanzable en landscape, que es el hallazgo principal.
+
+---
+
+## Ola 5 - Integridad del boleto (rama `fix/integridad-datos`) - resuelta
+
+Ocho fallos, todos de la misma familia: **la app tomaba dos decisiones distintas sobre la misma pregunta** y el usuario pagaba la diferencia. El peor no estaba en la lista.
+
+### A15 - La pantalla y el guardado se desaccordaban. Quiniela perdida sin aviso
+
+La auditoría lo describia como "la lista de estados del bloqueo estaba corta". El problema real era mayor.
+
+`build_jornada_matches` **repara en lectura** los partidos: si un partido esta marcado como vivo pero su saque aun no ha llegado, lo rebaja a `NS` para que un collector caido no deje un fantasma en pantalla. El guardado, en cambio, lee la tabla cruda. Con un collector en esas, la secuencia era:
+
+1. La BD dice `LIVE` con el saque dentro de tres horas.
+2. El read-path lo rebaja a `NS` y la pagina ofrece los 15 selectores 1X2.
+3. El usuario firma los 15 signos y pulsa guardar.
+4. `POST /api/predicciones/save` responde **403 "empezo el primer partido"**.
+
+Quiniela entera perdida, sin aviso y sin reintento. El bloqueo nunca podia detectarlo porque solo miraba el estado ya reparado.
+
+Ademas seguia en pie el defecto original: la lista a mano `("LIVE", "FT", "FINISHED")` es mas corta que `is_scored_status`/`is_live_scored_status`, que reconocen tambien `IN PLAY`, `HT`, `HALF TIME BREAK`, `EN JUEGO` y `TERMINADO`.
+
+**Arreglo:** `_is_ticket_locked` recibe ademas los estados crudos (`_raw_match_statuses`) y cierra con la union de ambos. Ante la duda, cerrar: perder una quiniela cuesta mas que dejar un partido sin firmar.
+
+**Test:** `test_la_pantalla_y_el_guardado_no_se_pueden_desacordar` recorre cada estado y compara **las dos respuestas de la misma app** (lo que muestra la pantalla y lo que acepta el guardado) en vez de dos listas escritas a mano. Es el test que habria encontrado el fallo de raiz. Los parametrizados de A15 usan saque futuro a proposito: con saque pasado el reloj cerraba el boleto igual y el test pasaba sin haber mirado el estado, un verde falso.
+
+### A18 - Dos guardados concurrentes, y el segundo machacaba al primero
+
+El cierre se comprobaba antes de `BEGIN IMMEDIATE`. Entre el `SELECT` y el lock, otro guardado (o el collector) podia cerrar la jornada: pasaban los dos el control y el que tomaba el lock despues borraba los signos del otro.
+
+**Arreglo:** `QuinielaCerradaError` y `_motivo_de_cierre()`; la comprobacion se repite **dentro** de la transaccion, releyendo los estados bajo el lock de escritura. Es el unico sitio donde el control y la escritura son atomicos. La comprobacion rapida de fuera se queda, pero solo como ahorro de trabajo.
+
+### A14 - `/api/liga/data` se declaraba `public` siendo un payload por usuario
+
+**Matiz importante, y no es el que decia la auditoria.** El `after_request` global (`__init__.py:156`) ya fuerza `no-store, private` **cuando hay sesion**, asi que el boleto de un usuario autenticado nunca llego a cachearse: no hubo fuga del boleto de A a B. El fallo real era el inverso y mas tonto: **sin sesion la ruta se quedaba en `public, max-age=60` y sin `Vary: Cookie`**, asi que una cache compartida guardaba el body anonimo y se lo servia a un usuario autenticado, que veia una pagina sin su boleto.
+
+Se arregla igualmente, porque lo que protegia era una rama ajena y ajena a la intencion: si manana esa condicion del `after_request` cambia, la ruta vuelve a servir datos de usuario como publicos sin que nada se queje.
+
+**Test:** `test_el_payload_por_usuario_no_es_cacheable_por_terceros` sin sesion, y `test_los_endpoints_publicos_siguen_siendo_cacheables` para que nadie lo "arregle" por el otro extremo y hexadecimalmente cargue la app.
+
+### A19 - El ranking puntuaba contra la columna cruda
+
+`signo_actual` en `'-'` con el marcador ya puesto (lo que deja un collector que murio a mitad) hacia que la pantalla marcara acierto y el ranking sumara 0. La derivacion del signo vive ahora en `signo_desde_goles()` (`services/teams.py`), en un solo sitio, porque la necesitan tres consumidores que tienen que contar lo mismo.
+
+### A20 - La Peña y el TICKET decian dos numeros distintos
+
+La Peña solo contaba partidos finalizados y el TICKET contaba tambien los en juego. La columna `signo_actual != '-'` del SQL hacia el fallo inalcanzable aunque la derivacion funcionara: los partidos que-la-diagnostica describe nunca llegaban a evaluarse. Las dos cosas.
+
+### A21 - El pleno se interpretaba distinto en cada lado
+
+`re.search` en `scoring.py` aceptaba `"AET 2-1"`; el `scoreOnly` del front lo rechazaba. El mismo partido contaba como acierto en el ranking y como fallo en la pantalla. Anclado con `re.match`.
+
+### El cerrojo del guardado y la regla del borrador
+
+- `savePredictions` se protegia con `if (saveButton?.disabled) return`, que no protege: `hydrateHero()` vuelve a pintar el boton mientras la peticion sigue viva. Con dos POST en vuelo, el backend borra y reinserta y el que llega ultimo manda. `guardadoEnCurso` vive en el modulo.
+- `hydrateUserSigns` hacia `draft || serverSigns`: un borrador viejo de `localStorage` ganaba al boleto del servidor, el boleto aparecia como "cambios sin guardar" y el primer clic reenviaba el borrador, machacando el real. Ahora el servidor gana cuando su boleto esta completo, y el borrador se aparta a una clave aparte en vez de tirarse.
+
+### Tests: 40 en `tests/test_integridad_boleto.py`
+
+Todos comprobados **uno a uno fallando al revertir cada arreglo**. Tres correcciones al propio tests durante el trabajo, que es justo lo que un verde sin verificar esconde:
+
+- Los tests de A15 median el reloj, no el estado: con saque en el pasado pasaban aunque el bloqueo estuviese roto.
+- El contrato front/guardado daba falsos verdes por el **rate-limit anti-flood** (`"Espera unos segundos"`) al reusar usuario entre iteraciones.
+- El test del borrador era una busqueda de cadenas (`"DRAFT_MAX_AGE_MS" in fuente`), que no puede detectar la regresion: con el codigo viejo las cadenas seguian ahi y el test pasaba. Sustituido por `tools/js/state_draft_harness.js`, que ejecuta `utils.js` y `state.js` de verdad en un `vm` con `localStorage` simulado. Si Node no esta, el test se salta en vez de dar un verde falso.
+
+**Sin verificar:** nada de esta ola necesita navegador. La suite completa queda en **752 tests** (712 + 40).
 
 ---
 

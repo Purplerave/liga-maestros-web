@@ -394,12 +394,24 @@ function updateHeroStrip() {
     alertNode.textContent = done === 15 ? "Quiniela lista" : "Marca tu quiniela";
 }
 
+// Antiguedad maxima de un borrador que se restaura sin preguntar. Por encima de
+// esto la copia local casi seguro esta obsoleta (el boleto se guardo en otro
+// dispositivo, o el usuario firmo otra vez y esta pestana quedo con el draft
+// viejo pegado) y pisar el boleto del servidor con el pierde el trabajo de verdad.
+const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 function readDraft() {
     try {
         const raw = window.localStorage.getItem(draftKey());
         if (!raw) return null;
         const draft = JSON.parse(raw);
-        return Array.isArray(draft.signos) && draft.signos.length === 15 ? draft.signos : null;
+        if (!Array.isArray(draft.signos) || draft.signos.length !== 15) return null;
+        const updatedAt = Date.parse(draft.updated_at || "");
+        if (Number.isFinite(updatedAt) && Date.now() - updatedAt > DRAFT_MAX_AGE_MS) {
+            window.localStorage.removeItem(draftKey());
+            return null;
+        }
+        return draft.signos;
     } catch {
         return null;
     }
@@ -444,8 +456,34 @@ function hydrateUserSigns({ preserveLocalTicket = false } = {}) {
         return;
     }
     const draft = readDraft();
-    state.my_signs = draft || serverSigns;
-    state.draftDirty = Boolean(draft && !sameSigns(draft, serverSigns));
+    const servidorCompleto = state.server_signs.every(sign => sign && sign !== "-");
+    if (draft && servidorCompleto && !sameSigns(draft, serverSigns)) {
+        // El servidor tiene un boleto completo y el borrador local es distinto:
+        // el servidor es la verdad guardada, el local es una copia vieja. Antes
+        // ganaba el local (`draft || serverSigns`), y el efecto era doble: el
+        // boleto aparecia como "cambios sin guardar" y el primer clic sobre un
+        // signo reenviaba el borrador, machacando el boleto real. Se aparta a una
+        // clave aparte en vez de tirarlo, por si el usuario lo queria.
+        console.warn(
+            "[state] Se ignora un borrador local mas antiguo que el boleto del servidor",
+            { servidor: serverSigns, borrador: draft }
+        );
+        try {
+            window.localStorage.setItem(
+                `liga_maestros_borrador_descartado_${draftKey()}`,
+                JSON.stringify({ signos: draft, updated_at: new Date().toISOString() })
+            );
+        } catch {
+            // Sin sitio para apartarlo: el boleto del servidor sigue siendo el
+            // que se muestra, que es lo importante.
+        }
+        window.localStorage.removeItem(draftKey());
+        state.my_signs = serverSigns;
+        state.draftDirty = false;
+    } else {
+        state.my_signs = draft || serverSigns;
+        state.draftDirty = Boolean(draft && !sameSigns(draft, serverSigns));
+    }
     if (!state.draftDirty && hasSavedTicket()) state.editMode = false;
 }
 
