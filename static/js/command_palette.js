@@ -207,6 +207,9 @@ const CommandPalette = {
         this._lastFocus = document.activeElement;
         this._items = this.commands();
         this._root.hidden = false;
+        // Sin esto, arrastrar sobre la paleta desplaza la pagina de fondo. En
+        // movil ademas hacia que el overlay se notase pegado a la pantalla.
+        this._liberarScroll = typeof lmBloquearScroll === "function" ? lmBloquearScroll() : null;
         // Forzar reflow para que la transicion se aplique
         void this._root.offsetWidth;
         this._root.classList.add("is-open");
@@ -218,6 +221,8 @@ const CommandPalette = {
     close() {
         if (!this._open) return;
         this._open = false;
+        this._liberarScroll?.();
+        this._liberarScroll = null;
         this._root.classList.remove("is-open");
         const finish = () => { if (!this._open) this._root.hidden = true; };
         setTimeout(finish, 160);

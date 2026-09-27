@@ -189,6 +189,23 @@
     textarea {
         font-size: 16px;
     }
+    /* El `select, input, textarea` de arriba no basta: los estilos de escritorio
+       bajan algunos de 16px con selectores mas especificos (`.field-group select`
+       a 0.64rem = 10.2px, `.award-picker select` a 0.72rem = 11.5px) y ganan por
+       especificidad. Con un campo por debajo de 16px, Safari hace zoom al
+       enfocarlo y NO vuelve atras: la pagina queda ilegible y la quiniela
+       desplazada. Aqui no se toca el diseño de escritorio, que si quiere esos
+       tamanos compactos; solo el movil. */
+    body .field-group select,
+    body .field-group input,
+    body .field-group textarea,
+    body .award-picker select,
+    body .porra-selector,
+    body .porra-form input,
+    body .porra-form select,
+    body .porra-form textarea {
+        font-size: 16px;
+    }
     body.newspaper-ui.quiniela-focus .field-group select {
         height: 44px;
         min-height: 44px;

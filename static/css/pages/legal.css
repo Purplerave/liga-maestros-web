@@ -9,7 +9,11 @@
 
 body.legal-page {
     margin: 0;
+    /* `dvh` y no `vh`: con la barra del navegador visible, `100vh` mide de mas y
+       deja un scroll fantasma al final de las legales en movil. Estas paginas no
+       cargan mobile_v2.css, asi que el fallback hay que declararlo aqui. */
     min-height: 100vh;
+    min-height: 100dvh;
     background: #06090f;
     color: #edf5ff;
 }

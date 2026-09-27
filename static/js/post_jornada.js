@@ -5,6 +5,8 @@
    ========================================================================== */
 
 const PostJornada = {
+    _liberarScroll: null,
+
     _storageKey(jornada) {
         return `lm_pj_seen_j${jornada}`;
     },
@@ -100,6 +102,11 @@ const PostJornada = {
             </div>
         `;
         document.body.appendChild(banner);
+        // La hoja cubre la pantalla entera: sin bloquear el scroll, arrastrar
+        // sobre ella desplaza la quiniela de fondo y el "Seguir" pierde el sitio.
+        if (typeof lmBloquearScroll === "function") {
+            this._liberarScroll = lmBloquearScroll();
+        }
         requestAnimationFrame(() => banner.classList.add("pj-visible"));
 
         banner.querySelectorAll("[data-pj-close]").forEach((btn) => {
@@ -114,6 +121,10 @@ const PostJornada = {
         try {
             localStorage.setItem(this._storageKey(jornada), "1");
         } catch (_) {}
+        if (this._liberarScroll) {
+            this._liberarScroll();
+            this._liberarScroll = null;
+        }
         const banner = document.getElementById("pj-banner");
         if (!banner) return;
         banner.classList.remove("pj-visible");

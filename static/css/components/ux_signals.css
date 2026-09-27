@@ -23,6 +23,10 @@
     text-decoration: none;
     transform: translateY(-160%);
     transition: transform var(--duration-fast, 120ms) var(--ease-out);
+    /* Al enfocarse con el teclado, el enlace aparecia literally bajo el notch de
+       un iPhone: con `viewport-fit=cover` hay que apartarlo del inset superior. */
+    top: calc(var(--space-2) + var(--safe-top, 0px));
+    left: calc(var(--space-2) + var(--safe-left, 0px));
 }
 
 .skip-link:focus-visible { transform: translateY(0); }
@@ -81,9 +85,23 @@
     font-weight: 700;
     transform: translate(-50%, 140%);
     transition: transform var(--duration-normal, 200ms) var(--ease-out);
+    /* Landscape con notch: sin esto los extremos de la píldora quedan bajo el
+       recorte lateral. */
+    margin-left: var(--safe-inline, 0px);
 }
 
 .system-pill.is-visible { transform: translate(-50%, 0); }
+
+/* En móvil la píldora queda encima de la bottom nav (z 9000 frente a z 50) y, con
+   `bottom: 20px`, por debajo del indicador de inicio. Tapaba el boton central de
+   la navegacion justo cuando mas falta hace el aviso de "sin conexion". Se
+   levanta por encima de la nav. */
+@media (max-width: 899px) {
+    .system-pill {
+        bottom: calc(58px + var(--safe-bottom, 0px) + var(--space-2));
+        max-width: calc(100vw - var(--safe-inline, 0px) - 24px);
+    }
+}
 
 .system-pill .pill-dot {
     width: 8px;

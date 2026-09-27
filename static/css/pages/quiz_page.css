@@ -27,7 +27,10 @@ body.newspaper-ui.quiniela-focus .quiz-feature-page {
     grid-template-rows: auto minmax(0, 1fr);
     gap: clamp(12px, 1.4vw, 18px);
     width: min(1380px, 100%);
+    /* `dvh` para que la altura siga a la barra del navegador en movil; con `vh`
+       el quiz dejaba un scroll fantasma al final. */
     min-height: calc(100vh - 202px);
+    min-height: calc(100dvh - 202px);
     margin: 0 auto;
     align-items: stretch;
     color: var(--quiz-ink);

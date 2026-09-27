@@ -6,17 +6,34 @@
     display: grid;
     place-items: center;
     padding: 16px;
+    /* Landscape con notch: los insets laterales evitan que el boton Confirmar
+       quede bajo el recorte fisico del dispositivo. */
+    padding-left: calc(16px + var(--safe-left, 0px));
+    padding-right: calc(16px + var(--safe-right, 0px));
+    padding-top: calc(16px + var(--safe-top, 0px));
+    padding-bottom: calc(16px + var(--safe-bottom, 0px));
     background: rgba(3, 7, 18, 0.86);
     backdrop-filter: blur(7px);
     opacity: 0;
     transition: opacity 160ms ease;
+    /* El overlay es fijo: sin esto, el dedo sobre el panel desplaza la pagina de
+       fondo y el modal se queda flotando sobre otro contenido. */
+    overscroll-behavior: contain;
 }
 
 .pleno-modal-overlay.is-active { opacity: 1; }
 
 .pleno-modal {
     width: min(430px, 100%);
-    overflow: hidden;
+    /* El panel antes tenia `overflow: hidden` sin altura maxima: en landscape
+       (iPhone SE: 375px de alto) la cabecera y el boton Confirmar se recortaban
+       arriba y abajo sin ninguna forma de llegar a ellos. Ahora el panel se
+       limita a la altura util y el CUERPO es lo unico que scrollea, de forma que
+       el header y los botones de accion quedan siempre visibles. */
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
     color: #f8fafc;
     background: #0f172a;
     border: 1px solid rgba(56, 189, 248, 0.28);
@@ -33,6 +50,8 @@
     text-align: center;
     background: #111c31;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* No encoger: el nombre de los equipos es la referencia al elegir los goles. */
+    flex: 0 0 auto;
 }
 
 .pleno-modal-header h3 {
@@ -71,6 +90,15 @@
     display: grid;
     gap: 16px;
     padding: 20px;
+    /* Unico elemento que scrollea dentro del panel: el header con los equipos y
+       el footer con Cancelar/Confirmar permanecen fijos y siempre alcanzables,
+       que es justo lo que se perdia al recortar el modal en pantallas bajas. */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    /* El rubber-band al final del body no debe arrastrar la pagina de fondo. */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pleno-goals-group { min-width: 0; margin: 0; padding: 0; border: 0; }
@@ -115,13 +143,28 @@
     font: 800 1.25rem/1 var(--font-data, monospace);
 }
 
-.pleno-modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
+.pleno-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 20px 20px;
+    /* No encoger: si el footer se comprimiera, Confirmar quedaria ilegible justo
+       cuando el contenido no cabe. */
+    flex: 0 0 auto;
+}
 
 .pleno-modal-actions button {
     min-height: 40px;
     border-radius: 6px;
     font-weight: 800;
     cursor: pointer;
+}
+
+/* En pantalla tactil 40px queda por debajo del minimo comodo (44px) y es facil
+   fallar el Confirmar con el dedo. Mismo patron que app_shell.css. */
+@media (pointer: coarse) {
+    .pleno-modal-actions button { min-height: 48px; }
+    .pleno-goal-btn { min-height: 48px; }
 }
 
 .pleno-modal-cancel { border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; background: #162136; }

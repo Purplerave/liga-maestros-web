@@ -8,10 +8,16 @@
   align-items: flex-end;
   justify-content: center;
   padding: 1rem;
+  /* Es una hoja pegada al borde inferior: sin el inset de la barra de inicio, el
+     boton de cerrar quedaba bajo el indicador de inicio en iPhone. */
+  padding-bottom: calc(1rem + var(--safe-bottom, 0px));
+  padding-left: calc(1rem + var(--safe-left, 0px));
+  padding-right: calc(1rem + var(--safe-right, 0px));
   background: rgba(6, 9, 15, 0.55);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
+  overscroll-behavior: contain;
 }
 .pj-banner.pj-visible {
   opacity: 1;
@@ -27,6 +33,13 @@
   position: relative;
   transform: translateY(12px);
   transition: transform 0.28s ease;
+  /* El resumen de la jornada lista hasta 15 partidos con escudos y marcadores: en
+     pantallas bajas se salia por arriba sin scroll. */
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .pj-banner.pj-visible .pj-banner-inner {
   transform: translateY(0);

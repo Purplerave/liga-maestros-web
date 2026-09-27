@@ -12,10 +12,17 @@
         }
     }
 
+    var liberarScroll = null;
+
     function dismiss() {
         try {
             localStorage.setItem(STORAGE_KEY, "1");
         } catch (e) { /* ignore */ }
+        // Sin esto, el dedo sobre el modal desplaza la pagina de fondo por detras.
+        if (liberarScroll) {
+            liberarScroll();
+            liberarScroll = null;
+        }
         var overlay = document.querySelector(".onboarding-overlay");
         if (overlay) {
             overlay.classList.add("onboarding-fade-out");
@@ -109,6 +116,9 @@
         overlay.setAttribute("aria-label", "Bienvenido a Liga de Maestros");
         overlay.innerHTML = '<div class="onboarding-modal"></div>';
         document.body.appendChild(overlay);
+        if (typeof lmBloquearScroll === "function") {
+            liberarScroll = lmBloquearScroll();
+        }
 
         // Close on overlay click (outside modal)
         overlay.addEventListener("click", function (e) {
