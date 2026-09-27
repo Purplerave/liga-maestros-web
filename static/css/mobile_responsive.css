@@ -58,11 +58,18 @@
         left: 0;
         width: 80%;
         max-width: 320px;
+        /* `dvh` para que el drawer no se salga por abajo al aparecer la barra del
+           navegador; ademas se aparta del inset lateral en landscape con notch. */
         height: 100vh;
+        height: 100dvh;
+        padding-top: var(--safe-top, 0px);
+        padding-bottom: var(--safe-bottom, 0px);
+        padding-left: var(--safe-left, 0px);
         z-index: 1000;
         background: var(--bg-surface);
         border-right: 1px solid var(--border-main);
         overflow-y: auto;
+        overscroll-behavior: contain;
     }
     .mobile-menu-btn {
         display: flex;

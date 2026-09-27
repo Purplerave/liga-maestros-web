@@ -3,7 +3,11 @@
 html, body {
     margin: 0;
     padding: 0;
+    /* `100dvh` y no `100vh`: en movil la barra de navegacion del navegador
+       encoge al hacer scroll, y `100vh` mide el viewport con la barra oculta.
+       El resultado era un scroll fantasma con el fondo del shell cortado. */
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -12,10 +16,16 @@ html, body {
     display: grid;
     grid-template-rows: auto auto auto 1fr;
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
     box-sizing: border-box;
     min-width: 0;
     overflow: hidden;
+    /* Landscape en iPhone: el notch va a un lateral y `viewport-fit=cover` deja
+       que el contenido se meta debajo. El inset lateral mantiene pulsables las
+       esquinas, que es donde caen los botones de la bottom nav. */
+    padding-left: var(--safe-inline, 0px);
+    padding-right: var(--safe-inline, 0px);
 }
 
 .main-arena {

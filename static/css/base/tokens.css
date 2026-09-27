@@ -107,6 +107,27 @@
     --z-overlay: 1000;
     --z-modal: 5000;
     --z-toast: 9000;
+
+    /* ---------- Safe areas (notch, home indicator, barras del sistema) ----------
+       El documento declara `viewport-fit=cover`, asi que el contenido se extiende
+       detras de los recortes fisicos. En vertical solo hacen falta top y bottom,
+       pero en landscape el notch va a un lateral y sin esto el contenido (y los
+       botones) quedan debajo de el. Safari expone ademas las variables de
+       viewport dinamico; el fallback `0px` cubre navegadores que no las
+       soporten, y `--safe-left/right` remain en 0 en vertical salvo recorte. */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    /* Suma de los laterales: en vertical es 0, en landscape con notch es ~44px. */
+    --safe-inline: calc(var(--safe-left) + var(--safe-right));
+
+    /* Altura util real: la barra de navegacion del navegador encoge y crece al
+       hacer scroll, asi que `100vh` mide de mas y deja un scroll fantasma. `dvh`
+       se ajusta a la barra visible. El fallback `100vh` va declarado antes para
+       los navegadores que no conocen `dvh`. */
+    --viewport-height: 100vh;
+    --viewport-height: 100dvh;
 }
 
 /* ==========================================================================

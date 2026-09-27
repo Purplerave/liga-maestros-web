@@ -65,8 +65,13 @@ function openPlenoModal(idx) {
         else awayGoals = button.dataset.goal;
         updatePreview();
     };
+    // Sin esto, arrastrar el dedo sobre el panel desplaza la quiniela de fondo y
+    // el modal acaba flotando sobre otro contenido. Es el unico punto de salida,
+    // asi que se libera dentro de `close`.
+    const liberarScroll = typeof lmBloquearScroll === "function" ? lmBloquearScroll() : null;
     const close = () => {
         document.removeEventListener("keydown", onKeydown);
+        liberarScroll?.();
         overlay.classList.remove("is-active");
         window.setTimeout(() => overlay.remove(), 160);
         if (trigger instanceof HTMLElement) trigger.focus();

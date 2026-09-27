@@ -824,7 +824,10 @@ body.newspaper-snake-active .arcade-help {
     grid-template-rows: auto auto minmax(0, 1fr) auto;
     gap: 8px 12px;
     width: min(1180px, calc(100vw - 34px));
+    /* `dvh` y no `vh`: el contenedor tiene `overflow: hidden`, asi que medir de mas
+       con la barra del navegador oculta recortaba la fila inferior del juego. */
     max-height: calc(100vh - 126px);
+    max-height: calc(100dvh - 126px);
     overflow: hidden;
     padding: 10px;
   }
