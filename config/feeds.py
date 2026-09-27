@@ -2,10 +2,12 @@
 
 import os
 
+from config.env import env_int
+
 from .paths import DATA_DIR
 
 NEWS_CACHE_PATH = os.path.join(DATA_DIR, "RADAR_NOTICIAS.json")
-NEWS_REFRESH_SECONDS = int(os.getenv("NEWS_REFRESH_SECONDS", "900"))
+NEWS_REFRESH_SECONDS = env_int("NEWS_REFRESH_SECONDS", 900)
 
 NEWS_FEEDS = [
     {"id": "laliga", "name": "LALIGA", "url": "https://www.laliga.com/noticias?format=feed&type=rss"},

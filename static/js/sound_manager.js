@@ -101,7 +101,11 @@ const SoundManager = {
                 enabled: this._enabled,
                 volume: this._volume
             }));
-        } catch {}
+        } catch {
+            // Safari en modo privado y la cuota llena lanzan aqui. Perder la
+            // preferencia de sonido es aceptable; romper la pagina no lo es, asi
+            // que el fallo se ignora a proposito.
+        }
     },
 
     _showToast(msg) {

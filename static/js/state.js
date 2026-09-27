@@ -413,13 +413,20 @@ function persistDraft() {
             signos: state.my_signs,
             updated_at: new Date().toISOString()
         }));
-    } catch {}
+    } catch (error) {
+        // Perder el borrador es perdida de trabajo del usuario, asi que deja
+        // rastro. No se avisa con un toast porque en modo privado de Safari o con
+        // la cuota llena fallaria en cada tecla y molestaria mas de lo que informa.
+        console.warn("[state] No se pudo guardar el borrador localmente:", error);
+    }
 }
 
 function clearDraft() {
     try {
         window.localStorage.removeItem(draftKey());
-    } catch {}
+    } catch {
+        // Solo no se pudo limpiar una copia local; el estado en memoria ya vale.
+    }
     state.draftDirty = false;
 }
 

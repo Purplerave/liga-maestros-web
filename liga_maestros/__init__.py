@@ -11,6 +11,7 @@ from flask import Flask, g, jsonify, render_template, request, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import config
+from config.env import env_bool, env_int, env_str
 
 logger = logging.getLogger(__name__)
 
@@ -91,13 +92,13 @@ def create_app():
 
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE=os.getenv("SESSION_COOKIE_SAMESITE", "Lax"),
-        SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "0").strip().lower() in ("1", "true", "yes", "on"),
-        PERMANENT_SESSION_LIFETIME=timedelta(hours=int(os.getenv("SESSION_LIFETIME_HOURS", "12"))),
+        SESSION_COOKIE_SAMESITE=env_str("SESSION_COOKIE_SAMESITE", "Lax"),
+        SESSION_COOKIE_SECURE=env_bool("SESSION_COOKIE_SECURE", False),
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=env_int("SESSION_LIFETIME_HOURS", 12)),
         PREFERRED_URL_SCHEME=preferred_scheme,
-        MAX_CONTENT_LENGTH=int(os.getenv("MAX_CONTENT_LENGTH", str(64 * 1024))),
-        MAX_FORM_MEMORY_SIZE=int(os.getenv("MAX_FORM_MEMORY_SIZE", str(32 * 1024))),
-        MAX_FORM_PARTS=int(os.getenv("MAX_FORM_PARTS", "50")),
+        MAX_CONTENT_LENGTH=env_int("MAX_CONTENT_LENGTH", 64 * 1024),
+        MAX_FORM_MEMORY_SIZE=env_int("MAX_FORM_MEMORY_SIZE", 32 * 1024),
+        MAX_FORM_PARTS=env_int("MAX_FORM_PARTS", 50),
     )
 
     _configure_logging(app)

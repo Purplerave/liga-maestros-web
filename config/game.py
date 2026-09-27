@@ -4,8 +4,10 @@ import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-MAX_DOBLES_PER_TICKET = int(os.getenv("MAX_DOBLES_PER_TICKET", "14"))
-MAX_TRIPLES_PER_TICKET = int(os.getenv("MAX_TRIPLES_PER_TICKET", "14"))
+from config.env import env_int
+
+MAX_DOBLES_PER_TICKET = env_int("MAX_DOBLES_PER_TICKET", 14)
+MAX_TRIPLES_PER_TICKET = env_int("MAX_TRIPLES_PER_TICKET", 14)
 
 
 def _compute_current_season_start_year() -> int:

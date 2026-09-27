@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 
 import config
 
@@ -21,6 +22,45 @@ class ClosingConnection(sqlite3.Connection):
         result = super().__exit__(exc_type, exc, tb)
         self.close()
         return result
+
+
+def is_transient_lock_error(exc: BaseException) -> bool:
+    """¿Este error es una contencion de escritura de SQLite que vale la pena reintentar?
+
+    SQLite no tiene un unico mensaje: segun el nivel y el modo, la misma
+    contencion puede llegar como "database is locked", "database table is locked"
+    o "database is busy". Un unico predicado evita que el reintento del helper y
+    el del endpoint discrepen y uno se quede sin cubrir.
+    """
+    if not isinstance(exc, sqlite3.OperationalError):
+        return False
+    texto = str(exc).lower()
+    return "locked" in texto or "is busy" in texto
+
+
+def begin_immediate_with_retry(conn, attempts: int = 3, base_delay: float = 0.2):
+    """`BEGIN IMMEDIATE` con reintentos cuando SQLite está momentáneamente bloqueado.
+
+    `PRAGMA busy_timeout` (10 s) ya aguanta la mayoría de las contendeduras, pero
+    WAL admite un solo escritor y el collector de resultados escribe mientras la
+    quiniela se cierra: si ese reintento se agota, el guardado devolvía un 500 y el
+    usuario perdía el boleto por algo que dura milisegundos.
+
+    Solo se reintenta si el error es de bloqueo. Cualquier otro error se levanta
+    tal cual, para no esconder un fallo real detrás de tres intentos.
+    """
+    ultimo: sqlite3.OperationalError | None = None
+    for intento in range(attempts):
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            return
+        except sqlite3.OperationalError as exc:
+            if not is_transient_lock_error(exc):
+                raise
+            ultimo = exc
+            if intento < attempts - 1:
+                time.sleep(base_delay * (2**intento))
+    raise ultimo if ultimo is not None else sqlite3.OperationalError("BEGIN IMMEDIATE no se pudo ejecutar")
 
 
 def ensure_db_file():

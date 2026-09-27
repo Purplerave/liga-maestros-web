@@ -1,7 +1,5 @@
 """Porra routes: exact-score predictions on any open match chosen by the user."""
 
-from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
 
 from ..db.connection import get_db
@@ -396,7 +394,11 @@ def post_porra():
                 {"status": "error", "message": "Ya cambiaste tu porra una vez. No puedes cambiarla más."}
             ), 400
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Hora de Madrid, como el resto del archivo. Con datetime.now() el
+        # `created_at` quedaba en la hora local del servidor, que en Alwaysdata es
+        # UTC: una porra creada a las 23:30 de Madrid se fechaba dos horas antes, y
+        # cualquier comparacion contra kickoff (madrid_now()) se desincronizaba.
+        now = madrid_now().strftime("%Y-%m-%d %H:%M:%S")
         changes = 1 if existing_entry else 0
 
         conn.execute(

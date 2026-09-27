@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request, session
 
 import config
 
-from ..db.connection import get_db
+from ..db.connection import begin_immediate_with_retry, get_db, is_transient_lock_error
 from ..middleware.rate_limit import is_rate_limited
 from ..scoring import normalize_prediction_sign
 from ..services.highlightly import Q15_EXPECTED_MATCHES
@@ -15,6 +15,16 @@ from ..services.teams import is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
+
+
+class GuardadoIncompletoError(Exception):
+    """La fila releida no coincide con lo enviado.
+
+    Se distingue del error generico porque significa que la escritura se guardo a
+    medias, no que la transaccion fallo: conviene registrarla aparte.
+    """
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -56,7 +66,6 @@ def save_predictions():
         return jsonify({"status": "error", "message": "Jornada invalida."}), 400
 
     conn = get_db()
-    transaction_started = False
     try:
         active_jornada = resolve_active_jornada(conn)
         if active_jornada is None or int(active_jornada) != target_jornada:
@@ -82,29 +91,66 @@ def save_predictions():
                 message = "La quiniela ya esta cerrada: empezo el primer partido."
             return jsonify({"status": "error", "message": message}), 403
 
-        conn.execute("BEGIN IMMEDIATE")
-        transaction_started = True
-        conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, target_jornada))
-        insert_tuples = [(uid, target_jornada, i, signo) for i, signo in enumerate(normalized_signs, 1) if signo != "-"]
-        if insert_tuples:
-            conn.executemany(
-                "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)", insert_tuples
-            )
-        saved_rows = conn.execute(
-            "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
-            (uid, target_jornada),
-        ).fetchall()
-        saved_signs = ["-"] * Q15_EXPECTED_MATCHES
-        for row in saved_rows:
-            idx = int(row["partido_id"]) - 1
-            if 0 <= idx < Q15_EXPECTED_MATCHES:
-                saved_signs[idx] = row["signo"]
-        if saved_signs != normalized_signs:
-            conn.rollback()
+        def escribir_y_verificar():
+            """Transaccion de escritura completa: borra, inserta y relee.
+
+            Se reintenta entera si SQLite esta bloqueado en el momento. El boleto
+            va con los 15 signos en un solo POST, asi que perderlo por un lock de
+            milisegundos del collector era un fallo evitible.
+            """
+            begin_immediate_with_retry(conn)
+            conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, target_jornada))
+            insert_tuples = [
+                (uid, target_jornada, i, signo) for i, signo in enumerate(normalized_signs, 1) if signo != "-"
+            ]
+            if insert_tuples:
+                conn.executemany(
+                    "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+                    insert_tuples,
+                )
+            saved_rows = conn.execute(
+                "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
+                (uid, target_jornada),
+            ).fetchall()
+            leidos = ["-"] * Q15_EXPECTED_MATCHES
+            for row in saved_rows:
+                idx = int(row["partido_id"]) - 1
+                if 0 <= idx < Q15_EXPECTED_MATCHES:
+                    leidos[idx] = row["signo"]
+            if leidos != normalized_signs:
+                raise GuardadoIncompletoError()
+            conn.commit()
+            return leidos
+
+        intentos = 3
+        for intento in range(intentos):
+            try:
+                saved_signs = escribir_y_verificar()
+                break
+            except GuardadoIncompletoError:
+                conn.rollback()
+                logger.error(
+                    "El guardado de la quiniela de la jornada %s quedo incompleto para el usuario %s",
+                    target_jornada,
+                    uid,
+                )
+                return jsonify(
+                    {"status": "error", "message": "No se pudo verificar el guardado completo de la quiniela."}
+                ), 500
+            except Exception as exc:  # noqa: BLE001
+                # `rollback()` sin transaccion abierta es un no-op, asi que se puede
+                # llamar siempre: cubre tanto el lock de BEGIN como un fallo a mitad.
+                conn.rollback()
+                if not is_transient_lock_error(exc):
+                    raise
+                logger.warning(
+                    "SQLite bloqueado al guardar la quiniela (intento %s/%s): %s", intento + 1, intentos, exc
+                )
+        else:
             return jsonify(
-                {"status": "error", "message": "No se pudo verificar el guardado completo de la quiniela."}
-            ), 500
-        conn.commit()
+                {"status": "error", "message": "El sistema esta ocupado. Intentalo de nuevo en unos segundos."}
+            ), 503
+
         return jsonify(
             {
                 "status": "ok",
@@ -115,7 +161,6 @@ def save_predictions():
             }
         )
     except Exception:
-        if transaction_started:
-            conn.rollback()
+        conn.rollback()
         logger.exception("No se pudo guardar la quiniela de la jornada %s", target_jornada)
         return jsonify({"status": "error", "message": "Error guardando la quiniela. Intentalo de nuevo."}), 500

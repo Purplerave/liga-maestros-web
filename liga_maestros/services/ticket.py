@@ -6,9 +6,10 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import config
+from config.env import env_int
 
 MADRID_TZ = ZoneInfo("Europe/Madrid")
-PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF = int(os.getenv("PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF", "15"))
+PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF = env_int("PREDICTION_CLOSE_MINUTES_BEFORE_KICKOFF", 15)
 
 
 def madrid_now():

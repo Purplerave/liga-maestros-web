@@ -36,6 +36,7 @@ import threading
 import time
 
 import config
+from config.env import env_int
 
 from ...utils import normalize_news_text, safe_read_json, safe_write_json
 from ..live_state import is_live_status
@@ -47,7 +48,7 @@ logger = logging.getLogger(__name__)
 CACHE_SCOPE = "comentarista-v1"
 EMITIDOS_PATH = os.path.join(config.DATA_DIR, "MIMO_COMENTARISTA_EMITIDOS.json")
 
-MIN_INTERVAL_SECONDS = int(os.getenv("MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS", "600"))
+MIN_INTERVAL_SECONDS = env_int("MIMO_COMENTARISTA_MIN_INTERVAL_SECONDS", 600)
 MAX_PARTIDOS = 6
 MAX_COMENTARIOS = 3
 MAX_PALABRAS = 16

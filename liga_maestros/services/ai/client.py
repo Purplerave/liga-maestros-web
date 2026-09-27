@@ -15,9 +15,11 @@ import os
 
 import requests
 
+from config.env import env_int
+
 logger = logging.getLogger(__name__)
 
-AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "10"))
+AI_TIMEOUT_SECONDS = env_int("AI_TIMEOUT_SECONDS", 10)
 
 # Base del token plan de Xiaomi MiMo (sin /chat/completions). Mirrors:
 #   token-plan-ams (Ámsterdam) | token-plan-sgp (Singapur) | token-plan-cn (China).

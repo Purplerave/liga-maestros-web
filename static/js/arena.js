@@ -17,7 +17,15 @@ function initLazyMatchRendering() {
                         const match = JSON.parse(matchData);
                         el.innerHTML = renderMatchCard(match);
                         el.classList.add("match-loaded");
-                    } catch {}
+                    } catch (error) {
+                        // Antes se dejaba el placeholder de 120px en blanco para
+                        // siempre, ademas de dejar de observar el elemento: un fallo
+                        // puntual de parseo se convertia en un agujero visible que no
+                        // se recuperaba nunca. Se muestra el motivo y se avisa.
+                        console.error("[arena] No se pudo pintar la tarjeta diferida:", error);
+                        el.classList.add("match-load-failed");
+                        el.innerHTML = '<div class="match-card error-state">No se pudo cargar este partido.</div>';
+                    }
                 }
                 _matchIntersectionObserver.unobserve(el);
             }
@@ -229,17 +237,28 @@ function renderArena() {
         try {
             const staleBanner = document.getElementById("stale-banner");
             if (staleBanner) staleBanner.remove();
-            const panelAge = state.data?._panel_fetched_at ? Date.now() - new Date(state.data._panel_fetched_at).getTime() : 0;
-            if (panelAge > 15 * 60 * 1000) {
-                const mins = Math.round(panelAge / 60000);
-                const banner = document.createElement("div");
-                banner.id = "stale-banner";
-                banner.setAttribute("role", "status");
-                banner.style.cssText = "background:#422006;color:#fde68a;padding:6px 12px;text-align:center;font:600 0.72rem 'JetBrains Mono',monospace;border-bottom:1px solid rgba(251,191,36,0.3)";
-                banner.textContent = `Datos de hace ${mins} min — reconectando…`;
-                container.prepend(banner);
+            const fetchedAt = new Date(state.data?._panel_fetched_at);
+            // Un timestamp invalido daria NaN, y `NaN > x` es false: el banner
+            // desapareceria sin avisar de nada. Se distingue de "recien actualizado".
+            if (state.data?._panel_fetched_at && Number.isNaN(fetchedAt.getTime())) {
+                console.warn("[arena] _panel_fetched_at no es una fecha valida:", state.data._panel_fetched_at);
+            } else {
+                const panelAge = state.data?._panel_fetched_at ? Date.now() - fetchedAt.getTime() : 0;
+                if (panelAge > 15 * 60 * 1000) {
+                    const mins = Math.round(panelAge / 60000);
+                    const banner = document.createElement("div");
+                    banner.id = "stale-banner";
+                    banner.setAttribute("role", "status");
+                    banner.style.cssText = "background:#422006;color:#fde68a;padding:6px 12px;text-align:center;font:600 0.72rem 'JetBrains Mono',monospace;border-bottom:1px solid rgba(251,191,36,0.3)";
+                    banner.textContent = `Datos de hace ${mins} min — reconectando…`;
+                    container.prepend(banner);
+                }
             }
-        } catch {}
+        } catch (error) {
+            // El render ya esta hecho en este punto, asi que un fallo aqui solo
+            // cuesta el banner decorativo. Se avisa, pero no se rompe la vista.
+            console.warn("[arena] No se pudo mostrar el aviso de datos antiguos:", error);
+        }
         return;
     }
 
