@@ -19,12 +19,13 @@ import time
 from datetime import date
 
 import config
+from config.env import env_int
 
 from ...utils import safe_read_json, safe_write_json
 
 logger = logging.getLogger(__name__)
 
-AI_DAILY_CALL_LIMIT = int(os.getenv("AI_DAILY_CALL_LIMIT", "50"))
+AI_DAILY_CALL_LIMIT = env_int("AI_DAILY_CALL_LIMIT", 50)
 
 _budget_lock = threading.RLock()
 

@@ -10,6 +10,7 @@ from datetime import timedelta
 import requests
 
 import config
+from config.env import env_min_int
 
 from ..db.connection import get_db
 from ..middleware.json_lock import update_json_list_by_id_locked, update_json_object_locked
@@ -44,7 +45,7 @@ HIGHLIGHTLY_REFRESH_ENABLED = os.getenv("HIGHLIGHTLY_REFRESH_ENABLED", "1").stri
 # que ocupa varias fechas (vie/sab/dom) solo refrescaba "hoy": los partidos
 # terminados de ayer quedaban para siempre en NS ("no aparecen"). 4 llamadas
 # cubren una jornada tipica de fin de semana (2-3 fechas + garantia Liga F).
-HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = max(0, int(os.getenv("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", "4")))
+HIGHLIGHTLY_MAX_CALLS_PER_REFRESH = env_min_int("HIGHLIGHTLY_MAX_CALLS_PER_REFRESH", 4, 0)
 HIGHLIGHTLY_ACTIVE_LEAGUES = {
     item.strip().upper() for item in os.getenv("HIGHLIGHTLY_ACTIVE_LEAGUES", "").split(",") if item.strip()
 }

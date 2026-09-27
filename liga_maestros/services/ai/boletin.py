@@ -2,7 +2,8 @@
 
 import json
 import logging
-import os
+
+from config.env import env_int
 
 from ...utils import normalize_news_text
 from .bajas import _validar_bajas
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 CACHE_SCOPE = "boletin-v3"
 MAX_NOTICIAS = 10
-MIN_INTERVAL_SECONDS = int(os.getenv("AI_NEWS_MIN_INTERVAL_SECONDS", "7200"))
+MIN_INTERVAL_SECONDS = env_int("AI_NEWS_MIN_INTERVAL_SECONDS", 7200)
 CATEGORIAS = {"fichaje", "baja", "alineacion", "forma", "club", "partido", "otro"}
 
 SYSTEM_PROMPT = """Eres el redactor breve de Liga de Maestros.

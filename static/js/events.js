@@ -189,7 +189,13 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
                     setTimeout(() => bar.remove(), 8000);
                 }
             }
-        } catch {}
+        } catch (error) {
+            // El CTA es de conversion; el guardado ya esta hecho y las llamadas
+            // importantes de abajo estan fuera del try, asi que aqui solo se pierde
+            // el banner. Se avisa para que un fallo de localStorage o de gtag no
+            // pase desapercibido.
+            console.warn("[events] No se pudo montar el CTA de primera eleccion:", error);
+        }
         if (typeof checkQuinielaCompletion === "function") checkQuinielaCompletion();
         hydrateHero();
         renderArena();

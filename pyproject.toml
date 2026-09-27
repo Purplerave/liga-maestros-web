@@ -30,7 +30,12 @@ indent-style = "space"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-q --ignore=tests/test_ensure_jornada_completa.py --ignore=tests/test_production_readiness.py"
+# Los tests de readiness (test_ensure_jornada_completa y test_production_readiness)
+# Tambien corren aqui, no solo en el paso dedicado de CI. Antes se excluian de
+# addopts y eso hacia trampas: un `pytest` en verde salia sin 20 tests de
+# migraciones, backups, CSRF y privacidad, y habia que acordarse de pasar
+# `-o addopts=` para verlos. Son hermeticos (tmp_path/monkeypatch o :memory:).
+addopts = "-q"
 
 [tool.mypy]
 python_version = "3.11"

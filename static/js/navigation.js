@@ -19,7 +19,11 @@ try {
         document.head.appendChild(link);
         fetch("/api/liga/live", { cache: "force-cache" }).catch(() => {});
     }, { passive: true });
-} catch {}
+} catch {
+    // El prefetch es solo una optimizacion: si el navegador no soporta
+    // requestIdleCallback o el fetch falla, la pagina funciona igual. Callado a
+    // proposito, avisar seria ruido para el usuario.
+}
 
 const VIEW_STYLES = {
     CONTEST: [
@@ -257,7 +261,12 @@ function syncUrlState() {
             url.searchParams.delete("live");
         }
         window.history.replaceState({}, "", url.toString());
-    } catch {}
+    } catch (error) {
+        // Puede fallar en un iframe con sandbox o si se llega al tope de historial.
+        // No rompe la navegacion, pero el usuario pierde la opcion de compartir o
+        // recargar la vista actual, asi que conviene que quede registrado.
+        console.warn("[navigation] No se pudo sincronizar el estado con la URL:", error);
+    }
 }
 
 function getAvailableLeagueOptions() {
