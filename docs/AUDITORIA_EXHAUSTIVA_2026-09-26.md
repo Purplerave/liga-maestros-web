@@ -199,6 +199,27 @@ El `setInterval` del render se registra en **cada** `renderNewspaperCoverPageV3(
 
 ---
 
+## Ola movil (PR #169, commit f2b91a8) - resuelta
+
+Revision hecha sin navegador ni dispositivo, contra el fuente. Tres fallos reales, y los tres son el mismo problema de fondo: un alto mal medido y ningun sitio donde hacer scroll.
+
+| # | Hallazgo | Donde | Arreglo |
+|---|---|---|---|
+| **N1** | **El boton Confirmar era inalcanzable en landscape.** El modal de relleno del pleno no tenia `max-height`: con iPhone SE (375px de alto) la cabecera y el pie se salian del cuadro, con `overflow:hidden` y sin forma de llegar. El resumen de jornada (hasta 15 partidos) y el onboarding, igual | `pleno_modal.css`, `post_jornada.css`, `onboarding.css` | `max-height` en `dvh` + scroll propio; cabecera y pie `flex: 0 0 auto`; cuerpo con `min-height: 0` |
+| **N2** | **Scroll fantasma por `100vh`.** `100vh` mide el viewport con la barra del navegador oculta, luego mide de mas; en un contenedor con `overflow:hidden` recorta contenido por abajo | `app_shell.css`, `legal.css`, `quiz_page.css`, `snake_gol_arcade.css` | `100vh` seguido de `100dvh`, en ese orden para que quien no conozca `dvh` conserve el fallback |
+| **N3** | **El notch se comia las esquinas.** `viewport-fit=cover` ya estaba declarado, pero no se honraba ningun `safe-area-inset`, asi que en landscape el contenido cae bajo el recorte fisico | `base/tokens.css` y consumidores | Tokens `--safe-top/right/bottom/left` centralizados, aplicados a shell, drawer y overlays |
+| **N4** | **Ningun overlay bloqueaba el scroll.** Arrastrar sobre el modal desplazaba la quiniela de fondo y al cerrar el usuario aparecia en otro sitio | `static/js/core/scroll_lock.js` (nuevo) | Servicio con contador: dos overlays a la vez no se dejan la pagina bloqueada. Conectado en los cuatro overlays |
+| **N5** | **Campos de formulario a 10.2px en movil.** Los estilos de escritorio los bajan con `0.64rem` y ganaban por especificidad al `input{font-size:16px}` del propio movil. Safari hace zoom al enfocarlos y no vuelve atras | `app_shell.css`, `contest.css` frente a `mobile_v2.css` | Override de 16px solo en movil. El diseno compacto de escritorio no se toca |
+| **N6** | **La pilora de "sin conexion" tapaba la bottom nav.** `bottom:20px` con `z-index:9000` frente a los `50` de la nav: flotaba encima y ocupaba el boton central, justo cuando no hay red | `ux_signals.css` | Elevada por encima de la nav y del indicador de inicio |
+
+**Lo que ya estaba bien** y no se ha tocado: el `meta viewport` (con `viewport-fit=cover`), el manifest PWA, `apple-touch-icon`, los botones de signo a 52px y `mobile_v2.css`, que ya aplicaba bien el patron `vh`/`dvh`.
+
+**Tests:** `tests/test_movil.py`, 36 tests. Al no haber navegador en la CI se trabaja sobre el fuente, y se ha comprobado uno a uno que **fallan al revertir cada arreglo**. Dos de ellos nacieron verdes por error del propio test y estan corregidos: uno comprobaba `dvh` en global (pasaba con una sola altura corregida de cinco) y otro parseaba selectores sin quitar comentarios.
+
+**Sin verificar:** no hay navegador automatizado ni telefono fisico, y `image.png` no se pudo inspeccionar. Queda pendiente de confirmar en un dispositivo real que el modal del pleno se ve bien y que Confirmar es alcanzable en landscape, que es el hallazgo principal.
+
+---
+
 ## Plan de ejecución
 
 | Ola | Contenido | Ficheros | Riesgo |
