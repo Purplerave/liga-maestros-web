@@ -163,8 +163,11 @@ if (!CASOS[caso]) {
 try {
     const servidorCompleto = Array(14).fill("1").concat(["X"]);
     const a = montar({ signosServidor: caso === "borrador-parcial-se-respeta" ? Array(15).fill("-") : servidorCompleto });
-    console.log(CASOS[caso](a) ? "OK " + caso : "FALLO " + caso);
-    process.exit(CASOS[caso](a) ? 0 : 1);
+    // Se evalua una sola vez: algunos casos cambian almacenamiento y estado, y
+    // una segunda llamada ya no veria el estado inicial.
+    const cumple = CASOS[caso](a);
+    console.log(cumple ? "OK " + caso : "FALLO " + caso);
+    process.exit(cumple ? 0 : 1);
 } catch (error) {
     console.error("No se pudo montar el arnes: " + (error && error.stack ? error.stack : error));
     process.exit(2);

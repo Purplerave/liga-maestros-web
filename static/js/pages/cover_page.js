@@ -25,9 +25,13 @@ function formatCountdownDigits(d, h, m, s) {
 }
 function startCoverCountdown() {
     if (_countdownStarted) return;
-    _countdownStarted = true;
     const el = document.getElementById("cx-cd");
     if (!el) return;
+    // La bandera se levanta SOLO cuando hay elemento. Antes se asignaba antes del
+    // `if (!el) return`: como el nodo lo inyecta el propio render, una primera
+    // llamada sin nodo (o antes del render) dejaba la cuenta atras apagada para
+    // siempre, sin reintento posible, porque el guardia ya habia pasado.
+    _countdownStarted = true;
     const tick = () => {
         const c = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
         if (c.ms <= 0 || state.data?.is_locked) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
@@ -146,10 +150,28 @@ function coverBandoDetailed() {
 function coverPredictionSigns(e) { if (Array.isArray(e)) return e; return Array.isArray(e?.signos) ? e.signos : []; }
 function coverPenaReading(row) {
     if (!row || !Number(row.total || 0)) return null;
+    // Se comparan los PESOS crudos, no los porcentajes. Los porcentajes se
+    // redondean y el resto siempre va a parar a la tercera casilla, asi que un
+    // empate con un voto por signo dejaba ganadora sola a esa casilla: un
+    // consenso fabricado con el reparto descentrado. Con pesos, el empate se ve
+    // como empate.
+    const { v1, vx, v2 } = coverPenaVoteWeights(row);
+    const r = [{ s: "1", v: Number(v1) || 0 }, { s: "X", v: Number(vx) || 0 }, { s: "2", v: Number(v2) || 0 }];
+    const max = Math.max(...r.map(x => x.v));
+    // Sin votos no hay lectura, y un empate tampoco. Antes se fabricaba un
+    // consenso que nadie habia expresado y se puntuaba como acierto:
+    //   - con `total > 0` y sin votos, la columna afirmaba un consenso
+    //     unanime (siempre "2", por el resto del redondeo);
+    //   - un empate real devolvia "1X2", y como `isHitSign("1X2", real)` es true
+    //     para cualquier resultado, la columna PEÑA se ponia en verde en todos los
+    //     partidos, todos los dias.
+    // Un empate es empate, no un acierto: se muestra "—" y no puntua.
+    if (max <= 0) return null;
+    const winners = r.filter(x => x.v === max).map(x => x.s);
+    if (winners.length !== 1) return null;
     const share = coverPenaPercents(row);
-    const r = [{ s: "1", p: share.p1 }, { s: "X", p: share.px }, { s: "2", p: share.p2 }];
-    const peak = Math.max(...r.map(x => x.p));
-    return { sign: r.filter(x => x.p === peak).map(x => x.s).join(""), percent: peak, total: Number(row.total || 0) };
+    const percent = { 1: share.p1, X: share.px, 2: share.p2 }[winners[0]];
+    return { sign: winners[0], percent, total: Number(row.total || 0) };
 }
 
 function coverPenaVoteWeights(row) {
@@ -182,9 +204,9 @@ function coverPenaPercents(row) {
     const { v1, vx, v2 } = coverPenaVoteWeights(row);
     const share = coverShareFromWeights(v1, vx, v2);
     if (v1 + vx + v2 > 0) return share;
-    const p1 = Math.max(0, Math.round(Number(row?.p1 || 0)));
-    const px = Math.max(0, Math.round(Number(row?.px || 0)));
-    return { p1, px, p2: Math.max(0, 100 - p1 - px) };
+    // Sin votos no hay reparto conocido. El resto a "2" fabricaba un consenso
+    // (`p2 = 100`) que nadie habia expresado.
+    return { p1: 0, px: 0, p2: 0 };
 }
 
 function coverAggregatePenaVote(consenso) {
@@ -206,7 +228,57 @@ function coverDisagreementMatch() { return null; }
 function coverTightPenaMatch() { return null; }
 function coverFixtureHtml() { return ""; }
 function updateCoverPorraStep() {}
-function hydrateCoverPorra() {}
+function hydrateCoverPorra(data = {}) {
+    // El panel LA PORRA de la portada no puede quedarse en "Cargando…".
+    // `loadPorra()` ya pide `/api/porra` y entrega aquí su respuesta; esta
+    // función pinta el resumen compacto con los mismos `data-*` que usan los
+    // manejadores globales de la porra, sin duplicar la lógica de envío.
+    const body = document.getElementById("cover-porra-content");
+    if (!body) return false;
+    const payload = data && typeof data === "object" ? data : {};
+    const nombreCorto = (nombre, defecto) => {
+        const texto = String(nombre ?? defecto ?? "").trim();
+        if (!texto) return defecto;
+        return typeof getShortName === "function" ? getShortName(texto) : texto;
+    };
+    const entero = (valor) => {
+        const numero = Number(valor);
+        return Number.isInteger(numero) && numero >= 0 && numero <= 15 ? String(numero) : "";
+    };
+    if (payload.status !== "ok" || payload.enabled === false) {
+        body.innerHTML = `<div class="cx-empty">${escapeHtml(payload.message || "Sin porra disponible.")}</div>`;
+        return true;
+    }
+    const match = payload.match && typeof payload.match === "object" ? payload.match : {};
+    const mine = payload.mine && typeof payload.mine === "object" ? payload.mine : {};
+    const local = nombreCorto(match.local, "Local");
+    const visitante = nombreCorto(match.visitante, "Visitante");
+    const titulo = String(payload.label || "Porra");
+    const golesLocal = entero(mine.goles_local);
+    const golesVisitante = entero(mine.goles_visitante);
+    const guardada = golesLocal !== "" && golesVisitante !== "";
+    const partidoId = Number(match.partido_id);
+    const cabecera = `<div class="cx-porra-match"><strong>${escapeHtml(local)} vs ${escapeHtml(visitante)}</strong><span>${escapeHtml(titulo)}</span></div>`;
+    if (guardada) {
+        body.innerHTML = `${cabecera}<div class="cx-porra-saved"><span>Tu porra</span><b>${golesLocal}-${golesVisitante}</b></div>`;
+        return true;
+    }
+    if (payload.locked) {
+        body.innerHTML = `${cabecera}<div class="cx-porra-saved cx-porra-closed"><span>Porra cerrada</span></div>`;
+        return true;
+    }
+    body.innerHTML = `${cabecera}
+        <form class="cx-porra-form" data-porra-form data-partido-id="${Number.isFinite(partidoId) ? partidoId : ""}">
+            <label class="cx-porra-form-label" for="cover-porra-home">Tu marcador exacto</label>
+            <input id="cover-porra-home" data-porra-home type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.local || "local")}" value="${golesLocal}">
+            <span aria-hidden="true">-</span>
+            <input id="cover-porra-away" data-porra-away type="number" min="0" max="15" inputmode="numeric" aria-label="Goles de ${escapeHtml(match.visitante || "visitante")}" value="${golesVisitante}">
+            <button type="button" data-porra-submit>${payload.auth ? "OK" : "Entrar"}</button>
+            <small class="cx-porra-form-status" data-porra-status aria-live="polite"></small>
+        </form>
+        <p class="cx-porra-hint">Marcador exacto: <b>+2 puntos</b>.</p>`;
+    return true;
+}
 
 function _abbr(name, max) {
     if (!name) return "—";
@@ -433,6 +505,20 @@ function _diffParts(deadline) {
     };
 }
 
+function filasCubiertaAlineadas(idsFilas, idsPartidos) {
+    // El parche incremental no puede emparejar filas por posicion. Esta regla es
+    // deliberadamente estricta: ante una longitud, orden o identidad distintas,
+    // el llamante tiene que hacer el render completo.
+    if (!Array.isArray(idsFilas) || !Array.isArray(idsPartidos)) return false;
+    if (idsFilas.length === 0 || idsFilas.length !== idsPartidos.length) return false;
+    return idsFilas.every((idFila, idx) => {
+        const idPartido = idsPartidos[idx];
+        if (idFila === undefined || idFila === null || idPartido === undefined || idPartido === null) return false;
+        if (String(idFila) === "" || String(idPartido) === "") return false;
+        return String(idFila) === String(idPartido);
+    });
+}
+
 function renderNewspaperCoverPageV3() {
     const matches = (state.data?.partidos || []).slice(0, 15);
     const closed = coverIsClosed();
@@ -634,8 +720,8 @@ function renderNewspaperCoverPageV3() {
         const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaState}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
 
         return `
-            <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${match.id}">
-                <td class="cx-r-num">${String(i+1).padStart(2,"0")}</td>
+            <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${escapeHtml(match.id)}">
+                <td class="cx-r-num"><button type="button" class="cx-r-num-btn" aria-label="Abrir el boleto">${String(i+1).padStart(2,"0")}</button></td>
                 <td class="cx-r-team is-home" title="${escapeHtml(homeFull)}">${escapeHtml(_fitName(homeFull, 14))}</td>
                 <td class="cx-r-vs">vs</td>
                 <td class="cx-r-team is-away" title="${escapeHtml(awayFull)}">${escapeHtml(_fitName(awayFull, 14))}</td>
@@ -923,12 +1009,11 @@ function renderNewspaperCoverPageV3() {
 /* ==========================================================================
    PATCH COVER — Actualizacion quirurgica sin parpadeo
    Evita el repintado completo de la portada cuando solo cambian marcadores,
-   clasificaciones o consenso. Se llama desde refreshLiveSnapshot y refreshData.
-   Devuelve true si pudo parchear, false si hay que hacer render completo.
+   clasificaciones o consenso. Hoy queda anidado dentro de
+   `renderNewspaperCoverPageV3`, asi que los llamantes no lo ven como global;
+   se deja endurecido por si se expone en el futuro. Si se expone, devuelve
+   false ante filas desalineadas para forzar el render completo.
    ========================================================================== */
-function _coverFindRowByIdx(idx) {
-    return document.querySelector(`.cx-boleto-table tbody tr[data-match-idx="${idx}"], .cx-boleto-table tbody tr:nth-child(${idx+1})`);
-}
 function _coverFindRowById(id) {
     if (!id) return null;
     return document.querySelector(`.cx-boleto-table tbody tr[data-match-id="${CSS.escape(String(id))}"]`);
@@ -1041,9 +1126,22 @@ function patchCoverPage() {
         const tbody = cx.querySelector(".cx-boleto-table tbody");
         if (tbody) {
             const rows = [...tbody.querySelectorAll("tr.cx-row")];
+            // A4: el emparejamiento era POSICIONAL (`rows[idx]`) sobre una tabla ya
+            // pintada. Al cambiar de jornada, o si la tabla renderizada tiene otra
+            // longitud u orden, la fila de la posicion N recibia los signos y los
+            // hits del partido N de OTRA jornada: aciertos y fallos en la fila
+            // equivocada, sin nada visible que lo delatara. `data-match-id` es lo
+            // unico estable. Si algo no cuadra, se devuelve false y quien llama
+            // hace el render completo: parchar a medias seria peor.
+            const alineado = filasCubiertaAlineadas(
+                rows.map((row) => row.dataset.matchId),
+                matches.map((match) => match.id)
+            );
+            if (!alineado) return false;
             matches.forEach((match, idx) => {
-                const row = rows[idx] || _coverFindRowById(match.id);
+                const row = rows[idx];
                 if (!row) return;
+
                 const isLive = _live(match);
                 const isClosed = _closed(match);
                 const realSign = String(match.signo_actual || "").toUpperCase();

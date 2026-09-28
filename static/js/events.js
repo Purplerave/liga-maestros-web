@@ -106,6 +106,10 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
         if (event.target.matches("[data-porra-form]")) submitPorra(event);
     });
     qs("matches-body")?.addEventListener("click", event => {
+        // Los controles de la porra viven dentro de paneles que tambien llevan
+        // `data-page-action`. Tienen que llegar a sus manejadores de envio y
+        // cambio, no abrir otra vista al hacer clic en un campo.
+        if (event.target.closest("[data-porra-form]")) return;
         const pageBtn = event.target.closest("[data-page-action]");
         if (pageBtn) {
             event.preventDefault();
@@ -184,7 +188,14 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
                     bar.setAttribute("role", "alert");
                     bar.style.cssText = "position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#1a1205;padding:10px 18px;border-radius:999px;font:800 0.85rem Outfit,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:9999;cursor:pointer";
                     bar.textContent = `LLEVAS ${done}/15 — GUARDA Y HUMILLA A LA IA →`;
-                    bar.onclick = () => { document.querySelector('[data-page-action=\"TICKET\"]')?.click(); };
+                    // Se pide un control de navegacion, no cualquier elemento con el
+                    // atributo: las filas del boleto tambien lo llevan (para abrir la
+                    // vista al hacer clic) y la que saliera primera en el DOM mandaba.
+                    bar.onclick = () => {
+                        const control = document.querySelector('button[data-page-action="TICKET"], a[data-page-action="TICKET"]')
+                            || document.querySelector('[data-page-action="TICKET"]');
+                        control?.click();
+                    };
                     document.body.appendChild(bar);
                     setTimeout(() => bar.remove(), 8000);
                 }
