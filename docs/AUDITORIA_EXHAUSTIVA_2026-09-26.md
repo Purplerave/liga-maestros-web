@@ -286,6 +286,112 @@ Todos comprobados **uno a uno fallando al revertir cada arreglo**. Tres correcci
 
 ---
 
+## Ola 4 - Portada y boleto, A1-A9 y porra (rama `fix/portada-a1-a9`) - resuelta
+
+Los fallos reales eran menos espectaculares que la tabla, pero dos afectaban a
+lo que el usuario ve: la columna PENA podia afirmar un consenso inexistente y el
+panel LA PORRA se quedaba en "Cargando…".
+
+### A1 - La cuenta atras podia quedar apagada antes de existir
+
+`_countdownStarted` se levantaba antes de comprobar `#cx-cd`. Como el nodo lo
+inyecta el propio render, una llamada temprana dejaba la cuenta apagada para
+siempre. Ahora la bandera solo se levanta con nodo presente, y el siguiente
+intento arranca el intervalo.
+
+**Test:** `la-cuenta-atras-reintenta-sin-nodo` ejecuta la función real dos veces
+en el arnés: sin nodo no arranca nada, y con nodo arranca exactamente un
+intervalo.
+
+### A2 - La columna PENA fabricaba consenso
+
+El problema era más hondo que el `"1X2"` de la auditoría. Los porcentajes se
+redondeaban y el resto siempre caía en `"2"`: con un empate real de 1-1-1 salía
+33/33/34 y `"2"` ganaba sola. Y con `total > 0` pero sin votos, también salía
+`"2"` al 100%.
+
+**Arreglo:** `coverPenaReading` compara los pesos crudos, no los porcentajes.
+Sin votos no hay lectura, y un empate tampoco: se muestra "—" y no puntúa. La
+mayoría clara sigue leyéndose igual.
+
+**Tests:** `sin-votos-no-inventa-consenso`, `porcentajes-sin-votos-son-cero`,
+`empate-a-tres-no-es-lectura`, `mayoria-clara-si-se-lee` y
+`mayoria-simple-sobre-la-mitad`.
+
+### A3 y A7 - El `id` se escapa y la fila se puede usar con teclado
+
+`data-match-id` ya sale con `escapeHtml`, y el número de fila es un `<button>`
+real con etiqueta y anillo de foco. El botón nativo dispara el clic delegado con
+Enter o Espacio, así que no hace falta un manejador aparte.
+
+**Test:** `la-fila-del-boleto-es-operable-y-segura` comprueba la plantilla, la
+regla de foco y que `escapeHtml` neutraliza un `id` malicioso.
+
+### A6 - La navegación ya no marca las filas como si fueran pestañas
+
+El selector sin acotar ponía `.active` y `aria-current="page"` en los 15 `<tr>`.
+Ahora solo alcanza a `button` y `a`. El CTA de la barra pide primero un control
+real y conserva el genérico como último recurso.
+
+**Test:** `la-navegacion-no-marca-las-filas` ejecuta la función real con un botón,
+una fila y un enlace: solo el botón activo recibe estado.
+
+### A4 y A5 - Latentes, no visibles
+
+Aquí la auditoría describía un fallo en ejecución que no puede ocurrir hoy.
+`patchCoverPage` vive dentro de `renderNewspaperCoverPageV3`, que no cierra
+hasta el final del fichero, así que no es global. Los guardas
+`typeof patchCoverPage === "function"` de `events.js` y `quantum_final.js`
+nunca pasan: el parche incremental está muerto y cada actualización hace el
+render completo. Por eso el emparejamiento posicional de A4 no llega a
+ejecutarse. El ayudante muerto `_coverFindRowByIdx` se eliminó.
+
+Lo que sí se deja hecho: la regla de alineación vive ahora en la función global
+`filasCubiertaAlineadas`, probada directamente, y el parche la usa antes de
+tocar una fila. Si algún día se expone el parche, no podrá mezclar jornadas.
+
+**Tests:** `filas-alineadas-permiten-el-parche`,
+`filas-desordenadas-exigen-render-completo`,
+`filas-de-mas-exigen-render-completo`,
+`el-parche-usa-la-regla-de-alineacion` y
+`el-parche-incremental-esta-muerto`.
+
+### A8 y A9 - Órdenes inertes y un separador que ya estaba bien
+
+Los `order` de las celdas no los leía nadie porque el `td` es
+`display: contents`. El orden del DOM ya es el correcto, así que se eliminaron
+las declaraciones engañosas en vez de "arreglarlas" y romper el diseño. El
+separador de PEÑA cae encima de su celda por DOM y rompe de línea al 100%, como
+debía.
+
+**Test:** `el-separador-de-pena-va-encima-de-su-celda`.
+
+### Porra de la portada - Ya no se queda en "Cargando…"
+
+`hydrateCoverPorra()` estaba vacía. Ahora pinta el resumen compacto con los
+mismos `data-*` de la porra: formulario con identificadores únicos si está
+abierta, marcador guardado si ya se firmó, "cerrada" si se cerró y mensaje
+seguro si falla. Los clics dentro del formulario no abren otra vista: el
+delegado de `events.js` los deja pasar a los manejadores de envío y cambio.
+
+**Tests:** `la-porra-de-la-portada-no-se-queda-cargando`,
+`la-porra-guardada-muestra-el-marcador`,
+`la-porra-cerrada-no-ofrece-formulario` y
+`el-fallo-de-la-porra-no-rompe-el-panel`.
+
+### Tests: 18 en `tests/test_portada.py`
+
+Todos comprobados **fallando al revertir cada arreglo**, incluido el caso del
+arnés que se evaluaba dos veces y escondía el fallo de A1. El arnés es
+`tools/js/cover_harness.js`; si Node no está, los tests se saltan en vez de dar
+un verde falso.
+
+**Sin verificar:** no hay navegador ni dispositivo. Queda pendiente confirmar en
+pantalla el orden móvil, el foco del botón de fila y el formulario compacto de
+la porra. La suite completa queda en **770 tests** (752 + 18).
+
+---
+
 ## Plan de ejecución
 
 | Ola | Contenido | Ficheros | Riesgo |

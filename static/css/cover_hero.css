@@ -530,6 +530,18 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-porra:hover { border-color: rgba(251, 191, 36, 0.4); }
 .cx-porra-body { font-size: 0.72rem; }
 .cx-porra-loading { color: var(--cx-dim); font-size: 0.7rem; }
+.cx-porra-match { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.cx-porra-match strong { color: var(--cx-text); font-size: 0.78rem; }
+.cx-porra-match span { color: var(--cx-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.cx-porra-saved { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.cx-porra-saved b { font-variant-numeric: tabular-nums; color: var(--cx-gold, #f5b53f); }
+.cx-porra-form { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 6px; align-items: center; margin-top: 6px; }
+.cx-porra-form-label { grid-column: 1 / -1; color: var(--cx-dim); font-size: 0.65rem; }
+.cx-porra-form input { width: 100%; min-height: 34px; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(0, 0, 0, 0.28); color: var(--cx-text); font-size: 1rem; }
+.cx-porra-form button { min-height: 34px; padding: 4px 14px; border-radius: 999px; border: 1px solid rgba(245, 181, 63, 0.9); background: #f5b53f; color: #111827; font-weight: 800; cursor: pointer; }
+.cx-porra-form-status { grid-column: 1 / -1; min-height: 1em; color: var(--cx-dim); }
+.cx-porra-hint { margin: 6px 0 0; color: var(--cx-dim); font-size: 0.65rem; }
+.cx-porra-hint b { color: var(--cx-gold, #f5b53f); }
 
 .cx-news-item {
     display: grid;
@@ -947,6 +959,15 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-boleto-table-wrap { overflow: visible; }
     .cx-boleto-table { display: block; width: 100%; }
     .cx-boleto-table thead { display: none; }
+    /* A8/A9: el orden de la tarjeta movil lo fija el DOM, no `order`.
+       El `td { display: contents }` de abajo hace que los hijos de cada celda sean
+       los flex items del `tr`, asi que un `order` puesto en la propia celda no lo
+       lee nadie. Hubo nueve declaraciones asi, inertes, de un diseno anterior que
+       colocaba "vs" DETRAS del visitante. No se restauran: el orden del DOM
+       (num, local, vs, visitante, cuando, tu signo, IA, PENA) es el que se ve y es
+       el correcto. Si algun dia se quita el `display: contents`, hay que mover el
+       `order` a los hijos, no a las celdas. El separador de PEÑA va antes que su
+       celda en el DOM, asi que cae justo encima de PEÑA. */
     .cx-boleto-table tbody { display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .cx-boleto-table tbody tr {
         display: flex;
@@ -964,6 +985,22 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-boleto-table tbody tr.is-miss { box-shadow: inset 0 0 0 1px rgba(239,68,68,0.28), 0 2px 12px rgba(0,0,0,0.25), inset 3px 0 0 rgba(239,68,68,0.55); }
     .cx-boleto-table tbody tr.is-live { background: linear-gradient(180deg, rgba(6,20,16,0.55), rgba(8,12,24,0.95)); border-color: rgba(52,211,153,0.25); }
     .cx-boleto-table td { display: contents; padding: 0; border: 0; }
+    /* A7: el numero de fila es el control de teclado de la tarjeta. Antes la
+       fila entera era solo clic, sin `tabindex` ni `role`: la quiniela era
+       inalcanzable sin raton. El boton NO lleva caja propia para no alterar lo que
+       se ve (la caja la pone el `td`), solo el anillo de foco, que sin esto
+       tampoco seria usable. */
+    .cx-r-num-btn {
+        font: inherit;
+        font-variant-numeric: tabular-nums;
+        color: inherit;
+        line-height: inherit;
+    }
+    .cx-r-num-btn:focus-visible {
+        outline: 2px solid var(--cx-cyan, #38bdf8);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
     .cx-r-num {
         display: inline-flex;
         align-items: center;
@@ -974,11 +1011,9 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         border: 1px solid rgba(255,255,255,0.08);
         font-size: 0.72rem;
         font-weight: 800;
-        order: 0;
         flex: 0 0 28px;
     }
     .cx-r-team.is-home {
-        order: 1;
         flex: 1 1 auto;
         max-width: none;
         font-size: 0.88rem;
@@ -989,14 +1024,12 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         text-overflow: ellipsis;
     }
     .cx-r-vs {
-        order: 2;
         flex: 0 0 auto;
         display: inline-flex;
         font-size: 0.6rem;
         padding: 0 2px;
     }
     .cx-r-team.is-away {
-        order: 3;
         flex: 1 1 auto;
         max-width: none;
         font-size: 0.88rem;
@@ -1007,7 +1040,6 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         text-overflow: ellipsis;
     }
     .cx-r-when {
-        order: 4;
         flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
@@ -1025,7 +1057,6 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-r-when.is-live-score { background: rgba(52,211,153,0.18); border-color: rgba(52,211,153,0.4); color: #6ee7b7; }
     .cx-r-when.is-ft-score { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.10); color: var(--cx-text); }
     .cx-r-pick {
-        order: 5;
         flex: 1 1 100%;
         display: flex;
         align-items: center;
@@ -1053,7 +1084,6 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     }
     .cx-r-pick-val.is-empty { min-width: 44px; }
     .cx-r-ia {
-        order: 6;
         display: inline-flex;
         flex: 0 0 auto;
         width: auto;
@@ -1066,7 +1096,6 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         border-radius: 7px;
         padding: 2px 6px;
     }
-    .cx-r-ia.is-pena { order: 7; }
     .cx-r-ia.is-pena::before {
         content: "";
         display: block;
@@ -1079,7 +1108,7 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     /* Agrupar IA en una fila envuelta */
     .cx-boleto-table tbody tr::after {
         content: "";
-        order: 8;
+        order: 1;
         flex: 1 1 100%;
         height: 0;
     }

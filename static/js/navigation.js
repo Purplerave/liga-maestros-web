@@ -49,7 +49,7 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-        ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-78")]],
+        ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-79")]],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
@@ -180,7 +180,12 @@ async function changeMainView(view) {
 }
 
 function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
-    document.querySelectorAll("[data-page-action]").forEach(button => {
+    // A6: el selector era `[data-page-action]` a secas, asi que además de las
+    // pestañas alcanzaba a los 15 `<tr>` del boleto, que llevan el atributo para
+    // poder abrir la vista al hacer clic. Cada fila se quedaba con `.active` y
+    // con `aria-current="page"`, que en una fila de tabla no es un estado válido
+    // y ademas ensuciaba el estilo. Se acota a los controles de navegacion.
+    document.querySelectorAll("button[data-page-action], a[data-page-action]").forEach(button => {
         const isActive = button.dataset.pageAction === activePage;
         button.classList.toggle("active", isActive);
         // Lectores de pantalla: "active" es solo visual, aria-current es el estado real.
