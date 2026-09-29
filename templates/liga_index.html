@@ -65,7 +65,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/surface_shape.css', v=assets_v ~ '-surface-shape-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-94') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/typography.css', v=assets_v ~ '-typography-2') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-4') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_unification.css', v=assets_v ~ '-unify-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
@@ -86,8 +86,17 @@
         <section class="panel header-brand-panel">
             <!-- Es la imagen visible al cargar: `loading="lazy"` retrasaba su
                  descarga en lo que es el LCP de la cabecera, y sin width/height
-                 el navegador no puede reservar el hueco (CLS en movil). -->
-            <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Pe&ntilde;a vs IA" width="709" height="274" decoding="async" fetchpriority="high">
+                 el navegador no puede reservar el hueco (CLS en movil).
+
+                 En <=899px el panel esta oculto siempre (mobile_v2.css), pero un
+                 <img> sin <picture> se descarga igual: eran 231KB por visita
+                 para un elemento que no se ve. Ahi se sirve el escudo SVG (1,5KB
+                 y ya en cache, lo usa el crest de la portada). El PNG se mantiene
+                 intacto para >=900px, que es donde si se pinta. -->
+            <picture>
+                <source media="(max-width: 899px)" srcset="{{ url_for('main.static_files', filename='img/liga_maestros_mark.svg', v=assets_v) }}">
+                <img class="sidebar-brand-image" src="{{ url_for('main.static_files', filename='img/ligademaestroslogo_trans.png', v=assets_v) }}" alt="Liga de Maestros - 1X2 - La Pe&ntilde;a vs IA" width="709" height="274" decoding="async" fetchpriority="high">
+            </picture>
         </section>
 
         <header class="topbar-shell">

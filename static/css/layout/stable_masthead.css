@@ -24,6 +24,13 @@ body.newspaper-ui.quiniela-focus .header-brand-panel {
     overflow: hidden;
 }
 
+/* El logo va envuelto en <picture> para poder servir el SVG en movil. Sin esto
+   el <picture> pasaria a ser el hijo flex del panel y el `height: 100%` de la
+   imagen ya no resolveria contra el alto del panel. */
+body.newspaper-ui.quiniela-focus .header-brand-panel picture {
+    display: contents;
+}
+
 body.newspaper-ui.quiniela-focus .sidebar-brand-image {
     height: 100%;
     max-height: none;

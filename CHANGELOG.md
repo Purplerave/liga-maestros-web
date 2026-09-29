@@ -2,6 +2,28 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-09-29 — El logo de cabecera deja de costar 231KB en movil
+
+### Rendimiento
+
+- `header-brand-panel` esta oculto en <=899px (`mobile_v2.css`, sin condiciones),
+  pero el `<img>` del logo se descargaba igual: **231KB por visita movil** para
+  un elemento que no se ve nunca. Medido con Playwright antes/despues: 230,9KB
+  de PNG en movil -> **0KB**.
+  - El logo pasa a `<picture>`: en <=899px sirve `liga_maestros_mark.svg` (1,5KB
+    y ya en cache, porque lo usa el crest de la portada). El corte coincide
+    exactamente con el de `mobile_v2.css`.
+  - **El PNG no se toca en >=900px**, que es donde si se ve: conserva
+    `fetchpriority="high"` y sus width/height, porque es el LCP de las paginas
+    interiores y esa decision es deliberada.
+  - El `<picture>` lleva `display: contents` para que la imagen siga siendo el
+    hijo flex del panel y su `height: 100%` resuelva igual; verificado a 1280 y
+    1440px (96x37, sin desplazamiento horizontal).
+- `tests/test_logo_movil.py` fija las tres garantias: que el panel siga oculto en
+  movil (premisa del ahorro), que el corte del `<source>` coincida con el de
+  `mobile_v2.css`, que el PNG de escritorio conserve sus atributos de LCP, y que
+  el `<picture>` no rompa el layout.
+
 ## 2026-09-14 — La PORTADA descarga menos antes de pintar (Frente 2)
 
 ### Rendimiento
