@@ -17,6 +17,10 @@ function hydrateCoverTypewriter() {}
 function startCoverScorebar() {}
 const _visibilitychange = "visibilitychange";
 
+// La cuenta atras de la portada nace UNA sola vez: cada render la reutiliza en
+// vez de sumar otro `setInterval`. Antes el propio render montaba el suyo sin
+// clearInterval, y cada refresco (30-60 s en ventana de jornada) dejaba un tick
+// huerfano escribiendo sobre un nodo ya desenganchado del DOM.
 let _countdownStarted = false;
 let _seasonCountdownStarted = false;
 const SEASON_KICKOFF = new Date("2026-08-15T19:30:00");
@@ -25,16 +29,18 @@ function formatCountdownDigits(d, h, m, s) {
 }
 function startCoverCountdown() {
     if (_countdownStarted) return;
-    const el = document.getElementById("cx-cd");
-    if (!el) return;
-    // La bandera se levanta SOLO cuando hay elemento. Antes se asignaba antes del
-    // `if (!el) return`: como el nodo lo inyecta el propio render, una primera
-    // llamada sin nodo (o antes del render) dejaba la cuenta atras apagada para
-    // siempre, sin reintento posible, porque el guardia ya habia pasado.
+    // Sin el nodo que deja el render no hay nada que pintar: se levanta la
+    // bandera solo con el intervalo en marcha, de modo que la siguiente llamada
+    // (u otro render) pueda reintentar en vez de quedarse apagada para siempre.
+    if (!document.getElementById("cx-cd")) return;
     _countdownStarted = true;
+    // El nodo se vuelve a buscar en cada tick: el render lo sustituye y una
+    // referencia fija escribiria sobre un elemento fuera del DOM.
     const tick = () => {
+        const el = document.getElementById("cx-cd");
+        if (!el) return;
         const c = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
-        if (c.ms <= 0 || state.data?.is_locked) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
+        if (c.ms <= 0 || coverIsClosed()) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
         el.innerHTML = `<span class="cx-cd-block">${String(c.d).padStart(2, "0")}<i>d</i></span><span class="cx-cd-block">${String(c.h).padStart(2, "0")}<i>h</i></span><span class="cx-cd-block">${String(c.m).padStart(2, "0")}<i>m</i></span><span class="cx-cd-block">${String(c.s).padStart(2, "0")}<i>s</i></span>`;
         el.closest("[data-kpi]")?.classList.toggle("is-urgent", c.urgent);
     };
@@ -943,24 +949,10 @@ function renderNewspaperCoverPageV3() {
         </section>
     `;
 
-    setTimeout(() => {
-        const cdEl = document.getElementById("cx-cd");
-        if (cdEl && !closed) {
-            const tick = () => {
-                const c = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
-                if (c.ms <= 0) { cdEl.innerHTML = `<span class="cx-kpi-closed">CERRADA</span>`; return; }
-                cdEl.innerHTML =
-                    `<span class="cx-cd-block">${String(c.d).padStart(2,"0")}<i>d</i></span>` +
-                    `<span class="cx-cd-block">${String(c.h).padStart(2,"0")}<i>h</i></span>` +
-                    `<span class="cx-cd-block">${String(c.m).padStart(2,"0")}<i>m</i></span>` +
-                    `<span class="cx-cd-block">${String(c.s).padStart(2,"0")}<i>s</i></span>`;
-                const kpi = cdEl.closest("[data-kpi]");
-                if (kpi) kpi.classList.toggle("is-urgent", c.urgent);
-            };
-            tick();
-            setInterval(tick, 1000);
-        }
-    }, 0);
+    // La cuenta atrás la arranca arena.js justo después de montar este HTML.
+    // Antes había aquí un setTimeout + setInterval propio: con cada render de la
+    // portada se sumaba un intervalo nuevo sin clearInterval y convivían dos
+    // ticks con predicados distintos (uno pintaba CERRADA y el otro lo tapaba).
 
     return `<div class="cx">
         ${tickerHtml}
@@ -1009,10 +1001,10 @@ function renderNewspaperCoverPageV3() {
 /* ==========================================================================
    PATCH COVER — Actualizacion quirurgica sin parpadeo
    Evita el repintado completo de la portada cuando solo cambian marcadores,
-   clasificaciones o consenso. Hoy queda anidado dentro de
-   `renderNewspaperCoverPageV3`, asi que los llamantes no lo ven como global;
-   se deja endurecido por si se expone en el futuro. Si se expone, devuelve
-   false ante filas desalineadas para forzar el render completo.
+   clasificaciones o consenso. Es global: esta declarada a nivel superior, asi
+   que los guards de events.js y quantum_final.js la encuentran con
+   `typeof patchCoverPage === "function"`. Devuelve false ante filas
+   desalineadas para que el llamante caiga en el render completo.
    ========================================================================== */
 function _coverFindRowById(id) {
     if (!id) return null;

@@ -89,3 +89,39 @@ def test_cover_version_bumped_after_change():
     # porque un bump legítimo a la versión 69+ también debe pasar).
     assert _cache_bust_version(nav, "cover-page") >= 68
     assert _cache_bust_version(template, "cover-hero") >= 68
+
+
+def _regla(css, clase):
+    recorte = css[css.index(clase) :]
+    return recorte[: recorte.index("}")]
+
+
+def test_las_celdas_vacias_no_sacrifican_el_contraste():
+    """`opacity` sobre --cx-dim hundía el ratio hasta ~2:1 (AA pide 4.5:1): las
+    celdas sin signo de una portada recién cargada eran casi ilegibles. La vacía
+    se distingue por su fondo y por no llevar text-shadow, no por transparentar
+    el texto."""
+    css = COVER_CSS.read_text(encoding="utf-8")
+    for clase in (".cx-r-pick-val.is-empty", ".cx-ia-sign.is-empty"):
+        regla = _regla(css, clase)
+        assert "opacity" not in regla, f"{clase} sigue bajando el contraste con opacity"
+
+
+def test_el_contenedor_de_vistas_no_anuncia_cada_refresh():
+    """#matches-body se repinta entero en cada refresh: con aria-live el lector
+    de pantalla volvía a anunciar la portada completa cada 30-60 segundos. El
+    anuncio útil es el contador de picks, que tiene su propio estado."""
+    template = TEMPLATE.read_text(encoding="utf-8")
+    tag = template[template.index('id="matches-body"') :]
+    tag = tag[: tag.index(">")]
+    assert "aria-live" not in tag, "el contenedor de vista no debe ser una region aria-live"
+
+
+def test_el_logo_de_cabecera_declara_sus_dimensiones():
+    """Sin width/height el navegador no puede reservar el hueco (CLS) y, con
+    loading="lazy", la imagen visible al cargar se retrasaba en el LCP."""
+    template = TEMPLATE.read_text(encoding="utf-8")
+    tag = template[template.index("sidebar-brand-image") :]
+    tag = tag[: tag.index(">")]
+    assert 'width="709"' in tag and 'height="274"' in tag, "faltan las dimensiones intrínsecas del logo"
+    assert "loading=" not in tag, "una imagen visible al cargar no debe ir con loading=lazy"
