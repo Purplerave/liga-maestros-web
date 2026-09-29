@@ -17,4 +17,7 @@ def get_csrf_token():
 def valid_csrf_request():
     expected = str(session.get("csrf_token") or "")
     received = str(request.headers.get("X-CSRF-Token") or request.form.get("csrf_token") or "")
-    return bool(expected and received and hmac.compare_digest(expected, received))
+    if not expected or not received:
+        return False
+    # compare_digest con str lanza TypeError si el token trae no-ASCII: se compara en bytes.
+    return hmac.compare_digest(expected.encode("utf-8"), received.encode("utf-8"))

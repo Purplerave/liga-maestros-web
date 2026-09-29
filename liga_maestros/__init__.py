@@ -15,6 +15,13 @@ from config.env import env_bool, env_int, env_str
 
 logger = logging.getLogger(__name__)
 
+# Barreras administrativas: el alias versionado /api/v1/admin/* debe caer en la
+# misma red que /api/admin/* (defensa en capas + Cache-Control no-store).
+ADMIN_API_PREFIXES = ("/api/admin/", "/api/v1/admin/")
+# Fuerza bruta contra X-Admin-Secret: N fallos por IP y ventana antes del 429.
+ADMIN_AUTH_WINDOW_SECONDS = 60
+ADMIN_AUTH_MAX_FAILURES = 5
+
 from .db.backups import start_backup_scheduler
 from .db.migrations import run_startup_migrations
 from .middleware.authz import is_admin_or_service_request
@@ -51,6 +58,23 @@ def _configure_logging(app):
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
     app.logger.setLevel(level)
+
+
+def _admin_auth_throttled(app, identity):
+    """True cuando una IP ya agoto sus intentos fallidos de autenticacion admin."""
+    now = time.time()
+    failures = app.config.setdefault("_ADMIN_AUTH_FAILURES", {})
+    if len(failures) > 1024:
+        cutoff = now - ADMIN_AUTH_WINDOW_SECONDS
+        for key in [key for key, stamps in failures.items() if not stamps or stamps[-1] < cutoff]:
+            failures.pop(key, None)
+    recent = [stamp for stamp in failures.get(identity, []) if stamp > now - ADMIN_AUTH_WINDOW_SECONDS]
+    if len(recent) >= ADMIN_AUTH_MAX_FAILURES:
+        failures[identity] = recent
+        return True
+    recent.append(now)
+    failures[identity] = recent
+    return False
 
 
 def create_app():
@@ -110,12 +134,24 @@ def create_app():
         g.request_started_at = time.perf_counter()
         g.request_id = secrets.token_hex(8)
 
+    # El limitador global va ANTES de las barreras: Flask corta la cadena en el
+    # primer before_request que devuelva respuesta, y un 403/415 de los guards
+    # no consumia cuota ni podia devolver 429 (fuerza bruta ilimitada).
+    init_rate_limiter(app)
+
     @app.before_request
     def protect_admin_api():
-        if not request.path.startswith("/api/admin/"):
+        if not request.path.startswith(ADMIN_API_PREFIXES):
             return None
         if is_admin_or_service_request():
             return None
+        ip = request.remote_addr or "unknown"
+        logger.warning("admin_auth_failed ip=%s path=%s", ip, request.path)
+        if _admin_auth_throttled(app, ip):
+            response = jsonify({"status": "error", "error": "Rate limit exceeded"})
+            response.status_code = 429
+            response.headers["Retry-After"] = str(ADMIN_AUTH_WINDOW_SECONDS)
+            return response
         return jsonify({"status": "forbidden", "message": "Solo admin"}), 403
 
     @app.before_request
@@ -205,7 +241,7 @@ def create_app():
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if (
             request.path in {"/api/user/status", "/api/user/stats", "/cuenta"}
-            or request.path.startswith("/api/admin/")
+            or request.path.startswith(ADMIN_API_PREFIXES)
             or (session.get("user") and request.path.startswith("/api/"))
         ):
             response.headers["Cache-Control"] = "no-store, private"
@@ -251,7 +287,6 @@ def create_app():
     # verified but never mutated here.
     start_backup_scheduler(app)
     start_web_collector(app)
-    init_rate_limiter(app)
     init_metrics(app)
 
     return app

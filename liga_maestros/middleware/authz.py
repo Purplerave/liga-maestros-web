@@ -6,6 +6,15 @@ import os
 from flask import request, session
 
 
+def _trust_proxy_headers() -> bool:
+    return os.getenv("TRUST_PROXY_HEADERS", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _digest_equal(expected: str, received: str) -> bool:
+    # compare_digest con str revienta con caracteres no ASCII (TypeError -> 500).
+    return hmac.compare_digest(expected.encode("utf-8"), received.encode("utf-8"))
+
+
 def is_admin_request():
     user = session.get("user") or {}
     if user.get("is_admin") is True:
@@ -18,7 +27,12 @@ def is_admin_request():
     allow_local = os.getenv("ALLOW_LOCAL_ADMIN", "0").strip().lower() in ("1", "true", "yes", "on")
     if not allow_local:
         return False
-    # Only use real remote_addr, never X-Forwarded-For for admin bypass.
+    # Detras de un proxy, ProxyFix reescribe REMOTE_ADDR con el ultimo valor de
+    # X-Forwarded-For, de modo que cualquier cliente podria mandar
+    # "X-Forwarded-For: 127.0.0.1" y colarse como admin. Sin proxy, remote_addr
+    # es la direccion real del socket y el bypass local es fiable.
+    if _trust_proxy_headers():
+        return False
     is_local = request.remote_addr in ("127.0.0.1", "::1", "localhost")
     return is_local
 
@@ -36,4 +50,4 @@ def is_admin_or_service_request():
 
     expected = os.getenv("ADMIN_API_SECRET", "").strip()
     received = request.headers.get("X-Admin-Secret", "").strip()
-    return bool(expected and received and hmac.compare_digest(expected, received))
+    return bool(expected and received and _digest_equal(expected, received))

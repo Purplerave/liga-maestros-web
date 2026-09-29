@@ -399,3 +399,57 @@ def test_rate_limiter_schema_is_migrated_and_reservation_is_atomic(tmp_path, mon
         indexes = {item[1] for item in conn.execute("PRAGMA index_list(api_rate_limit)")}
         assert "idx_rate_limit_last_seen" in indexes
         conn.close()
+
+
+def test_admin_rejection_consumes_global_rate_limit_quota(tmp_path, monkeypatch):
+    """Regresion: el limitador global va antes que las barreras admin.
+
+    Si va despues, Flask corta la cadena con el 403 del guard y ese intento no
+    consume cuota: la fuerza bruta contra X-Admin-Secret nunca podria llegar a
+    un 429.
+    """
+    from liga_maestros.middleware import security as security_middleware
+
+    monkeypatch.delenv("ADMIN_API_SECRET", raising=False)
+    app = _test_app(tmp_path, monkeypatch)
+    security_middleware._RATE_LIMIT_STORE.pop("127.0.0.1", None)
+    client = app.test_client()
+
+    assert client.get("/api/admin/debug-files").status_code == 403
+    assert len(security_middleware._RATE_LIMIT_STORE["127.0.0.1"]) == 1
+
+
+def test_admin_auth_failures_are_throttled_per_ip(tmp_path, monkeypatch):
+    from liga_maestros.middleware import security as security_middleware
+
+    monkeypatch.delenv("ADMIN_API_SECRET", raising=False)
+    app = _test_app(tmp_path, monkeypatch)
+    security_middleware._RATE_LIMIT_STORE.pop("127.0.0.1", None)
+    client = app.test_client()
+
+    statuses = [client.get("/api/admin/debug-files").status_code for _ in range(6)]
+
+    assert statuses[:5] == [403] * 5
+    assert statuses[5] == 429
+
+
+def test_local_admin_bypass_still_works_without_proxy(tmp_path, monkeypatch):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setenv("ALLOW_LOCAL_ADMIN", "1")
+
+    response = app.test_client().get("/api/admin/debug-files")
+
+    assert response.status_code == 200
+
+
+def test_local_admin_bypass_ignores_forwarded_headers(tmp_path, monkeypatch):
+    """Detras de un proxy, X-Forwarded-For: 127.0.0.1 no puede otorgar admin."""
+    monkeypatch.setenv("TRUST_PROXY_HEADERS", "1")
+    monkeypatch.delenv("ADMIN_API_SECRET", raising=False)
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setenv("ALLOW_LOCAL_ADMIN", "1")
+    client = app.test_client()
+
+    response = client.get("/api/admin/debug-files", headers={"X-Forwarded-For": "127.0.0.1"})
+
+    assert response.status_code == 403
