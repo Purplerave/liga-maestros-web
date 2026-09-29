@@ -155,6 +155,11 @@
        Sin altura fija ni overflow: el contenido fluye hacia el body/documento.
        Se fuerza con la misma especificidad que layout/hero para ganarles por
        orden de @layer. */
+    /* La reserva tiene que MEDIR la nav real, no suponerla. La nav fija mide
+       `min-height: 58px` MAS el inset inferior del dispositivo: en un iPhone
+       con home indicator eso son ~34px mas, o sea ~92px. Reservar 70px fijos
+       dejaba los ultimos ~22px de contenido (el pie, la ultima fila del
+       boleto) tapados por la barra, y parecian "columnas que no cuadran". */
     body.newspaper-ui.quiniela-focus .main-arena {
         flex: 1 1 auto;
         height: auto;
@@ -162,7 +167,7 @@
         max-height: none;
         width: 100%;
         overflow: visible;
-        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(58px + 12px + env(safe-area-inset-bottom, 0px));
     }
     body.newspaper-ui.quiniela-focus .arena-content {
         height: auto;
@@ -172,7 +177,7 @@
         overflow-y: visible;
     }
     body.newspaper-ui.quiniela-focus .site-legal-links {
-        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(58px + 12px + env(safe-area-inset-bottom, 0px));
     }
 
     /* ────────────────────────────────────────────────────────────────
@@ -238,11 +243,15 @@
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span:first-child[title] {
         font-size: 0.72rem;
     }
+    /* Los signos 1X2 de la quiniela son lo que mas se toca al rellenar el
+       boleto, y a 30px fallaban el minimo de 44px: se fallaba el toque y
+       acababa marcando el partido equivocado. El alto sube; el ancho se queda
+       en 30px porque los tres signos van en fila dentro de un chip estrecho. */
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .saved-ticket-sign,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick {
         font-size: 0.85rem;
-        min-height: 30px;
+        min-height: 44px;
         min-width: 30px;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small,

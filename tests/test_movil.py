@@ -284,6 +284,72 @@ def test_los_botones_de_signo_alcanzan_el_minimo_tactil():
     )
 
 
+def test_las_celdas_de_la_portada_alcanzan_el_minimo_tactil():
+    """En pantallas de 480px o menos las celdas de signo medían 32px y 30px de
+    alto: por debajo del mínimo cómodo de 44px. El ancho NO se toca, porque en
+    360px caben siete columnas por fila y ampliarlas desborda la tabla; la fila
+    entera ya es clicable por delegación, lo que faltaba era alto."""
+    fuente = _css("cover_hero.css")
+    inicio = fuente.index("@media (max-width: 480px)")
+    bloque = fuente[inicio : fuente.index("@media", inicio + 10)]
+
+    for selector in (".cx-r-pick-val {", ".cx-r-ia .cx-ia-sign {"):
+        decl = bloque[bloque.index(selector) :]
+        decl = decl[: decl.index("}")]
+        alto = re.search(r"height:\s*(\d+)px", decl)
+        assert alto, f"{selector} no fija altura en el bloque <=480px"
+        assert int(alto.group(1)) >= 44, f"{selector} mide {alto.group(1)}px, por debajo del mínimo de 44px"
+
+
+def test_los_signos_de_la_quiniela_alcanzan_el_minimo_tactil():
+    """Los botones 1X2 del boleto (.ia-signo, .saved-ticket-sign, .pena-pick)
+    median 30px de alto. Son el elemento que mas se toca al rellenar la
+    quiniela, y a 30px se fallaba el toque y se marcaba el partido
+    equivocado."""
+    fuente = _css("mobile_v2.css")
+    regla = fuente[fuente.index(".tension-chip .ia-signo") :]
+    regla = regla[: regla.index("}")]
+    alto = re.search(r"min-height:\s*(\d+)px", regla)
+    assert alto, "los signos de la quiniela no fijan min-height"
+    assert int(alto.group(1)) >= 44, f"los signos miden {alto.group(1)}px, por debajo del minimo de 44px"
+
+
+def test_la_reserva_inferior_cubre_la_nav_y_el_safe_area():
+    """La nav fija mide min-height 58px MAS el inset inferior del dispositivo
+    (~34px en iPhone con home indicator): unos 92px. Se reservaban 70px fijos,
+    asi que los ultimos ~22px de contenido quedaban tapados por la barra."""
+    fuente = _css("mobile_v2.css")
+    nav = fuente[fuente.index(".newspaper-page-nav {") :]
+    nav = nav[: nav.index("}")]
+    alto_nav = int(re.search(r"min-height:\s*(\d+)px", nav).group(1))
+
+    # `padding-bottom` y `min-height` pueden venir en cualquier orden dentro de
+    # la regla, asi que se toma el bloque entero y no una ventana fija.
+    bloque = fuente[fuente.index("quiniela-focus .main-arena {") :]
+    bloque = bloque[: bloque.index("}")]
+    reserva = re.search(r"padding-bottom:\s*([^;]+);", bloque)
+    assert reserva, ".main-arena no reserva hueco para la nav fija"
+    digitos = re.findall(r"(\d+)px", reserva.group(1))
+    assert digitos, "la reserva inferior debe medirse en px"
+    fijo = int(digitos[0])
+    assert fijo >= alto_nav, f"la reserva ({fijo}px) es menor que la nav ({alto_nav}px): el contenido queda tapado"
+    assert "safe-area-inset-bottom" in reserva.group(1), "la reserva debe sumar el inset inferior del dispositivo"
+
+
+def test_la_tabla_no_esta_mas_ancha_que_la_pantalla():
+    """A 480px de breakpoint se imponia `min-width: 500px` a .arena-table: en un
+    iPhone SE (375px) o un Android de 360px la tabla era mas ancha que la
+    pantalla y habia que arrastrar en horizontal para leer el boleto."""
+    fuente = _css("mobile_responsive.css")
+    bloque = fuente[fuente.index("@media (max-width: 480px)") :]
+    bloque = bloque[: bloque.index("\n}")]
+    regla = bloque[bloque.index(".arena-table {") :]
+    regla = regla[: regla.index("}")]
+    assert "min-width: 0" in regla or "min-width: 0px" in regla, (
+        ".arena-table no puede llevar min-width > 0 en el breakpoint de 480px"
+    )
+
+
 def test_los_inputs_evitan_el_zoom_automatico_de_ios():
     """Safari hace zoom al enfocar un input con menos de 16px y no lo devuelve,
     dejando la pagina medio ilegible. Mobile_v2 ya lo resuelve con 16px."""

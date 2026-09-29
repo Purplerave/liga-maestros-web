@@ -133,8 +133,13 @@
 }
 
 @media (max-width: 480px) {
+    /* `min-width: 500px` a 480px de breakpoint era una contradiccion: en un
+       iPhone SE (375px) o un Android de 360px la tabla era mas ancha que la
+       pantalla y obligaba a arrastrar en horizontal, partiendo el boleto en
+       dos. La tabla se adapta al ancho disponible; el desborde horizontal se
+       resuelve en el .arena-table-wrap, que ya tiene `overflow-x: auto`. */
     .arena-table {
-        min-width: 500px;
+        min-width: 0;
         font-size: 12px;
     }
     .arena-table th,
