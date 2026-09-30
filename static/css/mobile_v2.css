@@ -678,8 +678,10 @@
        7. CLASIFICACIONES: tablas compactas sin desbordar
        ──────────────────────────────────────────────────────────────── */
     body.newspaper-ui.quiniela-focus #matches-body.standings-full-mode,
-    body.newspaper-ui.quiniela-focus .full-standings-card {
+    body.newspaper-ui.quiniela-focus .full-standings-card,
+    body.newspaper-ui.quiniela-focus .full-standings-page {
         overflow: visible;
+        padding-bottom: 24px;
     }
     body.newspaper-ui.quiniela-focus .full-standings-table {
         table-layout: auto;
@@ -775,9 +777,11 @@
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
         font-size: 0.72rem;
     }
-    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(n+7),
-    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(n+7) {
-        display: none;
+    /* El corte n+7 se llevaba Pts (columna 10) en móviles reales (≤480).
+       Se mantienen goles y racha ocultos, y Pts visible. */
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(10),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(10) {
+        display: table-cell;
     }
 }
 
