@@ -878,6 +878,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
         order: 3;
         flex: 1 1 100%;
         width: 100%;
+        height: auto;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-mobile-insights-cell {
         display: block;
