@@ -82,8 +82,11 @@
         min-width: 0;
     }
     body.newspaper-ui.quiniela-focus .topbar-actions {
-        flex: 0 0 auto;
+        flex: 1 1 auto;
+        flex-wrap: wrap;
+        justify-content: flex-end;
         margin-left: auto;
+        max-width: 100%;
         gap: 6px;
     }
     /* En móvil sobra ruido: solo acciones esenciales */
@@ -138,7 +141,10 @@
         -webkit-tap-highlight-color: transparent;
     }
     body.newspaper-ui.quiniela-focus .newspaper-page-nav button .nav-ico {
-        font-size: 1.25rem;
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.95rem;
         line-height: 1;
         font-style: normal;
         filter: none;
@@ -172,7 +178,7 @@
         max-height: none;
         width: 100%;
         overflow: visible;
-        padding-bottom: calc(58px + 12px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(76px + 16px + env(safe-area-inset-bottom, 0px));
     }
     body.newspaper-ui.quiniela-focus .arena-content {
         height: auto;
@@ -182,7 +188,7 @@
         overflow-y: visible;
     }
     body.newspaper-ui.quiniela-focus .site-legal-links {
-        padding-bottom: calc(58px + 12px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(76px + 16px + env(safe-area-inset-bottom, 0px));
     }
 
     /* ────────────────────────────────────────────────────────────────
@@ -289,10 +295,16 @@
     body.newspaper-ui.quiniela-focus .form-dot {
         font-size: 0.72rem;
     }
+    body.newspaper-ui.quiniela-focus .league-tabs {
+        flex-wrap: wrap;
+        overflow: visible;
+    }
     body.newspaper-ui.quiniela-focus .league-tabs .tab-btn {
+        flex: 0 1 auto;
         font-size: 0.8rem;
         min-height: 44px;
         padding: 0 14px;
+        white-space: nowrap;
     }
     body.newspaper-ui.quiniela-focus .standings-legend {
         font-size: 0.72rem;
@@ -672,11 +684,23 @@
     body.newspaper-ui.quiniela-focus .full-standings-table {
         table-layout: auto;
     }
-    /* En pantallas muy estrechas, ocultar columnas de racha/estadísticas
-       menos críticas para que la tabla no desborde horizontalmente. */
-    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(n+8),
-    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(n+8) {
+    /* En el móvil importan posición, club, partidos y puntos.
+       Se ocultan goles (GF/GC/DG) y racha/forma. Pts es la columna 10
+       y tiene que seguir viéndose: el corte anterior (n+8) se la llevaba. */
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(7),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(7),
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(8),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(8),
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(9),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(9),
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(n+11),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(n+11) {
         display: none;
+    }
+    body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(10),
+    body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(10) {
+        display: table-cell;
+        font-weight: 800;
     }
     body.newspaper-ui.quiniela-focus .full-standings-table th:nth-child(2),
     body.newspaper-ui.quiniela-focus .full-standings-table td:nth-child(2) {
