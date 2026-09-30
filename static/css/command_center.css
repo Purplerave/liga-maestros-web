@@ -884,5 +884,6 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
         order: 4;
         flex: 1 1 100%;
         width: 100%;
+        height: auto;
     }
 }
