@@ -649,39 +649,74 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row {
-        display: grid;
-        grid-template-columns: 34px minmax(0, 1fr) auto;
-        gap: 9px 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 10px;
         align-items: center;
+        width: 100%;
         padding: 12px;
     }
 
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+    }
+
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .match-index-cell {
-        grid-column: 1;
-        grid-row: 1;
+        order: 0;
+        flex: 0 0 auto;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .tension-fixture-cell {
-        grid-column: 2;
-        grid-row: 1;
-        width: 100%;
+        order: 1;
+        flex: 1 1 auto;
         min-width: 0;
+        overflow: hidden;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-status-cell {
-        grid-column: 3;
-        grid-row: 1;
+        order: 2;
+        flex: 0 0 auto;
         min-width: 60px;
+        text-align: right;
     }
 
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pena-cell,
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-user-cell {
-        grid-column: 1 / -1;
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pena-cell {
+        order: 3;
+        flex: 1 1 100%;
         width: 100%;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) {
-        grid-column: auto;
+        order: 4;
+        flex: 0 0 auto;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row .ticket-user-cell {
+        order: 5;
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-pick-breakdown {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-cell .tension-chip-user {
+        width: 100%;
+        min-width: 0;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-user-sign-group {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
     }
 
     body.newspaper-ui.quiniela-focus .ticket-user-sign-group button.ia-signo {
