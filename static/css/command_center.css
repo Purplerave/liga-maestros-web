@@ -886,4 +886,17 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
         width: 100%;
         height: auto;
     }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item:not(.ticket-pena-cell) .tension-chip {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        height: auto;
+        min-height: 44px;
+        padding: 3px 7px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item:not(.ticket-pena-cell) .tension-chip > span {
+        flex: 0 0 auto;
+        line-height: 1.1;
+    }
 }
