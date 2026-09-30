@@ -78,6 +78,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_enhancements.css', v=assets_v ~ '-visual-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_v2.css', v=assets_v ~ '-mobile-v2-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/command_center.css', v=assets_v ~ '-command-center-1') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_finish.css', v=assets_v ~ '-mobile-finish-1') }}">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
@@ -127,7 +128,7 @@
                 </button>
                 <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)" aria-label="Actualizar">↻</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
-                <button id="share-ticket-btn" class="primary-btn" data-analytics="share_click" data-analytics-label="ticket" type="button">Compartir</button>
+                <button id="share-ticket-btn" class="primary-btn" data-analytics="share_click" data-analytics-label="ticket" type="button" aria-label="Compartir quiniela" title="Compartir quiniela">Compartir</button>
             </div>
 
         </header>
