@@ -37,6 +37,12 @@ MATCH_DURATION = timedelta(hours=2)
 # Margen para que el gate no se ponga rojo a los 2 minutos del saque, en la
 # ventana entre el push y la ejecución del job.
 SAFETY_MARGIN = timedelta(minutes=30)
+# La semilla de la jornada siguiente se publica a mitad de semana, cuando el
+# scraper ya puede ver el calendario: entre que una jornada termina (domingo)
+# y se sube la siguiente pasan 1-3 días. Sin esta gracia el gate estaba en rojo
+# cada lunes aunque nada estuviera roto de verdad. Cuando el plazo se pasa y la
+# web sigue mirando una jornada ya cerrada, sí hay un problema real.
+SEED_PUBLICATION_GRACE = timedelta(days=3)
 
 
 def _load(path: Path) -> dict:
@@ -123,19 +129,22 @@ def test_pavo_tiene_boleto_completo(predicciones):
 
 def test_el_calendario_no_esta_congelado_en_el_pasado(horarios, current_jornada):
     """La jornada en juego puede tener partidos ya terminados; lo raro es que
-    los quince estén atrás, señal de que el calendario se quedó congelado y la
-    web sigue pidiendo quinielas para una jornada que ya no existe."""
+    siga siendo la vigente cuando ya pasó su ventana de publicación, señal de
+    que el calendario se quedó congelado y la web sigue pidiendo quinielas
+    para una jornada que ya no existe."""
     ahora = datetime.now(MADRID)
-    terminados = 0
 
-    for partido_id, row in sorted(horarios.items(), key=lambda kv: int(kv[0])):
+    fins = []
+    for partido_id in sorted(horarios, key=int):
+        row = horarios[partido_id]
         kickoff = datetime.strptime(f"{row['fecha']} {row['hora']}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID)
-        if kickoff + MATCH_DURATION + SAFETY_MARGIN < ahora:
-            terminados += 1
+        fins.append(kickoff + MATCH_DURATION)
 
-    assert terminados < MATCHES_PER_JORNADA, (
+    ultimo_fin = max(fins)
+    assert ahora <= ultimo_fin + SAFETY_MARGIN + SEED_PUBLICATION_GRACE, (
         f"el calendario de la jornada {current_jornada} está congelado: los {MATCHES_PER_JORNADA} partidos "
-        f"ya deberían haber terminado. Sube el seed de la jornada siguiente."
+        f"terminaron y ya pasó la gracia de {SEED_PUBLICATION_GRACE.days} días para publicar la semilla "
+        f"de la siguiente. Sube el seed (make jornada J={current_jornada + 1})."
     )
 
 
