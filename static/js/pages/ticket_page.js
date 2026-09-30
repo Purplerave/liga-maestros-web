@@ -190,11 +190,17 @@ function renderArenaTensionBody(matches) {
             ? renderTensionPenaChip(renderPenaPleno(getPenaPlenoSummary(idx), m.marcador, m.status), "Peña")
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
         const mine = renderMyCell(idx, mySign, isPleno ? m.marcador : real, m.status, canEdit, isPleno);
-        const predictorCells = predictorColumns.map(([primary, fallback, label]) => {
+        const predictorDetails = predictorColumns.map(([primary, fallback, label]) => {
             const sign = getSign(preds, idx, primary, fallback);
             const reason = getPredictionReason(preds, idx, primary, fallback);
-            return `<td class="ticket-pick-cell">${renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno, "", reason)}</td>`;
-        }).join("");
+            const chip = renderTensionChip(label, sign, isPleno ? m.marcador : real, m.status, isPleno, "", reason);
+            return {
+                cell: `<td class="ticket-pick-cell">${chip}</td>`,
+                detail: `<div class="ticket-mobile-insight-item">${chip}</div>`
+            };
+        });
+        const predictorCells = predictorDetails.map(item => item.cell).join("");
+        const mobileInsights = `${predictorDetails.map(item => item.detail).join("")}<div class="ticket-mobile-insight-item ticket-pena-cell">${penaChip}</div>`;
 
         return `<tr class="tension-row ${rowClass}" data-ticket-row="${idx}">
             <td class="match-index-cell"><span class="match-number">${idx + 1}</span></td>
@@ -203,7 +209,8 @@ function renderArenaTensionBody(matches) {
             ${predictorCells}
             <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
             <td class="ticket-pick-cell ticket-user-cell"${isPleno ? ` title="Elegir resultado del Pleno al 15" data-pleno-label="${plenoLabel}"` : ""}><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
-        </tr>${state.expandedMatch === idx ? `<tr class="match-detail-row"><td colspan="${predictorColumns.length + 5}">${renderMatchDetailGrid(m, c)}</td></tr>` : ""}`;
+            <td class="ticket-mobile-insights-cell"><details class="ticket-mobile-insights"><summary>Ver pronósticos y consenso</summary><div class="ticket-mobile-insights-list">${mobileInsights}</div></details></td>
+        </tr>${state.expandedMatch === idx ? `<tr class="match-detail-row"><td colspan="${predictorColumns.length + 6}">${renderMatchDetailGrid(m, c)}</td></tr>` : ""}`;
     }).join("");
 
     // La seleccion se gestiona en el listener delegado de events.js. Mantener un

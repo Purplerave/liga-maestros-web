@@ -11,6 +11,11 @@
      5. La Quiniela se convierte en TARJETAS grandes y amables en vez de tabla.
    ========================================================================== */
 
+/* La celda auxiliar de análisis solo se utiliza en el diseño móvil. */
+.ticket-mobile-insights-cell {
+    display: none;
+}
+
 @media (max-width: 899px) {
 
     /* ── 1. SHELL: SCROLL NATIVO DEL DOCUMENTO ───────────────────────
@@ -546,6 +551,76 @@
         border: 1px solid rgba(56, 189, 248, 0.4);
         color: #e0f2fe;
     }
+
+    /* La tarjeta prioriza la quiniela del usuario. Los modelos y La Peña
+       quedan disponibles bajo demanda para evitar una fila saturada. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-user-cell) {
+        display: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-user-cell {
+        order: 3;
+        flex: 1 1 100%;
+        width: 100%;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-mobile-insights-cell {
+        display: block;
+        order: 4;
+        flex: 1 1 100%;
+        width: 100%;
+        margin-top: 1px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.025);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 44px;
+        padding: 0 12px;
+        color: #cbd5e1;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights summary::-webkit-details-marker {
+        display: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights summary::after {
+        content: "+";
+        color: #7dd3fc;
+        font-size: 1.15rem;
+        line-height: 1;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights[open] summary::after {
+        content: "−";
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insights-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+        gap: 7px;
+        padding: 0 8px 9px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item {
+        min-width: 0;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item .tension-chip {
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        justify-content: space-between;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item.ticket-pena-cell {
+        grid-column: 1 / -1;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item.ticket-pena-cell .pena-pick-breakdown {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     /* Fila de detalle expandible: se comporta como bloque de ancho completo */
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .match-detail-row,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table.is-tension-table .match-detail-row td {
