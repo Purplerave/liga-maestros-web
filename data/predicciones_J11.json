@@ -1,0 +1,21 @@
+{
+  "jornada": 11,
+  "temporada": "2026-2027",
+  "created_at": "2026-10-02",
+  "fuente": "Pronósticos de Jornada 11 aportados por el usuario; ChatGPT reemplazado por la línea acordada en esta conversación.",
+  "chipi": {"nombre": "DeepSeek", "signos": ["2", "1", "X", "2", "2", "1", "1", "1", "1", "1", "1", "2", "2", "1", "M-0"]},
+  "baidu": {"nombre": "Baidu", "signos": ["1", "X", "1", "X", "2", "1", "1", "1", "1", "1", "1", "2", "1", "X", "M-0"]},
+  "luzia": {"nombre": "Luzia", "signos": ["2", "1", "X", "1", "X", "1", "1", "1", "X", "1", "1", "2", "1", "X", "2-1"]},
+  "grok": {"nombre": "Grok", "signos": ["X", "1", "2", "1", "X", "1", "1", "1", "X", "2", "2", "2", "1", "X", "1-1"]},
+  "pavo": {"nombre": "Pavo", "fuente": "https://app.pavo-ai.work", "signos": ["2", "1", "X2", "1", "1X", "1", "1", "1", "X", "2", "1", "1X", "1", "X", "2-0"]},
+  "profe": {"nombre": "Meta", "signos": ["2", "1X", "X2", "1", "X", "1", "1", "1", "X2", "1", "1", "2", "1", "X", "M-0"]},
+  "gstudio": {"nombre": "GSTUDIO", "signos": ["X2", "1X", "X2", "1", "X", "1", "1", "1", "1", "1", "1", "2", "X", "1", "M-0"]},
+  "chatgpt": {"nombre": "GPT", "signos": ["2", "1X", "2", "1", "1X", "1", "1", "1", "X", "X", "1", "X", "1X", "2", "M-0"]},
+  "copilot": {"nombre": "Copilot", "signos": ["2", "1", "X2", "1", "X2", "1", "1", "1", "1X", "1", "1", "2", "1", "2", "M-0"]},
+  "claude": {"nombre": "Claude Opus 5.5", "signos": ["2", "1", "X", "1", "X", "1", "1", "1", "X", "1", "1", "2", "1", "X", "M-0"]},
+  "geli": {"nombre": "GLM5", "signos": ["X2", "1", "1", "1", "X2", "1", "1", "1", "1X", "1", "1", "2", "X", "1", "2-0"]},
+  "pepe": {"nombre": "Perplexity", "signos": ["X2", "1X", "2", "1", "X2", "1", "1", "1", "X2", "1", "1", "2", "1X", "2", "M-0"]},
+  "fortu": {"nombre": "Mistral", "signos": ["2", "1", "1X", "1", "X", "1", "1", "1", "1X", "1", "1", "2", "1", "1X", "M-0"]},
+  "oraculo": {"nombre": "Qwen", "signos": ["2", "1", "1X", "1", "X2", "1", "1", "1", "1X", "X", "1", "1", "X", "1", "2-0"]},
+  "programa": {"nombre": "PROGRAMA", "origen": "Consenso de los pronósticos aportados para la Jornada 11", "actualizado": "2026-10-02", "nota": "Mayoría ponderada por los signos de cada boleto; 3 dobles en P3, P9 y P14.", "signos": ["2", "1", "X2", "1", "X", "1", "1", "1", "1X", "1", "1", "2", "1", "1X", "M-0"]}
+}

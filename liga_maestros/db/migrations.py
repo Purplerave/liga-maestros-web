@@ -648,6 +648,15 @@ def ensure_jornada_9(conn):
     return updated + imported
 
 
+def ensure_jornada_11(conn):
+    """Seed Jornada 11 fixture and the supplied prediction tickets."""
+    updated = ensure_jornada_completa(conn, 11)
+    imported = _import_compact_prediction_tickets(conn, 11)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -798,6 +807,7 @@ def run_startup_migrations():
             ensure_jornada_7(conn)
             ensure_jornada_8(conn)
             ensure_jornada_9(conn)
+            ensure_jornada_11(conn)
             from ..services.season_rosters import sync_runtime_standings_files
             sync_runtime_standings_files()
             ensure_clasificacion_zero(conn)

@@ -1,0 +1,24 @@
+{
+  "jornada": 11,
+  "source_url": "https://www.quiniela15.com/pronostico-quiniela",
+  "scraped_at": "2026-10-02T00:00:00+02:00",
+  "cierre": "viernes 2 de octubre de 2026 a las 14:00",
+  "temporada": "2026-2027",
+  "partidos": [
+    {"num": 1, "local": "Albacete", "visitante": "Eibar", "fecha": "2026-10-03", "hora": "14:00", "division": "segunda"},
+    {"num": 2, "local": "Almería", "visitante": "Burgos", "fecha": "2026-10-03", "hora": "16:15", "division": "segunda"},
+    {"num": 3, "local": "Cádiz", "visitante": "Leganés", "fecha": "2026-10-03", "hora": "18:30", "division": "segunda"},
+    {"num": 4, "local": "Sabadell", "visitante": "FC Andorra", "fecha": "2026-10-03", "hora": "18:30", "division": "segunda"},
+    {"num": 5, "local": "R. Sociedad B", "visitante": "Granada", "fecha": "2026-10-04", "hora": "14:00", "division": "segunda"},
+    {"num": 6, "local": "Sporting", "visitante": "Celta Fortuna", "fecha": "2026-10-04", "hora": "16:15", "division": "segunda"},
+    {"num": 7, "local": "Castellón", "visitante": "Ceuta", "fecha": "2026-10-04", "hora": "18:30", "division": "segunda"},
+    {"num": 8, "local": "Las Palmas", "visitante": "R. Valladolid", "fecha": "2026-10-04", "hora": "18:30", "division": "segunda"},
+    {"num": 9, "local": "Girona", "visitante": "Mallorca", "fecha": "2026-10-04", "hora": "21:00", "division": "segunda"},
+    {"num": 10, "local": "Córdoba", "visitante": "Tenerife", "fecha": "2026-10-05", "hora": "20:30", "division": "segunda"},
+    {"num": 11, "local": "Barcelona (F)", "visitante": "Real Madrid (F)", "fecha": "2026-10-04", "hora": "17:00", "division": "liga_f"},
+    {"num": 12, "local": "Deportivo (F)", "visitante": "At. Madrid (F)", "fecha": "2026-10-03", "hora": "16:00", "division": "liga_f"},
+    {"num": 13, "local": "Madrid CFF (F)", "visitante": "Ath. Club (F)", "fecha": "2026-10-03", "hora": "18:00", "division": "liga_f"},
+    {"num": 14, "local": "Tenerife (F)", "visitante": "Logroño United (F)", "fecha": "2026-10-04", "hora": "12:00", "division": "liga_f"},
+    {"num": 15, "local": "España", "visitante": "República Checa", "fecha": "2026-10-03", "hora": "20:45", "division": "internacional", "pleno_al_15": true}
+  ]
+}
