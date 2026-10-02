@@ -40,6 +40,7 @@ def public_contest_name(uid, users):
         "fortu": "FORTU",
         "oraculo": "ORACULO",
         "fistro": "FISTRO",
+        "manus": "Manus",
         "sesudo": "SESUDO",
         "jimmy": "JIMMY",
         "luzia": "LUZIA",
@@ -62,6 +63,7 @@ def canonical_contest_id(uid):
     if low in ("v260_omnisciente", "programa"):
         return "programa"
     pena_aliases = {
+        "manus_j9": "manus",
         "deepseek": "chipi",
         "chipi": "chipi",
         "glm5": "geli",
@@ -79,7 +81,6 @@ def canonical_contest_id(uid):
         "oraculo": "oraculo",
         "ernie": "fistro",
         "ernie_ai": "fistro",
-        "manus": "fistro",
         "manus_ai": "fistro",
         "manusai": "fistro",
         "fistro": "fistro",
@@ -110,6 +111,7 @@ def canonical_contest_id(uid):
         "tecnotron",
         "consejo_ias",
         "fistro",
+        "manus",
         "sesudo",
         "jimmy",
         "luzia",
@@ -133,7 +135,8 @@ def contest_aliases_for_uid(uid):
         "profe": {"profe", "meta", "profe_llama"},
         "fortu": {"fortu", "mistral"},
         "oraculo": {"oraculo", "qwen", "gwen"},
-        "fistro": {"fistro", "ernie", "ernie_ai", "manus", "manus_ai", "manusai"},
+        "fistro": {"fistro", "ernie", "ernie_ai", "manus_ai", "manusai"},
+        "manus": {"manus", "manus_j9"},
         "sesudo": {"sesudo", "kimi"},
         "jimmy": {"jimmy"},
         "luzia": {"luzia"},

@@ -57,7 +57,7 @@
     "gpt_luna_j9",
     "gpt6_sol_search_max",
     "claude_sonnet_5",
-    "manus_j9",
+    "manus",
     "ernie_j9",
     "pavo",
     "gema"
@@ -103,7 +103,7 @@
     "gpt_luna_j9": "GPT-5.6 Luna",
     "gpt6_sol_search_max": "GPT-6 Sol Search Max",
     "claude_sonnet_5": "Claude Sonnet 5",
-    "manus_j9": "Manus",
+    "manus": "Manus",
     "ernie_j9": "Ernie",
     "pavo": "Pavo",
     "gema": "GEMA"

@@ -93,7 +93,7 @@ def build_contest_payload(current_jornada=None, current_user_id=None):
 
 
 def _build_contest_payload_uncached(current_jornada=None, current_user_id=None):
-    hidden_ids = {"hermes", "molbot", "jenova", "pena", "consenso", "momo", "manu", "manus"}
+    hidden_ids = {"hermes", "molbot", "jenova", "pena", "consenso", "momo", "manu"}
     conn = get_db()
     user_rows = conn.execute("SELECT id, nombre FROM usuarios").fetchall()
     users = {row["id"]: row["nombre"] for row in user_rows}

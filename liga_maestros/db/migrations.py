@@ -643,6 +643,11 @@ def ensure_jornada_9(conn):
     """Seed Jornada 9 fixture and the supplied prediction tickets."""
     updated = ensure_jornada_completa(conn, 9)
     imported = _import_compact_prediction_tickets(conn, 9)
+    if imported:
+        # The original J9 file used a jornada-specific Manus ID. Remove its
+        # persisted rows after importing the same ticket under the stable ID.
+        conn.execute("DELETE FROM predicciones WHERE user_id = 'manus_j9' AND jornada = 9")
+        conn.commit()
     if updated or imported:
         conn.commit()
     return updated + imported

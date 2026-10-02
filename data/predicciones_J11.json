@@ -19,6 +19,6 @@
   "oraculo": {"nombre": "Qwen", "signos": ["2", "1", "1X", "1", "X2", "1", "1", "1", "1X", "X", "1", "1", "X", "1", "2-0"]},
   "agentek": {"nombre": "Agente K", "signos": ["2", "1X", "X", "1", "X", "X", "1", "1", "X2", "2", "1X", "2", "1", "2", "M-0"]},
   "gema": {"nombre": "GEMA", "signos": ["X", "1", "1X", "X", "2", "1", "1", "X2", "1", "1", "1", "2", "2", "1X", "M-0"]},
-  "manus_j9": {"nombre": "Manus", "signos": ["X2", "1", "1X", "1", "X", "1", "1", "1", "X", "1", "1", "2", "1", "X", "M-0"]},
+  "manus": {"nombre": "Manus", "signos": ["X2", "1", "1X", "1", "X", "1", "1", "1", "X", "1", "1", "2", "1", "X", "M-0"]},
   "programa": {"nombre": "PROGRAMA", "origen": "PROGRAMAQUINIELA · PREDECIR_JORNADA.py (J11, 2026-10-02)", "actualizado": "2026-10-02", "nota": "Boleto optimizado del motor maestro: 3 dobles (P1, P6 y P13). Entrenado con 13.446 partidos. Confianza baja y sin datos específicos de Liga F; cuotas publicadas solo para 8 de los 14 partidos. Pleno manual: M-0 a favor de España.", "signos": ["1X", "1", "2", "1", "1", "1X", "1", "1", "1", "1", "1", "1", "1X", "1", "M-0"]}
 }

@@ -55,6 +55,7 @@ def canonical_id(uid):
         "v260_omnisciente": "programa",
         "consenso": "consejo_ias",
         "deepseek": "chipi",
+        "manus_j9": "manus",
     }
     if low in aliases:
         return aliases[low]
