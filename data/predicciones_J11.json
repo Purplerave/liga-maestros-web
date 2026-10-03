@@ -20,5 +20,6 @@
   "agentek": {"nombre": "Agente K", "signos": ["2", "1X", "X", "1", "X", "X", "1", "1", "X2", "2", "1X", "2", "1", "2", "M-0"]},
   "gema": {"nombre": "GEMA", "signos": ["X", "1", "1X", "X", "2", "1", "1", "X2", "1", "1", "1", "2", "2", "1X", "M-0"]},
   "manus": {"nombre": "Manus", "signos": ["X2", "1", "1X", "1", "X", "1", "1", "1", "X", "1", "1", "2", "1", "X", "M-0"]},
+  "gemini": {"nombre": "Gemini", "signos": ["X2", "1", "X2", "1", "1X", "1", "1", "1", "1", "1", "1", "2", "2", "1", "M-0"]},
   "programa": {"nombre": "PROGRAMA", "origen": "Estudio J11 Liga de Maestros (2026-10-03): consenso 18 columnas + Quiniela15 + cuotas", "actualizado": "2026-10-03", "nota": "Quiniela oro 3 dobles: P5 X2, P9 1X, P10 1X. Fijos: P1 2, P2 1, P3 2, P4 1, P6 1, P7 1, P8 1, P11 1, P12 2, P13 1, P14 1. Pleno: M-0 España.", "signos": ["2", "1", "2", "1", "X2", "1", "1", "1", "1X", "1X", "1", "2", "1", "1", "M-0"]}
 }
