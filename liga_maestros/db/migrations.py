@@ -657,6 +657,7 @@ def ensure_jornada_11(conn):
     """Seed Jornada 11 fixture and the supplied prediction tickets."""
     updated = ensure_jornada_completa(conn, 11)
     imported = _import_compact_prediction_tickets(conn, 11)
+    _import_jornada_resultados(conn, 11)
     if updated or imported:
         conn.commit()
     return updated + imported
