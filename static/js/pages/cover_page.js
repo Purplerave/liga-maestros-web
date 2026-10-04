@@ -463,7 +463,7 @@ function _whenCell(m) {
     const kind = _whenKind(m);
     const label = _whenLabel(m) || "—";
     const kindClass = kind === "live" ? " is-live-score" : (kind === "finished" ? " is-ft-score" : " is-schedule");
-    return `<td class="cx-r-when${kindClass}" data-cover-when="${kind}">${escapeHtml(String(label))}</td>`;
+    return `<td class="cx-r-when${kindClass}" data-cover-when="${kind}"><span class="cx-r-when-val">${escapeHtml(String(label))}</span></td>`;
 }
 function _closed(m) {
     if (!m) return false;

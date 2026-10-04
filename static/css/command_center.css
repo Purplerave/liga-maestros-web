@@ -81,9 +81,22 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-table tbody t
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-pick-val {
-    background: linear-gradient(180deg, rgba(123, 78, 7, 0.6), rgba(38, 25, 4, 0.9));
-    border-color: rgba(251, 191, 36, 0.62);
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.12);
+    /* Fondo solido oscuro de alto contraste: el degradado marron anterior
+       embarraba el signo dorado y no se leia lo que habia puesto el usuario. */
+    background: #101a2e;
+    border-color: rgba(251, 191, 36, 0.8);
+    color: #ffe08a;
+    box-shadow: none;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-table tbody tr.is-hit .cx-r-pick-val {
+    background: linear-gradient(180deg, #4ade80 0%, #22c55e 55%, #16a34a 100%);
+    border-color: #86efac;
+    color: #052e16;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-table tbody tr.is-miss .cx-r-pick-val {
+    background: rgba(239, 68, 68, 0.30);
+    border-color: rgba(248, 113, 113, 0.8);
+    color: #fff1f2;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-live-card {
@@ -996,19 +1009,39 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-when {
         display: inline-flex;
-        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 0;
         width: auto;
         min-width: 0;
-        padding: 4px 6px;
-        font-size: .65rem;
+        min-height: 44px;
+        padding: 0 8px;
+        font-size: .95rem;
+        font-weight: 800;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-when .cx-r-when-val {
+        width: 100%;
+        min-height: 44px;
+        font-size: 1rem;
+        border: 0;
+        background: transparent;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-pick {
         display: flex;
-        flex: 1 1 100%;
+        flex: 1 1 0;
+        align-items: center;
         justify-content: flex-end;
-        width: 100%;
+        width: auto;
         min-width: 0;
+        min-height: 44px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-pick-val {
+        min-width: 56px;
+        height: 44px;
+        font-size: 1.25rem;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-team.is-home::after {

@@ -677,8 +677,8 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     white-space: nowrap;
 }
 .cx-boleto-table thead th.cx-r-num { text-align: center; width: 36px; }
-.cx-boleto-table thead th.cx-r-when { text-align: center; width: 78px; }
-.cx-boleto-table thead th.cx-r-pick { text-align: center; width: 74px; color: var(--cx-gold); }
+.cx-boleto-table thead th.cx-r-when { text-align: center; width: 108px; }
+.cx-boleto-table thead th.cx-r-pick { text-align: center; width: 88px; color: var(--cx-gold); }
 .cx-boleto-table thead th.cx-r-ia { text-align: center; width: 42px; color: var(--cx-muted); }
 .cx-boleto-table thead th.cx-r-ia .cx-mi-logo { display: block; margin: 0 auto 3px; object-fit: contain; }
 .cx-boleto-table thead th.cx-r-ia em { font-style: normal; font-size: 0.52rem; font-weight: 800; letter-spacing: 0.06em; }
@@ -727,30 +727,44 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
 .cx-r-team.is-home { text-align: right; padding-right: 4px; }
 .cx-r-team.is-away { text-align: left; padding-left: 4px; }
 .cx-r-vs { color: var(--cx-dim); font-family: "JetBrains Mono", monospace; font-size: 0.65rem; text-transform: uppercase; text-align: center; width: 28px; padding: 0 2px; }
-.cx-r-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--cx-cyan); text-align: center; font-variant-numeric: tabular-nums; width: 78px; white-space: nowrap; }
+.cx-r-when { font-family: "JetBrains Mono", monospace; font-size: 0.88rem; font-weight: 800; color: #f0f4f8; text-align: center; font-variant-numeric: tabular-nums; width: 108px; white-space: nowrap; }
+.cx-r-when .cx-r-when-val {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    min-height: 34px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.10);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    line-height: 1.1;
+}
 .cx-r-when.is-ft-score { color: var(--cx-text); font-weight: 800; }
+.cx-r-when.is-ft-score .cx-r-when-val { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.16); }
 .cx-r-when.is-live-score { color: #6ee7b7; font-weight: 800; }
-.cx-r-pick { text-align: center; width: 74px; }
+.cx-r-when.is-live-score .cx-r-when-val { background: rgba(52, 211, 153, 0.16); border-color: rgba(52, 211, 153, 0.42); }
+.cx-r-pick { text-align: center; width: 88px; }
 .cx-r-pick-val {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 34px;
-    height: 28px;
-    padding: 0 10px;
-    border-radius: 6px;
-    /* Fondo solido oscuro (nada translucido): el dorado sobre dorado
-       transparente se embarraba con la fila y el signo se difuminaba con el
-       brillo. Texto claro grueso sin sombras. */
-    background: #131c2e;
-    border: 1px solid rgba(251, 191, 36, 0.65);
-    color: #ffd97a;
+    min-width: 46px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    /* Fondo solido oscuro de alto contraste: nada de marrones translucidos.
+       Texto dorado claro grueso, sin sombras que lo embarren. */
+    background: #101a2e;
+    border: 1.5px solid rgba(251, 191, 36, 0.8);
+    color: #ffe08a;
     font-family: "Rajdhani", "Outfit", sans-serif;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 900;
     line-height: 1;
     white-space: nowrap;
     text-shadow: none;
+    box-shadow: none;
 }
 /* Celdas vacias: sin `opacity`, que hundia el ratio hasta ~2:1 por debajo de AA.
    El contraste lo marca el token --cx-dim y la vacia se distingue por su fondo
@@ -1045,31 +1059,46 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    /* Resultado a la IZQUIERDA y TU signo a la DERECHA, en la misma fila,
+       los dos grandes y con el mismo alto tactil (44px). */
     .cx-r-when {
-        flex: 0 0 auto;
+        flex: 1 1 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 56px;
-        height: 26px;
+        min-width: 0;
+        min-height: 44px;
+        height: 44px;
         padding: 0 8px;
-        border-radius: 6px;
+        border-radius: 8px;
         background: rgba(56,189,248,0.10);
         border: 1px solid rgba(56,189,248,0.22);
-        font-size: 0.72rem;
-        font-weight: 700;
+        font-size: 0.95rem;
+        font-weight: 800;
         width: auto;
+    }
+    .cx-r-when .cx-r-when-val {
+        min-width: 0;
+        width: 100%;
+        min-height: 44px;
+        font-size: 1rem;
+        border: 0;
+        background: transparent;
+        padding: 0 4px;
     }
     .cx-r-when.is-live-score { background: rgba(52,211,153,0.18); border-color: rgba(52,211,153,0.4); color: #6ee7b7; }
     .cx-r-when.is-ft-score { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.10); color: var(--cx-text); }
     .cx-r-pick {
-        flex: 1 1 100%;
+        flex: 1 1 0;
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 8px;
-        margin-top: 2px;
-        width: 100%;
-        text-align: left;
+        margin-top: 0;
+        width: auto;
+        min-width: 0;
+        min-height: 44px;
+        text-align: right;
     }
     .cx-r-pick::before {
         content: "TÚ";
@@ -1081,14 +1110,14 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
         min-width: 28px;
     }
     .cx-r-pick-val {
-        min-width: 44px;
-        height: 36px;
-        padding: 0 12px;
-        font-size: 1.05rem;
+        min-width: 56px;
+        height: 44px;
+        padding: 0 14px;
+        font-size: 1.25rem;
         border-radius: 8px;
         flex: 0 0 auto;
     }
-    .cx-r-pick-val.is-empty { min-width: 44px; }
+    .cx-r-pick-val.is-empty { min-width: 56px; }
     .cx-r-ia {
         display: inline-flex;
         flex: 0 0 auto;
@@ -1130,8 +1159,9 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     .cx-kpi-eyebrow { font-size: 0.55rem; }
     .cx-boleto-table tbody tr { padding: 8px 8px; gap: 5px 6px; }
     .cx-r-team.is-home, .cx-r-team.is-away { font-size: 0.82rem; }
-    .cx-r-when { min-width: 48px; font-size: 0.68rem; }
-    .cx-r-pick-val { min-width: 40px; height: 44px; font-size: 0.95rem; }
+    .cx-r-when { font-size: 0.9rem; }
+    .cx-r-when .cx-r-when-val { font-size: 0.95rem; }
+    .cx-r-pick-val { min-width: 56px; height: 44px; font-size: 1.2rem; }
     .cx-r-ia .cx-ia-sign { min-width: 36px; height: 44px; font-size: 0.88rem; }
     .cx-r-num-btn { min-height: 44px; }
     .cx-grid { padding: 6px 6px 10px; gap: 10px; }

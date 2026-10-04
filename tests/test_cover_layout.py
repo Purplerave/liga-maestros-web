@@ -23,9 +23,11 @@ def test_cover_pick_cell_shows_the_sign_without_glyphs():
     # ...ni una raya atravesando el signo de los Maestros o La Pena.
     assert "is-miss::before" not in css
     # La casilla del signo tiene que hospedar un doble ("12") sin recorte.
-    assert ".cx-r-pick { text-align: center; width: 74px; }" in css
-    assert "min-width: 34px;" in css
+    # Resultado a la izquierda del TÚ, los dos grandes y legibles.
+    assert ".cx-r-pick { text-align: center; width: 88px; }" in css
+    assert "min-width: 46px;" in css
     assert "white-space: nowrap;" in css
+    assert ".cx-r-when-val" in css
 
 
 def test_cover_pick_cell_contrast_is_readable():
