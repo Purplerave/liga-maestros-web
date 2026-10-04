@@ -1,0 +1,56 @@
+{
+  "jornada": 11,
+  "fuente": "LaLiga Hypermotion (P1-P3), Liga F (P12-P13), UEFA/EFE (P15). Verificado 2026-10-04.",
+  "verificado_en": "2026-10-04T12:00:00+02:00",
+  "nota": "Parcial sábado 03/10/2026 (7 FT). P4 Sabadell-Andorra SUSPENDIDO por temporal (alerta roja INUNCAT), sin fecha: no se importa, queda pendiente de nueva fecha o sorteo. P5-P11 y P14 pendientes (se juegan 04/10) y P10 el 05/10.",
+  "resultados": [
+    {
+      "id": 1,
+      "goles_local": 1,
+      "goles_visitante": 3,
+      "signo": "2",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 2,
+      "goles_local": 2,
+      "goles_visitante": 1,
+      "signo": "1",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 3,
+      "goles_local": 4,
+      "goles_visitante": 0,
+      "signo": "1",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 12,
+      "goles_local": 1,
+      "goles_visitante": 2,
+      "signo": "2",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 13,
+      "goles_local": 2,
+      "goles_visitante": 2,
+      "signo": "X",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 15,
+      "goles_local": 3,
+      "goles_visitante": 1,
+      "signo": "3-1",
+      "status": "FT",
+      "minuto": "Finalizado"
+    }
+  ]
+}
