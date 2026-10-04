@@ -627,7 +627,7 @@ def next_sleep_seconds(window, base_interval):
         if remaining > 0:
             return max(60, min(remaining, 900))
     if window.get("live_now"):
-        return max(30, min(int(base_interval or 120), 120))
+        return max(60, min(int(base_interval or 120), 120))
     if window.get("needs_result_catchup"):
         return 900
     if not window.get("enabled"):

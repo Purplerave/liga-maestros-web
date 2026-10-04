@@ -298,7 +298,7 @@ function newsSignature(data) {
 }
 
 /* El poll del directo pide la variante ligera del payload (``?slim=1``): solo
-   lo que puede cambiar en 15 s (marcadores, estado, clasificaciones,
+   lo que puede cambiar en 30 s (marcadores, estado, clasificaciones,
    comentarista). Cada ``LIVE_HEAVY_SYNC_POLLS`` polls sin cambios se hace
    ademas una recarga silenciosa de las partes pesadas (ranking en vivo,
    consenso de la Pena, predicciones) para que no se queden detras.
@@ -492,14 +492,14 @@ let liveRefreshTimer = null;
 let liveTransportKey = "";
 
 function livePollDelay() {
-    // 15 s con partidos en juego. Tambien se refresca rapido en la ventana de
+    // 30s con partidos en juego. Tambien se refresca rapido en la ventana de
     // una jornada (desde 10 min antes del primer saque hasta que todos han
     // terminado): si solo mirasemos "hay algo en vivo" el primer gol del dia
     // podia tardar dos minutos en aparecer.
     // v2: en idle (sin jornada) 60s en vez de 180s para que el consenso y
     // noticias no parezcan congelados.
-    if (hasLiveLeagueMatches()) return 15000;
-    return isJornadaWindowOpen() ? 30000 : 60000;
+    if (hasLiveLeagueMatches()) return 30000;
+    return isJornadaWindowOpen() ? 40000 : 60000;
 }
 
 function isJornadaWindowOpen() {

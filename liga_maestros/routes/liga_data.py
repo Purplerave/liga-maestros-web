@@ -65,7 +65,7 @@ def _cold_start_response(message="Los datos de la jornada aún se están prepara
 def _wants_slim():
     """True cuando el cliente pide la variante ligera (``?slim=1``).
 
-    La usa el poll del directo: cada 15 s por cliente, solo necesita lo que
+    La usa el poll del directo: cada 30 s por cliente, solo necesita lo que
     puede cambiar en esa ventana.
     """
     return (request.args.get("slim") or "").strip().lower() in _SLIM_FLAGS

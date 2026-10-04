@@ -176,6 +176,16 @@ def test_j2_prediction_reasons_include_pena_explanations():
 
 def test_api_liga_data_j2_hides_pena_tickets_and_exposes_consensus(tmp_path, monkeypatch):
     app = _test_app(tmp_path, monkeypatch)
+    # La J2 ya se jugo y el repo trae sus resultados oficiales, pero este test
+    # comprueba la vista con el boleto ABIERTO: se vacian los marcadores en la
+    # BD temporal para simular la previa (no toca los ficheros del repo).
+    _conn = sqlite3.connect(str(tmp_path / "j2.db"))
+    _conn.execute(
+        "UPDATE resultados SET goles_local = NULL, goles_visitante = NULL,"
+        " status = 'NS', minuto = '', signo_actual = '-' WHERE jornada = 2"
+    )
+    _conn.commit()
+    _conn.close()
     response = app.test_client().get("/api/liga/data?j=2")
     assert response.status_code == 200
     payload = response.get_json()
