@@ -544,7 +544,16 @@ function scheduleLivePoll(delay = livePollDelay()) {
 
 function startLivePolling() {
     stopLiveSSE();
-    scheduleLivePoll();
+    /* Primera comprobacion rapida al arrancar en ventana de jornada: si un
+       partido empezo hace 2 minutos, no tiene sentido esperar 30-40 s para
+       pintarlo en directo. Solo el primer poll; los siguientes usan el
+       intervalo normal. */
+    try {
+        if (isJornadaWindowOpen()) scheduleLivePoll(5000);
+        else scheduleLivePoll();
+    } catch {
+        scheduleLivePoll();
+    }
 }
 
 function startLiveUpdates() {

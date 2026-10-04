@@ -153,6 +153,10 @@ TEAM_LOGO_ALIASES = {
     # trae "Ferencvaros": sin este alias el cruce Q15<->BD fallaba y el partido
     # J7#12 no se actualizaba solo (false negative del matcher).
     "FERENCVAROSI": "FERENCVAROS",
+    # El directo Q15 escribe "R. Checa" y el boleto "Republica Checa": el pleno
+    # al 15 no cruzaba nunca y solo entraba por JSON manual.
+    "R CHECA": "REPUBLICA CHECA",
+    "REP CHECA": "REPUBLICA CHECA",
     "BELGICA": "BELGICA",
     "BELGIUM": "BELGICA",
     "TUNEZ": "TUNEZ",
@@ -282,18 +286,22 @@ TEAM_LOGO_ALIASES = {
     "DEPORTIVO ABANCA": "DEPORTIVO ABANCA",
     "DEPORTIVO FEMENINO": "DEPORTIVO ABANCA",
     "DEPORTIVO DE LA CORUNA WOMEN": "DEPORTIVO ABANCA",
-    "LOGROÑO UNITED": "LOGROÑO UNITED",
-    "DUX LOGRONO": "LOGROÑO UNITED",
-    "DUX LOGRONO F": "LOGROÑO UNITED",
-    # La quiniela llama "Edf Logrono" al club que la web conoce como
-    # "Logrono (F)": sin estas claves el cruce por partido_id se descartaba y
-    # el resultado nunca entraba (J4 2026/27, Edf Logrono - Athletic Club (F)).
-    "EDF LOGRONO": "LOGROÑO UNITED",
-    "EDF LOGRONO F": "LOGROÑO UNITED",
-    "EDF LOGRONO FEMENINO": "LOGROÑO UNITED",
-    "LOGRONO": "LOGROÑO UNITED",
-    "LOGRONO F": "LOGROÑO UNITED",
-    "LOGRONO FEMENINO": "LOGROÑO UNITED",
+    "LOGROÑO UNITED": "LOGRONO UNITED F",
+    "LOGRONO UNITED": "LOGRONO UNITED F",
+    "LOGRONO UNITED F": "LOGRONO UNITED F",
+    "LOGRONO UNITED FEMENINO": "LOGRONO UNITED F",
+    "DUX LOGRONO": "LOGRONO UNITED F",
+    "DUX LOGRONO F": "LOGRONO UNITED F",
+    # La quiniela llama "Edf Logrono" al club que el boleto trae como
+    # "Logrono United (F)": el canonico lleva la F para que ambas orillas
+    # queden en "LOGRONO UNITED F" (la igualdad gana antes de mirar el
+    # genero, y Q15 no marca este equipo como femenino).
+    "EDF LOGRONO": "LOGRONO UNITED F",
+    "EDF LOGRONO F": "LOGRONO UNITED F",
+    "EDF LOGRONO FEMENINO": "LOGRONO UNITED F",
+    "LOGRONO": "LOGRONO UNITED F",
+    "LOGRONO F": "LOGRONO UNITED F",
+    "LOGRONO FEMENINO": "LOGRONO UNITED F",
     # Barca femenino: "Barcelona (F)" quedaba en "BARCELONA F" sin canonico y
     # no cruzaba con "Barcelona Femenino" del proveedor.
     "BARCELONA F": "BARCELONA FEMENINO",

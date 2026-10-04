@@ -2,7 +2,9 @@
 
 import hashlib
 import logging
+import threading
 import time
+from datetime import datetime, timedelta
 
 from flask import Blueprint, g, jsonify, request, session
 
@@ -28,6 +30,18 @@ logger = logging.getLogger(__name__)
 _STANDINGS_CACHE = {"data": None, "expires": 0, "key": None}
 _STANDINGS_TTL = 300  # seconds
 _COLD_START_RETRY_AFTER = 2
+# Antipisarrapeos del refresco de primera pintura (ver
+# _maybe_refresh_stale_window): un scrape Q15 como mucho cada 90 s en todo el
+# proceso, y nunca dos a la vez.
+_WINDOW_REFRESH_LOCK = threading.Lock()
+_WINDOW_REFRESH_LAST = {"at": 0.0}
+_WINDOW_REFRESH_MIN_GAP = 90  # seconds
+_WINDOW_REFRESH_BUDGET = 6  # seconds max bloqueando la respuesta
+# Ventana en la que un NS con el saque ya pasado exige dato fresco antes de
+# pintar: desde 10 min antes del saque hasta 3 h despues (igual que el poll
+# rapido del frontend). Fuera de ahi manda el catchup del colector.
+_WINDOW_PRE_MINUTES = 10
+_WINDOW_POST_HOURS = 3
 # ``?slim=1`` lo pide el poll del directo (static/js/events.js). Cualquiera de
 # estos valores activa la variante ligera; cualquier otro la desactiva.
 _SLIM_FLAGS = frozenset({"1", "true", "yes", "on"})
@@ -64,6 +78,96 @@ def _wants_first():
     la carga completa. Pensado para el móvil.
     """
     return (request.args.get("first") or "").strip().lower() in _SLIM_FLAGS
+
+
+def _maybe_refresh_stale_window(conn, jornada, partidos):
+    """Scrape Q15 sincrono (con tope) cuando la primera pintura saldria rancia.
+
+    Si algun partido esta en ventana de juego (saque entre hace 3 h y dentro
+    de 10 min) pero la BD aun lo marca NS, la pagina pintaria "no empezado"
+    aunque el partido vaya por el minuto 5: es justo lo que se ve al abrir
+    tras un cold start, con el colector aun despertando. En ese caso se lanza
+    un scrape directo con presupuesto maximo de 6 s y se reconstruye la lista
+    de partidos con lo que traiga. Best-effort total: cualquier fallo (o el
+    tope) deja la respuesta como estaba y el poll del directo la cura en 30 s.
+    """
+    try:
+        now = madrid_now().replace(tzinfo=None)
+    except Exception:
+        return partidos
+    try:
+        in_window_ns = False
+        for match in partidos or []:
+            if str(match.get("status") or "").upper() not in ("NS", "SCHEDULED", "NOT STARTED", ""):
+                continue
+            kickoff = _parse_payload_kickoff(match)
+            if kickoff is None:
+                continue
+            if kickoff - timedelta(minutes=_WINDOW_PRE_MINUTES) <= now <= kickoff + timedelta(
+                hours=_WINDOW_POST_HOURS
+            ):
+                in_window_ns = True
+                break
+        if not in_window_ns:
+            return partidos
+    except Exception:
+        return partidos
+    if not _WINDOW_REFRESH_LOCK.acquire(blocking=False):
+        return partidos
+    try:
+        if time.time() - _WINDOW_REFRESH_LAST["at"] < _WINDOW_REFRESH_MIN_GAP:
+            return partidos
+        _WINDOW_REFRESH_LAST["at"] = time.time()
+    finally:
+        _WINDOW_REFRESH_LOCK.release()
+    try:
+        import sys as _sys
+        from pathlib import Path as _Path
+
+        tools_ops = str(_Path(config.BASE_DIR) / "tools" / "ops")
+        if tools_ops not in _sys.path:
+            _sys.path.insert(0, tools_ops)
+
+        holder = {}
+        worker = threading.Thread(
+            target=lambda: holder.update(_run_q15_cache(jornada)),
+            name="liga-first-paint-refresh",
+            daemon=True,
+        )
+        worker.start()
+        worker.join(timeout=_WINDOW_REFRESH_BUDGET)
+        if not holder.get("done"):
+            logger.info("first-paint refresh supera %ss para J%s; pinta BD y el poll curara", _WINDOW_REFRESH_BUDGET, jornada)
+            return partidos
+        from ..services.payloads.matches import build_jornada_matches
+        from ..utils import load_team_logos
+
+        return build_jornada_matches(conn, jornada, load_team_logos())
+    except Exception:
+        logger.exception("first-paint refresh fallo para J%s", jornada)
+        return partidos
+
+
+def _run_q15_cache(jornada):
+    try:
+        from LIVE_COLLECTOR import write_q15_directo_cache
+
+        write_q15_directo_cache(int(jornada))
+        return {"done": True}
+    except Exception:
+        return {"done": False}
+
+
+def _parse_payload_kickoff(match):
+    """Kickoff naive (Madrid) desde los campos del payload de partidos."""
+    try:
+        date = str(match.get("fecha_raw") or match.get("fecha") or "")[:10]
+        hour = str(match.get("hora") or "")[:5]
+        if len(date) != 10 or len(hour) != 5:
+            return None
+        return datetime.strptime(f"{date} {hour}", "%Y-%m-%d %H:%M")
+    except Exception:
+        return None
 
 
 def _get_standings_cached(conn, partidos, team_logos):
@@ -105,6 +209,10 @@ def get_liga_data():
         partidos = build_jornada_matches(conn, jornada, team_logos)
         if len(partidos) < 15:
             return _cold_start_response("La jornada todavía no tiene sus 15 partidos disponibles.")
+        # Primera pintura fresca: si hay saques en ventana aun marcados NS
+        # (cold start con BD dormida), intenta traer el directo ahora mismo
+        # con tope de 6 s en vez de pintar "no empezado" hasta el refresh.
+        partidos = _maybe_refresh_stale_window(conn, jornada, partidos)
         standings, standings_db = _get_standings_cached(conn, partidos, team_logos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos, standings_db)
