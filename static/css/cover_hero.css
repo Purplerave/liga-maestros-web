@@ -739,15 +739,18 @@ a.cx-pn-meta:hover { color: var(--cx-cyan); }
     height: 28px;
     padding: 0 10px;
     border-radius: 6px;
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    color: var(--cx-gold);
+    /* Fondo solido oscuro (nada translucido): el dorado sobre dorado
+       transparente se embarraba con la fila y el signo se difuminaba con el
+       brillo. Texto claro grueso sin sombras. */
+    background: #131c2e;
+    border: 1px solid rgba(251, 191, 36, 0.65);
+    color: #ffd97a;
     font-family: "Rajdhani", "Outfit", sans-serif;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 900;
     line-height: 1;
     white-space: nowrap;
-    text-shadow: 0 0 6px rgba(251, 191, 36, 0.3);
+    text-shadow: none;
 }
 /* Celdas vacias: sin `opacity`, que hundia el ratio hasta ~2:1 por debajo de AA.
    El contraste lo marca el token --cx-dim y la vacia se distingue por su fondo
