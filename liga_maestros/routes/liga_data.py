@@ -103,9 +103,7 @@ def _maybe_refresh_stale_window(conn, jornada, partidos):
             kickoff = _parse_payload_kickoff(match)
             if kickoff is None:
                 continue
-            if kickoff - timedelta(minutes=_WINDOW_PRE_MINUTES) <= now <= kickoff + timedelta(
-                hours=_WINDOW_POST_HOURS
-            ):
+            if kickoff - timedelta(minutes=_WINDOW_PRE_MINUTES) <= now <= kickoff + timedelta(hours=_WINDOW_POST_HOURS):
                 in_window_ns = True
                 break
         if not in_window_ns:
@@ -137,7 +135,9 @@ def _maybe_refresh_stale_window(conn, jornada, partidos):
         worker.start()
         worker.join(timeout=_WINDOW_REFRESH_BUDGET)
         if not holder.get("done"):
-            logger.info("first-paint refresh supera %ss para J%s; pinta BD y el poll curara", _WINDOW_REFRESH_BUDGET, jornada)
+            logger.info(
+                "first-paint refresh supera %ss para J%s; pinta BD y el poll curara", _WINDOW_REFRESH_BUDGET, jornada
+            )
             return partidos
         from ..services.payloads.matches import build_jornada_matches
         from ..utils import load_team_logos
