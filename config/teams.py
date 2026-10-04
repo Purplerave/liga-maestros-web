@@ -149,6 +149,10 @@ TEAM_LOGO_ALIASES = {
     "GERMANY": "GERMANY",
     "FINLANDIA": "FINLAND",
     "FINLAND": "FINLAND",
+    # La quiniela publica "Ferencvarosi" (nombre completo hungaro) y el boleto
+    # trae "Ferencvaros": sin este alias el cruce Q15<->BD fallaba y el partido
+    # J7#12 no se actualizaba solo (false negative del matcher).
+    "FERENCVAROSI": "FERENCVAROS",
     "BELGICA": "BELGICA",
     "BELGIUM": "BELGICA",
     "TUNEZ": "TUNEZ",

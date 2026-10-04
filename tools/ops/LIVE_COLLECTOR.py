@@ -282,6 +282,66 @@ def close_stuck_live_matches(jornada, grace_minutes=None):
     return stuck
 
 
+_CATCHUP_PENDING_STATUS = frozenset(
+    {
+        "NS",
+        "SCHEDULED",
+        "",
+        "LIVE",
+        "IN PLAY",
+        "HT",
+        "HALF TIME BREAK",
+        "EN JUEGO",
+        "STALE",
+        "PENDING_OVERDUE",
+    }
+)
+# J1#5 (Celta-Osasuna) fue a sorteo LAE y se cura a mano: el catchup nunca
+# debe rellenarlo con el marcador del partido aplazado.
+_CATCHUP_EXCLUDED_JORNADAS = frozenset({1})
+_CATCHUP_MAX_JORNADAS_PER_PASS = 2
+_CATCHUP_OVERDUE_AFTER = timedelta(hours=3)
+
+
+def overdue_catchup_jornadas(conn, exclude=None, limit=_CATCHUP_MAX_JORNADAS_PER_PASS):
+    """Jornadas 1..42 (distintas de ``exclude``) con filas pendientes de un
+    saque ya pasado.
+
+    Red de seguridad para que un fin de semana sin colector (despliegue a
+    medias, scraper bloqueado, jornada no vigilada) se cure solo en pasadas
+    posteriores en vez de dejar NS/LIVE eternos. Solo se propone una jornada
+    si al menos una de sus filas pendientes debio terminar hace mas de
+    ``_CATCHUP_OVERDUE_AFTER``; los NS futuros no se tocan.
+    """
+    try:
+        rows = conn.execute(
+            """SELECT jornada, fecha, hora, status FROM resultados
+               WHERE jornada BETWEEN 1 AND 42"""
+        ).fetchall()
+    except Exception:
+        return []
+    now = madrid_now().replace(tzinfo=None)
+    overdue = set()
+    for row in rows:
+        try:
+            jornada = int(row["jornada"])
+        except (TypeError, ValueError):
+            continue
+        if jornada in _CATCHUP_EXCLUDED_JORNADAS or (exclude is not None and jornada == exclude):
+            continue
+        if str(row["status"] or "").upper() not in _CATCHUP_PENDING_STATUS:
+            continue
+        kickoff = parse_madrid_datetime(row["fecha"], row["hora"])
+        if kickoff is None:
+            overdue.add(jornada)
+            continue
+        if kickoff.tzinfo is not None:
+            kickoff = kickoff.replace(tzinfo=None)
+        if kickoff < now - _CATCHUP_OVERDUE_AFTER:
+            overdue.add(jornada)
+    return sorted(overdue)[: max(0, int(limit or 0))]
+
+
 def cleanup_old_backups(retention_days=14):
     cutoff = madrid_now() - timedelta(days=max(1, int(retention_days or 14)))
     for path in BACKUP_DIR.glob("*"):
@@ -649,13 +709,43 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
     backup_runtime_state(window=window)
     target_jornada = window.get("jornada") or jornada
     auto_closed = []
+    # Red de seguridad multi-jornada: aunque la ventana activa este al dia,
+    # otras jornadas pueden tener pendientes de un saque ya pasado (fin de
+    # semana sin colector, scraper bloqueado, jornada que dejo de vigilarse).
+    # Se repescan aqui (max 2 por pasada, nunca en pleno directo) en vez de
+    # dejar NS/LIVE eternos hasta que alguien lo rellene a mano.
+    catchup_jornadas = []
+    catchup_matches = 0
+    if q15 and not window.get("live_now"):
+        try:
+            with get_db() as _catchup_conn:
+                catchup_jornadas = overdue_catchup_jornadas(_catchup_conn, exclude=target_jornada)
+        except Exception as exc:
+            log_line(f"catchup_detect_error={exc}")
+            catchup_jornadas = []
+        for _catchup_jornada in catchup_jornadas:
+            try:
+                _detail = write_q15_directo_cache(_catchup_jornada)
+                catchup_matches += int(_detail.get("matches") or 0)
+                log_line(f"catchup_jornada={_catchup_jornada} q15={_detail.get('matches')}")
+            except Exception as exc:
+                log_line(f"catchup_error={_catchup_jornada}:{exc}")
+
+    def _close_stuck_everywhere():
+        closed = []
+        for _jornada_cierre in [target_jornada] + [j for j in catchup_jornadas if j != target_jornada]:
+            if not _jornada_cierre:
+                continue
+            try:
+                closed.extend(close_stuck_live_matches(_jornada_cierre))
+            except Exception as exc:
+                log_line(f"auto_ft_error={exc}")
+        return closed
+
     q15_catchup = bool(q15 and window.get("jornada") and window.get("reason") == "ventana_jornada" and enabled)
     if not force and not enabled and not q15_catchup:
         log_line(f"skip jornada={window.get('jornada')} reason={window.get('reason')}")
-        try:
-            auto_closed = close_stuck_live_matches(target_jornada)
-        except Exception as exc:
-            log_line(f"auto_ft_error={exc}")
+        auto_closed = _close_stuck_everywhere()
         stuck_live = detect_stuck_live_matches(target_jornada)
         write_health(
             "idle",
@@ -666,6 +756,8 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
                 "stuck_live_matches": stuck_live,
                 "auto_closed_count": len(auto_closed),
                 "auto_closed_matches": auto_closed,
+                "catchup_jornadas": catchup_jornadas,
+                "catchup_q15_matches": catchup_matches,
             },
         )
         return 0, window
@@ -713,10 +805,7 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
 
     # Provider/Q15 refreshes can return a stale LIVE snapshot and reopen a row.
     # Apply the hard deadline afterwards so the same pass always ends closed.
-    try:
-        auto_closed = close_stuck_live_matches(target_jornada)
-    except Exception as exc:
-        log_line(f"auto_ft_error={exc}")
+    auto_closed = _close_stuck_everywhere()
 
     # Update Spanish league standings from all collected matches
     if updates > 0 or highlightly_status == "refresh_api":
@@ -751,6 +840,8 @@ def run_once(force=False, q15=True, jornada=None, highlightly_interval=60):
             "stuck_live_matches": stuck_live,
             "auto_closed_count": len(auto_closed),
             "auto_closed_matches": auto_closed,
+            "catchup_jornadas": catchup_jornadas,
+            "catchup_q15_matches": catchup_matches,
         },
     )
     return updates, window

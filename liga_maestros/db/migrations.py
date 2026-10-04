@@ -814,6 +814,14 @@ def run_startup_migrations():
             ensure_jornada_8(conn)
             ensure_jornada_9(conn)
             ensure_jornada_11(conn)
+            # Red de seguridad: aplica los resultados oficiales de TODAS las
+            # jornadas que tengan fichero (incluidas futuras J12+). Es
+            # idempotente (solo rellena filas vacias/en juego, nunca reescribe
+            # un FT), asi que un fin de semana sin colector se cura solo con
+            # el siguiente arranque/despliegue en vez de dejar NS eternos.
+            for _jornada_con_resultados in range(1, 43):
+                _import_jornada_resultados(conn, _jornada_con_resultados)
+            conn.commit()
             from ..services.season_rosters import sync_runtime_standings_files
             sync_runtime_standings_files()
             ensure_clasificacion_zero(conn)
