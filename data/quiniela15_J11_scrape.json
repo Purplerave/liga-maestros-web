@@ -8,7 +8,7 @@
     {"num": 1, "local": "Albacete", "visitante": "Eibar", "fecha": "2026-10-03", "hora": "14:00", "division": "segunda"},
     {"num": 2, "local": "Almería", "visitante": "Burgos", "fecha": "2026-10-03", "hora": "16:15", "division": "segunda"},
     {"num": 3, "local": "Cádiz", "visitante": "Leganés", "fecha": "2026-10-03", "hora": "18:30", "division": "segunda"},
-    {"num": 4, "local": "Sabadell", "visitante": "FC Andorra", "fecha": "2026-10-03", "hora": "18:30", "division": "segunda"},
+    {"num": 4, "local": "Sabadell", "visitante": "FC Andorra", "fecha": "2026-10-04", "hora": "21:00", "division": "segunda", "nota": "Aplazado del sabado por alerta roja; se juega domingo 21:00"},
     {"num": 5, "local": "R. Sociedad B", "visitante": "Granada", "fecha": "2026-10-04", "hora": "14:00", "division": "segunda"},
     {"num": 6, "local": "Sporting", "visitante": "Celta Fortuna", "fecha": "2026-10-04", "hora": "16:15", "division": "segunda"},
     {"num": 7, "local": "Castellón", "visitante": "Ceuta", "fecha": "2026-10-04", "hora": "18:30", "division": "segunda"},
