@@ -87,3 +87,24 @@ def seed_data_dir(tmp_path, monkeypatch):
 
     monkeypatch.setattr(config, "SEED_DATA_DIR", str(isolated))
     return isolated
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limit_state():
+    """Limpia el estado global del rate-limiter entre tests.
+
+    `_RATE_LIMIT_STORE` (middleware.security) es estado de módulo vivo: en una
+    suite completa todos los tests comparten el contador de 127.0.0.1 y una
+    corrida rápida supera las 120 peticiones/60s, así que los tests tardíos de
+    `test_security_hardening` recibían 429 en vez del 403 esperado. El fallo
+    era intermitente (corridas lentas lo enmascaraban). Se limpia antes y
+    después de cada test para que la suite sea determinista.
+    """
+    from liga_maestros.middleware import rate_limit as _rate_limit
+    from liga_maestros.middleware import security as _security
+
+    _security._RATE_LIMIT_STORE.clear()
+    _rate_limit._rate_limit_hits.clear()
+    yield
+    _security._RATE_LIMIT_STORE.clear()
+    _rate_limit._rate_limit_hits.clear()
