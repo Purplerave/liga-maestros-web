@@ -40,9 +40,8 @@ jobs:
       - name: Format check with ruff
         run: ruff format --check .
 
-      - name: Type check with mypy (informativo)
-        run: |
-          mypy liga_maestros || echo "::warning::mypy found type issues — see logs (will be blocking after 2026-10-01)"
+      - name: Type check with mypy (blocking)
+        run: mypy liga_maestros
 
       - name: Dependency security audit
         run: pip-audit -r requirements.lock --progress-spinner off
