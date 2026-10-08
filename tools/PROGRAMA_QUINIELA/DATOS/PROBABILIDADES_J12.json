@@ -1,0 +1,128 @@
+{
+  "1": {
+    "num": 1,
+    "probabilidades": {
+      "1": 23,
+      "X": 37,
+      "2": 40
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "2": {
+    "num": 2,
+    "probabilidades": {
+      "1": 14,
+      "X": 16,
+      "2": 70
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "3": {
+    "num": 3,
+    "probabilidades": {
+      "1": 81,
+      "X": 9,
+      "2": 10
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "4": {
+    "num": 4,
+    "probabilidades": {
+      "1": 27,
+      "X": 38,
+      "2": 35
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "5": {
+    "num": 5,
+    "probabilidades": {
+      "1": 61,
+      "X": 24,
+      "2": 15
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "6": {
+    "num": 6,
+    "probabilidades": {
+      "1": 76,
+      "X": 14,
+      "2": 10
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "7": {
+    "num": 7,
+    "probabilidades": {
+      "1": 40,
+      "X": 33,
+      "2": 28
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "8": {
+    "num": 8,
+    "probabilidades": {
+      "1": 21,
+      "X": 29,
+      "2": 50
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "9": {
+    "num": 9,
+    "probabilidades": {
+      "1": 37,
+      "X": 39,
+      "2": 24
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "10": {
+    "num": 10,
+    "probabilidades": {
+      "1": 16,
+      "X": 16,
+      "2": 68
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "11": {
+    "num": 11,
+    "probabilidades": {
+      "1": 74,
+      "X": 16,
+      "2": 11
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "12": {
+    "num": 12,
+    "probabilidades": {
+      "1": 63,
+      "X": 24,
+      "2": 13
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "13": {
+    "num": 13,
+    "probabilidades": {
+      "1": 60,
+      "X": 25,
+      "2": 15
+    },
+    "fuente": "quiniela15_q15"
+  },
+  "14": {
+    "num": 14,
+    "probabilidades": {
+      "1": 24,
+      "X": 35,
+      "2": 40
+    },
+    "fuente": "quiniela15_q15"
+  }
+}
