@@ -1,0 +1,12 @@
+{
+  "jornada": 12,
+  "temporada": "2026-2027",
+  "generado_en": "2026-10-09T15:13:26+02:00",
+  "version_config": "motor_maestro_hibrido_v2_calibrado_vector_pleno_dc",
+  "nota": "Boleto optimizado del Programa J12 con exactamente 3 dobles: casillas 4 (Elche-Celta), 8 (Levante-Sevilla) y 9 (Eldense-Cordoba). Coste: 8 columnas. Pleno al 15: Real Madrid-Villarreal M-1 (marcador top 1-1).",
+  "signos": ["1", "2", "1", "1X", "1", "1", "1", "1X", "1X", "2", "1", "1", "1", "1", "M-1"],
+  "dobles": [4, 8, 9],
+  "n_dobles": 3,
+  "n_columnas": 8,
+  "coste_euros": 6.0
+}

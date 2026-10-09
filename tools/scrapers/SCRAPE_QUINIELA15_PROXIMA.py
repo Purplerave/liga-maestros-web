@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = ROOT.parent
+# data/ vive en la raiz del repo: ahi es donde liga_maestros.db y
+# load_scrape_matches() buscan horarios_JN.json y quiniela15_JN_scrape.json.
+REPO_ROOT = PROJECT_ROOT.parent
 PROGRAM_DIR = PROJECT_ROOT / "PROGRAMA_QUINIELA"
 URL = "https://www.quiniela15.com/pronostico-quiniela"
 
@@ -243,7 +246,7 @@ def scrape_quiz(url=URL):
 
 def write_outputs(payload, write_program=True):
     jornada = payload["jornada"]
-    data_dir = ROOT / "data"
+    data_dir = REPO_ROOT / "data"
     data_dir.mkdir(exist_ok=True)
     (data_dir / f"quiniela15_J{jornada}_scrape.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2),

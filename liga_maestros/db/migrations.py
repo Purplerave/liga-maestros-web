@@ -663,6 +663,15 @@ def ensure_jornada_11(conn):
     return updated + imported
 
 
+def ensure_jornada_12(conn):
+    """Seed Jornada 12 fixture and the supplied prediction tickets."""
+    updated = ensure_jornada_completa(conn, 12)
+    imported = _import_compact_prediction_tickets(conn, 12)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -814,6 +823,7 @@ def run_startup_migrations():
             ensure_jornada_8(conn)
             ensure_jornada_9(conn)
             ensure_jornada_11(conn)
+            ensure_jornada_12(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
             # idempotente (solo rellena filas vacias/en juego, nunca reescribe

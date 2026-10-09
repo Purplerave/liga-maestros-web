@@ -224,5 +224,14 @@
     "puntos_totales": 0,
     "activo": true,
     "descripcion": "Nuevo participante de La Pena en Jornada 8."
+  },
+  {
+    "id": "tecnotron",
+    "nombre": "Tecnotron",
+    "tipo": "pena",
+    "grupo": "pena",
+    "puntos_totales": 0,
+    "activo": true,
+    "descripcion": "Participante de La Pena."
   }
 ]

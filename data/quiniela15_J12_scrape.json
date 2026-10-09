@@ -511,5 +511,212 @@
       "hora": "21:00",
       "detalle": " sábado 10 oct 21:00h Estado de Forma (Últimos 6) Real Madrid Clasificación: #4 V D V V V D Villarreal Clasificación: #9 D D D D V V Análisis Real Madrid - Villarreal"
     }
+  ],
+  "horarios": {
+    "1": {
+      "fecha": "2026-10-10",
+      "hora": "14:00"
+    },
+    "2": {
+      "fecha": "2026-10-10",
+      "hora": "16:15"
+    },
+    "3": {
+      "fecha": "2026-10-10",
+      "hora": "18:30"
+    },
+    "4": {
+      "fecha": "2026-10-11",
+      "hora": "14:00"
+    },
+    "5": {
+      "fecha": "2026-10-11",
+      "hora": "16:15"
+    },
+    "6": {
+      "fecha": "2026-10-11",
+      "hora": "18:30"
+    },
+    "7": {
+      "fecha": "2026-10-11",
+      "hora": "21:00"
+    },
+    "8": {
+      "fecha": "2026-10-12",
+      "hora": "21:00"
+    },
+    "9": {
+      "fecha": "2026-10-10",
+      "hora": "18:30"
+    },
+    "10": {
+      "fecha": "2026-10-11",
+      "hora": "14:00"
+    },
+    "11": {
+      "fecha": "2026-10-11",
+      "hora": "16:15"
+    },
+    "12": {
+      "fecha": "2026-10-11",
+      "hora": "18:30"
+    },
+    "13": {
+      "fecha": "2026-10-12",
+      "hora": "16:15"
+    },
+    "14": {
+      "fecha": "2026-10-12",
+      "hora": "18:30"
+    },
+    "15": {
+      "fecha": "2026-10-10",
+      "hora": "21:00"
+    }
+  },
+  "probabilidades": {
+    "1": {
+      "num": 1,
+      "probabilidades": {
+        "1": 24,
+        "X": 37,
+        "2": 40
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "2": {
+      "num": 2,
+      "probabilidades": {
+        "1": 13,
+        "X": 17,
+        "2": 70
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "3": {
+      "num": 3,
+      "probabilidades": {
+        "1": 81,
+        "X": 9,
+        "2": 10
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "4": {
+      "num": 4,
+      "probabilidades": {
+        "1": 27,
+        "X": 39,
+        "2": 34
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "5": {
+      "num": 5,
+      "probabilidades": {
+        "1": 61,
+        "X": 25,
+        "2": 14
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "6": {
+      "num": 6,
+      "probabilidades": {
+        "1": 76,
+        "X": 14,
+        "2": 10
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "7": {
+      "num": 7,
+      "probabilidades": {
+        "1": 39,
+        "X": 33,
+        "2": 28
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "8": {
+      "num": 8,
+      "probabilidades": {
+        "1": 20,
+        "X": 30,
+        "2": 50
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "9": {
+      "num": 9,
+      "probabilidades": {
+        "1": 37,
+        "X": 39,
+        "2": 24
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "10": {
+      "num": 10,
+      "probabilidades": {
+        "1": 16,
+        "X": 16,
+        "2": 68
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "11": {
+      "num": 11,
+      "probabilidades": {
+        "1": 73,
+        "X": 16,
+        "2": 10
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "12": {
+      "num": 12,
+      "probabilidades": {
+        "1": 64,
+        "X": 24,
+        "2": 12
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "13": {
+      "num": 13,
+      "probabilidades": {
+        "1": 59,
+        "X": 25,
+        "2": 15
+      },
+      "fuente": "quiniela15_q15"
+    },
+    "14": {
+      "num": 14,
+      "probabilidades": {
+        "1": 24,
+        "X": 34,
+        "2": 42
+      },
+      "fuente": "quiniela15_q15"
+    }
+  },
+  "q15_base_signs": [
+    "2",
+    "2",
+    "1",
+    "X",
+    "1",
+    "1",
+    "1",
+    "2",
+    "X",
+    "2",
+    "1",
+    "1",
+    "1",
+    "2",
+    "M-1"
   ]
 }

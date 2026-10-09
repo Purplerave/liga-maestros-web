@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-02",
+  "updated": "2026-10-09",
   "principios": [
     "Programa, Maestros, La Pena y usuario son capas distintas.",
     "La Pena no es un usuario unico: es un grupo de participantes y aliases.",
@@ -60,7 +60,8 @@
     "manus",
     "ernie_j9",
     "pavo",
-    "gema"
+    "gema",
+    "tecnotron"
   ],
   "ids_obsoletos": [
     "hermes",
@@ -106,6 +107,7 @@
     "manus": "Manus",
     "ernie_j9": "Ernie",
     "pavo": "Pavo",
-    "gema": "GEMA"
+    "gema": "GEMA",
+    "tecnotron": "Tecnotron"
   }
 }
