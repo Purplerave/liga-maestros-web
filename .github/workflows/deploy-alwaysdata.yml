@@ -206,10 +206,13 @@ jobs:
           PYTHONPATH="$HOME_DIR/current" "$RELEASE/venv/bin/python" tools/ops/INICIALIZAR_PRODUCCION.py
 
           # Importar quiniela(s) del Programa — BLOCKING (audit fix #3: no more || true)
+          # Solo cuentan los ficheros canonicos quiniela_programa_J<N>.json;
+          # los auxiliares (p. ej. *_J12_q15_base.json) no deben marcar jornada.
           MAXJ=""
-          for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J*.json; do
+          for f in tools/PROGRAMA_QUINIELA/SALIDAS/quiniela_programa_J[0-9]*.json; do
             [ -e "$f" ] || continue
-            J="$(basename "$f" | tr -dc '0-9')"
+            J="$(basename "$f" | sed -nE 's/^quiniela_programa_J([0-9]+)\.json$/\1/p')"
+            [ -n "$J" ] || continue
             if [ -z "$MAXJ" ] || [ "$J" -gt "$MAXJ" ]; then MAXJ="$J"; fi
           done
           if [ -n "$MAXJ" ]; then
