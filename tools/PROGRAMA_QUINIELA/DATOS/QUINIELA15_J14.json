@@ -1,0 +1,113 @@
+{
+  "jornada": 14,
+  "source_url": "https://api.eduardolosilla.es/analisisSigno?num_jornada=14&num_temporada=2027&csv=true",
+  "scraped_at": "2026-10-12T13:06:02",
+  "cierre": "sábado 17 de octubre a las 14:00",
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Espanyol",
+      "visitante": "Atlético",
+      "fecha": "2026-10-17",
+      "hora": "14:00"
+    },
+    {
+      "num": 2,
+      "local": "Villarreal",
+      "visitante": "Elche",
+      "fecha": "2026-10-17",
+      "hora": "16:15"
+    },
+    {
+      "num": 3,
+      "local": "Betis",
+      "visitante": "Barcelona",
+      "fecha": "2026-10-17",
+      "hora": "18:30"
+    },
+    {
+      "num": 4,
+      "local": "Valencia",
+      "visitante": "Athletic",
+      "fecha": "2026-10-17",
+      "hora": "21:00"
+    },
+    {
+      "num": 5,
+      "local": "Celta",
+      "visitante": "Alavés",
+      "fecha": "2026-10-18",
+      "hora": "16:15"
+    },
+    {
+      "num": 6,
+      "local": "Málaga",
+      "visitante": "R. Sociedad",
+      "fecha": "2026-10-18",
+      "hora": "18:30"
+    },
+    {
+      "num": 7,
+      "local": "R. Madrid",
+      "visitante": "Sevilla",
+      "fecha": "2026-10-18",
+      "hora": "21:00"
+    },
+    {
+      "num": 8,
+      "local": "Eibar",
+      "visitante": "Mallorca",
+      "fecha": "2026-10-17",
+      "hora": "16:15"
+    },
+    {
+      "num": 9,
+      "local": "Las Palmas",
+      "visitante": "Castellón",
+      "fecha": "2026-10-17",
+      "hora": "21:00"
+    },
+    {
+      "num": 10,
+      "local": "Burgos",
+      "visitante": "Sabadell",
+      "fecha": "2026-10-18",
+      "hora": "21:00"
+    },
+    {
+      "num": 11,
+      "local": "Athletic (F)",
+      "visitante": "Valencia (F)",
+      "fecha": "2026-10-17",
+      "hora": "14:30"
+    },
+    {
+      "num": 12,
+      "local": "R. Madrid (F)",
+      "visitante": "Espanyol (F)",
+      "fecha": "2026-10-17",
+      "hora": "20:30"
+    },
+    {
+      "num": 13,
+      "local": "Eibar (F)",
+      "visitante": "Deportivo (F)",
+      "fecha": "2026-10-18",
+      "hora": "16:00"
+    },
+    {
+      "num": 14,
+      "local": "Atlético (F)",
+      "visitante": "Madrid CFF (F)",
+      "fecha": "2026-10-18",
+      "hora": "18:00"
+    },
+    {
+      "num": 15,
+      "local": "Getafe",
+      "visitante": "Rayo",
+      "fecha": "2026-10-19",
+      "hora": "21:00"
+    }
+  ]
+}
