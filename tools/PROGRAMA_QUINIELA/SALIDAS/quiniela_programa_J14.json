@@ -1,26 +1,32 @@
 {
   "jornada": 14,
-  "temporada": "2026/27",
-  "generado_en": "2026-10-12T13:06:02",
-  "version_config": "placeholder",
-  "nota": "Boleto pendiente de rellenar con el programa y las predicciones de las IAs. J13 saltada por decisión de Pablo (12/10).",
+  "temporada": "2026-2027",
+  "generado_en": "2026-10-16T08:45:50+02:00",
+  "version_config": "run_semana_completa_dc_decay_ligam_ligaf_pleno_optimizador_tres_dobles",
+  "nota": "Boleto optimizado del Programa J14 con exactamente 3 dobles: casillas 4 (Valencia-Athletic 12), 8 (Eibar-Mallorca 1X) y 10 (Burgos-Sabadell 1X). Coste: 8 columnas. Pleno al 15: Getafe-Rayo 0-0 (marcador top, p=0,209; top3: 0-0 0,209, 1-0 0,180, 0-1 0,147). Generado con RUN_SEMANA_COMPLETA.py (motor ligam DC-decay + ligaf DC-decay + pleno Poisson + OPTIMIZADOR_BOLETO tres dobles) el 2026-10-16 sobre los partidos de QUINIELA15_J14.json (scrapeado 2026-10-12). Bote desconocido: se uso el valor por defecto del pipeline (1.500.000 EUR). Correccion aplicada en local y SIN commitear al repo del motor: el alias del historico 'Vallecano' no mapeaba a 'rayo', asi que el Rayo salia NEUTRO y el pleno salia 1-0; con el alias 'vallecano'->'rayo' el Rayo entra ajustado y el pleno pasa a 0-0. Adaptacion documentada: el optimizador situaba el tercer doble en el pleno (0-0/1-0); el formato clasico no admite doble en el pleno (un solo marcador), asi que el tercer doble es el siguiente por ratio p2/p1 entre las casillas 1-14 (casilla 10, ratio 0,740). Prior NEUTRO documentado del motor en: Sabadell (ascendido a Segunda 2026-27, sin historico), Espanyol (F) y Deportivo (F).",
   "signos": [
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-",
-    "-"
+    "2",
+    "1",
+    "2",
+    "12",
+    "1",
+    "1",
+    "1",
+    "1X",
+    "1",
+    "1X",
+    "1",
+    "1",
+    "2",
+    "1",
+    "0-0"
   ],
-  "dobles": [],
-  "n_dobles": 0
+  "dobles": [
+    4,
+    8,
+    10
+  ],
+  "n_dobles": 3,
+  "n_columnas": 8,
+  "coste_euros": 6.0
 }
