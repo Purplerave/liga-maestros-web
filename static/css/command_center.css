@@ -814,6 +814,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
         padding-inline: 12px;
     }
 
+    /* En pantallas muy estrechas la etiqueta no cabe junto a la casilla:
+       se oculta y queda solo el valor dorado, que ya explica la columna. */
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-pick::before {
+        display: none;
+    }
+
     body.newspaper-ui.quiniela-focus .topbar-actions .primary-btn {
         min-width: 42px;
         padding-inline: 9px;
@@ -1058,6 +1064,16 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
         font-size: .6rem;
         font-weight: 800;
         letter-spacing: .12em;
+        /* La etiqueta puede encoger con puntos suspensivos: sin esto, en
+           pantallas estrechas se montaba sobre la casilla dorada y la
+           fila desbordaba por la derecha. */
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-r-pick-val {
+        flex-shrink: 0;
     }
 }
 
@@ -1072,27 +1088,62 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-jornada {
     }
 }
 
-/* Última capa de presentación: móvil muestra primero el boleto del usuario y
-   deja el análisis de modelos/Peña dentro de un desplegable por partido. */
+/* Última capa de presentación (oct 2026): en móvil los maestros van
+   visibles primero en la tarjeta (tira compacta futurista), luego el
+   consenso de La Peña y TU quiniela la última. El desplegable móvil ya
+   no hace falta: su contenido está visible. */
 .ticket-mobile-insights-cell {
     display: none;
 }
 @media (max-width: 899px) {
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-user-cell) {
-        display: none;
-    }
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-user-cell {
-        order: 3;
-        flex: 1 1 100%;
-        width: 100%;
-        height: auto;
-    }
-    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-mobile-insights-cell {
         display: block;
+    }
+    /* Tira de maestros: compacta, con envoltura, orden 3 */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) {
+        order: 3;
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+    /* Consenso de La Peña: tira fina a lo ancho, orden 4 */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pena-cell {
         order: 4;
         flex: 1 1 100%;
         width: 100%;
+    }
+    /* TU quiniela: la última, orden 5, a lo ancho como antes */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-user-cell {
+        order: 5;
+        flex: 1 1 100%;
+        width: 100%;
         height: auto;
+    }
+    /* Sin duplicados: el desplegable mostraba los mismos chips */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-mobile-insights-cell {
+        display: none;
+    }
+    /* Chips de maestros, modo futurista: cristal oscuro con neón cian,
+       etiqueta micro en mayúsculas y signo en negrita. Solo lectura. */
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) .tension-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 6px 9px;
+        border: 1px solid rgba(56, 189, 248, 0.45);
+        border-radius: 9px;
+        background: linear-gradient(180deg, rgba(56, 189, 248, 0.14), rgba(10, 17, 30, 0.85));
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.18), inset 0 0 8px rgba(56, 189, 248, 0.08);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) .tension-chip > span {
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7dd3fc;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) .tension-chip .ia-signo {
+        font-size: 0.95rem;
+        font-weight: 900;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-mobile-insight-item:not(.ticket-pena-cell) .tension-chip {
         display: flex;
