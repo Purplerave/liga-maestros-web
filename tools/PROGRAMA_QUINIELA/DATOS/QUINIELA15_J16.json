@@ -1,0 +1,114 @@
+{
+  "jornada": 16,
+  "source_url": "https://api.eduardolosilla.es/analisisSigno?num_jornada=16&num_temporada=2027&csv=true",
+  "scraped_at": "2026-10-23T23:45:18",
+  "cierre": "sábado 24 de octubre a las 14:00",
+  "nota": "Partidos y horarios verificados en dos fuentes: API de Eduardo Losilla y quinielaposible.com (2026-10-23).",
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Rayo",
+      "visitante": "Elche",
+      "fecha": "2026-10-24",
+      "hora": "14:00"
+    },
+    {
+      "num": 2,
+      "local": "Valencia",
+      "visitante": "Villarreal",
+      "fecha": "2026-10-24",
+      "hora": "18:30"
+    },
+    {
+      "num": 3,
+      "local": "Atlético",
+      "visitante": "Deportivo",
+      "fecha": "2026-10-24",
+      "hora": "21:00"
+    },
+    {
+      "num": 4,
+      "local": "Athletic",
+      "visitante": "Getafe",
+      "fecha": "2026-10-25",
+      "hora": "14:00"
+    },
+    {
+      "num": 5,
+      "local": "Celta",
+      "visitante": "Betis",
+      "fecha": "2026-10-25",
+      "hora": "15:15"
+    },
+    {
+      "num": 6,
+      "local": "R. Sociedad",
+      "visitante": "Levante",
+      "fecha": "2026-10-25",
+      "hora": "18:30"
+    },
+    {
+      "num": 7,
+      "local": "Sevilla",
+      "visitante": "Osasuna",
+      "fecha": "2026-10-26",
+      "hora": "20:00"
+    },
+    {
+      "num": 8,
+      "local": "Leganés",
+      "visitante": "Mallorca",
+      "fecha": "2026-10-24",
+      "hora": "14:15"
+    },
+    {
+      "num": 9,
+      "local": "Almería",
+      "visitante": "R. Oviedo",
+      "fecha": "2026-10-24",
+      "hora": "21:00"
+    },
+    {
+      "num": 10,
+      "local": "Sabadell",
+      "visitante": "Tenerife",
+      "fecha": "2026-10-25",
+      "hora": "13:00"
+    },
+    {
+      "num": 11,
+      "local": "Logroño (F)",
+      "visitante": "Badalona (F)",
+      "fecha": "2026-10-24",
+      "hora": "16:15"
+    },
+    {
+      "num": 12,
+      "local": "Deportivo (F)",
+      "visitante": "Alavés (F)",
+      "fecha": "2026-10-25",
+      "hora": "11:45"
+    },
+    {
+      "num": 13,
+      "local": "Eibar (F)",
+      "visitante": "Madrid CFF (F)",
+      "fecha": "2026-10-25",
+      "hora": "16:00"
+    },
+    {
+      "num": 14,
+      "local": "R. Madrid (F)",
+      "visitante": "Tenerife (F)",
+      "fecha": "2026-10-24",
+      "hora": "14:00"
+    },
+    {
+      "num": 15,
+      "local": "Barcelona",
+      "visitante": "R. Madrid",
+      "fecha": "2026-10-25",
+      "hora": "21:00"
+    }
+  ]
+}
