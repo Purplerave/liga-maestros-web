@@ -672,6 +672,22 @@ def ensure_jornada_12(conn):
     return updated + imported
 
 
+def ensure_jornada_16(conn):
+    """Importa solo los boletos editoriales de la Jornada 16.
+
+    Los partidos y resultados de la J16 ya viven en la base de datos de
+    producción (la jornada está en juego), así que aquí no se tocan ni
+    fixtures ni resultados: solo se sincronizan los boletos de
+    data/predicciones_J16.json (maestros + La Peña) a la tabla
+    predicciones. Sin este paso, la web mostraba solo al Programa y
+    «—» en el resto de columnas.
+    """
+    imported = _import_compact_prediction_tickets(conn, 16)
+    if imported:
+        conn.commit()
+    return imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -824,6 +840,7 @@ def run_startup_migrations():
             ensure_jornada_9(conn)
             ensure_jornada_11(conn)
             ensure_jornada_12(conn)
+            ensure_jornada_16(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
             # idempotente (solo rellena filas vacias/en juego, nunca reescribe
