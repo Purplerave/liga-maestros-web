@@ -1,0 +1,32 @@
+{
+  "jornada": 16,
+  "temporada": "2026-2027",
+  "generado_en": "2026-10-23T21:51:17+00:00",
+  "version_config": "run_semana_completa_dc_decay_ligam_ligaf_pleno_optimizador_tres_dobles",
+  "nota": "Boleto optimizado del Programa J16 con exactamente 3 dobles: casillas 6 (R. Sociedad-Levante 12), 7 (Sevilla-Osasuna 12) y 8 (Leganés-Mallorca 12). Coste: 8 columnas. Pleno al 15: Barcelona-R. Madrid M-1 (marcador top, p=0,111; top3: M-1 0,111, 1-1 0,097, 2-1 0,095). Generado con RUN_SEMANA_COMPLETA.py (motor ligam DC-decay + ligaf DC-decay + pleno Poisson + OPTIMIZADOR_BOLETO tres dobles) el 2026-10-23 sobre los partidos de QUINIELA15_J16.json (verificados 2026-10-23 en api.eduardolosilla.es y quinielaposible.com). Bote desconocido: se uso el valor por defecto del pipeline (1.500.000 EUR). Adaptacion documentada (misma que en J14): el optimizador situaba el tercer doble en el pleno (M-1/1-1); el formato clasico no admite doble en el pleno (un solo marcador), asi que el tercer doble es el siguiente por ratio p2/p1 entre las casillas 1-14 (casilla 8, Leganés-Mallorca, ratio 0,778). Prior NEUTRO documentado del motor en: Sabadell (casilla 10, sin historial en el historico ligam), Logroño (F) (casilla 11, sin historial en el backbone ligaf), Deportivo (F) y Alavés (F) (casilla 12, ambos sin historial).",
+  "signos": [
+    "1",
+    "2",
+    "1",
+    "1",
+    "1",
+    "12",
+    "12",
+    "12",
+    "1",
+    "1",
+    "1",
+    "1",
+    "2",
+    "1",
+    "M-1"
+  ],
+  "dobles": [
+    6,
+    7,
+    8
+  ],
+  "n_dobles": 3,
+  "n_columnas": 8,
+  "coste_euros": 6.0
+}
