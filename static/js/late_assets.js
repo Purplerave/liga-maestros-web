@@ -93,6 +93,9 @@
     function applyWebfonts() {
         const link = document.getElementById("lm-webfonts");
         if (link && link.rel === "preload") link.rel = "stylesheet";
+
+        const futureStyles = document.getElementById("future-styles");
+        if (futureStyles && futureStyles.rel === "preload") futureStyles.rel = "stylesheet";
     }
 
     async function loadLateAssets() {
