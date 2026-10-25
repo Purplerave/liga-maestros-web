@@ -51,8 +51,8 @@
     {# La precarga y la hoja de estilo deben compartir version: con `v` distinto
        el navegador descargaba tokens.css dos veces. #}
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
-    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, onboarding;</style>
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
+    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding;</style>
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/shell.css', v=assets_v ~ '-newspaper-split-1') }}">
@@ -78,6 +78,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_enhancements.css', v=assets_v ~ '-visual-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_v2.css', v=assets_v ~ '-mobile-v2-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/command_center.css', v=assets_v ~ '-command-center-mobile-8') }}">
+    <link rel="preload" as="style" id="future-styles" href="{{ url_for('main.static_files', filename='css/themes/future.css', v=assets_v ~ '-future-1') }}">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">

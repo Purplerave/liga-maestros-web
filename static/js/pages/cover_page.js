@@ -1,8 +1,8 @@
 /* Portada Liga de Maestros v19 — QUINIELA EN FORMATO TABLA
    Direccion: boleto de quiniela digital con paneles alrededor.
-   - Centro: tabla de 15 filas (1 por partido) con una columna por Maestro
-     (logo arriba, signo 1/X/2 normal, sin pastillas de color) y una
-     columna PEÑA con el signo de consenso.
+   - Centro: tabla de 14 partidos con una columna por Maestro (logo arriba,
+     signo 1/X/2 normal, sin pastillas de color), más panel separado para el
+     pleno con marcadores exactos de goles.
    - Ticker de goles arriba (banda fina animada) con directo y finalizados.
    - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO,
      RESULTADOS/PROXIMOS, PORRA +2, ULTIMA HORA.
@@ -495,6 +495,29 @@ function _coverRealRef(match, isPleno) {
     const score = String(match?.marcador_base || match?.marcador || "").trim();
     return score || String(match?.signo_actual || "").toUpperCase();
 }
+function _exactGoalScore(value) {
+    const match = String(value || "").trim().match(/^(\d{1,2})\s*[-–]\s*(\d{1,2})$/);
+    return match ? `${match[1]}-${match[2]}` : "—";
+}
+function _coverPlenoPanel(match, predictions, masters, consensus) {
+    if (!match) return "";
+    const home = typeof getShortName === "function" ? getShortName(match.local) : match.local;
+    const away = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
+    const score = _exactGoalScore(match.goles_local != null && match.goles_visitante != null
+        ? `${match.goles_local}-${match.goles_visitante}`
+        : (match.marcador_base || match.marcador || match.score));
+    const predictionsHtml = masters.map(col => {
+        const signs = coverPredictionSigns(predictions[col.id]);
+        const value = _exactGoalScore(signs[14]);
+        return `<div class="cx-pleno-prediction ${_mtone(col)}"><span>${escapeHtml(col.label)}</span><b>${escapeHtml(value)}</b></div>`;
+    }).join("");
+    const penaValue = _exactGoalScore(consensus?.topScore?.[0]);
+    const userValue = _exactGoalScore(_upick(14));
+    return `<section class="cx-pleno-panel" data-page-action="TICKET" data-match-id="${escapeHtml(match.id)}" aria-label="Pleno al quince, marcador de goles">
+        <header class="cx-pleno-head"><span>PLENO AL QUINCE</span><b>${escapeHtml(_fitName(home, 18))} <i>–</i> ${escapeHtml(_fitName(away, 18))}</b><strong>${escapeHtml(score)}</strong></header>
+        <div class="cx-pleno-predictions">${predictionsHtml}<div class="cx-pleno-prediction is-pena"><span>PEÑA</span><b>${escapeHtml(penaValue)}</b></div><div class="cx-pleno-prediction is-user"><span>TÚ</span><b>${escapeHtml(userValue)}</b></div></div>
+    </section>`;
+}
 function _diffParts(deadline) {
     if (!deadline) return { d: 0, h: 0, m: 0, s: 0, ms: 0, urgent: false };
     const target = _coverDeadlineMs(deadline);
@@ -633,13 +656,22 @@ function renderNewspaperCoverPageV3() {
     const cdt = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
     const ctaHref = closed ? (saved ? "/app" : "/directo") : "/app";
 
+    const jornadaValue = state.data?.jornada;
+    const jornadaKpi = jornadaValue != null && String(jornadaValue).trim() !== ""
+        ? `<div class="cx-kpi"><span class="cx-kpi-eyebrow">JORNADA</span><div class="cx-kpi-value" id="cx-jornada">${escapeHtml(String(jornadaValue))}</div></div>` : "";
+    const decidedCount = finishedMatches.length;
+    const jornadaLeader = sortedByJornada.find(row => row.jornada > 0);
+    const leaderKpi = jornadaLeader
+        ? `<div class="cx-kpi"><span class="cx-kpi-eyebrow">LÍDER · JORNADA</span><div class="cx-kpi-value" id="cx-leader">${escapeHtml(_fitName(jornadaLeader.name, 12))} · ${jornadaLeader.jornada}</div></div>` : "";
+    const deadlineRaw = state.data?.edit_deadline || state.data?.kickoff_at;
+    const hasDeadline = Boolean(deadlineRaw && _coverDeadlineMs(deadlineRaw));
     const headerHtml = `
         <header class="cx-top">
             <div class="cx-top-left">
                 <img class="cx-top-crest" src="${crestSrc}" alt="" width="36" height="36" decoding="async" fetchpriority="high">
                 <div class="cx-top-id">
                     <span class="cx-top-eyebrow">J${escapeHtml(String(jornada))} · TEMPORADA 26/27</span>
-                    <h1 class="cx-top-title">LA PEÑA <em>vs</em> MÁQUINAS</h1>
+                    <h1 class="cx-top-title">¿PUEDES GANAR A LA IA?</h1>
                 </div>
             </div>
             <div class="cx-top-right">
@@ -647,29 +679,20 @@ function renderNewspaperCoverPageV3() {
                     <i class="cx-state-dot"></i>
                     <span class="cx-state-label">${escapeHtml(duelLabel)}</span>
                 </span>
+                ${jornadaKpi}
                 <div class="cx-kpi">
+                    <span class="cx-kpi-eyebrow">PARTIDOS DECIDIDOS</span>
+                    <div class="cx-kpi-value" id="cx-decided">${decidedCount}</div>
+                </div>
+                ${leaderKpi}
+                ${hasDeadline ? `<div class="cx-kpi">
                     <span class="cx-kpi-eyebrow">${closed ? "ESTADO" : "CIERRE"}</span>
                     <div class="cx-kpi-value cx-kpi-mono" id="cx-cd">
                         ${closed
                             ? `<span class="cx-kpi-closed">CERRADA</span>`
                             : `<span class="cx-cd-block">${String(cdt.d).padStart(2,"0")}<i>d</i></span><span class="cx-cd-block">${String(cdt.h).padStart(2,"0")}<i>h</i></span><span class="cx-cd-block">${String(cdt.m).padStart(2,"0")}<i>m</i></span><span class="cx-cd-block">${String(cdt.s).padStart(2,"0")}<i>s</i></span>`}
                     </div>
-                </div>
-                <div class="cx-kpi">
-                    <span class="cx-kpi-eyebrow">PEÑA · IA</span>
-                    <div class="cx-kpi-value">
-                        <span class="cx-kpi-num is-pena">${humanAvg.toFixed(1).replace(/\.0$/, "")}</span>
-                        <span class="cx-kpi-vs">vs</span>
-                        <span class="cx-kpi-num is-ia">${aiAvg.toFixed(1).replace(/\.0$/, "")}</span>
-                    </div>
-                </div>
-                <div class="cx-kpi">
-                    <span class="cx-kpi-eyebrow">TU QUINIELA</span>
-                    <div class="cx-kpi-value">
-                        <span class="cx-kpi-big"><b id="cx-done">${userDone}</b><i>/${userTotal}</i></span>
-                        <span class="cx-kpi-bar"><i style="width:${((userDone/userTotal)*100).toFixed(1)}%"></i></span>
-                    </div>
-                </div>
+                </div>` : ""}
                 <a class="cx-cta-primary" href="${ctaHref}" data-page-action="TICKET">${escapeHtml(ctaLabel)} →</a>
             </div>
         </header>
@@ -742,9 +765,12 @@ function renderNewspaperCoverPageV3() {
     const masterHeads = visibleMasters.map(col =>
         `<th class="cx-r-ia ${_mtone(col)}" title="${escapeHtml(col.label || col.id)}">${_mlogoImg(col, 18)}<em>${escapeHtml(_mshort(col))}</em></th>`
     ).join("");
-    const boletoBody = matches.map((m, i) => buildRow(m, i)).join("");
+    const tableMatches = matches.slice(0, 14);
+    const plenoMatch = matches[14];
+    const boletoBody = tableMatches.map((m, i) => buildRow(m, i)).join("");
+    const plenoPanelHtml = _coverPlenoPanel(plenoMatch, predictions, visibleMasters, plenoConsenso);
     const totalCols = 7 + visibleMasters.length;
-    const boletoEmpty = matches.length === 0
+    const boletoEmpty = tableMatches.length === 0
         ? `<tr><td colspan="${totalCols}" class="cx-r-empty-grid">Los partidos se publicarán al cierre de la jornada anterior.</td></tr>`
         : "";
 
@@ -965,6 +991,7 @@ function renderNewspaperCoverPageV3() {
             </aside>
             <section class="cx-col cx-col-center">
                 ${boletoHtml}
+                ${plenoPanelHtml}
             </section>
             <aside class="cx-col cx-col-right" aria-label="Directo, porra, próximos y noticias">
                 ${livePanelHtml}
@@ -1031,7 +1058,8 @@ function patchCoverPage() {
         if (typeof isCoverPage === "function" && !isCoverPage()) return false;
         const cx = document.querySelector(".cx");
         if (!cx) return false;
-        const matches = (state.data.partidos || []).slice(0, 15);
+        const allMatches = (state.data.partidos || []).slice(0, 15);
+        const matches = allMatches.slice(0, 14);
         if (!matches.length) return false;
         const predictions = state.data.predicciones_actuales || {};
         const consenso = Array.isArray(state.data.consenso_pena) ? state.data.consenso_pena : [];
@@ -1039,10 +1067,10 @@ function patchCoverPage() {
         const masterCols = coverMasterColumns();
         const visibleMasters = _visibleMasters(masterCols);
         // 1) Ticker — reconstruir solo si cambio el contenido
-        const quinielaPairs = new Set(matches.map(_matchPairKey));
-        const liveMatches = [...matches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
+        const quinielaPairs = new Set(allMatches.map(_matchPairKey));
+        const liveMatches = [...allMatches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
         const liveCount = liveMatches.length;
-        const finishedMatches = matches.filter(m => _finished(m) && _hasScore(m));
+        const finishedMatches = allMatches.filter(m => _finished(m) && _hasScore(m));
         const comentarista = state.data.comentarista || {};
         const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
         const tickerTrack = cx.querySelector(".cx-ticker-track");
@@ -1085,34 +1113,33 @@ function patchCoverPage() {
                 tickerTrack.dataset.sig = newSig;
             }
         }
-        // 2) KPIs superiores — PEÑA vs IA, TU quiniela
-        const bando = coverBandoDetailed();
-        const humanAvg = bando.humanAvg || 0;
-        const aiAvg = bando.aiAvg || 0;
-        const penaEl = cx.querySelector(".cx-kpi-num.is-pena");
-        const iaEl = cx.querySelector(".cx-kpi-num.is-ia");
-        if (penaEl) {
-            const newVal = humanAvg.toFixed(1).replace(/\.0$/, "");
-            if (penaEl.textContent !== newVal) penaEl.textContent = newVal;
-        }
-        if (iaEl) {
-            const newVal = aiAvg.toFixed(1).replace(/\.0$/, "");
-            if (iaEl.textContent !== newVal) iaEl.textContent = newVal;
-        }
+        // 2) KPIs — actualizar solo contadores respaldados por el payload.
+        const decidedEl = cx.querySelector("#cx-decided");
+        const decidedCount = finishedMatches.length;
+        if (decidedEl && decidedEl.textContent !== String(decidedCount)) decidedEl.textContent = String(decidedCount);
+        const jornadaEl = cx.querySelector("#cx-jornada");
+        const jornadaValue = state.data.jornada;
+        if (jornadaEl && jornadaValue != null && jornadaEl.textContent !== String(jornadaValue)) jornadaEl.textContent = String(jornadaValue);
+        const rankingRows = coverRankingRows().sort((a, b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name, "es"));
+        const leader = rankingRows.find(row => row.jornada > 0);
+        const leaderEl = cx.querySelector("#cx-leader");
+        if (leaderEl && leader) leaderEl.textContent = `${_fitName(leader.name, 12)} · ${leader.jornada}`;
         const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
-        const doneEl = cx.querySelector("#cx-done");
         const statusEl = cx.querySelector(".cx-boleto-status b");
         const barEl = cx.querySelector(".cx-boleto-bar i");
-        const kpiBarEl = cx.querySelector(".cx-kpi-bar i");
-        if (doneEl && doneEl.textContent !== String(userDone)) doneEl.textContent = String(userDone);
         if (statusEl && statusEl.textContent !== String(userDone)) statusEl.textContent = String(userDone);
         if (barEl) {
             const w = `${((userDone/15)*100).toFixed(1)}%`;
             if (barEl.style.width !== w) barEl.style.width = w;
         }
-        if (kpiBarEl) {
-            const w = `${((userDone/15)*100).toFixed(1)}%`;
-            if (kpiBarEl.style.width !== w) kpiBarEl.style.width = w;
+        const plenoPanel = _coverPlenoPanel(allMatches[14], predictions, visibleMasters, plenoConsenso);
+        const plenoPanelEl = cx.querySelector(".cx-pleno-panel");
+        if (plenoPanelEl && allMatches[14]) {
+            if (plenoPanelEl.outerHTML !== plenoPanel) plenoPanelEl.outerHTML = plenoPanel;
+        } else if (!plenoPanelEl && allMatches[14]) {
+            cx.querySelector(".cx-col-center")?.insertAdjacentHTML("beforeend", plenoPanel);
+        } else if (plenoPanelEl && !allMatches[14]) {
+            plenoPanelEl.remove();
         }
         // 3) Boleto — parchear cada fila sin recrear la tabla
         const tbody = cx.querySelector(".cx-boleto-table tbody");
@@ -1137,7 +1164,7 @@ function patchCoverPage() {
                 const isLive = _live(match);
                 const isClosed = _closed(match);
                 const realSign = String(match.signo_actual || "").toUpperCase();
-                const isPlenoRow = idx === 14;
+                const isPlenoRow = false;
                 const realRef = _coverRealRef(match, isPlenoRow);
                 const pick = _upick(idx);
                 // clases de fila
