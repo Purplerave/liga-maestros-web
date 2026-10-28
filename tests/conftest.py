@@ -87,3 +87,27 @@ def seed_data_dir(tmp_path, monkeypatch):
 
     monkeypatch.setattr(config, "SEED_DATA_DIR", str(isolated))
     return isolated
+
+
+@pytest.fixture(autouse=True)
+def _aisla_rate_limit_global():
+    """Vacia el limitador por IP en memoria antes y despues de cada test.
+
+    ``middleware/security.py`` guarda las peticiones por IP en un dict del
+    proceso (120 req / 60 s por defecto): sin limpiarlo, la posicion de cada
+    test dentro de la suite decide si le toca un 429 y el verde de
+    ``test_security_hardening`` dependia del orden de ejecucion. El propio
+    limitador sigue probandose en su test, que lo puebla a proposito.
+    """
+    from liga_maestros.middleware import rate_limit as sqlite_rate_limit
+    from liga_maestros.middleware import security as security_middleware
+
+    def limpiar():
+        with security_middleware._RATE_LIMIT_LOCK:
+            security_middleware._RATE_LIMIT_STORE.clear()
+        with sqlite_rate_limit._get_lock():
+            sqlite_rate_limit._rate_limit_hits.clear()
+
+    limpiar()
+    yield
+    limpiar()

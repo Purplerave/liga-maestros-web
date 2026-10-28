@@ -1,0 +1,1024 @@
+@layer kawaii {
+/* ===========================================================================
+   PAGINA UNICA KAWAII — la quiniela ES la web.
+   Paleta y formas de la maqueta informes/maqueta-kawaii.html: crema, rosa,
+   menta, sol y lavanda, esquinas redondeadas y sombra suave. Va al final de la
+   cadena de @layer, asi que pisa los estilos del antiguo
+   periodico y de la portada para la unica pagina que ahora sirve el sitio.
+   =========================================================================== */
+
+:root {
+    --kk-cream: #FFF7EC;
+    --kk-card: #FFFFFF;
+    --kk-ink: #4A3B31;
+    --kk-muted: #9B897A;
+    --kk-pink: #FF8FA3;
+    --kk-pink-soft: #FFE3E9;
+    --kk-pink-ink: #D4669A;
+    --kk-mint: #7FD8BE;
+    --kk-mint-soft: #E4F7F1;
+    --kk-sun: #FFD166;
+    --kk-sun-soft: #FFF3D6;
+    --kk-sun-ink: #6B4A00;
+    --kk-lav: #B9A7F2;
+    --kk-lav-soft: #EDE8FF;
+    --kk-ok: #5CC98E;
+    --kk-ok-soft: #E3F7EC;
+    --kk-bad: #F07B7B;
+    --kk-bad-soft: #FDE7E7;
+    --kk-line: #F1E4D6;
+    --kk-shadow: 0 8px 24px rgba(120, 90, 60, 0.10);
+    --kk-radius: 22px;
+    --kk-font: "Outfit", ui-rounded, "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------- shell: la pagina vuelve a ser un documento con scroll ---------- */
+/* Mismo selector que la capa `theme` del periodico, para que la cascada se
+   resuelva por orden de fuente dentro de la capa kawaii. */
+body.newspaper-ui.quiniela-focus,
+html,
+body {
+    height: auto;
+    min-height: 100%;
+    /* El antiguo shell de viewport fijo fijaba max-height:100dvh y la pagina
+       unica dejaba de hacer scroll (el contenido se salia del html). */
+    max-height: none;
+    overflow: visible;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 12% -5%, var(--kk-pink-soft) 0 34%, transparent 35%),
+        radial-gradient(circle at 112% 10%, var(--kk-mint-soft) 0 30%, transparent 31%),
+        var(--kk-cream);
+}
+
+body {
+    color: var(--kk-ink);
+    font-family: var(--kk-font);
+    font-weight: 600;
+    line-height: 1.35;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+    display: block;
+    width: auto;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+}
+
+.header-brand-panel {
+    display: none;
+}
+
+.main-arena,
+.arena-content,
+.app-shell,
+.kk-page,
+.cx {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    background-image: none;
+}
+
+/* La navegacion de vistas no existe: una sola pagina con un boton. */
+.newspaper-page-nav {
+    display: none;
+}
+
+/* ---------- barra superior ---------- */
+body.newspaper-ui.quiniela-focus .topbar-shell,
+.topbar-shell {
+    position: sticky;
+    top: 8px;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    max-width: 760px;
+    margin: 12px auto 0;
+    padding: 8px 10px;
+    background: var(--kk-card);
+    border: 2px solid var(--kk-line);
+    border-radius: 18px;
+    box-shadow: var(--kk-shadow);
+    color: var(--kk-ink);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    overflow: visible;
+    height: auto;
+    max-height: none;
+}
+
+.topbar-shell::before,
+.topbar-shell::after {
+    display: none;
+}
+
+.topbar-context {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.topbar-kicker,
+.topbar-title {
+    color: var(--kk-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+}
+
+.topbar-title {
+    color: var(--kk-ink);
+    font-weight: 800;
+}
+
+.field-group label {
+    color: var(--kk-muted);
+    font-size: 0.66rem;
+}
+
+.topbar-shell select {
+    font-family: inherit;
+    color: var(--kk-ink);
+    background: var(--kk-sun-soft);
+    border: 2px solid var(--kk-line);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-weight: 800;
+}
+
+.topbar-shell button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 2px solid var(--kk-line);
+    background: #fff;
+    color: var(--kk-ink);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-weight: 800;
+    font-size: 0.8rem;
+}
+
+.topbar-shell .primary-btn {
+    background: var(--kk-pink);
+    border-color: var(--kk-pink);
+    color: #fff;
+}
+
+.topbar-shell .cmdk-trigger,
+.topbar-shell .icon-btn {
+    background: var(--kk-mint-soft);
+    border-color: var(--kk-mint);
+}
+
+.login-btn,
+.topbar-login-btn {
+    display: inline-block;
+    background: #fff;
+    border: 2px solid var(--kk-line);
+    border-radius: 999px;
+    padding: 7px 14px;
+    color: var(--kk-ink);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* El selector `hidden` del topbar lo pisaban las capas antiguas con un
+   display explicito: sin esto, anonimo veia «Guardar quiniela». */
+.topbar-shell button[hidden],
+.topbar-shell a[hidden],
+.topbar-shell div[hidden] {
+    display: none;
+}
+
+/* Pastilla de estado de ux_signals: se recolorea en vez de quedar a negras. */
+.system-pill {
+    background: var(--kk-card);
+    color: var(--kk-ink);
+    border: 2px solid var(--kk-line);
+    box-shadow: var(--kk-shadow);
+    font-family: var(--kk-font);
+}
+
+.logout-link,
+.topbar-user-summary {
+    color: var(--kk-ink);
+    font-size: 0.8rem;
+}
+
+.site-legal-links {
+    background: transparent;
+    background-image: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px 14px 8px;
+    color: var(--kk-muted);
+    font-size: 0.75rem;
+}
+
+.site-legal-links a {
+    color: var(--kk-muted);
+    text-decoration: none;
+}
+
+.site-legal-links a:hover {
+    color: var(--kk-pink-ink);
+}
+
+/* ---------- pagina kawaii ---------- */
+.kk-page {
+    display: block;
+    padding: 4px 0 30px;
+}
+
+.kk-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 14px 40px;
+}
+
+.kk-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kk-logo {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 auto;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--kk-pink), #FF6F91);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    box-shadow: var(--kk-shadow);
+    transform: rotate(-4deg);
+}
+
+.kk-brand {
+    min-width: 0;
+}
+
+.kk-title {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: 0.2px;
+    color: var(--kk-ink);
+}
+
+.kk-sub {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--kk-muted);
+    font-weight: 700;
+}
+
+.kk-jbadge {
+    margin-left: auto;
+    background: var(--kk-sun);
+    color: var(--kk-sun-ink);
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 13.5px;
+    font-weight: 800;
+    box-shadow: var(--kk-shadow);
+    white-space: nowrap;
+}
+
+.kk-ticket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-top: 12px;
+}
+
+.kk-ticket .cx-sv-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin: 0;
+}
+
+.kk-ticket .cx-sv-meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    background: var(--kk-card);
+    border: 2px solid var(--kk-line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    box-shadow: var(--kk-shadow);
+}
+
+.kk-ticket .cx-sv-meta-item dt {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kk-muted);
+    font-weight: 800;
+}
+
+.kk-ticket .cx-sv-meta-item dd {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--kk-ink);
+}
+
+.kk-pill {
+    background: var(--kk-mint-soft);
+    border: 2px solid var(--kk-mint);
+    color: #2E7D6B;
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.kk-pill.is-closed {
+    background: var(--kk-bad-soft);
+    border-color: var(--kk-bad);
+    color: #B4413F;
+}
+
+/* ---------- entrar con Google ---------- */
+.kk-glogin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin: 14px 0 6px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 800;
+    background: #fff;
+    color: #444;
+    border: 2px solid var(--kk-line);
+    border-radius: 999px;
+    box-shadow: var(--kk-shadow);
+    text-decoration: none;
+}
+
+.kk-glogin:hover {
+    border-color: var(--kk-pink);
+}
+
+.kk-glogin:focus-visible {
+    outline: 3px solid var(--kk-pink);
+    outline-offset: 2px;
+}
+
+.kk-g {
+    font-weight: 900;
+    color: #4285F4;
+    font-size: 17px;
+}
+
+/* ---------- franja EN DIRECTO ---------- */
+.kk-live-wrap:empty {
+    display: none;
+}
+
+.kk-live-wrap {
+    display: block;
+}
+
+.kk-live,
+.kk-live-wrap > .kk-clock {
+    margin-top: 12px;
+}
+
+.kk-live-wrap > * {
+    vertical-align: middle;
+}
+
+.kk-live-wrap .kk-dot,
+.kk-live-wrap .kk-clock {
+    box-sizing: border-box;
+}
+
+.kk-live-wrap .kk-clock {
+    display: none;
+}
+
+.kk-live-wrap .kk-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--kk-bad);
+    animation: kkPulse 1.2s infinite;
+}
+
+@keyframes kkPulse {
+    50% {
+        opacity: 0.25;
+    }
+}
+
+.kk-live-wrap .kk-live-body {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    background: var(--kk-mint-soft);
+    border: 2px solid var(--kk-mint);
+    border-radius: var(--kk-radius);
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--kk-ink);
+    max-width: calc(100% - 90px);
+}
+
+.kk-live-wrap .kk-live-body b {
+    font-size: 15px;
+}
+
+.kk-live-wrap .kk-live-score {
+    font-weight: 900;
+    font-size: 14.5px;
+    background: var(--kk-pink-soft);
+    border-radius: 9px;
+    padding: 3px 8px;
+    color: #B0466B;
+}
+
+.kk-live-wrap .kk-more {
+    background: #fff;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #2E7D6B;
+}
+
+.kk-live-wrap .kk-min {
+    display: inline-block;
+    margin-left: 8px;
+    background: #fff;
+    border: 2px solid var(--kk-line);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #2E7D6B;
+}
+
+/* ---------- tarjetas ---------- */
+.kk-card {
+    background: var(--kk-card);
+    border: 2px solid var(--kk-line);
+    border-radius: var(--kk-radius);
+    box-shadow: var(--kk-shadow);
+    margin-top: 14px;
+    overflow: hidden;
+    padding-bottom: 10px;
+}
+
+.kk-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 14px 16px 6px;
+    font-size: 15.5px;
+    color: var(--kk-ink);
+}
+
+.kk-card-title .kk-tag {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: var(--kk-muted);
+    font-weight: 800;
+}
+
+.kk-hint {
+    margin: 4px 16px 0;
+    font-size: 12.5px;
+    color: var(--kk-muted);
+}
+
+.kk-hint b {
+    color: var(--kk-pink-ink);
+}
+
+/* ---------- tabla de la quiniela ---------- */
+.kk-page .cx-sv {
+    padding: 0;
+}
+
+.kk-page .cx-sv-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 8px;
+}
+
+.kk-page .cx-sv-scroll:focus-visible {
+    outline: 3px solid var(--kk-pink);
+    outline-offset: -3px;
+}
+
+.kk-page .cx-sv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--kk-font);
+    table-layout: auto;
+    font-size: 13.5px;
+    min-width: 520px;
+}
+
+.kk-page .cx-sv-table thead th {
+    font-size: 11px;
+    color: var(--kk-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 8px 6px;
+    border-bottom: 2px solid var(--kk-line);
+    background: transparent;
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-table thead th.cx-sv-match-head {
+    text-align: left;
+    width: auto;
+    padding-left: 8px;
+}
+
+.kk-page .cx-sv-table thead th.cx-sv-result-head {
+    text-align: center;
+    width: auto;
+    font-size: 10px;
+}
+
+.kk-page .cx-sv-col-name {
+    display: block;
+    color: var(--kk-ink);
+    font-size: 12px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-col-flag {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 10px;
+    letter-spacing: 0;
+    color: var(--kk-muted);
+    border: 1.5px solid var(--kk-line);
+    border-radius: 999px;
+    padding: 0 6px;
+}
+
+.kk-page .cx-sv-table th.cx-sv-col[data-col] {
+    color: var(--kk-pink-ink);
+}
+
+.kk-page .cx-sv-body tr:nth-child(even) {
+    background: #FFFBF2;
+}
+
+.kk-page .cx-sv-row:hover td,
+.kk-page .cx-sv-row:hover th {
+    background: var(--kk-mint-soft);
+}
+
+.kk-page .cx-sv-row {
+    border-bottom: 1px solid var(--kk-line);
+}
+
+.kk-page .cx-sv-match {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+    padding: 9px 6px 9px 8px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--kk-ink);
+}
+
+.kk-page .cx-sv-idx {
+    font-size: 11px;
+    color: var(--kk-muted);
+    min-width: 14px;
+}
+
+.kk-page .cx-sv-teams {
+    flex: 1 1 auto;
+    font-size: 13.5px;
+    line-height: 1.25;
+    color: var(--kk-ink);
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-teams b {
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-teams i {
+    font-style: normal;
+    color: var(--kk-muted);
+    padding: 0 2px;
+}
+
+.kk-page .cx-sv-when {
+    flex: 1 1 100%;
+    padding-left: 20px;
+    font-size: 11px;
+    color: var(--kk-muted);
+    font-weight: 700;
+}
+
+.kk-page .cx-sv-result {
+    text-align: center;
+    padding: 8px 4px;
+}
+
+.kk-page .cx-sv-result-val {
+    display: inline-block;
+    min-width: 52px;
+    font-size: 13.5px;
+    font-weight: 900;
+    color: var(--kk-muted);
+    white-space: nowrap;
+    background: #FFFDF9;
+    border: 2px dashed var(--kk-line);
+    border-radius: 10px;
+    padding: 3px 6px;
+}
+
+.kk-page .cx-sv-result.is-ft .cx-sv-result-val {
+    background: var(--kk-sun-soft);
+    border: 2px solid var(--kk-sun);
+    color: var(--kk-sun-ink);
+}
+
+.kk-page .cx-sv-result.is-live .cx-sv-result-val {
+    background: var(--kk-pink-soft);
+    border: 2px solid var(--kk-pink);
+    color: #B0466B;
+}
+
+.kk-page .cx-sv-result.is-pending .cx-sv-result-val {
+    background: transparent;
+    border-color: transparent;
+    color: var(--kk-muted);
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-cell {
+    text-align: center;
+    padding: 7px 4px;
+}
+
+.kk-page .cx-sv-sign {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 5px;
+    border-radius: 12px;
+    border: 2px solid var(--kk-line);
+    background: #fff;
+    font-size: 14.5px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: var(--kk-ink);
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.kk-page .cx-sv-cell.is-empty .cx-sv-sign {
+    color: var(--kk-muted);
+    background: transparent;
+    border-color: transparent;
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-cell.is-double .cx-sv-sign {
+    background: var(--kk-lav-soft);
+    border: 2px solid var(--kk-lav);
+    color: #5B49A8;
+}
+
+.kk-page .cx-sv-cell.is-hit .cx-sv-sign {
+    background: var(--kk-ok-soft);
+    border: 2px solid var(--kk-ok);
+    color: #1F7A4D;
+}
+
+.kk-page .cx-sv-cell.is-miss .cx-sv-sign {
+    background: var(--kk-bad-soft);
+    border: 2px solid var(--kk-bad);
+    color: #B4413F;
+}
+
+.kk-page .cx-sv-mark {
+    display: block;
+    min-height: 0;
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 900;
+    color: var(--kk-muted);
+}
+
+.kk-page .cx-sv-cell.is-hit .cx-sv-mark {
+    color: var(--kk-ok);
+}
+
+.kk-page .cx-sv-cell.is-miss .cx-sv-mark {
+    color: var(--kk-bad);
+}
+
+/* columna propia */
+.kk-page .cx-sv-cell.cx-sv-me .cx-sv-sign {
+    background: var(--kk-pink-soft);
+    border-color: var(--kk-pink);
+    color: #B0466B;
+}
+
+.kk-page .cx-sv-cell.is-editing .kk-sign {
+    font-family: inherit;
+    cursor: pointer;
+    border: 2px solid var(--kk-line);
+    background: #fff;
+    color: var(--kk-ink);
+    border-radius: 10px;
+    min-width: 28px;
+    padding: 5px 6px;
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.kk-page .cx-sv-cell.is-editing .kk-sign.is-active {
+    background: var(--kk-pink);
+    border-color: var(--kk-pink);
+    color: #fff;
+}
+
+.kk-page .cx-sv-cell.is-editing .kk-sign-pleno {
+    min-width: 54px;
+    background: var(--kk-sun-soft);
+    border-color: var(--kk-sun);
+    color: var(--kk-sun-ink);
+}
+
+.kk-page .cx-sv-cell.is-editing .kk-sign:focus-visible {
+    outline: 3px solid var(--kk-pink);
+    outline-offset: 1px;
+}
+
+/* pleno aparte */
+.kk-page .cx-sv-pleno-head th {
+    padding: 10px 8px 6px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kk-sun-ink);
+    background: var(--kk-sun-soft);
+    border-top: 2px solid var(--kk-sun);
+    border-bottom: 2px solid var(--kk-sun);
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-row.is-pleno,
+.kk-page .cx-sv-row.is-pleno:hover td,
+.kk-page .cx-sv-row.is-pleno:hover th {
+    background: var(--kk-sun-soft);
+}
+
+.kk-page .cx-sv-row.is-pleno .cx-sv-sign {
+    font-family: var(--kk-font);
+}
+
+/* totales al pie */
+.kk-page .cx-sv-table tfoot th.cx-sv-total-label {
+    padding: 12px 8px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kk-muted);
+    border-top: 2px dashed var(--kk-line);
+    background: #FFFDF9;
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-total {
+    font-family: var(--kk-font);
+    padding: 10px 4px;
+    border-top: 2px dashed var(--kk-line);
+    background: #FFFDF9;
+    color: var(--kk-ink);
+}
+
+.kk-page .cx-sv-total b {
+    display: block;
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--kk-pink-ink);
+}
+
+.kk-page .cx-sv-total small {
+    display: block;
+    font-size: 10.5px;
+    color: var(--kk-muted);
+    font-weight: 800;
+}
+
+.kk-page .cx-sv-total.is-empty {
+    color: var(--kk-muted);
+    font-weight: 700;
+}
+
+.kk-page .cx-sv-note {
+    margin: 4px 0 0;
+    padding: 0 16px;
+}
+
+.kk-page .cx-sv-note ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.kk-page .cx-sv-note li {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--kk-muted);
+}
+
+/* ---------- clasificacion ---------- */
+.kk-rank-list {
+    display: block;
+    padding: 4px 0 6px;
+}
+
+.kk-rank {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--kk-line);
+    font-size: 14px;
+}
+
+.kk-rank:last-child {
+    border-bottom: 0;
+}
+
+.kk-rank.is-you {
+    background: var(--kk-pink-soft);
+}
+
+.kk-pos {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--kk-muted);
+    min-width: 18px;
+}
+
+.kk-av {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    background: var(--kk-sun-soft);
+    border: 2px solid var(--kk-line);
+}
+
+.kk-nm {
+    font-weight: 800;
+    color: var(--kk-ink);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.kk-you-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    background: var(--kk-pink);
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    font-weight: 800;
+}
+
+.kk-sc {
+    margin-left: auto;
+    font-weight: 800;
+    color: #2E7D6B;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.kk-rank.is-you .kk-sc {
+    color: var(--kk-pink-ink);
+}
+
+.kk-sc b {
+    font-weight: 900;
+    font-size: 15px;
+}
+
+.kk-empty {
+    margin: 6px 16px 8px;
+    font-size: 13px;
+    color: var(--kk-muted);
+}
+
+.kk-foot {
+    text-align: center;
+    color: var(--kk-muted);
+    font-size: 11.5px;
+    margin-top: 18px;
+    padding-bottom: 6px;
+}
+
+/* ---------- movil ---------- */
+@media (max-width: 700px) {
+    .topbar-shell {
+        top: 6px;
+        margin-top: 8px;
+        border-radius: 16px;
+        padding: 7px 8px;
+    }
+
+    .topbar-title,
+    .topbar-kicker {
+        font-size: 0.68rem;
+    }
+
+    .kk-wrap {
+        padding: 10px 10px 34px;
+    }
+
+    .kk-title {
+        font-size: 18px;
+    }
+
+    .kk-logo {
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
+        border-radius: 15px;
+    }
+
+    .kk-jbadge {
+        padding: 6px 11px;
+        font-size: 12.5px;
+    }
+
+    .kk-live-wrap .kk-live-body {
+        max-width: calc(100% - 20px);
+        display: flex;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+
+    .kk-live-wrap .kk-dot {
+        margin-top: 14px;
+    }
+
+    .kk-live-wrap .kk-min {
+        margin-left: 0;
+        margin-top: 6px;
+    }
+
+    .kk-page .cx-sv-table {
+        font-size: 13px;
+    }
+}
+
+/* ---------- movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .kk-live-wrap .kk-dot {
+        animation: none;
+    }
+
+    .kk-logo {
+        transform: none;
+    }
+
+    .kk-card,
+    .kk-glogin,
+    .topbar-shell {
+        transition: none;
+    }
+}
+}

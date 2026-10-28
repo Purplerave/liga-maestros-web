@@ -71,13 +71,17 @@ def _prediction_signs_by_column(conn, jornada):
     return signs
 
 
-def _column_ids(contract, signs, jornada, max_jornada):
+def _column_ids(contract, signs, jornada, max_jornada, current_user_id=None):
     """Columnas visibles: las tres por defecto + quien manda linea esta semana.
 
     El filtro usa el mecanismo que ya tiene la pagina (``hidden_ids`` del
     contrato de participantes): se OCULTA en la vista, nunca se borra de la BD.
     El «esta semana» es a proposito: en el historico J1-J16 se comparan los
     tres contendientes, no las veinte lineas que aquella jornada acumulo.
+
+    Ademas, el participante registrado con sesion ve SIEMPRE su propia columna
+    en la jornada en juego (``es_mia``): aunque todavia no haya mandado linea,
+    la pagina necesita la columna para ofrecerle el editor de su quiniela.
     """
     hidden = {str(uid).lower() for uid in contract.get("hidden_ids", [])}
     oficial = {str(col.get("id", "")).lower() for col in contract.get("visible_ai_columns", [])}
@@ -89,6 +93,9 @@ def _column_ids(contract, signs, jornada, max_jornada):
         for uid in sorted(signs):
             if uid in oficial and uid not in hidden and uid not in ids:
                 ids.append(uid)
+        me = str(current_user_id or "").strip().lower()
+        if me and me not in hidden and me not in ids:
+            ids.append(me)
     return ids
 
 
@@ -124,12 +131,13 @@ def _match_is_live(match):
     return str(match.get("status") or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")
 
 
-def build_simple_view_payload(conn, jornada, partidos, participant_contract, max_jornada=None):
+def build_simple_view_payload(conn, jornada, partidos, participant_contract, max_jornada=None, current_user_id=None):
     """Payload de la vista simple: columnas, filas, marcadores y totals de 14."""
     contract = participant_contract or {}
     names = contract.get("names") or {}
     signs_by_column = _prediction_signs_by_column(conn, jornada)
-    column_ids = _column_ids(contract, signs_by_column, jornada, max_jornada)
+    column_ids = _column_ids(contract, signs_by_column, jornada, max_jornada, current_user_id)
+    yo = str(current_user_id or "").strip().lower()
 
     columns = []
     for uid in column_ids:
@@ -139,6 +147,7 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
                 "id": uid,
                 "name": names.get(uid) or public_contest_name(uid, {}),
                 "es_pena": uid in {str(x).lower() for x in contract.get("pena_ids", [])},
+                "es_mia": bool(yo) and uid == yo,
                 "sin_linea": not any(str(s) not in ("", "-") for s in line),
             }
         )

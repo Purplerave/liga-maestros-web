@@ -86,20 +86,6 @@ class MatchPayload(_StrictBase):
         return v
 
 
-class TrashTalkPayload(_StrictBase):
-    jornada: str = ""
-    bando_state: str = "primera"
-    masters: dict[str, str] = Field(default_factory=dict)
-    pena_replica: str = ""
-
-    @field_validator("bando_state")
-    @classmethod
-    def _state_in_set(cls, v: str) -> str:
-        if v not in {"va_ganando", "va_perdiendo", "empate", "primera"}:
-            return "primera"
-        return v
-
-
 class ComentarioPayload(_StrictBase):
     texto: str = ""
     local: str = ""
@@ -149,7 +135,6 @@ class LigaDataPayload(_StrictBase):
     # topScore), not the per-match list used by ``consenso_pena``.
     consenso_pleno_pena: dict[str, Any] = Field(default_factory=dict)
     ranking_maestros: dict[str, Any] = Field(default_factory=dict)
-    trash_talk: TrashTalkPayload = Field(default_factory=TrashTalkPayload)
     comentarista: ComentaristaPayload = Field(default_factory=ComentaristaPayload)
     auth_enabled: bool = False
     live_stream_enabled: bool = False

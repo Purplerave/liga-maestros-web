@@ -2,8 +2,6 @@
 
 from flask import Blueprint
 
-from .ai_predictions import bp as ai_predictions_bp
-from .arcade import bp as arcade_bp
 from .auth import bp as auth_bp
 from .comments import bp as comments_bp
 from .contest_routes import bp as contest_bp
@@ -14,8 +12,6 @@ from .main import bp as main_bp
 from .news import bp as news_bp
 from .porra import bp as porra_bp
 from .predictions import bp as predictions_bp
-from .quiz import bp as quiz_bp
-from .snake import bp as snake_bp
 from .teams_routes import bp as teams_bp
 from .user import bp as user_bp
 
@@ -26,15 +22,11 @@ _BLUEPRINTS = {
     "predictions": predictions_bp,
     "contest": contest_bp,
     "porra": porra_bp,
-    "snake": snake_bp,
     "news": news_bp,
     "teams": teams_bp,
     "user": user_bp,
-    "quiz": quiz_bp,
     "legal": legal_bp,
-    "arcade": arcade_bp,
     "comments": comments_bp,
-    "ai_predictions": ai_predictions_bp,
     "auth": auth_bp,
 }
 

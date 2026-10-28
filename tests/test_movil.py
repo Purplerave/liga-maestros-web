@@ -84,8 +84,6 @@ def test_el_shell_se_aparta_de_los_insets_laterales():
 ALTURA_CRITICA = [
     "layout/app_shell.css",
     "pages/legal.css",
-    "pages/quiz_page.css",
-    "snake_gol_arcade.css",
 ]
 
 

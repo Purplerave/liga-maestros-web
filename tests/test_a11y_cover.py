@@ -24,15 +24,6 @@ def test_skip_link_css_hidden_until_focused():
     assert "translateY(-160" in css or "translateY(-100" in css or "left: -9999" in css
 
 
-def test_cover_hero_crest_has_explicit_dimensions():
-    """LCP: la imagen del crest debe tener width/height/decoding/fetchpriority."""
-    cover = COVER_JS.read_text(encoding="utf-8")
-    assert "cp-hero-crest" in cover
-    assert 'width="72"' in cover and 'height="72"' in cover
-    assert 'fetchpriority="high"' in cover
-    assert 'decoding="async"' in cover
-
-
 def test_focus_visible_on_cover_ctas():
     css = COVER_CSS.read_text(encoding="utf-8")
     # CTAs principales con focus-visible
@@ -57,15 +48,6 @@ def test_reduced_motion_disables_new_animations():
     assert ".cp-primary" in section or ".cp-primary:hover" in section
 
 
-def test_cover_trash_talk_keyboard_accessible():
-    cover = COVER_JS.read_text(encoding="utf-8")
-    # dots y avatares son <button> o tienen role
-    assert "data-voz-idx" in cover
-    assert 'type="button"' in cover
-    # aria-labels para los dots
-    assert "aria-label=" in cover
-
-
 def test_cover_uses_real_data_not_invented():
     """Regla de oro: nunca inventar marcadores."""
     cover = COVER_JS.read_text(encoding="utf-8")
@@ -85,10 +67,10 @@ def test_cover_version_bumped_after_change():
     """El cache-bust de la portada debe haber sido bumpeado para invalidar la caché."""
     nav = (ROOT / "static" / "js" / "navigation.js").read_text(encoding="utf-8")
     template = TEMPLATE.read_text(encoding="utf-8")
-    # Tras los cambios, ambos deben apuntar al menos a 68 (nunca un valor exacto fijo,
-    # porque un bump legítimo a la versión 69+ también debe pasar).
-    assert _cache_bust_version(nav, "cover-page") >= 68
-    assert _cache_bust_version(template, "cover-hero") >= 68
+    # Tras los cambios, ambos deben apuntar al menos a estos valores (nunca un valor
+    # exacto fijo, porque un bump legítimo posterior también debe pasar).
+    assert _cache_bust_version(nav, "cover-page") >= 83
+    assert _cache_bust_version(template, "kawaii") >= 1
 
 
 def _regla(css, clase):

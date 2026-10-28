@@ -56,41 +56,6 @@ function updateCpUrgency() {}
 const _MAESTRO_LABEL = { programa: "Programa", claude: "Claude", grok: "Grok", chatgpt: "ChatGPT", copilot: "Copilot", gemini: "Gemini" };
 const _MAESTRO_AVATAR = { programa: "∑", claude: "✦", grok: "✕", chatgpt: "◎", copilot: "▣", gemini: "✺" };
 const _MAESTRO_TONE = { programa: "is-programa", claude: "is-claude", grok: "is-grok", chatgpt: "is-chatgpt", copilot: "is-copilot", gemini: "is-gemini" };
-let _currentTrashTalkIdx = 0;
-let _trashTalkRotateTimer = null;
-function coverBandoState() { return "primera"; }
-function coverTrashTalkMasters() { return []; }
-function coverTrashTalkReplica() { return ""; }
-function coverTrashTalkHtml() {
-    // consumes state.data.trash_talk payload when present
-    return `<article class="cp-voz" aria-label="La voz del duelo" hidden>
-        <div class="cp-card-head"><span>LA VOZ DEL DUELO</span><b>Maestros</b></div>
-        <div class="cp-voz-stage">
-            <div class="cp-voz-avatars" aria-hidden="true">
-                <span class="cp-voz-avatar is-programa" data-voz-idx="0">∑</span>
-                <span class="cp-voz-avatar is-claude" data-voz-idx="1">✦</span>
-                <span class="cp-voz-avatar is-grok" data-voz-idx="2">✕</span>
-                <span class="cp-voz-avatar is-chatgpt" data-voz-idx="3">◎</span>
-                <span class="cp-voz-avatar is-copilot" data-voz-idx="4">▣</span>
-                <span class="cp-voz-avatar is-gemini" data-voz-idx="5">✺</span>
-            </div>
-            <blockquote class="cp-voz-quote is-programa">
-                <span class="cp-voz-quote-avatar">∑</span>
-                <div class="cp-voz-quote-body"><b>Programa</b><p>stub</p></div>
-            </blockquote>
-            <div class="cp-voz-dots" role="tablist" aria-label="Cambiar de maestro">
-                <button type="button" class="cp-voz-dot is-active" data-voz-idx="0" aria-label="Programa"></button>
-                <button type="button" class="cp-voz-dot" data-voz-idx="1" aria-label="Claude"></button>
-                <button type="button" class="cp-voz-dot" data-voz-idx="2" aria-label="Grok"></button>
-                <button type="button" class="cp-voz-dot" data-voz-idx="3" aria-label="ChatGPT"></button>
-                <button type="button" class="cp-voz-dot" data-voz-idx="4" aria-label="Copilot"></button>
-                <button type="button" class="cp-voz-dot" data-voz-idx="5" aria-label="Gemini"></button>
-            </div>
-        </div>
-    </article>`;
-}
-function setTrashTalkIdx() {}
-function startTrashTalkRotation() {}
 function triggerProgressPop() {}
 function loadSeasonSummary() {}
 /* El cierre de la quiniela llega del servidor en hora de Madrid
@@ -140,18 +105,6 @@ function coverRankingRows() {
     return Object.entries(ranking).filter(([uid]) => !hidden.has(String(uid).toLowerCase()))
         .map(([uid, values]) => ({ uid, name: coverDisplayName(uid), total: Number(values?.total || 0), jornada: Number(values?.jornada_live ?? values?.jornada ?? 0) }))
         .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.name.localeCompare(b.name, "es"));
-}
-function coverBandoDetailed() {
-    const rows = coverRankingRows();
-    const aiIds = new Set(coverMasterColumns().map(c => String(c.id || "").toLowerCase()));
-    const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
-    let hT = 0, aT = 0, hC = 0, aC = 0;
-    rows.forEach(r => {
-        const uid = String(r.uid).toLowerCase();
-        if (aiIds.has(uid)) { aT += r.jornada; aC++; }
-        else if (penaIds.has(uid)) { hT += r.jornada; hC++; }
-    });
-    return { rows, humanTotal: hT, aiTotal: aT, humanCount: hC || 1, aiCount: aC || 1, humanAvg: hC ? hT / hC : 0, aiAvg: aC ? aT / aC : 0 };
 }
 function coverPredictionSigns(e) { if (Array.isArray(e)) return e; return Array.isArray(e?.signos) ? e.signos : []; }
 function coverPenaReading(row) {
@@ -652,7 +605,27 @@ function simpleViewMetaHtml(payload) {
         .join("")}</dl>`;
 }
 
+function kawaiiCeldaEditable(col, row) {
+    // Selector 1X2 de la columna propia, con el mismo contrato de eventos que
+    // la vista de boleto: `.clickable` + `data-sign`/`data-pleno` + match-idx.
+    const idx = Number(row.id) - 1;
+    const signo = (state.my_signs || [])[idx] || "-";
+    if (row.is_pleno) {
+        const etiqueta = signo === "-" ? "Elegir" : signo;
+        return `<td class="cx-sv-cell cx-sv-me is-editing is-empty">`
+            + `<button type="button" class="kk-sign kk-sign-pleno clickable" data-pleno="true" data-match-idx="${idx}" aria-label="Elegir el marcador del Pleno al 15">${escapeHtml(etiqueta)}</button></td>`;
+    }
+    const botones = ["1", "X", "2"]
+        .map(opcion => {
+            const activo = signo === opcion;
+            return `<button type="button" class="kk-sign clickable${activo ? " is-active" : ""}" data-sign="${opcion}" data-match-idx="${idx}" aria-pressed="${activo ? "true" : "false"}" aria-label="Marcar ${opcion} en la casilla ${idx + 1}">${opcion}</button>`;
+        })
+        .join("");
+    return `<td class="cx-sv-cell cx-sv-me is-editing" title="Tu columna: marca tu pronostico">${botones}</td>`;
+}
+
 function simpleViewCellHtml(col, row) {
+    if (col && col.es_mia && kawaiiPuedeEditarLinea()) return kawaiiCeldaEditable(col, row);
     const pick = (row.picks || {})[col.id] || null;
     const signo = pick ? String(pick.signo || "-") : "-";
     const vacio = !signo || signo === "-";
@@ -683,9 +656,18 @@ function simpleViewRowHtml(row, columns) {
         + `</tr>`;
 }
 
-function simpleViewHtml() {
+function simpleViewColumnas(payload) {
+    // La columna del registrado (es_mia) va la primera y con nombre corto: es
+    // la unica que se puede editar desde esta propia tabla.
+    const columnas = simpleViewColumns(payload);
+    const mia = columnas.find(col => col && col.es_mia);
+    if (!mia) return columnas;
+    return [{ ...mia, name: "Tu" }, ...columnas.filter(col => col !== mia)];
+}
+
+function kawaiiTablaHtml() {
     const payload = simpleViewPayload();
-    const columns = simpleViewColumns(payload);
+    const columns = simpleViewColumnas(payload);
     const rows = simpleViewRows(payload);
     const casillas = rows.filter(row => !row.is_pleno).slice(0, 14);
     const plenoRow = rows.find(row => row.is_pleno) || null;
@@ -702,22 +684,15 @@ function simpleViewHtml() {
         .map(col => {
             const total = (payload?.totals || {})[col.id] || null;
             if (col.sin_linea || !total) {
-                return `<td class="cx-sv-cell cx-sv-total is-empty" title="Sin linea para esta jornada">—</td>`;
+                return `<td class="cx-sv-cell cx-sv-total is-empty" title="Sin linea para esta jornada">&mdash;</td>`;
             }
             const aciertos = Number(total.aciertos || 0);
             const jugados = Number(total.jugados || 0);
             const detalle = `${aciertos} aciertos en ${jugados} partidos con resultado, de ${totalCasillas} casillas`;
-            return `<td class="cx-sv-cell cx-sv-total" title="${escapeHtml(detalle)}">${aciertos}/${totalCasillas}</td>`;
+            return `<td class="cx-sv-cell cx-sv-total" title="${escapeHtml(detalle)}">`
+                + `<b>${aciertos}/${totalCasillas}</b><small>${escapeHtml(col.name || col.id)}</small></td>`;
         })
         .join("");
-
-    const sinHora = casillas.concat(plenoRow ? [plenoRow] : []).filter(row => !String(row.cuando || "").trim());
-    const notas = [
-        "Sin resultado verificado la casilla se queda en —: nunca se inventa un marcador.",
-    ];
-    if (sinHora.length) {
-        notas.push(`Casilla${sinHora.length > 1 ? "s" : ""} ${sinHora.map(row => row.id).join(", ")} sin hora verificada en la fuente oficial.`);
-    }
 
     const plenoBody = plenoRow
         ? `<tbody class="cx-sv-pleno">`
@@ -726,18 +701,7 @@ function simpleViewHtml() {
             + `</tbody>`
         : "";
 
-    return `
-        <header class="cx-sv-head">
-            <div class="cx-sv-brand">
-                <span class="cx-sv-kicker">TEMPORADA 26/27 · LA PENA CONTRA LOS MAESTROS</span>
-                <h1 class="cx-sv-title">LIGA DE MAESTROS EN SIMPLE</h1>
-                <p class="cx-sv-sub">Resultado de cada casilla y acierto o fallo de cada linea.</p>
-            </div>
-            ${simpleViewMetaHtml(payload)}
-            <a class="cx-sv-cta" href="/app" data-page-action="TICKET">Firmar mi quiniela →</a>
-        </header>
-        <div class="cx-sv-scroll" tabindex="0">
-            <table class="cx-sv-table">
+    return `<table class="cx-sv-table">
                 <thead>
                     <tr>
                         <th scope="col" class="cx-sv-match-head">PARTIDO (fecha y hora)</th>
@@ -753,744 +717,162 @@ function simpleViewHtml() {
                         ${footCells}
                     </tr>
                 </tfoot>
-            </table>
-        </div>
+            </table>`;
+}
+
+function simpleViewHtml() {
+    const payload = simpleViewPayload();
+    const rows = simpleViewRows(payload);
+    const casillas = rows.filter(row => !row.is_pleno).slice(0, 14);
+    const plenoRow = rows.find(row => row.is_pleno) || null;
+    const sinHora = casillas.concat(plenoRow ? [plenoRow] : []).filter(row => !String(row.cuando || "").trim());
+    const notas = [
+        "Sin resultado verificado la casilla se queda en —: nunca se inventa un marcador.",
+    ];
+    if (sinHora.length) {
+        notas.push(`Casilla${sinHora.length > 1 ? "s" : ""} ${sinHora.map(row => row.id).join(", ")} sin hora verificada en la fuente oficial.`);
+    }
+
+    return `
+        <div class="cx-sv-scroll" tabindex="0">${kawaiiTablaHtml()}</div>
         <footer class="cx-sv-note"><ul>${notas.map(nota => `<li>${escapeHtml(nota)}</li>`).join("")}</ul></footer>
     `;
 }
 
-function renderNewspaperCoverPageV3() {
-    const matches = (state.data?.partidos || []).slice(0, 15);
-    const closed = coverIsClosed();
-    const saved = typeof hasSavedTicket === "function" ? hasSavedTicket() : false;
-    const jornada = state.data?.jornada || state.jornada || "1";
-    const masterCols = coverMasterColumns();
-    const visibleMasters = _visibleMasters(masterCols);
-    const plenoConsenso = state.data?.consenso_pleno_pena || {};
-    const predictions = state.data?.predicciones_actuales || {};
-    const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
-    const userTotal = 15;
-    const quinielaPairs = new Set(matches.map(_matchPairKey));
-    const liveMatches = [...matches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
-    const liveCount = liveMatches.length;
-    const bando = coverBandoDetailed();
-    const consenso = Array.isArray(state.data?.consenso_pena) ? state.data.consenso_pena : [];
-    const assetsV = document.body?.dataset?.assetsV || "";
-    const crestSrc = `/static/img/liga_maestros_mark.svg?v=${encodeURIComponent(assetsV)}`;
+/* ==========================================================================
+   PAGINA UNICA KAWAII — «la quiniela ES la web».
 
-    const humanAvg = bando.humanAvg || 0;
-    const aiAvg = bando.aiAvg || 0;
-    const hasRealBando = (bando.humanTotal + bando.aiTotal) > 0;
-    const diff = aiAvg - humanAvg;
-    const duelLabel = !hasRealBando
-        ? "HUMANO vs MÁQUINA — ¿TE ATREVES?"
-        : (Math.abs(diff) < 0.05 ? "DUELO A MUERTE — EMPATE" : (diff > 0 ? "LAS MÁQUINAS TE HUMILLAN" : "LA PEÑA APLASTA A LA IA"));
+   Una sola vista con todo lo de la jornada: cabecera, acceso con Google,
+   franja de directo con datos reales, la tabla de la vista simple (✓/✗ por
+   celda, dobles sombreados, pleno aparte y totales al pie) y la clasificacion
+   final. Fuera juegos, quiz, landing, trash-talk y consejo de IA.
 
-    const ctaLabel = closed
-        ? (saved ? "VER MI QUINIELA" : "VER RESULTADOS")
-        : (userDone === 0 ? "FIRMAR QUINIELA" : (userDone === 15 ? "QUINIELA COMPLETA" : `FIRMAR (${userDone}/${userTotal})`));
+   Reglas que NO viven aqui:
+   - El acierto/fallo y los totales llegan decididos desde el backend (payload
+     `simple_view`, puntuado una sola vez en liga_maestros/scoring.py).
+   - Sin resultado verificado la casilla se queda en «—»: nunca se inventa.
+   - La linea del registrado se guarda con el mecanismo existente
+     (POST /api/predicciones/save) y solo mientras la jornada esta abierta.
+   ========================================================================== */
 
-    const penaIds = new Set((state.data?.participant_contract?.pena_ids || []).map(id => String(id || "").toLowerCase()));
-    const aiIds = new Set(masterCols.map(c => String(c.id || "").toLowerCase()));
-    const sortedByJornada = [...coverRankingRows()].sort((a, b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name, "es"));
-    const penaTop = sortedByJornada.filter(r => penaIds.has(String(r.uid).toLowerCase())).slice(0, 5);
-    const iaTop = sortedByJornada.filter(r => aiIds.has(String(r.uid).toLowerCase())).slice(0, 5);
-    const fallbackPena = penaTop.length >= 2 ? penaTop : sortedByJornada.slice(0, 5);
-    const fallbackIa = iaTop.length >= 2 ? iaTop : sortedByJornada.slice(5, 10);
+const _KK_AVATARES = ["🦖", "🤖", "🔮", "👾", "🦊", "🐼", "🐸", "🐵", "🦄", "🐱"];
 
-    function buildStandings(title, rows, accent) {
-        const items = rows.map((r, i) => {
-            const isPena = accent === "cyan";
-            const iconClass = isPena ? "is-pena" : "is-ia";
-            const col = masterCols.find(c => String(c.id || "").toLowerCase() === String(r.uid || "").toLowerCase());
-            const iconInner = (!isPena && col) ? _mlogoImg(col, 14) : "";
-            return `
-                <div class="cx-st-row${i === 0 ? " is-leader" : ""}">
-                    <span class="cx-st-pos">${String(i + 1).padStart(2, "0")}</span>
-                    <span class="cx-st-icon ${iconClass}">${iconInner}</span>
-                    <span class="cx-st-name">${escapeHtml(_fitName(r.name, 14))}</span>
-                    <span class="cx-st-pts">${r.jornada || 0}</span>
-                </div>
-            `;
-        }).join("");
-        return `
-            <section class="cx-panel cx-st cx-accent-${accent}">
-                <header class="cx-pn-head">
-                    <span class="cx-pn-eyebrow">${escapeHtml(title)}</span>
-                    <span class="cx-pn-meta">J${escapeHtml(String(jornada))}</span>
-                </header>
-                <div class="cx-pn-body">${items || '<div class="cx-empty">Sin datos</div>'}</div>
-            </section>
-        `;
+function kawaiiPuedeEditarLinea() {
+    if (!state.user || !state.data) return false;
+    if (coverIsClosed()) return false;
+    if (String(state.data.jornada) !== String(state.data.max_jornada)) return false;
+    // Mismas reglas que el boton del topbar: sin boleto guardado se edita ya;
+    // con boleto guardado, solo al pulsar «Editar quiniela».
+    return Boolean(state.editMode || state.draftDirty || !hasSavedTicket());
+}
+
+function kawaiiLoginHtml() {
+    if (state.user) return "";
+    if (state.data && state.data.auth_enabled === false) return "";
+    return `<a class="kk-glogin" href="/login/google">
+            <span class="kk-g" aria-hidden="true">G</span>
+            Entrar con Google para dejar tu quiniela
+        </a>`;
+}
+
+function kawaiiDirectoHtml() {
+    // Franja de directo SOLO con datos del payload: sin partido en juego se
+    // muestra el proximo de la quiniela y, si no hay ninguno, no se pinta nada.
+    try {
+        const enJuego = typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : [];
+        if (enJuego.length) {
+            const partido = enJuego[0];
+            const home = _liveTeamLabel(_matchSideName(partido, "home"), 16);
+            const away = _liveTeamLabel(_matchSideName(partido, "away"), 16);
+            const marcador = _liveScoreText(partido);
+            const minuto = _liveMinuteLabel(partido);
+            const resto = enJuego.length > 1 ? `<span class="kk-more">+${enJuego.length - 1}</span>` : "";
+            return `<span class="kk-dot" aria-hidden="true"></span>
+                <div class="kk-live-body"><b>EN DIRECTO</b> — ${escapeHtml(home)} · ${escapeHtml(away)}
+                    <span class="kk-live-score">${escapeHtml(String(marcador || "—"))}</span>${resto}</div>
+                <span class="kk-min">${escapeHtml(String(minuto || ""))}</span>`;
+        }
+        const proximo = typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
+        if (!proximo) return "";
+        const home = typeof getShortName === "function" ? getShortName(proximo.local || "") : String(proximo.local || "");
+        const away = typeof getShortName === "function" ? getShortName(proximo.visitante || "") : String(proximo.visitante || "");
+        const cuando = _whenLabel(proximo) || "";
+        return `<span class="kk-clock" aria-hidden="true">🕒</span>
+            <div class="kk-live-body"><b>PRÓXIMO PARTIDO</b> — ${escapeHtml(home)} · ${escapeHtml(away)}</div>
+            <span class="kk-min">${escapeHtml(String(cuando || "—"))}</span>`;
+    } catch (error) {
+        console.warn("[cover] no se pudo pintar la franja de directo:", error);
+        return "";
     }
+}
 
-    const penaVote = coverAggregatePenaVote(consenso);
-    const consensusPct1 = penaVote.p1;
-    const consensusPctX = penaVote.px;
-    const consensusPct2 = penaVote.p2;
-    const penaVoters = penaVote.penistas;
-
-    const finishedMatches = matches.filter(m => _finished(m) && _hasScore(m));
-    const tickerLiveItems = liveMatches.map(m => {
-        const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
-        const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
-        const score = _liveScoreText(m);
-        const minute = _liveMinuteLabel(m);
-        return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
+function kawaiiRankingListHtml() {
+    let filas = [];
+    try {
+        filas = coverRankingRows();
+    } catch (error) {
+        console.warn("[cover] sin clasificacion pintable:", error);
+        filas = [];
+    }
+    const yo = state.user ? String(state.user.id).toLowerCase() : "";
+    const items = filas.map((fila, i) => {
+        const mia = Boolean(yo) && String(fila.uid).toLowerCase() === yo;
+        return `<div class="kk-rank${mia ? " is-you" : ""}">
+                    <span class="kk-pos">${i + 1}</span>
+                    <span class="kk-av" aria-hidden="true">${_KK_AVATARES[i % _KK_AVATARES.length]}</span>
+                    <span class="kk-nm">${escapeHtml(_fitName(fila.name, 18))}${mia ? '<span class="kk-you-tag">tu columna</span>' : ""}</span>
+                    <span class="kk-sc"><b>${Number(fila.total || 0)}</b> pts · ${Number(fila.jornada || 0)} en J</span>
+                </div>`;
     }).join("");
-    const tickerFtItems = finishedMatches.map(m => {
-        const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
-        const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
-        const score = _liveScoreText(m);
-        return `<span class="cx-ticker-item is-ft"><i class="cx-ticker-dot is-ft"></i><b>FT</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
-    }).join("");
-    const comentarista = state.data?.comentarista || {};
-    const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
-    const comentarioItems = comentarios.map(c => {
-        const local = _abbr(c.local, 3);
-        const visitante = _abbr(c.visitante, 3);
-        const contexto = `${local}${c.marcador ? ` ${String(c.marcador)} ` : "–"}${visitante}`;
-        return `<span class="cx-ticker-item is-comentario"><i class="cx-ticker-dot is-comentario"></i><b>COMENTARISTA</b> ${escapeHtml(String(c.texto || ""))} <em>${escapeHtml(contexto)}</em></span>`;
-    }).join("");
-    const trackItems = tickerLiveItems + tickerFtItems + comentarioItems;
-    const tickerLabel = liveCount ? "⚽ EN DIRECTO" : (finishedMatches.length ? "⚽ RESULTADOS" : "");
-    const tickerHtml = trackItems ? `
-        <div class="cx-ticker" role="status" aria-live="polite">
-            <div class="cx-ticker-track">
-                <span class="cx-ticker-label">${tickerLabel}</span>
-                ${trackItems}
-                ${trackItems}
-            </div>
-        </div>
-    ` : "";
+    if (!items) {
+        return `<p class="kk-empty">Todavía sin puntos: cada casilla se puntúa con su resultado verificado.</p>`;
+    }
+    return items;
+}
 
-    const cdt = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
-    const ctaHref = closed ? (saved ? "/app" : "/directo") : "/app";
-
-    const jornadaValue = state.data?.jornada;
-    const jornadaKpi = jornadaValue != null && String(jornadaValue).trim() !== ""
-        ? `<div class="cx-kpi"><span class="cx-kpi-eyebrow">JORNADA</span><div class="cx-kpi-value" id="cx-jornada">${escapeHtml(String(jornadaValue))}</div></div>` : "";
-    const decidedCount = finishedMatches.length;
-    const jornadaLeader = sortedByJornada.find(row => row.jornada > 0);
-    const leaderKpi = jornadaLeader
-        ? `<div class="cx-kpi"><span class="cx-kpi-eyebrow">LÍDER · JORNADA</span><div class="cx-kpi-value" id="cx-leader">${escapeHtml(_fitName(jornadaLeader.name, 12))} · ${jornadaLeader.jornada}</div></div>` : "";
-    const deadlineRaw = state.data?.edit_deadline || state.data?.kickoff_at;
-    const hasDeadline = Boolean(deadlineRaw && _coverDeadlineMs(deadlineRaw));
-    const headerHtml = `
-        <header class="cx-top">
-            <div class="cx-top-left">
-                <img class="cx-top-crest" src="${crestSrc}" alt="" width="36" height="36" decoding="async" fetchpriority="high">
-                <div class="cx-top-id">
-                    <span class="cx-top-eyebrow">J${escapeHtml(String(jornada))} · TEMPORADA 26/27</span>
-                    <h1 class="cx-top-title">¿PUEDES GANAR A LA IA?</h1>
-                </div>
+function kawaiiCabeceraHtml(jornada, payload) {
+    const cerrada = coverIsClosed();
+    const abierto = coverCloseLabel();
+    const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
+    return `<header class="kk-header">
+            <span class="kk-logo" aria-hidden="true">🐾</span>
+            <div class="kk-brand">
+                <h1 class="kk-title">Liga de Maestros</h1>
+                <p class="kk-sub">La Peña contra los Maestros IA &middot; 15 casillas, en directo y con aciertos y fallos</p>
             </div>
-            <div class="cx-top-right">
-                <span class="cx-top-state ${closed ? "is-closed" : (cdt.urgent ? "is-urgent" : "is-live")}">
-                    <i class="cx-state-dot"></i>
-                    <span class="cx-state-label">${escapeHtml(duelLabel)}</span>
-                </span>
-                ${jornadaKpi}
-                <div class="cx-kpi">
-                    <span class="cx-kpi-eyebrow">PARTIDOS DECIDIDOS</span>
-                    <div class="cx-kpi-value" id="cx-decided">${decidedCount}</div>
-                </div>
-                ${leaderKpi}
-                ${hasDeadline ? `<div class="cx-kpi">
-                    <span class="cx-kpi-eyebrow">${closed ? "ESTADO" : "CIERRE"}</span>
-                    <div class="cx-kpi-value cx-kpi-mono" id="cx-cd">
-                        ${closed
-                            ? `<span class="cx-kpi-closed">CERRADA</span>`
-                            : `<span class="cx-cd-block">${String(cdt.d).padStart(2,"0")}<i>d</i></span><span class="cx-cd-block">${String(cdt.h).padStart(2,"0")}<i>h</i></span><span class="cx-cd-block">${String(cdt.m).padStart(2,"0")}<i>m</i></span><span class="cx-cd-block">${String(cdt.s).padStart(2,"0")}<i>s</i></span>`}
-                    </div>
-                </div>` : ""}
-                <a class="cx-cta-primary" href="${ctaHref}" data-page-action="TICKET">${escapeHtml(ctaLabel)} →</a>
-            </div>
+            <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
         </header>
-    `;
+        <div class="kk-ticket">
+            ${simpleViewMetaHtml(payload)}
+            <span class="kk-pill kk-pill-state${cerrada ? " is-closed" : ""}">${escapeHtml(chip)}</span>
+        </div>`;
+}
 
-    function buildRow(match, i) {
-        const totalCols = 7 + visibleMasters.length;
-        if (!match) {
-            return `<tr class="cx-row is-empty"><td class="cx-r-num">${String(i+1).padStart(2,"0")}</td><td colspan="${totalCols}" class="cx-r-empty">—</td></tr>`;
-        }
-        const homeFull = typeof getShortName === "function" ? getShortName(match.local) : match.local;
-        const awayFull = typeof getShortName === "function" ? getShortName(match.visitante) : match.visitante;
-        const pick = _upick(i);
-        const isLive = _live(match);
-        const isClosed = _closed(match);
-        const realSign = String(match.signo_actual || "").toUpperCase();
-        const isPlenoRow = i === 14;
-        const realRef = _coverRealRef(match, isPlenoRow);
-
-        let pickClass = "";
-        if (pick) {
-            if (realSign && _coverSignHit(pick, realRef, isPlenoRow)) pickClass = " is-hit";
-            else if (realSign) pickClass = " is-miss";
-            else pickClass = " is-signed";
-        }
-        if (isLive) pickClass += " is-live";
-        if (isClosed) pickClass += " is-closed";
-
-        const maestroCells = visibleMasters.map(col => {
-            const signs = coverPredictionSigns(predictions[col.id]);
-            const sign = signs[i] || "-";
-            const signEmpty = sign === "-" || sign === "—";
-            const signHit = isClosed && realSign && !signEmpty && _coverSignHit(sign, realRef, isPlenoRow);
-            const signMiss = isClosed && realSign && !signEmpty && !signHit;
-            const hitClass = signHit ? " is-hit" : (signMiss ? " is-miss" : "");
-            return `<td class="cx-r-ia ${_mtone(col)}"><span class="cx-ia-sign${signEmpty ? " is-empty" : ""}${hitClass}${isPlenoRow ? " is-pleno" : ""}" title="${escapeHtml(col.label)}">${escapeHtml(sign)}</span></td>`;
-        }).join("");
-
-        const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
-        let penaSign = "—";
-        if (i === 14) {
-            if (plenoConsenso.topScore && plenoConsenso.topScore[0]) penaSign = String(plenoConsenso.topScore[0]);
-        } else if (rowCons) {
-            if (String(rowCons.ganador || "").trim() && String(rowCons.ganador).trim() !== "-") {
-                penaSign = String(rowCons.ganador).trim();
-            } else if (Number(rowCons.total || 0) > 0 && coverPenaReading(rowCons)) {
-                penaSign = coverPenaReading(rowCons).sign || "—";
-            }
-        }
-        const penaEmpty = penaSign === "—" || penaSign === "-";
-        const penaHit = isClosed && realSign && !penaEmpty && _coverSignHit(penaSign, realRef, isPlenoRow);
-        const penaMiss = isClosed && realSign && !penaEmpty && !penaHit;
-        const penaState = penaHit ? " is-hit" : (penaMiss ? " is-miss" : "");
-        const penaCell = `<td class="cx-r-ia is-pena"><span class="cx-ia-sign is-pena${penaEmpty ? " is-empty" : ""}${penaState}${isPlenoRow ? " is-pleno" : ""}" title="Consenso de La Peña">${escapeHtml(penaSign)}</span></td>`;
-
-        return `
-            <tr class="cx-row${pickClass}" data-page-action="TICKET" data-match-id="${escapeHtml(match.id)}">
-                <td class="cx-r-num"><button type="button" class="cx-r-num-btn" aria-label="Abrir el boleto">${String(i+1).padStart(2,"0")}</button></td>
-                <td class="cx-r-team is-home" title="${escapeHtml(homeFull)}">${escapeHtml(_fitName(homeFull, 14))}</td>
-                <td class="cx-r-vs">vs</td>
-                <td class="cx-r-team is-away" title="${escapeHtml(awayFull)}">${escapeHtml(_fitName(awayFull, 14))}</td>
-                ${_whenCell(match)}
-                <td class="cx-r-pick">${pick ? `<span class="cx-r-pick-val">${escapeHtml(pick)}</span>` : `<span class="cx-r-pick-val is-empty">—</span>`}</td>
-                ${maestroCells}
-                ${penaCell}
-            </tr>
-        `;
-    }
-
-    const masterHeads = visibleMasters.map(col =>
-        `<th class="cx-r-ia ${_mtone(col)}" title="${escapeHtml(col.label || col.id)}">${_mlogoImg(col, 18)}<em>${escapeHtml(_mshort(col))}</em></th>`
-    ).join("");
-    const tableMatches = matches.slice(0, 14);
-    const plenoMatch = matches[14];
-    const boletoBody = tableMatches.map((m, i) => buildRow(m, i)).join("");
-    const plenoPanelHtml = _coverPlenoPanel(plenoMatch, predictions, visibleMasters, plenoConsenso);
-    const totalCols = 7 + visibleMasters.length;
-    const boletoEmpty = tableMatches.length === 0
-        ? `<tr><td colspan="${totalCols}" class="cx-r-empty-grid">Los partidos se publicarán al cierre de la jornada anterior.</td></tr>`
+function renderNewspaperCoverPageV3() {
+    const payload = simpleViewPayload();
+    const jornada = state.data?.jornada || state.jornada || "1";
+    const editable = kawaiiPuedeEditarLinea();
+    const aviso = state.user
+        ? (editable
+            ? `<p class="kk-hint">Marca tus signos en la columna <b>Tu</b> y guarda con el botón de arriba.</p>`
+            : "")
         : "";
 
-    const boletoHtml = `
-        <section class="cx-boleto" aria-label="Quiniela de la jornada">
-            <header class="cx-boleto-head">
-                <div class="cx-boleto-title">
-                    <span class="cx-boleto-jornada">QUINIELA</span>
-                    <span class="cx-boleto-sub">J${escapeHtml(String(jornada))} · 15 PARTIDOS</span>
-                </div>
-                <div class="cx-boleto-progress">
-                    <span class="cx-boleto-status"><b>${userDone}</b>/${userTotal} FIRMADOS</span>
-                    <span class="cx-boleto-bar"><i style="width:${((userDone/userTotal)*100).toFixed(1)}%"></i></span>
-                </div>
-            </header>
-            <div class="cx-boleto-table-wrap">
-                <table class="cx-boleto-table">
-                    <thead>
-                        <tr>
-                            <th class="cx-r-num">Nº</th>
-                            <th colspan="3" class="cx-r-teams-head">PARTIDO</th>
-                            <th class="cx-r-when">HORA / RES</th>
-                            <th class="cx-r-pick">TÚ</th>
-                            ${masterHeads}
-                            <th class="cx-r-ia is-pena" title="Consenso de La Peña"><em>PEÑA</em></th>
-                        </tr>
-                    </thead>
-                    <tbody>${boletoBody}${boletoEmpty}</tbody>
-                </table>
-            </div>
-        </section>
-    `;
-
-    function liveCard(match) {
-        if (!match) return "";
-        const homeFull = _liveTeamLabel(_matchSideName(match, "home"), 12);
-        const awayFull = _liveTeamLabel(_matchSideName(match, "away"), 12);
-        const score = _liveScoreText(match);
-        const minute = _liveMinuteLabel(match);
-        const comp = _liveCompLabel(match);
-        return `
-            <div class="cx-live-card" data-page-action="LIVE">
-                <span class="cx-live-pulse"></span>
-                <span class="cx-live-mincell">
-                    <span class="cx-live-min">${escapeHtml(String(minute))}</span>
-                    ${comp ? `<span class="cx-live-comp">${escapeHtml(comp)}</span>` : ""}
-                </span>
-                <div class="cx-live-match">
-                    <span class="cx-live-team is-home">${escapeHtml(homeFull)}</span>
-                    <span class="cx-live-score">${escapeHtml(String(score))}</span>
-                    <span class="cx-live-team is-away">${escapeHtml(awayFull)}</span>
-                </div>
-            </div>
-        `;
-    }
-
-    const livePanelHtml = `
-        <section class="cx-panel cx-live cx-accent-green">
-            <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow"><span class="cx-live-pulse is-on"></span>EN DIRECTO</span>
-                <span class="cx-pn-meta">${liveCount} PARTIDO${liveCount === 1 ? "" : "S"}</span>
-            </header>
-            <div class="cx-pn-body">
-                ${liveCount
-                    ? liveMatches.slice(0, 4).map(liveCard).join("")
-                    : '<div class="cx-empty">Ahora mismo no hay partidos en directo</div>'}
-            </div>
-            ${liveCount > 0 ? `<a class="cx-pn-more" href="/directo" data-page-action="LIVE">VER DIRECTO COMPLETO →</a>` : ""}
-        </section>
-    `;
-
-    const finishedCards = finishedMatches.slice(-5).reverse();
-    const upcomingQuiniela = matches.filter(m => !_live(m) && !_finished(m)).slice(0, 5);
-
-    // Partidos de hoy de Primera/Segunda que NO están en la quiniela 15.
-    const quinielaKeys = quinielaPairs;
-    const leagueToday = (typeof getTodayLeagueMatches === "function" ? getTodayLeagueMatches() : [])
-        .filter(m => !isLiveMatch(m) && !isFinishedStatus(String(m.status || "")))
-        .filter(m => {
-            const k = (String(m.local || "").trim() + "|" + String(m.visitante || "").trim()).toLowerCase();
-            return !quinielaKeys.has(k);
-        })
-        .slice(0, 8);
-
-    const leagueCard = (m) => {
-        const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
-        const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
-        const when = typeof fixtureScheduleDisplay === "function"
-            ? fixtureScheduleDisplay(m)
-            : (m.hora || m.kickoff || "");
-        return `
-            <div class="cx-up-card">
-                <span class="cx-up-when">${escapeHtml(String(when))}</span>
-                <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
-            </div>`;
-    };
-
-    const _whenParts = (m) => (typeof fixtureScheduleParts === "function"
-        ? fixtureScheduleParts(m)
-        : { day: "", time: "", label: (typeof fixtureScheduleDisplay === "function" ? fixtureScheduleDisplay(m) : (m.hora || m.kickoff || "")) });
-    const _whenMarkup = (parts) => {
-        const time = parts.time || parts.label || "";
-        const day = (parts.day && parts.time) ? parts.day : "";
-        return `<b class="cx-up-time">${escapeHtml(String(time))}</b>${day ? `<small class="cx-up-day">${escapeHtml(String(day))}</small>` : ""}`;
-    };
-    const _finishedMarkup = (score) => `<b class="cx-up-time">${escapeHtml(String(score))}</b>`;
-
-    const jornadaCards = [
-        ...finishedCards.map(m => {
-            const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
-            const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
-            const score = _liveScoreText(m);
-            return `
-                <div class="cx-up-card is-ft">
-                    <span class="cx-up-when">${_finishedMarkup(score)}</span>
-                    <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>FT</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
-                </div>
-            `;
-        }),
-        ...upcomingQuiniela.map(m => {
-            const homeFull = typeof getShortName === "function" ? getShortName(m.local) : m.local;
-            const awayFull = typeof getShortName === "function" ? getShortName(m.visitante) : m.visitante;
-            const when = typeof fixtureScheduleDisplay === "function"
-                ? fixtureScheduleDisplay(m)
-                : (m.hora || m.kickoff || "");
-            return `
-                <div class="cx-up-card">
-                    <span class="cx-up-when">${_whenMarkup(_whenParts(m))}</span>
-                    <span class="cx-up-match"><b>${escapeHtml(_fitName(homeFull, 12))}</b> <i>vs</i> <b>${escapeHtml(_fitName(awayFull, 12))}</b></span>
-                </div>
-            `;
-        }),
-        ...leagueToday.map(leagueCard),
-    ];
-    const jornadaTitle = finishedCards.length && (upcomingQuiniela.length || leagueToday.length)
-        ? "JORNADA"
-        : (finishedCards.length ? "RESULTADOS" : "PRÓXIMOS");
-    const upcomingHtml = `
-        <section class="cx-panel cx-upcoming cx-accent-cyan">
-            <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow">${jornadaTitle}</span>
-                <span class="cx-pn-meta">${jornadaCards.length}</span>
-            </header>
-            <div class="cx-pn-body">
-                ${jornadaCards.length ? jornadaCards.join("") : '<div class="cx-empty">Sin partidos próximos</div>'}
-            </div>
-        </section>
-    `;
-
-    const porraHtml = `
-        <section class="cx-panel cx-porra cx-accent-gold" data-page-action="TICKET" aria-label="La porra">
-            <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow">LA PORRA</span>
-                <span class="cx-pn-meta">+2 PTS</span>
-            </header>
-            <div class="cx-pn-body cx-porra-body" id="cover-porra-content">
-                <span class="cx-porra-loading">Cargando…</span>
-            </div>
-        </section>
-    `;
-
-    const newsRows = typeof normalizeNewsRows === "function"
-        ? normalizeNewsRows(state.newsRadar || {})
-        : [];
-    const newsHtml = `
-        <section class="cx-panel cx-news cx-accent-pink">
-            <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow">ÚLTIMA HORA</span>
-                <a class="cx-pn-meta" href="/?view=NEWS_PAGE" data-page-action="NEWS">Ver todas →</a>
-            </header>
-            <div class="cx-pn-body" id="cover-news-content">
-                ${newsRows.length && typeof renderNewsRows === "function"
-                    ? renderNewsRows(newsRows, { limit: 4 })
-                    : '<div class="cx-empty">Cargando últimas noticias…</div>'}
-            </div>
-        </section>
-    `;
-
-    const consensusRows = [
-        { sign: "1", pct: consensusPct1 },
-        { sign: "X", pct: consensusPctX },
-        { sign: "2", pct: consensusPct2 },
-    ];
-    const consensusPeak = Math.max(consensusPct1, consensusPctX, consensusPct2);
-    const consensusMeta = penaVoters
-        ? `${penaVoters} PEÑISTA${penaVoters === 1 ? "" : "S"}`
-        : "SIN VOTOS";
-    const consensusHtml = `
-        <section class="cx-panel cx-consensus cx-accent-purple">
-            <header class="cx-pn-head">
-                <span class="cx-pn-eyebrow">VOTO LA PEÑA</span>
-                <span class="cx-pn-meta">${escapeHtml(consensusMeta)}</span>
-            </header>
-            <div class="cx-pn-body">
-                ${penaVoters ? consensusRows.map(item => `
-                <div class="cx-cons-row${item.pct === consensusPeak ? " is-peak" : ""}">
-                    <span class="cx-cons-lab">${item.sign}</span>
-                    <span class="cx-cons-bar" aria-hidden="true"><i style="width:${item.pct}%"></i></span>
-                    <span class="cx-cons-pct">${item.pct}%</span>
-                </div>`).join("") : '<div class="cx-empty">Aún no hay consenso de La Peña</div>'}
-            </div>
-        </section>
-    `;
-
-    // La cuenta atrás la arranca arena.js justo después de montar este HTML.
-    // Antes había aquí un setTimeout + setInterval propio: con cada render de la
-    // portada se sumaba un intervalo nuevo sin clearInterval y convivían dos
-    // ticks con predicados distintos (uno pintaba CERRADA y el otro lo tapaba).
-
-    return `<div class="cx">
-        <div id="cx-simple-view" class="cx-sv">${simpleViewHtml()}</div>
-        <details class="cx-more">
-            <summary class="cx-sv-more-summary">Otras secciones de la portada (directo, La Pe&ntilde;a, clasificaciones, porra, noticias)</summary>
-            ${tickerHtml}
-            ${headerHtml}
-            <main class="cx-grid">
-            <aside class="cx-col cx-col-left" aria-label="Clasificaciones y voto">
-                ${buildStandings("LA PEÑA · TOP 5", fallbackPena, "cyan")}
-                ${buildStandings("MAESTROS · TOP 5", fallbackIa, "gold")}
-                ${consensusHtml}
-            </aside>
-            <section class="cx-col cx-col-center">
-                ${boletoHtml}
-                ${plenoPanelHtml}
+    return `<div class="cx kk-page">
+        <div class="kk-wrap">
+            ${kawaiiCabeceraHtml(jornada, payload)}
+            ${kawaiiLoginHtml()}
+            <div class="kk-live-wrap">${kawaiiDirectoHtml()}</div>
+            <section class="kk-card kk-table-card" aria-label="Quiniela de la jornada">
+                <h2 class="kk-card-title">📅 Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
+                ${aviso}
+                ${simpleViewHtml()}
             </section>
-            <aside class="cx-col cx-col-right" aria-label="Directo, porra, próximos y noticias">
-                ${livePanelHtml}
-                ${upcomingHtml}
-                ${porraHtml}
-                ${newsHtml}
-            </aside>
-            </main>
-        </details>
-    </div>
-    <div hidden aria-hidden="true" class="cp-legacy-stubs">
-        <div class="cp-top">
-            <header class="cp-hero">
-                <div class="cp-command-brand">
-                    <img class="cp-hero-crest" src="${crestSrc}" alt="" width="72" height="72" decoding="async" fetchpriority="high">
-                </div>
-            </header>
-            <div id="cp-scorebar"></div>
-            <div id="cp-urgency"></div>
+            <section class="kk-card kk-rank-card" aria-label="Clasificación">
+                <h2 class="kk-card-title">🏆 Clasificación <span class="kk-tag">total · jornada</span></h2>
+                <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
+            </section>
+            <footer class="kk-foot">🐾 una sola página · resultados en directo, ✓ y ✗ por casilla · sin juegos ni quiz</footer>
         </div>
-        <div class="cp-main">
-            <section class="cp-arena">
-                <article class="cp-duel"></article>
-                <article class="cp-featured"></article>
-                ${coverTrashTalkHtml()}
-            </section>
-        </div>
-        <section class="cp-ops">
-            <section class="cp-journey-card">
-                <span id="cover-porra-step-status">stub</span>
-            </section>
-        </section>
     </div>`;
-
-/* ==========================================================================
-   PATCH COVER — Actualizacion quirurgica sin parpadeo
-   Evita el repintado completo de la portada cuando solo cambian marcadores,
-   clasificaciones o consenso. Es global: esta declarada a nivel superior, asi
-   que los guards de events.js y quantum_final.js la encuentran con
-   `typeof patchCoverPage === "function"`. Devuelve false ante filas
-   desalineadas para que el llamante caiga en el render completo.
-   ========================================================================== */
-function _coverFindRowById(id) {
-    if (!id) return null;
-    return document.querySelector(`.cx-boleto-table tbody tr[data-match-id="${CSS.escape(String(id))}"]`);
-}
-function _coverPatchWhenCell(match, cell) {
-    if (!cell || !match) return false;
-    const kind = _whenKind(match);
-    const label = _whenLabel(match) || "—";
-    const kindClass = kind === "live" ? " is-live-score" : (kind === "finished" ? " is-ft-score" : " is-schedule");
-    const newClass = `cx-r-when${kindClass}`;
-    const newText = String(label);
-    if (cell.textContent.trim() === newText && cell.className === newClass && cell.dataset.coverWhen === kind) return false;
-    cell.textContent = newText;
-    cell.className = newClass;
-    cell.dataset.coverWhen = kind;
-    cell.classList.add("is-updating");
-    setTimeout(() => cell.classList.remove("is-updating"), 600);
-    return true;
-}
-function patchCoverPage() {
-    try {
-        if (typeof state === "undefined" || !state.data) return false;
-        if (typeof isCoverPage === "function" && !isCoverPage()) return false;
-        const cx = document.querySelector(".cx");
-        if (!cx) return false;
-        const allMatches = (state.data.partidos || []).slice(0, 15);
-        const matches = allMatches.slice(0, 14);
-        if (!matches.length) return false;
-        const predictions = state.data.predicciones_actuales || {};
-        const consenso = Array.isArray(state.data.consenso_pena) ? state.data.consenso_pena : [];
-        const plenoConsenso = state.data.consenso_pleno_pena || {};
-        const masterCols = coverMasterColumns();
-        const visibleMasters = _visibleMasters(masterCols);
-        // 1) Ticker — reconstruir solo si cambio el contenido
-        const quinielaPairs = new Set(allMatches.map(_matchPairKey));
-        const liveMatches = [...allMatches.filter(_live), ..._otherLiveMatchesToday(quinielaPairs)];
-        const liveCount = liveMatches.length;
-        const finishedMatches = allMatches.filter(m => _finished(m) && _hasScore(m));
-        const comentarista = state.data.comentarista || {};
-        const comentarios = Array.isArray(comentarista.comentarios) ? comentarista.comentarios : [];
-        const tickerTrack = cx.querySelector(".cx-ticker-track");
-        if (tickerTrack) {
-            const buildTickerItems = () => {
-                const liveItems = liveMatches.map(m => {
-                    const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
-                    const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
-                    const score = _liveScoreText(m);
-                    const minute = _liveMinuteLabel(m);
-                    return `<span class="cx-ticker-item"><i class="cx-ticker-dot"></i><b>${escapeHtml(String(minute))}</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
-                }).join("");
-                const ftItems = finishedMatches.map(m => {
-                    const home = _liveTeamLabel(_matchSideName(m, "home"), 11);
-                    const away = _liveTeamLabel(_matchSideName(m, "away"), 11);
-                    const score = _liveScoreText(m);
-                    return `<span class="cx-ticker-item is-ft"><i class="cx-ticker-dot is-ft"></i><b>FT</b> ${escapeHtml(home)} <em>${escapeHtml(String(score || "—"))}</em> ${escapeHtml(away)}</span>`;
-                }).join("");
-                const commItems = comentarios.map(c => {
-                    const local = _abbr(c.local, 3);
-                    const visitante = _abbr(c.visitante, 3);
-                    const contexto = `${local}${c.marcador ? ` ${String(c.marcador)} ` : "–"}${visitante}`;
-                    return `<span class="cx-ticker-item is-comentario"><i class="cx-ticker-dot is-comentario"></i><b>COMENTARISTA</b> ${escapeHtml(String(c.texto || ""))} <em>${escapeHtml(contexto)}</em></span>`;
-                }).join("");
-                return liveItems + ftItems + commItems;
-            };
-            const newTrackItems = buildTickerItems();
-            const tickerLabel = liveCount ? "⚽ EN DIRECTO" : (finishedMatches.length ? "⚽ RESULTADOS" : "");
-            const labelEl = cx.querySelector(".cx-ticker-label");
-            if (labelEl && labelEl.textContent !== tickerLabel) labelEl.textContent = tickerLabel;
-            // Solo si el contenido cambio de verdad
-            const currentSig = tickerTrack.dataset.sig || "";
-            const newSig = `${liveCount}|${finishedMatches.length}|${comentarios.length}|${newTrackItems.length}`;
-            if (currentSig !== newSig || !tickerTrack.dataset.sig) {
-                const full = `<span class="cx-ticker-label">${escapeHtml(tickerLabel)}</span>${newTrackItems}${newTrackItems}`;
-                // Evitar parpadeo: solo si hay cambio
-                if (tickerTrack.innerHTML.length !== full.length || tickerTrack.textContent.length < 10) {
-                    tickerTrack.innerHTML = full;
-                }
-                tickerTrack.dataset.sig = newSig;
-            }
-        }
-        // 2) KPIs — actualizar solo contadores respaldados por el payload.
-        const decidedEl = cx.querySelector("#cx-decided");
-        const decidedCount = finishedMatches.length;
-        if (decidedEl && decidedEl.textContent !== String(decidedCount)) decidedEl.textContent = String(decidedCount);
-        const jornadaEl = cx.querySelector("#cx-jornada");
-        const jornadaValue = state.data.jornada;
-        if (jornadaEl && jornadaValue != null && jornadaEl.textContent !== String(jornadaValue)) jornadaEl.textContent = String(jornadaValue);
-        const rankingRows = coverRankingRows().sort((a, b) => b.jornada - a.jornada || b.total - a.total || a.name.localeCompare(b.name, "es"));
-        const leader = rankingRows.find(row => row.jornada > 0);
-        const leaderEl = cx.querySelector("#cx-leader");
-        if (leaderEl && leader) leaderEl.textContent = `${_fitName(leader.name, 12)} · ${leader.jornada}`;
-        const userDone = (state.my_signs || []).filter(s => s && s !== "-").length;
-        const statusEl = cx.querySelector(".cx-boleto-status b");
-        const barEl = cx.querySelector(".cx-boleto-bar i");
-        if (statusEl && statusEl.textContent !== String(userDone)) statusEl.textContent = String(userDone);
-        if (barEl) {
-            const w = `${((userDone/15)*100).toFixed(1)}%`;
-            if (barEl.style.width !== w) barEl.style.width = w;
-        }
-        const plenoPanel = _coverPlenoPanel(allMatches[14], predictions, visibleMasters, plenoConsenso);
-        const plenoPanelEl = cx.querySelector(".cx-pleno-panel");
-        if (plenoPanelEl && allMatches[14]) {
-            if (plenoPanelEl.outerHTML !== plenoPanel) plenoPanelEl.outerHTML = plenoPanel;
-        } else if (!plenoPanelEl && allMatches[14]) {
-            cx.querySelector(".cx-col-center")?.insertAdjacentHTML("beforeend", plenoPanel);
-        } else if (plenoPanelEl && !allMatches[14]) {
-            plenoPanelEl.remove();
-        }
-        // 3) Boleto — parchear cada fila sin recrear la tabla
-        const tbody = cx.querySelector(".cx-boleto-table tbody");
-        if (tbody) {
-            const rows = [...tbody.querySelectorAll("tr.cx-row")];
-            // A4: el emparejamiento era POSICIONAL (`rows[idx]`) sobre una tabla ya
-            // pintada. Al cambiar de jornada, o si la tabla renderizada tiene otra
-            // longitud u orden, la fila de la posicion N recibia los signos y los
-            // hits del partido N de OTRA jornada: aciertos y fallos en la fila
-            // equivocada, sin nada visible que lo delatara. `data-match-id` es lo
-            // unico estable. Si algo no cuadra, se devuelve false y quien llama
-            // hace el render completo: parchar a medias seria peor.
-            const alineado = filasCubiertaAlineadas(
-                rows.map((row) => row.dataset.matchId),
-                matches.map((match) => match.id)
-            );
-            if (!alineado) return false;
-            matches.forEach((match, idx) => {
-                const row = rows[idx];
-                if (!row) return;
-
-                const isLive = _live(match);
-                const isClosed = _closed(match);
-                const realSign = String(match.signo_actual || "").toUpperCase();
-                const isPlenoRow = false;
-                const realRef = _coverRealRef(match, isPlenoRow);
-                const pick = _upick(idx);
-                // clases de fila
-                row.classList.toggle("is-live", !!isLive);
-                row.classList.toggle("is-closed", !!isClosed);
-                if (pick) {
-                    if (realSign && _coverSignHit(pick, realRef, isPlenoRow)) {
-                        row.classList.add("is-hit");
-                        row.classList.remove("is-miss");
-                    } else if (realSign) {
-                        row.classList.add("is-miss");
-                        row.classList.remove("is-hit");
-                    } else {
-                        row.classList.remove("is-hit", "is-miss");
-                    }
-                }
-                // HORA / RES
-                const whenCell = row.querySelector(".cx-r-when");
-                if (whenCell) _coverPatchWhenCell(match, whenCell);
-                // Signos IA
-                visibleMasters.forEach((col, colIdx) => {
-                    const signs = coverPredictionSigns(predictions[col.id]);
-                    const sign = signs[idx] || "-";
-                    const td = row.querySelectorAll(".cx-r-ia")[colIdx];
-                    if (!td) return;
-                    const span = td.querySelector(".cx-ia-sign");
-                    if (!span) return;
-                    if (span.textContent.trim() !== String(sign)) {
-                        span.textContent = String(sign);
-                        span.classList.add("is-updating");
-                        setTimeout(() => span.classList.remove("is-updating"), 600);
-                    }
-                    const empty = sign === "-" || sign === "—";
-                    span.classList.toggle("is-empty", !!empty);
-                    const hit = isClosed && realSign && !empty && _coverSignHit(sign, realRef, isPlenoRow);
-                    const miss = isClosed && realSign && !empty && !hit;
-                    span.classList.toggle("is-hit", !!hit);
-                    span.classList.toggle("is-miss", !!miss);
-                });
-                // Peña
-                const penaTd = row.querySelector(".cx-r-ia.is-pena");
-                if (penaTd) {
-                    const span = penaTd.querySelector(".cx-ia-sign");
-                    if (span) {
-                        const rowCons = consenso.find(r => Number(r.id) === Number(match.id));
-                        let penaSign = "—";
-                        if (idx === 14) {
-                            if (plenoConsenso.topScore && plenoConsenso.topScore[0]) penaSign = String(plenoConsenso.topScore[0]);
-                        } else if (rowCons) {
-                            if (String(rowCons.ganador || "").trim() && String(rowCons.ganador).trim() !== "-") {
-                                penaSign = String(rowCons.ganador).trim();
-                            } else if (Number(rowCons.total || 0) > 0 && coverPenaReading(rowCons)) {
-                                penaSign = coverPenaReading(rowCons).sign || "—";
-                            }
-                        }
-                        if (span.textContent.trim() !== String(penaSign)) {
-                            span.textContent = String(penaSign);
-                            span.classList.add("is-updating");
-                            setTimeout(() => span.classList.remove("is-updating"), 600);
-                        }
-                        const empty = penaSign === "—" || penaSign === "-";
-                        span.classList.toggle("is-empty", !!empty);
-                        const hit = isClosed && realSign && !empty && _coverSignHit(penaSign, realRef, isPlenoRow);
-                        const miss = isClosed && realSign && !empty && !hit;
-                        span.classList.toggle("is-hit", !!hit);
-                        span.classList.toggle("is-miss", !!miss);
-                    }
-                }
-            });
-        }
-        // 4) Live panel — solo si cambia el numero de partidos
-        const livePanelBody = cx.querySelector(".cx-live .cx-pn-body");
-        if (livePanelBody) {
-            const existingCount = livePanelBody.querySelectorAll(".cx-live-card").length;
-            if (existingCount !== liveCount) {
-                // Re-render ligero del panel live
-                const cardsHtml = liveMatches.slice(0,4).map(m => {
-                    const homeFull = _liveTeamLabel(_matchSideName(m, "home"), 12);
-                    const awayFull = _liveTeamLabel(_matchSideName(m, "away"), 12);
-                    const score = _liveScoreText(m);
-                    const minute = _liveMinuteLabel(m);
-                    const comp = _liveCompLabel(m);
-                    return `<div class="cx-live-card" data-page-action="LIVE"><span class="cx-live-pulse"></span><span class="cx-live-mincell"><span class="cx-live-min">${escapeHtml(String(minute))}</span>${comp ? `<span class="cx-live-comp">${escapeHtml(comp)}</span>` : ""}</span><div class="cx-live-match"><span class="cx-live-team is-home">${escapeHtml(homeFull)}</span><span class="cx-live-score">${escapeHtml(String(score))}</span><span class="cx-live-team is-away">${escapeHtml(awayFull)}</span></div></div>`;
-                }).join("") || '<div class="cx-empty">Ahora mismo no hay partidos en directo</div>';
-                livePanelBody.innerHTML = cardsHtml;
-            } else {
-                // Parchear solo marcadores y minutos
-                livePanelBody.querySelectorAll(".cx-live-card").forEach((card, i) => {
-                    const m = liveMatches[i];
-                    if (!m) return;
-                    const scoreEl = card.querySelector(".cx-live-score");
-                    const minEl = card.querySelector(".cx-live-min");
-                    const newScore = _liveScoreText(m);
-                    const newMin = _liveMinuteLabel(m);
-                    if (scoreEl && scoreEl.textContent !== String(newScore)) scoreEl.textContent = String(newScore);
-                    if (minEl && minEl.textContent !== String(newMin)) minEl.textContent = String(newMin);
-                });
-            }
-            const metaEl = cx.querySelector(".cx-live .cx-pn-meta");
-            if (metaEl) {
-                const newMeta = `${liveCount} PARTIDO${liveCount===1?"":"S"}`;
-                if (metaEl.textContent !== newMeta) metaEl.textContent = newMeta;
-            }
-        }
-        // 5) No forzamos re-render de standings/voto para no parpadear — se actualizan en el siguiente full render si hace falta
-        // Devolvemos true: parche aplicado, no hace falta render completo
-        return true;
-    } catch (e) {
-        console.warn("[cover] patch failed, fallback to full render", e);
-        return false;
-    }
-}
-
 }

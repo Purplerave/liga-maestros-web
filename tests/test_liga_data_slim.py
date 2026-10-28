@@ -37,7 +37,6 @@ HEAVY_KEYS = {
     "consenso_pena",
     "consenso_pleno_pena",
     "ranking_maestros",
-    "trash_talk",
     "auth_enabled",
     "live_stream_enabled",
     "is_admin",
@@ -114,20 +113,17 @@ def test_slim_skips_prediction_builders(monkeypatch, tmp_path):
     client = app.test_client()
 
     predictions = _spy(monkeypatch, "build_predictions_payload")
-    trash_talk = _spy(monkeypatch, "build_trash_talk")
     match_info = _spy(monkeypatch, "load_match_info_for_jornada")
 
     full = client.get("/api/liga/data")
     assert full.status_code == 200
     assert len(predictions) == 1
-    assert len(trash_talk) == 1
     assert len(match_info) == 1
 
     slim = client.get("/api/liga/data?slim=1")
     assert slim.status_code == 200
     # Ni una sola llamada más: el poll no ha reconstruido nada de esto.
     assert len(predictions) == 1
-    assert len(trash_talk) == 1
     assert len(match_info) == 1
 
 

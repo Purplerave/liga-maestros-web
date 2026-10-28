@@ -46,15 +46,13 @@ const state = {
     }
 };
 
-const initialView = new URLSearchParams(window.location.search).get("view");
-if (initialView) state.currentFilter = ["MATCHES", "PANEL"].includes(initialView) ? "ALL" : initialView;
-if (initialView === "NEWS") state.currentFilter = "NEWS_PAGE";
-const initialContest = new URLSearchParams(window.location.search).get("contest");
-if (initialContest) state.contestView = initialContest;
-if (state.currentFilter === "CONTEST") {
-    state.currentFilter = "ALL";
-    state.contestView = "CONTEST_GENERAL";
-}
+// Pagina unica: la quiniela kawaii (vista ALL) es la unica con contenido.
+// Los enlaces antiguos con ?view=... (directo, boleto, ligas, juegos, quiz)
+// aterrizan aqui en vez de abrir vistas retiradas, y /directo sigue
+// redirigiendo para no romper los enlaces guardados.
+state.currentFilter = "ALL";
+state.contestView = "MATCHES";
+state.newspaperPage = "ALL";
 document.body.classList.toggle("newspaper-cover-active", state.contestView === "MATCHES" && state.currentFilter === "ALL");
 document.body.classList.toggle("newspaper-ticket-active", state.contestView === "MATCHES" && state.currentFilter === "TICKET");
 

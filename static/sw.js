@@ -153,12 +153,12 @@ self.addEventListener('fetch', event => {
        `no-store, no-cache, must-revalidate`, asi que cachearlos era.cachear
        basura. Se respeta la cabecera y, si aun asi arrives cacheado, se
        revalida contra la red. */
-    if (path.startsWith('/static/') || path.startsWith('/juegos/')) {
+    if (path.startsWith('/static/')) {
         event.respondWith(staticNoStore(request));
         return;
     }
 
-    // Resto de navegacion (landing, 404, etc.): red primero, con caducidad.
+    // Resto de navegacion (404, legales, etc.): red primero, con caducidad.
     event.respondWith(
         networkFirst(request, CACHE, NAV_TTL_MS).catch(() => caches.match(request))
     );

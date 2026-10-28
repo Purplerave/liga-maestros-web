@@ -22,16 +22,9 @@ const CommandPalette = {
 
     /* ---------- Fuente de comandos ---------- */
     commands() {
-        const pages = [
-            ["ALL", "Portada", "Resumen de la jornada", "📰"],
-            ["TICKET", "Quiniela", "Rellena y guarda tus 15 signos", "🎫"],
-            ["LIVE", "Directo", "Marcadores en vivo", "🔴"],
-            ["STANDINGS", "Ligas", "Clasificaciones Primera y Segunda", "📊"],
-            ["SNAKE", "Juegos", "Snake Gol, Arkanoid e Invaders", "🎮"],
-            ["CONTEST", "La Peña", "Rankings, premios y palmares", "🏆"],
-            ["QUIZ", "Quiz", "Preguntas de la jornada", "❓"],
-            ["NEWS", "Última hora", "Titulares del radar de prensa", "🗞️"],
-        ];
+        // Pagina unica: no hay a donde ir. Los comandos de navegacion salen con
+        // los juegos, el quiz y las demas vistas; quedan los de accion.
+        const pages = [];
 
         const list = pages.map(([page, title, desc, icon]) => ({
             id: `page:${page}`,
