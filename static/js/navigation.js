@@ -26,6 +26,9 @@ try {
 }
 
 const VIEW_STYLES = {
+    // La portada tambien permite elegir el pleno: sin esta hoja el dialogo se
+    // inserta al final de la pagina, fuera de la vista del usuario.
+    ALL: [["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")]],
     CONTEST: [
         ["view-contest-styles", versionedAsset("/static/css/pages/contest.css", "contest-9")],
         ["view-profile-styles", versionedAsset("/static/css/pages/profile.css", "profile-4")],
@@ -51,13 +54,13 @@ const VIEW_SCRIPTS = {
         ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-83")],
         // El pleno de la columna «Tú» se elige con el mismo modal que usa el
         // boleto: la pagina unica lo pide al estar la jornada abierta.
-        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-3")],
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     TICKET: [
         ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-11")],
-        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-2")],
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
 };
 
