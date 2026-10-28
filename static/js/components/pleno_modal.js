@@ -1,8 +1,15 @@
 /* Selector accesible del marcador del Pleno al 15. */
 
 function openPlenoModal(idx) {
-    const match = (state.data?.partidos || [])[idx];
-    if (!match) return;
+    const matches = state.data?.partidos || [];
+    // El indice es el numero de casilla menos uno, no necesariamente la
+    // posicion en la lista: una jornada parcial puede tener huecos.
+    const match = matches.find(item => Number(item.id) === idx + 1)
+        || (matches[idx]?.id == null ? matches[idx] : null);
+    if (!match) {
+        if (typeof showToast === "function") showToast("No se ha podido cargar el partido del Pleno al 15. Actualiza la página e inténtalo de nuevo.", "error");
+        return;
+    }
 
     const validGoals = ["0", "1", "2", "M"];
     const current = String(state.my_signs[idx] || "0-0").toUpperCase();
