@@ -139,6 +139,9 @@ class LigaDataPayload(_StrictBase):
     standings: dict[str, Any] = Field(default_factory=dict)
     multi_league_standings: dict[str, Any] = Field(default_factory=dict)
     participant_contract: ParticipantContract = Field(default_factory=ParticipantContract)
+    # Vista simple por columnas de la portada (J17): columnas, filas con el
+    # resultado ya enlazado y aciertos calculados en backend con scoring.py.
+    simple_view: dict[str, Any] = Field(default_factory=dict)
     match_info: dict[str, Any] = Field(default_factory=dict)
     predicciones_actuales: dict[str, Any] = Field(default_factory=dict)
     consenso_pena: list[Any] = Field(default_factory=list)

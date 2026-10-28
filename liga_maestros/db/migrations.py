@@ -688,6 +688,69 @@ def ensure_jornada_16(conn):
     return imported
 
 
+# Boletos editoriales de la J17 (tabla 4 del brief de la vista simple, ver
+# informes/BRIEF-vista-simple-J17.md). Signos y plenos literales: no tocar.
+#
+# Van en codigo y no en data/predicciones_J17.json a proposito. El gate de CI
+# (tests/test_jornada_vigente_gate.py) toma el predicciones_J*.json de mayor
+# numero como semilla vigente y exige para ella las 15 horas y el boleto de
+# Pavo: la casilla 14 (Tenerife (F) - Athletic (F)) va SIN hora verificada y
+# Pavo no ha mandado linea para la J17, asi que un fichero con ese nombre
+# pondria esa puerta en rojo sin que haya nada roto (y publicar la hora de la
+# 14 seria inventar datos). La leccion de la J16 se respeta igual: los signos
+# acaban en la tabla predicciones, que es de donde lee la pagina.
+J17_EDITORIAL_TICKETS = {
+    "tecnotron": [
+        "2", "1", "1", "1", "2", "2", "1", "1", "12", "2", "X", "X2", "2", "1X", "2-1",
+    ],
+    "programa": [
+        "2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0",
+    ],
+    # MrPurple (Pablo) pendiente: sin linea, no se inventa ninguna fila.
+}
+
+
+def _import_inline_prediction_tickets(conn, jornada, tickets):
+    """Importa boletos escritos en el propio codigo a la tabla predicciones.
+
+    Mismo contrato que _import_compact_prediction_tickets (15 signos validados
+    con normalize_prediction_sign, INSERT OR REPLACE idempotente), solo cambia
+    el origen de los datos.
+    """
+    imported = 0
+    for uid, raw_signs in tickets.items():
+        signs = [normalize_prediction_sign(pid, value) for pid, value in enumerate(raw_signs, start=1)]
+        if len(signs) != 15 or any(not sign or sign == "-" for sign in signs):
+            continue
+        conn.executemany(
+            "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+            ((str(uid), int(jornada), partido_id, sign) for partido_id, sign in enumerate(signs, start=1)),
+        )
+        imported += len(signs)
+    if imported:
+        conn.commit()
+    return imported
+
+
+def ensure_jornada_17(conn):
+    """Semilla de la Jornada 17 (boleto SELAE 18, concurso 2026/63, 01/11/2026).
+
+    Sigue el patron de ensure_jornada_16 (boletos editoriales -> tabla
+    predicciones, que es donde la pagina los lee) y anade los fixtures, que la
+    J16 no necesitaba porque ya estaba en la BD. Los 15 partidos salen de
+    data/quiniela15_J17_scrape.json + data/horarios_J17.json, copiados de la
+    tabla 4 del brief: la casilla 14 queda sin hora (y sin fecha) porque la
+    fuente no la verifica. MrPurple no manda linea, asi que no hay fila para
+    el: su columna se muestra pendiente.
+    """
+    updated = ensure_jornada_completa(conn, 17)
+    imported = _import_inline_prediction_tickets(conn, 17, J17_EDITORIAL_TICKETS)
+    _import_jornada_resultados(conn, 17)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -841,6 +904,7 @@ def run_startup_migrations():
             ensure_jornada_11(conn)
             ensure_jornada_12(conn)
             ensure_jornada_16(conn)
+            ensure_jornada_17(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
             # idempotente (solo rellena filas vacias/en juego, nunca reescribe
