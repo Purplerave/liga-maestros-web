@@ -548,6 +548,217 @@ function filasCubiertaAlineadas(idsFilas, idsPartidos) {
     });
 }
 
+/* ==========================================================================
+   VISTA SIMPLE — la portada por defecto (Jornada 17 «en simple»)
+   Una tabla por columnas, movil primero:
+   Partido (fecha y hora) | Resultado | MrPurple | Programa | Tecnotron.
+
+   Reglas que NO viven aqui:
+   - El acierto/fallo llega DECIDIDO desde el backend (payload `simple_view`,
+     calculado con liga_maestros/scoring.py): en JS no se vuelve a puntuar, para
+     que un doble o el pleno no se puedan contar distinto que en el ranking.
+   - El marcador nunca se inventa: sin resultado verificado la casilla se queda
+     en raya («—») y la fila aparece pendiente.
+   - Las columnas por defecto las decide el backend con el contrato de
+     participantes (hidden_ids/pena_ids): aqui solo se pintan. Se ocultan en la
+     vista, nunca se borra nada de la BD.
+   El resto de secciones de la portada no se borra: siguen debajo, plegadas en
+   «Otras secciones», y el historico J1-J16 se ve con el selector #jornada-nav.
+   ========================================================================== */
+
+function simpleViewPayload() {
+    return state?.data?.simple_view || null;
+}
+
+function simpleViewColumns(payload) {
+    const columns = Array.isArray(payload?.columns) ? payload.columns : [];
+    if (columns.length) return columns;
+    // Sin payload (backend antiguo o respuesta a medias): las tres columnas
+    // por defecto con el nombre publico del contrato, y todo pendiente.
+    const names = state?.data?.participant_contract?.names || {};
+    return [
+        { id: "mrpurple", name: names.mrpurple || "MrPurple", sin_linea: true },
+        { id: "programa", name: names.programa || "Programa", sin_linea: true },
+        { id: "tecnotron", name: names.tecnotron || "Tecnotron", sin_linea: true },
+    ];
+}
+
+function simpleViewRows(payload) {
+    const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+    if (rows.length) return rows;
+    // Fallback: la tabla se pinte aunque el payload no llegue, siempre con las
+    // casillas pendientes y sin ningun marcador.
+    return (state?.data?.partidos || []).slice(0, 15).map((match, index) => {
+        const golesLocal = match.goles_local;
+        const golesVisitante = match.goles_visitante;
+        const hayMarcador = golesLocal != null && golesVisitante != null;
+        const hora = String(match.hora || "").trim();
+        const fecha = String(match.fecha_limpia || "").trim();
+        const id = Number(match.id) || index + 1;
+        return {
+            id,
+            local: String(match.local || ""),
+            visitante: String(match.visitante || ""),
+            cuando: [fecha, hora && hora !== "-" ? hora : ""].filter(Boolean).join(" "),
+            is_pleno: id === 15,
+            has_result: hayMarcador,
+            resultado: hayMarcador ? `${golesLocal}-${golesVisitante}` : "",
+            en_juego: false,
+            minuto: "",
+            picks: {},
+        };
+    });
+}
+
+function simpleViewMark(pick) {
+    if (!pick || pick.hit === null || pick.hit === undefined) return { glyph: "", state: "" };
+    return pick.hit ? { glyph: "✓", state: "is-hit" } : { glyph: "✗", state: "is-miss" };
+}
+
+function simpleViewWhenText(row) {
+    const cuando = String(row?.cuando || "").trim();
+    // Casilla sin hora verificada (J17, la 14): se queda sin ella, sin rellenar.
+    return cuando || "—";
+}
+
+function simpleViewResultText(row) {
+    if (!row || !row.has_result) return "—";
+    const marcador = String(row.resultado || "").trim();
+    if (!marcador) return "—";
+    if (!row.en_juego) return marcador;
+    const minuto = String(row.minuto || "").trim();
+    const digitos = minuto.match(/\d{1,3}/);
+    if (digitos) return `${marcador} · ${digitos[0]}'`;
+    if (minuto && minuto !== "-") return `${marcador} · ${minuto}`;
+    return marcador;
+}
+
+function simpleViewDateText(fecha) {
+    const texto = String(fecha || "").trim();
+    const partes = texto.split("-");
+    return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : texto;
+}
+
+function simpleViewMetaHtml(payload) {
+    const boleto = payload?.boleto || {};
+    const items = [["JORNADA", String(payload?.jornada || state?.data?.jornada || "")]];
+    if (boleto.nombre) items.push(["BOLETO", boleto.nombre]);
+    if (boleto.concurso) items.push(["CONCURSO", boleto.concurso]);
+    if (boleto.fecha) items.push(["SE JUEGA", simpleViewDateText(boleto.fecha)]);
+    if (boleto.cierre) items.push(["CIERRE", `${boleto.cierre}${boleto.cierre_estimado ? " (estimado)" : ""}`]);
+    // Sin importe de bote: mientras no este confirmado, no se pinta ninguno.
+    return `<dl class="cx-sv-meta">${items
+        .map(([key, value]) => `<div class="cx-sv-meta-item"><dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd></div>`)
+        .join("")}</dl>`;
+}
+
+function simpleViewCellHtml(col, row) {
+    const pick = (row.picks || {})[col.id] || null;
+    const signo = pick ? String(pick.signo || "-") : "-";
+    const vacio = !signo || signo === "-";
+    const mark = vacio ? { glyph: "", state: "" } : simpleViewMark(pick);
+    const doble = Boolean(pick && pick.dobles && !row.is_pleno);
+    const classes = ["cx-sv-cell", doble ? "is-double" : "", vacio ? "is-empty" : "", mark.state]
+        .filter(Boolean)
+        .join(" ");
+    const estado = mark.glyph ? (pick.hit ? "acierto" : "fallo") : "pendiente";
+    const etiqueta = `${col.name || col.id}: ${vacio ? "sin linea" : signo}, ${estado}`;
+    return `<td class="${classes}" title="${escapeHtml(etiqueta)}">`
+        + `<span class="cx-sv-sign">${vacio ? "—" : escapeHtml(signo)}</span>`
+        + `<span class="cx-sv-mark" aria-hidden="true">${mark.glyph}</span></td>`;
+}
+
+function simpleViewRowHtml(row, columns) {
+    const cells = columns.map(col => simpleViewCellHtml(col, row)).join("");
+    const resultClass = row.has_result ? (row.en_juego ? " is-live" : " is-ft") : " is-pending";
+    return `<tr class="cx-sv-row${row.is_pleno ? " is-pleno" : ""}" data-id="${escapeHtml(row.id)}">`
+        + `<th scope="row" class="cx-sv-match">`
+        + `<span class="cx-sv-idx" aria-hidden="true">${escapeHtml(row.id)}</span>`
+        + `<span class="cx-sv-teams"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
+        + `<span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span>`
+        + `</th>`
+        + `<td class="cx-sv-result${resultClass}">`
+        + `<span class="cx-sv-result-val">${escapeHtml(simpleViewResultText(row))}</span></td>`
+        + cells
+        + `</tr>`;
+}
+
+function simpleViewHtml() {
+    const payload = simpleViewPayload();
+    const columns = simpleViewColumns(payload);
+    const rows = simpleViewRows(payload);
+    const casillas = rows.filter(row => !row.is_pleno).slice(0, 14);
+    const plenoRow = rows.find(row => row.is_pleno) || null;
+    const totalCasillas = Number(payload?.total_casillas || 14);
+    const spanCols = 2 + columns.length;
+
+    const headCells = columns
+        .map(col => `<th scope="col" class="cx-sv-col" data-col="${escapeHtml(col.id)}">`
+            + `<span class="cx-sv-col-name">${escapeHtml(col.name || col.id)}</span>`
+            + (col.sin_linea ? `<span class="cx-sv-col-flag">pendiente</span>` : "")
+            + `</th>`)
+        .join("");
+    const footCells = columns
+        .map(col => {
+            const total = (payload?.totals || {})[col.id] || null;
+            if (col.sin_linea || !total) {
+                return `<td class="cx-sv-cell cx-sv-total is-empty" title="Sin linea para esta jornada">—</td>`;
+            }
+            const aciertos = Number(total.aciertos || 0);
+            const jugados = Number(total.jugados || 0);
+            const detalle = `${aciertos} aciertos en ${jugados} partidos con resultado, de ${totalCasillas} casillas`;
+            return `<td class="cx-sv-cell cx-sv-total" title="${escapeHtml(detalle)}">${aciertos}/${totalCasillas}</td>`;
+        })
+        .join("");
+
+    const sinHora = casillas.concat(plenoRow ? [plenoRow] : []).filter(row => !String(row.cuando || "").trim());
+    const notas = [
+        "Sin resultado verificado la casilla se queda en —: nunca se inventa un marcador.",
+    ];
+    if (sinHora.length) {
+        notas.push(`Casilla${sinHora.length > 1 ? "s" : ""} ${sinHora.map(row => row.id).join(", ")} sin hora verificada en la fuente oficial.`);
+    }
+
+    const plenoBody = plenoRow
+        ? `<tbody class="cx-sv-pleno">`
+            + `<tr class="cx-sv-pleno-head"><th colspan="${spanCols}" scope="colgroup">PLENO AL 15 · GOLES EXACTOS (fuera del total de ${totalCasillas})</th></tr>`
+            + simpleViewRowHtml(plenoRow, columns)
+            + `</tbody>`
+        : "";
+
+    return `
+        <header class="cx-sv-head">
+            <div class="cx-sv-brand">
+                <span class="cx-sv-kicker">TEMPORADA 26/27 · LA PENA CONTRA LOS MAESTROS</span>
+                <h1 class="cx-sv-title">LIGA DE MAESTROS EN SIMPLE</h1>
+                <p class="cx-sv-sub">Resultado de cada casilla y acierto o fallo de cada linea.</p>
+            </div>
+            ${simpleViewMetaHtml(payload)}
+            <a class="cx-sv-cta" href="/app" data-page-action="TICKET">Firmar mi quiniela →</a>
+        </header>
+        <div class="cx-sv-scroll" tabindex="0">
+            <table class="cx-sv-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="cx-sv-match-head">PARTIDO (fecha y hora)</th>
+                        <th scope="col" class="cx-sv-result-head">RESULTADO</th>
+                        ${headCells}
+                    </tr>
+                </thead>
+                <tbody class="cx-sv-body">${casillas.map(row => simpleViewRowHtml(row, columns)).join("")}</tbody>
+                ${plenoBody}
+                <tfoot>
+                    <tr>
+                        <th colspan="2" scope="row" class="cx-sv-total-label">TOTAL · ${totalCasillas} CASILLAS SIN PLENO</th>
+                        ${footCells}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <footer class="cx-sv-note"><ul>${notas.map(nota => `<li>${escapeHtml(nota)}</li>`).join("")}</ul></footer>
+    `;
+}
+
 function renderNewspaperCoverPageV3() {
     const matches = (state.data?.partidos || []).slice(0, 15);
     const closed = coverIsClosed();
@@ -981,9 +1192,12 @@ function renderNewspaperCoverPageV3() {
     // ticks con predicados distintos (uno pintaba CERRADA y el otro lo tapaba).
 
     return `<div class="cx">
-        ${tickerHtml}
-        ${headerHtml}
-        <main class="cx-grid">
+        <div id="cx-simple-view" class="cx-sv">${simpleViewHtml()}</div>
+        <details class="cx-more">
+            <summary class="cx-sv-more-summary">Otras secciones de la portada (directo, La Pe&ntilde;a, clasificaciones, porra, noticias)</summary>
+            ${tickerHtml}
+            ${headerHtml}
+            <main class="cx-grid">
             <aside class="cx-col cx-col-left" aria-label="Clasificaciones y voto">
                 ${buildStandings("LA PEÑA · TOP 5", fallbackPena, "cyan")}
                 ${buildStandings("MAESTROS · TOP 5", fallbackIa, "gold")}
@@ -999,7 +1213,8 @@ function renderNewspaperCoverPageV3() {
                 ${porraHtml}
                 ${newsHtml}
             </aside>
-        </main>
+            </main>
+        </details>
     </div>
     <div hidden aria-hidden="true" class="cp-legacy-stubs">
         <div class="cp-top">

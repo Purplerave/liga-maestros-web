@@ -1,0 +1,33 @@
+{
+  "jornada": 17,
+  "source_url": "",
+  "scraped_at": "2026-10-27",
+  "cierre": "sabado 31 de octubre de 2026 a las 13:00 (estimado)",
+  "temporada": "2026-2027",
+  "fuente": "informes/BRIEF-vista-simple-J17.md tabla 4: boleto verificado con la API de Eduardo Losilla + calendarios oficiales el 27/10/2026. SELAE 17 (Copa del Rey 28/10) NO entra.",
+  "nota": "Casilla 14 (Tenerife (F) - Athletic (F)): la hora va sin verificar; las fuentes daban horas en conflicto y no se usa ninguna. Fecha tampoco verificada en la fuente.",
+  "boleto": {
+    "nombre": "SELAE 18",
+    "concurso": "2026/63",
+    "fecha": "2026-11-01",
+    "cierre": "sabado 31 de octubre de 2026 a las 13:00",
+    "cierre_estimado": true
+  },
+  "partidos": [
+    {"num": 1, "local": "Levante", "visitante": "Atlético", "fecha": "2026-10-31", "hora": "14:00", "division": "primera"},
+    {"num": 2, "local": "Rayo", "visitante": "Celta", "fecha": "2026-10-31", "hora": "16:15", "division": "primera"},
+    {"num": 3, "local": "Betis", "visitante": "Málaga", "fecha": "2026-10-31", "hora": "18:30", "division": "primera", "nota": "La Cartuja"},
+    {"num": 4, "local": "Barcelona", "visitante": "Alavés", "fecha": "2026-10-31", "hora": "21:00", "division": "primera"},
+    {"num": 5, "local": "Getafe", "visitante": "Sevilla", "fecha": "2026-11-01", "hora": "14:00", "division": "primera"},
+    {"num": 6, "local": "Racing", "visitante": "Real Madrid", "fecha": "2026-11-01", "hora": "16:15", "division": "primera"},
+    {"num": 7, "local": "Elche", "visitante": "Valencia", "fecha": "2026-11-01", "hora": "18:30", "division": "primera"},
+    {"num": 8, "local": "Eibar", "visitante": "Almería", "fecha": "2026-10-31", "hora": "16:15", "division": "segunda"},
+    {"num": 9, "local": "Eldense", "visitante": "Granada", "fecha": "2026-11-01", "hora": "14:00", "division": "segunda"},
+    {"num": 10, "local": "Burgos", "visitante": "Castellón", "fecha": "2026-11-01", "hora": "18:30", "division": "segunda"},
+    {"num": 11, "local": "Alavés (F)", "visitante": "R. Sociedad (F)", "fecha": "2026-11-01", "hora": "12:00", "division": "liga_f"},
+    {"num": 12, "local": "Madrid CFF (F)", "visitante": "Deportivo (F)", "fecha": "2026-10-31", "hora": "18:00", "division": "liga_f"},
+    {"num": 13, "local": "Sevilla (F)", "visitante": "R. Madrid (F)", "fecha": "2026-11-01", "hora": "19:00", "division": "liga_f"},
+    {"num": 14, "local": "Tenerife (F)", "visitante": "Athletic (F)", "fecha": "", "hora": "", "division": "liga_f", "nota": "hora sin verificar en fuente oficial"},
+    {"num": 15, "local": "Athletic", "visitante": "R. Sociedad", "fecha": "2026-11-01", "hora": "21:00", "division": "primera", "pleno_al_15": true}
+  ]
+}

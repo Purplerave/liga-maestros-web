@@ -17,6 +17,7 @@ from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
+from ..services.payloads.simple_view import build_simple_view_payload
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
@@ -285,6 +286,13 @@ def get_liga_data():
                 reveal_all=is_locked,
             )
             participant_contract = predictions_payload.get("participant_contract") or build_participant_contract()
+            simple_view = build_simple_view_payload(
+                conn,
+                jornada,
+                partidos,
+                participant_contract,
+                max_jornada=max_jornada,
+            )
             trash_talk = _build_trash_talk_payload(
                 jornada=jornada,
                 ranking=predictions_payload.get("ranking_maestros", {}),
@@ -306,6 +314,7 @@ def get_liga_data():
                 "standings": standings,
                 "multi_league_standings": multi_league_standings,
                 "participant_contract": participant_contract,
+                "simple_view": simple_view,
                 "match_info": match_info,
                 "predicciones_actuales": predictions_payload["predicciones_actuales"],
                 "consenso_pena": predictions_payload["consenso_pena"],
