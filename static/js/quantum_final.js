@@ -69,7 +69,9 @@ async function fetchLigaDataWithRetry(url) {
 }
 
 async function refreshData(options = {}) {
-    if (options.auto && Date.now() - state.lastUserEdit < 12000) return;
+    // El refresco automático también debe actualizar resultados y clasificación
+    // mientras se edita. `preserveLocalTicket` evita que la respuesta sustituya
+    // los signos locales aún no guardados.
     const preserveLocalTicket = Boolean(options.auto && (state.editMode || state.draftDirty));
     const scrollState = options.auto ? {
         x: window.scrollX,

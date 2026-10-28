@@ -1,12 +1,11 @@
-"""Vista simple J17 (§6 del brief de la vista simple): criterios a-f.
+"""Vista simple J17: cinco columnas, líneas simples y resultados honestos.
 
-(a) la vista por defecto muestra solo MrPurple, Programa y Tecnotron;
-(b) un doble acierta si contiene el signo real y falla si no;
+(a) el orden fijo es MrPurple, Programa, Tecnotron, Grok y Sonia;
+(b) la línea del usuario autenticado se integra bajo MrPurple;
 (c) el pleno solo acierta con el marcador exacto (buckets de scoring.py);
-(d) sin resultado la fila queda pendiente y no muestra marcador;
+(d) sin resultado o con directo degradado la fila queda pendiente;
 (e) la casilla 14 no muestra hora;
-(f) ensure_jornada_17 importa la jornada y las lineas salen de la tabla
-    predicciones.
+(f) ensure_jornada_17 importa fixtures y líneas desde la tabla predicciones.
 
 Los casos de pintado se ejecutan de verdad contra cover_page.js en una maquina
 virtual (mismo arnes que test_cover_directo_panel), y los de puntuacion contra
@@ -26,7 +25,7 @@ import pytest
 from liga_maestros.db import migrations
 from liga_maestros.scoring import normalize_prediction_sign
 from liga_maestros.services.payloads.matches import build_jornada_matches
-from liga_maestros.services.payloads.simple_view import build_simple_view_payload
+from liga_maestros.services.payloads.simple_view import build_simple_view_payload, build_simple_view_ranking
 from liga_maestros.services.teams import build_participant_contract
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,8 +33,10 @@ COVER = ROOT / "static" / "js" / "pages" / "cover_page.js"
 UTILS = ROOT / "static" / "js" / "utils.js"
 STATE = ROOT / "static" / "js" / "state.js"
 
-LINEA_TECNOTRON = ["2", "1", "1", "1", "2", "2", "1", "1", "12", "2", "X", "X2", "2", "1X", "2-1"]
+LINEA_TECNOTRON = ["2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "2", "1", "2-1"]
 LINEA_PROGRAMA = ["2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0"]
+LINEA_GROK = ["2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1"]
+COLUMN_IDS = ["mrpurple", "programa", "tecnotron", "grok", "sonia"]
 
 
 def _conn():
@@ -106,9 +107,13 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
     for fila in filas:
         por_uid.setdefault(fila["user_id"], {})[int(fila["partido_id"])] = fila["signo"]
 
-    assert set(por_uid) == {"tecnotron", "programa"}
+    assert set(por_uid) == {"tecnotron", "programa", "grok"}
     assert [por_uid["tecnotron"][i] for i in range(1, 16)] == LINEA_TECNOTRON
     assert [por_uid["programa"][i] for i in range(1, 16)] == LINEA_PROGRAMA
+    assert [por_uid["grok"][i] for i in range(1, 16)] == LINEA_GROK
+    assert all(
+        len(signo) == 1 for uid in ("tecnotron", "programa", "grok") for pid, signo in por_uid[uid].items() if pid < 15
+    )
     # Sin linea validada no hay fila (los signos pasan por scoring.py).
     for uid, signos in por_uid.items():
         for partido_id, signo in signos.items():
@@ -122,7 +127,7 @@ def test_ensure_jornada_17_es_idempotente_y_esta_registrada_en_el_arranque():
     primera = migrations.ensure_jornada_17(conn)
     assert primera > 0
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 17").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 30
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 45
 
     fuente = (ROOT / "liga_maestros" / "db" / "migrations.py").read_text(encoding="utf-8")
     arranque = fuente[fuente.index("def run_startup_migrations") :]
@@ -148,38 +153,36 @@ def test_los_datos_de_la_jornada_17_estan_versionados():
 
 
 # ---------------------------------------------------------------------------
-# (a) solo tres columnas por defecto
+# (a) cinco columnas fijas
 # ---------------------------------------------------------------------------
 
 
-def test_vista_por_defecto_solo_tres_columnas():
+def test_vista_por_defecto_solo_muestra_las_cinco_columnas_en_orden():
     conn = _conn()
     payload = _payload(conn)
-    assert [col["id"] for col in payload["columns"]] == ["mrpurple", "programa", "tecnotron"]
-    assert [col["name"] for col in payload["columns"]] == ["MrPurple", "Programa", "Tecnotron"]
-    # MrPurple no tiene linea: la columna se queda visible pero pendiente.
-    assert payload["columns"][0]["sin_linea"] is True
-    assert payload["columns"][1]["sin_linea"] is False
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
+    assert [col["name"] for col in payload["columns"]] == ["MrPurple", "Programa", "Tecnotron", "Grok", "Sonia"]
+    assert [col["sin_linea"] for col in payload["columns"]] == [True, False, False, False, True]
 
 
-def test_el_historico_tambien_muestra_solo_las_tres_columnas():
-    """En J1-J16 se comparan los tres contendientes, no las lineas de aquel dia."""
+def test_el_historico_no_deja_colarse_otras_columnas():
+    """Los ids fuera de los cinco no aparecen aunque tengan predicciones."""
     conn = _conn()
     conn.executemany(
         "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 12, ?, ?)",
         [
             (uid, pid, signo)
-            for uid in ("chipi", "claude", "gemini", "grok", "baidu", "gstudio")
+            for uid in ("chipi", "claude", "gemini", "baidu", "gstudio")
             for pid, signo in enumerate(LINEA_TECNOTRON, start=1)
         ],
     )
     conn.commit()
     payload = _payload(conn, jornada=12, max_jornada=17)
-    assert [col["id"] for col in payload["columns"]] == ["mrpurple", "programa", "tecnotron"]
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
     assert all(col["sin_linea"] for col in payload["columns"])
 
 
-def test_quien_manda_linea_la_semana_en_juego_anade_su_columna():
+def test_una_linea_ajena_no_anade_una_sexta_columna():
     conn = _conn()
     conn.executemany(
         "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES ('chipi', 17, ?, ?)",
@@ -187,8 +190,31 @@ def test_quien_manda_linea_la_semana_en_juego_anade_su_columna():
     )
     conn.commit()
     payload = _payload(conn)
-    assert [col["id"] for col in payload["columns"]] == ["mrpurple", "programa", "tecnotron", "chipi"]
-    assert payload["columns"][3]["name"] == "DeepSeek"
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
+    assert all(col["id"] != "chipi" for col in payload["columns"])
+
+
+def test_la_linea_guardada_en_tu_se_mapea_a_mrpurple():
+    conn = _conn()
+    user_id = "pablo-account-1"
+    conn.executemany(
+        "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 17, ?, ?)",
+        [(user_id, partido_id, signo) for partido_id, signo in enumerate(LINEA_TECNOTRON, start=1)],
+    )
+    conn.commit()
+    payload = build_simple_view_payload(
+        conn,
+        17,
+        build_jornada_matches(conn, "17", {}),
+        build_participant_contract(),
+        max_jornada=17,
+        current_user_id=user_id,
+    )
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
+    assert payload["columns"][0]["es_mia"] is True
+    assert payload["columns"][0]["sin_linea"] is False
+    assert _fila(payload, 1)["picks"]["mrpurple"]["signo"] == "2"
+    assert all(user_id not in row["picks"] for row in payload["rows"])
 
 
 def test_los_ids_ocultos_del_contrato_no_pueden_colarse():
@@ -203,27 +229,27 @@ def test_los_ids_ocultos_del_contrato_no_pueden_colarse():
     )
     conn.commit()
     payload = _payload(conn)
-    assert [col["id"] for col in payload["columns"]] == ["mrpurple", "programa", "tecnotron"]
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
 
 
 # ---------------------------------------------------------------------------
-# (b) dobles, (c) pleno, (d) pendiente
+# (b) signos simples, (c) pleno, (d) pendiente
 # ---------------------------------------------------------------------------
 
 
-def test_un_doble_acierta_si_contiene_el_signo_real_y_falla_si_no():
+def test_las_tres_lineas_recibidas_son_simples_y_se_puntuan():
     conn = _conn()
-    _marca_resultado(conn, 9, 1, 0)  # Tecnotron tiene 12 en la casilla 9
-    _marca_resultado(conn, 12, 1, 0)  # Tecnotron tiene X2 en la casilla 12
+    _marca_resultado(conn, 9, 1, 0)
+    _marca_resultado(conn, 12, 1, 0)
     payload = _payload(conn)
 
-    assert _fila(payload, 9)["signo_real"] == "1"
-    assert _fila(payload, 9)["picks"]["tecnotron"] == {"signo": "12", "dobles": True, "hit": True}
-    assert _fila(payload, 9)["picks"]["programa"]["hit"] is False  # 2 contra 1
-
-    assert _fila(payload, 12)["signo_real"] == "1"
-    assert _fila(payload, 12)["picks"]["tecnotron"] == {"signo": "X2", "dobles": True, "hit": False}
-    assert _fila(payload, 12)["picks"]["programa"]["hit"] is True  # 1 = 1
+    for uid in ("programa", "tecnotron", "grok"):
+        assert all(not pick["dobles"] for row in payload["rows"] for pick in [row["picks"][uid]])
+    assert _fila(payload, 9)["picks"]["tecnotron"] == {"signo": "2", "dobles": False, "hit": False}
+    assert _fila(payload, 9)["picks"]["programa"]["hit"] is False
+    assert _fila(payload, 9)["picks"]["grok"]["hit"] is False
+    assert _fila(payload, 12)["picks"]["tecnotron"]["hit"] is False
+    assert _fila(payload, 12)["picks"]["programa"]["hit"] is True
 
 
 def test_el_total_del_pie_solo_cuenta_casillas_con_linea_y_resultado():
@@ -256,16 +282,29 @@ def test_el_pleno_solo_acierta_con_el_marcador_exacto():
     assert _fila(payload, 15)["picks"]["tecnotron"]["hit"] is False
 
 
+def test_clasificacion_j17_solo_incluye_los_cinco_y_reutiliza_hits():
+    conn = _conn()
+    for partido_id in range(1, 4):
+        _marca_resultado(conn, partido_id, 1, 0)
+    payload = _payload(conn)
+    ranking = build_simple_view_ranking(payload)
+    assert list(ranking) == COLUMN_IDS
+    assert ranking["programa"]["total"] == payload["totals"]["programa"]["aciertos"]
+    assert ranking["programa"]["jornada"] == ranking["programa"]["total"]
+    assert ranking["sonia"]["total"] == 0
+    assert ranking["mrpurple"]["total"] == 0
+
+
 def test_el_pleno_cuenta_por_buckets_como_score_prediction():
     """M-M acierta a M-M: mismo criterio que el ranking, ni mas ni menos."""
     conn = _conn()
     conn.execute(
-        "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES ('gemini', 17, 15, 'M-M')"
+        "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES ('grok', 17, 15, 'M-M')"
     )
     conn.commit()
     _marca_resultado(conn, 15, 5, 5)
     payload = _payload(conn)
-    assert _fila(payload, 15)["picks"]["gemini"] == {"signo": "M-M", "dobles": False, "hit": True}
+    assert _fila(payload, 15)["picks"]["grok"] == {"signo": "M-M", "dobles": False, "hit": True}
     assert _fila(payload, 15)["picks"]["tecnotron"]["hit"] is False  # 2-1 contra M-M
 
 
@@ -282,6 +321,16 @@ def test_sin_resultado_la_fila_queda_pendiente():
         for pick in row["picks"].values():
             assert pick["hit"] is None, f"casilla {row['id']}: sin resultado no hay acierto ni fallo"
     assert all(total == {"aciertos": 0, "jugados": 0} for total in payload["totals"].values())
+
+
+def test_directo_degradado_deja_el_resultado_pendiente():
+    conn = _conn()
+    _marca_resultado(conn, 1, 1, 0, status="STALE")
+    payload = _payload(conn)
+    fila = _fila(payload, 1)
+    assert fila["has_result"] is False
+    assert fila["resultado"] == "" and fila["signo_real"] == ""
+    assert all(pick["hit"] is None for pick in fila["picks"].values())
 
 
 def test_el_resultado_se_pinta_cuando_existe():
@@ -405,12 +454,12 @@ def portada_j17():
     return state_data, partidos, _render_cover(state_data)
 
 
-def test_a_la_vista_por_defecto_solo_se_le_ven_tres_columnas(portada_j17):
+def test_a_la_vista_por_defecto_se_le_ven_exactamente_las_cinco_columnas(portada_j17):
     _, _, html = portada_j17
     cabeceras = re.findall(r'class="cx-sv-col" data-col="([^"]+)"', html)
-    assert cabeceras == ["mrpurple", "programa", "tecnotron"]
-    assert html.count('class="cx-sv-col"') == 3
-    assert "MrPurple" in html and "Programa" in html and "Tecnotron" in html
+    assert cabeceras == COLUMN_IDS
+    assert html.count('class="cx-sv-col"') == 5
+    assert "MrPurple" in html and "Programa" in html and "Tecnotron" in html and "Grok" in html and "Sonia" in html
     # 14 casillas + el pleno, con su total al pie.
     assert html.count('class="cx-sv-row"') == 14
     assert html.count('class="cx-sv-row is-pleno"') == 1
@@ -422,20 +471,20 @@ def test_a_la_vista_por_defecto_solo_se_le_ven_tres_columnas(portada_j17):
     assert "€" not in html and "importe" not in html.lower()
 
 
-def test_b_el_doble_se_marca_y_se_pinta_como_acierto(portada_j17):
+def test_b_las_casillas_pintan_aciertos_y_fallos_sin_dobles(portada_j17):
     _, _, html = portada_j17
     fila = re.search(r'<tr class="cx-sv-row" data-id="9">.*?</tr>', html, re.S)
     assert fila, "la casilla 9 no se pinta"
-    celda = re.search(r'<td class="[^"]*" title="Tecnotron: 12[^"]*">.*?</td>', fila.group(0), re.S)
-    assert celda, "la celda de Tecnotron en la 9 no aparece"
-    assert "is-double" in celda.group(0) and "is-hit" in celda.group(0)
-    assert "✓" in celda.group(0)
+    celda = re.search(r'<td class="[^"]*" title="Tecnotron: 2, fallo">.*?</td>', fila.group(0), re.S)
+    assert celda, "la celda simple de Tecnotron en la 9 no aparece"
+    assert "is-double" not in celda.group(0) and "is-miss" in celda.group(0)
+    assert "✗" in celda.group(0)
 
-    # La 12 (X2) con resultado 1 falla: doble marcado y ✗.
     fila12 = re.search(r'<tr class="cx-sv-row" data-id="12">.*?</tr>', html, re.S)
-    celda12 = re.search(r'<td class="[^"]*" title="Tecnotron: X2[^"]*">.*?</td>', fila12.group(0), re.S)
-    assert "is-double" in celda12.group(0) and "is-miss" in celda12.group(0)
+    celda12 = re.search(r'<td class="[^"]*" title="Tecnotron: 2, fallo">.*?</td>', fila12.group(0), re.S)
+    assert celda12 and "is-double" not in celda12.group(0)
     assert "✗" in celda12.group(0)
+    assert not re.search(r"cx-sv-cell[^>]*is-double", html)
 
 
 def test_c_el_pleno_se_pinta_con_goles_y_su_acierto(portada_j17):
@@ -457,6 +506,27 @@ def test_d_sin_resultado_la_casilla_se_pinta_con_raya(portada_j17):
     assert '<span class="cx-sv-result-val">1-0</span>' in fila9
     assert "cx-sv-result is-ft" in fila9
     assert "nunca se inventa un marcador" in html
+
+
+def test_el_fallback_frontend_no_pinta_marcador_stale():
+    conn = _conn()
+    _marca_resultado(conn, 1, 1, 0, status="STALE")
+    partidos = build_jornada_matches(conn, "17", {})
+    simple_view = _payload(conn)
+    simple_view["rows"] = []
+    state_data = {
+        "jornada": "17",
+        "max_jornada": 17,
+        "is_locked": False,
+        "partidos": partidos,
+        "participant_contract": build_participant_contract(),
+        "ranking_maestros": {},
+        "simple_view": simple_view,
+    }
+    html = _render_cover(state_data)
+    fila1 = re.search(r'<tr class="cx-sv-row" data-id="1">.*?</tr>', html, re.S).group(0)
+    assert '<span class="cx-sv-result-val">—</span>' in fila1
+    assert "cx-sv-result is-pending" in fila1
 
 
 def test_e_la_casilla_14_se_pinta_sin_hora(portada_j17):
