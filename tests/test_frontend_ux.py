@@ -136,6 +136,15 @@ def test_live_refresh_does_not_spawn_goal_popups():
     assert "checkLiveNotifications" not in js
 
 
+def test_auto_refresh_no_se_bloquea_por_edicion_y_conserva_el_borrador():
+    quantum = QUANTUM_JS.read_text(encoding="utf-8")
+    start = quantum.index("async function refreshData(options = {})")
+    body = quantum[start : quantum.index("async function ensureQ15Directo()", start)]
+    assert "Date.now() - state.lastUserEdit < 12000" not in body
+    assert "const preserveLocalTicket = Boolean(options.auto && (state.editMode || state.draftDirty))" in body
+    assert "hydrateUserSigns({ preserveLocalTicket })" in body
+
+
 def test_live_transport_waits_for_data_and_degrades_to_bounded_polling():
     events = (ROOT / "static" / "js" / "events.js").read_text(encoding="utf-8")
     quantum = QUANTUM_JS.read_text(encoding="utf-8")

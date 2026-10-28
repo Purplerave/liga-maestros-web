@@ -504,7 +504,7 @@ function filasCubiertaAlineadas(idsFilas, idsPartidos) {
 /* ==========================================================================
    VISTA SIMPLE — la portada por defecto (Jornada 17 «en simple»)
    Una tabla por columnas, movil primero:
-   Partido (fecha y hora) | Resultado | MrPurple | Programa | Tecnotron.
+   Partido (fecha y hora) | Resultado | MrPurple | Programa | Tecnotron | Grok | Sonia.
 
    Reglas que NO viven aqui:
    - El acierto/fallo llega DECIDIDO desde el backend (payload `simple_view`,
@@ -512,9 +512,8 @@ function filasCubiertaAlineadas(idsFilas, idsPartidos) {
      que un doble o el pleno no se puedan contar distinto que en el ranking.
    - El marcador nunca se inventa: sin resultado verificado la casilla se queda
      en raya («—») y la fila aparece pendiente.
-   - Las columnas por defecto las decide el backend con el contrato de
-     participantes (hidden_ids/pena_ids): aqui solo se pintan. Se ocultan en la
-     vista, nunca se borra nada de la BD.
+   - La portada fija y blanquea sus cinco columnas permitidas: aqui solo se
+     pintan. Las demás líneas siguen en BD, pero no se muestran ni se puntúan.
    El resto de secciones de la portada no se borra: siguen debajo, plegadas en
    «Otras secciones», y el historico J1-J16 se ve con el selector #jornada-nav.
    ========================================================================== */
@@ -524,27 +523,33 @@ function simpleViewPayload() {
 }
 
 function simpleViewColumns(payload) {
-    const columns = Array.isArray(payload?.columns) ? payload.columns : [];
-    if (columns.length) return columns;
-    // Sin payload (backend antiguo o respuesta a medias): las tres columnas
-    // por defecto con el nombre publico del contrato, y todo pendiente.
-    const names = state?.data?.participant_contract?.names || {};
+    const incoming = Array.isArray(payload?.columns) ? payload.columns : [];
+    const byId = new Map(incoming.filter(col => col?.id).map(col => [String(col.id).toLowerCase(), col]));
+    // Orden/identidad cerrados incluso si llega un payload antiguo o parcial;
+    // los ids ajenos se descartan y las columnas ausentes quedan pendientes.
     return [
-        { id: "mrpurple", name: names.mrpurple || "MrPurple", sin_linea: true },
-        { id: "programa", name: names.programa || "Programa", sin_linea: true },
-        { id: "tecnotron", name: names.tecnotron || "Tecnotron", sin_linea: true },
-    ];
+        ["mrpurple", "MrPurple"],
+        ["programa", "Programa"],
+        ["tecnotron", "Tecnotron"],
+        ["grok", "Grok"],
+        ["sonia", "Sonia"],
+    ].map(([id, name]) => {
+        const source = byId.get(id);
+        return { ...(source || {}), id, name, sin_linea: source ? Boolean(source.sin_linea) : true };
+    });
 }
 
 function simpleViewRows(payload) {
     const rows = Array.isArray(payload?.rows) ? payload.rows : [];
     if (rows.length) return rows;
-    // Fallback: la tabla se pinte aunque el payload no llegue, siempre con las
-    // casillas pendientes y sin ningun marcador.
+    // Fallback para una respuesta antigua/parcial: solo acepta marcadores con
+    // estado válido; STALE u otro estado degradado queda pendiente.
     return (state?.data?.partidos || []).slice(0, 15).map((match, index) => {
         const golesLocal = match.goles_local;
         const golesVisitante = match.goles_visitante;
-        const hayMarcador = golesLocal != null && golesVisitante != null;
+        const status = String(match.status || "").toUpperCase();
+        const verificado = ["FT", "FINISHED", "TERMINADO", "LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"].includes(status);
+        const hayMarcador = verificado && golesLocal != null && golesVisitante != null;
         const hora = String(match.hora || "").trim();
         const fecha = String(match.fecha_limpia || "").trim();
         const id = Number(match.id) || index + 1;
@@ -556,8 +561,8 @@ function simpleViewRows(payload) {
             is_pleno: id === 15,
             has_result: hayMarcador,
             resultado: hayMarcador ? `${golesLocal}-${golesVisitante}` : "",
-            en_juego: false,
-            minuto: "",
+            en_juego: ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"].includes(status),
+            minuto: String(match.minuto_live || match.minuto || ""),
             picks: {},
         };
     });
@@ -657,12 +662,9 @@ function simpleViewRowHtml(row, columns) {
 }
 
 function simpleViewColumnas(payload) {
-    // La columna del registrado (es_mia) va la primera y con nombre corto: es
-    // la unica que se puede editar desde esta propia tabla.
-    const columnas = simpleViewColumns(payload);
-    const mia = columnas.find(col => col && col.es_mia);
-    if (!mia) return columnas;
-    return [{ ...mia, name: "Tu" }, ...columnas.filter(col => col !== mia)];
+    // El boleto «Tú» del usuario autenticado ocupa la columna MrPurple sin
+    // cambiar el nombre ni el orden fijados para la portada.
+    return simpleViewColumns(payload);
 }
 
 function kawaiiTablaHtml() {
@@ -744,7 +746,7 @@ function simpleViewHtml() {
 
    Una sola vista con todo lo de la jornada: cabecera, acceso con Google,
    franja de directo con datos reales, la tabla de la vista simple (✓/✗ por
-   celda, dobles sombreados, pleno aparte y totales al pie) y la clasificacion
+   celda, signos simples, pleno aparte y totales al pie) y la clasificacion
    final. Fuera juegos, quiz, landing, trash-talk y consejo de IA.
 
    Reglas que NO viven aqui:

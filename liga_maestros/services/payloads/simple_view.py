@@ -1,6 +1,6 @@
 """Vista simple por columnas de la portada (J17 «en simple»).
 
-Una fila por casilla, solo tres columnas de participantes por defecto y
+Una fila por casilla, solo las cinco columnas de participantes acordadas y
 aciertos/fallos ya decididos en el servidor. La regla de puntuacion vive
 UNA sola vez, en ``liga_maestros/scoring.py``: aqui se llama a
 ``score_prediction`` y el frontend solo pinta el resultado, para que un doble
@@ -18,12 +18,17 @@ import os
 import config
 
 from ...scoring import normalize_prediction_sign, score_prediction
-from ...services.teams import canonical_contest_id, public_contest_name, signo_desde_goles
+from ...services.teams import (
+    canonical_contest_id,
+    is_live_scored_status,
+    is_scored_status,
+    public_contest_name,
+    signo_desde_goles,
+)
 
-# Columnas que se muestran por defecto: los tres contendientes reales de la
-# temporada. Si alguien mas manda linea la semana en juego, se anade su
-# columna (sin perseguir a nadie); el historico se ve con las mismas tres.
-BASE_COLUMNS = ("mrpurple", "programa", "tecnotron")
+# Orden cerrado de la portada J17. Las columnas se reservan aunque aún no
+# haya llegado una línea: pendiente se representa como «—», nunca se fabrica.
+BASE_COLUMNS = ("mrpurple", "programa", "tecnotron", "grok", "sonia")
 
 
 def load_ticket_metadata(jornada):
@@ -72,31 +77,12 @@ def _prediction_signs_by_column(conn, jornada):
 
 
 def _column_ids(contract, signs, jornada, max_jornada, current_user_id=None):
-    """Columnas visibles: las tres por defecto + quien manda linea esta semana.
+    """Devuelve solo las cinco columnas fijadas para la portada J17.
 
-    El filtro usa el mecanismo que ya tiene la pagina (``hidden_ids`` del
-    contrato de participantes): se OCULTA en la vista, nunca se borra de la BD.
-    El «esta semana» es a proposito: en el historico J1-J16 se comparan los
-    tres contendientes, no las veinte lineas que aquella jornada acumulo.
-
-    Ademas, el participante registrado con sesion ve SIEMPRE su propia columna
-    en la jornada en juego (``es_mia``): aunque todavia no haya mandado linea,
-    la pagina necesita la columna para ofrecerle el editor de su quiniela.
+    Ni otras líneas guardadas ni ids ocultos u oficiales del contrato pueden
+    alterar el orden o colarse en esta tabla.
     """
-    hidden = {str(uid).lower() for uid in contract.get("hidden_ids", [])}
-    oficial = {str(col.get("id", "")).lower() for col in contract.get("visible_ai_columns", [])}
-    oficial.update(str(uid).lower() for uid in contract.get("pena_ids", []))
-
-    ids = [uid for uid in BASE_COLUMNS if uid not in hidden]
-    en_juego = str(jornada) == str(max_jornada) if max_jornada not in (None, "") else True
-    if en_juego:
-        for uid in sorted(signs):
-            if uid in oficial and uid not in hidden and uid not in ids:
-                ids.append(uid)
-        me = str(current_user_id or "").strip().lower()
-        if me and me not in hidden and me not in ids:
-            ids.append(me)
-    return ids
+    return list(BASE_COLUMNS)
 
 
 def _when_label(match):
@@ -113,7 +99,14 @@ def _when_label(match):
 
 
 def _real_reference(match, is_pleno):
-    """Signo real (casillas 1-14) o marcador exacto (pleno); '' si no hay resultado."""
+    """Signo o marcador exacto, solo con estado verificado; '' si está pendiente.
+
+    STALE significa que el directo se degradó: aunque conserve el último
+    marcador parcial para diagnóstico, no se publica ni se puntúa como fiable.
+    """
+    status = str(match.get("status") or "").upper()
+    if not (is_scored_status(status) or is_live_scored_status(status)):
+        return ""
     goles_local = match.get("goles_local")
     goles_visitante = match.get("goles_visitante")
     if goles_local is None or goles_visitante is None:
@@ -136,6 +129,12 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
     contract = participant_contract or {}
     names = contract.get("names") or {}
     signs_by_column = _prediction_signs_by_column(conn, jornada)
+    # La columna humana es MrPurple: si Pablo ha guardado su boleto desde
+    # «Tú», se presenta bajo ese id fijo en vez de dejarla fuera por usar su
+    # id privado de Google. No se expone el id de cuenta como columna aparte.
+    current_uid = canonical_contest_id(current_user_id) if current_user_id else ""
+    if current_uid and current_uid != "mrpurple" and current_uid in signs_by_column:
+        signs_by_column["mrpurple"] = signs_by_column[current_uid]
     column_ids = _column_ids(contract, signs_by_column, jornada, max_jornada, current_user_id)
     yo = str(current_user_id or "").strip().lower()
 
@@ -147,7 +146,7 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
                 "id": uid,
                 "name": names.get(uid) or public_contest_name(uid, {}),
                 "es_pena": uid in {str(x).lower() for x in contract.get("pena_ids", [])},
-                "es_mia": bool(yo) and uid == yo,
+                "es_mia": bool(yo) and uid == "mrpurple",
                 "sin_linea": not any(str(s) not in ("", "-") for s in line),
             }
         )
@@ -226,3 +225,25 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
         "pleno": pleno,
         "total_casillas": 14,
     }
+
+
+def build_simple_view_ranking(payload):
+    """Clasificación J17 de las cinco columnas, derivada de los hits ya puntuados.
+
+    No vuelve a evaluar signos: reutiliza el resultado de ``score_prediction``
+    almacenado por ``build_simple_view_payload`` para que tabla y ranking nunca
+    diverjan ante un cambio de marcador.
+    """
+    ranking = {}
+    for column in (payload or {}).get("columns", []):
+        uid = str(column.get("id") or "")
+        hits = sum(
+            1 for row in (payload or {}).get("rows", []) if (row.get("picks") or {}).get(uid, {}).get("hit") is True
+        )
+        ranking[uid] = {
+            "total": hits,
+            "jornada": hits,
+            "jornada_live": hits,
+            "jornada_final": hits,
+        }
+    return ranking

@@ -688,25 +688,21 @@ def ensure_jornada_16(conn):
     return imported
 
 
-# Boletos editoriales de la J17 (tabla 4 del brief de la vista simple, ver
-# informes/BRIEF-vista-simple-J17.md). Signos y plenos literales: no tocar.
-#
-# Van en codigo y no en data/predicciones_J17.json a proposito. El gate de CI
-# (tests/test_jornada_vigente_gate.py) toma el predicciones_J*.json de mayor
-# numero como semilla vigente y exige para ella las 15 horas y el boleto de
-# Pavo: la casilla 14 (Tenerife (F) - Athletic (F)) va SIN hora verificada y
-# Pavo no ha mandado linea para la J17, asi que un fichero con ese nombre
-# pondria esa puerta en rojo sin que haya nada roto (y publicar la hora de la
-# 14 seria inventar datos). La leccion de la J16 se respeta igual: los signos
-# acaban en la tabla predicciones, que es de donde lee la pagina.
+# Boletos editoriales recibidos para la J17. Signos y plenos literales:
+# normalizar/validar con scoring.py, pero no corregir ni completar a mano.
+# Se guardan en predicciones para que tabla, puntuación y clasificación lean la
+# misma fuente. MrPurple (Pablo) y Sonia quedan pendientes hasta que llegue su
+# línea; la línea de Pablo se recogerá de su boleto «Tú» autenticado.
 J17_EDITORIAL_TICKETS = {
     "tecnotron": [
-        "2", "1", "1", "1", "2", "2", "1", "1", "12", "2", "X", "X2", "2", "1X", "2-1",
+        "2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "2", "1", "2-1",
     ],
     "programa": [
         "2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0",
     ],
-    # MrPurple (Pablo) pendiente: sin linea, no se inventa ninguna fila.
+    "grok": [
+        "2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1",
+    ],
 }
 
 

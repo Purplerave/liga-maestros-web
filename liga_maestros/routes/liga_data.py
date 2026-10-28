@@ -17,7 +17,7 @@ from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
-from ..services.payloads.simple_view import build_simple_view_payload
+from ..services.payloads.simple_view import build_simple_view_payload, build_simple_view_ranking
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
@@ -293,6 +293,12 @@ def get_liga_data():
                 max_jornada=max_jornada,
                 current_user_id=user.get("id"),
             )
+            ranking_maestros = predictions_payload["ranking_maestros"]
+            if str(jornada) == "17":
+                # La clasificación de esta portada empieza en J17 y solo
+                # incluye estos cinco participantes. Reutiliza los hits del
+                # simple_view; no recalcula el scoring por segunda vez.
+                ranking_maestros = build_simple_view_ranking(simple_view)
             response_payload = {
                 "jornada": jornada,
                 "jornada_liga": jornada_liga,
@@ -314,7 +320,7 @@ def get_liga_data():
                 "predicciones_actuales": predictions_payload["predicciones_actuales"],
                 "consenso_pena": predictions_payload["consenso_pena"],
                 "consenso_pleno_pena": predictions_payload["consenso_pleno_pena"],
-                "ranking_maestros": predictions_payload["ranking_maestros"],
+                "ranking_maestros": ranking_maestros,
                 "comentarista": comentarista,
                 "auth_enabled": config.GOOGLE_AUTH_ENABLED,
                 "live_stream_enabled": config.LIVE_SSE_ENABLED,
