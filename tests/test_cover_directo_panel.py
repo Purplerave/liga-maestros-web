@@ -1,10 +1,10 @@
-"""Contrato del panel EN DIRECTO de la portada (cover_page.js).
+"""Contrato de la franja EN DIRECTO de la pagina unica (cover_page.js).
 
-La portada solo miraba los 15 partidos de la quiniela: un viernes con un
-Racing - Elche de LaLiga en juego (fuera de la quiniela) el panel se quedaba
-en «0 PARTIDOS» y el partido no aparecia en ningun sitio. El panel debe
-reforzararse con los directos de hoy que el backend sirve en ``live_matches``
-(por pareja de equipos, quiniela primero y sin duplicados).
+La quiniela sola miraba los 15 partidos del boleto: un viernes con un
+Racing - Elche de LaLiga en juego (fuera de la quiniela) la franja se quedaba
+vacia y el partido no aparecia en ningun sitio. La franja kawaii se apoya en
+``live_matches`` (el backend ya decide que esta en juego), por pareja de
+equipos y sin duplicados, y si no hay directo no inventa ninguno.
 """
 
 import json
@@ -135,11 +135,10 @@ CASES = r"""
         live_matches: [elche],
     });
     results.externalLive = {
-        showsElche: html.includes("RACING") && html.includes("ELCHE"),
-        showsScore: html.includes("2-0"),
-        showsComp: html.includes("LALIGA"),
-        showsLink: html.includes("VER DIRECTO COMPLETO"),
-        countLabel: (html.match(/cx-pn-meta">(\d+) PARTIDO/) || [])[1] || "",
+        showsElche: /racing/i.test(html) && /elche/i.test(html),
+        showsScore: html.includes("2-0") || html.includes("2 - 0"),
+        showsStrip: html.includes("EN DIRECTO") && html.includes("kk-live-body"),
+        countLabel: String((html.match(/kk-live-body/g) || []).length),
         emptyMessage: html.includes("Ahora mismo no hay partidos en directo"),
     };
 }
@@ -161,7 +160,7 @@ CASES = r"""
     results.noLive = {
         emptyMessage: html.includes("Ahora mismo no hay partidos en directo"),
         oldMessage: html.includes("Sin partidos de la quiniela en directo"),
-        linkHidden: !html.includes("VER DIRECTO COMPLETO"),
+        noFakeLive: !html.includes("EN DIRECTO"),
     };
 }
 
@@ -183,9 +182,9 @@ CASES = r"""
         live_matches: [proveedor],
     });
     results.quinielaLive = {
-        shown: html.includes("LEVANTE") && html.includes("BETIS"),
-        onceInPanel: (html.match(/cx-live-card/g) || []).length === 1,
-        countLabel: (html.match(/cx-pn-meta">(\d+) PARTIDO/) || [])[1] || "",
+        shown: /levante/i.test(html) && /betis/i.test(html),
+        onceInPanel: (html.match(/EN DIRECTO/g) || []).length === 1,
+        countLabel: String((html.match(/kk-live-body/g) || []).length),
     };
 }
 
@@ -215,11 +214,10 @@ def test_cover_directo_panel_shows_non_quiniela_live_match():
     """Racing - Elche (fuera de la quiniela) debe verse en el panel EN DIRECTO."""
     payload = _run_node()
 
-    assert payload["externalLive"]["showsElche"], "el partido externo en juego no aparece en la portada"
+    assert payload["externalLive"]["showsElche"], "el partido externo en juego no aparece en la franja EN DIRECTO"
     assert payload["externalLive"]["showsScore"], "el marcador del directo externo no se pinta"
-    assert payload["externalLive"]["showsComp"], "falta la etiqueta de competicion del directo externo"
-    assert payload["externalLive"]["showsLink"], "sin enlace al directo completo habiendo partidos en juego"
-    assert payload["externalLive"]["countLabel"] == "1", "el contador del panel no cuenta el directo externo"
+    assert payload["externalLive"]["showsStrip"], "falta la franja kawaii de directo con partidos en juego"
+    assert payload["externalLive"]["countLabel"] == "1", "la franja debe pintar un solo partido en juego"
     assert not payload["externalLive"]["emptyMessage"], "panel vacio pese a haber un partido en juego"
 
 
@@ -228,9 +226,9 @@ def test_cover_directo_panel_empty_state_without_any_live_match():
     """Sin directos en ningun sitio, el panel lo dice sin mencionar la quiniela."""
     payload = _run_node()
 
-    assert payload["noLive"]["emptyMessage"]
+    assert not payload["noLive"]["emptyMessage"], "el aviso vacio viejo del panel ha vuelto"
     assert not payload["noLive"]["oldMessage"], "el mensaje vacio ya no debe hablar solo de la quiniela"
-    assert payload["noLive"]["linkHidden"]
+    assert payload["noLive"]["noFakeLive"], "sin partidos en juego no debe pintarse una franja EN DIRECTO"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")

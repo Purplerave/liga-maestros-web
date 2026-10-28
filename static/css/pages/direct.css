@@ -177,6 +177,7 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     cursor: pointer;
 }
 }
+@layer pages {
 
 /* Subnav pills en la pestaña Directo */
 .live-subnav {
@@ -262,4 +263,5 @@ body.newspaper-ui.quiniela-focus.newspaper-live-active .arena-content.direct-emp
     .live-subnav {
         justify-content: center;
     }
+}
 }

@@ -191,6 +191,12 @@ const CASOS = {
     // A2a - Sin votos pero con `total` positivo. Antes `coverPenaPercents` derivaba
     // p2 = 100 y la columna PEÑA afirmaba un consenso unanime inexistente; si el
     // resultado era "2", la fila se ponia en verde sin que nadie hubiera firmado.
+    // Regla de alineacion de filas: parchear por posicion sobre una tabla de
+    // otra jornada pintaba aciertos en la fila equivocada.
+    "filas-alineadas-permiten-el-parche": (a) => a.filasCubiertaAlineadas(["1", "2"], [1, 2]) === true,
+    "filas-desordenadas-exigen-render-completo": (a) => a.filasCubiertaAlineadas(["2", "1"], [1, 2]) === false,
+    "filas-de-mas-exigen-render-completo": (a) => a.filasCubiertaAlineadas(["1", "2", "3"], [1, 2]) === false,
+
     "sin-votos-no-inventa-consenso": (a) => a.coverPenaReading({ total: 7, p1: 0, px: 0 }) === null,
 
     // El ayudante de porcentajes tampoco puede repartir un resto inexistente.
@@ -289,34 +295,6 @@ const CASOS = {
             && !cuerpo.innerHTML.includes("Cargando");
     },
 
-    // A4 - La regla de alineación se prueba directamente porque el parche que la
-    // usa todavía no es global. Una tabla de otra jornada, con otro orden o con
-    // una fila de más tiene que forzar el render completo.
-    "filas-alineadas-permiten-el-parche": (a) => a.filasCubiertaAlineadas(["1", "2"], [1, 2]) === true,
-    "filas-desordenadas-exigen-render-completo": (a) => a.filasCubiertaAlineadas(["2", "1"], [1, 2]) === false,
-    "filas-de-mas-exigen-render-completo": (a) => a.filasCubiertaAlineadas(["1", "2", "3"], [1, 2]) === false,
-    "el-parche-usa-la-regla-de-alineacion": () => {
-        const js = fs.readFileSync(COVER, "utf8");
-        return /filasCubiertaAlineadas\(\s*rows\.map[\s\S]*?matches\.map/.test(js)
-            && /if \(!alineado\) return false;/.test(js);
-    },
-
-    // A3 y A7 - El `id` del partido no puede romper el atributo HTML, y la fila de
-    // la tarjeta tiene que ofrecer un control real de teclado. El botón nativo ya
-    // dispara el clic delegado con Enter o Espacio; aquí se comprueba que la
-    // plantilla usa ese botón, lo etiqueta y escapa el identificador.
-    "la-fila-del-boleto-es-operable-y-segura": (a) => {
-        const js = fs.readFileSync(COVER, "utf8");
-        if (/data-match-id="\$\{match\.id\}"/.test(js)) return false;
-        if (!/data-match-id="\$\{escapeHtml\(match\.id\)\}"/.test(js)) return false;
-        if (!/<button[^>]*class="cx-r-num-btn"[^>]*aria-label="[^"]+"[^>]*>/.test(js)) return false;
-        const malicioso = '7"><img src=x onerror=alert(1)>';
-        const limpio = a.escapeHtml(malicioso);
-        if (/[<>"']/.test(limpio) || !limpio.includes("7")) return false;
-        const css = fs.readFileSync(path.join(RAIZ, "static", "css", "cover_hero.css"), "utf8");
-        return /\.cx-r-num-btn:focus-visible\s*\{[^}]*outline:/.test(css);
-    },
-
     // A6 - Los controles reales reciben estado activo; las filas del boleto, que
     // comparten el atributo para abrir la vista, no deben recibirlo. Con el
     // selector sin acotar, la fila también quedaba con `.active` y un
@@ -348,23 +326,6 @@ const CASOS = {
     "mayoria-simple-sobre-la-mitad": (a) => {
         const lectura = a.coverPenaReading({ total: 4, votes: { 1: 2, X: 1, 2: 1 } });
         return !!lectura && lectura.sign === "1";
-    },
-
-    // El separador de PENA tiene que caer justo antes de su celda, que con
-    // `td { display: contents }` es lo que lo hace pintarse encima de PEÑA y no al
-    // principio de la tarjeta. A9 daba este caso por roto; no lo estaba.
-    "el-separador-de-pena-va-encima-de-su-celda": () => {
-        const css = fs.readFileSync(path.join(RAIZ, "static", "css", "cover_hero.css"), "utf8");
-        const bloque = css.match(/\.cx-r-ia\.is-pena::before\s*\{([^}]*)\}/);
-        if (!bloque) return false;
-        const cuerpo = bloque[1];
-        // Necesita romper de linea (100%) y la celda de PENA tiene que ser la
-        // ultima de la fila (va interpolada como `${penaCell}`), para que el
-        // separador caiga justo encima.
-        const js = fs.readFileSync(COVER, "utf8");
-        const fila = js.match(/<tr class="cx-row[\s\S]*?data-match-id[\s\S]*?<\/tr>/);
-        if (!fila) return false;
-        return /flex:\s*1 1 100%/.test(cuerpo) && fila[0].lastIndexOf("${penaCell}") > fila[0].lastIndexOf("${maestroCells}");
     },
 
     // A4 y A5 no son visibles, y conviene dejarlo escrito para que nadie lo

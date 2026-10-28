@@ -75,17 +75,9 @@ def directo():
     return redirect(url_for("main.index", **params))
 
 
-@bp.route("/landing")
-def landing():
-    """Landing SEO de conversión (kit viral). Indexable, CTAs hacia /app."""
-    response = make_response(render_template("landing.html"))
-    response.headers["Cache-Control"] = "public, max-age=300"
-    return response
-
-
 @bp.route("/app")
 def app_index():
-    """Alias explícito de la app (para CTAs de la landing)."""
+    """Alias corto de la unica pagina del sitio (enlaces guardados)."""
     return index()
 
 
@@ -112,11 +104,6 @@ def static_files(filename):
     if normalized == "sw.js":
         response.headers["Service-Worker-Allowed"] = "/"
     return response
-
-
-@bp.route("/juegos/<path:filename>")
-def juegos_files(filename):
-    return send_from_directory(os.path.join(config.BASE_DIR, "juegos"), filename, max_age=0)
 
 
 @bp.route("/api/season-summary")
@@ -221,7 +208,6 @@ def robots_txt():
     body = (
         "User-agent: *\n"
         "Allow: /$\n"
-        "Allow: /landing\n"
         "Allow: /app\n"
         "Allow: /static/\n"
         "Disallow: /api/\n"
@@ -243,7 +229,6 @@ def sitemap_xml():
         f"  <url><loc>{root}{path}</loc><changefreq>{freq}</changefreq></url>\n"
         for path, freq in (
             ("/", "daily"),
-            ("/landing", "weekly"),
             ("/app", "daily"),
             ("/privacidad", "yearly"),
             ("/cookies", "yearly"),

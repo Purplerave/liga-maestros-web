@@ -1,4 +1,6 @@
 @layer tokens {
+/* Orden canonico de capas (mismo orden que templates/liga_index.html). */
+@layer base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding, kawaii;
 /* ==========================================================================
    LIGA DE MAESTROS — DESIGN TOKENS (fuente única de verdad)
    Paleta "Deep Space Premium": diario deportivo nocturno con acentos

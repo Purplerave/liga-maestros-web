@@ -39,8 +39,6 @@ const VIEW_STYLES = {
         ["view-match-card-styles", versionedAsset("/static/css/components/match_cards.css", "matches-6")],
         ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
-    SNAKE: [["view-games-styles", versionedAsset("/static/css/pages/games.css", "games-7")]],
-    QUIZ: [["view-quiz-styles", versionedAsset("/static/css/pages/quiz_page.css", "quiz-page-3")]],
     TICKET: [
         ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-7")],
         ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-10")],
@@ -49,11 +47,14 @@ const VIEW_STYLES = {
 };
 
 const VIEW_SCRIPTS = {
-        ALL: [["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-82")]],
+    ALL: [
+        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-83")],
+        // El pleno de la columna «Tú» se elige con el mismo modal que usa el
+        // boleto: la pagina unica lo pide al estar la jornada abierta.
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-3")],
+    ],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
-    SNAKE: [["view-games-script", versionedAsset("/static/js/pages/games_hub.js", "games-hub-10")]],
-    QUIZ: [["view-quiz-script", versionedAsset("/static/js/quiz.js", "quiz-2")]],
     TICKET: [
         ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-11")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-2")],
@@ -138,42 +139,20 @@ function changeJornada(jornada) {
 }
 
 function currentMainView() {
-    if (state.contestView !== "MATCHES") return "CONTEST";
-    if (String(state.currentFilter || "").startsWith("STANDINGS_")) return "STANDINGS";
-    if (state.currentFilter === "LIVE") return "LIVE";
-    if (state.currentFilter === "SNAKE_PAGE") return "SNAKE";
-    if (state.currentFilter === "QUIZ_PAGE") return "QUIZ";
-    if (state.currentFilter === "NEWS_PAGE") return "NEWS";
-    if (state.currentFilter === "TICKET") return "TICKET";
-    if (state.currentFilter && state.currentFilter !== "ALL") return "LEAGUES";
+    // El sitio sirve UNA sola pagina: la quiniela kawaii (vista ALL). Las
+    // demas vistas quedan sin navegacion (ver tests y README), por lo que
+    // cualquier estado heredado vuelve a ALL.
+    if (state.contestView !== "MATCHES") return "ALL";
     return "ALL";
 }
 
 async function changeMainView(view) {
     const target = view || "ALL";
     await ensureViewAssets(target);
-    state.newspaperPage = target;
-    hydrateNewspaperPageNav(target);
-    if (target === "CONTEST") {
-        state.currentFilter = "ALL";
-        state.contestView = "CONTEST_GENERAL";
-    } else if (target === "STANDINGS") {
-        state.currentFilter = "STANDINGS_PRIMERA";
-        state.contestView = "MATCHES";
-    } else if (target === "LIVE") {
-        state.currentFilter = "LIVE";
-        state.contestView = "MATCHES";
-    } else if (target === "TICKET") {
-        state.currentFilter = "TICKET";
-        state.contestView = "MATCHES";
-    } else if (target === "LEAGUES") {
-        const leagues = getAvailableLeagueOptions();
-        state.currentFilter = leagues[0]?.[0] || "LIVE";
-        state.contestView = "MATCHES";
-    } else {
-        state.currentFilter = "ALL";
-        state.contestView = "MATCHES";
-    }
+    state.newspaperPage = "ALL";
+    hydrateNewspaperPageNav("ALL");
+    state.currentFilter = "ALL";
+    state.contestView = "MATCHES";
     syncUrlState();
     renderArena();
     hydrateHero();
@@ -195,32 +174,8 @@ function hydrateNewspaperPageNav(activePage = state.newspaperPage) {
 }
 
 async function openNewspaperPage(page) {
-    const target = page || "ALL";
-    await ensureViewAssets(target);
-    state.newspaperPage = target;
-    hydrateNewspaperPageNav(target);
-    if (target === "SNAKE") {
-        state.currentFilter = "SNAKE_PAGE";
-        state.contestView = "MATCHES";
-        syncUrlState();
-        renderArena();
-        return;
-    }
-    if (target === "QUIZ") {
-        state.currentFilter = "QUIZ_PAGE";
-        state.contestView = "MATCHES";
-        syncUrlState();
-        renderArena();
-        return;
-    }
-    if (target === "NEWS") {
-        state.currentFilter = "NEWS_PAGE";
-        state.contestView = "MATCHES";
-        syncUrlState();
-        renderArena();
-        return;
-    }
-    await changeMainView(target);
+    // Navegacion unica: cualquier accion de pagina vuelve a la quiniela.
+    await changeMainView(page || "ALL");
 }
 
 async function openProfileView() {

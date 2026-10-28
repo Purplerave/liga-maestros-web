@@ -1,7 +1,7 @@
 """Regresión: las estadísticas arrancan de cero con la temporada 2026/27.
 
 El periodo de pruebas (jornadas 51-76) se conserva en la BD como archivo,
-pero no debe alimentar rankings, perfiles, rachas ni rankings de quiz. Solo
+pero no debe alimentar rankings, perfiles ni rachas. Solo
 cuentan las jornadas de la temporada publicada (J1 en adelante).
 """
 
@@ -9,12 +9,11 @@ import sqlite3
 
 import config
 from liga_maestros import create_app
-from liga_maestros.db.migrations import ensure_core_tables, ensure_porra_table, ensure_quiz_tables
+from liga_maestros.db.migrations import ensure_core_tables, ensure_porra_table
 from liga_maestros.services import contest as contest_service
 from liga_maestros.services.engagement import build_post_jornada_summary, compute_quiniela_streak
 from liga_maestros.services.jornada import current_season_sql, is_current_season_jornada
 from liga_maestros.services.payloads.predictions import _build_ranking
-from liga_maestros.services.quiz import get_quiz_ranking_temporada
 
 LEGACY_JORNADA = 75  # periodo de pruebas
 CURRENT_JORNADA = 1  # temporada publicada 2026/27
@@ -26,7 +25,6 @@ def _make_db(tmp_path, monkeypatch):
     conn = sqlite3.connect(config.DB_PATH)
     conn.row_factory = sqlite3.Row
     ensure_core_tables(conn)
-    ensure_quiz_tables(conn)
     ensure_porra_table(conn)
     conn.execute("INSERT INTO usuarios (id, nombre, puntos_acumulados) VALUES ('mrpurple', 'MrPurple', 14)")
     for partido_id in range(1, 16):
@@ -140,34 +138,6 @@ def test_predictions_ranking_ignores_test_jornadas(tmp_path, monkeypatch):
     assert ranking["mrpurple"]["bonus"] == 2
     assert ranking["mrpurple"]["jornada_final"] == 2
     conn.close()
-
-
-def test_quiz_ranking_temporada_ignores_test_jornadas(tmp_path, monkeypatch):
-    _make_db(tmp_path, monkeypatch)
-    conn = sqlite3.connect(config.DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute(
-        """
-        INSERT INTO quiz_participaciones
-            (jornada, user_id, nombre, respuestas, aciertos, total_preguntas, puntos, created_at)
-        VALUES (72, 'mrpurple', 'MrPurple', '[]', 9, 10, 10, '2026-07-20 10:00:00')
-        """
-    )
-    conn.execute(
-        """
-        INSERT INTO quiz_participaciones
-            (jornada, user_id, nombre, respuestas, aciertos, total_preguntas, puntos, created_at)
-        VALUES (1, 'mrpurple', 'MrPurple', '[]', 5, 10, 6, '2026-08-14 10:00:00')
-        """
-    )
-    conn.commit()
-    conn.close()
-
-    ranking = get_quiz_ranking_temporada()
-
-    assert len(ranking) == 1
-    assert ranking[0]["puntos_totales"] == 6
-    assert ranking[0]["jornadas_participadas"] == 1
 
 
 def _test_app(tmp_path, monkeypatch):

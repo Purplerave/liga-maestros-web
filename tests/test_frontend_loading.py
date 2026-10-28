@@ -10,10 +10,8 @@ TYPEWRITER = ROOT / "static" / "css" / "typewriter_system.css"
 LAZY_VIEW_SCRIPTS = {
     "static/js/pages/cover_page.js",
     "static/js/pages/ticket_page.js",
-    "static/js/pages/games_hub.js",
     "static/js/standings.js",
     "static/js/contest.js",
-    "static/js/quiz.js",
     "static/js/components/pleno_modal.js",
 }
 
@@ -88,9 +86,6 @@ def test_page_styles_do_not_contain_removed_cross_page_components():
     assert ".status-tile" not in app_shell
     assert ".secondary-btn" not in app_shell
 
-    quiz = (ROOT / "static" / "css" / "pages" / "quiz_page.css").read_text(encoding="utf-8")
-    assert ".pulse-page" not in quiz
-    assert ".world-cup-quiz-card" not in quiz
     assert not (ROOT / "static" / "css" / "pages" / "porra.css").exists()
 
 

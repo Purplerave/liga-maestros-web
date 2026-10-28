@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="Liga de Maestros: la quiniela donde La Peña compite contra GPT, Claude, Gemini y Grok. 15 partidos, ranking en vivo y porra del pleno." />
-    <meta name="theme-color" content="#06090f" />
-    <title>Liga de Maestros — ¿Puedes ganar a la IA?</title>
+    <meta name="description" content="La Quiniela de Liga de Maestros en una sola página: resultados en directo, aciertos y fallos por casilla, columna de cada participante y clasificación. Boleto SELAE 18." />
+    <meta name="theme-color" content="#FFF7EC" />
+    <title>La Quiniela — Liga de Maestros en una sola página</title>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Liga de Maestros" />
-    <meta property="og:title" content="Liga de Maestros — La Peña contra los Maestros IA" />
-    <meta property="og:description" content="15 partidos. Humanos vs GPT, Claude, Gemini y Grok. Firma tu quiniela y demuestra quién acierta más." />
+    <meta property="og:title" content="La Quiniela — Liga de Maestros en una sola página" />
+    <meta property="og:description" content="15 casillas, resultados en directo, ✓ y ✗ por columna y la clasificación final. Entra con Google y deja tu quiniela." />
     <link rel="canonical" href="{{ url_for('main.index', _external=True) }}" />
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Liga de Maestros",
-        "description": "Quiniela competitiva: La Peña contra GPT, Claude, Gemini y Grok. Predicciones, rankings, directo y juegos.",
+        "description": "Quiniela competitiva en una sola página: resultados en directo, aciertos y fallos por casilla, columna de cada participante y clasificación.",
         "url": "{{ url_for('main.index', _external=True) }}",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Web",
@@ -34,8 +34,8 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Liga de Maestros — ¿Puedes ganar a la IA?" />
-    <meta name="twitter:description" content="15 partidos. Humanos vs GPT, Claude, Gemini y Grok. Firma tu quiniela." />
+    <meta name="twitter:title" content="La Quiniela — Liga de Maestros en una sola página" />
+    <meta name="twitter:description" content="15 casillas en directo con aciertos y fallos. Deja tu quiniela con tu cuenta de Google." />
     <meta name="twitter:image" content="{{ url_for('main.static_files', filename='img/og-image.png', v=assets_v, _external=True) }}" />
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('main.static_files', filename='img/favicon-32.png', v=assets_v) }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('main.static_files', filename='img/favicon-16.png', v=assets_v) }}">
@@ -51,7 +51,7 @@
     {# La precarga y la hoja de estilo deben compartir version: con `v` distinto
        el navegador descargaba tokens.css dos veces. #}
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-3') }}">
-    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding;</style>
+    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding, kawaii;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-1') }}">
@@ -63,7 +63,6 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/ticket_compact.css', v=assets_v ~ '-ticket-mobile-cards-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/typewriter_system.css', v=assets_v ~ '-typewriter-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/surface_shape.css', v=assets_v ~ '-surface-shape-1') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/cover_hero.css', v=assets_v ~ '-cover-hero-96') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/typography.css', v=assets_v ~ '-typography-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
@@ -79,6 +78,12 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/mobile_v2.css', v=assets_v ~ '-mobile-v2-7') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/command_center.css', v=assets_v ~ '-command-center-mobile-8') }}">
     <link rel="preload" as="style" id="future-styles" href="{{ url_for('main.static_files', filename='css/themes/future.css', v=assets_v ~ '-future-1') }}">
+    {# La pagina unica kawaii: su capa cierra la cadena de @layer y pisa los
+       estilos del antiguo periodico y de la portada, sin ningun !important.
+       Sustituye a cover_hero.css en el camino critico (25 hojas, presupuesto
+       de test_portada_critical_path); cover_hero.css sigue existiendo para los
+       tests que bloquean sus reglas. #}
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/kawaii.css', v=assets_v ~ '-kawaii-1') }}">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
 </head>
 <body class="newspaper-ui quiniela-focus newspaper-cover-active" data-jornada="{{ jornada }}" data-assets-v="{{ assets_v }}">
@@ -134,12 +139,7 @@
         </header>
 
         <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
-            <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">⌂</i><span>Portada</span></button>
-            <button type="button" data-page-action="TICKET"><i class="nav-ico" aria-hidden="true">1X2</i><span>Quiniela</span></button>
-            <button type="button" data-page-action="LIVE"><i class="nav-ico" aria-hidden="true">●</i><span>Directo</span></button>
-            <button type="button" data-page-action="STANDINGS"><i class="nav-ico" aria-hidden="true">☰</i><span>Ligas</span></button>
-            <button type="button" data-page-action="SNAKE"><i class="nav-ico" aria-hidden="true">▶</i><span>Juegos</span></button>
-            <button type="button" data-page-action="CONTEST"><i class="nav-ico" aria-hidden="true">★</i><span>La Pe&ntilde;a</span></button>
+            <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">🐾</i><span>La quiniela</span></button>
         </nav>
 
         <main class="main-arena">

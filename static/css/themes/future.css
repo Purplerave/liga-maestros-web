@@ -596,6 +596,7 @@ body.newspaper-cover-active .cx-pleno-prediction.is-user { border-color: rgba(25
     }
 }
 }
+@layer future {
 
 /* command_center.css intentionally leaves cover rules unlayered. These narrow
    unlayered resets are needed because normal unlayered rules outrank @layer. */
@@ -869,4 +870,5 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-boleto-table tbody t
 }
 
 @layer future {
+}
 }

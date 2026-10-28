@@ -234,10 +234,6 @@ qs("refresh-btn")?.addEventListener("click", refreshData);
             openProfileView();
             return;
         }
-        if (event.target.closest("[data-close-game]")) {
-            closeActiveGame();
-            return;
-        }
         const expandContest = event.target.closest("[data-contest-expand]");
         if (expandContest) {
             const target = qs(expandContest.dataset.contestExpand);

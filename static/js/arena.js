@@ -67,18 +67,12 @@ function renderArena() {
     if (state.currentFilter !== "TICKET" && typeof stopTicketComments === "function") {
         stopTicketComments();
     }
-    if (state.currentFilter !== "SNAKE_PAGE") {
-        if (typeof leaveGamesHub === "function") leaveGamesHub();
-        else document.body.classList.remove("games-snake-open", "games-arkanoid-open");
-    }
     standingContextCache = new Map();
     document.body.classList.add("quiniela-focus");
     document.body.classList.toggle("newspaper-cover-active", isCoverPage());
     if (isCoverPage()) loadSacramentoFont();
     document.body.classList.toggle("newspaper-ticket-active", isTicketPage());
     document.body.classList.toggle("newspaper-standings-active", isStandingsPage());
-    document.body.classList.toggle("newspaper-snake-active", isSnakePage());
-    document.body.classList.toggle("newspaper-quiz-active", isQuizPage());
     document.body.classList.toggle("newspaper-news-active", isNewsPage());
     document.body.classList.toggle("newspaper-contest-active", isContestPage() && !isProfilePage());
     document.body.classList.toggle("newspaper-live-active", isLiveOrLeaguePage());
@@ -119,20 +113,6 @@ function renderArena() {
             ? renderNewsPage()
             : `<div class="empty-state">Cargando noticias...</div>`;
         loadNewsBriefing();
-        return;
-    }
-
-    if (state.currentFilter === "QUIZ_PAGE") {
-        container.className = "arena-content newspaper-feature-page";
-        container.innerHTML = renderQuizNewspaperPage();
-        setTimeout(initQuiz, 50);
-        return;
-    }
-
-    if (state.currentFilter === "SNAKE_PAGE") {
-        container.className = "arena-content newspaper-feature-page games-hub";
-        container.innerHTML = renderGamesHub();
-        if (typeof initGamesHub === "function") initGamesHub();
         return;
     }
 

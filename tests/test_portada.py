@@ -22,15 +22,12 @@ CASOS_PORTADA = [
     "filas-alineadas-permiten-el-parche",
     "filas-desordenadas-exigen-render-completo",
     "filas-de-mas-exigen-render-completo",
-    "el-parche-usa-la-regla-de-alineacion",
     "sin-votos-no-inventa-consenso",
     "porcentajes-sin-votos-son-cero",
     "empate-a-tres-no-es-lectura",
     "mayoria-clara-si-se-lee",
     "mayoria-simple-sobre-la-mitad",
-    "la-fila-del-boleto-es-operable-y-segura",
     "la-navegacion-no-marca-las-filas",
-    "el-separador-de-pena-va-encima-de-su-celda",
     "el-parche-incremental-esta-muerto",
 ]
 
