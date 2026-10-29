@@ -114,7 +114,10 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
     assert [por_uid["grok"][i] for i in range(1, 16)] == LINEA_GROK
     assert [por_uid["sonia"][i] for i in range(1, 16)] == LINEA_SONIA
     assert all(
-        len(signo) == 1 for uid in ("tecnotron", "programa", "grok", "sonia") for pid, signo in por_uid[uid].items() if pid < 15
+        len(signo) == 1
+        for uid in ("tecnotron", "programa", "grok", "sonia")
+        for pid, signo in por_uid[uid].items()
+        if pid < 15
     )
     # Sin linea validada no hay fila (los signos pasan por scoring.py).
     for uid, signos in por_uid.items():
