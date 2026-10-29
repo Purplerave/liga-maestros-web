@@ -109,6 +109,12 @@ def save_predictions():
         if motivo_cierre:
             return jsonify({"status": "error", "message": motivo_cierre}), 403
 
+        # Solo el admin puede escribir el id reservado mrpurple
+        if str(uid).strip().lower() == "mrpurple" and not bool(user.get("is_admin")):
+            return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+        es_admin = bool(user.get("is_admin"))
+
         def escribir_y_verificar():
             """Transaccion de escritura completa: borra, inserta y relee.
 
@@ -148,6 +154,32 @@ def save_predictions():
                     leidos[idx] = row["signo"]
             if leidos != normalized_signs:
                 raise GuardadoIncompletoError()
+
+            # Espejo admin para mrpurple
+            if es_admin and str(uid).strip().lower() != "mrpurple":
+                conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", ("mrpurple", target_jornada))
+                mrpurple_tuples = [
+                    ("mrpurple", target_jornada, i, signo)
+                    for i, signo in enumerate(normalized_signs, 1)
+                    if signo != "-"
+                ]
+                if mrpurple_tuples:
+                    conn.executemany(
+                        "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+                        mrpurple_tuples,
+                    )
+                mrpurple_rows = conn.execute(
+                    "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
+                    ("mrpurple", target_jornada),
+                ).fetchall()
+                leidos_mr = ["-"] * Q15_EXPECTED_MATCHES
+                for row in mrpurple_rows:
+                    idx = int(row["partido_id"]) - 1
+                    if 0 <= idx < Q15_EXPECTED_MATCHES:
+                        leidos_mr[idx] = row["signo"]
+                if leidos_mr != normalized_signs:
+                    raise GuardadoIncompletoError()
+
             conn.commit()
             return leidos
 

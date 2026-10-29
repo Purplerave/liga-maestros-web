@@ -691,21 +691,93 @@ def ensure_jornada_16(conn):
 # Boletos editoriales recibidos para la J17. Signos y plenos literales:
 # normalizar/validar con scoring.py, pero no corregir ni completar a mano.
 # Se guardan en predicciones para que tabla, puntuación y clasificación lean la
-# misma fuente. MrPurple (Pablo) queda pendiente hasta que llegue su línea;
-# la línea de Pablo se recogerá de su boleto «Tú» autenticado. La línea de
-# Sonia llegó el 29/10/2026 por WhatsApp (Pablo) y se registra tal cual.
+# misma fuente. MrPurple llega con su línea tal como figura en su boleto «Tú».
+# La línea de Sonia llegó el 29/10/2026 por WhatsApp (Pablo) y se registra tal cual.
 J17_EDITORIAL_TICKETS = {
+    "mrpurple": [
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "2",
+        "2",
+        "1",
+        "2",
+        "2",
+        "X",
+        "X",
+        "2",
+        "1",
+        "2-1",
+    ],
     "tecnotron": [
-        "2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "2", "1", "2-1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2",
+        "1",
+        "1",
+        "2",
+        "2",
+        "X",
+        "2",
+        "2",
+        "1",
+        "2-1",
     ],
     "programa": [
-        "2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "2",
+        "2",
+        "1-0",
     ],
     "grok": [
-        "2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "X",
+        "2",
+        "1",
+        "X",
+        "2",
+        "2",
+        "2",
+        "1",
+        "2",
+        "2",
+        "1-1",
     ],
     "sonia": [
-        "2", "X", "1", "1", "X", "X", "1", "X", "2", "2", "2", "X", "X", "2", "2-1",
+        "2",
+        "X",
+        "1",
+        "1",
+        "X",
+        "X",
+        "1",
+        "X",
+        "2",
+        "2",
+        "2",
+        "X",
+        "X",
+        "2",
+        "2-1",
     ],
 }
 
@@ -719,6 +791,15 @@ def _import_inline_prediction_tickets(conn, jornada, tickets):
     """
     imported = 0
     for uid, raw_signs in tickets.items():
+        uid_str = str(uid)
+        if uid_str.strip().lower() == "mrpurple":
+            # Si ya existe un espejo guardado por admin, no lo pisamos con el editorial
+            existing = conn.execute(
+                "SELECT COUNT(*) as c FROM predicciones WHERE jornada = ? AND lower(user_id) = 'mrpurple'",
+                (int(jornada),),
+            ).fetchone()
+            if existing and int(existing["c"] or 0) > 0:
+                continue
         signs = [normalize_prediction_sign(pid, value) for pid, value in enumerate(raw_signs, start=1)]
         if len(signs) != 15 or any(not sign or sign == "-" for sign in signs):
             continue

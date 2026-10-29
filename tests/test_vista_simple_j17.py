@@ -108,7 +108,7 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
     for fila in filas:
         por_uid.setdefault(fila["user_id"], {})[int(fila["partido_id"])] = fila["signo"]
 
-    assert set(por_uid) == {"tecnotron", "programa", "grok", "sonia"}
+    assert set(por_uid) == {"mrpurple", "tecnotron", "programa", "grok", "sonia"}
     assert [por_uid["tecnotron"][i] for i in range(1, 16)] == LINEA_TECNOTRON
     assert [por_uid["programa"][i] for i in range(1, 16)] == LINEA_PROGRAMA
     assert [por_uid["grok"][i] for i in range(1, 16)] == LINEA_GROK
@@ -123,8 +123,24 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
     for uid, signos in por_uid.items():
         for partido_id, signo in signos.items():
             assert normalize_prediction_sign(partido_id, signo) == signo, (uid, partido_id, signo)
-    # MrPurple pendiente: no se fabrica ninguna linea para el.
-    assert not [f for f in filas if str(f["user_id"]).lower() == "mrpurple"]
+    # MrPurple ya tiene línea pública
+    assert [por_uid["mrpurple"][i] for i in range(1, 16)] == [
+        "2",
+        "1",
+        "X",
+        "1",
+        "X",
+        "2",
+        "2",
+        "1",
+        "2",
+        "2",
+        "X",
+        "X",
+        "2",
+        "1",
+        "2-1",
+    ]
 
 
 def test_ensure_jornada_17_es_idempotente_y_esta_registrada_en_el_arranque():
@@ -132,7 +148,7 @@ def test_ensure_jornada_17_es_idempotente_y_esta_registrada_en_el_arranque():
     primera = migrations.ensure_jornada_17(conn)
     assert primera > 0
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 17").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 60
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 75
 
     fuente = (ROOT / "liga_maestros" / "db" / "migrations.py").read_text(encoding="utf-8")
     arranque = fuente[fuente.index("def run_startup_migrations") :]
@@ -167,7 +183,7 @@ def test_vista_por_defecto_solo_muestra_las_cinco_columnas_en_orden():
     payload = _payload(conn)
     assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
     assert [col["name"] for col in payload["columns"]] == ["MrPurple", "Programa", "Tecnotron", "Grok", "Sonia"]
-    assert [col["sin_linea"] for col in payload["columns"]] == [True, False, False, False, False]
+    assert [col["sin_linea"] for col in payload["columns"]] == [False, False, False, False, False]
 
 
 def test_el_historico_no_deja_colarse_otras_columnas():
@@ -266,8 +282,8 @@ def test_el_total_del_pie_solo_cuenta_casillas_con_linea_y_resultado():
     assert payload["totals"]["programa"] == {"aciertos": 5, "jugados": 7}
     # Tecnotron: 4 de 7 (2 en las casillas 1, 5 y 6).
     assert payload["totals"]["tecnotron"] == {"aciertos": 4, "jugados": 7}
-    # MrPurple sigue sin linea: ni jugados ni aciertos.
-    assert payload["totals"]["mrpurple"] == {"aciertos": 0, "jugados": 0}
+    # MrPurple acierta casilla 2 y 4 con '1'
+    assert payload["totals"]["mrpurple"] == {"aciertos": 2, "jugados": 7}
 
 
 def test_el_pleno_solo_acierta_con_el_marcador_exacto():
@@ -297,7 +313,7 @@ def test_clasificacion_j17_solo_incluye_los_cinco_y_reutiliza_hits():
     assert ranking["programa"]["total"] == payload["totals"]["programa"]["aciertos"]
     assert ranking["programa"]["jornada"] == ranking["programa"]["total"]
     assert ranking["sonia"]["total"] == payload["totals"]["sonia"]["aciertos"]
-    assert ranking["mrpurple"]["total"] == 0
+    assert ranking["mrpurple"]["total"] == 1
 
 
 def test_el_pleno_cuenta_por_buckets_como_score_prediction():
@@ -344,8 +360,8 @@ def test_el_resultado_se_pinta_cuando_existe():
     payload = _payload(conn)
     fila = _fila(payload, 1)
     assert fila["has_result"] and fila["resultado"] == "1-0" and fila["signo_real"] == "1"
-    # Una columna sin linea en esa casilla no es un fallo: queda pendiente.
-    assert fila["picks"]["mrpurple"] == {"signo": "-", "dobles": False, "hit": None}
+    # MrPurple puso '2' en casilla 1
+    assert fila["picks"]["mrpurple"] == {"signo": "2", "dobles": False, "hit": False}
     # La resta de casillas sigue pendiente.
     assert _fila(payload, 2)["has_result"] is False
 
@@ -433,7 +449,16 @@ def _render_cover(state_data):
         .replace("COVER_PATH", json.dumps(str(COVER)))
         .replace("PAYLOAD_JSON", json.dumps(json.dumps(state_data)))
     )
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+    )
     return result.stdout
 
 
