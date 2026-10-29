@@ -14,6 +14,7 @@ actualizaba la fila.
 """
 
 import sqlite3
+from datetime import datetime
 
 import config
 from liga_maestros.db import migrations
@@ -21,7 +22,11 @@ from liga_maestros.services import highlightly
 
 FECHA = "2026-08-30"
 HORA = "14:00"
-RECENT = 60 * 24  # horas: la jornada se cerro "hace poco" respecto a la fecha del partido
+# La ventana se mide desde "ahora": el fixture es del 30/08/2026 y con 60 dias
+# justos el test caduco el 29/10/2026 (el partido quedaba fuera de la ventana
+# y ya no se lanzaba la llamada explicita). Ventana = edad del fixture + 48 h
+# de margen, para que el caso "reciente" lo siga siendo siempre.
+RECENT = int((datetime.now() - datetime.fromisoformat(f"{FECHA}T{HORA}")).total_seconds() // 3600) + 48
 
 
 def _patch_env(monkeypatch, tmp_path):
