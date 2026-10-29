@@ -36,6 +36,7 @@ STATE = ROOT / "static" / "js" / "state.js"
 LINEA_TECNOTRON = ["2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "2", "1", "2-1"]
 LINEA_PROGRAMA = ["2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0"]
 LINEA_GROK = ["2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1"]
+LINEA_SONIA = ["2", "X", "1", "1", "X", "X", "1", "X", "2", "2", "2", "X", "X", "2", "2-1"]
 COLUMN_IDS = ["mrpurple", "programa", "tecnotron", "grok", "sonia"]
 
 
@@ -107,12 +108,13 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
     for fila in filas:
         por_uid.setdefault(fila["user_id"], {})[int(fila["partido_id"])] = fila["signo"]
 
-    assert set(por_uid) == {"tecnotron", "programa", "grok"}
+    assert set(por_uid) == {"tecnotron", "programa", "grok", "sonia"}
     assert [por_uid["tecnotron"][i] for i in range(1, 16)] == LINEA_TECNOTRON
     assert [por_uid["programa"][i] for i in range(1, 16)] == LINEA_PROGRAMA
     assert [por_uid["grok"][i] for i in range(1, 16)] == LINEA_GROK
+    assert [por_uid["sonia"][i] for i in range(1, 16)] == LINEA_SONIA
     assert all(
-        len(signo) == 1 for uid in ("tecnotron", "programa", "grok") for pid, signo in por_uid[uid].items() if pid < 15
+        len(signo) == 1 for uid in ("tecnotron", "programa", "grok", "sonia") for pid, signo in por_uid[uid].items() if pid < 15
     )
     # Sin linea validada no hay fila (los signos pasan por scoring.py).
     for uid, signos in por_uid.items():
@@ -127,7 +129,7 @@ def test_ensure_jornada_17_es_idempotente_y_esta_registrada_en_el_arranque():
     primera = migrations.ensure_jornada_17(conn)
     assert primera > 0
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 17").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 45
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 60
 
     fuente = (ROOT / "liga_maestros" / "db" / "migrations.py").read_text(encoding="utf-8")
     arranque = fuente[fuente.index("def run_startup_migrations") :]
@@ -162,7 +164,7 @@ def test_vista_por_defecto_solo_muestra_las_cinco_columnas_en_orden():
     payload = _payload(conn)
     assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
     assert [col["name"] for col in payload["columns"]] == ["MrPurple", "Programa", "Tecnotron", "Grok", "Sonia"]
-    assert [col["sin_linea"] for col in payload["columns"]] == [True, False, False, False, True]
+    assert [col["sin_linea"] for col in payload["columns"]] == [True, False, False, False, False]
 
 
 def test_el_historico_no_deja_colarse_otras_columnas():
@@ -291,7 +293,7 @@ def test_clasificacion_j17_solo_incluye_los_cinco_y_reutiliza_hits():
     assert list(ranking) == COLUMN_IDS
     assert ranking["programa"]["total"] == payload["totals"]["programa"]["aciertos"]
     assert ranking["programa"]["jornada"] == ranking["programa"]["total"]
-    assert ranking["sonia"]["total"] == 0
+    assert ranking["sonia"]["total"] == payload["totals"]["sonia"]["aciertos"]
     assert ranking["mrpurple"]["total"] == 0
 
 

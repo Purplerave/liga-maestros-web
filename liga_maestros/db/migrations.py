@@ -691,8 +691,9 @@ def ensure_jornada_16(conn):
 # Boletos editoriales recibidos para la J17. Signos y plenos literales:
 # normalizar/validar con scoring.py, pero no corregir ni completar a mano.
 # Se guardan en predicciones para que tabla, puntuación y clasificación lean la
-# misma fuente. MrPurple (Pablo) y Sonia quedan pendientes hasta que llegue su
-# línea; la línea de Pablo se recogerá de su boleto «Tú» autenticado.
+# misma fuente. MrPurple (Pablo) queda pendiente hasta que llegue su línea;
+# la línea de Pablo se recogerá de su boleto «Tú» autenticado. La línea de
+# Sonia llegó el 29/10/2026 por WhatsApp (Pablo) y se registra tal cual.
 J17_EDITORIAL_TICKETS = {
     "tecnotron": [
         "2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "2", "1", "2-1",
@@ -702,6 +703,9 @@ J17_EDITORIAL_TICKETS = {
     ],
     "grok": [
         "2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1",
+    ],
+    "sonia": [
+        "2", "X", "1", "1", "X", "X", "1", "X", "2", "2", "2", "X", "X", "2", "2-1",
     ],
 }
 
