@@ -37,6 +37,7 @@ LINEA_TECNOTRON = ["2", "1", "1", "1", "2", "2", "1", "1", "2", "2", "X", "2", "
 LINEA_PROGRAMA = ["2", "1", "1", "1", "1", "2", "1", "1", "2", "1", "1", "1", "2", "2", "1-0"]
 LINEA_GROK = ["2", "1", "1", "1", "X", "2", "1", "X", "2", "2", "2", "1", "2", "2", "1-1"]
 LINEA_SONIA = ["2", "X", "1", "1", "X", "X", "1", "X", "2", "2", "2", "X", "X", "2", "2-1"]
+LINEA_MRPURPLE = ["2", "1", "X", "1", "X", "2", "2", "1", "2", "2", "X", "X", "2", "1", "2-1"]
 COLUMN_IDS = ["mrpurple", "programa", "tecnotron", "grok", "sonia"]
 
 
@@ -124,23 +125,7 @@ def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():
         for partido_id, signo in signos.items():
             assert normalize_prediction_sign(partido_id, signo) == signo, (uid, partido_id, signo)
     # MrPurple ya tiene línea pública
-    assert [por_uid["mrpurple"][i] for i in range(1, 16)] == [
-        "2",
-        "1",
-        "X",
-        "1",
-        "X",
-        "2",
-        "2",
-        "1",
-        "2",
-        "2",
-        "X",
-        "X",
-        "2",
-        "1",
-        "2-1",
-    ]
+    assert [por_uid["mrpurple"][i] for i in range(1, 16)] == LINEA_MRPURPLE
 
 
 def test_ensure_jornada_17_es_idempotente_y_esta_registrada_en_el_arranque():
@@ -184,6 +169,32 @@ def test_vista_por_defecto_solo_muestra_las_cinco_columnas_en_orden():
     assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
     assert [col["name"] for col in payload["columns"]] == ["MrPurple", "Programa", "Tecnotron", "Grok", "Sonia"]
     assert [col["sin_linea"] for col in payload["columns"]] == [False, False, False, False, False]
+
+
+def test_el_payload_anonimo_publica_la_linea_de_mrpurple_sin_ids_privados():
+    """Sin sesion, la columna MrPurple trae sus 15 signos y ningun id de cuenta.
+
+    Se siembra ademas el boleto privado de otro usuario (id decimal largo) para
+    comprobar que ni se cuela en la tabla ni aparece serializado en el payload.
+    """
+    conn = _conn()
+    private_id = "102938475610293847"
+    conn.executemany(
+        "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 17, ?, ?)",
+        [(private_id, partido_id, signo) for partido_id, signo in enumerate(LINEA_TECNOTRON, start=1)],
+    )
+    conn.commit()
+
+    payload = _payload(conn)  # sin current_user_id: la peticion es anonima
+
+    mrpurple = payload["columns"][0]
+    assert mrpurple["id"] == "mrpurple"
+    assert mrpurple["name"] == "MrPurple"
+    assert mrpurple["sin_linea"] is False
+    assert mrpurple["es_mia"] is False
+    assert [row["picks"]["mrpurple"]["signo"] for row in payload["rows"]] == LINEA_MRPURPLE
+    assert private_id not in json.dumps(payload)
+    assert all(private_id not in row["picks"] for row in payload["rows"])
 
 
 def test_el_historico_no_deja_colarse_otras_columnas():

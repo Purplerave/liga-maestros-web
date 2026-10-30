@@ -8,14 +8,17 @@ ya se sabe que "las de pruebas (51-76) ya no alimentan el concurso", así que la
 única comprobación capaz de bloquear la CI no vigilaba nada del concurso real.
 
 Este módulo cierra ese hueco. Valida los **datos versionados que se despliegan**
-(`data/`), no la base de datos de producción: así el gate es determinista en CI y
-sigue siendo significativo sin acceso a Alwaysdata.
+(`data/` y, desde la J17, los boletos editoriales de `migrations.py`), no la base
+de datos de producción: así el gate es determinista en CI y sigue siendo
+significativo sin acceso a Alwaysdata.
 
 Lo que vigila:
-- la jornada declarada en el seed está dentro de la temporada vigente;
-- existen exactamente 15 partidos con fecha y hora;
+- la jornada en juego está dentro de la temporada vigente;
+- existen exactamente 15 partidos y su horario es el verificado (una casilla
+  marcada como no verificada en el scrape no se rellena a mano);
 - el boleto `programa` tiene 15 signos y es un boleto válido según el backend;
-- Pavo tiene boleto completo (es fuente de verdad, no se degrada);
+- todos los boletos de la jornada están completos (Pavo en los seeds antiguos,
+  los cinco maestros en la J17);
 - el calendario no está congelado en el pasado;
 - el resumen de temporada se sirve desde la temporada vigente.
 """
@@ -33,6 +36,8 @@ DATA = ROOT / "data"
 MADRID = ZoneInfo("Europe/Madrid")
 
 MATCHES_PER_JORNADA = 15
+# Los cinco participantes cerrados desde la J17: liga simple, sin dobles.
+JUGADORES_J17 = {"mrpurple", "programa", "tecnotron", "grok", "sonia"}
 MATCH_DURATION = timedelta(hours=2)
 # Margen para que el gate no se ponga rojo a los 2 minutos del saque, en la
 # ventana entre el push y la ejecución del job.
@@ -50,29 +55,32 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _seed_jornada_de_un_fichero(path: Path) -> int | None:
-    match = re.fullmatch(r"predicciones_J(\d+)\.json", path.name)
+def _jornada_de_un_fichero(path: Path, prefijo: str) -> int | None:
+    match = re.fullmatch(rf"{prefijo}_J(\d+)\.json", path.name)
     return int(match.group(1)) if match else None
 
 
 @pytest.fixture(scope="module")
 def current_jornada() -> int:
-    """Jornada vigente según los seeds de la repo.
+    """Jornada en juego según los datos versionados de la repo.
 
     Se descubre sola (no está codificada) para que el gate siga a la jornada
-    real cuando se suba la siguiente: se queda con el `predicciones_J*.json` de
-    mayor número que siga dentro de la temporada publicada.
+    real cuando se suba la siguiente. Se miran tanto los boletos
+    (`predicciones_J*.json`) como los fixtures (`horarios_J*.json`): la J17
+    tiene calendario y scrape, pero sus boletos viven en `migrations.py`, y
+    mirar solo `predicciones_J*.json` dejaba el gate validando la J16 ya cerrada.
     """
     from liga_maestros.services.jornada import CURRENT_SEASON_MAX_JORNADA
 
-    candidatas = []
-    for path in DATA.glob("predicciones_J*.json"):
-        jornada = _seed_jornada_de_un_fichero(path)
-        if jornada is not None and 1 <= jornada <= CURRENT_SEASON_MAX_JORNADA:
-            candidatas.append(jornada)
+    candidatas = set()
+    for prefijo in ("predicciones", "horarios"):
+        for path in DATA.glob(f"{prefijo}_J*.json"):
+            jornada = _jornada_de_un_fichero(path, prefijo)
+            if jornada is not None and 1 <= jornada <= CURRENT_SEASON_MAX_JORNADA:
+                candidatas.add(jornada)
 
     assert candidatas, (
-        f"no hay ningún data/predicciones_J*.json de la temporada vigente (1..{CURRENT_SEASON_MAX_JORNADA})"
+        f"no hay ningún data/(predicciones|horarios)_J*.json de la temporada vigente (1..{CURRENT_SEASON_MAX_JORNADA})"
     )
     return max(candidatas)
 
@@ -84,7 +92,37 @@ def horarios(current_jornada: int) -> dict:
 
 @pytest.fixture(scope="module")
 def predicciones(current_jornada: int) -> dict:
-    return _load(DATA / f"predicciones_J{current_jornada}.json")
+    """Boletos de la jornada: del seed si existe, o de la importación editorial.
+
+    La J17 no tiene `data/predicciones_J17.json`: sus cinco líneas se despliegan
+    desde `J17_EDITORIAL_TICKETS`. Se normaliza la forma para que los tests no
+    distingan entre las dos fuentes.
+    """
+    path = DATA / f"predicciones_J{current_jornada}.json"
+    if path.is_file():
+        return _load(path)
+
+    from liga_maestros.db import migrations
+
+    tickets = getattr(migrations, f"J{current_jornada}_EDITORIAL_TICKETS", None)
+    assert tickets, (
+        f"falta data/predicciones_J{current_jornada}.json y no hay "
+        f"J{current_jornada}_EDITORIAL_TICKETS en migrations.py"
+    )
+    return {uid: {"signos": list(signos)} for uid, signos in tickets.items()}
+
+
+def _kickoffs_sin_verificar(current_jornada: int) -> set[int]:
+    """Casillas que el scrape marca como pendientes de horario verificado."""
+    path = DATA / f"quiniela15_J{current_jornada}_scrape.json"
+    if not path.is_file():
+        return set()
+    scrape = _load(path)
+    return {
+        int(partido["num"])
+        for partido in scrape.get("partidos", [])
+        if not str(partido.get("hora") or "").strip() and partido.get("nota")
+    }
 
 
 def test_la_jornada_del_seed_esta_en_la_temporada_vigente(current_jornada):
@@ -96,12 +134,17 @@ def test_la_jornada_del_seed_esta_en_la_temporada_vigente(current_jornada):
     assert is_current_season_jornada(current_jornada), "la jornada del seed no es de la temporada vigente"
 
 
-def test_hay_quince_partidos_con_fecha_y_hora(horarios):
+def test_hay_quince_partidos_con_horario_verificado(horarios, current_jornada):
     esperado = {str(i) for i in range(1, MATCHES_PER_JORNADA + 1)}
     assert set(horarios) == esperado, f"partidos esperados 1..{MATCHES_PER_JORNADA}, recibidos {sorted(horarios)}"
 
+    sin_verificar = _kickoffs_sin_verificar(current_jornada)
     for partido_id in sorted(esperado, key=int):
         row = horarios[partido_id]
+        if int(partido_id) in sin_verificar:
+            # Pendiente documentado en el scrape: no se inventa ni fecha ni hora.
+            assert not str(row.get("hora") or "").strip(), f"partido {partido_id}: hora inventada"
+            continue
         assert row.get("fecha"), f"partido {partido_id} sin fecha"
         assert row.get("hora"), f"partido {partido_id} sin hora"
         datetime.strptime(row["hora"], "%H:%M")
@@ -121,10 +164,23 @@ def test_el_programa_tiene_boleto_completo_y_valido(predicciones):
         )
 
 
-def test_pavo_tiene_boleto_completo(predicciones):
-    assert "pavo" in predicciones, "el seed no contiene a Pavo"
-    signos = predicciones["pavo"]["signos"]
-    assert len(signos) == MATCHES_PER_JORNADA, f"Pavo tiene {len(signos)} signos, no {MATCHES_PER_JORNADA}"
+def test_todos_los_boletos_de_la_jornada_estan_completos(predicciones, current_jornada):
+    """Pavo era la fuente de verdad de los seeds antiguos; desde la J17 la liga
+    es de cinco maestros y se validan los cinco."""
+    from liga_maestros.scoring import normalize_prediction_sign
+
+    if current_jornada == 17:
+        assert set(predicciones) == JUGADORES_J17, f"la J17 debe tener los cinco maestros, tiene {sorted(predicciones)}"
+    else:
+        assert "pavo" in predicciones, "el seed no contiene a Pavo"
+
+    for uid, data in predicciones.items():
+        signos = data["signos"]
+        assert len(signos) == MATCHES_PER_JORNADA, f"{uid} tiene {len(signos)} signos, no {MATCHES_PER_JORNADA}"
+        for partido_id, sign in enumerate(signos, start=1):
+            assert normalize_prediction_sign(partido_id, sign), (
+                f"el signo de {uid} en el partido {partido_id} no es válido: {sign!r}"
+            )
 
 
 def test_el_calendario_no_esta_congelado_en_el_pasado(horarios, current_jornada):
@@ -137,9 +193,14 @@ def test_el_calendario_no_esta_congelado_en_el_pasado(horarios, current_jornada)
     fins = []
     for partido_id in sorted(horarios, key=int):
         row = horarios[partido_id]
-        kickoff = datetime.strptime(f"{row['fecha']} {row['hora']}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID)
+        fecha = str(row.get("fecha") or "").strip()
+        hora = str(row.get("hora") or "").strip()
+        if not fecha or not hora:
+            continue
+        kickoff = datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID)
         fins.append(kickoff + MATCH_DURATION)
 
+    assert fins, f"la jornada {current_jornada} no tiene ningún horario verificado"
     ultimo_fin = max(fins)
     assert ahora <= ultimo_fin + SAFETY_MARGIN + SEED_PUBLICATION_GRACE, (
         f"el calendario de la jornada {current_jornada} está congelado: los {MATCHES_PER_JORNADA} partidos "

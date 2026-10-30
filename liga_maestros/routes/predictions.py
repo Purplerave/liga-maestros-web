@@ -16,6 +16,10 @@ from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
 
+# Id publico del dueno de la liga. Solo el admin (espejo) o la importacion
+# editorial pueden escribir esta columna; nunca se expone el id de su cuenta.
+MRPURPLE_PUBLIC_ID = "mrpurple"
+
 
 class GuardadoIncompletoError(Exception):
     """La fila releida no coincide con lo enviado.
@@ -46,6 +50,32 @@ def _motivo_de_cierre(rows, close_at):
     if any(is_scored_status(row["status"]) or is_live_scored_status(row["status"]) for row in rows):
         return "La quiniela ya esta cerrada: empezo el primer partido."
     return None
+
+
+def _ticket_signs_from_rows(rows):
+    """Devuelve los 15 signos de una columna releida de `predicciones`."""
+    leidos = ["-"] * Q15_EXPECTED_MATCHES
+    for row in rows:
+        idx = int(row["partido_id"]) - 1
+        if 0 <= idx < Q15_EXPECTED_MATCHES:
+            leidos[idx] = row["signo"]
+    return leidos
+
+
+def _replace_ticket(conn, uid, jornada, signs):
+    """Sustituye la linea completa de una columna y la devuelve releida."""
+    conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, jornada))
+    insert_tuples = [(uid, jornada, i, signo) for i, signo in enumerate(signs, 1) if signo != "-"]
+    if insert_tuples:
+        conn.executemany(
+            "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
+            insert_tuples,
+        )
+    rows = conn.execute(
+        "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
+        (uid, jornada),
+    ).fetchall()
+    return _ticket_signs_from_rows(rows)
 
 
 logger = logging.getLogger(__name__)
@@ -110,10 +140,9 @@ def save_predictions():
             return jsonify({"status": "error", "message": motivo_cierre}), 403
 
         # Solo el admin puede escribir el id reservado mrpurple
-        if str(uid).strip().lower() == "mrpurple" and not bool(user.get("is_admin")):
-            return jsonify({"status": "error", "message": "No autorizado"}), 403
-
         es_admin = bool(user.get("is_admin"))
+        if str(uid).strip().lower() == MRPURPLE_PUBLIC_ID and not es_admin:
+            return jsonify({"status": "error", "message": "No autorizado"}), 403
 
         def escribir_y_verificar():
             """Transaccion de escritura completa: borra, inserta y relee.
@@ -134,49 +163,15 @@ def save_predictions():
             motivo = _motivo_de_cierre(filas, close_at)
             if motivo:
                 raise QuinielaCerradaError(motivo)
-            conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", (uid, target_jornada))
-            insert_tuples = [
-                (uid, target_jornada, i, signo) for i, signo in enumerate(normalized_signs, 1) if signo != "-"
-            ]
-            if insert_tuples:
-                conn.executemany(
-                    "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
-                    insert_tuples,
-                )
-            saved_rows = conn.execute(
-                "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
-                (uid, target_jornada),
-            ).fetchall()
-            leidos = ["-"] * Q15_EXPECTED_MATCHES
-            for row in saved_rows:
-                idx = int(row["partido_id"]) - 1
-                if 0 <= idx < Q15_EXPECTED_MATCHES:
-                    leidos[idx] = row["signo"]
+            leidos = _replace_ticket(conn, uid, target_jornada, normalized_signs)
             if leidos != normalized_signs:
                 raise GuardadoIncompletoError()
 
-            # Espejo admin para mrpurple
-            if es_admin and str(uid).strip().lower() != "mrpurple":
-                conn.execute("DELETE FROM predicciones WHERE user_id = ? AND jornada = ?", ("mrpurple", target_jornada))
-                mrpurple_tuples = [
-                    ("mrpurple", target_jornada, i, signo)
-                    for i, signo in enumerate(normalized_signs, 1)
-                    if signo != "-"
-                ]
-                if mrpurple_tuples:
-                    conn.executemany(
-                        "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, ?, ?, ?)",
-                        mrpurple_tuples,
-                    )
-                mrpurple_rows = conn.execute(
-                    "SELECT partido_id, signo FROM predicciones WHERE user_id = ? AND jornada = ? ORDER BY partido_id",
-                    ("mrpurple", target_jornada),
-                ).fetchall()
-                leidos_mr = ["-"] * Q15_EXPECTED_MATCHES
-                for row in mrpurple_rows:
-                    idx = int(row["partido_id"]) - 1
-                    if 0 <= idx < Q15_EXPECTED_MATCHES:
-                        leidos_mr[idx] = row["signo"]
+            # Espejo admin: la linea publica de MrPurple se actualiza con el
+            # mismo guardado, en la misma transaccion. Si se queda a medias,
+            # el rollback revierte tambien la linea privada.
+            if es_admin and str(uid).strip().lower() != MRPURPLE_PUBLIC_ID:
+                leidos_mr = _replace_ticket(conn, MRPURPLE_PUBLIC_ID, target_jornada, normalized_signs)
                 if leidos_mr != normalized_signs:
                     raise GuardadoIncompletoError()
 
