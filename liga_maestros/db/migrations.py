@@ -821,8 +821,8 @@ def ensure_jornada_17(conn):
     J16 no necesitaba porque ya estaba en la BD. Los 15 partidos salen de
     data/quiniela15_J17_scrape.json + data/horarios_J17.json, copiados de la
     tabla 4 del brief: la casilla 14 queda sin hora (y sin fecha) porque la
-    fuente no la verifica. MrPurple no manda linea, asi que no hay fila para
-    el: su columna se muestra pendiente.
+    fuente no la verifica. MrPurple entra con la linea de su boleto «Tu»; si
+    ya hay un espejo guardado por el admin, la importacion no lo pisa.
     """
     updated = ensure_jornada_completa(conn, 17)
     imported = _import_inline_prediction_tickets(conn, 17, J17_EDITORIAL_TICKETS)
