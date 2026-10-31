@@ -686,7 +686,8 @@ function kawaiiCeldaEditable(col, row) {
     const pick = (row.picks || {})[col.id] || null;
     // El backend calcula el acierto. Conserva el color del boleto guardado
     // mientras se edita, siempre que siga visible el mismo signo puntuado.
-    const scoredState = pick && pick.signo === signo && pick.hit !== null && pick.hit !== undefined
+    const sameScoredSign = pick && String(pick.signo || "-").localeCompare(String(signo)) === 0;
+    const scoredState = sameScoredSign && pick.hit !== null && pick.hit !== undefined
         ? (pick.hit ? "is-hit" : "is-miss")
         : "";
     if (row.is_pleno) {
