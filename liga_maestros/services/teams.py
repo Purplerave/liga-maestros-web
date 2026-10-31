@@ -161,8 +161,18 @@ def is_scored_status(status):
 
 def is_live_scored_status(status):
     return str(status or "").strip().upper() in (
-        "LIVE", "IN PLAY", "IN_PLAY", "HT", "HALF TIME", "HALF TIME BREAK",
-        "EN JUEGO", "1H", "2H", "ET", "P", "PEN LIVE",
+        "LIVE",
+        "IN PLAY",
+        "IN_PLAY",
+        "HT",
+        "HALF TIME",
+        "HALF TIME BREAK",
+        "EN JUEGO",
+        "1H",
+        "2H",
+        "ET",
+        "P",
+        "PEN LIVE",
     )
 
 
