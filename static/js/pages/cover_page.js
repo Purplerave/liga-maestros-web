@@ -286,7 +286,10 @@ function _matchSideName(match, side) {
     return String(match.visitante || match.away_name || (match.away || {}).name || "").trim();
 }
 function _matchPairKey(match) {
-    return `${_matchSideName(match, "home").toLowerCase()}|${_matchSideName(match, "away").toLowerCase()}`;
+    const canonical = name => typeof normalizeName === "function"
+        ? normalizeName(name)
+        : String(name || "").trim().toLowerCase();
+    return `${canonical(_matchSideName(match, "home"))}|${canonical(_matchSideName(match, "away"))}`;
 }
 function _liveCompLabel(match) {
     if (!match) return "";
@@ -559,23 +562,46 @@ function simpleViewVerifiedScore(match) {
    verificados: nunca se rellena una casilla con un resultado dudoso. */
 function freshenSimpleViewRow(row) {
     if (!row) return row;
-    const source = (Array.isArray(state?.data?.partidos) ? state.data.partidos : [])
+    const matches = Array.isArray(state?.data?.partidos) ? state.data.partidos : [];
+    const source = matches
         .find(match => match && String(match.id ?? "") === String(row.id ?? ""));
-    if (!source) return row;
-    const status = String(source.status || "").toUpperCase();
-    const live = _SV_LIVE_STATUSES.includes(status)
+    const sourceStatus = String(source?.status || "").toUpperCase();
+    const sourceIsLive = _SV_LIVE_STATUSES.includes(sourceStatus)
         && !(typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(source));
-    const finished = _SV_FINAL_STATUSES.includes(status);
-    if (!live && !finished) return row;
-    const marcador = simpleViewVerifiedScore(source);
+    const sourceIsFinal = _SV_FINAL_STATUSES.includes(sourceStatus);
+    let verifiedMatch = (sourceIsLive || sourceIsFinal) && simpleViewVerifiedScore(source) ? source : null;
+
+    // El partido puede llegar primero al panel `live_matches` (con el minuto
+    // y el marcador del proveedor) mientras la fila de `partidos` sigue NS.
+    // Se cruza por equipos canonicos: Q15 puede decir «Rayo» / «Celta» y el
+    // panel «Rayo Vallecano» / «Celta de Vigo».
+    if (!verifiedMatch) {
+        const panelMatches = [
+            ...(Array.isArray(state?.data?.live_matches) ? state.data.live_matches : []),
+            ...(typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : []),
+        ];
+        const rowPair = _matchPairKey(row);
+        verifiedMatch = panelMatches.find(match => {
+            if (!match || _matchPairKey(match) !== rowPair) return false;
+            const status = String(match.status || "").toUpperCase();
+            const live = _SV_LIVE_STATUSES.includes(status)
+                && !(typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(match));
+            return live && Boolean(simpleViewVerifiedScore(match));
+        }) || null;
+    }
+    if (!verifiedMatch) return row;
+
+    const status = String(verifiedMatch.status || "").toUpperCase();
+    const live = _SV_LIVE_STATUSES.includes(status);
+    const marcador = simpleViewVerifiedScore(verifiedMatch);
     const next = { ...row, status, en_juego: live };
     if (marcador) {
         next.resultado = marcador;
         next.has_result = true;
     }
     if (live) {
-        const raw = String(source.minuto_live || source.minuto || source.time || "").match(/\d{1,3}/);
-        const minuto = raw ? `${raw[0]}'` : (typeof _liveMinuteLabel === "function" ? _liveMinuteLabel(source) : "");
+        const raw = String(verifiedMatch.minuto_live || verifiedMatch.minuto || verifiedMatch.minute || verifiedMatch.time || "").match(/\d{1,3}/);
+        const minuto = raw ? `${raw[0]}'` : (typeof _liveMinuteLabel === "function" ? _liveMinuteLabel(verifiedMatch) : "");
         if (minuto && minuto !== "LIVE") next.minuto = minuto;
     }
     return next;
@@ -890,7 +916,7 @@ function kawaiiLiveItemHtml(match) {
     return `<li class="kk-live-item${slot ? " is-quiniela" : ""}">
                 <div class="kk-live-meta">
                     ${comp ? `<span class="kk-live-comp">${escapeHtml(comp)}</span>` : ""}
-                    ${slot ? `<span class="kk-live-slot" title="Casilla ${slot} de la quiniela">Q${slot}</span>` : ""}
+                    ${slot ? `<span class="kk-live-slot" title="Casilla ${slot} de la quiniela">Casilla ${slot}</span>` : ""}
                     <span class="kk-live-min">${escapeHtml(String(minuto || "EN JUEGO"))}</span>
                 </div>
                 <div class="kk-live-body">
