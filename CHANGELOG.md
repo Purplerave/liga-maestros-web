@@ -2,6 +2,34 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-10-31 — Los partidos terminados siguen visibles en el panel de resultados
+
+### Corregido
+
+- **Un partido desaparecia de la pagina al pitar el final**: el panel lateral de
+  la portada solo listaba los directos (`live_matches`), asi que en cuanto un
+  partido acababa dejaba de estar en cualquier sitio de la pagina. La portada
+  antigua tenia su ticker «⚽ RESULTADOS» con los FT; la pagina unica lo habia
+  perdido y el marcador final solo se podia ver dentro de la tabla, casilla a
+  casilla, sin decir que partido era cada casilla. Ahora
+  `kawaiiFinishedMatches()` alimenta un bloque de resultados en ese mismo panel:
+  sin directo se titula **RESULTADOS** y lista los finales (competicion, casilla
+  del boleto, «FINAL» y marcador); con directo, el directo manda y los resultados
+  quedan plegados debajo (`details.kk-ft-fold`), sin robar el sitio al EN DIRECTO.
+- **Solo resultados verificados**: entran unicamente estados finales con goles
+  (`FT`, `FINISHED`, `TERMINADO`, `AET`, `PEN`, `AWARDED`). Un `STALE` (directo
+  degradado, que conserva el ultimo marcador parcial) o una fila sin goles no se
+  pintan como resultado definitivo, igual que en la tabla y en el scoring.
+- Deduplicado por pareja de equipos: la copia de la quiniela manda sobre la del
+  panel externo, asi que el mismo partido no sale dos veces.
+- Cache-bust: `cover-page-88` y `kawaii-7`.
+
+### Pruebas
+
+- `tests/test_cover_directo_panel.py`: los terminados sobreviven al pitido final
+  (titulo RESULTADOS, una sola vez cada uno, con su casilla y marcador), directo
+  y resultados conviven sin taparse, y un `STALE` no se pinta como final.
+
 ## 2026-10-31 — Semilla de la J17 y gate de la jornada vigente en verde
 
 ### Corregido
