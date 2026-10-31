@@ -189,7 +189,7 @@ CASES = r"""
 }
 
 // 4. Varios directos a la vez: TODOS en el panel lateral, cada uno una sola
-//    vez, y la casilla de la quiniela marcada con su numero (Q3).
+//    vez, y la casilla de la quiniela marcada con su numero.
 {
     const partidos = [];
     for (let i = 1; i <= 15; i++) {
@@ -214,9 +214,41 @@ CASES = r"""
         showsRacing: /racing/i.test(html),
         showsToulouse: /toulouse/i.test(html),
         showsLevante: /levante/i.test(html),
-        quinielaSlot: html.includes(">Q3<"),
+        quinielaSlot: html.includes(">Casilla 3<"),
         aside: html.includes("kk-live-aside"),
         layout: html.includes("kk-page has-live"),
+    };
+}
+
+// 6. El marcador del proveedor debe llegar a RESULTADO aunque el registro de
+//    la quiniela aún figure NS; los nombres de los equipos pueden venir largos.
+{
+    const partidos = [];
+    for (let i = 1; i <= 15; i++) {
+        partidos.push(quinielaMatch(i, `Equipo${i}`, `Rival${i}`, "2026-10-31", "14:00", "NS"));
+    }
+    partidos[1] = quinielaMatch(2, "Rayo", "Celta", "2026-10-31", "16:15", "NS");
+    const row = {
+        id: 2, local: "Rayo", visitante: "Celta", cuando: "sabado 31/10 16:15",
+        is_pleno: false, has_result: false, resultado: "", en_juego: false,
+        minuto: "", picks: {},
+    };
+    const proveedor = externalMatch(7788, "Rayo Vallecano", "Celta de Vigo", 65, {
+        score: "2 - 0", time: "65",
+    });
+    const html = renderCover({
+        jornada: 17,
+        is_locked: false,
+        partidos,
+        live_matches: [proveedor],
+        simple_view: { jornada: "17", columns: [], rows: [row], totals: {}, total_casillas: 14 },
+    });
+    const fila = (html.match(/<tr class="cx-sv-row" data-id="2">[\s\S]*?<\/tr>/) || [""])[0];
+    results.providerLiveOnQuinielaRow = {
+        resultCell: fila.includes("cx-sv-result is-live"),
+        score: fila.includes("2-0"),
+        minute: fila.includes("65"),
+        readableSlot: html.includes(">Casilla 2<"),
     };
 }
 
@@ -351,3 +383,15 @@ def test_cada_casilla_de_la_quiniela_lleva_su_directo_al_lado():
     assert not row["staleChip"], "un directo degradado (STALE) no puede pintarse en juego"
     assert not row["staleScore"], "un STALE no puede pintarse como resultado"
     assert row["stalePending"], "sin resultado verificado la casilla se queda pendiente"
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
+def test_marcador_externo_de_quiniela_aparece_en_columna_resultado():
+    """Rayo/Celta del proveedor debe completar la fila aunque Q15 siga NS."""
+    payload = _run_node()
+    row = payload["providerLiveOnQuinielaRow"]
+
+    assert row["resultCell"], "la columna Resultado no se marca en directo"
+    assert row["score"], "falta el marcador del partido en Resultado"
+    assert row["minute"], "falta el minuto del partido en Resultado"
+    assert row["readableSlot"], "el panel debe explicar qué casilla de la quiniela está en juego"

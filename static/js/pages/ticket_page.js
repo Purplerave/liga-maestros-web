@@ -149,7 +149,7 @@ function ticketLivePanelItemHtml(match) {
     return `<li class="ticket-live-item${slot ? " is-quiniela" : ""}">
                 <span class="ticket-live-meta">
                     ${comp && comp !== "OTROS" ? `<span class="ticket-live-comp">${escapeHtml(comp)}</span>` : ""}
-                    ${slot ? `<span class="ticket-live-slot" title="Casilla ${slot} de la quiniela">Q${slot}</span>` : ""}
+                    ${slot ? `<span class="ticket-live-slot" title="Casilla ${slot} de la quiniela">Casilla ${slot}</span>` : ""}
                     <span class="ticket-live-min">${escapeHtml(String(minute))}</span>
                 </span>
                 <span class="ticket-live-teams">
