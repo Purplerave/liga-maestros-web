@@ -252,9 +252,8 @@ CASES = r"""
     };
 }
 
-// 5. La lista de la quiniela lleva el directo al lado del partido: marcador y
-//    minuto del payload (fresco en el poll de 30 s) sin inventar nada, y un
-//    STALE nunca se pinta como resultado.
+// 5. La quiniela muestra el directo una sola vez, dentro de RESULTADO:
+//    marcador y minuto frescos, y un STALE no se pinta como resultado.
 {
     const enJuego = quinielaMatch(1, "Levante", "Betis", kickoffMadrid(20).slice(0, 10), kickoffMadrid(20).slice(11, 16), "LIVE");
     enJuego.minuto = "63'";
@@ -289,11 +288,10 @@ CASES = r"""
     const fila1 = (html.match(/<tr class="cx-sv-row" data-id="1">[\s\S]*?<\/tr>/) || [""])[0];
     const fila2 = (html.match(/<tr class="cx-sv-row" data-id="2">[\s\S]*?<\/tr>/) || [""])[0];
     results.rowLive = {
-        chip: fila1.includes("cx-sv-live"),
-        chipText: fila1.includes("2-1 · 63"),  // el apice se escapa en el HTML
-        rowScore: fila1.includes("2-1"),
+        duplicateChip: fila1.includes("cx-sv-live"),
+        resultText: /cx-sv-result-val[^>]*>2-1 · 63&#039;<\/span>/.test(fila1),
         resultLive: fila1.includes("cx-sv-result is-live"),
-        staleChip: fila2.includes("cx-sv-live"),
+        staleDuplicateChip: fila2.includes("cx-sv-live"),
         staleScore: fila2.includes("1-0"),
         stalePending: fila2.includes("cx-sv-result is-pending"),
     };
@@ -371,16 +369,15 @@ def test_cover_directo_panel_lists_every_live_match_on_one_side():
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
-def test_cada_casilla_de_la_quiniela_lleva_su_directo_al_lado():
-    """Marcador y minuto pegados al partido, y nunca un STALE como resultado."""
+def test_marcador_de_quiniela_aparece_una_vez_en_columna_resultado():
+    """El marcador y minuto se muestran en Resultado, sin chip duplicado."""
     payload = _run_node()
     row = payload["rowLive"]
 
-    assert row["chip"], "la casilla en juego no lleva su marca de directo"
-    assert row["chipText"], "la marca de directo no lleva el minuto del payload"
-    assert row["rowScore"], "la casilla no toma el marcador fresco del partido"
+    assert not row["duplicateChip"], "el marcador no debe repetirse junto al nombre del partido"
+    assert row["resultText"], "el marcador y minuto deben aparecer en la columna Resultado"
     assert row["resultLive"], "la columna de resultado debe pintarse como en directo"
-    assert not row["staleChip"], "un directo degradado (STALE) no puede pintarse en juego"
+    assert not row["staleDuplicateChip"], "un directo degradado (STALE) no puede pintarse en juego"
     assert not row["staleScore"], "un STALE no puede pintarse como resultado"
     assert row["stalePending"], "sin resultado verificado la casilla se queda pendiente"
 
