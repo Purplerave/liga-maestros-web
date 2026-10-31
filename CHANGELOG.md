@@ -2,6 +2,67 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-10-31 — Semilla de la J17 y gate de la jornada vigente en verde
+
+### Corregido
+
+- **`data/predicciones_J17.json`**: faltaba la semilla de la jornada en curso, que
+  es justo lo que vigila el gate bloqueante. Se genera con los boletos
+  editoriales ya registrados en `liga_maestros/db/migrations.py`
+  (`J17_EDITORIAL_TICKETS`: MrPurple, Programa, Tecnotron, Grok y Sonia), sin
+  inventar ni completar ningun signo.
+- **Gate de la jornada vigente** (`tests/test_jornada_vigente_gate.py`): seguia
+  anclado a la J16. Ahora acepta que Pavo no este en el seed (la J17 se juega con
+  las cinco columnas editoriales) exigiendo boleto completo a quien si aparezca,
+  y permite **una** casilla sin hora verificada (la 14 de la J17, que la portada
+  pinta «—» por diseño) calculando el calendario con las que si tienen horario.
+- **`tests/test_season_stats_reset.py`**: el arranque importa los boletos
+  editoriales de la J17 y el fixture dejaba de poseer su propia BD (aparecia una
+  jornada 17 jugada por MrPurple). Se aísla el importador, igual que ya se hacia
+  con los de resultados.
+- Formato ruff de `tests/test_panel_directo_ticket.py` (rompia el paso de CI).
+
+## 2026-10-31 — Todos los directos al lado de la quiniela (portada y boleto)
+
+### Añadido
+
+- **El mismo panel de directos en la vista TICKET**: la tabla del boleto gana la
+  columna derecha (`ticket-side-column`) con la lista completa de partidos en
+  juego, y cada fila lleva su marcador y minuto pegados al partido
+  (`ticket-live-chip`). `patchTicketArena` refresca ese chip con el poll, no solo
+  la columna de resultado.
+- **Lista compartida** `getAllLiveMatches()` / `quinielaSlotForMatch()` en
+  `state.js`: las dos vistas dejan de duplicar la union de `live_matches` con las
+  casillas que la quiniela ya marca en juego (y el deduplicado por pareja).
+- **Panel plegable**: la cabecera EN DIRECTO es un `<summary>`; con jornada en
+  curso arranca abierto y sin jornada (un miercoles con solo Premier, temporada
+  parada) arranca plegado para no tapar la quiniela. La eleccion manual se
+  recuerda en `localStorage` (`lm-live-panel`) mediante un listener `toggle` en
+  captura, asi el repintado de cada 30 s no la revierte.
+- `tests/test_panel_directo_ticket.py`: contrato del panel del boleto (todos los
+  directos, sin duplicados, plegado por defecto sin jornada, memoria del usuario
+  y ausencia total cuando no hay directos).
+
+### Añadido
+
+- **Panel lateral EN DIRECTO** en la portada (`kk-live-aside`): lista *todos* los
+  partidos en juego (las 5 ligas + las casillas que la quiniela ya marca LIVE),
+  cada uno con su competición, marcador y minuto. Antes la franja pintaba un
+  solo partido y un `+N`, así que con tres partidos en juego dos no salían en
+  ningún sitio. La lista se deduplica por pareja de equipos y ordena por casilla
+  del boleto (`Q1…Q15`); los de fuera de la quiniela van al final.
+- **Directo pegado a cada casilla de la quiniela**: la fila lleva su marcador y
+  minuto (`cx-sv-live`) junto a los nombres, además de la columna de resultado.
+- En pantalla ancha la portada abre a dos columnas (quiniela a la izquierda,
+  panel de directos sticky a la derecha). En móvil el panel sube encima de la
+  tabla, con scroll propio para no empujar la quiniela.
+- `freshenSimpleViewRow` cruza cada fila con `partidos` (que sí viene en el poll
+  ligero de 30 s) para que el marcador y el minuto no esperen a la recarga
+  completa. Solo adopta estados verificados: `STALE` u otro directo degradado se
+  queda pendiente, nunca se pinta como resultado.
+- `tests/test_cover_directo_panel.py`: casos nuevos con tres directos a la vez y
+  con casilla en juego + `STALE`, para fijar el contrato.
+
 ## 2026-09-29 — El logo de cabecera deja de costar 231KB en movil
 
 ### Rendimiento

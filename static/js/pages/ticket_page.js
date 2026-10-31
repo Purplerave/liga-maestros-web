@@ -133,12 +133,63 @@ function initTicketComments() {
     if (list) list.innerHTML = `<div class="empty-state">Comentarios de la jornada</div>`;
 }
 
+/* ---------- panel con TODOS los directos en la vista TICKET ---------- */
+/* Mismo contenido que el panel de la portada (lista compartida en state.js),
+   con el lenguaje visual de la tabla de tension. Se pliega solo cuando no hay
+   jornada en curso y recuerda lo que el usuario elija. */
+function ticketLivePanelItemHtml(match) {
+    const comp = typeof competitionLabel === "function" ? competitionLabel(match) : "";
+    const slot = typeof quinielaSlotForMatch === "function" ? quinielaSlotForMatch(match) : 0;
+    const home = getShortName(match.local || match.home_name || (match.home || {}).name || "");
+    const away = getShortName(match.visitante || match.away_name || (match.away || {}).name || "");
+    const score = (typeof liveScoreDisplay === "function"
+        ? liveScoreDisplay(match, match.marcador_base || match.score || match.marcador || "")
+        : "") || "—";
+    const minute = (typeof liveMinuteLabel === "function" && liveMinuteLabel(match)) || "EN JUEGO";
+    return `<li class="ticket-live-item${slot ? " is-quiniela" : ""}">
+                <span class="ticket-live-meta">
+                    ${comp && comp !== "OTROS" ? `<span class="ticket-live-comp">${escapeHtml(comp)}</span>` : ""}
+                    ${slot ? `<span class="ticket-live-slot" title="Casilla ${slot} de la quiniela">Q${slot}</span>` : ""}
+                    <span class="ticket-live-min">${escapeHtml(String(minute))}</span>
+                </span>
+                <span class="ticket-live-teams">
+                    <b>${escapeHtml(home)}</b><i aria-hidden="true">–</i><b>${escapeHtml(away)}</b>
+                    <em class="ticket-live-score">${escapeHtml(String(score))}</em>
+                </span>
+            </li>`;
+}
+
+function renderTicketLivePanel() {
+    const matches = typeof getAllLiveMatches === "function" ? getAllLiveMatches() : [];
+    if (!matches.length) return "";
+    const open = typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true;
+    return `<section class="ticket-live-panel" aria-label="Todos los partidos en directo">
+            <details class="lm-live-fold"${open ? " open" : ""}>
+                <summary class="ticket-live-head">
+                    <span class="ticket-live-pulse" aria-hidden="true"></span>
+                    <b>EN DIRECTO</b>
+                    <span class="ticket-live-count">${matches.length}</span>
+                    <span class="ticket-live-chevron" aria-hidden="true"></span>
+                </summary>
+                <ul class="ticket-live-list">${matches.map(ticketLivePanelItemHtml).join("")}</ul>
+            </details>
+        </section>`;
+}
+
 function renderLiveScrutinyBadge(matches) {
     if (!Array.isArray(matches) || !matches.length) return "";
     const live = matches.filter(m => isMatchLiveNow(m)).length;
     const finished = matches.filter(m => isFinishedStatus(m.status) || isImplicitlyFinished(m)).length;
     if (!live && !finished) return "";
     return `<div class="live-scrutiny-badge" aria-live="polite">${live ? `<span class="is-live">${live} en directo</span>` : ""}${finished ? `<span class="is-done">${finished} finalizados</span>` : ""}</div>`;
+}
+
+/* Marcador y minuto pegados al partido, dentro de la propia casilla. */
+function ticketLiveChipHtml(match, score) {
+    const text = liveScoreWithMinute(match, score);
+    if (!text) return "";
+    return `<span class="ticket-live-chip" data-ticket-live-chip title="En directo">`
+        + `<i class="ticket-live-dot" aria-hidden="true"></i>${escapeHtml(String(text))}</span>`;
 }
 
 function renderArenaTensionBody(matches) {
@@ -204,7 +255,7 @@ function renderArenaTensionBody(matches) {
 
         return `<tr class="tension-row ${rowClass}" data-ticket-row="${idx}">
             <td class="match-index-cell"><span class="match-number">${idx + 1}</span></td>
-            <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante, m.logo_local, m.logo_visitante)}</div></td>
+            <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante, m.logo_local, m.logo_visitante)}${liveMatch ? ticketLiveChipHtml(m, score) : ""}</div></td>
             <td class="ticket-status-cell" data-ticket-status>${scoreBadge}</td>
             ${predictorCells}
             <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
@@ -240,6 +291,17 @@ function patchTicketArena() {
             : `<span class="match-score-badge ${liveMatch ? "is-live-score" : ""}"${liveScoreAttrs(match, liveMatch)}>${escapeHtml(scoreText)}</span>`;
         row.classList.toggle("is-live-row", liveMatch);
         row.classList.toggle("is-finished-row", isFinished);
+        // El marcador pegado al partido se refresca con el mismo poll que el
+        // resto de la fila: si no, el gol se veria en la columna de resultado
+        // pero no al lado del nombre.
+        const fixture = row.querySelector(".tension-fixture-main");
+        if (fixture) {
+            const current = fixture.querySelector("[data-ticket-live-chip]");
+            const chip = liveMatch ? ticketLiveChipHtml(match, score) : "";
+            if (!chip) current?.remove();
+            else if (current) current.outerHTML = chip;
+            else fixture.insertAdjacentHTML("beforeend", chip);
+        }
     }
     return true;
 }

@@ -13,9 +13,10 @@ sigue siendo significativo sin acceso a Alwaysdata.
 
 Lo que vigila:
 - la jornada declarada en el seed está dentro de la temporada vigente;
-- existen exactamente 15 partidos con fecha y hora;
+- existen exactamente 15 casillas y su horario verificado (la fuente puede
+  dejar una sin hora: la portada la pinta «—», nunca la inventa);
 - el boleto `programa` tiene 15 signos y es un boleto válido según el backend;
-- Pavo tiene boleto completo (es fuente de verdad, no se degrada);
+- ningun boleto del seed queda a medias (Pavo incluido cuando aparece en el seed);
 - el calendario no está congelado en el pasado;
 - el resumen de temporada se sirve desde la temporada vigente.
 """
@@ -96,15 +97,31 @@ def test_la_jornada_del_seed_esta_en_la_temporada_vigente(current_jornada):
     assert is_current_season_jornada(current_jornada), "la jornada del seed no es de la temporada vigente"
 
 
-def test_hay_quince_partidos_con_fecha_y_hora(horarios):
+def test_hay_quince_casillas_con_horario_verificado(horarios):
+    """Quince casillas; el horario es obligatorio salvo donde la fuente no lo ha
+    publicado.
+
+    La J17 llego con la casilla 14 sin hora verificada —la portada la pinta «—»
+    y no la inventa (`test_vista_simple_j17.py: test_la_casilla_14_no_muestra_hora`)—.
+    Por eso el seed puede dejar UNA casilla vacia, nunca dos: sin horarios no
+    hay forma de saber si el calendario se quedo congelado.
+    """
     esperado = {str(i) for i in range(1, MATCHES_PER_JORNADA + 1)}
     assert set(horarios) == esperado, f"partidos esperados 1..{MATCHES_PER_JORNADA}, recibidos {sorted(horarios)}"
 
+    sin_horario = []
     for partido_id in sorted(esperado, key=int):
         row = horarios[partido_id]
-        assert row.get("fecha"), f"partido {partido_id} sin fecha"
-        assert row.get("hora"), f"partido {partido_id} sin hora"
-        datetime.strptime(row["hora"], "%H:%M")
+        fecha = str(row.get("fecha") or "").strip()
+        hora = str(row.get("hora") or "").strip()
+        if not fecha and not hora:
+            sin_horario.append(partido_id)
+            continue
+        assert fecha and hora, f"partido {partido_id} con el horario a medias ({fecha!r} {hora!r})"
+        datetime.strptime(fecha, "%Y-%m-%d")
+        datetime.strptime(hora, "%H:%M")
+
+    assert len(sin_horario) <= 1, f"demasiadas casillas sin horario verificado: {sin_horario}"
 
 
 def test_el_programa_tiene_boleto_completo_y_valido(predicciones):
@@ -121,10 +138,26 @@ def test_el_programa_tiene_boleto_completo_y_valido(predicciones):
         )
 
 
-def test_pavo_tiene_boleto_completo(predicciones):
-    assert "pavo" in predicciones, "el seed no contiene a Pavo"
-    signos = predicciones["pavo"]["signos"]
-    assert len(signos) == MATCHES_PER_JORNADA, f"Pavo tiene {len(signos)} signos, no {MATCHES_PER_JORNADA}"
+def test_todos_los_boletos_del_seed_estan_completos(predicciones, current_jornada):
+    """Ningun participante del seed queda a medias.
+
+    Pavo era la fuente de verdad de la temporada anterior y este gate lo exigia
+    siempre. Desde la J17 el boleto lo forman las cinco columnas editoriales
+    (MrPurple, Programa, Tecnotron, Grok y Sonia), asi que la comprobacion se
+    hace sobre quien este en el seed: cuando Pavo aparece (J16 y anteriores) su
+    linea se valida igual que las demas.
+    """
+    participantes = {
+        str(uid).lower(): entry
+        for uid, entry in predicciones.items()
+        if isinstance(entry, dict) and isinstance(entry.get("signos"), list)
+    }
+
+    assert participantes, f"el seed de la J{current_jornada} no contiene ningun boleto"
+    for uid, entry in participantes.items():
+        assert len(entry["signos"]) == MATCHES_PER_JORNADA, (
+            f"{uid} tiene {len(entry['signos'])} signos en la J{current_jornada}, no {MATCHES_PER_JORNADA}"
+        )
 
 
 def test_el_calendario_no_esta_congelado_en_el_pasado(horarios, current_jornada):
@@ -137,9 +170,16 @@ def test_el_calendario_no_esta_congelado_en_el_pasado(horarios, current_jornada)
     fins = []
     for partido_id in sorted(horarios, key=int):
         row = horarios[partido_id]
-        kickoff = datetime.strptime(f"{row['fecha']} {row['hora']}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID)
+        fecha = str(row.get("fecha") or "").strip()
+        hora = str(row.get("hora") or "").strip()
+        # La casilla sin horario verificado no puede fechar el final de la
+        # jornada: se calcula con las que si lo tienen.
+        if not fecha or not hora:
+            continue
+        kickoff = datetime.strptime(f"{fecha} {hora}", "%Y-%m-%d %H:%M").replace(tzinfo=MADRID)
         fins.append(kickoff + MATCH_DURATION)
 
+    assert fins, "el seed no tiene ningun horario verificado: no se puede fechar la jornada"
     ultimo_fin = max(fins)
     assert ahora <= ultimo_fin + SAFETY_MARGIN + SEED_PUBLICATION_GRACE, (
         f"el calendario de la jornada {current_jornada} está congelado: los {MATCHES_PER_JORNADA} partidos "

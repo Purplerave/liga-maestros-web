@@ -539,9 +539,51 @@ function simpleViewColumns(payload) {
     });
 }
 
+/* Estados con marcador VERIFICADO. STALE (directo degradado) queda fuera a
+   proposito: pintarlo seria inventar un resultado, igual que hace el backend. */
+const _SV_LIVE_STATUSES = ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H"];
+const _SV_FINAL_STATUSES = ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED"];
+
+function simpleViewVerifiedScore(match) {
+    if (!match) return "";
+    const gl = match.goles_local;
+    const gv = match.goles_visitante;
+    if (gl != null && gv != null && gl !== "" && gv !== "") return `${gl}-${gv}`;
+    return (typeof scoreOnly === "function" && scoreOnly(match.marcador || match.score || "")) || "";
+}
+
+/* El payload ligero del poll (30 s) refresca `partidos` pero NO `simple_view`:
+   sin este cruce la lista de la quiniela se quedaba con el marcador de la
+   carga completa y el directo de cada casilla iba por detras. Solo se adopta
+   lo que el partido diga de si mismo (mismo id) y solo en estados
+   verificados: nunca se rellena una casilla con un resultado dudoso. */
+function freshenSimpleViewRow(row) {
+    if (!row) return row;
+    const source = (Array.isArray(state?.data?.partidos) ? state.data.partidos : [])
+        .find(match => match && String(match.id ?? "") === String(row.id ?? ""));
+    if (!source) return row;
+    const status = String(source.status || "").toUpperCase();
+    const live = _SV_LIVE_STATUSES.includes(status)
+        && !(typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(source));
+    const finished = _SV_FINAL_STATUSES.includes(status);
+    if (!live && !finished) return row;
+    const marcador = simpleViewVerifiedScore(source);
+    const next = { ...row, status, en_juego: live };
+    if (marcador) {
+        next.resultado = marcador;
+        next.has_result = true;
+    }
+    if (live) {
+        const raw = String(source.minuto_live || source.minuto || source.time || "").match(/\d{1,3}/);
+        const minuto = raw ? `${raw[0]}'` : (typeof _liveMinuteLabel === "function" ? _liveMinuteLabel(source) : "");
+        if (minuto && minuto !== "LIVE") next.minuto = minuto;
+    }
+    return next;
+}
+
 function simpleViewRows(payload) {
     const rows = Array.isArray(payload?.rows) ? payload.rows : [];
-    if (rows.length) return rows;
+    if (rows.length) return rows.map(freshenSimpleViewRow);
     // Fallback para una respuesta antigua/parcial: solo acepta marcadores con
     // estado válido; STALE u otro estado degradado queda pendiente.
     return (state?.data?.partidos || []).slice(0, 15).map((match, index) => {
@@ -646,6 +688,25 @@ function simpleViewCellHtml(col, row) {
         + `<span class="cx-sv-mark" aria-hidden="true">${mark.glyph}</span></td>`;
 }
 
+/* Directo pegado al nombre del partido: la casilla lleva su marcador y su
+   minuto en el mismo renglon de los equipos (siempre del payload, nunca
+   pintados a mano), sin tener que mirar la columna de resultado. */
+function simpleViewLiveChipText(row) {
+    if (!row?.en_juego) return "";
+    const marcador = String(row.resultado || "").trim();
+    const raw = String(row.minuto || "").trim();
+    const digits = raw.match(/\d{1,3}/);
+    const minuto = digits ? `${digits[0]}'` : raw;
+    return [marcador, minuto].filter(Boolean).join(" · ") || "En juego";
+}
+
+function simpleViewLiveChipHtml(row) {
+    if (!row?.en_juego) return "";
+    const text = simpleViewLiveChipText(row);
+    return `<span class="cx-sv-live" title="En directo${text ? ` · ${escapeHtml(text)}` : ""}">`
+        + `<i class="cx-sv-live-dot" aria-hidden="true"></i>${escapeHtml(text)}</span>`;
+}
+
 function simpleViewRowHtml(row, columns) {
     const cells = columns.map(col => simpleViewCellHtml(col, row)).join("");
     const resultClass = row.has_result ? (row.en_juego ? " is-live" : " is-ft") : " is-pending";
@@ -653,6 +714,7 @@ function simpleViewRowHtml(row, columns) {
         + `<th scope="row" class="cx-sv-match">`
         + `<span class="cx-sv-idx" aria-hidden="true">${escapeHtml(row.id)}</span>`
         + `<span class="cx-sv-teams"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
+        + simpleViewLiveChipHtml(row)
         + `<span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span>`
         + `</th>`
         + `<td class="cx-sv-result${resultClass}">`
@@ -777,23 +839,91 @@ function kawaiiLoginHtml() {
         </a>`;
 }
 
+/* ---------- panel lateral con TODOS los directos ---------- */
+
+/* Casilla de la quiniela que corresponde al partido (0 si no esta en el boleto). */
+function kawaiiQuinielaSlot(match) {
+    if (typeof quinielaSlotForMatch === "function") return quinielaSlotForMatch(match);
+    if (!match) return 0;
+    const key = _matchPairKey(match);
+    const partidos = Array.isArray(state?.data?.partidos) ? state.data.partidos : [];
+    const found = partidos.find(partido => {
+        if (!partido) return false;
+        if (match.id != null && String(partido.id ?? "") === String(match.id)) return true;
+        return key && key !== "|" && _matchPairKey(partido) === key;
+    });
+    if (!found) return 0;
+    const id = Number(found.id);
+    return Number.isFinite(id) && id >= 1 && id <= 15 ? id : 0;
+}
+
+/* Todos los partidos en juego que ya sirve el backend (`live_matches`: las 5
+   ligas + la quiniela, deduplicado en origen). La lista compartida se vuelve a
+   deduplicar por pareja de equipos y se ordena por casilla del boleto. */
+function kawaiiLiveMatches() {
+    if (typeof getAllLiveMatches === "function") return getAllLiveMatches();
+    const source = [
+        ...(typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : []),
+        ...(Array.isArray(state?.data?.partidos) ? state.data.partidos : []),
+    ];
+    const seen = new Set();
+    const rows = [];
+    source.forEach(match => {
+        if (!match) return;
+        const key = _matchPairKey(match);
+        if (!key || key === "|" || seen.has(key)) return;
+        if (!_live(match) || _finished(match)) return;
+        if (typeof isExpiredLiveMatch === "function" && isExpiredLiveMatch(match)) return;
+        seen.add(key);
+        rows.push(match);
+    });
+    return rows;
+}
+
+function kawaiiLiveItemHtml(match) {
+    const comp = _liveCompLabel(match);
+    const home = _matchSideName(match, "home");
+    const away = _matchSideName(match, "away");
+    const marcador = _liveScoreText(match);
+    const minuto = _liveMinuteLabel(match);
+    const slot = kawaiiQuinielaSlot(match);
+    return `<li class="kk-live-item${slot ? " is-quiniela" : ""}">
+                <div class="kk-live-meta">
+                    ${comp ? `<span class="kk-live-comp">${escapeHtml(comp)}</span>` : ""}
+                    ${slot ? `<span class="kk-live-slot" title="Casilla ${slot} de la quiniela">Q${slot}</span>` : ""}
+                    <span class="kk-live-min">${escapeHtml(String(minuto || "EN JUEGO"))}</span>
+                </div>
+                <div class="kk-live-body">
+                    <b>${escapeHtml(_fitName(home, 22))}</b><i aria-hidden="true">–</i><b>${escapeHtml(_fitName(away, 22))}</b>
+                    <span class="kk-live-score">${escapeHtml(String(marcador || "—"))}</span>
+                </div>
+            </li>`;
+}
+
+function kawaiiLiveAsideHtml() {
+    const matches = kawaiiLiveMatches();
+    if (!matches.length) return "";
+    const open = typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true;
+    return `<aside class="kk-live-aside" aria-label="Todos los partidos en directo">
+            <details class="lm-live-fold"${open ? " open" : ""}>
+                <summary class="kk-live-head">
+                    <span class="kk-live-pulse" aria-hidden="true"></span>
+                    <b>EN DIRECTO</b>
+                    <span class="kk-live-count">${matches.length}</span>
+                    <span class="kk-live-chevron" aria-hidden="true"></span>
+                </summary>
+                <ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>
+                <p class="kk-live-note">Se actualiza solo, cada 30 segundos.</p>
+            </details>
+        </aside>`;
+}
+
 function kawaiiDirectoHtml() {
-    // Franja de directo SOLO con datos del payload: sin partido en juego se
-    // muestra el proximo de la quiniela y, si no hay ninguno, no se pinta nada.
+    // Con partidos en juego el panel lateral pinta TODOS los directos, asi que
+    // la franja se calla. Sin directo se muestra el proximo de la quiniela y,
+    // si no hay ninguno, no se pinta nada.
     try {
-        const enJuego = typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : [];
-        if (enJuego.length) {
-            const partido = enJuego[0];
-            const home = _liveTeamLabel(_matchSideName(partido, "home"), 16);
-            const away = _liveTeamLabel(_matchSideName(partido, "away"), 16);
-            const marcador = _liveScoreText(partido);
-            const minuto = _liveMinuteLabel(partido);
-            const resto = enJuego.length > 1 ? `<span class="kk-more">+${enJuego.length - 1}</span>` : "";
-            return `<span class="kk-dot" aria-hidden="true"></span>
-                <div class="kk-live-body"><b>EN DIRECTO</b> — ${escapeHtml(home)} · ${escapeHtml(away)}
-                    <span class="kk-live-score">${escapeHtml(String(marcador || "—"))}</span>${resto}</div>
-                <span class="kk-min">${escapeHtml(String(minuto || ""))}</span>`;
-        }
+        if (kawaiiLiveMatches().length) return "";
         const proximo = typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
         if (!proximo) return "";
         const home = typeof getShortName === "function" ? getShortName(proximo.local || "") : String(proximo.local || "");
@@ -860,20 +990,28 @@ function renderNewspaperCoverPageV3() {
             : "")
         : "";
 
-    return `<div class="cx kk-page">
+    const liveAside = kawaiiLiveAsideHtml();
+    const franja = kawaiiDirectoHtml();
+
+    return `<div class="cx kk-page${liveAside ? " has-live" : ""}">
         <div class="kk-wrap">
             ${kawaiiCabeceraHtml(jornada, payload)}
             ${kawaiiLoginHtml()}
-            <div class="kk-live-wrap">${kawaiiDirectoHtml()}</div>
-            <section class="kk-card kk-table-card" aria-label="Quiniela de la jornada">
-                <h2 class="kk-card-title">📅 Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
-                ${aviso}
-                ${simpleViewHtml()}
-            </section>
-            <section class="kk-card kk-rank-card" aria-label="Clasificación">
-                <h2 class="kk-card-title">🏆 Clasificación <span class="kk-tag">total · jornada</span></h2>
-                <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
-            </section>
+            <div class="kk-layout">
+                ${liveAside}
+                <div class="kk-main">
+                    ${franja ? `<div class="kk-live-wrap">${franja}</div>` : ""}
+                    <section class="kk-card kk-table-card" aria-label="Quiniela de la jornada">
+                        <h2 class="kk-card-title">📅 Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
+                        ${aviso}
+                        ${simpleViewHtml()}
+                    </section>
+                    <section class="kk-card kk-rank-card" aria-label="Clasificación">
+                        <h2 class="kk-card-title">🏆 Clasificación <span class="kk-tag">total · jornada</span></h2>
+                        <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
+                    </section>
+                </div>
+            </div>
             <footer class="kk-foot">🐾 una sola página · resultados en directo, ✓ y ✗ por casilla · sin juegos ni quiz</footer>
         </div>
     </div>`;

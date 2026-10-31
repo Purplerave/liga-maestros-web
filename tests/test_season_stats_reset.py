@@ -148,6 +148,10 @@ def _test_app(tmp_path, monkeypatch):
 
     monkeypatch.setattr(migrations, "_import_j1_resultados", lambda conn: 0)
     monkeypatch.setattr(migrations, "_import_jornada_resultados", lambda conn, jornada: 0)
+    # La J17 trae sus boletos editoriales dentro de migrations.py y el arranque
+    # los importa: sin este no-op el fixture deja de poseer su propia BD y
+    # aparece una tercera jornada (la 17) jugada por MrPurple.
+    monkeypatch.setattr(migrations, "_import_inline_prediction_tickets", lambda conn, jornada, tickets: 0)
     monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
     monkeypatch.setattr(config, "FIXTURE_CORRECTIONS_PATH", str(tmp_path / "missing-fixtures.json"))
     monkeypatch.setattr(config, "DB_BACKUP_DIR", str(tmp_path / "backups"))
