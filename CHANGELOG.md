@@ -2,6 +2,26 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-10-31 — Semilla de la J17 y gate de la jornada vigente en verde
+
+### Corregido
+
+- **`data/predicciones_J17.json`**: faltaba la semilla de la jornada en curso, que
+  es justo lo que vigila el gate bloqueante. Se genera con los boletos
+  editoriales ya registrados en `liga_maestros/db/migrations.py`
+  (`J17_EDITORIAL_TICKETS`: MrPurple, Programa, Tecnotron, Grok y Sonia), sin
+  inventar ni completar ningun signo.
+- **Gate de la jornada vigente** (`tests/test_jornada_vigente_gate.py`): seguia
+  anclado a la J16. Ahora acepta que Pavo no este en el seed (la J17 se juega con
+  las cinco columnas editoriales) exigiendo boleto completo a quien si aparezca,
+  y permite **una** casilla sin hora verificada (la 14 de la J17, que la portada
+  pinta «—» por diseño) calculando el calendario con las que si tienen horario.
+- **`tests/test_season_stats_reset.py`**: el arranque importa los boletos
+  editoriales de la J17 y el fixture dejaba de poseer su propia BD (aparecia una
+  jornada 17 jugada por MrPurple). Se aísla el importador, igual que ya se hacia
+  con los de resultados.
+- Formato ruff de `tests/test_panel_directo_ticket.py` (rompia el paso de CI).
+
 ## 2026-10-31 — Todos los directos al lado de la quiniela (portada y boleto)
 
 ### Añadido

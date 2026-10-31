@@ -23,9 +23,7 @@ UTILS = ROOT / "static" / "js" / "utils.js"
 STATE = ROOT / "static" / "js" / "state.js"
 TICKET = ROOT / "static" / "js" / "pages" / "ticket_page.js"
 
-requires_node = pytest.mark.skipif(
-    shutil.which("node") is None, reason="Node is required to exercise browser code"
-)
+requires_node = pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
 
 _HARNESS = r"""
 const fs = require("fs");

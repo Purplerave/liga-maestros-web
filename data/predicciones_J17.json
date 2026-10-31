@@ -1,0 +1,106 @@
+{
+  "mrpurple": {
+    "nombre": "MrPurple",
+    "signos": [
+      "2",
+      "1",
+      "X",
+      "1",
+      "X",
+      "2",
+      "2",
+      "1",
+      "2",
+      "2",
+      "X",
+      "X",
+      "2",
+      "1",
+      "2-1"
+    ]
+  },
+  "tecnotron": {
+    "nombre": "Tecnotron",
+    "signos": [
+      "2",
+      "1",
+      "1",
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "2",
+      "X",
+      "2",
+      "2",
+      "1",
+      "2-1"
+    ]
+  },
+  "programa": {
+    "nombre": "Programa",
+    "signos": [
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "2",
+      "1",
+      "1",
+      "2",
+      "1",
+      "1",
+      "1",
+      "2",
+      "2",
+      "1-0"
+    ]
+  },
+  "grok": {
+    "nombre": "Grok",
+    "signos": [
+      "2",
+      "1",
+      "1",
+      "1",
+      "X",
+      "2",
+      "1",
+      "X",
+      "2",
+      "2",
+      "2",
+      "1",
+      "2",
+      "2",
+      "1-1"
+    ]
+  },
+  "sonia": {
+    "nombre": "Sonia",
+    "signos": [
+      "2",
+      "X",
+      "1",
+      "1",
+      "X",
+      "X",
+      "1",
+      "X",
+      "2",
+      "2",
+      "2",
+      "X",
+      "X",
+      "2",
+      "2-1"
+    ]
+  },
+  "created_at": "2026-10-29",
+  "fuente": "Boletos editoriales de la Jornada 17 registrados en liga_maestros/db/migrations.py (J17_EDITORIAL_TICKETS): MrPurple, Programa, Tecnotron, Grok y Sonia, con sus signos y plenos literales. La linea de Sonia llego el 29/10/2026 (Pablo). Sin corregir ni completar a mano, mismo criterio que en J14/J16.",
+  "jornada": 17,
+  "temporada": "2026-2027"
+}
