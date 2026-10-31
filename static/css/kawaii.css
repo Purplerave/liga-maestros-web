@@ -849,31 +849,6 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
     font-weight: 700;
 }
 
-/* Directo pegado al nombre del partido: marcador y minuto en la misma linea. */
-.kk-page .cx-sv-live {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    flex: 0 0 auto;
-    font-size: 10.5px;
-    font-weight: 900;
-    letter-spacing: 0.2px;
-    color: #B0466B;
-    background: var(--kk-pink-soft);
-    border: 1.5px solid var(--kk-pink);
-    border-radius: 999px;
-    padding: 1px 7px;
-    white-space: nowrap;
-}
-
-.kk-page .cx-sv-live-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--kk-bad);
-    animation: kkPulse 1.2s infinite;
-}
-
 .kk-page .cx-sv-result {
     text-align: center;
     padding: 8px 4px;
@@ -1252,10 +1227,6 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 @media (prefers-reduced-motion: reduce) {
     .kk-live-wrap .kk-dot,
     .kk-live-pulse,
-    .kk-page .cx-sv-live-dot {
-        animation: none;
-    }
-
     .kk-logo {
         transform: none;
     }
@@ -1383,14 +1354,6 @@ body.newspaper-ui.quiniela-focus .topbar-shell {
 
 .kk-page .cx-sv-result.is-ft .cx-sv-result-val {
     color: #cbd5e1;
-}
-
-.kk-page .cx-sv-live {
-    color: #a5f3fc;
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    background: rgba(34, 211, 238, 0.08);
-    font-family: var(--font-data);
-    font-variant-numeric: tabular-nums;
 }
 
 .kk-page .cx-sv-sign {
