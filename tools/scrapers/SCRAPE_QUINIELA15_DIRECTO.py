@@ -92,6 +92,63 @@ def q15_row_is_scheduled_placeholder(row):
     return parse_score(score_cell.get_text(" ", strip=True)) == (None, None)
 
 
+# La fecha de juego vive en la celda de marcador mientras el partido no ha
+# empezado ("sábado31 oct 18:30h"). Exponerla permite comprobar que las fechas
+# de la quiniela descargada caen en las del boleto (ver LIVE_COLLECTOR).
+# Ojo: la quiniela15 escribe el dia pegado al nombre del dia ("sábado31 oct"),
+# asi que no hay \b delante del numero.
+_Q15_DATE_TEXT = re.compile(
+    r"(\d{1,2})\s*(ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\b",
+    flags=re.I,
+)
+_Q15_MONTHS = {
+    "ene": 1,
+    "feb": 2,
+    "mar": 3,
+    "abr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "ago": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dic": 12,
+}
+
+
+def q15_row_date(row, reference=None):
+    """Fecha ISO de la celda de marcador ("sábado31 oct 18:30h" -> 2026-10-31).
+
+    La quiniela15 escribe dia + mes sin año. El año se toma del ``reference``
+    (por defecto hoy) y se corrige el salto de año: en enero una fila de
+    "31 dic" pertenece al año anterior.
+    """
+    cells = row.find_all("td")
+    if len(cells) < 3:
+        return ""
+    text = cells[2].get_text(" ", strip=True)
+    match = _Q15_DATE_TEXT.search(text)
+    if not match:
+        return ""
+    day = int(match.group(1))
+    month = _Q15_MONTHS.get(match.group(2).lower()[:3])
+    if not month:
+        return ""
+    reference = reference or datetime.now()
+    try:
+        candidate = datetime(reference.year, month, day)
+    except ValueError:
+        return ""
+    # Si la fecha queda a mas de 45 dias del dia de hoy es del otro año
+    # (la jornada de enero con filas del 31 de diciembre, o viceversa).
+    if (candidate - reference).days > 45:
+        candidate = candidate.replace(year=candidate.year - 1)
+    elif (reference - candidate).days > 45:
+        candidate = candidate.replace(year=candidate.year + 1)
+    return candidate.strftime("%Y-%m-%d")
+
+
 def status_for_q15(score_home, score_away, minute, text, live_markup=False, scheduled_placeholder=False):
     if minute:
         return "HT" if str(minute).lower().startswith("descanso") else "LIVE"
@@ -200,6 +257,7 @@ def parse_main_row(row):
         "id": index,
         "local": home,
         "visitante": away,
+        "fecha": q15_row_date(row),
         "score_home": score_home,
         "score_away": score_away,
         "status": status,
@@ -212,7 +270,23 @@ def parse_main_row(row):
     }
 
 
+def _ficha_fecha(by_id, index, prev):
+    """Fecha ISO de una fila de detalle sin perder la que ya traia el listado."""
+    if by_id.get(index, {}).get("fecha"):
+        return by_id[index]["fecha"]
+    if prev is None:
+        return ""
+    return q15_row_date(prev)
+
+
 def scrape(jornada):
+    """Raspa /resultados-quiniela/<jornada> de quiniela15.com.
+
+    ``jornada`` es el numero DE QUINIELA15, no necesariamente el del boleto de
+    esta liga: cuando no coinciden, el llamador debe traducirlo con
+    ``config.quiniela15_jornadas.q15_jornada`` (el colector y ``/api/live/probe``
+    ya lo hacen).
+    """
     url = f"https://www.quiniela15.com/resultados-quiniela/{jornada}"
     response = fetch_page(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -259,6 +333,7 @@ def scrape(jornada):
             "id": index,
             "local": home,
             "visitante": away,
+            "fecha": _ficha_fecha(by_id, index, prev),
             "score_home": score_home,
             "score_away": score_away,
             "status": status,

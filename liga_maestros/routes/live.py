@@ -49,14 +49,27 @@ def _build_q15_cache_status(jornada):
     try:
         payload = safe_read_json(q15_path, {})
         received = len(payload.get("matches") or [])
+        # El cache guarda la jornada del boleto; si el payload trae la de
+        # quiniela15 (que puede ser otra: su J17 fue la Copa del Rey), se
+        # expone para no confundir el diagnostico.
+        numero_q15 = payload.get("q15_jornada")
+        confirmado = payload.get("boleto_comprobado")
         status.update(
             {
                 "available": True,
-                "ok": received == Q15_EXPECTED_MATCHES,
+                "ok": received == Q15_EXPECTED_MATCHES and confirmado is not False,
                 "last_sync": datetime.fromtimestamp(os.path.getmtime(q15_path)).strftime("%H:%M"),
                 "matches": received,
                 "matches_received": received,
-                "message": "ok" if received == Q15_EXPECTED_MATCHES else "matches_incompletos",
+                "q15_jornada": numero_q15,
+                "boleto_comprobado": confirmado,
+                "message": (
+                    "ok"
+                    if received == Q15_EXPECTED_MATCHES and confirmado is not False
+                    else "jornada_no_confirmada"
+                    if confirmado is False
+                    else "matches_incompletos"
+                ),
             }
         )
     except Exception:
@@ -433,8 +446,15 @@ def live_probe():
         try:
             from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo
 
-            payload = scrape_q15_directo(int(target_jornada))
-            matches = validate_q15_payload(payload, target_jornada)
+            from config.quiniela15_jornadas import q15_jornada
+
+            # La numeracion de quiniela15 no siempre es la del boleto (su J17
+            # fue la Copa del Rey y el boleto se juega en su J18).
+            numero_q15 = q15_jornada(target_jornada)
+            payload = scrape_q15_directo(int(numero_q15))
+            payload["boleto_jornada"] = int(target_jornada)
+            payload["q15_jornada"] = int(numero_q15)
+            matches = validate_q15_payload(payload, numero_q15)
             q15_path = os.path.join(config.DATA_DIR, f"quiniela15_directo_J{target_jornada}.json")
             write_json_locked(q15_path, payload)
             received = len(matches)

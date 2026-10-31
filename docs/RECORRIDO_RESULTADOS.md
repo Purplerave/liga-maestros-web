@@ -88,3 +88,74 @@ J6 2026/27 (el "(M)" → `test_j6_resultados_cruce`).
    nombres solo rellena la jornada dentro de su ventana (hasta 24 h después
    del último saque). Para una jornada antigua: `REPARAR_JORNADA_QUINIELA.py`
    o los resultados oficiales en `data/quiniela15_JN_resultados.json`.
+
+## 6. Incidente J17 2026/27 (31/10/2026): «no vemos los resultados»
+
+Ese sábado a las 16:47 el Levante–Atlético y el Rayo–Celta ya estaban jugados
+o en juego y la portada seguía enseñando el horario de **todas** las casillas.
+Esta vez no fallaba el render ni el payload: fallaban los **nombres** y, sobre
+todo, el **número de jornada**. Tres capas, y las tres hacían falta para dejar
+la jornada a cero:
+
+### 6.1 La numeración de quiniela15 no es la del boleto
+
+`/resultados-quiniela/17` de quiniela15.com es la **Copa del Rey del 28/10**,
+un boleto extraordinario de SELAE que esta liga no juega. El boleto de la liga
+(Levante–Atlético, Rayo–Celta, Betis–Málaga…) es la **J18** de quiniela15. El
+colector pedía la 17, recibía 15 partidos impecables de otra quiniela y los
+cruzaba por `partido_id`: 0 updates, todo `NS`.
+
+Arreglo:
+
+- `config/quiniela15_jornadas.py` → tabla de equivalencias
+  (`QUINIELA15_JORNADA_OVERRIDES`, hoy `{17: 18}`).
+- `LIVE_COLLECTOR._q15_numero_para_boleto()` → si la tabla no lo resuelve,
+  prueba el número del boleto y sus vecinos y se queda con el que reproduce
+  las casillas del boleto (`_q15_boleto_coverage`, 60% de coincidencia). Así un
+  boleto extraordinario nuevo se resuelve solo.
+- `_q15_payload_matches_boleto()` → si la quiniela descargada no es la del
+  boleto, el payload se marca `boleto_comprobado: false`, **no se escribe en la
+  BD** y **no se pisa el caché del directo** (`q15_cache_conservado`).
+- `_q15_kickoff_order_plausible()` → última red: aunque el nombre cruce, un
+  partido con fecha a más de 2 días del boleto no se aplica (la Copa numera
+  «Levante–Atlético» en la casilla 1 igual que el boleto, pero otro día).
+- El scraper expone `fecha` por fila y `/api/live/probe` usa la misma
+  equivalencia.
+
+### 6.2 Las grafías del boleto y de la quiniela15
+
+`At. Madrid` en la J2/J3/J4/J12, `Atlético` a secas en la J17 (¡y en el mismo
+boleto!). Lo mismo con `Racing`/`Racing Santander`, `R. Madrid (F)`/
+`Real Madrid (F)` y `R. Sociedad (F)`/`Real Sociedad (F)`. Sin alias, el cruce
+se descartaba (`q15_team_mismatch_skipped`) y el equipo salía además **sin
+escudo**, porque `logo_for` usa el mismo canónico.
+
+Aliases nuevos en `config/teams.py`: `ATLETICO`, `RACING`, `R MADRID F`,
+`R SOCIEDAD F`, `ATHLETIC BILBAO FEMENINO`, `UD TENERIFE`,
+`DEPORTIVO DE LA CORUNA FEMENINO`.
+
+`UD Tenerife` es el Costa Adeje Tenerife de Liga F, pero sin forma jurídica
+canonizaba igual que el Tenerife masculino: por eso se añade
+`FEMININE_TEAM_KEYS` + `raw_team_key()` (clave con «UD/CD/FC»), que marca esos
+nombres como femeninos y permite que el alias `UD TENERIFE` sea alcanzable sin
+abrir el cruce masculino ↔ femenino.
+
+### 6.3 El fallback del proveedor (Highlightly)
+
+`_core_team_key` troceaba el nombre y ordenaba los tokens: `Atlético` daba
+`("ATL", "TICO")` y `Málaga` `("LAGA", "M")`, claves que solo casaban con otro
+nombre partido igual. Ahora parte del canónico y devuelve una clave estable
+(`ATLETICO MADRID`, `MALAGA`), conserva el sufijo de género (un masculino no
+puede cruzar con un femenino por el fallback) y un nombre que solo es forma
+jurídica devuelve `()` para que no se acepte.
+
+### 6.4 Checklist actualizado
+
+1. `GET /api/sync/status` → ¿`q15_cache.ok` con 15/15?
+2. `GET /api/q15/directo?j=N` → ¿trae el partido con `score_home/away`?
+3. **¿`q15_jornada` del JSON es el número del boleto?** Si no, es la
+   numeración (§6.1). Mirar `q15_origen`, `boleto_comprobado` y los logs
+   `q15_jornada_autodetectada` / `q15_jornada_no_confirma_boleto`.
+4. Si el payload es correcto y la fila sigue `NS`: es el **cruce de nombres**
+   (§6.2). Buscar `q15_team_mismatch_skipped` y añadir el alias que falta.
+5. Regresión: `tests/test_j17_resultados_grafias_y_numeracion.py`.

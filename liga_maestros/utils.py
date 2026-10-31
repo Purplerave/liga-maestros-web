@@ -14,6 +14,7 @@ from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 from config import BASE_DIR, DATA_DIR, NEWS_GENERIC_KEYWORDS, NEWS_TEAM_KEYWORDS, TEAM_LOGO_ALIASES
+from config.teams import FEMININE_TEAM_KEYS
 
 
 def runtime_data_path(*parts):
@@ -83,9 +84,35 @@ def clean_team_key(value):
     return _clean_team_key_memo(str(value or ""))
 
 
+@lru_cache(maxsize=8192)
+def _raw_team_key_memo(text_in):
+    text = str(text_in or "").upper()
+    text = "".join(LATIN_TRANSLIT.get(ch, ch) for ch in text)
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = re.sub(r"[^A-Z0-9]+", " ", text).strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def raw_team_key(value):
+    """Clave sin acentos ni puntuación pero **con** las formas jurídicas.
+
+    ``clean_team_key`` borra "UD"/"CD"/"FC", así que "UD Tenerife" y "Tenerife"
+    acaban en la misma clave. Para los nombres que solo existen en femenino
+    (``FEMININE_TEAM_KEYS``) y para los alias que dependen del prefijo
+    ("UD TENERIFE" -> COSTA ADEJE TENERIFE) hace falta distinguirlos.
+    """
+    return _raw_team_key_memo(str(value or ""))
+
+
 def _is_feminine_raw(value):
     raw = str(value or "").upper()
     if "(F)" in raw:
+        return True
+    # Equipos que solo existen en femenino aunque el nombre no lo diga
+    # ("UD Tenerife", "Athletic Bilbao Femenino"): sin esto el masculino y el
+    # femenino del mismo club compartían género y el cruce podía mezclarlos.
+    if raw_team_key(raw) in FEMININE_TEAM_KEYS:
         return True
     if "FEMENINO" in raw or "FEMENINA" in raw or " WOMEN" in raw:
         return True
@@ -138,6 +165,14 @@ def team_keys_compatible(a, b):
 
 def normalize_team_key(value):
     text = clean_team_key(value)
+    # Antes que la clave limpia se prueba la clave con formas jurídicas: hay
+    # alias que solo se distinguen por el prefijo ("UD TENERIFE" es el Costa
+    # Adeje de Liga F; "TENERIFE" es el masculino). Solo gana si el nombre
+    # lleva forma jurídica y el alias existe, así que no altera nada de lo
+    # que hoy canoniza por la vía normal.
+    raw_text = raw_team_key(value)
+    if raw_text != text and raw_text in TEAM_LOGO_ALIASES:
+        return TEAM_LOGO_ALIASES[raw_text]
     # Direct alias
     if text in TEAM_LOGO_ALIASES:
         return TEAM_LOGO_ALIASES[text]

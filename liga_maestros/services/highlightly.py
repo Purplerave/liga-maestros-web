@@ -2,7 +2,6 @@
 
 import logging
 import os
-import re
 import threading
 import time
 from datetime import timedelta
@@ -577,14 +576,26 @@ def refresh_dates_for_jornada(conn, jornada=None):
     return sorted(dates)
 
 
+# El sufijo de genero NO se quita de la clave core: es lo unico que impide que
+# el fallback del feed cruce el "Real Madrid" masculino con el "Real Madrid
+# Femenino" (ambos dan la misma clave si se limpia el "FEMENINO").
+
+
 def _core_team_key(value):
-    """Tokens of a team name without legal-form noise ("AD Ceuta FC" -> CEUTA)."""
-    tokens = [
-        token
-        for token in re.split(r"[^A-Z0-9]+", str(value or "").upper())
-        if token and token not in _CORE_NOISE_TOKENS
-    ]
-    return tuple(sorted(tokens))
+    """Clave de un equipo sin ruido societario ("AD Ceuta FC" -> ("CEUTA",)).
+
+    Se parte del canonico (``normalize_team_key``) en vez de trocear el nombre
+    crudo: antes, ordenar los tokens producia claves tan poco informativas como
+    ("ATL", "TICO") para "Atletico" o ("LAGA", "M") para "Malaga", porque los
+    dos ultimos caracteres de un nombre sin tilde acababan en un token aparte.
+    Ahora "AD Ceuta FC" y "Ceuta" dan ("CEUTA",), "Atletico" y "At. Madrid" dan
+    canonicos distintos pero estables, y un nombre de solo forma juridica
+    ("Deportivo (F)") devuelve () para que el fallback no se acepte.
+    """
+    key = normalize_team_key(value)
+    tokens = [token for token in key.split() if token and token not in _CORE_NOISE_TOKENS]
+    core = " ".join(tokens).strip()
+    return (core,) if core else ()
 
 
 def _find_feed_item(feed, local_raw, visitante_raw, core_feed=None):
@@ -598,10 +609,10 @@ def _find_feed_item(feed, local_raw, visitante_raw, core_feed=None):
     El cruce masculino/femenino sigue siendo imposible: las variantes
     respetan el genero del nombre original.
 
-    Segundo nivel: si el cruce canonico falla, se ignora la forma juridica
-    ("Ceuta" <-> "AD Ceuta FC", "R. Sociedad" <-> "Real Sociedad"). Solo se
-    acepta si ese par no es ambiguo dentro del feed, para no cruzar el
-    partido equivocado.
+    Segundo nivel: si el cruce canonico falla, se ignora el ruido societario y
+    de genero ("Ceuta" <-> "AD Ceuta FC", "R. Sociedad" <-> "Real Sociedad",
+    "Atletico Madrid (F)" <-> "At. Madrid Femenino"). Solo se acepta si ese par
+    no es ambiguo dentro del feed, para no cruzar el partido equivocado.
     """
     for local_variant in team_key_variants(local_raw):
         for visit_variant in team_key_variants(visitante_raw):

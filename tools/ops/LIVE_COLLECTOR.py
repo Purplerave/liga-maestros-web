@@ -20,6 +20,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in sys.path:
 from SCRAPE_QUINIELA15_DIRECTO import scrape as scrape_q15_directo  # noqa: E402
 
 import config  # noqa: E402
+from config.quiniela15_jornadas import Q15_BOLETO_DATE_TOLERANCE_DAYS, q15_jornada  # noqa: E402
 from liga_maestros import utils  # noqa: E402
 from liga_maestros.db.connection import get_db  # noqa: E402
 from liga_maestros.middleware.json_lock import write_json_locked  # noqa: E402
@@ -433,13 +434,158 @@ def should_refresh(jornada=None):
     return bool(window.get("enabled")), window
 
 
+def _q15_numero_para_boleto(boleto):
+    """Numero de quiniela15 que reproduce este boleto.
+
+    Primero la tabla de equivalencias (``config/quiniela15_jornadas``). Si ahi
+    no esta, se mira si el numero pelado y sus vecinos traen los mismos equipos:
+    asi un boleto extraordinario nuevo (otra Copa que descuadra la numeracion)
+    se resuelve solo en vez de dejar la jornada sin resultados hasta que alguien
+    edite la tabla. La sonda solo se hace fuera de la ventana de un partido en
+    juego y con un presupuesto de peticiones, para no gastar tiempo cuando la
+    jornada ya esta alineada.
+    """
+    boleto = int(boleto)
+    fijado = q15_jornada(boleto)
+    if int(fijado) != boleto:
+        return int(fijado), f"tabla:{fijado}"
+    candidatos = [boleto, boleto + 1, boleto - 1]
+    for numero in candidatos:
+        if numero <= 0:
+            continue
+        try:
+            payload = scrape_q15_directo(int(numero))
+        except Exception as exc:
+            log_line(f"q15_sonda_error j={boleto} q15={numero} error={exc}")
+            continue
+        cubiertas, total = _q15_boleto_coverage(boleto, payload)
+        if total and cubiertas >= max(2, (total * 3) // 5):
+            if numero != boleto:
+                log_line(f"q15_jornada_autodetectada j={boleto} q15={numero} equipos={cubiertas}/{total}")
+                return int(numero), f"autodetectada:{cubiertas}/{total}"
+            return int(numero), f"alineada:{cubiertas}/{total}"
+    return boleto, "sin_equivalencia"
+
+
+def scrape_q15_boleto(jornada):
+    """Raspa en quiniela15 la jornada que corresponde al boleto ``jornada``.
+
+    La numeracion de quiniela15 no siempre es la del boleto (ver
+    ``config/quiniela15_jornadas.py``): con el numero pelado se descargaba la
+    quiniela de la Copa del Rey y el boleto se quedaba sin resultados. Aqui se
+    aplica la equivalencia y se comprueba que la jornada descargada cae en las
+    fechas del boleto; si no, el payload se marca como no fiable y el llamador
+    no escribe nada en la BD (el cache del directo se queda como estaba).
+    """
+    boleto = int(jornada)
+    numero_q15, origen = _q15_numero_para_boleto(boleto)
+    payload = scrape_q15_directo(int(numero_q15))
+    payload["boleto_jornada"] = boleto
+    payload["q15_jornada"] = int(numero_q15)
+    payload["q15_origen"] = origen
+    # Cuando la equivalencia no se ha podido confirmar (numero pelado sin
+    # equipos en comun, o tabla sin verificar) hay que comprobarlo igual: si no,
+    # el payload de otra quiniela se aplicaria a ciegas.
+    confirmado = origen.startswith("alineada:")
+    if not confirmado:
+        trusted, reason = _q15_payload_matches_boleto(boleto, payload)
+        payload["boleto_comprobado"] = trusted
+        if not trusted:
+            log_line(f"q15_jornada_no_confirma_boleto j={boleto} q15={numero_q15} reason={reason}")
+            payload["matches"] = []
+            payload["mismatch_reason"] = reason
+            return payload
+        log_line(f"q15_jornada_equivalente j={boleto} q15={numero_q15} reason={reason}")
+    return payload
+
+
+def _q15_boleto_coverage(boleto, payload):
+    """Cuántas de las casillas del boleto aparecen en el payload de quiniela15.
+
+    Se recorren las filas DEL BOLETO (no las del payload) y se busca su pareja.
+    Con la quiniela equivocada casi ninguna coincide: la Copa del Rey repite
+    "Levante - Atletico" y "Rayo - Celta", pero no Betis-Malaga ni el resto.
+    """
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT local, visitante, fecha FROM resultados WHERE jornada = ?",
+            (int(boleto),),
+        ).fetchall()
+    matches = payload.get("matches") or []
+    cubiertas = 0
+    for row in rows:
+        local_boleto = row["local"]
+        visit_boleto = row["visitante"]
+        for match in matches:
+            local_q15 = match.get("local")
+            visit_q15 = match.get("visitante")
+            if (
+                utils.team_keys_compatible(local_q15, local_boleto)
+                and utils.team_keys_compatible(visit_q15, visit_boleto)
+            ) or (
+                utils.team_keys_compatible(local_q15, visit_boleto)
+                and utils.team_keys_compatible(visit_q15, local_boleto)
+            ):
+                cubiertas += 1
+                break
+    return cubiertas, len(rows)
+
+
+def _q15_payload_matches_boleto(boleto, payload):
+    """True si las fechas que publica quiniela15 caen en las del boleto."""
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT local, visitante, fecha FROM resultados WHERE jornada = ?",
+            (int(boleto),),
+        ).fetchall()
+    boleto_teams = set()
+    boleto_dates = []
+    for row in rows:
+        for name in (row["local"], row["visitante"]):
+            key = utils.clean_team_key(name)
+            if key:
+                boleto_teams.add(key)
+                boleto_teams.add(key.replace(" F", "").strip())
+        fecha = str(row["fecha"] or "").strip()[:10]
+        if len(fecha) == 10:
+            boleto_dates.append(fecha)
+    if not boleto_teams:
+        return False, "boleto_sin_filas"
+
+    matches = payload.get("matches") or []
+    if not matches:
+        return False, "q15_sin_partidos"
+
+    # 1) Los equipos: se cuentan las casillas DEL BOLETO que la jornada
+    #    descargada reproduce.
+    boleto_cubiertas, total = _q15_boleto_coverage(boleto, payload)
+    umbral = max(2, (total * 3) // 5)  # 60% de las casillas del boleto
+    if boleto_cubiertas >= umbral:
+        return True, f"equipos={boleto_cubiertas}/{total}"
+
+    # 2) Si no hay equipos en comun, al menos que las fechas se solapen.
+    q15_dates = sorted({str(m.get("fecha") or "").strip()[:10] for m in matches if str(m.get("fecha") or "")[:10]})
+    if boleto_dates and q15_dates:
+        try:
+            boleto_first = datetime.strptime(min(boleto_dates), "%Y-%m-%d")
+            boleto_last = datetime.strptime(max(boleto_dates), "%Y-%m-%d")
+            tolerance = timedelta(days=Q15_BOLETO_DATE_TOLERANCE_DAYS)
+            q15_first = datetime.strptime(min(q15_dates), "%Y-%m-%d")
+            q15_last = datetime.strptime(max(q15_dates), "%Y-%m-%d")
+        except ValueError:
+            return False, "fechas_ilegibles"
+        if q15_first <= boleto_last + tolerance and q15_last >= boleto_first - tolerance:
+            return True, f"fechas={q15_first:%Y-%m-%d}..{q15_last:%Y-%m-%d}"
+    return False, f"equipos={boleto_cubiertas}/{total}"
+
+
 def write_q15_directo_cache(jornada):
     if not jornada:
         return {"matches": 0, "last_success_per_match": {}}
     started_at = time.time()
-    payload = scrape_q15_directo(int(jornada))
+    payload = scrape_q15_boleto(jornada)
     try:
-        matches = validate_q15_payload(payload, jornada)
+        matches = validate_q15_payload(payload, payload.get("q15_jornada", jornada))
     except ValueError as exc:
         # Un boleto con 14 filas parseadas vale mas que cero: la validacion
         # estricta dejaba la jornada entera sin resultados por una sola fila
@@ -450,6 +596,20 @@ def write_q15_directo_cache(jornada):
         log_line(f"q15_partial_payload={len(matches)}/15 reason={exc}")
     fetched_at = madrid_now().isoformat(timespec="seconds")
     payload["fetched_at"] = fetched_at
+    if payload.get("boleto_comprobado") is False:
+        # La quiniela descargada no es la del boleto: no se pisa el cache buneo
+        # (el panel del directo lo lee) ni se escribe en la BD. Se devuelve el
+        # error para que la salud del colector lo enseñe.
+        log_line(
+            f"q15_cache_conservado j={int(jornada)} q15={payload.get('q15_jornada')} "
+            f"reason={payload.get('mismatch_reason')}"
+        )
+        return {
+            "matches": 0,
+            "duration_ms": int((time.time() - started_at) * 1000),
+            "last_success_per_match": {},
+            "error": f"q15_jornada_no_confirmada:{payload.get('mismatch_reason')}",
+        }
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     path = DATA_DIR / f"quiniela15_directo_J{int(jornada)}.json"
     write_json_locked(str(path), payload)
@@ -482,9 +642,38 @@ def write_q15_directo_cache(jornada):
     }
 
 
+def _q15_kickoff_order_plausible(match, row, tolerance_days=Q15_BOLETO_DATE_TOLERANCE_DAYS):
+    """False si la fecha del partido en quiniela15 no puede ser la del boleto.
+
+    Es la ultima red contra las numeraciones cruzadas: la quiniela de la Copa
+    del Rey numera "Levante - Atletico" en la casilla 1 igual que el boleto,
+    pero la juega otra noche. Si quiniela15 publica fecha y esta cae fuera del
+    margen del boleto, no es el mismo partido y no se aplica el marcador.
+
+    Sin fecha en la fuente (quiniela15 no siempre la publica en la tabla) se
+    acepta: el cruce de nombres ya ha pasado.
+    """
+    q15_fecha = str(match.get("fecha") or "").strip()[:10]
+    boleto_fecha = str(row["fecha"] or "").strip()[:10]
+    if len(q15_fecha) != 10 or len(boleto_fecha) != 10:
+        return True
+    try:
+        q15_day = datetime.strptime(q15_fecha, "%Y-%m-%d").date()
+        boleto_day = datetime.strptime(boleto_fecha, "%Y-%m-%d").date()
+    except ValueError:
+        return True
+    return abs((q15_day - boleto_day).days) <= int(tolerance_days)
+
+
 def apply_q15_results_to_db(jornada, payload):
     matches = payload.get("matches") or []
     if not matches:
+        return 0
+    # Si el payload viene de otra numeracion de quiniela15 y no se pudo
+    # confirmar que es el boleto, no se escribe nada: aplicar marcadores de
+    # partidos que no son (Copa del Rey sobre LaLiga) es peor que no tenerlos.
+    if payload.get("boleto_comprobado") is False:
+        log_line(f"q15_payload_no_confirmado j={jornada} reason={payload.get('mismatch_reason')}")
         return 0
     updates = 0
     now = madrid_now()
@@ -508,6 +697,19 @@ def apply_q15_results_to_db(jornada, payload):
                 partido_id = int(match.get("id"))
             except Exception:
                 continue
+            row = current.get(partido_id)
+            if not row:
+                continue
+            if not _q15_kickoff_order_plausible(match, row):
+                # Con numeraciones cruzadas la casilla 1 de la quiniela de la
+                # Copa del Rey tambien se llama "Levante - Atletico": si su
+                # partido se jugo en otra fecha que el del boleto, no puede ser
+                # el mismo partido.
+                log_line(
+                    f"q15_kickoff_fuera_de_orden id={partido_id} q15={match.get('local')}|{match.get('visitante')} "
+                    f"fecha_q15={match.get('fecha') or ''} fecha_boleto={row['fecha'] or ''}"
+                )
+                continue
             home_goals = match.get("score_home")
             away_goals = match.get("score_away")
             if home_goals is None or away_goals is None:
@@ -517,9 +719,6 @@ def apply_q15_results_to_db(jornada, payload):
                 away_goals = int(str(away_goals).strip().replace("?", ""))
             except (TypeError, ValueError):
                 log_line(f"q15_corrupt_score_skipped id={match.get('id')}")
-                continue
-            row = current.get(partido_id)
-            if not row:
                 continue
             q15_home = utils.normalize_team_key(match.get("local"))
             q15_away = utils.normalize_team_key(match.get("visitante"))

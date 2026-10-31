@@ -2,6 +2,44 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-10-31 — Los partidos jugados vuelven a enseñar su resultado (J17)
+
+### Corregido
+
+- **La quiniela15 numera distinto que el boleto.** Su `/resultados-quiniela/17`
+  es la Copa del Rey del 28/10 (boleto extraordinario de SELAE que esta liga no
+  juega); el boleto de la liga es su **J18**. El colector descargaba otra
+  quiniela y la cruzaba por `partido_id`: 0 updates y las 15 casillas en `NS`
+  aunque Levante–Atlético y Rayo–Celta ya estuvieran jugados. Nuevo
+  `config/quiniela15_jornadas.py` (`QUINIELA15_JORNADA_OVERRIDES`) y
+  autodetección en `LIVE_COLLECTOR._q15_numero_para_boleto()` (prueba el número
+  del boleto y sus vecinos y se queda con el que reproduce sus casillas). Si la
+  quiniela descargada no se confirma, no se escribe en la BD y se conserva el
+  caché del directo (`q15_cache_conservado`).
+- **Grafías que no cruzaban**: `At. Madrid`/`Atlético` (la misma jornada usa las
+  dos), `Racing`/`Racing Santander`, `R. Madrid (F)`/`Real Madrid (F)`,
+  `R. Sociedad (F)`/`Real Sociedad (F)`, `Athletic Bilbao Femenino` y
+  `UD Tenerife`. Además de perder el resultado, esos equipos salían **sin
+  escudo**. Aliases nuevos en `config/teams.py`.
+- **`UD Tenerife` apuntaba al Tenerife masculino**: al borrar `clean_team_key`
+  la forma jurídica, el Costa Adeje de Liga F canonizaba igual que el masculino.
+  Nuevo `FEMININE_TEAM_KEYS` + `raw_team_key()` para marcarlo como femenino sin
+  abrir nunca el cruce masculino ↔ femenino.
+- **`_core_team_key`** (fallback del feed de Highlightly) troceaba y ordenaba
+  tokens: `Atlético` → `("ATL", "TICO")`, `Málaga` → `("LAGA", "M")`. Ahora
+  parte del canónico, conserva el sufijo de género y descarta los nombres que
+  solo son forma jurídica.
+- **Blindaje por fecha**: aunque el nombre cruce, un marcador con fecha a más de
+  2 días del boleto no se aplica (`q15_kickoff_fuera_de_orden`). La Copa numera
+  «Levante–Atlético» en la casilla 1 igual que el boleto, pero otro día.
+
+### Añadido
+
+- `tests/test_j17_resultados_grafias_y_numeracion.py` (41 casos): grafías,
+  género blindado, escudos, equivalencia de jornada, autodetección, rechazo de
+  la quiniela de la Copa, fallback del proveedor y parser de fechas.
+- `docs/RECORRIDO_RESULTADOS.md` §6 con el incidente y el checklist actualizado.
+
 ## 2026-10-31 — Semilla de la J17 y gate de la jornada vigente en verde
 
 ### Corregido

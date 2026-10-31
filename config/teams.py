@@ -41,6 +41,10 @@ TEAM_LOGO_ALIASES = {
     "RACING SANTANDER": "RACING DE SANTANDER",
     "SANTANDER": "RACING DE SANTANDER",
     "REAL RACING CLUB": "RACING DE SANTANDER",
+    # "Racing" a secas es como lo escribe la quiniela15 en la J17; la forma
+    # larga ("Racing Santander") en la J4. Sin el alias corto la fila del
+    # boleto no cruzaba con el directo (R. Racing Club vs Real Madrid).
+    "RACING": "RACING DE SANTANDER",
     "CADIZ": "CADIZ",
     "CADIZ CF": "CADIZ",
     "SEVILLA": "SEVILLA FC",
@@ -87,6 +91,11 @@ TEAM_LOGO_ALIASES = {
     "AT MADRID": "ATLETICO MADRID",
     "ATLETICO MADRID": "ATLETICO MADRID",
     "ATLETICO DE MADRID": "ATLETICO MADRID",
+    # La quiniela15 alterna las dos grafias segun la jornada ("At. Madrid" en
+    # la J2/J3/J4, "Atletico" a secas en la J17). Sin esta clave la fila que el
+    # boleto guarda como "Atletico" nunca cruzaba con "At. Madrid" del directo
+    # y el partido se quedaba sin resultado toda la jornada.
+    "ATLETICO": "ATLETICO MADRID",
     "R MADRID": "REAL MADRID",
     "REAL MADRID": "REAL MADRID",
     "R SOCIEDAD": "REAL SOCIEDAD",
@@ -223,6 +232,11 @@ TEAM_LOGO_ALIASES = {
     "ATHLETIC CLUB FEMENINO": "ATHLETIC CLUB FEMENINO",
     "ATHLETIC CLUB WOMEN": "ATHLETIC CLUB FEMENINO",
     "ATHLETIC FEMENINO": "ATHLETIC CLUB FEMENINO",
+    # El proveedor publica el nombre completo ("Athletic Bilbao Femenino") y el
+    # boleto lo abrevia ("Athletic (F)"): sin alias quedaba sin resultado y sin
+    # escudo en la J17.
+    "ATHLETIC BILBAO FEMENINO": "ATHLETIC CLUB FEMENINO",
+    "ATHLETIC CLUB BILBAO FEMENINO": "ATHLETIC CLUB FEMENINO",
     "EIBAR F": "EIBAR FEMENINO",
     "SD EIBAR F": "EIBAR FEMENINO",
     "EIBAR FEMENINO": "EIBAR FEMENINO",
@@ -238,6 +252,13 @@ TEAM_LOGO_ALIASES = {
     "VCF FEMENINO": "VALENCIA FEMENINO",
     "VALENCIA WOMEN": "VALENCIA FEMENINO",
     "REAL MADRID F": "REAL MADRID FEMENINO",
+    # La quiniela15 abrevia "Real Madrid (F)" como "R. Madrid (F)" en la J17 y
+    # "R. Sociedad (F)" en la J11/J17. "R MADRID" ya existia (masculino) pero
+    # la forma femenina se quedaba en "R MADRID F", una clave que no publicaba
+    # nadie: los dos partidos de Liga F no cruzaban con el directo ni tenian
+    # escudo.
+    "R MADRID F": "REAL MADRID FEMENINO",
+    "R SOCIEDAD F": "REAL SOCIEDAD FEMENINO",
     "REAL MADRID CF F": "REAL MADRID FEMENINO",
     "REAL MADRID FEMENINO": "REAL MADRID FEMENINO",
     "REAL MADRID WOMEN": "REAL MADRID FEMENINO",
@@ -281,11 +302,24 @@ TEAM_LOGO_ALIASES = {
     "REAL SOCIEDAD FEMENINO": "REAL SOCIEDAD FEMENINO",
     "REAL SOCIEDAD WOMEN": "REAL SOCIEDAD FEMENINO",
     "COSTA ADEJE TENERIFE": "COSTA ADEJE TENERIFE",
+    # El proveedor y el calendario llaman "UD Tenerife" (y "Tenerife (F)" al
+    # equipo de Liga F) al mismo club; el masculino canoniza como "TENERIFE".
+    # Solo se cruzan entre si (ambos llevan marcador femenino), nunca con el
+    # Tenerife masculino.
+    "UD TENERIFE": "COSTA ADEJE TENERIFE",
+    "UD TENERIFE F": "COSTA ADEJE TENERIFE",
+    "UD TENERIFE FEMENINO": "COSTA ADEJE TENERIFE",
     "TENERIFE FEMENINO": "COSTA ADEJE TENERIFE",
     "COSTA ADEJE TENERIFE FEMENINO": "COSTA ADEJE TENERIFE",
     "DEPORTIVO ABANCA": "DEPORTIVO ABANCA",
     "DEPORTIVO FEMENINO": "DEPORTIVO ABANCA",
     "DEPORTIVO DE LA CORUNA WOMEN": "DEPORTIVO ABANCA",
+    # El calendario/el proveedor a veces publica el nombre largo con el
+    # marcador femenino pegado ("Deportivo de La Coruna Femenino"). Antes
+    # canonizaba distinto que "Deportivo (F)" del boleto.
+    "DEPORTIVO DE LA CORUNA FEMENINO": "DEPORTIVO ABANCA",
+    "DEPORTIVO DE LA CORUNA F": "DEPORTIVO ABANCA",
+    "DEPORTIVO CORUNA FEMENINO": "DEPORTIVO ABANCA",
     "LOGROÑO UNITED": "LOGRONO UNITED F",
     "LOGRONO UNITED": "LOGRONO UNITED F",
     "LOGRONO UNITED F": "LOGRONO UNITED F",
@@ -310,6 +344,27 @@ TEAM_LOGO_ALIASES = {
     "FC BARCELONA FEMENINO": "BARCELONA FEMENINO",
     "BARCELONA WOMEN": "BARCELONA FEMENINO",
 }
+
+# Nombres que solo existen en femenino aunque quien los escribe no ponga el
+# marcador de genero: el proveedor llama "UD Tenerife" al Costa Adeje Tenerife
+# de Liga F y "Athletic Bilbao Femenino" al Athletic Club. Hasta ahora "UD
+# Tenerife" canonizaba como el TENERIFE masculino, asi que un nombre de Liga F
+# podia casar (o descartar) con el equipo masculino por accidente. Estas claves
+# se tratan como femeninas en ``_is_feminine_raw`` y su canonico es siempre el
+# del equipo femenino: el cruce masculino <-> femenino sigue cerrado.
+FEMININE_TEAM_KEYS = frozenset(
+    {
+        "UD TENERIFE",
+        "UD TENERIFE F",
+        "UD TENERIFE FEMENINO",
+        # Ojo: "ATHLETIC BILBAO" a secas NO entra aqui, que ya canoniza al
+        # Athletic masculino en TEAM_LOGO_ALIASES.
+        "ATHLETIC BILBAO F",
+        "ATHLETIC BILBAO FEMENINO",
+        "ATHLETIC CLUB BILBAO",
+        "ATHLETIC CLUB BILBAO FEMENINO",
+    }
+)
 
 # Leagues shown in standings tabs.
 STANDINGS_LEAGUES = {
