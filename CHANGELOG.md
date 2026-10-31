@@ -2,6 +2,28 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-10-31 — Todos los directos al lado de la quiniela
+
+### Añadido
+
+- **Panel lateral EN DIRECTO** en la portada (`kk-live-aside`): lista *todos* los
+  partidos en juego (las 5 ligas + las casillas que la quiniela ya marca LIVE),
+  cada uno con su competición, marcador y minuto. Antes la franja pintaba un
+  solo partido y un `+N`, así que con tres partidos en juego dos no salían en
+  ningún sitio. La lista se deduplica por pareja de equipos y ordena por casilla
+  del boleto (`Q1…Q15`); los de fuera de la quiniela van al final.
+- **Directo pegado a cada casilla de la quiniela**: la fila lleva su marcador y
+  minuto (`cx-sv-live`) junto a los nombres, además de la columna de resultado.
+- En pantalla ancha la portada abre a dos columnas (quiniela a la izquierda,
+  panel de directos sticky a la derecha). En móvil el panel sube encima de la
+  tabla, con scroll propio para no empujar la quiniela.
+- `freshenSimpleViewRow` cruza cada fila con `partidos` (que sí viene en el poll
+  ligero de 30 s) para que el marcador y el minuto no esperen a la recarga
+  completa. Solo adopta estados verificados: `STALE` u otro directo degradado se
+  queda pendiente, nunca se pinta como resultado.
+- `tests/test_cover_directo_panel.py`: casos nuevos con tres directos a la vez y
+  con casilla en juego + `STALE`, para fijar el contrato.
+
 ## 2026-09-29 — El logo de cabecera deja de costar 231KB en movil
 
 ### Rendimiento

@@ -242,6 +242,180 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
     padding: 14px 14px 40px;
 }
 
+/* ---------- maquetacion: quiniela + panel de todos los directos ---------- */
+/* Sin directos manda una sola columna (nada de huecos vacios). Con directos,
+   en pantalla ancha el panel va a la derecha y la quiniela conserva su ancho
+   de lectura; en movil el panel sube encima de la tabla. */
+.kk-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.kk-main {
+    min-width: 0;
+}
+
+.kk-page.has-live .kk-wrap {
+    max-width: 1120px;
+}
+
+@media (min-width: 1024px) {
+    .kk-page.has-live .kk-layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+
+    .kk-page.has-live .kk-main {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .kk-page.has-live .kk-live-aside {
+        grid-column: 2;
+        grid-row: 1;
+        position: sticky;
+        top: 14px;
+        max-height: calc(100dvh - 28px);
+        overflow-y: auto;
+    }
+}
+
+/* ---------- panel lateral EN DIRECTO ---------- */
+.kk-live-aside {
+    background: var(--kk-card);
+    border: 2px solid var(--kk-pink);
+    border-radius: var(--kk-radius);
+    box-shadow: var(--kk-shadow);
+    padding: 12px 12px 10px;
+    margin-top: 14px;
+}
+
+.kk-live-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 2px 8px;
+    border-bottom: 2px dashed var(--kk-line);
+}
+
+.kk-live-head b {
+    font-size: 12.5px;
+    letter-spacing: 0.6px;
+    color: #B0466B;
+    font-weight: 900;
+}
+
+.kk-live-pulse {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--kk-bad);
+    animation: kkPulse 1.2s infinite;
+}
+
+.kk-live-count {
+    margin-left: auto;
+    min-width: 22px;
+    text-align: center;
+    background: var(--kk-pink-soft);
+    color: #B0466B;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.kk-live-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.kk-live-item {
+    padding: 7px 4px 8px;
+    border-bottom: 1px solid var(--kk-line);
+}
+
+.kk-live-item:last-child {
+    border-bottom: 0;
+}
+
+.kk-live-item.is-quiniela {
+    background: var(--kk-mint-soft);
+    border-radius: 14px;
+    padding: 7px 8px 8px;
+    border-bottom: 0;
+}
+
+.kk-live-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.kk-live-comp {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: var(--kk-muted);
+}
+
+.kk-live-slot {
+    font-size: 10px;
+    font-weight: 900;
+    color: #2E7D6B;
+    background: #fff;
+    border: 1.5px solid var(--kk-mint);
+    border-radius: 999px;
+    padding: 0 6px;
+}
+
+.kk-live-min {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--kk-pink-ink);
+    white-space: nowrap;
+}
+
+.kk-live-aside .kk-live-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--kk-ink);
+}
+
+.kk-live-aside .kk-live-body i {
+    font-style: normal;
+    color: var(--kk-muted);
+}
+
+.kk-live-aside .kk-live-score {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 900;
+    background: var(--kk-pink-soft);
+    color: #B0466B;
+    border-radius: 9px;
+    padding: 1px 7px;
+    white-space: nowrap;
+}
+
+.kk-live-note {
+    margin: 8px 2px 0;
+    font-size: 10.5px;
+    color: var(--kk-muted);
+    font-weight: 700;
+}
+
 .kk-header {
     display: flex;
     align-items: center;
@@ -638,6 +812,31 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
     font-weight: 700;
 }
 
+/* Directo pegado al nombre del partido: marcador y minuto en la misma linea. */
+.kk-page .cx-sv-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    color: #B0466B;
+    background: var(--kk-pink-soft);
+    border: 1.5px solid var(--kk-pink);
+    border-radius: 999px;
+    padding: 1px 7px;
+    white-space: nowrap;
+}
+
+.kk-page .cx-sv-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--kk-bad);
+    animation: kkPulse 1.2s infinite;
+}
+
 .kk-page .cx-sv-result {
     text-align: center;
     padding: 8px 4px;
@@ -1000,6 +1199,13 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
         margin-top: 6px;
     }
 
+    /* En el movil el panel sube encima de la quiniela; con muchos partidos en
+       juego no debe empujar la tabla fuera de la primera pantalla. */
+    .kk-live-aside {
+        max-height: 46dvh;
+        overflow-y: auto;
+    }
+
     .kk-page .cx-sv-table {
         font-size: 13px;
     }
@@ -1007,7 +1213,9 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 /* ---------- movimiento reducido ---------- */
 @media (prefers-reduced-motion: reduce) {
-    .kk-live-wrap .kk-dot {
+    .kk-live-wrap .kk-dot,
+    .kk-live-pulse,
+    .kk-page .cx-sv-live-dot {
         animation: none;
     }
 

@@ -188,6 +188,85 @@ CASES = r"""
     };
 }
 
+// 4. Varios directos a la vez: TODOS en el panel lateral, cada uno una sola
+//    vez, y la casilla de la quiniela marcada con su numero (Q3).
+{
+    const partidos = [];
+    for (let i = 1; i <= 15; i++) {
+        partidos.push(quinielaMatch(i, `Equipo${i}`, `Rival${i}`, "2026-08-29", "17:00", "NS"));
+    }
+    partidos[2] = quinielaMatch(3, "Levante", "Betis", kickoffMadrid(20).slice(0, 10), kickoffMadrid(20).slice(11, 16), "LIVE");
+    partidos[2].minuto = "63'";
+    partidos[2].goles_local = 2;
+    partidos[2].goles_visitante = 1;
+    const elche = externalMatch(1336376293, "Racing Santander", "Elche", 30);
+    const toulouse = externalMatch(1336371187, "Toulouse", "Lille", 38, { time: "38" });
+    const html = renderCover({
+        jornada: 3,
+        today_madrid: kickoffMadrid(30).slice(0, 10),
+        is_locked: false,
+        partidos,
+        all_league_matches: [elche, toulouse],
+        live_matches: [elche, toulouse],
+    });
+    results.manyLive = {
+        count: String((html.match(/kk-live-body/g) || []).length),
+        showsRacing: /racing/i.test(html),
+        showsToulouse: /toulouse/i.test(html),
+        showsLevante: /levante/i.test(html),
+        quinielaSlot: html.includes(">Q3<"),
+        aside: html.includes("kk-live-aside"),
+        layout: html.includes("kk-page has-live"),
+    };
+}
+
+// 5. La lista de la quiniela lleva el directo al lado del partido: marcador y
+//    minuto del payload (fresco en el poll de 30 s) sin inventar nada, y un
+//    STALE nunca se pinta como resultado.
+{
+    const enJuego = quinielaMatch(1, "Levante", "Betis", kickoffMadrid(20).slice(0, 10), kickoffMadrid(20).slice(11, 16), "LIVE");
+    enJuego.minuto = "63'";
+    enJuego.goles_local = 2;
+    enJuego.goles_visitante = 1;
+    const degradado = quinielaMatch(2, "Sevilla", "Valencia", kickoffMadrid(80).slice(0, 10), kickoffMadrid(80).slice(11, 16), "STALE");
+    degradado.goles_local = 1;
+    degradado.goles_visitante = 0;
+    const partidos = [enJuego, degradado];
+    for (let i = 3; i <= 15; i++) {
+        partidos.push(quinielaMatch(i, `Equipo${i}`, `Rival${i}`, "2026-08-29", "17:00", "NS"));
+    }
+    const simpleView = {
+        jornada: "3",
+        columns: [],
+        rows: [
+            { id: 1, local: "Levante", visitante: "Betis", cuando: "2026-08-29 17:00", is_pleno: false, has_result: false, resultado: "", en_juego: false, minuto: "", picks: {} },
+            { id: 2, local: "Sevilla", visitante: "Valencia", cuando: "2026-08-29 17:00", is_pleno: false, has_result: false, resultado: "", en_juego: false, minuto: "", picks: {} },
+        ],
+        totals: {},
+        total_casillas: 14,
+    };
+    const html = renderCover({
+        jornada: 3,
+        today_madrid: kickoffMadrid(30).slice(0, 10),
+        is_locked: false,
+        partidos,
+        all_league_matches: [],
+        live_matches: [],
+        simple_view: simpleView,
+    });
+    const fila1 = (html.match(/<tr class="cx-sv-row" data-id="1">[\s\S]*?<\/tr>/) || [""])[0];
+    const fila2 = (html.match(/<tr class="cx-sv-row" data-id="2">[\s\S]*?<\/tr>/) || [""])[0];
+    results.rowLive = {
+        chip: fila1.includes("cx-sv-live"),
+        chipText: fila1.includes("2-1 · 63"),  // el apice se escapa en el HTML
+        rowScore: fila1.includes("2-1"),
+        resultLive: fila1.includes("cx-sv-result is-live"),
+        staleChip: fila2.includes("cx-sv-live"),
+        staleScore: fila2.includes("1-0"),
+        stalePending: fila2.includes("cx-sv-result is-pending"),
+    };
+}
+
 console.log(JSON.stringify(results));
 """
 
@@ -239,3 +318,36 @@ def test_cover_directo_panel_keeps_quiniela_match_first_and_deduped():
     assert payload["quinielaLive"]["shown"]
     assert payload["quinielaLive"]["onceInPanel"], "la quiniela y la copia del proveedor se pintan dos veces"
     assert payload["quinielaLive"]["countLabel"] == "1"
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
+def test_cover_directo_panel_lists_every_live_match_on_one_side():
+    """El panel lateral muestra TODOS los directos, no solo el primero.
+
+    Antes la portada pintaba un partido y un «+N»: con tres partidos en juego
+    dos de ellos no estaban en ningun sitio.
+    """
+    payload = _run_node()
+    many = payload["manyLive"]
+
+    assert many["aside"], "falta el panel lateral de directos"
+    assert many["count"] == "3", f"el panel debe listar los tres directos, hay {many['count']}"
+    assert many["showsRacing"] and many["showsToulouse"], "falta un directo de fuera de la quiniela"
+    assert many["showsLevante"], "el directo de la quiniela tambien va en el panel"
+    assert many["quinielaSlot"], "la casilla de la quiniela debe marcarse con su numero"
+    assert many["layout"], "con directos la portada debe abrir la maquetacion a dos columnas"
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
+def test_cada_casilla_de_la_quiniela_lleva_su_directo_al_lado():
+    """Marcador y minuto pegados al partido, y nunca un STALE como resultado."""
+    payload = _run_node()
+    row = payload["rowLive"]
+
+    assert row["chip"], "la casilla en juego no lleva su marca de directo"
+    assert row["chipText"], "la marca de directo no lleva el minuto del payload"
+    assert row["rowScore"], "la casilla no toma el marcador fresco del partido"
+    assert row["resultLive"], "la columna de resultado debe pintarse como en directo"
+    assert not row["staleChip"], "un directo degradado (STALE) no puede pintarse en juego"
+    assert not row["staleScore"], "un STALE no puede pintarse como resultado"
+    assert row["stalePending"], "sin resultado verificado la casilla se queda pendiente"
