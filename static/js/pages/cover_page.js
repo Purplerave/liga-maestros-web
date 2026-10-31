@@ -714,25 +714,6 @@ function simpleViewCellHtml(col, row) {
         + `<span class="cx-sv-mark" aria-hidden="true">${mark.glyph}</span></td>`;
 }
 
-/* Directo pegado al nombre del partido: la casilla lleva su marcador y su
-   minuto en el mismo renglon de los equipos (siempre del payload, nunca
-   pintados a mano), sin tener que mirar la columna de resultado. */
-function simpleViewLiveChipText(row) {
-    if (!row?.en_juego) return "";
-    const marcador = String(row.resultado || "").trim();
-    const raw = String(row.minuto || "").trim();
-    const digits = raw.match(/\d{1,3}/);
-    const minuto = digits ? `${digits[0]}'` : raw;
-    return [marcador, minuto].filter(Boolean).join(" · ") || "En juego";
-}
-
-function simpleViewLiveChipHtml(row) {
-    if (!row?.en_juego) return "";
-    const text = simpleViewLiveChipText(row);
-    return `<span class="cx-sv-live" title="En directo${text ? ` · ${escapeHtml(text)}` : ""}">`
-        + `<i class="cx-sv-live-dot" aria-hidden="true"></i>${escapeHtml(text)}</span>`;
-}
-
 function simpleViewRowHtml(row, columns) {
     const cells = columns.map(col => simpleViewCellHtml(col, row)).join("");
     const resultClass = row.has_result ? (row.en_juego ? " is-live" : " is-ft") : " is-pending";
@@ -740,7 +721,6 @@ function simpleViewRowHtml(row, columns) {
         + `<th scope="row" class="cx-sv-match">`
         + `<span class="cx-sv-idx" aria-hidden="true">${escapeHtml(row.id)}</span>`
         + `<span class="cx-sv-teams"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
-        + simpleViewLiveChipHtml(row)
         + `<span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span>`
         + `</th>`
         + `<td class="cx-sv-result${resultClass}">`
