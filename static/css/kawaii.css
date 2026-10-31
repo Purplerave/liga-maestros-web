@@ -978,6 +978,18 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
     color: #fff;
 }
 
+.kk-page .cx-sv-cell.is-editing .kk-sign.is-active.is-hit {
+    background: var(--kk-ok-soft);
+    border-color: var(--kk-ok);
+    color: #1F7A4D;
+}
+
+.kk-page .cx-sv-cell.is-editing .kk-sign.is-active.is-miss {
+    background: var(--kk-bad-soft);
+    border-color: var(--kk-bad);
+    color: #B4413F;
+}
+
 .kk-page .cx-sv-cell.is-editing .kk-sign-pleno {
     min-width: 54px;
     background: var(--kk-sun-soft);

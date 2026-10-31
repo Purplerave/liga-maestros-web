@@ -156,11 +156,14 @@ def prediction_source_priority(uid):
 
 
 def is_scored_status(status):
-    return str(status or "").upper() in ("FT", "FINISHED", "TERMINADO")
+    return str(status or "").strip().upper() in ("FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED")
 
 
 def is_live_scored_status(status):
-    return str(status or "").upper() in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")
+    return str(status or "").strip().upper() in (
+        "LIVE", "IN PLAY", "IN_PLAY", "HT", "HALF TIME", "HALF TIME BREAK",
+        "EN JUEGO", "1H", "2H", "ET", "P", "PEN LIVE",
+    )
 
 
 def signo_desde_goles(goles_local, goles_visitante):

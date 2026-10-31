@@ -544,7 +544,7 @@ function simpleViewColumns(payload) {
 
 /* Estados con marcador VERIFICADO. STALE (directo degradado) queda fuera a
    proposito: pintarlo seria inventar un resultado, igual que hace el backend. */
-const _SV_LIVE_STATUSES = ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H"];
+const _SV_LIVE_STATUSES = ["LIVE", "IN PLAY", "IN_PLAY", "HT", "HALF TIME", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "PEN LIVE"];
 const _SV_FINAL_STATUSES = ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED"];
 
 function simpleViewVerifiedScore(match) {
@@ -616,7 +616,7 @@ function simpleViewRows(payload) {
         const golesLocal = match.goles_local;
         const golesVisitante = match.goles_visitante;
         const status = String(match.status || "").toUpperCase();
-        const verificado = ["FT", "FINISHED", "TERMINADO", "LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"].includes(status);
+        const verificado = _SV_FINAL_STATUSES.includes(status) || _SV_LIVE_STATUSES.includes(status);
         const hayMarcador = verificado && golesLocal != null && golesVisitante != null;
         const hora = String(match.hora || "").trim();
         const fecha = String(match.fecha_limpia || "").trim();
@@ -629,7 +629,7 @@ function simpleViewRows(payload) {
             is_pleno: id === 15,
             has_result: hayMarcador,
             resultado: hayMarcador ? `${golesLocal}-${golesVisitante}` : "",
-            en_juego: ["LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"].includes(status),
+            en_juego: _SV_LIVE_STATUSES.includes(status),
             minuto: String(match.minuto_live || match.minuto || ""),
             picks: {},
         };
@@ -683,15 +683,22 @@ function kawaiiCeldaEditable(col, row) {
     // la vista de boleto: `.clickable` + `data-sign`/`data-pleno` + match-idx.
     const idx = Number(row.id) - 1;
     const signo = (state.my_signs || [])[idx] || "-";
+    const pick = (row.picks || {})[col.id] || null;
+    // El backend calcula el acierto. Conserva el color del boleto guardado
+    // mientras se edita, siempre que siga visible el mismo signo puntuado.
+    const scoredState = pick && pick.signo === signo && pick.hit !== null && pick.hit !== undefined
+        ? (pick.hit ? "is-hit" : "is-miss")
+        : "";
     if (row.is_pleno) {
         const etiqueta = signo === "-" ? "Elegir" : signo;
-        return `<td class="cx-sv-cell cx-sv-me is-editing is-empty">`
-            + `<button type="button" class="kk-sign kk-sign-pleno clickable" data-pleno="true" data-match-idx="${idx}" aria-label="Elegir el marcador del Pleno al 15">${escapeHtml(etiqueta)}</button></td>`;
+        return `<td class="cx-sv-cell cx-sv-me is-editing${signo === "-" ? " is-empty" : ""}${scoredState ? ` ${scoredState}` : ""}">`
+            + `<button type="button" class="kk-sign kk-sign-pleno clickable${signo !== "-" ? " is-active" : ""}${scoredState ? ` ${scoredState}` : ""}" data-pleno="true" data-match-idx="${idx}" aria-label="Elegir el marcador del Pleno al 15">${escapeHtml(etiqueta)}</button></td>`;
     }
     const botones = ["1", "X", "2"]
         .map(opcion => {
             const activo = signo === opcion;
-            return `<button type="button" class="kk-sign clickable${activo ? " is-active" : ""}" data-sign="${opcion}" data-match-idx="${idx}" aria-pressed="${activo ? "true" : "false"}" aria-label="Marcar ${opcion} en la casilla ${idx + 1}">${opcion}</button>`;
+            const resultado = activo ? scoredState : "";
+            return `<button type="button" class="kk-sign clickable${activo ? " is-active" : ""}${resultado ? ` ${resultado}` : ""}" data-sign="${opcion}" data-match-idx="${idx}" aria-pressed="${activo ? "true" : "false"}" aria-label="Marcar ${opcion} en la casilla ${idx + 1}">${opcion}</button>`;
         })
         .join("");
     return `<td class="cx-sv-cell cx-sv-me is-editing" title="Tu columna: marca tu pronostico">${botones}</td>`;

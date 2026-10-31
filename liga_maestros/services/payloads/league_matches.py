@@ -173,11 +173,11 @@ def _add_team_logos(matches, team_logos):
 
 
 def _is_live_match(match):
-    status = str(match.get("status") or "").upper()
-    if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
-        return False
-    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
-    return not match_date or match_date == today_madrid()
+    # _close_stale_live_matches ya elimina snapshots caducados. No filtres un
+    # partido confirmado por la fecha de "added" (que puede ser de importación)
+    # ni por el día de inicio: un partido nocturno puede seguir en juego pasada
+    # la medianoche. Usa el mismo catálogo de estados que el cierre de directos.
+    return is_live_status(match.get("status"))
 
 
 def _load_external_matches():
@@ -295,6 +295,10 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
             window_end = max(quiniela_datetimes) + timedelta(days=1)
 
     def keep_external_match(match):
+        # Un directo ya validado por _close_stale_live_matches es relevante
+        # aunque el proveedor conserve una fecha de importación antigua.
+        if is_live_status(match.get("status")):
+            return True
         match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
         if match_date == today_str:
             return True
