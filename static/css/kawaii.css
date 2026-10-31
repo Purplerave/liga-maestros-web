@@ -8,27 +8,27 @@
    =========================================================================== */
 
 :root {
-    --kk-cream: #FFF7EC;
-    --kk-card: #FFFFFF;
-    --kk-ink: #4A3B31;
-    --kk-muted: #9B897A;
-    --kk-pink: #FF8FA3;
-    --kk-pink-soft: #FFE3E9;
-    --kk-pink-ink: #D4669A;
-    --kk-mint: #7FD8BE;
-    --kk-mint-soft: #E4F7F1;
-    --kk-sun: #FFD166;
-    --kk-sun-soft: #FFF3D6;
-    --kk-sun-ink: #6B4A00;
-    --kk-lav: #B9A7F2;
-    --kk-lav-soft: #EDE8FF;
-    --kk-ok: #5CC98E;
-    --kk-ok-soft: #E3F7EC;
-    --kk-bad: #F07B7B;
-    --kk-bad-soft: #FDE7E7;
-    --kk-line: #F1E4D6;
-    --kk-shadow: 0 8px 24px rgba(120, 90, 60, 0.10);
-    --kk-radius: 22px;
+    --kk-cream: #060b13;
+    --kk-card: #0b1422;
+    --kk-ink: #e6f1ff;
+    --kk-muted: #8ba3bf;
+    --kk-pink: #22d3ee;
+    --kk-pink-soft: rgba(34, 211, 238, 0.12);
+    --kk-pink-ink: #67e8f9;
+    --kk-mint: #38bdf8;
+    --kk-mint-soft: rgba(56, 189, 248, 0.10);
+    --kk-sun: #fbbf24;
+    --kk-sun-soft: rgba(251, 191, 36, 0.12);
+    --kk-sun-ink: #fcd34d;
+    --kk-lav: #818cf8;
+    --kk-lav-soft: rgba(129, 140, 248, 0.12);
+    --kk-ok: #4ade80;
+    --kk-ok-soft: rgba(34, 197, 94, 0.12);
+    --kk-bad: #fb7185;
+    --kk-bad-soft: rgba(244, 63, 94, 0.12);
+    --kk-line: rgba(125, 165, 205, 0.20);
+    --kk-shadow: 0 14px 38px rgba(0, 0, 0, 0.38), 0 0 24px rgba(34, 211, 238, 0.05);
+    --kk-radius: 14px;
     --kk-font: "Outfit", ui-rounded, "Segoe UI", system-ui, sans-serif;
 }
 
@@ -46,9 +46,12 @@ body {
     overflow: visible;
     overflow-x: hidden;
     background:
-        radial-gradient(circle at 12% -5%, var(--kk-pink-soft) 0 34%, transparent 35%),
-        radial-gradient(circle at 112% 10%, var(--kk-mint-soft) 0 30%, transparent 31%),
+        linear-gradient(rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at 12% -5%, rgba(34, 211, 238, 0.09) 0 20%, transparent 42%),
+        radial-gradient(circle at 112% 10%, rgba(56, 189, 248, 0.07) 0 18%, transparent 38%),
         var(--kk-cream);
+    background-size: 48px 48px, 48px 48px, auto, auto, auto;
 }
 
 body {
@@ -1263,4 +1266,188 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
         transition: none;
     }
 }
+/* ---------- panel tecnico de datos en directo ---------- */
+body.newspaper-ui.quiniela-focus .topbar-shell {
+    background: rgba(8, 14, 24, 0.94);
+    border: 1px solid var(--kk-line);
+    border-radius: 14px;
+    box-shadow: var(--kk-shadow), 0 0 22px rgba(34, 211, 238, 0.06);
+    color: var(--kk-ink);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.kk-wrap,
+.kk-page.has-live .kk-wrap {
+    max-width: 1320px;
+}
+
+.kk-page .kk-header,
+.kk-page .kk-ticket,
+.kk-page .kk-live-aside,
+.kk-page .kk-card {
+    border: 1px solid var(--kk-line);
+    border-radius: var(--kk-radius);
+    background: rgba(9, 15, 25, 0.92);
+    box-shadow: var(--kk-shadow);
+    color: var(--kk-ink);
+}
+
+.kk-page .kk-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.kk-page .kk-header::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.65), transparent);
+    content: "";
+}
+
+.kk-page .kk-title,
+.kk-page .kk-card-title,
+.kk-page .kk-live-head b {
+    color: var(--kk-ink);
+    text-shadow: 0 0 18px rgba(34, 211, 238, 0.12);
+}
+
+.kk-page .kk-sub,
+.kk-page .kk-ticket .cx-sv-meta-item dt,
+.kk-page .cx-sv-idx,
+.kk-page .cx-sv-when {
+    color: var(--kk-muted);
+}
+
+.kk-page .kk-jbadge,
+.kk-page .kk-pill,
+.kk-page .kk-live-count {
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.08);
+    color: #a5f3fc;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.kk-page .cx-sv-scroll {
+    border: 1px solid var(--kk-line);
+    border-radius: 10px;
+    background: rgba(4, 8, 14, 0.72);
+}
+
+.kk-page .cx-sv-table {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.kk-page .cx-sv-table thead th {
+    background: rgba(18, 30, 46, 0.96);
+    color: #9db4ce;
+    border-bottom: 1px solid rgba(34, 211, 238, 0.24);
+    letter-spacing: 0.08em;
+}
+
+.kk-page .cx-sv-col-name,
+.kk-page .cx-sv-result-val,
+.kk-page .cx-sv-teams b {
+    color: var(--kk-ink);
+}
+
+.kk-page .cx-sv-body tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.kk-page .cx-sv-row {
+    border-bottom: 1px solid rgba(125, 165, 205, 0.12);
+}
+
+.kk-page .cx-sv-row:hover th,
+.kk-page .cx-sv-row:hover td {
+    background: rgba(34, 211, 238, 0.055);
+}
+
+.kk-page .cx-sv-result-val {
+    font-family: var(--font-data);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+}
+
+.kk-page .cx-sv-result.is-live .cx-sv-result-val {
+    color: #67e8f9;
+    text-shadow: 0 0 12px rgba(34, 211, 238, 0.32);
+}
+
+.kk-page .cx-sv-result.is-ft .cx-sv-result-val {
+    color: #cbd5e1;
+}
+
+.kk-page .cx-sv-live {
+    color: #a5f3fc;
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    background: rgba(34, 211, 238, 0.08);
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.kk-page .cx-sv-sign {
+    border: 1px solid rgba(125, 165, 205, 0.32);
+    border-radius: 8px;
+    background: rgba(15, 25, 39, 0.9);
+    color: #e6f1ff;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.kk-page .cx-sv-cell.is-hit .cx-sv-sign {
+    border-color: rgba(74, 222, 128, 0.72);
+    background: rgba(34, 197, 94, 0.13);
+    color: #86efac;
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.12);
+}
+
+.kk-page .cx-sv-cell.is-miss .cx-sv-sign {
+    border-color: rgba(251, 113, 133, 0.7);
+    background: rgba(244, 63, 94, 0.13);
+    color: #fda4af;
+    box-shadow: 0 0 14px rgba(244, 63, 94, 0.10);
+}
+
+.kk-page .cx-sv-cell.is-hit .cx-sv-mark { color: #4ade80; }
+.kk-page .cx-sv-cell.is-miss .cx-sv-mark { color: #fb7185; }
+
+.kk-page .cx-sv-cell.cx-sv-me .cx-sv-sign {
+    border-color: rgba(34, 211, 238, 0.65);
+    background: rgba(34, 211, 238, 0.08);
+    color: #a5f3fc;
+}
+
+.kk-page .cx-sv-table tfoot th.cx-sv-total-label,
+.kk-page .cx-sv-total {
+    border-top: 1px solid var(--kk-line);
+    background: rgba(9, 15, 25, 0.96);
+    color: var(--kk-ink);
+    font-family: var(--font-data);
+}
+
+.kk-page .kk-rank {
+    border-bottom-color: rgba(125, 165, 205, 0.14);
+    color: var(--kk-ink);
+}
+
+.kk-page .kk-rank.is-you {
+    border-color: rgba(34, 211, 238, 0.38);
+    background: rgba(34, 211, 238, 0.07);
+}
+
+.kk-page .kk-sc,
+.kk-page .kk-sc b {
+    color: #67e8f9;
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+}
+
 }
