@@ -115,7 +115,7 @@ results.withJornada = (() => {
         items: String((html.match(/ticket-live-item/g) || []).length),
         showsArsenal: /arsenal/i.test(html) && /chelsea/i.test(html),
         showsLevante: /levante/i.test(html) && /betis/i.test(html),
-        slot: html.includes(">Q3<"),
+        slot: html.includes(">Casilla 3<"),
         count: (html.match(/ticket-live-count">(\d+)/) || [])[1],
     };
 })();
