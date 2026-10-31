@@ -843,6 +843,7 @@ function kawaiiLoginHtml() {
 
 /* Casilla de la quiniela que corresponde al partido (0 si no esta en el boleto). */
 function kawaiiQuinielaSlot(match) {
+    if (typeof quinielaSlotForMatch === "function") return quinielaSlotForMatch(match);
     if (!match) return 0;
     const key = _matchPairKey(match);
     const partidos = Array.isArray(state?.data?.partidos) ? state.data.partidos : [];
@@ -857,13 +858,10 @@ function kawaiiQuinielaSlot(match) {
 }
 
 /* Todos los partidos en juego que ya sirve el backend (`live_matches`: las 5
-   ligas + la quiniela, deduplicado en origen). Se vuelve a deduplicar por
-   pareja de equipos y se ordena por casilla del boleto. */
+   ligas + la quiniela, deduplicado en origen). La lista compartida se vuelve a
+   deduplicar por pareja de equipos y se ordena por casilla del boleto. */
 function kawaiiLiveMatches() {
-    /* Se unen las dos fuentes: la lista ya decidida por el servidor
-       (`live_matches`) y las casillas de la quiniela que van en juego segun
-       `partidos`. Asi un directo que el proveedor aun no publica pero la
-       quiniela ya marca LIVE no se queda fuera del panel. */
+    if (typeof getAllLiveMatches === "function") return getAllLiveMatches();
     const source = [
         ...(typeof getLiveLeagueMatches === "function" ? getLiveLeagueMatches() : []),
         ...(Array.isArray(state?.data?.partidos) ? state.data.partidos : []),
@@ -879,14 +877,7 @@ function kawaiiLiveMatches() {
         seen.add(key);
         rows.push(match);
     });
-    return rows.sort((a, b) => {
-        const slotA = kawaiiQuinielaSlot(a) || 99;
-        const slotB = kawaiiQuinielaSlot(b) || 99;
-        if (slotA !== slotB) return slotA - slotB;
-        const keyA = `${_liveCompLabel(a)}${_matchPairKey(a)}`;
-        const keyB = `${_liveCompLabel(b)}${_matchPairKey(b)}`;
-        return keyA.localeCompare(keyB);
-    });
+    return rows;
 }
 
 function kawaiiLiveItemHtml(match) {
@@ -912,14 +903,18 @@ function kawaiiLiveItemHtml(match) {
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
     if (!matches.length) return "";
+    const open = typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true;
     return `<aside class="kk-live-aside" aria-label="Todos los partidos en directo">
-            <header class="kk-live-head">
-                <span class="kk-live-pulse" aria-hidden="true"></span>
-                <b>EN DIRECTO</b>
-                <span class="kk-live-count">${matches.length}</span>
-            </header>
-            <ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>
-            <p class="kk-live-note">Se actualiza solo, cada 30 segundos.</p>
+            <details class="lm-live-fold"${open ? " open" : ""}>
+                <summary class="kk-live-head">
+                    <span class="kk-live-pulse" aria-hidden="true"></span>
+                    <b>EN DIRECTO</b>
+                    <span class="kk-live-count">${matches.length}</span>
+                    <span class="kk-live-chevron" aria-hidden="true"></span>
+                </summary>
+                <ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>
+                <p class="kk-live-note">Se actualiza solo, cada 30 segundos.</p>
+            </details>
         </aside>`;
 }
 

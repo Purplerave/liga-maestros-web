@@ -75,7 +75,19 @@ function initMicroInteractions() {
     });
 }
 
+/* El panel de directos se pliega/despliega con <details>. El evento `toggle`
+   no burbujea, asi que se escucha en captura; la eleccion se recuerda para que
+   el repintado del poll (cada 30 s) no vuelva a abrirlo o cerrarlo solo. */
+function bindLivePanelFold() {
+    document.addEventListener("toggle", event => {
+        const fold = event.target;
+        if (!fold || !fold.classList || !fold.classList.contains("lm-live-fold")) return;
+        if (typeof rememberLivePanelOpen === "function") rememberLivePanelOpen(Boolean(fold.open));
+    }, true);
+}
+
 function bindEvents() {
+    bindLivePanelFold();
     qs("jornada-nav")?.addEventListener("change", event => changeJornada(event.target.value));
 qs("refresh-btn")?.addEventListener("click", refreshData);
     qs("save-quiniela-btn")?.addEventListener("click", savePredictions);

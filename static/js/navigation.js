@@ -43,7 +43,7 @@ const VIEW_STYLES = {
         ["view-direct-styles", versionedAsset("/static/css/pages/direct.css", "direct-5")],
     ],
     TICKET: [
-        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-7")],
+        ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-8")],
         ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-10")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
     ],
@@ -51,7 +51,7 @@ const VIEW_STYLES = {
 
 const VIEW_SCRIPTS = {
     ALL: [
-        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-84")],
+        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-85")],
         // El pleno de la columna «Tú» se elige con el mismo modal que usa el
         // boleto: la pagina unica lo pide al estar la jornada abierta.
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
@@ -59,7 +59,7 @@ const VIEW_SCRIPTS = {
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     TICKET: [
-        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-11")],
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-12")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
 };

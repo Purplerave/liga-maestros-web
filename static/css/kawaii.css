@@ -297,6 +297,40 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
     gap: 8px;
     padding: 2px 2px 8px;
     border-bottom: 2px dashed var(--kk-line);
+    cursor: pointer;
+    list-style: none;
+}
+
+.kk-live-head::-webkit-details-marker {
+    display: none;
+}
+
+.kk-live-head:focus-visible {
+    outline: 3px solid var(--kk-pink);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* Sin jornada en curso el panel arranca plegado: la cabecera hace de tirador. */
+.kk-live-chevron {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    margin: 0 3px 4px 2px;
+    border-right: 2.5px solid #B0466B;
+    border-bottom: 2.5px solid #B0466B;
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+}
+
+.lm-live-fold:not([open]) .kk-live-chevron {
+    transform: rotate(-45deg);
+    margin-bottom: 0;
+}
+
+.lm-live-fold:not([open]) .kk-live-head {
+    border-bottom: 0;
+    padding-bottom: 2px;
 }
 
 .kk-live-head b {

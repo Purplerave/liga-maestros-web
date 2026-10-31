@@ -2,7 +2,26 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
-## 2026-10-31 — Todos los directos al lado de la quiniela
+## 2026-10-31 — Todos los directos al lado de la quiniela (portada y boleto)
+
+### Añadido
+
+- **El mismo panel de directos en la vista TICKET**: la tabla del boleto gana la
+  columna derecha (`ticket-side-column`) con la lista completa de partidos en
+  juego, y cada fila lleva su marcador y minuto pegados al partido
+  (`ticket-live-chip`). `patchTicketArena` refresca ese chip con el poll, no solo
+  la columna de resultado.
+- **Lista compartida** `getAllLiveMatches()` / `quinielaSlotForMatch()` en
+  `state.js`: las dos vistas dejan de duplicar la union de `live_matches` con las
+  casillas que la quiniela ya marca en juego (y el deduplicado por pareja).
+- **Panel plegable**: la cabecera EN DIRECTO es un `<summary>`; con jornada en
+  curso arranca abierto y sin jornada (un miercoles con solo Premier, temporada
+  parada) arranca plegado para no tapar la quiniela. La eleccion manual se
+  recuerda en `localStorage` (`lm-live-panel`) mediante un listener `toggle` en
+  captura, asi el repintado de cada 30 s no la revierte.
+- `tests/test_panel_directo_ticket.py`: contrato del panel del boleto (todos los
+  directos, sin duplicados, plegado por defecto sin jornada, memoria del usuario
+  y ausencia total cuando no hay directos).
 
 ### Añadido
 
