@@ -14,7 +14,11 @@ from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
 from ..schemas import validate_liga_data, validate_liga_data_first, validate_liga_data_slim
 from ..services.multi_standings import build_multi_league_standings
-from ..services.payloads.league_matches import build_all_league_matches, build_live_matches
+from ..services.payloads.league_matches import (
+    apply_verified_provider_scores,
+    build_all_league_matches,
+    build_live_matches,
+)
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.simple_view import build_simple_view_payload, build_simple_view_ranking
@@ -213,6 +217,10 @@ def get_liga_data():
         # (cold start con BD dormida), intenta traer el directo ahora mismo
         # con tope de 6 s en vez de pintar "no empezado" hasta el refresh.
         partidos = _maybe_refresh_stale_window(conn, jornada, partidos)
+        # Directo es efímero; el resultado de una casilla de la quiniela queda
+        # en su fila cuando el partido termina, incluso si el collector de BD
+        # aún no ha guardado el FT definitivo.
+        partidos = apply_verified_provider_scores(partidos)
         standings, standings_db = _get_standings_cached(conn, partidos, team_logos)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos, standings_db)

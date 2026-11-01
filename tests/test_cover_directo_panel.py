@@ -297,9 +297,8 @@ CASES = r"""
     };
 }
 
-// 7. Los partidos que ya han TERMINADO no desaparecen de la pagina: sin ningun
-//    directo el panel se titula RESULTADOS y lista los marcadores finales con su
-//    casilla. Antes, al pitar el final, el partido se borraba de la portada.
+// 7. Al terminar el partido desaparece del Directo, pero el resultado queda
+//    fijo en su fila de la quiniela.
 {
     const partidos = [
         quinielaMatch(1, "Levante", "Atletico", "2026-08-29", "14:00", "FT"),
@@ -320,48 +319,15 @@ CASES = r"""
         simple_view: { jornada: "3", columns: [], rows: [], totals: {}, total_casillas: 14 },
     });
     const aside = (html.match(/<aside class="kk-live-aside"[\s\S]*?<\/aside>/) || [""])[0];
-    results.finishedResults = {
-        aside: Boolean(aside),
-        title: aside.includes("<b>RESULTADOS</b>"),
-        notLive: !aside.includes("<b>EN DIRECTO</b>"),
-        once: (aside.match(/FINAL/g) || []).length,
-        showsLevante: /levante/i.test(aside),
-        showsScore: aside.includes("1-0"),
-        showsSlot: aside.includes("Casilla 1"),
-        list: aside.includes("kk-ft-list"),
+    const ticketRow = (html.match(/<tr class="cx-sv-row" data-id="1">[\s\S]*?<\/tr>/) || [""])[0];
+    results.finishedMatchLifecycle = {
+        goneFromLive: !aside,
+        scoreStaysOnTicket: ticketRow.includes("cx-sv-result is-ft") && ticketRow.includes("1-0"),
     };
 }
 
-// 8. Con directo y finales a la vez el directo manda y los resultados quedan
-//    plegados debajo (no se pierden, pero no roban el sitio al EN DIRECTO).
-{
-    const partidos = [
-        quinielaMatch(1, "Levante", "Atletico", kickoffMadrid(40).slice(0, 10), kickoffMadrid(40).slice(11, 16), "LIVE"),
-        quinielaMatch(2, "Rayo", "Celta", "2026-08-29", "16:15", "FT"),
-    ];
-    for (let i = 3; i <= 15; i++) {
-        partidos.push(quinielaMatch(i, `Equipo${i}`, `Rival${i}`, "2026-08-29", "21:00", "NS"));
-    }
-    const html = renderCover({
-        jornada: 3,
-        today_madrid: kickoffMadrid(40).slice(0, 10),
-        is_locked: true,
-        partidos,
-        all_league_matches: [],
-        live_matches: [],
-        simple_view: { jornada: "3", columns: [], rows: [], totals: {}, total_casillas: 14 },
-    });
-    const aside = (html.match(/<aside class="kk-live-aside"[\s\S]*?<\/aside>/) || [""])[0];
-    results.mixedLiveAndFinished = {
-        liveTitle: aside.includes("<b>EN DIRECTO</b>"),
-        finishedFold: aside.includes('class="kk-ft-fold"') && !aside.includes('class="kk-ft-fold" open'),
-        finishedTitle: aside.includes("<b>RESULTADOS</b>"),
-        showsFinal: aside.includes("FINAL") && /rayo/i.test(aside),
-    };
-}
-
-// 9. Un directo degradado (STALE) no es un resultado final: no se cuela en la
-//    lista de marcadores definitivos aunque traiga goles.
+// 9. Un directo degradado (STALE) no se debe mostrar en el panel Directo aunque
+//    conserve goles parciales.
 {
     const stale = quinielaMatch(1, "Sevilla", "Valencia", "2026-08-29", "19:00", "STALE");
     stale.goles_local = 1;
@@ -483,32 +449,12 @@ def test_marcador_externo_de_quiniela_aparece_en_columna_resultado():
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
-def test_los_partidos_terminados_se_quedan_en_el_panel_de_resultados():
-    """Al acabar un partido desaparecia de la pagina y no habia donde verlo.
+def test_el_final_sale_del_directo_y_permanece_en_la_quiniela():
+    """Directo es efímero; el marcador final se conserva en la fila del boleto."""
+    lifecycle = _run_node()["finishedMatchLifecycle"]
 
-    Ahora el panel se titula RESULTADOS cuando no hay directo, lista el
-    marcador final con su casilla y lo pinta una sola vez.
-    """
-    finished = _run_node()["finishedResults"]
-
-    assert finished["aside"], "sin directo ni resultados el panel no se pinta"
-    assert finished["title"], "el panel debe titularse RESULTADOS cuando no hay directo"
-    assert finished["notLive"], "sin partidos en juego no puede decir EN DIRECTO"
-    assert int(finished["once"]) == 3, f"deben listarse los tres finalizados, hay {finished['once']}"
-    assert finished["showsLevante"] and finished["showsScore"], "falta el marcador final del partido"
-    assert finished["showsSlot"], "el resultado debe decir de que casilla del boleto es"
-    assert finished["list"], "los resultados finales van en su lista, no dentro de un desplegable"
-
-
-@pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
-def test_directo_y_resultados_conviven_sin_taparse():
-    """Con partidos en juego el directo manda: los finales van plegados debajo."""
-    mixed = _run_node()["mixedLiveAndFinished"]
-
-    assert mixed["liveTitle"], "con un partido en juego el panel debe seguir diciendo EN DIRECTO"
-    assert mixed["finishedTitle"], "los resultados finales no pueden desaparecer cuando hay directo"
-    assert mixed["finishedFold"], "con directo los finales van plegados, no ocupando el sitio"
-    assert mixed["showsFinal"], "el partido terminado debe seguir listado con su FINAL"
+    assert lifecycle["goneFromLive"], "un partido terminado no debe quedarse en el panel Directo"
+    assert lifecycle["scoreStaysOnTicket"], "el resultado final debe permanecer en la fila de la quiniela"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
@@ -516,5 +462,5 @@ def test_un_directo_degradado_no_se_pinta_como_resultado_final():
     """STALE conserva goles parciales para diagnostico, no es un marcador final."""
     stale = _run_node()["staleIsNotFinal"]
 
-    assert stale["aside"], "un STALE no puede abrir el panel de RESULTADOS"
+    assert stale["aside"], "un STALE no puede abrir el panel Directo"
     assert stale["noStaleScore"], "un STALE no puede pintarse como marcador definitivo"
