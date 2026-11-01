@@ -230,25 +230,27 @@ def normalize_team_key(value, feminine=False):
     return direct_alias or text
 
 
+SHORT_TEAM_NAMES = {
+    "ATLETICO MADRID": "AT. MADRID",
+    "REAL MADRID": "R. MADRID",
+    "BARCELONA": "BARCA",
+    "REAL SOCIEDAD": "R. SOC.",
+    "REAL BETIS": "BETIS",
+    "DEPORTIVO LA CORUNA": "DEPOR",
+    "RACING DE SANTANDER": "RACING",
+    "RACING SANTANDER": "RACING",
+    "CULTURAL LEONESA": "C. LEONESA",
+    "SPORTING GIJON": "SPORTING",
+    "COSTA DE MARFIL": "C. MARFIL",
+    "COREA DEL SUR": "C. SUR",
+    "REPUBLICA CHECA": "R. CHECA",
+}
+
+
 def short_team_name(value):
     key = normalize_team_key(value)
-    names = {
-        "ATLETICO MADRID": "AT. MADRID",
-        "REAL MADRID": "R. MADRID",
-        "BARCELONA": "BARCA",
-        "REAL SOCIEDAD": "R. SOC.",
-        "REAL BETIS": "BETIS",
-        "DEPORTIVO LA CORUNA": "DEPOR",
-        "RACING DE SANTANDER": "RACING",
-        "RACING SANTANDER": "RACING",
-        "CULTURAL LEONESA": "C. LEONESA",
-        "SPORTING GIJON": "SPORTING",
-        "COSTA DE MARFIL": "C. MARFIL",
-        "COREA DEL SUR": "C. SUR",
-        "REPUBLICA CHECA": "R. CHECA",
-    }
-    if key in names:
-        return names[key]
+    if key in SHORT_TEAM_NAMES:
+        return SHORT_TEAM_NAMES[key]
     cleaned = re.sub(
         r"\b(REAL|CLUB|FC|CF|RC|RCD|CD|UD|SD|SAD|BALOMPIE|DEPORTIVO)\b",
         "",
