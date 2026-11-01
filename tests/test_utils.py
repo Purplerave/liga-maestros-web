@@ -10,6 +10,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from liga_maestros.utils import (
+    FEMININE_ONLY_CANONICALS,
     clean_team_key,
     highlightly_status,
     is_feminine_competition,
@@ -76,7 +77,7 @@ class TestNormalizeTeamKey:
 
     def test_every_known_female_alias_resolves_without_its_gender_suffix_in_liga_f(self):
         for alias, expected in TEAM_LOGO_ALIASES.items():
-            if not expected.endswith(" FEMENINO"):
+            if not (expected.endswith(" FEMENINO") or expected in FEMININE_ONLY_CANONICALS):
                 continue
             base = re.sub(r"\b(FEMENINO|FEMENINA|FEMININE|WOMEN|WOMAN|W|F)\b", " ", alias)
             base = re.sub(r"\s+", " ", base).strip()
