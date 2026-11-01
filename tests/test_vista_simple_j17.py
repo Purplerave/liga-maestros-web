@@ -336,6 +336,73 @@ def test_clasificacion_j17_solo_incluye_los_cinco_y_reutiliza_hits():
     assert ranking["mrpurple"]["total"] == 1
 
 
+# MrPurple: 2, 1, X, 1, X, 2, 2, 1, 2, 2, X, X, 2, 1 — pleno 2-1
+_RESULTADOS_PARA_QUE_MRPURPLE_ACIERTE = {
+    1: (0, 1),  # 2
+    2: (2, 0),  # 1
+    3: (1, 1),  # X
+    4: (2, 0),  # 1
+    5: (1, 1),  # X
+    6: (0, 1),  # 2
+    7: (0, 1),  # 2
+    8: (2, 0),  # 1
+    9: (0, 1),  # 2
+    10: (0, 1),  # 2
+    11: (1, 1),  # X
+    12: (1, 1),  # X
+    13: (0, 1),  # 2
+    14: (2, 0),  # 1
+}
+
+
+def test_el_pleno_solo_entra_en_la_clasificacion_con_las_14_previas_acertadas():
+    """Regla SELAE: el marcador exacto del 15 solo puntúa si está bien el boleto
+    entero. Con alguna de las 14 previas fallada o pendiente, el pleno se ve en
+    su bloque pero no suma."""
+    conn = _conn()
+    for partido_id, (gl, gv) in _RESULTADOS_PARA_QUE_MRPURPLE_ACIERTE.items():
+        _marca_resultado(conn, partido_id, gl, gv)
+    _marca_resultado(conn, 15, 2, 1)
+    payload = _payload(conn)
+    assert payload["totals"]["mrpurple"] == {"aciertos": 14, "jugados": 14}
+    assert payload["pleno"]["mrpurple"] == {"acierto": True}
+    ranking = build_simple_view_ranking(payload)
+    assert ranking["mrpurple"]["total"] == 15  # 14 casillas + pleno
+    # El resto ni acertó las 14: su pleno (aunque lo acertara) no les suma.
+    assert ranking["tecnotron"]["total"] == payload["totals"]["tecnotron"]["aciertos"]
+    assert ranking["programa"]["total"] == payload["totals"]["programa"]["aciertos"]
+
+    # Una casilla previa falla: se pierde el +1 del pleno, aunque siga exacto.
+    _marca_resultado(conn, 5, 0, 1)
+    ranking = build_simple_view_ranking(_payload(conn))
+    assert ranking["mrpurple"]["total"] == 13
+
+    # Una casilla previa pendiente también bloquea el pleno.
+    conn = _conn()
+    for partido_id, (gl, gv) in _RESULTADOS_PARA_QUE_MRPURPLE_ACIERTE.items():
+        if partido_id != 1:  # la casilla 1 se queda sin resolver
+            _marca_resultado(conn, partido_id, gl, gv)
+    _marca_resultado(conn, 15, 2, 1)
+    payload = _payload(conn)
+    assert payload["totals"]["mrpurple"] == {"aciertos": 13, "jugados": 13}
+    ranking = build_simple_view_ranking(payload)
+    assert ranking["mrpurple"]["total"] == 13
+
+
+def test_el_pleno_no_cuenta_ni_con_la_casilla_14_pendiente():
+    conn = _conn()
+    for partido_id, (gl, gv) in _RESULTADOS_PARA_QUE_MRPURPLE_ACIERTE.items():
+        if partido_id != 14:  # sin la 14 no hay "14 previas acertadas"
+            _marca_resultado(conn, partido_id, gl, gv)
+    _marca_resultado(conn, 15, 2, 1)
+    payload = _payload(conn)
+    # MrPurple pleno exacto y 13 de 13 jugadas, pero la 14 sin resolver.
+    assert payload["pleno"]["mrpurple"] == {"acierto": True}
+    assert payload["totals"]["mrpurple"] == {"aciertos": 13, "jugados": 13}
+    ranking = build_simple_view_ranking(payload)
+    assert ranking["mrpurple"]["total"] == 13
+
+
 def test_el_pleno_cuenta_por_buckets_como_score_prediction():
     """M-M acierta a M-M: mismo criterio que el ranking, ni mas ni menos."""
     conn = _conn()

@@ -233,17 +233,31 @@ def build_simple_view_ranking(payload):
     No vuelve a evaluar signos: reutiliza el resultado de ``score_prediction``
     almacenado por ``build_simple_view_payload`` para que tabla y ranking nunca
     diverjan ante un cambio de marcador.
+
+    Regla del pleno al 15, como en la quiniela de SELAE: el marcador exacto
+    solo entra en la clasificación si las **14 casillas previas están
+    acertadas**. Un pleno acertado con alguna casilla previa fallada (o aun sin
+    resolver) no puntúa: queda visible en su bloque aparte, pero no suma.
     """
     ranking = {}
+    rows = (payload or {}).get("rows", [])
+    pleno_pick = next((row.get("picks") or {}) for row in rows if row.get("is_pleno"))
+    previas = [row for row in rows if not row.get("is_pleno")]
+
     for column in (payload or {}).get("columns", []):
         uid = str(column.get("id") or "")
-        hits = sum(
-            1 for row in (payload or {}).get("rows", []) if (row.get("picks") or {}).get(uid, {}).get("hit") is True
-        )
+
+        def _picks_de(row, _uid=uid):
+            return (row.get("picks") or {}).get(_uid) or {}
+
+        hits = sum(1 for row in previas if _picks_de(row).get("hit") is True)
+        quince_previas_acertadas = len(previas) == 14 and all(_picks_de(row).get("hit") is True for row in previas)
+        acierta_pleno = pleno_pick is not None and (pleno_pick.get(uid) or {}).get("hit") is True
+        total = hits + (1 if quince_previas_acertadas and acierta_pleno else 0)
         ranking[uid] = {
-            "total": hits,
-            "jornada": hits,
-            "jornada_live": hits,
-            "jornada_final": hits,
+            "total": total,
+            "jornada": total,
+            "jornada_live": total,
+            "jornada_final": total,
         }
     return ranking
