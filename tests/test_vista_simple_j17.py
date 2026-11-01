@@ -4,7 +4,7 @@
 (b) la línea del usuario autenticado se integra bajo MrPurple;
 (c) el pleno solo acierta con el marcador exacto (buckets de scoring.py);
 (d) sin resultado o con directo degradado la fila queda pendiente;
-(e) la casilla 14 no muestra hora;
+(e) la casilla 14 muestra el horario oficial actualizado;
 (f) ensure_jornada_17 importa fixtures y líneas desde la tabla predicciones.
 
 Los casos de pintado se ejecutan de verdad contra cover_page.js en una maquina
@@ -46,6 +46,13 @@ def _conn():
     migrations.ensure_core_tables(conn)
     migrations.ensure_predicciones_unique_index(conn)
     migrations.ensure_jornada_17(conn)
+    # Los tests de pintado parten de un estado previo a los partidos. Los
+    # resultados oficiales de las casillas 1 y 12 se comprueban aparte abajo.
+    conn.execute(
+        "UPDATE resultados SET goles_local = NULL, goles_visitante = NULL, status = 'NS', minuto = '', signo_actual = '-' "
+        "WHERE jornada = 17"
+    )
+    conn.commit()
     return conn
 
 
@@ -158,18 +165,32 @@ def test_los_datos_de_la_jornada_17_estan_versionados():
     """El fixture sale de data/ con la estructura de las jornadas anteriores."""
     horarios = json.loads((ROOT / "data" / "horarios_J17.json").read_text(encoding="utf-8"))
     assert set(horarios) == {str(i) for i in range(1, 16)}
-    assert horarios["14"]["hora"] == "" and horarios["14"]["fecha"] == ""
+    assert horarios["14"] == {"fecha": "2026-11-02", "hora": "19:00"}
     assert horarios["1"] == {"fecha": "2026-10-31", "hora": "14:00"}
 
     scrape = json.loads((ROOT / "data" / "quiniela15_J17_scrape.json").read_text(encoding="utf-8"))
     assert scrape["jornada"] == 17
     assert len(scrape["partidos"]) == 15
-    assert scrape["partidos"][13]["hora"] == ""
+    assert scrape["partidos"][13]["fecha"] == "2026-11-02"
+    assert scrape["partidos"][13]["hora"] == "19:00"
     assert scrape["boleto"]["nombre"] == "SELAE 18"
     assert scrape["boleto"]["concurso"] == "2026/63"
     assert scrape["boleto"]["cierre_estimado"] is True
     # Sin importe de bote: no existe ni la clave.
     assert "bote" not in scrape["boleto"]
+
+
+def test_migracion_persiste_los_resultados_oficiales_de_j17():
+    conn = _conn()
+    assert migrations._import_jornada_resultados(conn, 17) == 2
+    rows = conn.execute(
+        "SELECT partido_id, goles_local, goles_visitante, status FROM resultados "
+        "WHERE jornada = 17 AND partido_id IN (1, 12) ORDER BY partido_id"
+    ).fetchall()
+    assert [(r["partido_id"], r["goles_local"], r["goles_visitante"], r["status"]) for r in rows] == [
+        (1, 0, 2, "FT"),
+        (12, 2, 1, "FT"),
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -335,9 +356,7 @@ def test_sin_resultado_la_fila_queda_pendiente():
         assert row["has_result"] is False
         assert row["resultado"] == ""
         assert row["signo_real"] == ""
-        # Todas menos la 14 muestran horario: esa casilla no lo tiene verificado.
-        if row["id"] != 14:
-            assert row["cuando"], f"la casilla {row['id']} deberia mostrar su horario"
+        assert row["cuando"], f"la casilla {row['id']} deberia mostrar su horario"
         for pick in row["picks"].values():
             assert pick["hit"] is None, f"casilla {row['id']}: sin resultado no hay acierto ni fallo"
     assert all(total == {"aciertos": 0, "jugados": 0} for total in payload["totals"].values())
@@ -366,16 +385,16 @@ def test_el_resultado_se_pinta_cuando_existe():
 
 
 # ---------------------------------------------------------------------------
-# (e) casilla 14 sin hora
+# (e) casilla 14 con horario oficial
 # ---------------------------------------------------------------------------
 
 
-def test_la_casilla_14_no_muestra_hora():
+def test_la_casilla_14_muestra_horario_oficial():
     conn = _conn()
     payload = _payload(conn)
     fila = _fila(payload, 14)
-    assert fila["hora"] == ""
-    assert fila["cuando"] == ""
+    assert fila["hora"] == "19:00"
+    assert fila["cuando"].endswith("19:00")
     assert fila["has_result"] is False and fila["resultado"] == ""
     # El resto de casillas si conservan su horario verificado.
     assert _fila(payload, 13)["cuando"].endswith("19:00")
@@ -558,11 +577,10 @@ def test_el_fallback_frontend_no_pinta_marcador_stale():
     assert "cx-sv-result is-pending" in fila1
 
 
-def test_e_la_casilla_14_se_pinta_sin_hora(portada_j17):
+def test_e_la_casilla_14_se_pinta_con_horario(portada_j17):
     _, _, html = portada_j17
     fila14 = re.search(r'<tr class="cx-sv-row" data-id="14">.*?</tr>', html, re.S).group(0)
-    assert '<span class="cx-sv-when">—</span>' in fila14
-    assert "Casilla 14 sin hora verificada" in html
+    assert re.search(r'<span class="cx-sv-when">[^—]+19:00</span>', fila14)
     # Las demas casillas si muestran dia y hora.
     fila13 = re.search(r'<tr class="cx-sv-row" data-id="13">.*?</tr>', html, re.S).group(0)
     assert re.search(r'<span class="cx-sv-when">[^—]+19:00</span>', fila13)
