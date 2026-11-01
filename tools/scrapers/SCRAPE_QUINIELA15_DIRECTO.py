@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from liga_maestros import utils
+from liga_maestros.services.boleto_numero import resolve_boleto_number
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
@@ -213,7 +214,14 @@ def parse_main_row(row):
 
 
 def scrape(jornada):
-    url = f"https://www.quiniela15.com/resultados-quiniela/{jornada}"
+    # La jornada interna de la app NO es el numero de boleto de SELAE: en la
+    # temporada 2026/27 la J17 se juega con el boleto SELAE 18. Pedir
+    # /resultados-quiniela/<jornada interna> devolvia otro boleto ya jugado y
+    # el cruce de equipos descartaba las quince filas, asi que los resultados
+    # de la jornada no entraban nunca. El numero sale de los datos versionados
+    # (``boleto.selae`` del scrape de la jornada).
+    boleto = resolve_boleto_number(jornada) or int(jornada)
+    url = f"https://www.quiniela15.com/resultados-quiniela/{boleto}"
     response = fetch_page(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -275,6 +283,7 @@ def scrape(jornada):
     matches = [by_id[key] for key in sorted(by_id)]
     return {
         "jornada": int(jornada),
+        "boleto": boleto,
         "source": url,
         "fetched_at": datetime.now().isoformat(timespec="seconds"),
         "matches": matches,

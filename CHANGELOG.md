@@ -2,6 +2,38 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-01 — Los partidos ya jugados vuelven a mostrar su resultado
+
+### Corregido
+
+- **Boleto equivocado al pedir los resultados.** La app numera por concurso
+  (J1, J2, J3…) y SELAE numera por boleto: la J17 se juega con el boleto SELAE
+  **18**. El colector pedía `quiniela15.com/resultados-quiniela/17`, un boleto
+  ya jugado con otros quince equipos (`RSD Alcalá - Las Palmas`, `Alcoyano -
+  Mallorca`…). El cruce de nombres descartaba las quince filas
+  (`q15_team_mismatch_skipped`) y la jornada se quedaba sin marcadores aunque
+  el directo sí viera los partidos. El número de boleto se resuelve ahora desde
+  los datos versionados (`boleto.selae` del scrape de la jornada,
+  `liga_maestros/services/boleto_numero.py`) y una jornada sin dato explícito
+  conserva su propio número, que es lo correcto mientras concurso y boleto
+  coinciden.
+- **`Atlético` a secas no cruzaba con el proveedor.** El boleto abrevia el
+  club como «Atlético» / «Atlético (F)» donde el proveedor publica «Atlético
+  Madrid», «At. Madrid» o «Atlético Madrid Women». Sin alias propio eran
+  identidades distintas y el resultado del Levante - Atlético de la J17 no
+  entraba nunca. Se añaden `ATLETICO` y `ATLETICO F`; el género sigue aislado
+  (el Atlético masculino no cruza nunca con el femenino).
+
+### Pruebas
+
+- `tests/test_resultados_jugados_visibles.py`: la J17 resuelve el boleto 18, el
+  scraper construye la URL del boleto correcto, las abreviaturas del club
+  cruzan en ambos géneros sin mezclarlos y la fila del Levante - Atlético
+  devuelve `0-2` con estado `FT`.
+- `tests/test_live_matches_payload.py`: el caso del alias «Real Racing Club»
+  fija su reloj; antes se ponía rojo solo por la hora a la que se ejecutara
+  (un LIVE de las 16:15 con minuto 55 es imposible a las 19:00).
+
 ## 2026-11-01 — Cruce de nombres masculino y femenino con contexto de liga
 
 ### Corregido
