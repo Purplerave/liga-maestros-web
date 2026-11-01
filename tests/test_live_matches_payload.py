@@ -135,6 +135,43 @@ def test_provider_female_competition_scores_match_names_without_gender_markers(m
     assert result["signo_actual"] == "1"
 
 
+def test_provider_real_racing_alias_updates_racing_real_madrid_score(monkeypatch):
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 989,
+                "status": "IN PLAY",
+                "time": "55",
+                "added": "2026-11-01 16:15:00",
+                "scheduled": "16:15",
+                "score": "0-1",
+                "competition_name": "LA LIGA",
+                "home": {"name": "Real Racing Club"},
+                "away": {"name": "Real Madrid CF"},
+            }
+        ],
+    )
+    ticket = [
+        {
+            "id": 6,
+            "local": "Racing",
+            "visitante": "Real Madrid",
+            "fecha_raw": "2026-11-01",
+            "hora": "16:15",
+            "status": "NS",
+            "marcador": "-",
+        }
+    ]
+
+    result = league_matches.apply_verified_provider_scores(ticket)[0]
+
+    assert result["status"] == "IN PLAY"
+    assert result["marcador_base"] == "0-1"
+    assert result["signo_actual"] == "2"
+
+
 def test_female_provider_match_is_deduplicated_from_quiniela_despite_name_variants(monkeypatch):
     monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-11-01")
     monkeypatch.setattr(

@@ -84,6 +84,24 @@ class TestNormalizeTeamKey:
             if base:
                 assert normalize_team_key(base, feminine=True) == expected, (alias, base, expected)
 
+    def test_every_short_display_name_round_trips_to_its_team(self):
+        display_names = {
+            "ATLETICO MADRID": "AT. MADRID",
+            "REAL MADRID": "R. MADRID",
+            "BARCELONA": "BARCA",
+            "REAL SOCIEDAD": "R. SOC.",
+            "REAL BETIS": "BETIS",
+            "DEPORTIVO LA CORUNA": "DEPOR",
+            "RACING DE SANTANDER": "RACING",
+            "CULTURAL LEONESA": "C. LEONESA",
+            "SPORTING GIJON": "SPORTING",
+            "COSTA DE MARFIL": "C. MARFIL",
+            "COREA DEL SUR": "C. SUR",
+            "REPUBLICA CHECA": "R. CHECA",
+        }
+        for team, display_name in display_names.items():
+            assert normalize_team_key(display_name) == normalize_team_key(team), (team, display_name)
+
 
 class TestShortTeamName:
     def test_known_short_names(self):

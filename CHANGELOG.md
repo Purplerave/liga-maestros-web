@@ -13,6 +13,9 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
   competición para identificar equipos femeninos aunque el proveedor omita
   `(F)`, `Femenino` o `Women`; el mismo cruce se usa para puntuar y deduplicar
   directos. Los equipos masculinos siguen separados.
+- Se añadieron los alias abreviados que faltaban en los nombres de presentación
+  (`Racing`/`Real Racing Club`, `R. Soc.`/`Real Sociedad`, etc.) y una prueba
+  que obliga a que cada nombre corto vuelva a su identidad canónica.
 
 ### Pruebas
 
