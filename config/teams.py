@@ -88,6 +88,11 @@ TEAM_LOGO_ALIASES = {
     "AT MADRID": "ATLETICO MADRID",
     "ATLETICO MADRID": "ATLETICO MADRID",
     "ATLETICO DE MADRID": "ATLETICO MADRID",
+    # El boleto abrevia el club como "Atlético" a secas y el proveedor publica
+    # "Atlético Madrid" / "At. Madrid" / "Atlético de Madrid". Sin esta clave
+    # las tres identidades eran distintas y el resultado del partido se
+    # descartaba para siempre (J17 2026/27, Levante - Atlético).
+    "ATLETICO": "ATLETICO MADRID",
     "R MADRID": "REAL MADRID",
     "REAL MADRID": "REAL MADRID",
     "R SOCIEDAD": "REAL SOCIEDAD",
@@ -247,6 +252,9 @@ TEAM_LOGO_ALIASES = {
     "REAL MADRID WOMEN": "REAL MADRID FEMENINO",
     "AT MADRID F": "ATLETICO MADRID FEMENINO",
     "ATLETICO MADRID F": "ATLETICO MADRID FEMENINO",
+    # Mismo caso que el masculino: el boleto escribe "Atlético (F)" y el
+    # proveedor "Atlético Madrid Women" / "At. Madrid (F)".
+    "ATLETICO F": "ATLETICO MADRID FEMENINO",
     "AT MADRID FEMENINO": "ATLETICO MADRID FEMENINO",
     "ATLETICO MADRID FEMENINO": "ATLETICO MADRID FEMENINO",
     "ATLETICO DE MADRID FEMENINO": "ATLETICO MADRID FEMENINO",

@@ -8,6 +8,7 @@
   "nota": "Casilla 14 (Tenerife (F) - Athletic (F)): fecha y hora verificadas en el calendario oficial del Tenerife Femenino.",
   "boleto": {
     "nombre": "SELAE 18",
+    "selae": 18,
     "concurso": "2026/63",
     "fecha": "2026-11-01",
     "cierre": "sabado 31 de octubre de 2026 a las 13:00",

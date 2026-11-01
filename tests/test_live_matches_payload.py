@@ -136,6 +136,16 @@ def test_provider_female_competition_scores_match_names_without_gender_markers(m
 
 
 def test_provider_real_racing_alias_updates_racing_real_madrid_score(monkeypatch):
+    # El reloj se fija a la hora del saque: `apply_verified_provider_scores`
+    # cierra los snapshots LIVE cuyo minuto ya no cabe en el tiempo real
+    # transcurrido (ver services.live_state), asi que sin fijarlo el test se
+    # ponia rojo solo por la hora a la que se ejecutara (pasadas las 18:50 del
+    # 1/11/2026 el minuto 55 de un partido de las 16:15 es imposible).
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 11, 1, 17, 10, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
     monkeypatch.setattr(
         league_matches,
         "_load_external_matches",
