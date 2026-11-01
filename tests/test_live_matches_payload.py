@@ -99,6 +99,42 @@ def test_recent_live_snapshot_remains_live(monkeypatch):
     assert league_matches.build_live_matches([], {})[0]["status"] == "HT"
 
 
+def test_provider_female_competition_scores_match_names_without_gender_markers(monkeypatch):
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 987,
+                "status": "FINISHED",
+                "added": "2026-11-01 12:00:00",
+                "scheduled": "12:00",
+                "score": "2-1",
+                "competition_name": "Liga F Moeve",
+                "home": {"name": "Deportivo Alavés"},
+                "away": {"name": "Real Sociedad"},
+            }
+        ],
+    )
+    ticket = [
+        {
+            "id": 11,
+            "local": "Alavés (F)",
+            "visitante": "R. Sociedad (F)",
+            "fecha_raw": "2026-11-01",
+            "hora": "12:00",
+            "status": "NS",
+            "marcador": "-",
+        }
+    ]
+
+    result = league_matches.apply_verified_provider_scores(ticket)[0]
+
+    assert result["status"] == "FINISHED"
+    assert result["marcador_base"] == "2-1"
+    assert result["signo_actual"] == "1"
+
+
 def test_live_before_kickoff_is_never_shown_as_live(monkeypatch):
     """Andorra-Ceuta: LIVE minuto 90 mientras su inicio (17:00) es futuro.
 

@@ -1,7 +1,10 @@
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
+
+from config.teams import TEAM_LOGO_ALIASES
 
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -9,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from liga_maestros.utils import (
     clean_team_key,
     highlightly_status,
+    is_feminine_competition,
     news_relevance_score,
     normalize_news_text,
     normalize_team_key,
@@ -53,6 +57,31 @@ class TestNormalizeTeamKey:
         assert normalize_team_key("R. Sociedad B") == normalize_team_key("Real Sociedad II")
         assert normalize_team_key("Celta Fortuna") == normalize_team_key("Celta de Vigo B")
         assert normalize_team_key("Celta Fortuna") == normalize_team_key("Celta de Vigo II")
+
+    def test_female_variants_resolve_after_normalizing_abbreviations_and_markers(self):
+        canonical = "REAL SOCIEDAD FEMENINO"
+        assert normalize_team_key("R. Sociedad (F)") == canonical
+        assert normalize_team_key("Real Sociedad Women") == canonical
+        assert normalize_team_key("Real Sociedad") != canonical
+
+        alaves = "ALAVES FEMENINO"
+        assert normalize_team_key("Deportivo Alavés W") == alaves
+        assert normalize_team_key("Alavés", feminine=True) == alaves
+        assert normalize_team_key("Alavés") != alaves
+
+    def test_competition_context_identifies_female_provider_matches(self):
+        assert is_feminine_competition("Liga F Moeve")
+        assert is_feminine_competition({"name": "Primera División Femenina"})
+        assert not is_feminine_competition("La Liga")
+
+    def test_every_known_female_alias_resolves_without_its_gender_suffix_in_liga_f(self):
+        for alias, expected in TEAM_LOGO_ALIASES.items():
+            if not expected.endswith(" FEMENINO"):
+                continue
+            base = re.sub(r"\b(FEMENINO|FEMENINA|FEMININE|WOMEN|WOMAN|W|F)\b", " ", alias)
+            base = re.sub(r"\s+", " ", base).strip()
+            if base:
+                assert normalize_team_key(base, feminine=True) == expected, (alias, base, expected)
 
 
 class TestShortTeamName:

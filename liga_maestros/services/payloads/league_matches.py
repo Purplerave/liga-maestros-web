@@ -16,7 +16,7 @@ from ...services.live_state import (
 )
 from ...services.teams import signo_desde_goles
 from ...services.ticket import madrid_now, today_madrid
-from ...utils import normalize_team_key, parse_any_match_datetime
+from ...utils import is_feminine_competition, normalize_team_key, parse_any_match_datetime
 
 STALE_LIVE_AFTER = timedelta(minutes=120)
 _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
@@ -153,7 +153,12 @@ def apply_verified_provider_scores(partidos):
             continue
         home = provider.get("local") or provider.get("home_name") or (provider.get("home") or {}).get("name")
         away = provider.get("visitante") or provider.get("away_name") or (provider.get("away") or {}).get("name")
-        pair = (normalize_team_key(home), normalize_team_key(away))
+        competition = provider.get("competition_name") or provider.get("competition")
+        feminine_competition = is_feminine_competition(competition)
+        pair = (
+            normalize_team_key(home, feminine=feminine_competition),
+            normalize_team_key(away, feminine=feminine_competition),
+        )
         if not pair[0] or not pair[1]:
             continue
         kickoff = parse_any_match_datetime(provider)

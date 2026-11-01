@@ -2,6 +2,22 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-01 — Cruce de nombres masculino y femenino con contexto de liga
+
+### Corregido
+
+- El normalizador resuelve abreviaturas y variantes de sufijo antes de asignar
+  la identidad del equipo; por ejemplo, «R. Sociedad (F)», «Real Sociedad
+  Women» y el nombre sin marca del proveedor dentro de Liga F.
+- Los resultados de Highlightly y del panel externo usan el contexto de la
+  competición para identificar equipos femeninos aunque el proveedor omita
+  `(F)`, `Femenino` o `Women`. Los equipos masculinos siguen separados.
+
+### Pruebas
+
+- Se comprueban todas las bases de alias femeninos registradas, el aislamiento
+  entre identidades masculina/femenina y el cruce de marcador del proveedor.
+
 ## 2026-11-01 — Directo efímero y resultados fijos en la quiniela
 
 ### Corregido
