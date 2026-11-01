@@ -14,6 +14,9 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
   columnas.
 - Los marcadores externos solo se asocian a la quiniela con equipos y fecha de
   partido coincidentes; los snapshots `STALE` no se aceptan como resultado.
+- Casillas 1 y 12 de J17: resultados finales oficiales persistidos (Levante
+  0-2 Atlético y Madrid CFF 2-1 Deportivo). Casilla 14: fecha y hora del
+  Tenerife–Athletic completadas desde el calendario oficial del club.
 - Cache-bust: `cover-page-89` y `kawaii-8`.
 
 ### Pruebas

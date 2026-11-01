@@ -95,9 +95,8 @@ def test_ensure_jornada_17_importa_los_quince_partidos():
     # Boleto SELAE 18: sáb 31/10 y dom 01/11, sin mezclar la Copa del 28/10.
     assert filas[0]["fecha"] == "2026-10-31" and filas[0]["hora"] == "14:00"
     assert filas[14]["fecha"] == "2026-11-01" and filas[14]["hora"] == "21:00"
-    # La casilla 14 no tiene hora (ni fecha) verificada: no se inventa.
-    assert filas[13]["hora"] in ("", None)
-    assert filas[13]["fecha"] in ("", None)
+    # Casilla 14: horario confirmado por el calendario oficial del Tenerife.
+    assert filas[13]["fecha"] == "2026-11-02" and filas[13]["hora"] == "19:00"
 
 
 def test_ensure_jornada_17_las_lineas_salen_de_la_tabla_predicciones():

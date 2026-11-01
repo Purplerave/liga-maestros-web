@@ -5,7 +5,7 @@
   "cierre": "sabado 31 de octubre de 2026 a las 13:00 (estimado)",
   "temporada": "2026-2027",
   "fuente": "informes/BRIEF-vista-simple-J17.md tabla 4: boleto verificado con la API de Eduardo Losilla + calendarios oficiales el 27/10/2026. SELAE 17 (Copa del Rey 28/10) NO entra.",
-  "nota": "Casilla 14 (Tenerife (F) - Athletic (F)): la hora va sin verificar; las fuentes daban horas en conflicto y no se usa ninguna. Fecha tampoco verificada en la fuente.",
+  "nota": "Casilla 14 (Tenerife (F) - Athletic (F)): fecha y hora verificadas en el calendario oficial del Tenerife Femenino.",
   "boleto": {
     "nombre": "SELAE 18",
     "concurso": "2026/63",
@@ -27,7 +27,7 @@
     {"num": 11, "local": "Alavés (F)", "visitante": "R. Sociedad (F)", "fecha": "2026-11-01", "hora": "12:00", "division": "liga_f"},
     {"num": 12, "local": "Madrid CFF (F)", "visitante": "Deportivo (F)", "fecha": "2026-10-31", "hora": "18:00", "division": "liga_f"},
     {"num": 13, "local": "Sevilla (F)", "visitante": "R. Madrid (F)", "fecha": "2026-11-01", "hora": "19:00", "division": "liga_f"},
-    {"num": 14, "local": "Tenerife (F)", "visitante": "Athletic (F)", "fecha": "", "hora": "", "division": "liga_f", "nota": "hora sin verificar en fuente oficial"},
+    {"num": 14, "local": "Tenerife (F)", "visitante": "Athletic (F)", "fecha": "2026-11-02", "hora": "19:00", "division": "liga_f"},
     {"num": 15, "local": "Athletic", "visitante": "R. Sociedad", "fecha": "2026-11-01", "hora": "21:00", "division": "primera", "pleno_al_15": true}
   ]
 }
