@@ -914,111 +914,19 @@ function kawaiiLiveItemHtml(match) {
             </li>`;
 }
 
-/* Partidos con resultado VERIFICADO que ya no estan en juego.
-   El panel lateral solo listaba los directos: cuando un partido pitaba el final
-   desaparecia de la pagina y no habia ningun sitio donde consultar como habia
-   quedado (la portada antigua si tenia su ticker «RESULTADOS»). Aqui se
-   recuperan, del mas reciente al mas antiguo y sin duplicar pareja de equipos.
-   Solo entran estados finales con marcador de goles: STALE (directo degradado)
-   o una fila sin goles no se pintan, igual que en la tabla. */
-const _KK_FINAL_STATUSES = ["FT", "FINISHED", "TERMINADO", "AET", "PEN", "AWARDED"];
-
-function kawaiiFinishedMatches() {
-    const finalState = match => {
-        if (!match) return false;
-        const status = String(match.status || "").trim().toUpperCase();
-        return _KK_FINAL_STATUSES.includes(status);
-    };
-    const scoreOf = match => {
-        const gl = match?.goles_local;
-        const gv = match?.goles_visitante;
-        if (gl != null && gl !== "" && gv != null && gv !== "") return `${gl}-${gv}`;
-        if (typeof scoreOnly !== "function") return "";
-        return scoreOnly(match?.marcador_base || match?.marcador || match?.score || "");
-    };
-    // La copia de la quiniela manda (lleva casilla y competicion correctas) y
-    // despues el panel de las ligas, por si el partido no esta en el boleto.
-    const source = [
-        ...(Array.isArray(state?.data?.partidos) ? state.data.partidos : []),
-        ...(typeof getAllLeagueMatches === "function" ? getAllLeagueMatches() : []),
-        ...(Array.isArray(state?.data?.live_matches) ? state.data.live_matches : []),
-    ];
-    const seen = new Set();
-    const rows = [];
-    source.forEach(match => {
-        if (!finalState(match) || !scoreOf(match)) return;
-        const pair = _matchPairKey(match);
-        const key = pair && pair !== "|" ? pair : String(match.id ?? "");
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-        rows.push(match);
-    });
-    return rows.sort((a, b) => {
-        const slotA = kawaiiQuinielaSlot(a) || 99;
-        const slotB = kawaiiQuinielaSlot(b) || 99;
-        if (slotA !== slotB) return slotA - slotB;
-        return _matchPairKey(a).localeCompare(_matchPairKey(b));
-    });
-}
-
-function kawaiiFinishedItemHtml(match) {
-    const comp = _liveCompLabel(match);
-    const home = _matchSideName(match, "home");
-    const away = _matchSideName(match, "away");
-    const score = typeof liveScoreDisplay === "function"
-        ? liveScoreDisplay(match, match?.marcador_base || match?.score || "")
-        : (match?.marcador_base || match?.score || "");
-    const slot = kawaiiQuinielaSlot(match);
-    return `<li class="kk-live-item is-ft${slot ? " is-quiniela" : ""}">
-                <div class="kk-live-meta">
-                    ${comp ? `<span class="kk-live-comp">${escapeHtml(comp)}</span>` : ""}
-                    ${slot ? `<span class="kk-live-slot" title="Casilla ${slot} de la quiniela">Casilla ${slot}</span>` : ""}
-                    <span class="kk-live-min is-ft">FINAL</span>
-                </div>
-                <div class="kk-live-body">
-                    <b>${escapeHtml(_fitName(home, 22))}</b><i aria-hidden="true">–</i><b>${escapeHtml(_fitName(away, 22))}</b>
-                    <span class="kk-live-score is-ft">${escapeHtml(String(score || "—"))}</span>
-                </div>
-            </li>`;
-}
-
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
-    const finished = kawaiiFinishedMatches();
-    if (!matches.length && !finished.length) return "";
+    if (!matches.length) return "";
     const open = typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true;
-    // Con partidos en juego el panel se titula EN DIRECTO y los resultados van
-    // debajo, plegados: el directo manda, pero los finales siguen a un toque.
-    const title = matches.length ? "EN DIRECTO" : "RESULTADOS";
-    const pulse = matches.length
-        ? '<span class="kk-live-pulse" aria-hidden="true"></span>'
-        : '<span class="kk-live-check" aria-hidden="true">✓</span>';
-    const liveHtml = matches.length
-        ? `<ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>`
-        : "";
-    const finishedHtml = finished.length
-        ? (matches.length
-            // Con directo el directo manda: los finales van debajo, plegados.
-            ? `<details class="kk-ft-fold">
-                    <summary class="kk-ft-head">
-                        <b>RESULTADOS</b>
-                        <span class="kk-live-count">${finished.length}</span>
-                        <span class="kk-live-chevron" aria-hidden="true"></span>
-                    </summary>
-                    <ul class="kk-live-list">${finished.map(kawaiiFinishedItemHtml).join("")}</ul>
-                </details>`
-            : `<ul class="kk-live-list kk-ft-list">${finished.map(kawaiiFinishedItemHtml).join("")}</ul>`)
-        : "";
-    return `<aside class="kk-live-aside" aria-label="Partidos en directo y resultados">
+    return `<aside class="kk-live-aside" aria-label="Todos los partidos en directo">
             <details class="lm-live-fold"${open ? " open" : ""}>
                 <summary class="kk-live-head">
-                    ${pulse}
-                    <b>${title}</b>
-                    <span class="kk-live-count">${matches.length || finished.length}</span>
+                    <span class="kk-live-pulse" aria-hidden="true"></span>
+                    <b>EN DIRECTO</b>
+                    <span class="kk-live-count">${matches.length}</span>
                     <span class="kk-live-chevron" aria-hidden="true"></span>
                 </summary>
-                ${liveHtml}
-                ${finishedHtml}
+                <ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>
                 <p class="kk-live-note">Se actualiza solo, cada 30 segundos.</p>
             </details>
         </aside>`;
