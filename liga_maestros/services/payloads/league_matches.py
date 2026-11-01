@@ -7,7 +7,14 @@ from datetime import datetime, timedelta
 
 import config
 
-from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state, is_live_status
+from ...services.live_state import (
+    RESET_TO_SCHEDULED,
+    closes_live,
+    evaluate_match_state,
+    is_final_status,
+    is_live_status,
+)
+from ...services.teams import signo_desde_goles
 from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_any_match_datetime
 
@@ -128,6 +135,81 @@ def build_live_matches(partidos, team_logos, standings_db=None):
             seen_pairs.add(pair)
         merged.append(match)
     return _add_team_logos(merged, team_logos)
+
+
+def apply_verified_provider_scores(partidos):
+    """Keep verified provider scores on quiniela fixtures after they leave live.
+
+    The Directo payload intentionally drops a fixture as soon as it is no
+    longer live. The quiniela row has a different lifetime: it keeps the last
+    verified live score and then the final result, even while the database
+    result collector is catching up.
+    """
+    provider_matches = _close_stale_live_matches(_load_external_matches())
+    by_pair = {}
+    for provider in provider_matches:
+        status = str(provider.get("status") or "").strip().upper()
+        if status == "STALE" or not (is_live_status(status) or is_final_status(status)):
+            continue
+        home = provider.get("local") or provider.get("home_name") or (provider.get("home") or {}).get("name")
+        away = provider.get("visitante") or provider.get("away_name") or (provider.get("away") or {}).get("name")
+        pair = (normalize_team_key(home), normalize_team_key(away))
+        if not pair[0] or not pair[1]:
+            continue
+        kickoff = parse_any_match_datetime(provider)
+        if not kickoff:
+            continue
+        scores = provider.get("scores")
+        raw_score = provider.get("score") or provider.get("marcador")
+        if not raw_score:
+            raw_score = scores.get("score") if isinstance(scores, dict) else scores
+        score_match = re.match(r"^\s*(\d{1,2})\s*[-–:]\s*(\d{1,2})", str(raw_score or ""))
+        if not score_match:
+            continue
+        # If both a live and a finished snapshot exist, the final one wins.
+        previous = by_pair.get(pair)
+        if previous and is_final_status(previous["status"]) and not is_final_status(status):
+            continue
+        by_pair[pair] = {
+            "status": status,
+            "home_goals": int(score_match.group(1)),
+            "away_goals": int(score_match.group(2)),
+            "minute": str(provider.get("time") or provider.get("minute") or provider.get("minuto") or "").strip(),
+            "kickoff_date": kickoff.date(),
+        }
+
+    merged = []
+    for match in partidos:
+        pair = (normalize_team_key(match.get("local")), normalize_team_key(match.get("visitante")))
+        result = by_pair.get(pair)
+        kickoff = parse_any_match_datetime(match)
+        if not result or not kickoff or abs((result["kickoff_date"] - kickoff.date()).days) > 1:
+            merged.append(match)
+            continue
+        row = dict(match)
+        home_goals = result["home_goals"]
+        away_goals = result["away_goals"]
+        score = f"{home_goals}-{away_goals}"
+        status = result["status"]
+        row.update(
+            {
+                "status": status,
+                "goles_local": home_goals,
+                "goles_visitante": away_goals,
+                "signo_actual": signo_desde_goles(home_goals, away_goals) or "-",
+                "marcador_base": score,
+                "marcador": score,
+            }
+        )
+        minute = result["minute"]
+        if is_live_status(status):
+            row["minuto"] = minute
+            minute_number = re.search(r"\d{1,3}", minute)
+            row["minuto_live"] = f"{minute_number.group(0)}'" if minute_number else ""
+            if minute_number:
+                row["marcador"] = f"{score} ({minute_number.group(0)}')"
+        merged.append(row)
+    return merged
 
 
 def _match_pair_key(match):
