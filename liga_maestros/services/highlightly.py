@@ -17,6 +17,7 @@ from ..middleware.json_lock import update_json_list_by_id_locked, update_json_ob
 from ..utils import (
     highlightly_match_to_panel,
     highlightly_status,
+    is_feminine_competition,
     normalize_team_key,
     parse_db_match_datetime,
     parse_score_text,
@@ -683,8 +684,10 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                 home_name = home_team.get("name")
                 away_name = away_team.get("name")
                 if home_name and away_name:
-                    home_key = normalize_team_key(home_name)
-                    away_key = normalize_team_key(away_name)
+                    league_name = match.get("_competition_name") or (match.get("league") or {}).get("name")
+                    feminine_competition = is_feminine_competition(league_name)
+                    home_key = normalize_team_key(home_name, feminine=feminine_competition)
+                    away_key = normalize_team_key(away_name, feminine=feminine_competition)
                     feed[(home_key, away_key)] = (match, False)
                     feed[(away_key, home_key)] = (match, True)
                     home_core = _core_team_key(home_name)
