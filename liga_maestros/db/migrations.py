@@ -308,7 +308,8 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None, force=False):
         status = str(row[5] or "").upper()
         has_result = row[6] is not None or row[7] is not None
         in_play = status in ("LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "FT", "FINISHED", "TERMINADO")
-        if in_play and has_result:
+        schedule_missing = not str(row[3] or "").strip()
+        if in_play and has_result and not schedule_missing:
             continue
         current_identity = (
             str(row[1] or "").strip(), str(row[2] or "").strip(),
@@ -325,7 +326,7 @@ def ensure_jornada_completa(conn, jornada, fallback_matches=None, force=False):
         schedule_differs = bool(fecha) and (current_identity[2], current_identity[3]) != (fecha, hora)
         if not force and not incomplete and not (not in_play and (identity_differs or schedule_differs)):
             continue
-        if in_play and not incomplete and not force:
+        if in_play and not incomplete and not schedule_missing and not force:
             continue
         conn.execute(
             "UPDATE resultados SET local = ?, visitante = ?, fecha = ?, hora = ? WHERE jornada = ? AND partido_id = ?",
@@ -819,10 +820,10 @@ def ensure_jornada_17(conn):
     Sigue el patron de ensure_jornada_16 (boletos editoriales -> tabla
     predicciones, que es donde la pagina los lee) y anade los fixtures, que la
     J16 no necesitaba porque ya estaba en la BD. Los 15 partidos salen de
-    data/quiniela15_J17_scrape.json + data/horarios_J17.json, copiados de la
-    tabla 4 del brief: la casilla 14 queda sin hora (y sin fecha) porque la
-    fuente no la verifica. MrPurple no manda linea, asi que no hay fila para
-    el: su columna se muestra pendiente.
+    data/quiniela15_J17_scrape.json + data/horarios_J17.json. La casilla 14
+    usa el horario confirmado en el calendario oficial de Tenerife Femenino.
+    MrPurple no manda linea, asi que no hay fila para el: su columna se muestra
+    pendiente.
     """
     updated = ensure_jornada_completa(conn, 17)
     imported = _import_inline_prediction_tickets(conn, 17, J17_EDITORIAL_TICKETS)
