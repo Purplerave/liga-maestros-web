@@ -11,7 +11,8 @@ Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
   Women» y el nombre sin marca del proveedor dentro de Liga F.
 - Los resultados de Highlightly y del panel externo usan el contexto de la
   competición para identificar equipos femeninos aunque el proveedor omita
-  `(F)`, `Femenino` o `Women`. Los equipos masculinos siguen separados.
+  `(F)`, `Femenino` o `Women`; el mismo cruce se usa para puntuar y deduplicar
+  directos. Los equipos masculinos siguen separados.
 
 ### Pruebas
 

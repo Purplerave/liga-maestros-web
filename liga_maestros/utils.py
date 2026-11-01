@@ -151,6 +151,11 @@ def is_feminine_competition(value):
 FEMININE_ONLY_CANONICALS = frozenset(
     {"LEVANTE LAS PLANAS", "MADRID CFF", "COSTA ADEJE TENERIFE", "DEPORTIVO ABANCA", "LOGRONO UNITED F"}
 )
+FEMININE_CANONICALS = frozenset(
+    canonical
+    for canonical in TEAM_LOGO_ALIASES.values()
+    if canonical.endswith(" FEMENINO") or canonical in FEMININE_ONLY_CANONICALS
+)
 
 
 @lru_cache(maxsize=1)

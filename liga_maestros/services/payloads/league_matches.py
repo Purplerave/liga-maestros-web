@@ -16,7 +16,7 @@ from ...services.live_state import (
 )
 from ...services.teams import signo_desde_goles
 from ...services.ticket import madrid_now, today_madrid
-from ...utils import is_feminine_competition, normalize_team_key, parse_any_match_datetime
+from ...utils import FEMININE_CANONICALS, is_feminine_competition, normalize_team_key, parse_any_match_datetime
 
 STALE_LIVE_AFTER = timedelta(minutes=120)
 _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
@@ -90,9 +90,7 @@ def _close_stale_live_matches(matches):
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     all_league_matches = _close_stale_live_matches(_load_external_matches())
     quiniela_league_matches = _close_stale_live_matches(_build_quiniela_league_matches(jornada, partidos, standings_db))
-    quiniela_pairs = {
-        (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante"))) for m in quiniela_league_matches
-    }
+    quiniela_pairs = {_match_pair_key(match) for match in quiniela_league_matches}
 
     all_league_matches = _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches)
     all_league_matches = [
@@ -219,8 +217,16 @@ def apply_verified_provider_scores(partidos):
 
 def _match_pair_key(match):
     """Team-pair identity key, robust across the two payload shapes."""
-    home = normalize_team_key(match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"))
-    away = normalize_team_key(match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"))
+    competition = match.get("competition_name") or match.get("competition")
+    feminine_competition = is_feminine_competition(competition)
+    home = normalize_team_key(
+        match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"),
+        feminine=feminine_competition,
+    )
+    away = normalize_team_key(
+        match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"),
+        feminine=feminine_competition,
+    )
     if not home or not away:
         return ""
     return f"{home}|{away}"
@@ -329,25 +335,8 @@ def _infer_match_competition(match, standings_db):
     # Liga F detection: explicit (F) marker or feminine canonical
     feminine_indicators = ("(F)", "FEMENINO", "FEMENINA", " WOMEN")
     is_feminine_raw = any(ind in f"{home_raw.upper()} {away_raw.upper()}" for ind in feminine_indicators)
-    feminine_canonicals = {
-        "ATHLETIC CLUB FEMENINO",
-        "EIBAR FEMENINO",
-        "ESPANYOL FEMENINO",
-        "VALENCIA FEMENINO",
-        "REAL MADRID FEMENINO",
-        "ATLETICO MADRID FEMENINO",
-        "ALAVES FEMENINO",
-        "LEVANTE LAS PLANAS",
-        "SEVILLA FEMENINO",
-        "GRANADA FEMENINO",
-        "MADRID CFF",
-        "REAL SOCIEDAD FEMENINO",
-        "COSTA ADEJE TENERIFE",
-        "DEPORTIVO ABANCA",
-        "LOGROÑO UNITED",
-    }
     # If either side is known feminine canonical or raw has (F), it's Liga F
-    if is_feminine_raw or home_key in feminine_canonicals or away_key in feminine_canonicals:
+    if is_feminine_raw or home_key in FEMININE_CANONICALS or away_key in FEMININE_CANONICALS:
         # If one side is feminine and the other is ambiguous (e.g. Alaves without marker paired with Valencia F),
         # treat as Liga F as well - this fixes J3 partido 13
         return "LIGA F"
@@ -428,6 +417,4 @@ def _duplicates_quiniela_match(match, quiniela_pairs):
         "PRIMERA DIVISION FEMENINA",
     ):
         return False
-    home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
-    away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
-    return (normalize_team_key(home), normalize_team_key(away)) in quiniela_pairs
+    return _match_pair_key(match) in quiniela_pairs
