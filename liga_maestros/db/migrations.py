@@ -991,6 +991,7 @@ def run_startup_migrations():
             ensure_jornada_12(conn)
             ensure_jornada_16(conn)
             ensure_jornada_17(conn)
+            ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
             # idempotente (solo rellena filas vacias/en juego, nunca reescribe

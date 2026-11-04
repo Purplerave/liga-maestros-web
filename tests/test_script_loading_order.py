@@ -114,7 +114,7 @@ def test_los_scripts_de_vista_se_cargan_por_navegacion_y_no_estan_en_el_shell():
     fin = re.search(r"\n\s*[A-Z_]+:\s*[\[{]", resto)
     bloque = resto[: fin.start()] if fin else resto
     rutas = re.findall(r"/static/js/[^\"']+", bloque)
-    assert len(rutas) == 2, f"TICKET deberia cargar ticket_page y pleno_modal, carga {rutas}"
+    assert len(rutas) == 3, f"TICKET deberia cargar ticket_page, pena_vote y pleno_modal, carga {rutas}"
     for ruta in rutas:
         destino = ROOT / ruta.lstrip("/")
         assert destino.is_file(), f"{ruta} se carga pero no existe"

@@ -1,0 +1,676 @@
+@layer pages {
+/* ==========================================================================
+   NASA CONTROL PANEL — Diseño futurista-tecnológico para la vista TICKET
+   Fondo oscuro, acentos cian/verde fósforo, numerales monoespaciados tabulares,
+   paneles/rejilla tipo telemetría, luces de estado, signos y marcadores en
+   negrita condensada. Móvil primero.
+   ========================================================================== */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active {
+    --nasa-bg: #030509;
+    --nasa-panel: rgba(8, 14, 26, 0.88);
+    --nasa-border: rgba(56, 189, 248, 0.18);
+    --nasa-border-strong: rgba(56, 189, 248, 0.45);
+    --nasa-cyan: #38bdf8;
+    --nasa-cyan-dim: rgba(56, 189, 248, 0.12);
+    --nasa-green: #4ade80;
+    --nasa-green-dim: rgba(74, 222, 128, 0.12);
+    --nasa-red: #fb7185;
+    --nasa-red-dim: rgba(251, 113, 133, 0.12);
+    --nasa-gold: #fbbf24;
+    --nasa-text: #e8f4ff;
+    --nasa-text-dim: #9fb1c8;
+    --nasa-glow: 0 0 14px rgba(56, 189, 248, 0.25);
+    --nasa-glow-green: 0 0 14px rgba(74, 222, 128, 0.25);
+    --nasa-font-data: var(--font-data);
+    --nasa-font-ui: var(--font-ui);
+}
+
+/* ---------- Fondo de la arena (telemetría) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-content {
+    background:
+        radial-gradient(800px 400px at 10% 0%, rgba(56, 189, 248, 0.06), transparent 45%),
+        radial-gradient(600px 300px at 90% 100%, rgba(74, 222, 128, 0.04), transparent 45%),
+        linear-gradient(180deg, #030509 0%, #05080e 55%, #030509 100%);
+    background-attachment: fixed;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table {
+    background: transparent;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row {
+    background: transparent;
+}
+
+/* ---------- Topbar tipo consola ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-shell {
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.92), rgba(4, 8, 16, 0.92));
+    border: 1px solid var(--nasa-border);
+    border-top: 1px solid var(--nasa-cyan);
+    box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-kicker {
+    color: var(--nasa-cyan);
+    letter-spacing: 0.14em;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-title {
+    color: var(--nasa-text);
+    font-family: var(--nasa-font-ui);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+/* ---------- Marcador del duelo (telemetría superior) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-scorebar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 10px 18px;
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.85), rgba(4, 8, 16, 0.85));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 20px rgba(56, 189, 248, 0.08);
+    margin: 8px 12px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-label {
+    font-family: var(--nasa-font-data);
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-score {
+    font-family: var(--nasa-font-data);
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--nasa-text);
+    text-shadow: var(--nasa-glow);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelomaestros-side .duelo-score { color: var(--nasa-cyan); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelopena-side .duelo-score { color: var(--nasa-green); }
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-vs {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: var(--nasa-text-dim);
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-countdown {
+    font-family: var(--nasa-font-data);
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--nasa-cyan);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-countdown.urgent {
+    color: var(--nasa-red);
+    text-shadow: 0 0 10px rgba(251, 113, 133, 0.45);
+    animation: nasaCountdownPulse 1s ease-in-out infinite;
+}
+
+@keyframes nasaCountdownPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+/* ---------- Barra de la Peña (consenso %1/%X/%2) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar-wrap {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nasa-text);
+    font-family: var(--nasa-font-data);
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    transition: width 220ms ease;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg.is-leader {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg-1 { background: rgba(56, 189, 248, 0.85); color: #030509; }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg-X { background: rgba(74, 222, 128, 0.85); color: #030509; }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg-2 { background: rgba(251, 113, 133, 0.85); color: #030509; }
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg.is-leader.pena-seg-1 { background: var(--nasa-cyan); box-shadow: var(--nasa-glow); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg.is-leader.pena-seg-X { background: var(--nasa-green); box-shadow: var(--nasa-glow-green); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg.is-leader.pena-seg-2 { background: var(--nasa-red); box-shadow: 0 0 14px rgba(251, 113, 133, 0.45); }
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nasa-text-dim);
+    font-family: var(--nasa-font-data);
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-voters {
+    font-family: var(--nasa-font-ui);
+    font-size: 0.62rem;
+    color: var(--nasa-text-dim);
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+}
+
+/* ---------- Tabla de quiniela como panel de telemetría ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin: 0;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table thead {
+    background: linear-gradient(180deg, rgba(14, 24, 42, 0.9), rgba(8, 14, 26, 0.9));
+    border-bottom: 2px solid var(--nasa-border-strong);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table th {
+    font-family: var(--nasa-font-data);
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--nasa-cyan);
+    padding: 8px 6px;
+    border: none;
+    border-bottom: 1px solid var(--nasa-border);
+    background: transparent;
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table th.ticket-predictor-heading {
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table th.ticket-pena-heading {
+    color: var(--nasa-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table th.ticket-user-heading {
+    color: var(--nasa-gold);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 150ms ease;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row:nth-child(even) {
+    background: rgba(14, 24, 42, 0.35);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row:hover {
+    background: rgba(56, 189, 248, 0.06);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-live-row {
+    background: rgba(8, 40, 20, 0.45);
+    border-left: 3px solid var(--nasa-green);
+    box-shadow: inset 0 0 12px rgba(74, 222, 128, 0.08);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-finished-row {
+    opacity: 0.55;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-pleno-row {
+    border-top: 2px solid var(--nasa-border-strong);
+}
+
+/* ---------- Celdas de signo (telemetría) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ia-signo,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .saved-ticket-sign,
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-pick {
+    font-family: var(--nasa-font-data);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ia-signo {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    line-height: 32px;
+    font-size: 0.85rem;
+    border: 1px solid var(--nasa-border);
+    background: rgba(8, 14, 26, 0.7);
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo.hit {
+    border-color: var(--nasa-green);
+    background: rgba(74, 222, 128, 0.18);
+    color: #030509;
+    box-shadow: var(--nasa-glow-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .ia-signo.miss {
+    border-color: var(--nasa-red);
+    background: rgba(251, 113, 133, 0.18);
+    color: #030509;
+    box-shadow: 0 0 12px rgba(251, 113, 133, 0.35);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick {
+    width: auto;
+    padding: 2px 8px;
+    min-height: 28px;
+    line-height: 1;
+    font-size: 0.78rem;
+    border: 1px solid var(--nasa-border);
+    background: rgba(8, 14, 26, 0.7);
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick.hit {
+    border-color: var(--nasa-green);
+    background: rgba(74, 222, 128, 0.18);
+    color: #030509;
+    box-shadow: var(--nasa-glow-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick.miss {
+    border-color: var(--nasa-red);
+    background: rgba(251, 113, 133, 0.18);
+    color: #030509;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick.is-leader {
+    font-weight: 900;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-pick-pleno {
+    font-family: var(--nasa-font-data);
+    font-weight: 900;
+    font-size: 0.85rem;
+}
+
+/* ---------- Luz de estado ---------- */
+.nasa-state-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--nasa-font-data);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nasa-text-dim);
+}
+
+.nasa-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nasa-text-dim);
+    box-shadow: 0 0 0 3px rgba(120, 140, 160, 0.15);
+}
+
+.nasa-dot.is-open { background: var(--nasa-green); box-shadow: 0 0 8px var(--nasa-green), 0 0 0 3px rgba(74, 222, 128, 0.2); }
+.nasa-dot.is-closed { background: var(--nasa-red); box-shadow: 0 0 8px var(--nasa-red), 0 0 0 3px rgba(251, 113, 133, 0.2); }
+
+/* ---------- Panel de directo (partidos en vivo) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-panel {
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.85), rgba(4, 8, 16, 0.85));
+    box-shadow: var(--nasa-glow);
+    overflow: hidden;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-head {
+    background: rgba(14, 24, 42, 0.6);
+    color: var(--nasa-text);
+    font-family: var(--nasa-font-ui);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--nasa-border);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-pulse {
+    background: var(--nasa-green);
+    box-shadow: 0 0 10px var(--nasa-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-count {
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--nasa-cyan);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-comp { color: var(--nasa-text-dim); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-slot {
+    color: var(--nasa-cyan);
+    border: 1px solid var(--nasa-border-strong);
+}
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-min { color: var(--nasa-gold); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-teams { color: var(--nasa-text); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-live-score { color: var(--nasa-cyan); font-weight: 900; }
+
+/* ---------- Formulario de voto de La Peña ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-section {
+    margin: 12px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-wrap {
+    display: grid;
+    gap: 10px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-header {
+    display: grid;
+    gap: 6px;
+    padding: 12px 16px;
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.85), rgba(4, 8, 16, 0.85));
+    box-shadow: var(--nasa-glow);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-state.is-open .pena-vote-dot { background: var(--nasa-green); box-shadow: 0 0 10px var(--nasa-green); }
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-state.is-closed .pena-vote-dot { background: var(--nasa-red); box-shadow: 0 0 10px var(--nasa-red); }
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-state strong {
+    font-family: var(--nasa-font-ui);
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--nasa-text);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-caption {
+    font-family: var(--nasa-font-data);
+    font-size: 0.7rem;
+    color: var(--nasa-text-dim);
+    letter-spacing: 0.04em;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-match {
+    font-family: var(--nasa-font-data);
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-options {
+    display: grid;
+    gap: 4px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-options.is-pleno {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-options:not(.is-pleno) {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-sm);
+    background: rgba(8, 14, 26, 0.7);
+    color: var(--nasa-text-dim);
+    font-family: var(--nasa-font-data);
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn:hover {
+    border-color: var(--nasa-cyan);
+    color: var(--nasa-cyan);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn.active {
+    border-color: var(--nasa-cyan);
+    background: var(--nasa-cyan);
+    color: #030509;
+    box-shadow: var(--nasa-glow);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-row.is-pleno .pena-vote-btn {
+    font-size: 0.68rem;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn-save {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.25));
+    border: 1px solid var(--nasa-green);
+    color: var(--nasa-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn-save:not(:disabled):hover {
+    background: var(--nasa-green);
+    color: #030509;
+    box-shadow: var(--nasa-glow-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn-save[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: rgba(74, 222, 128, 0.25);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn-clear {
+    border: 1px solid var(--nasa-border);
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn-clear:hover {
+    border-color: var(--nasa-red);
+    color: var(--nasa-red);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    border: 2px dashed var(--nasa-border);
+    border-radius: var(--radius-lg);
+    background: rgba(8, 14, 26, 0.4);
+    color: var(--nasa-text-dim);
+    font-family: var(--nasa-font-ui);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-empty p {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+/* ---------- Chips y badges ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-score-badge {
+    font-family: var(--nasa-font-data);
+    font-weight: 900;
+    border: 1px solid var(--nasa-border);
+    background: rgba(8, 14, 26, 0.7);
+    color: var(--nasa-text);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .match-score-badge.is-live-score {
+    border-color: var(--nasa-green);
+    color: var(--nasa-green);
+    box-shadow: var(--nasa-glow-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--nasa-font-ui);
+    font-size: 0.7rem;
+    color: var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span {
+    color: var(--nasa-text-dim);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ---------- Botón Guardar quiniela (acción principal) ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .primary-btn#save-quiniela-btn {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.35));
+    border: 1px solid var(--nasa-cyan);
+    color: var(--nasa-cyan);
+    font-family: var(--nasa-font-data);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .primary-btn#save-quiniela-btn:hover {
+    background: var(--nasa-cyan);
+    color: #030509;
+    box-shadow: var(--nasa-glow);
+}
+
+/* ---------- Móvil primero ---------- */
+@media (max-width: 640px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table {
+        font-size: 0.72rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ia-signo,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .saved-ticket-sign {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
+        line-height: 28px;
+        font-size: 0.75rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-score {
+        font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-label {
+        font-size: 0.55rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-btn {
+        min-height: 48px;
+        font-size: 0.75rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-vote-actions {
+        grid-template-columns: 1fr;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .topbar-shell {
+        margin: 4px 8px;
+        padding: 8px 12px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .duelo-scorebar {
+        margin: 4px 8px;
+        padding: 8px 12px;
+    }
+}

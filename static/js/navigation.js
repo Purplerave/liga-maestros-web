@@ -45,6 +45,7 @@ const VIEW_STYLES = {
     TICKET: [
         ["view-ticket-styles", versionedAsset("/static/css/pages/ticket.css", "ticket-8")],
         ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-10")],
+        ["view-ticket-nasa-styles", versionedAsset("/static/css/pages/ticket_nasa.css", "ticket-nasa-1")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
     ],
 };
@@ -59,7 +60,8 @@ const VIEW_SCRIPTS = {
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
     TICKET: [
-        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-13")],
+        ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-14")],
+        ["view-pena-vote-script", versionedAsset("/static/js/pages/pena_vote.js", "pena-vote-1")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
 };

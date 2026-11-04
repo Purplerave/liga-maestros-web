@@ -6,14 +6,18 @@
 
 let _dueloCountdownInterval = null;
 
-/* Aciertos de las columnas oficiales en la jornada que está en juego. */
+/* Aciertos de las columnas oficiales en la jornada que está en juego.
+   El marcador del duelo NO suma todos los maestros (eso daba 41-9 en la J17).
+   Usa el mejor maestro de la jornada: si la Peña gana al mejor máquina,
+   queda escrito. */
 function dueloMaestrosHits() {
     const ranking = state.data?.ranking_maestros || {};
-    let hits = 0;
+    let mejor = 0;
     for (const stats of Object.values(ranking)) {
-        hits += Number(stats?.jornada_live ?? stats?.jornada ?? 0) || 0;
+        const h = Number(stats?.jornada_live ?? stats?.jornada ?? 0) || 0;
+        if (h > mejor) mejor = h;
     }
-    return hits;
+    return mejor;
 }
 
 /* Aciertos del consenso de la Peña: un signo mayoritario por partido.
