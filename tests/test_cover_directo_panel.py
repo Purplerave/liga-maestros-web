@@ -160,7 +160,9 @@ CASES = r"""
     results.noLive = {
         emptyMessage: html.includes("Ahora mismo no hay partidos en directo"),
         oldMessage: html.includes("Sin partidos de la quiniela en directo"),
-        noFakeLive: !html.includes("EN DIRECTO"),
+        panelVisible: html.includes("kk-live-aside"),
+        emptyStateVisible: html.includes("SIN PARTIDOS EN JUEGO"),
+        noFakeLiveScore: !html.includes("kk-live-score"),
     };
 }
 
@@ -321,7 +323,9 @@ CASES = r"""
     const aside = (html.match(/<aside class="kk-live-aside"[\s\S]*?<\/aside>/) || [""])[0];
     const ticketRow = (html.match(/<tr class="cx-sv-row" data-id="1">[\s\S]*?<\/tr>/) || [""])[0];
     results.finishedMatchLifecycle = {
-        goneFromLive: !aside,
+        panelRemains: Boolean(aside),
+        finishedFixtureGone: !/Levante|Atletico/i.test(aside),
+        emptyStateVisible: aside.includes("SIN PARTIDOS EN JUEGO"),
         scoreStaysOnTicket: ticketRow.includes("cx-sv-result is-ft") && ticketRow.includes("1-0"),
     };
 }
@@ -346,7 +350,8 @@ CASES = r"""
         simple_view: { jornada: "3", columns: [], rows: [], totals: {}, total_casillas: 14 },
     });
     results.staleIsNotFinal = {
-        aside: !html.includes("kk-live-aside"),
+        aside: html.includes("kk-live-aside"),
+        emptyState: html.includes("SIN PARTIDOS EN JUEGO"),
         noStaleScore: !html.includes('kk-live-score is-ft">1-0'),
     };
 }
@@ -385,13 +390,13 @@ def test_cover_directo_panel_shows_non_quiniela_live_match():
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
-def test_cover_directo_panel_empty_state_without_any_live_match():
-    """Sin directos en ningun sitio, el panel lo dice sin mencionar la quiniela."""
+def test_cover_directo_panel_remains_visible_without_live_matches():
+    """La portada mantiene el panel, con estado vacío honesto, aunque no haya directos."""
     payload = _run_node()
 
-    assert not payload["noLive"]["emptyMessage"], "el aviso vacio viejo del panel ha vuelto"
-    assert not payload["noLive"]["oldMessage"], "el mensaje vacio ya no debe hablar solo de la quiniela"
-    assert payload["noLive"]["noFakeLive"], "sin partidos en juego no debe pintarse una franja EN DIRECTO"
+    assert payload["noLive"]["panelVisible"], "la portada debe mantener visible el panel de directo"
+    assert payload["noLive"]["emptyStateVisible"], "sin partidos debe explicar el estado del panel"
+    assert payload["noLive"]["noFakeLiveScore"], "sin partidos no debe inventarse un marcador"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is required to exercise browser code")
@@ -453,7 +458,9 @@ def test_el_final_sale_del_directo_y_permanece_en_la_quiniela():
     """Directo es efímero; el marcador final se conserva en la fila del boleto."""
     lifecycle = _run_node()["finishedMatchLifecycle"]
 
-    assert lifecycle["goneFromLive"], "un partido terminado no debe quedarse en el panel Directo"
+    assert lifecycle["panelRemains"], "el panel debe seguir visible tras finalizar los partidos"
+    assert lifecycle["finishedFixtureGone"], "un partido finalizado no debe quedarse como directo"
+    assert lifecycle["emptyStateVisible"], "tras el final debe verse el estado vacío"
     assert lifecycle["scoreStaysOnTicket"], "el resultado final debe permanecer en la fila de la quiniela"
 
 
@@ -462,5 +469,6 @@ def test_un_directo_degradado_no_se_pinta_como_resultado_final():
     """STALE conserva goles parciales para diagnostico, no es un marcador final."""
     stale = _run_node()["staleIsNotFinal"]
 
-    assert stale["aside"], "un STALE no puede abrir el panel Directo"
+    assert stale["aside"], "el panel de directo debe permanecer visible en estado vacío"
+    assert stale["emptyState"], "sin directos debe indicarse el estado vacío"
     assert stale["noStaleScore"], "un STALE no puede pintarse como marcador definitivo"

@@ -780,6 +780,7 @@ def get_historial():
             build_participant_contract,
             load_pena_votes,
         )
+        from ..services.payloads.simple_view import CURRENT_MASTER_COLUMNS
         from ..services.teams import is_live_scored_status, is_scored_status
 
         # Resultados reales por jornada
@@ -811,7 +812,15 @@ def get_historial():
             # Aciertos del mejor maestro
             preds = _load_predictions(conn, j)
             contract = build_participant_contract()
-            official_ids = {str(c.get("id", "")).lower() for c in contract.get("visible_ai_columns", [])}
+            if j >= 19:
+                # La liga pública arranca en J19: Programa es el boleto de
+                # Pablo (MrPurple), no la línea editorial histórica Programa.
+                mrpurple = preds.get("mrpurple")
+                if mrpurple:
+                    preds["programa"] = mrpurple
+                official_ids = set(CURRENT_MASTER_COLUMNS)
+            else:
+                official_ids = {str(c.get("id", "")).lower() for c in contract.get("visible_ai_columns", [])}
             # Aciertos por maestro
             maestro_hits = {}
             for uid, data in preds.items():

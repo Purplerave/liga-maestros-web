@@ -527,19 +527,22 @@ function simpleViewPayload() {
 
 function simpleViewColumns(payload) {
     const incoming = Array.isArray(payload?.columns) ? payload.columns : [];
-    const byId = new Map(incoming.filter(col => col?.id).map(col => [String(col.id).toLowerCase(), col]));
-    // Orden/identidad cerrados incluso si llega un payload antiguo o parcial;
-    // los ids ajenos se descartan y las columnas ausentes quedan pendientes.
+    if (incoming.length) {
+        return incoming.filter(col => col?.id).map(col => ({
+            ...col,
+            id: String(col.id).toLowerCase(),
+            name: col.name || col.label || String(col.id),
+            sin_linea: Boolean(col.sin_linea),
+        }));
+    }
+    // Compatibilidad con payloads antiguos: la composición histórica de J17.
     return [
         ["mrpurple", "MrPurple"],
         ["programa", "Programa"],
         ["tecnotron", "Tecnotron"],
         ["grok", "Grok"],
         ["sonia", "Sonia"],
-    ].map(([id, name]) => {
-        const source = byId.get(id);
-        return { ...(source || {}), id, name, sin_linea: source ? Boolean(source.sin_linea) : true };
-    });
+    ].map(([id, name]) => ({ id, name, sin_linea: true }));
 }
 
 /* Estados con marcador VERIFICADO. STALE (directo degradado) queda fuera a
@@ -755,7 +758,9 @@ function kawaiiTablaHtml() {
     const headCells = columns
         .map(col => `<th scope="col" class="cx-sv-col" data-col="${escapeHtml(col.id)}">`
             + `<span class="cx-sv-col-name">${escapeHtml(col.name || col.id)}</span>`
-            + (col.sin_linea ? `<span class="cx-sv-col-flag">pendiente</span>` : "")
+            + (col.estado === "no-juega"
+                ? `<span class="cx-sv-col-flag">no juega esta jornada</span>`
+                : (col.sin_linea ? `<span class="cx-sv-col-flag">pendiente</span>` : ""))
             + `</th>`)
         .join("");
     const footCells = columns
@@ -832,8 +837,6 @@ function simpleViewHtml() {
    - La linea del registrado se guarda con el mecanismo existente
      (POST /api/predicciones/save) y solo mientras la jornada esta abierta.
    ========================================================================== */
-
-const _KK_AVATARES = ["🦖", "🤖", "🔮", "👾", "🦊", "🐼", "🐸", "🐵", "🦄", "🐱"];
 
 function kawaiiPuedeEditarLinea() {
     if (!state.user || !state.data) return false;
@@ -916,18 +919,21 @@ function kawaiiLiveItemHtml(match) {
 
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
-    if (!matches.length) return "";
-    const open = typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true;
+    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
+    const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
+    const vacio = proximo
+        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
+        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><p>El panel mostrará aquí los partidos en cuanto comience el directo.</p></div>`;
     return `<aside class="kk-live-aside" aria-label="Todos los partidos en directo">
             <details class="lm-live-fold"${open ? " open" : ""}>
                 <summary class="kk-live-head">
                     <span class="kk-live-pulse" aria-hidden="true"></span>
-                    <b>EN DIRECTO</b>
+                    <b>PARTIDOS EN DIRECTO</b>
                     <span class="kk-live-count">${matches.length}</span>
                     <span class="kk-live-chevron" aria-hidden="true"></span>
                 </summary>
-                <ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>
-                <p class="kk-live-note">Se actualiza solo, cada 30 segundos.</p>
+                ${matches.length ? `<ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>` : vacio}
+                <p class="kk-live-note">Actualización automática cada 30 segundos.</p>
             </details>
         </aside>`;
 }
@@ -965,7 +971,7 @@ function kawaiiRankingListHtml() {
         const mia = Boolean(yo) && String(fila.uid).toLowerCase() === yo;
         return `<div class="kk-rank${mia ? " is-you" : ""}">
                     <span class="kk-pos">${i + 1}</span>
-                    <span class="kk-av" aria-hidden="true">${_KK_AVATARES[i % _KK_AVATARES.length]}</span>
+                    <span class="kk-av" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
                     <span class="kk-nm">${escapeHtml(_fitName(fila.name, 18))}${mia ? '<span class="kk-you-tag">tu columna</span>' : ""}</span>
                     <span class="kk-sc"><b>${Number(fila.total || 0)}</b> pts · ${Number(fila.jornada || 0)} en J</span>
                 </div>`;
@@ -981,10 +987,11 @@ function kawaiiCabeceraHtml(jornada, payload) {
     const abierto = coverCloseLabel();
     const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
     return `<header class="kk-header">
-            <span class="kk-logo" aria-hidden="true">🐾</span>
+            <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
-                <h1 class="kk-title">Liga de Maestros</h1>
-                <p class="kk-sub">La Peña contra los Maestros IA &middot; 15 casillas, en directo y con aciertos y fallos</p>
+                <p class="kk-kicker">CENTRO DE CONTROL · QUINIELA PÚBLICA</p>
+                <h1 class="kk-title">LIGA DE MAESTROS</h1>
+                <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
             </div>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
         </header>
@@ -1005,7 +1012,6 @@ function renderNewspaperCoverPageV3() {
         : "";
 
     const liveAside = kawaiiLiveAsideHtml();
-    const franja = kawaiiDirectoHtml();
 
     return `<div class="cx kk-page${liveAside ? " has-live" : ""}">
         <div class="kk-wrap">
@@ -1014,19 +1020,22 @@ function renderNewspaperCoverPageV3() {
             <div class="kk-layout">
                 ${liveAside}
                 <div class="kk-main">
-                    ${franja ? `<div class="kk-live-wrap">${franja}</div>` : ""}
                     <section class="kk-card kk-table-card" aria-label="Quiniela de la jornada">
-                        <h2 class="kk-card-title">📅 Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
+                        <h2 class="kk-card-title"><span class="kk-card-kicker">PRONÓSTICOS</span>Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
                         ${aviso}
                         ${simpleViewHtml()}
                     </section>
                     <section class="kk-card kk-rank-card" aria-label="Clasificación">
-                        <h2 class="kk-card-title">🏆 Clasificación <span class="kk-tag">total · jornada</span></h2>
+                        <h2 class="kk-card-title"><span class="kk-card-kicker">ESTADÍSTICAS</span>Clasificación <span class="kk-tag">total · jornada</span></h2>
                         <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
+                    </section>
+                    <section class="kk-card kk-history-card" aria-label="Historial de la liga">
+                        <h2 class="kk-card-title"><span class="kk-card-kicker">RESULTADOS ACUMULADOS</span>Historial de la liga <span class="kk-tag">jornada a jornada</span></h2>
+                        <div id="historial-duelo-body" class="historial-duelo-body"><div class="kk-empty">Cargando estadísticas…</div></div>
                     </section>
                 </div>
             </div>
-            <footer class="kk-foot">🐾 una sola página · resultados en directo, ✓ y ✗ por casilla · sin juegos ni quiz</footer>
+            <footer class="kk-foot">LIGA DE MAESTROS · FEED DE RESULTADOS VERIFICADOS · DATOS ACTUALIZADOS AUTOMÁTICAMENTE</footer>
         </div>
     </div>`;
 }
