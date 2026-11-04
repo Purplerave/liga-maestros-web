@@ -62,6 +62,7 @@ const VIEW_SCRIPTS = {
     TICKET: [
         ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-14")],
         ["view-pena-vote-script", versionedAsset("/static/js/pages/pena_vote.js", "pena-vote-1")],
+        ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-1")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
 };
