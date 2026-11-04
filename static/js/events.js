@@ -449,6 +449,7 @@ async function refreshLiveSnapshot() {
         const pageY = window.scrollY;
         const tableScroll = qs("matches-body")?.querySelector(".arena-table-wrap")?.scrollLeft || 0;
         hydrateHero();
+        if (typeof hydrateDuelo === "function") hydrateDuelo();
         renderArena();
         window.scrollTo(pageX, pageY);
         const nextTable = qs("matches-body")?.querySelector(".arena-table-wrap");
@@ -597,6 +598,7 @@ function startLiveSSE(jornada) {
                     if (state.currentFilter === "LIVE" && patchLiveArena()) return;
                     if (state.currentFilter === "TICKET" && patchTicketArena()) return;
                     hydrateHero();
+                    if (typeof hydrateDuelo === "function") hydrateDuelo();
                     renderArena();
                     loadPorra();
                 }

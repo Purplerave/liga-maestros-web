@@ -1018,7 +1018,9 @@ def run_startup_migrations():
 
 
 def ensure_votos_pena_table(conn):
-    conn.execute("CREATE TABLE IF NOT EXISTS votos_pena (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, jornada INTEGER NOT NULL, partido_id INTEGER NOT NULL, signo TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), UNIQUE(user_id, jornada, partido_id))");
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_jornada ON votos_pena(jornada)");
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_user ON votos_pena(user_id)");
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS votos_pena (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, jornada INTEGER NOT NULL, partido_id INTEGER NOT NULL, signo TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), UNIQUE(user_id, jornada, partido_id))"
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_jornada ON votos_pena(jornada)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_user ON votos_pena(user_id)")
     conn.commit()
