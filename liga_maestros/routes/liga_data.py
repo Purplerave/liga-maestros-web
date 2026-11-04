@@ -811,10 +811,7 @@ def get_historial():
             # Aciertos del mejor maestro
             preds = _load_predictions(conn, j)
             contract = build_participant_contract()
-            official_ids = {
-                str(c.get("id", "")).lower()
-                for c in contract.get("visible_ai_columns", [])
-            }
+            official_ids = {str(c.get("id", "")).lower() for c in contract.get("visible_ai_columns", [])}
             # Aciertos por maestro
             maestro_hits = {}
             for uid, data in preds.items():
