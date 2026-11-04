@@ -766,3 +766,117 @@ def get_matches():
                 "request_id": getattr(g, "request_id", ""),
             }
         ), 500
+
+
+@bp.route("/api/liga/historial")
+def get_historial():
+    conn = get_db()
+    try:
+        from ..services.jornada import is_current_season_jornada
+        from ..services.payloads.predictions import (
+            _build_pena_consensus_from_preds,
+            _load_predictions,
+            build_participant_contract,
+            load_pena_votes,
+        )
+        from ..scoring import score_prediction
+        from ..services.teams import is_scored_status, is_live_scored_status
+
+        # Jornadas disponibles
+        rows = conn.execute(
+            "SELECT DISTINCT jornada FROM resultados ORDER BY jornada"
+        ).fetchall()
+        jornadas = sorted(
+            {
+                int(r["jornada"])
+                for r in rows
+                if r["jornada"] is not None and is_current_season_jornada(r["jornada"])
+            }
+        )
+
+        # Resultados reales por jornada
+        result_map = {}
+        res_rows = conn.execute(
+            "SELECT jornada, partido_id, signo_actual, goles_local, goles_visitante, status FROM resultados"
+        ).fetchall()
+        for r in res_rows:
+            j = int(r["jornada"])
+            pid = int(r["partido_id"])
+            status = r["status"] or ""
+            if not (is_scored_status(status) or is_live_scored_status(status)):
+                continue
+            real = r["signo_actual"]
+            if pid == 15 and r["goles_local"] is not None and r["goles_visitante"] is not None:
+                real = f"{int(r['goles_local'])}-{int(r['goles_visitante'])}"
+            if real and real not in ("", "-"):
+                result_map.setdefault(j, {})[pid] = real
+
+        historial = []
+        acum_maestros = 0
+        acum_pena = 0
+
+        for j in jornadas:
+            # Aciertos del mejor maestro
+            preds = _load_predictions(conn, j)
+            contract = build_participant_contract()
+            official_ids = {
+                str(c.get("id", "")).lower()
+                for c in contract.get("visible_ai_columns", [])
+            }
+            # Aciertos por maestro
+            maestro_hits = {}
+            for uid, data in preds.items():
+                if str(uid).lower() not in official_ids:
+                    continue
+                signos = data.get("signos", [])
+                hits = 0
+                reales = result_map.get(j, {})
+                for pid in range(1, 16):
+                    if pid in reales and pid - 1 < len(signos):
+                        if score_prediction(pid, signos[pid - 1], reales[pid]):
+                            hits += 1
+                maestro_hits[uid] = hits
+
+            mejor_maestro = max(maestro_hits.values(), default=0) if maestro_hits else 0
+
+            # Consenso de la Peña
+            votos_pena = load_pena_votes(conn, j)
+            consenso = _build_pena_consensus_from_preds(preds, contract, votos_pena)
+
+            # Aciertos del consenso de la Peña
+            pena_hits = 0
+            reales = result_map.get(j, {})
+            for c in consenso:
+                pid = c.get("id")
+                ganador = c.get("ganador", "-")
+                if pid in reales and ganador and ganador != "-":
+                    if reales[pid].upper().find(ganador.upper()) >= 0:
+                        pena_hits += 1
+
+            # Votantes de la Peña
+            votantes = len({uid for uid in votos_pena.keys()})
+
+            acum_maestros += mejor_maestro
+            acum_pena += pena_hits
+
+            historial.append(
+                {
+                    "jornada": j,
+                    "maestros": mejor_maestro,
+                    "pena": pena_hits,
+                    "votantes": votantes,
+                    "acumulado_maestros": acum_maestros,
+                    "acumulado_pena": acum_pena,
+                }
+            )
+
+        return jsonify({"status": "ok", "historial": historial})
+    except Exception:
+        logger.exception("api/liga/historial failed")
+        return jsonify(
+            {
+                "status": "error",
+                "message": "No se pudo procesar la solicitud",
+                "request_id": getattr(g, "request_id", ""),
+            }
+        ), 500
