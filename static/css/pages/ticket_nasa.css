@@ -628,6 +628,129 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .primary-btn#save-quini
 }
 
 /* ---------- Móvil primero ---------- */
+/* ---------- Historial del duelo ---------- */
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-section {
+    margin: 12px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-wrap {
+    display: grid;
+    gap: 10px;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-header {
+    display: grid;
+    gap: 4px;
+    padding: 12px 16px;
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.85), rgba(4, 8, 16, 0.85));
+    box-shadow: var(--nasa-glow);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-title {
+    font-family: var(--nasa-font-data);
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--nasa-cyan);
+    margin: 0;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-sub {
+    font-family: var(--nasa-font-ui);
+    font-size: 0.7rem;
+    color: var(--nasa-text-dim);
+    margin: 0;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--nasa-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(6, 12, 24, 0.85), rgba(4, 8, 16, 0.85));
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table th {
+    font-family: var(--nasa-font-data);
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nasa-cyan);
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--nasa-border-strong);
+    background: rgba(14, 24, 42, 0.6);
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table td {
+    font-family: var(--nasa-font-data);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--nasa-text);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table tr:nth-child(even) {
+    background: rgba(14, 24, 42, 0.35);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table tr.maestros-win {
+    border-left: 3px solid var(--nasa-cyan);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table tr.pena-win {
+    border-left: 3px solid var(--nasa-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table tr.draw {
+    border-left: 3px solid var(--nasa-text-dim);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-jornada {
+    color: var(--nasa-text-dim);
+    font-weight: 900;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-maestros {
+    color: var(--nasa-cyan);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-pena {
+    color: var(--nasa-green);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-votantes {
+    color: var(--nasa-gold);
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-acum-m {
+    color: var(--nasa-cyan);
+    font-weight: 900;
+}
+
+body.newspaper-ui.quiniela-focus.newspaper-ticket-active .hist-acum-p {
+    color: var(--nasa-green);
+    font-weight: 900;
+}
+
+@media (max-width: 640px) {
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table {
+        font-size: 0.65rem;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table th,
+    body.newspaper-ui.quiniela-focus.newspaper-ticket-active .historial-duelo-table td {
+        padding: 4px 3px;
+    }
+}
+
 @media (max-width: 640px) {
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .arena-table {
         font-size: 0.72rem;
