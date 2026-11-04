@@ -772,6 +772,7 @@ def get_matches():
 def get_historial():
     conn = get_db()
     try:
+        from ..scoring import score_prediction
         from ..services.jornada import is_current_season_jornada
         from ..services.payloads.predictions import (
             _build_pena_consensus_from_preds,
@@ -779,20 +780,7 @@ def get_historial():
             build_participant_contract,
             load_pena_votes,
         )
-        from ..scoring import score_prediction
-        from ..services.teams import is_scored_status, is_live_scored_status
-
-        # Jornadas disponibles
-        rows = conn.execute(
-            "SELECT DISTINCT jornada FROM resultados ORDER BY jornada"
-        ).fetchall()
-        jornadas = sorted(
-            {
-                int(r["jornada"])
-                for r in rows
-                if r["jornada"] is not None and is_current_season_jornada(r["jornada"])
-            }
-        )
+        from ..services.teams import is_live_scored_status, is_scored_status
 
         # Resultados reales por jornada
         result_map = {}
@@ -810,6 +798,10 @@ def get_historial():
                 real = f"{int(r['goles_local'])}-{int(r['goles_visitante'])}"
             if real and real not in ("", "-"):
                 result_map.setdefault(j, {})[pid] = real
+
+        # Solo mostramos jornadas que ya tienen al menos un resultado real.
+        # La tabla resultados también contiene fixtures futuros en estado NS.
+        jornadas = sorted(j for j in result_map if is_current_season_jornada(j))
 
         historial = []
         acum_maestros = 0
@@ -850,7 +842,7 @@ def get_historial():
                 pid = c.get("id")
                 ganador = c.get("ganador", "-")
                 if pid in reales and ganador and ganador != "-":
-                    if reales[pid].upper().find(ganador.upper()) >= 0:
+                    if score_prediction(pid, ganador, reales[pid]):
                         pena_hits += 1
 
             # Votantes de la Peña

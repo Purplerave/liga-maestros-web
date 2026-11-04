@@ -67,7 +67,10 @@ function renderHistorial(historial) {
     `;
 }
 
-// Carga el historial cuando el DOM esté listo
-document.addEventListener("DOMContentLoaded", () => {
+// Este script se carga de forma dinámica y puede ejecutarse después de
+// DOMContentLoaded; en ese caso hay que cargar el historial inmediatamente.
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadHistorial, { once: true });
+} else {
     loadHistorial();
-});
+}

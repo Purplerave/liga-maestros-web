@@ -53,6 +53,7 @@ const VIEW_STYLES = {
 const VIEW_SCRIPTS = {
     ALL: [
         ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-89")],
+        ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-2")],
         // El pleno de la columna «Tú» se elige con el mismo modal que usa el
         // boleto: la pagina unica lo pide al estar la jornada abierta.
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
@@ -62,7 +63,7 @@ const VIEW_SCRIPTS = {
     TICKET: [
         ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-14")],
         ["view-pena-vote-script", versionedAsset("/static/js/pages/pena_vote.js", "pena-vote-1")],
-        ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-1")],
+        ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-2")],
         ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
     ],
 };
