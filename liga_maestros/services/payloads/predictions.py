@@ -21,13 +21,16 @@ from ...services.teams import (
 def build_predictions_payload(conn, jornada, current_user_id=None, reveal_all=False):
     preds = _load_predictions(conn, jornada)
     participant_contract = build_participant_contract()
-    consenso = _build_pena_consensus(preds, participant_contract)
+    votos_pena = load_pena_votes(conn, jornada)
+    # Doble fuente: los votos de `votos_pena` y los boletos oficiales del seed.
+    # Con solo la tabla, la J1 pasaba de 13 votos a 0 en cuanto alguien votaba.
+    consenso = _build_pena_consensus_from_preds(preds, participant_contract, votos_pena)
     ranking = publicize_mapping_keys(_build_ranking(conn, jornada), current_user_id)
     return {
         "predicciones_actuales": _filter_public_predictions(preds, participant_contract, current_user_id, reveal_all),
         "participant_contract": participant_contract,
         "consenso_pena": consenso,
-        "consenso_pleno_pena": _build_pena_pleno_consensus(preds, participant_contract),
+        "consenso_pleno_pena": _build_pena_pleno_consensus_from_preds(preds, participant_contract, votos_pena),
         "ranking_maestros": ranking,
     }
 
@@ -104,31 +107,73 @@ def _load_prediction_reasons(jornada):
     return {}
 
 
-def _build_pena_consensus(preds, participant_contract):
+def _build_pena_consensus_from_preds(preds, participant_contract, votes_by_uid=None):
+    """Consenso de La Peña para los 14 primeros partidos.
+
+    Se suman dos fuentes, sin contar dos veces a nadie:
+
+    * ``votes_by_uid``: los votos reales que la Peña guarda en ``votos_pena``
+      (un voto por cuenta y jornada, se puede cambiar hasta el cierre).
+    * ``preds``: los boletos oficiales de la peña que vienen en el seed. Los
+      peñistas historicos (chipi, geli, pepe...) no tienen cuenta con la que
+      entrar a votar, asi que su boleto del seed es su voto.
+
+    Si una misma persona tiene boleto en el seed y voto en la BD, manda el
+    voto de la BD (es el mas reciente). Los dobles valen medio voto para cada
+    signo, como siempre.
+
+    Ojo con quien cuenta en cada fuente: del seed solo cuentan las columnas
+    oficiales de la peña (``pena_ids``) — el boleto de un usuario anonimo no es
+    un voto de La Peña—, pero un voto explicito en ``votos_pena`` si: quien
+    entra con su cuenta y vota es La Peña, aunque su id no este en la lista de
+    alias historicos.
+    """
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
         canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
     }
 
-    pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 16)}
-    seen_pena_votes = set()
-    for raw_uid, data in preds.items():
+    def _vota_como_pena(uid):
+        """Un voto explicito cuenta salvo que sea de un maestro o columna oculta."""
+        return str(uid).lower() not in visible_master_ids
+
+    def _es_penista(uid):
+        """Solo las columnas oficiales de la peña cuentan por su boleto del seed."""
+        if not _vota_como_pena(uid):
+            return False
+        return not (pena_ids and uid not in pena_ids)
+
+    # uid -> {partido_id: signo}. Primero el seed; el voto de la BD lo pisa.
+    votos = {}
+    for raw_uid, data in (preds or {}).items():
         uid = canonical_contest_id(raw_uid)
-        if str(uid).lower() in visible_master_ids:
+        if not _es_penista(uid):
             continue
-        if pena_ids and uid not in pena_ids:
+        signos = data.get("signos") if isinstance(data, dict) else None
+        if not isinstance(signos, list):
             continue
-        for partido_id, raw_sign in enumerate(data.get("signos", []), start=1):
+        votos.setdefault(uid, {})
+        for partido_id, raw_sign in enumerate(signos, start=1):
             if partido_id >= 15:
                 continue
+            votos[uid][partido_id] = raw_sign
+    for raw_uid, signos in (votes_by_uid or {}).items():
+        uid = canonical_contest_id(raw_uid)
+        if not _vota_como_pena(uid):
+            continue
+        votos.setdefault(uid, {})
+        for partido_id, raw_sign in signos.items():
+            if partido_id >= 15:
+                continue
+            votos[uid][partido_id] = raw_sign
+
+    pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 16)}
+    for uid, por_partido in votos.items():
+        for partido_id, raw_sign in por_partido.items():
             sign = str(raw_sign or "").strip().upper()
             supported = [candidate for candidate in ("1", "X", "2") if candidate in sign]
             if sign not in ("1", "X", "2", "1X", "12", "X2") or not supported:
                 continue
-            vote_key = (uid, partido_id)
-            if vote_key in seen_pena_votes:
-                continue
-            seen_pena_votes.add(vote_key)
             weight = 1 / len(supported)
             for candidate in supported:
                 pena_votes[partido_id][candidate] += weight
@@ -154,13 +199,15 @@ def _build_pena_consensus(preds, participant_contract):
 
         p1 = round(votes["1"] * 100 / total)
         px = round(votes["X"] * 100 / total)
-        p2 = round(votes["2"] * 100 / total)
+        # El residual se lo queda el 2: los tres porcentajes suman 100 y nunca
+        # se pinta un -1 % por el redondeo.
+        p2 = max(0, 100 - p1 - px)
         max_votes = max(votes.values())
         tied = [sign for sign in ("1", "X", "2") if votes[sign] == max_votes]
         consenso.append(
             {
                 "id": partido_id,
-                "ganador": tied[0],
+                "ganador": tied[0] if len(tied) == 1 else "-",
                 "p1": p1,
                 "px": px,
                 "p2": p2,
@@ -172,7 +219,8 @@ def _build_pena_consensus(preds, participant_contract):
     return consenso
 
 
-def _build_pena_pleno_consensus(preds, participant_contract):
+def _build_pena_pleno_consensus_from_preds(preds, participant_contract, votes_by_uid=None):
+    """Resumen anonimo del pleno al 15 de La Peña (misma doble fuente)."""
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
         canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
@@ -183,13 +231,26 @@ def _build_pena_pleno_consensus(preds, participant_contract):
     seen = set()
     invalid = 0
 
-    for raw_uid, data in preds.items():
+    plenos = {}
+    for raw_uid, data in (preds or {}).items():
+        signos = data.get("signos") if isinstance(data, dict) else None
+        if isinstance(signos, list) and len(signos) > 14:
+            plenos[canonical_contest_id(raw_uid)] = signos[14]
+    votantes_bd = set()
+    for raw_uid, signos in (votes_by_uid or {}).items():
         uid = canonical_contest_id(raw_uid)
-        if str(uid).lower() in visible_master_ids or (pena_ids and uid not in pena_ids) or uid in seen:
+        votantes_bd.add(uid)
+        if 15 in signos:
+            plenos[uid] = signos[15]
+
+    for uid, raw_pleno in plenos.items():
+        if str(uid).lower() in visible_master_ids or uid in seen:
+            continue
+        # Del seed solo las columnas oficiales; de la BD, cualquier cuenta.
+        if uid not in votantes_bd and pena_ids and uid not in pena_ids:
             continue
         seen.add(uid)
-        signs = data.get("signos") or []
-        score = pleno_score_key(signs[14] if len(signs) > 14 else "")
+        score = pleno_score_key(raw_pleno)
         parts = score.split("-") if score else []
         if len(parts) != 2 or any(part not in home_buckets for part in parts):
             invalid += 1
@@ -209,6 +270,30 @@ def _build_pena_pleno_consensus(preds, participant_contract):
         "awayBuckets": away_buckets,
         "topScore": top_score,
     }
+
+
+def load_pena_votes(conn, jornada):
+    """Votos de La Peña guardados en la BD: ``{uid: {partido_id: signo}}``.
+
+    La tabla la crea la migracion v6, pero una BD restaurada de un backup
+    antiguo puede no tenerla todavia: en ese caso el consenso se construye
+    solo con los boletos del seed en vez de romper la portada entera.
+    """
+    try:
+        rows = conn.execute(
+            "SELECT user_id, partido_id, signo FROM votos_pena WHERE jornada = ?",
+            (jornada,),
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    votos = {}
+    for row in rows:
+        try:
+            partido_id = int(row["partido_id"])
+        except (TypeError, ValueError):
+            continue
+        votos.setdefault(row["user_id"], {})[partido_id] = row["signo"]
+    return votos
 
 
 def _official_prediction_ids(participant_contract):

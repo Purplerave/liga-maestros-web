@@ -153,3 +153,17 @@ CREATE UNIQUE INDEX ux_predicciones_user_jornada_partido
 
 -- index: ux_quiz_user_jornada
 CREATE UNIQUE INDEX ux_quiz_user_jornada ON quiz_participaciones(user_id, jornada);
+
+-- table: votos_pena
+CREATE TABLE IF NOT EXISTS votos_pena (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, jornada INTEGER NOT NULL, partido_id INTEGER NOT NULL,
+            signo TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+            updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+            UNIQUE(user_id, jornada, partido_id)
+    );
+
+-- index: idx_votos_pena_jornada
+CREATE INDEX IF NOT EXISTS idx_votos_pena_jornada ON votos_pena(jornada);
+
+-- index: idx_votos_pena_user
+CREATE INDEX IF NOT EXISTS idx_votos_pena_user ON votos_pena(user_id);

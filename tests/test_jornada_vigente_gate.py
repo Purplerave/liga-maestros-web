@@ -8,8 +8,9 @@ ya se sabe que "las de pruebas (51-76) ya no alimentan el concurso", así que la
 única comprobación capaz de bloquear la CI no vigilaba nada del concurso real.
 
 Este módulo cierra ese hueco. Valida los **datos versionados que se despliegan**
-(`data/`), no la base de datos de producción: así el gate es determinista en CI y
-sigue siendo significativo sin acceso a Alwaysdata.
+(`data/` y, desde la J17, los boletos editoriales de `migrations.py`), no la base
+de datos de producción: así el gate es determinista en CI y sigue siendo
+significativo sin acceso a Alwaysdata.
 
 Lo que vigila:
 - la jornada declarada en el seed está dentro de la temporada vigente;
@@ -34,6 +35,8 @@ DATA = ROOT / "data"
 MADRID = ZoneInfo("Europe/Madrid")
 
 MATCHES_PER_JORNADA = 15
+# Los cinco participantes cerrados desde la J17: liga simple, sin dobles.
+JUGADORES_J17 = {"mrpurple", "programa", "tecnotron", "grok", "sonia"}
 MATCH_DURATION = timedelta(hours=2)
 # Margen para que el gate no se ponga rojo a los 2 minutos del saque, en la
 # ventana entre el push y la ejecución del job.
@@ -51,29 +54,32 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _seed_jornada_de_un_fichero(path: Path) -> int | None:
-    match = re.fullmatch(r"predicciones_J(\d+)\.json", path.name)
+def _jornada_de_un_fichero(path: Path, prefijo: str) -> int | None:
+    match = re.fullmatch(rf"{prefijo}_J(\d+)\.json", path.name)
     return int(match.group(1)) if match else None
 
 
 @pytest.fixture(scope="module")
 def current_jornada() -> int:
-    """Jornada vigente según los seeds de la repo.
+    """Jornada en juego según los datos versionados de la repo.
 
     Se descubre sola (no está codificada) para que el gate siga a la jornada
-    real cuando se suba la siguiente: se queda con el `predicciones_J*.json` de
-    mayor número que siga dentro de la temporada publicada.
+    real cuando se suba la siguiente. Se miran tanto los boletos
+    (`predicciones_J*.json`) como los fixtures (`horarios_J*.json`): la J17
+    tiene calendario y scrape, pero sus boletos viven en `migrations.py`, y
+    mirar solo `predicciones_J*.json` dejaba el gate validando la J16 ya cerrada.
     """
     from liga_maestros.services.jornada import CURRENT_SEASON_MAX_JORNADA
 
-    candidatas = []
-    for path in DATA.glob("predicciones_J*.json"):
-        jornada = _seed_jornada_de_un_fichero(path)
-        if jornada is not None and 1 <= jornada <= CURRENT_SEASON_MAX_JORNADA:
-            candidatas.append(jornada)
+    candidatas = set()
+    for prefijo in ("predicciones", "horarios"):
+        for path in DATA.glob(f"{prefijo}_J*.json"):
+            jornada = _jornada_de_un_fichero(path, prefijo)
+            if jornada is not None and 1 <= jornada <= CURRENT_SEASON_MAX_JORNADA:
+                candidatas.add(jornada)
 
     assert candidatas, (
-        f"no hay ningún data/predicciones_J*.json de la temporada vigente (1..{CURRENT_SEASON_MAX_JORNADA})"
+        f"no hay ningún data/(predicciones|horarios)_J*.json de la temporada vigente (1..{CURRENT_SEASON_MAX_JORNADA})"
     )
     return max(candidatas)
 
@@ -85,7 +91,37 @@ def horarios(current_jornada: int) -> dict:
 
 @pytest.fixture(scope="module")
 def predicciones(current_jornada: int) -> dict:
-    return _load(DATA / f"predicciones_J{current_jornada}.json")
+    """Boletos de la jornada: del seed si existe, o de la importación editorial.
+
+    La J17 no tiene `data/predicciones_J17.json`: sus cinco líneas se despliegan
+    desde `J17_EDITORIAL_TICKETS`. Se normaliza la forma para que los tests no
+    distingan entre las dos fuentes.
+    """
+    path = DATA / f"predicciones_J{current_jornada}.json"
+    if path.is_file():
+        return _load(path)
+
+    from liga_maestros.db import migrations
+
+    tickets = getattr(migrations, f"J{current_jornada}_EDITORIAL_TICKETS", None)
+    assert tickets, (
+        f"falta data/predicciones_J{current_jornada}.json y no hay "
+        f"J{current_jornada}_EDITORIAL_TICKETS en migrations.py"
+    )
+    return {uid: {"signos": list(signos)} for uid, signos in tickets.items()}
+
+
+def _kickoffs_sin_verificar(current_jornada: int) -> set[int]:
+    """Casillas que el scrape marca como pendientes de horario verificado."""
+    path = DATA / f"quiniela15_J{current_jornada}_scrape.json"
+    if not path.is_file():
+        return set()
+    scrape = _load(path)
+    return {
+        int(partido["num"])
+        for partido in scrape.get("partidos", [])
+        if not str(partido.get("hora") or "").strip() and partido.get("nota")
+    }
 
 
 def test_la_jornada_del_seed_esta_en_la_temporada_vigente(current_jornada):

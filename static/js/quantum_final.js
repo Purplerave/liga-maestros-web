@@ -129,6 +129,9 @@ async function refreshData(options = {}) {
         hydrateJornadaNav();
         hydrateUserSigns({ preserveLocalTicket });
         hydrateHero();
+        // El marcador del duelo (Maestros vs Peña) y la cuenta atrás viven en
+        // la topbar y no se repintan con renderArena: se refrescan aparte.
+        if (typeof hydrateDuelo === "function") hydrateDuelo();
         updateAuthUI();
         renderArena();
         if (scrollState) {

@@ -944,6 +944,10 @@ def ensure_schema_migrations_versioned(conn):
     if not _has_migration(conn, 5):
         ensure_predicciones_unique_index(conn)
         _record_migration(conn, 5, "predicciones unique index")
+    # version 6: votos_pena table (La Peña redesign)
+    if not _has_migration(conn, 6):
+        ensure_votos_pena_table(conn)
+        _record_migration(conn, 6, "votos_pena table")
 
 
 def run_startup_migrations():
@@ -1011,3 +1015,12 @@ def run_startup_migrations():
                     pass
             _unlock_file(lock_fh)
 # fmt: on
+
+
+def ensure_votos_pena_table(conn):
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS votos_pena (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, jornada INTEGER NOT NULL, partido_id INTEGER NOT NULL, signo TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), UNIQUE(user_id, jornada, partido_id))"
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_jornada ON votos_pena(jornada)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_votos_pena_user ON votos_pena(user_id)")
+    conn.commit()

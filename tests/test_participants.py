@@ -1,4 +1,7 @@
-from liga_maestros.services.payloads.predictions import _build_pena_consensus, _build_pena_pleno_consensus
+from liga_maestros.services.payloads.predictions import (
+    _build_pena_consensus_from_preds,
+    _build_pena_pleno_consensus_from_preds,
+)
 from liga_maestros.services.teams import canonical_contest_id, contest_aliases_for_uid
 
 
@@ -31,7 +34,7 @@ def test_pena_doubles_split_one_vote_between_both_signs():
         "pena_ids": ["chipi", "geli"],
     }
 
-    first = _build_pena_consensus(preds, contract)[0]
+    first = _build_pena_consensus_from_preds(preds, contract)[0]
 
     assert first["total"] == 2
     assert first["votes"] == {"1": 0.5, "X": 0.5, "2": 1}
@@ -50,7 +53,7 @@ def test_personal_user_ticket_is_not_counted_as_pena_consensus():
         "pena_ids": ["chipi"],
     }
 
-    first = _build_pena_consensus(preds, contract)[0]
+    first = _build_pena_consensus_from_preds(preds, contract)[0]
 
     assert first["total"] == 1
     assert (first["p1"], first["px"], first["p2"]) == (100, 0, 0)
@@ -68,7 +71,7 @@ def test_pena_pleno_accepts_m_goal_bucket_without_revealing_members():
         "pena_ids": ["pepe", "geli"],
     }
 
-    summary = _build_pena_pleno_consensus(preds, contract)
+    summary = _build_pena_pleno_consensus_from_preds(preds, contract)
 
     assert summary["valid"] == 2
     assert summary["invalid"] == 0
