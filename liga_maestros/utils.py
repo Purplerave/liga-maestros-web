@@ -87,10 +87,10 @@ def _is_feminine_raw(value):
     raw = str(value or "").upper()
     if "(F)" in raw:
         return True
-    if "FEMENINO" in raw or "FEMENINA" in raw or " WOMEN" in raw:
+    if any(marker in raw for marker in ("FEMENIN", "FEMININ", " WOMEN", " WOMAN")):
         return True
     # Proveedores ingleses usan "(W)" / " W" como marcador femenino.
-    if re.search(r"\(W\)(\s|$)", raw) or re.search(r"\sW(\s|$)", raw) or raw.endswith(" W"):
+    if re.search(r"\(W\)(\s|$)", raw) or re.search(r"\s[WF](\s|$)", raw):
         return True
     return False
 
@@ -136,57 +136,121 @@ def team_keys_compatible(a, b):
     return bool(team_key_variants(a) & team_key_variants(b))
 
 
-def normalize_team_key(value):
+def is_feminine_competition(value):
+    """Return whether a provider competition identifies a women's league."""
+    if isinstance(value, dict):
+        value = value.get("name") or value.get("competition_name") or ""
     text = clean_team_key(value)
-    # Direct alias
-    if text in TEAM_LOGO_ALIASES:
-        return TEAM_LOGO_ALIASES[text]
+    return (
+        any(marker in text for marker in ("FEMENIN", "FEMININ", "WOMEN", "WOMAN"))
+        or text == "LIGA F"
+        or text.startswith("LIGA F ")
+    )
 
+
+FEMININE_ONLY_CANONICALS = frozenset(
+    {"LEVANTE LAS PLANAS", "MADRID CFF", "COSTA ADEJE TENERIFE", "DEPORTIVO ABANCA", "LOGRONO UNITED F"}
+)
+FEMININE_CANONICALS = frozenset(
+    canonical
+    for canonical in TEAM_LOGO_ALIASES.values()
+    if canonical.endswith(" FEMENINO") or canonical in FEMININE_ONLY_CANONICALS
+)
+
+
+@lru_cache(maxsize=1)
+def _feminine_base_aliases():
+    """Map known base-name aliases to their women's canonical identity."""
+    aliases = {}
+    ambiguous = set()
+    for alias, canonical in TEAM_LOGO_ALIASES.items():
+        if not (canonical.endswith(" FEMENINO") or canonical in FEMININE_ONLY_CANONICALS):
+            continue
+        base = re.sub(r"\b(FEMENINO|FEMENINA|FEMININE|WOMEN|WOMAN|W|F)\b", " ", alias)
+        base = re.sub(r"\s+", " ", base).strip()
+        if not base:
+            continue
+        for candidate in {base, TEAM_LOGO_ALIASES.get(base, base)}:
+            if candidate in aliases and aliases[candidate] != canonical:
+                ambiguous.add(candidate)
+            else:
+                aliases[candidate] = canonical
+    return {key: value for key, value in aliases.items() if key not in ambiguous}
+
+
+def normalize_team_key(value, feminine=False):
+    """Normalize provider, quiniela and roster names to one team identity.
+
+    Provider match records often omit the women's marker even when their league
+    is Liga F. ``feminine=True`` supplies that competition context. Suffix and
+    abbreviation variants are resolved through the base aliases before the
+    feminine alias is applied (for example ``R. Sociedad (F)`` ->
+    ``REAL SOCIEDAD FEMENINO``).
+    """
+    text = clean_team_key(value)
     raw_upper = str(value or "").upper()
-    if _is_feminine_raw(raw_upper):
-        # Try F variant
-        candidate_f = f"{text} F".strip() if not text.endswith(" F") else text
-        if candidate_f in TEAM_LOGO_ALIASES:
-            return TEAM_LOGO_ALIASES[candidate_f]
-        candidate_fem = f"{text} FEMENINO".strip()
-        if " FEMENINO" not in text and candidate_fem in TEAM_LOGO_ALIASES:
-            return TEAM_LOGO_ALIASES[candidate_fem]
-        # Base without F
-        base = text[:-2].strip() if text.endswith(" F") else text
-        if base.endswith(" FEMENINO"):
-            base = base[: -len(" FEMENINO")].strip()
-        # Special handling for Las Planas / Badalona
-        if base in ("LAS PLANAS", "LEVANTE LAS PLANAS", "LEVANTE BADALONA", "BADALONA", "FC BADALONA"):
-            return TEAM_LOGO_ALIASES.get("LEVANTE LAS PLANAS", "LEVANTE LAS PLANAS")
-        fem_candidate = f"{base} FEMENINO"
-        if fem_candidate in TEAM_LOGO_ALIASES.values() or fem_candidate in TEAM_LOGO_ALIASES:
-            return TEAM_LOGO_ALIASES.get(fem_candidate, fem_candidate)
-        if base == "ALAVES":
-            if "(F)" in raw_upper or "FEMENINO" in raw_upper:
-                return TEAM_LOGO_ALIASES.get("ALAVES FEMENINO", "ALAVES FEMENINO")
+    is_feminine = feminine or _is_feminine_raw(raw_upper)
+    direct_alias = TEAM_LOGO_ALIASES.get(text)
+    if direct_alias and (
+        not is_feminine or direct_alias.endswith(" FEMENINO") or direct_alias in FEMININE_ONLY_CANONICALS
+    ):
+        return direct_alias
+    if is_feminine:
+        # Providers use (F), F, Femenino/a, W, Women and Women’s in different
+        # combinations with club prefixes (e.g. "Deportivo Alavés W"). Strip
+        # only the gender marker, canonicalize the base name, then reapply it.
+        base = re.sub(r"\b(FEMENINO|FEMENINA|FEMININE|WOMEN|WOMAN|W|F)\b", " ", text)
+        base = re.sub(r"\s+", " ", base).strip()
+        feminine_aliases = _feminine_base_aliases()
+        if base in feminine_aliases:
+            return feminine_aliases[base]
+        canonical_base = TEAM_LOGO_ALIASES.get(base, base)
+        if canonical_base in feminine_aliases:
+            return feminine_aliases[canonical_base]
+        feminine_candidates = (
+            f"{base} FEMENINO",
+            f"{base} F",
+            f"{base} WOMEN",
+            f"{canonical_base} FEMENINO",
+            f"{canonical_base} F",
+            f"{canonical_base} WOMEN",
+        )
+        for candidate in feminine_candidates:
+            if candidate in TEAM_LOGO_ALIASES:
+                return TEAM_LOGO_ALIASES[candidate]
+            if candidate in TEAM_LOGO_ALIASES.values():
+                return candidate
 
-    return TEAM_LOGO_ALIASES.get(text, text)
+        # A few women's clubs have a distinct proper name, not a masculine
+        # counterpart with a gender suffix.
+        if canonical_base in FEMININE_ONLY_CANONICALS:
+            return canonical_base
+        return f"{canonical_base} FEMENINO" if canonical_base else ""
+
+    return direct_alias or text
+
+
+SHORT_TEAM_NAMES = {
+    "ATLETICO MADRID": "AT. MADRID",
+    "REAL MADRID": "R. MADRID",
+    "BARCELONA": "BARCA",
+    "REAL SOCIEDAD": "R. SOC.",
+    "REAL BETIS": "BETIS",
+    "DEPORTIVO LA CORUNA": "DEPOR",
+    "RACING DE SANTANDER": "RACING",
+    "RACING SANTANDER": "RACING",
+    "CULTURAL LEONESA": "C. LEONESA",
+    "SPORTING GIJON": "SPORTING",
+    "COSTA DE MARFIL": "C. MARFIL",
+    "COREA DEL SUR": "C. SUR",
+    "REPUBLICA CHECA": "R. CHECA",
+}
 
 
 def short_team_name(value):
     key = normalize_team_key(value)
-    names = {
-        "ATLETICO MADRID": "AT. MADRID",
-        "REAL MADRID": "R. MADRID",
-        "BARCELONA": "BARCA",
-        "REAL SOCIEDAD": "R. SOC.",
-        "REAL BETIS": "BETIS",
-        "DEPORTIVO LA CORUNA": "DEPOR",
-        "RACING DE SANTANDER": "RACING",
-        "RACING SANTANDER": "RACING",
-        "CULTURAL LEONESA": "C. LEONESA",
-        "SPORTING GIJON": "SPORTING",
-        "COSTA DE MARFIL": "C. MARFIL",
-        "COREA DEL SUR": "C. SUR",
-        "REPUBLICA CHECA": "R. CHECA",
-    }
-    if key in names:
-        return names[key]
+    if key in SHORT_TEAM_NAMES:
+        return SHORT_TEAM_NAMES[key]
     cleaned = re.sub(
         r"\b(REAL|CLUB|FC|CF|RC|RCD|CD|UD|SD|SAD|BALOMPIE|DEPORTIVO)\b",
         "",

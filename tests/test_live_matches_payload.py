@@ -99,6 +99,132 @@ def test_recent_live_snapshot_remains_live(monkeypatch):
     assert league_matches.build_live_matches([], {})[0]["status"] == "HT"
 
 
+def test_provider_female_competition_scores_match_names_without_gender_markers(monkeypatch):
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 987,
+                "status": "FINISHED",
+                "added": "2026-11-01 12:00:00",
+                "scheduled": "12:00",
+                "score": "2-1",
+                "competition_name": "Liga F Moeve",
+                "home": {"name": "Deportivo Alavés"},
+                "away": {"name": "Real Sociedad"},
+            }
+        ],
+    )
+    ticket = [
+        {
+            "id": 11,
+            "local": "Alavés (F)",
+            "visitante": "R. Sociedad (F)",
+            "fecha_raw": "2026-11-01",
+            "hora": "12:00",
+            "status": "NS",
+            "marcador": "-",
+        }
+    ]
+
+    result = league_matches.apply_verified_provider_scores(ticket)[0]
+
+    assert result["status"] == "FINISHED"
+    assert result["marcador_base"] == "2-1"
+    assert result["signo_actual"] == "1"
+
+
+def test_provider_real_racing_alias_updates_racing_real_madrid_score(monkeypatch):
+    # El reloj se fija a la hora del saque: `apply_verified_provider_scores`
+    # cierra los snapshots LIVE cuyo minuto ya no cabe en el tiempo real
+    # transcurrido (ver services.live_state), asi que sin fijarlo el test se
+    # ponia rojo solo por la hora a la que se ejecutara (pasadas las 18:50 del
+    # 1/11/2026 el minuto 55 de un partido de las 16:15 es imposible).
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 11, 1, 17, 10, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 989,
+                "status": "IN PLAY",
+                "time": "55",
+                "added": "2026-11-01 16:15:00",
+                "scheduled": "16:15",
+                "score": "0-1",
+                "competition_name": "LA LIGA",
+                "home": {"name": "Real Racing Club"},
+                "away": {"name": "Real Madrid CF"},
+            }
+        ],
+    )
+    ticket = [
+        {
+            "id": 6,
+            "local": "Racing",
+            "visitante": "Real Madrid",
+            "fecha_raw": "2026-11-01",
+            "hora": "16:15",
+            "status": "NS",
+            "marcador": "-",
+        }
+    ]
+
+    result = league_matches.apply_verified_provider_scores(ticket)[0]
+
+    assert result["status"] == "IN PLAY"
+    assert result["marcador_base"] == "0-1"
+    assert result["signo_actual"] == "2"
+
+
+def test_female_provider_match_is_deduplicated_from_quiniela_despite_name_variants(monkeypatch):
+    monkeypatch.setattr(league_matches, "today_madrid", lambda: "2026-11-01")
+    monkeypatch.setattr(
+        league_matches,
+        "madrid_now",
+        lambda: datetime(2026, 11, 1, 13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+    )
+    monkeypatch.setattr(
+        league_matches,
+        "_load_external_matches",
+        lambda: [
+            {
+                "id": 988,
+                "status": "IN PLAY",
+                "time": "55",
+                "added": "2026-11-01 12:00:00",
+                "scheduled": "12:00",
+                "score": "2-1",
+                "competition_name": "Liga F Moeve",
+                "home": {"name": "Deportivo Alavés"},
+                "away": {"name": "Real Sociedad"},
+            }
+        ],
+    )
+    ticket = [
+        {
+            "id": 11,
+            "local": "Alavés (F)",
+            "visitante": "R. Sociedad (F)",
+            "status": "LIVE",
+            "minuto": "55",
+            "marcador": "2-1 (55')",
+            "fecha_raw": "2026-11-01",
+            "hora": "12:00",
+        }
+    ]
+
+    matches = league_matches.build_live_matches(ticket, {})
+
+    assert len(matches) == 1
+    assert matches[0]["competition_name"] == "LIGA F"
+
+
 def test_live_before_kickoff_is_never_shown_as_live(monkeypatch):
     """Andorra-Ceuta: LIVE minuto 90 mientras su inicio (17:00) es futuro.
 

@@ -7,9 +7,16 @@ from datetime import datetime, timedelta
 
 import config
 
-from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state, is_live_status
+from ...services.live_state import (
+    RESET_TO_SCHEDULED,
+    closes_live,
+    evaluate_match_state,
+    is_final_status,
+    is_live_status,
+)
+from ...services.teams import signo_desde_goles
 from ...services.ticket import madrid_now, today_madrid
-from ...utils import normalize_team_key, parse_any_match_datetime
+from ...utils import FEMININE_CANONICALS, is_feminine_competition, normalize_team_key, parse_any_match_datetime
 
 STALE_LIVE_AFTER = timedelta(minutes=120)
 _LIVE_STATUSES = {"LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "1H", "2H", "ET", "P", "SUSPENDED"}
@@ -83,9 +90,7 @@ def _close_stale_live_matches(matches):
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
     all_league_matches = _close_stale_live_matches(_load_external_matches())
     quiniela_league_matches = _close_stale_live_matches(_build_quiniela_league_matches(jornada, partidos, standings_db))
-    quiniela_pairs = {
-        (normalize_team_key(m.get("local")), normalize_team_key(m.get("visitante"))) for m in quiniela_league_matches
-    }
+    quiniela_pairs = {_match_pair_key(match) for match in quiniela_league_matches}
 
     all_league_matches = _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches)
     all_league_matches = [
@@ -130,10 +135,98 @@ def build_live_matches(partidos, team_logos, standings_db=None):
     return _add_team_logos(merged, team_logos)
 
 
+def apply_verified_provider_scores(partidos):
+    """Keep verified provider scores on quiniela fixtures after they leave live.
+
+    The Directo payload intentionally drops a fixture as soon as it is no
+    longer live. The quiniela row has a different lifetime: it keeps the last
+    verified live score and then the final result, even while the database
+    result collector is catching up.
+    """
+    provider_matches = _close_stale_live_matches(_load_external_matches())
+    by_pair = {}
+    for provider in provider_matches:
+        status = str(provider.get("status") or "").strip().upper()
+        if status == "STALE" or not (is_live_status(status) or is_final_status(status)):
+            continue
+        home = provider.get("local") or provider.get("home_name") or (provider.get("home") or {}).get("name")
+        away = provider.get("visitante") or provider.get("away_name") or (provider.get("away") or {}).get("name")
+        competition = provider.get("competition_name") or provider.get("competition")
+        feminine_competition = is_feminine_competition(competition)
+        pair = (
+            normalize_team_key(home, feminine=feminine_competition),
+            normalize_team_key(away, feminine=feminine_competition),
+        )
+        if not pair[0] or not pair[1]:
+            continue
+        kickoff = parse_any_match_datetime(provider)
+        if not kickoff:
+            continue
+        scores = provider.get("scores")
+        raw_score = provider.get("score") or provider.get("marcador")
+        if not raw_score:
+            raw_score = scores.get("score") if isinstance(scores, dict) else scores
+        score_match = re.match(r"^\s*(\d{1,2})\s*[-–:]\s*(\d{1,2})", str(raw_score or ""))
+        if not score_match:
+            continue
+        # If both a live and a finished snapshot exist, the final one wins.
+        previous = by_pair.get(pair)
+        if previous and is_final_status(previous["status"]) and not is_final_status(status):
+            continue
+        by_pair[pair] = {
+            "status": status,
+            "home_goals": int(score_match.group(1)),
+            "away_goals": int(score_match.group(2)),
+            "minute": str(provider.get("time") or provider.get("minute") or provider.get("minuto") or "").strip(),
+            "kickoff_date": kickoff.date(),
+        }
+
+    merged = []
+    for match in partidos:
+        pair = (normalize_team_key(match.get("local")), normalize_team_key(match.get("visitante")))
+        result = by_pair.get(pair)
+        kickoff = parse_any_match_datetime(match)
+        if not result or not kickoff or abs((result["kickoff_date"] - kickoff.date()).days) > 1:
+            merged.append(match)
+            continue
+        row = dict(match)
+        home_goals = result["home_goals"]
+        away_goals = result["away_goals"]
+        score = f"{home_goals}-{away_goals}"
+        status = result["status"]
+        row.update(
+            {
+                "status": status,
+                "goles_local": home_goals,
+                "goles_visitante": away_goals,
+                "signo_actual": signo_desde_goles(home_goals, away_goals) or "-",
+                "marcador_base": score,
+                "marcador": score,
+            }
+        )
+        minute = result["minute"]
+        if is_live_status(status):
+            row["minuto"] = minute
+            minute_number = re.search(r"\d{1,3}", minute)
+            row["minuto_live"] = f"{minute_number.group(0)}'" if minute_number else ""
+            if minute_number:
+                row["marcador"] = f"{score} ({minute_number.group(0)}')"
+        merged.append(row)
+    return merged
+
+
 def _match_pair_key(match):
     """Team-pair identity key, robust across the two payload shapes."""
-    home = normalize_team_key(match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"))
-    away = normalize_team_key(match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"))
+    competition = match.get("competition_name") or match.get("competition")
+    feminine_competition = is_feminine_competition(competition)
+    home = normalize_team_key(
+        match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name"),
+        feminine=feminine_competition,
+    )
+    away = normalize_team_key(
+        match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name"),
+        feminine=feminine_competition,
+    )
     if not home or not away:
         return ""
     return f"{home}|{away}"
@@ -173,11 +266,11 @@ def _add_team_logos(matches, team_logos):
 
 
 def _is_live_match(match):
-    status = str(match.get("status") or "").upper()
-    if not ("LIVE" in status or status in ("IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO")):
-        return False
-    match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
-    return not match_date or match_date == today_madrid()
+    # _close_stale_live_matches ya elimina snapshots caducados. No filtres un
+    # partido confirmado por la fecha de "added" (que puede ser de importación)
+    # ni por el día de inicio: un partido nocturno puede seguir en juego pasada
+    # la medianoche. Usa el mismo catálogo de estados que el cierre de directos.
+    return is_live_status(match.get("status"))
 
 
 def _load_external_matches():
@@ -242,25 +335,8 @@ def _infer_match_competition(match, standings_db):
     # Liga F detection: explicit (F) marker or feminine canonical
     feminine_indicators = ("(F)", "FEMENINO", "FEMENINA", " WOMEN")
     is_feminine_raw = any(ind in f"{home_raw.upper()} {away_raw.upper()}" for ind in feminine_indicators)
-    feminine_canonicals = {
-        "ATHLETIC CLUB FEMENINO",
-        "EIBAR FEMENINO",
-        "ESPANYOL FEMENINO",
-        "VALENCIA FEMENINO",
-        "REAL MADRID FEMENINO",
-        "ATLETICO MADRID FEMENINO",
-        "ALAVES FEMENINO",
-        "LEVANTE LAS PLANAS",
-        "SEVILLA FEMENINO",
-        "GRANADA FEMENINO",
-        "MADRID CFF",
-        "REAL SOCIEDAD FEMENINO",
-        "COSTA ADEJE TENERIFE",
-        "DEPORTIVO ABANCA",
-        "LOGROÑO UNITED",
-    }
     # If either side is known feminine canonical or raw has (F), it's Liga F
-    if is_feminine_raw or home_key in feminine_canonicals or away_key in feminine_canonicals:
+    if is_feminine_raw or home_key in FEMININE_CANONICALS or away_key in FEMININE_CANONICALS:
         # If one side is feminine and the other is ambiguous (e.g. Alaves without marker paired with Valencia F),
         # treat as Liga F as well - this fixes J3 partido 13
         return "LIGA F"
@@ -295,6 +371,10 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
             window_end = max(quiniela_datetimes) + timedelta(days=1)
 
     def keep_external_match(match):
+        # Un directo ya validado por _close_stale_live_matches es relevante
+        # aunque el proveedor conserve una fecha de importación antigua.
+        if is_live_status(match.get("status")):
+            return True
         match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
         if match_date == today_str:
             return True
@@ -337,6 +417,4 @@ def _duplicates_quiniela_match(match, quiniela_pairs):
         "PRIMERA DIVISION FEMENINA",
     ):
         return False
-    home = match.get("local") or match.get("home_name") or (match.get("home") or {}).get("name")
-    away = match.get("visitante") or match.get("away_name") or (match.get("away") or {}).get("name")
-    return (normalize_team_key(home), normalize_team_key(away)) in quiniela_pairs
+    return _match_pair_key(match) in quiniela_pairs

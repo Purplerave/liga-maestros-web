@@ -312,6 +312,87 @@ function hasLiveLeagueMatches() {
     return getLiveLeagueMatches().length > 0;
 }
 
+/* Casilla de la quiniela (1..15) que corresponde a un partido, o 0 si el
+   partido no esta en el boleto. Se usa para marcar y ordenar el directo. */
+function quinielaSlotForMatch(match) {
+    if (!match) return 0;
+    const pair = matchPairKey(match);
+    const partidos = Array.isArray(state?.data?.partidos) ? state.data.partidos : [];
+    const found = partidos.find(partido => {
+        if (!partido) return false;
+        if (match.id != null && String(partido.id ?? "") === String(match.id)) return true;
+        return pair && pair !== "-" && matchPairKey(partido) === pair;
+    });
+    if (!found) return 0;
+    const id = Number(found.id);
+    return Number.isFinite(id) && id >= 1 && id <= 15 ? id : 0;
+}
+
+/* TODOS los directos en una sola lista: los que ya decide el servidor
+   (`live_matches`, las 5 ligas) mas las casillas que la quiniela marca en
+   juego, sin duplicar la misma pareja de equipos. Ordenados por casilla; los
+   partidos de fuera del boleto van al final. */
+function getAllLiveMatches() {
+    const source = [
+        ...getLiveLeagueMatches(),
+        ...(Array.isArray(state?.data?.partidos) ? state.data.partidos : []),
+    ];
+    const seen = new Set();
+    const rows = [];
+    source.forEach(match => {
+        if (!match) return;
+        if (!isMatchLiveNow(match)) return;
+        const pair = matchPairKey(match);
+        if (!pair || pair === "-" || seen.has(pair)) return;
+        seen.add(pair);
+        rows.push(match);
+    });
+    return rows.sort((a, b) => {
+        const slotA = quinielaSlotForMatch(a) || 99;
+        const slotB = quinielaSlotForMatch(b) || 99;
+        if (slotA !== slotB) return slotA - slotB;
+        return matchPairKey(a).localeCompare(matchPairKey(b));
+    });
+}
+
+/* ---------- plegado del panel de directos ---------- */
+/* Con jornada en curso el panel se abre; sin jornada (un miercoles con solo
+   Premier, o la temporada parada) se queda plegado para no tapar la quiniela.
+   Si el usuario lo abre o lo cierra a mano, esa eleccion manda y se recuerda. */
+const LIVE_PANEL_STORAGE_KEY = "lm-live-panel";
+
+function livePanelRememberedOpen() {
+    try {
+        if (typeof localStorage === "undefined") return null;
+        const value = localStorage.getItem(LIVE_PANEL_STORAGE_KEY);
+        if (value === "open") return true;
+        if (value === "closed") return false;
+    } catch (error) {
+        // Modo privado o almacenamiento bloqueado: se usa el valor por defecto.
+    }
+    return null;
+}
+
+function livePanelOpenByDefault() {
+    const jornadaOpen = typeof isJornadaWindowOpen === "function" && isJornadaWindowOpen();
+    const quinielaLive = getAllLiveMatches().some(match => quinielaSlotForMatch(match) > 0);
+    return Boolean(jornadaOpen || quinielaLive);
+}
+
+function livePanelShouldOpen() {
+    const remembered = livePanelRememberedOpen();
+    return remembered === null ? livePanelOpenByDefault() : remembered;
+}
+
+function rememberLivePanelOpen(open) {
+    try {
+        if (typeof localStorage === "undefined") return;
+        localStorage.setItem(LIVE_PANEL_STORAGE_KEY, open ? "open" : "closed");
+    } catch (error) {
+        // Sin persistencia el panel sigue funcionando: solo olvida la eleccion.
+    }
+}
+
 function getNextLeagueMatch() {
     const officialNext = (state.data?.partidos || [])
         .filter(m => isUpcomingScheduledMatch(m))

@@ -14,6 +14,183 @@
     min-width: 0;
 }
 
+/* Columna derecha del boleto: panel de directos + comentarios. */
+.ticket-side-column {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    min-width: 0;
+}
+
+/* ---------- panel con TODOS los directos ---------- */
+.ticket-live-panel {
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 8px;
+    background: rgba(8, 15, 28, 0.82);
+    overflow: hidden;
+}
+
+.ticket-live-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 10px;
+    cursor: pointer;
+    list-style: none;
+    color: #e2f3ff;
+    font: 900 0.68rem/1 var(--font-ui);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.ticket-live-head::-webkit-details-marker {
+    display: none;
+}
+
+.ticket-live-head b {
+    color: #7dd3fc;
+}
+
+.ticket-live-head:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: -2px;
+}
+
+.ticket-live-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f87171;
+    animation: ticketLivePulse 1.2s infinite;
+}
+
+@keyframes ticketLivePulse {
+    50% {
+        opacity: 0.25;
+    }
+}
+
+.ticket-live-count {
+    margin-left: auto;
+    background: rgba(56, 189, 248, 0.16);
+    color: #7dd3fc;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-weight: 900;
+}
+
+.ticket-live-chevron {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    margin: 0 2px 3px 4px;
+    border-right: 2px solid #7dd3fc;
+    border-bottom: 2px solid #7dd3fc;
+    transform: rotate(45deg);
+}
+
+.lm-live-fold:not([open]) .ticket-live-chevron {
+    transform: rotate(-45deg);
+    margin-bottom: 0;
+}
+
+.ticket-live-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 8px 8px;
+    display: grid;
+    gap: 4px;
+    max-height: 52vh;
+    overflow-y: auto;
+}
+
+.ticket-live-item {
+    padding: 6px 2px;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.ticket-live-item:first-child {
+    border-top: 0;
+}
+
+.ticket-live-item.is-quiniela {
+    padding: 6px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.ticket-live-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+    font: 800 0.58rem/1 var(--font-ui);
+}
+
+.ticket-live-comp {
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+}
+
+.ticket-live-slot {
+    color: #7dd3fc;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 999px;
+    padding: 0 5px;
+}
+
+.ticket-live-min {
+    margin-left: auto;
+    color: #fda4af;
+}
+
+.ticket-live-teams {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+    font: 700 0.72rem/1.2 var(--font-ui);
+    color: #e8f4ff;
+}
+
+.ticket-live-teams i {
+    font-style: normal;
+    color: #64748b;
+}
+
+.ticket-live-score {
+    margin-left: auto;
+    background: rgba(56, 189, 248, 0.16);
+    color: #bae6fd;
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-style: normal;
+    font-weight: 900;
+}
+
+/* Marcador y minuto pegados al partido, dentro de la casilla del boleto. */
+.ticket-live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(248, 113, 113, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+    font: 900 0.62rem/1 var(--font-ui);
+    white-space: nowrap;
+}
+
+.ticket-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f87171;
+    animation: ticketLivePulse 1.2s infinite;
+}
+
 .ticket-comments {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
@@ -172,8 +349,24 @@ body.quiniela-focus .tension-row td {
         grid-template-columns: minmax(0, 1fr);
     }
 
+    /* En una columna el panel de directos sube encima de la quiniela. */
+    .ticket-side-column {
+        order: -1;
+    }
+
     .ticket-comments {
         max-height: 280px;
+    }
+
+    .ticket-live-list {
+        max-height: 40vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticket-live-pulse,
+    .ticket-live-dot {
+        animation: none;
     }
 }
 
@@ -243,7 +436,9 @@ body.quiniela-focus .tension-row td {
 
 .tension-fixture-main {
     display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 6px;
     min-width: 0;
 }
 
@@ -1238,4 +1433,10 @@ body.quiniela-focus .arena-table.is-tension-table td:nth-child(3) {
         min-height: 34px;
     }
 }
+}
+
+@media (max-width: 900px) {
+    .ticket-live-chip {
+        display: none;
+    }
 }

@@ -1,0 +1,24 @@
+{
+  "jornada": 17,
+  "fuente": "https://www.levanteud.com/noticias/el-levante-ud-se-queda-sin-premio-ante-el-atletico-de-madrid; https://ligaf.es/partido/madrid-cf-femenino/deportivo-femenino/202723891/detail",
+  "verificado_en": "2026-11-01",
+  "nota": "Resultados finales confirmados oficialmente para las casillas 1 y 12; el resto de partidos se completa desde el proveedor y la base de datos.",
+  "resultados": [
+    {
+      "id": 1,
+      "goles_local": 0,
+      "goles_visitante": 2,
+      "signo": "2",
+      "status": "FT",
+      "minuto": "Finalizado"
+    },
+    {
+      "id": 12,
+      "goles_local": 2,
+      "goles_visitante": 1,
+      "signo": "1",
+      "status": "FT",
+      "minuto": "Finalizado"
+    }
+  ]
+}

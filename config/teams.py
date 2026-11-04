@@ -38,6 +38,7 @@ TEAM_LOGO_ALIASES = {
     "R SANTANDER": "RACING DE SANTANDER",
     "R RACING CLUB": "RACING DE SANTANDER",
     "RACING CLUB": "RACING DE SANTANDER",
+    "RACING": "RACING DE SANTANDER",
     "RACING SANTANDER": "RACING DE SANTANDER",
     "SANTANDER": "RACING DE SANTANDER",
     "REAL RACING CLUB": "RACING DE SANTANDER",
@@ -87,9 +88,15 @@ TEAM_LOGO_ALIASES = {
     "AT MADRID": "ATLETICO MADRID",
     "ATLETICO MADRID": "ATLETICO MADRID",
     "ATLETICO DE MADRID": "ATLETICO MADRID",
+    # El boleto abrevia el club como "Atlético" a secas y el proveedor publica
+    # "Atlético Madrid" / "At. Madrid" / "Atlético de Madrid". Sin esta clave
+    # las tres identidades eran distintas y el resultado del partido se
+    # descartaba para siempre (J17 2026/27, Levante - Atlético).
+    "ATLETICO": "ATLETICO MADRID",
     "R MADRID": "REAL MADRID",
     "REAL MADRID": "REAL MADRID",
     "R SOCIEDAD": "REAL SOCIEDAD",
+    "R SOC": "REAL SOCIEDAD",
     "ELCHE CF": "ELCHE",
     "LEVANTE UD": "LEVANTE",
     "CA OSASUNA": "OSASUNA",
@@ -157,6 +164,8 @@ TEAM_LOGO_ALIASES = {
     # al 15 no cruzaba nunca y solo entraba por JSON manual.
     "R CHECA": "REPUBLICA CHECA",
     "REP CHECA": "REPUBLICA CHECA",
+    "C MARFIL": "COSTA DE MARFIL",
+    "C SUR": "COREA DEL SUR",
     "BELGICA": "BELGICA",
     "BELGIUM": "BELGICA",
     "TUNEZ": "TUNEZ",
@@ -243,6 +252,9 @@ TEAM_LOGO_ALIASES = {
     "REAL MADRID WOMEN": "REAL MADRID FEMENINO",
     "AT MADRID F": "ATLETICO MADRID FEMENINO",
     "ATLETICO MADRID F": "ATLETICO MADRID FEMENINO",
+    # Mismo caso que el masculino: el boleto escribe "Atlético (F)" y el
+    # proveedor "Atlético Madrid Women" / "At. Madrid (F)".
+    "ATLETICO F": "ATLETICO MADRID FEMENINO",
     "AT MADRID FEMENINO": "ATLETICO MADRID FEMENINO",
     "ATLETICO MADRID FEMENINO": "ATLETICO MADRID FEMENINO",
     "ATLETICO DE MADRID FEMENINO": "ATLETICO MADRID FEMENINO",

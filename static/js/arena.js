@@ -157,7 +157,10 @@ function renderArena() {
                         </table>
                     </div>
                 </div>
-                ${renderTicketCommentsPanel()}
+                <div class="ticket-side-column">
+                    ${typeof renderTicketLivePanel === "function" ? renderTicketLivePanel() : ""}
+                    ${renderTicketCommentsPanel()}
+                </div>
             </div>`;
         renderArenaTensionBody(matches);
         if (typeof updatePicksProgress === "function") updatePicksProgress();
