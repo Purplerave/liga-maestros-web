@@ -21,13 +21,13 @@ from ...services.teams import (
 def build_predictions_payload(conn, jornada, current_user_id=None, reveal_all=False):
     preds = _load_predictions(conn, jornada)
     participant_contract = build_participant_contract()
-    consenso = _build_pena_consensus(preds, participant_contract)
+    consenso = _build_pena_consensus(conn, jornada, participant_contract)
     ranking = publicize_mapping_keys(_build_ranking(conn, jornada), current_user_id)
     return {
         "predicciones_actuales": _filter_public_predictions(preds, participant_contract, current_user_id, reveal_all),
         "participant_contract": participant_contract,
         "consenso_pena": consenso,
-        "consenso_pleno_pena": _build_pena_pleno_consensus(preds, participant_contract),
+        "consenso_pleno_pena": _build_pena_pleno_consensus(conn, jornada, participant_contract),
         "ranking_maestros": ranking,
     }
 
@@ -104,34 +104,42 @@ def _load_prediction_reasons(jornada):
     return {}
 
 
-def _build_pena_consensus(preds, participant_contract):
+def _build_pena_consensus(conn, jornada, participant_contract):
+    """Construye el consenso de la Peña desde la tabla `votos_pena`.
+
+    El brief exige que los votos de la Peña se lean de la BD (tabla nueva),
+    no de la tabla `predicciones` ni de JSONs. Un voto por cuenta y jornada:
+    cada usuario puede cambiar su boleto hasta el cierre.
+    """
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
         canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
     }
 
+    rows = conn.execute(
+        "SELECT user_id, partido_id, signo FROM votos_pena WHERE jornada = ?",
+        (jornada,),
+    ).fetchall()
+
     pena_votes = {pid: {"1": 0, "X": 0, "2": 0} for pid in range(1, 16)}
     seen_pena_votes = set()
-    for raw_uid, data in preds.items():
-        uid = canonical_contest_id(raw_uid)
+    for row in rows:
+        uid = canonical_contest_id(row["user_id"])
         if str(uid).lower() in visible_master_ids:
             continue
         if pena_ids and uid not in pena_ids:
             continue
-        for partido_id, raw_sign in enumerate(data.get("signos", []), start=1):
-            if partido_id >= 15:
-                continue
-            sign = str(raw_sign or "").strip().upper()
-            supported = [candidate for candidate in ("1", "X", "2") if candidate in sign]
-            if sign not in ("1", "X", "2", "1X", "12", "X2") or not supported:
-                continue
-            vote_key = (uid, partido_id)
-            if vote_key in seen_pena_votes:
-                continue
-            seen_pena_votes.add(vote_key)
-            weight = 1 / len(supported)
-            for candidate in supported:
-                pena_votes[partido_id][candidate] += weight
+        partido_id = int(row["partido_id"])
+        if partido_id >= 15:
+            continue
+        sign = str(row["signo"] or "").strip().upper()
+        if sign not in ("1", "X", "2"):
+            continue
+        vote_key = (uid, partido_id)
+        if vote_key in seen_pena_votes:
+            continue
+        seen_pena_votes.add(vote_key)
+        pena_votes[partido_id][sign] += 1
 
     consenso = []
     for partido_id in range(1, 15):
@@ -154,13 +162,14 @@ def _build_pena_consensus(preds, participant_contract):
 
         p1 = round(votes["1"] * 100 / total)
         px = round(votes["X"] * 100 / total)
-        p2 = round(votes["2"] * 100 / total)
+        p2 = max(0, 100 - p1 - px)
         max_votes = max(votes.values())
         tied = [sign for sign in ("1", "X", "2") if votes[sign] == max_votes]
+        ganador = tied[0] if len(tied) == 1 else "-"
         consenso.append(
             {
                 "id": partido_id,
-                "ganador": tied[0],
+                "ganador": ganador,
                 "p1": p1,
                 "px": px,
                 "p2": p2,
@@ -172,7 +181,7 @@ def _build_pena_consensus(preds, participant_contract):
     return consenso
 
 
-def _build_pena_pleno_consensus(preds, participant_contract):
+def _build_pena_pleno_consensus(conn, jornada, participant_contract):
     visible_master_ids = _official_prediction_ids(participant_contract)
     pena_ids = {
         canonical_contest_id(uid) for uid in participant_contract.get("pena_ids", []) if canonical_contest_id(uid)
@@ -183,13 +192,16 @@ def _build_pena_pleno_consensus(preds, participant_contract):
     seen = set()
     invalid = 0
 
-    for raw_uid, data in preds.items():
-        uid = canonical_contest_id(raw_uid)
+    rows = conn.execute(
+        "SELECT user_id, signo FROM votos_pena WHERE jornada = ? AND partido_id = 15",
+        (jornada,),
+    ).fetchall()
+    for row in rows:
+        uid = canonical_contest_id(row["user_id"])
         if str(uid).lower() in visible_master_ids or (pena_ids and uid not in pena_ids) or uid in seen:
             continue
         seen.add(uid)
-        signs = data.get("signos") or []
-        score = pleno_score_key(signs[14] if len(signs) > 14 else "")
+        score = pleno_score_key(row["signo"])
         parts = score.split("-") if score else []
         if len(parts) != 2 or any(part not in home_buckets for part in parts):
             invalid += 1

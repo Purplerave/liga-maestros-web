@@ -105,10 +105,26 @@
             </picture>
         </section>
 
-        <header class="topbar-shell">
+<header class="topbar-shell">
             <div class="topbar-context">
                 <div id="topbar-kicker" class="topbar-kicker">Jornada &middot; La Pe&ntilde;a vs Maestros IA</div>
                 <div id="topbar-title" class="topbar-title">Liga de Maestros: Humanos vs IA</div>
+            </div>
+
+            <!-- Marcador del duelo: Maestros X — Y Peña, en vivo -->
+            <div id="duelo-scorebar" class="duelo-scorebar" aria-live="polite">
+                <div class="duelo-side duelomaestros-side">
+                    <span class="duelo-label">MAESTROS</span>
+                    <b id="duelo-maestros" class="duelo-score">0</b>
+                </div>
+                <div class="duelo-center">
+                    <span class="duelo-vs">VS</span>
+                    <span id="duelo-countdown" class="duelo-countdown">—</span>
+                </div>
+                <div class="duelo-side duelopena-side">
+                    <span class="duelo-label">PE&Ntilde;A</span>
+                    <b id="duelo-pena" class="duelo-score">0</b>
+                </div>
             </div>
 
             <div class="topbar-filters">
@@ -131,7 +147,7 @@
                     <span class="cmdk-trigger-label">Buscar</span>
                     <kbd class="cmdk-kbd">⌘K</kbd>
                 </button>
-                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizar (R)" aria-label="Actualizar">↻</button>
+                <button id="refresh-btn" class="icon-btn" type="button" title="Actualizard (R)" aria-label="Actualizard">↻</button>
                 <button id="save-quiniela-btn" class="primary-btn" type="button">Guardar quiniela</button>
                 <button id="share-ticket-btn" class="primary-btn" data-analytics="share_click" data-analytics-label="ticket" type="button" aria-label="Compartir quiniela" title="Compartir quiniela">Compartir</button>
             </div>
@@ -141,6 +157,14 @@
         <nav class="newspaper-page-nav" aria-label="Navegaci&oacute;n principal">
             <button class="active" type="button" data-page-action="ALL"><i class="nav-ico" aria-hidden="true">🐾</i><span>La quiniela</span></button>
         </nav>
+
+        <section id="como-juega" class="como-juega" aria-label="Cómo se juega">
+            <div class="como-juega-steps">
+                <div class="como-juega-step"><span class="como-juega-num">1</span><span>Entra con Google.</span></div>
+                <div class="como-juega-step"><span class="como-juega-num">2</span><span>Pon tu boleto: 14 signos y el pleno.</span></div>
+                <div class="como-juega-step"><span class="como-juega-num">3</span><span>Reta a las máquinas: si la Peña gana la jornada, queda escrito.</span></div>
+            </div>
+        </section>
 
         <main class="main-arena">
             <!-- Sin aria-live: es un contenedor de vista que se repinta entero
@@ -187,6 +211,7 @@
     <script defer src="{{ url_for('main.static_files', filename='js/arena.js', v=assets_v ~ '-arena-14') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-19') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-47') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/pages/duelo.js', v=assets_v ~ '-duelo-1') }}"></script>
     {# Frente 2: analytics, confeti, imagen del boleto, sonidos, paleta de
        comandos, señales UX, post-jornada, onboarding y service worker NO van
        en el camino critico. Los carga late_assets.js en cuanto el hilo

@@ -3,26 +3,35 @@
    ========================================================================== */
 
 function penaPercents(c) {
-    // p1/px/p2 already arrive as 0-100. Do not scale them again.
+    // p1/px/p2 ya llegan como 0-100. No los escalamos de nuevo.
     const p1 = Math.max(0, Math.round(Number(c?.p1 || 0)));
     const px = Math.max(0, Math.round(Number(c?.px || 0)));
     const p2 = Math.max(0, Math.round(Number(c?.p2 || 0)));
     return { p1, px, p2 };
 }
 
-function renderMatchInsight(match) {
-    return "";
-}
-
-/* La fecha (si el partido no es hoy) y la hora se apilan y no se truncan. */
-function renderFixtureSchedule(match) {
-    const { day, time, label } = fixtureScheduleParts(match);
-    if (!time) return `<span class="fixture-schedule is-pending" title="${escapeHtml(label)}">${escapeHtml(label)}</span>`;
-    return `<span class="fixture-schedule" title="${escapeHtml(label)}">${day ? `<small class="fixture-schedule-day">${escapeHtml(day)}</small>` : ""}<b class="fixture-schedule-time">${escapeHtml(time)}</b></span>`;
-}
-
-function renderMatchDetailGrid(m, c) {
-    return `<div class="match-detail-grid"><div class="empty-state">Detalle del partido</div></div>`;
+/* Barra de la Peña: tres segmentos apilados %1 / %X / %2, con el mayoritario destacado.
+   Legible sin ampliar, como los paneles de consenso tipo Polymarket/Tipsters. */
+function renderPenaBar(c) {
+    const { p1, px, p2 } = penaPercents(c);
+    const total = Number(c?.total || 0);
+    if (!total) {
+        return `<div class="pena-bar-wrap"><div class="pena-bar pena-bar-empty"><span>—</span></div><small class="pena-voters">Sé el primero en votar</small></div>`;
+    }
+    const peak = Math.max(p1, px, p2);
+    const items = [
+        { sign: "1", pct: p1, cls: p1 === peak && peak > 0 ? " is-leader" : "" },
+        { sign: "X", pct: px, cls: px === peak && peak > 0 ? " is-leader" : "" },
+        { sign: "2", pct: p2, cls: p2 === peak && peak > 0 ? " is-leader" : "" },
+    ];
+    const bar = items.map(item =>
+        `<span class="pena-seg${item.cls}" style="width:${item.pct}%" title="${item.sign} ${item.pct}%">${item.pct > 0 ? item.pct : ""}</span>`
+    ).join("");
+    const votersText = total === 1 ? "1 votante" : `${total} votantes`;
+    return `<div class="pena-bar-wrap">
+        <div class="pena-bar">${bar}</div>
+        <small class="pena-voters">${votersText} han votado</small>
+    </div>`;
 }
 
 function renderConsensus(c, real, status) {
@@ -189,6 +198,9 @@ function renderArenaTensionBody(matches) {
         const penaChip = isPleno
             ? renderTensionPenaChip(renderPenaPleno(getPenaPlenoSummary(idx), m.marcador, m.status), "Peña")
             : renderTensionPenaChip(renderConsensus(c, real, m.status), "Peña");
+        const penaBar = isPleno
+            ? renderPenaPleno(getPenaPlenoSummary(idx), m.marcador, m.status)
+            : renderPenaBar(c);
         const mine = renderMyCell(idx, mySign, isPleno ? m.marcador : real, m.status, canEdit, isPleno);
         const predictorDetails = predictorColumns.map(([primary, fallback, label]) => {
             const sign = getSign(preds, idx, primary, fallback);
@@ -207,7 +219,12 @@ function renderArenaTensionBody(matches) {
             <td class="fixture-cell tension-fixture-cell"><div class="tension-fixture-main">${fixtureInline(m.local, m.visitante, m.logo_local, m.logo_visitante)}</div></td>
             <td class="ticket-status-cell" data-ticket-status>${scoreBadge}</td>
             ${predictorCells}
-            <td class="ticket-pick-cell ticket-pena-cell">${penaChip}</td>
+            <td class="ticket-pick-cell ticket-pena-cell">
+                <div class="pena-cell-content">
+                    ${penaChip}
+                    <div class="pena-bar-inline">${penaBar}</div>
+                </div>
+            </td>
             <td class="ticket-pick-cell ticket-user-cell"${isPleno ? ` title="Elegir resultado del Pleno al 15" data-pleno-label="${plenoLabel}"` : ""}><div class="tension-chip tension-chip-user"><span title="Tu quiniela">TU</span>${mine}</div></td>
             <td class="ticket-mobile-insights-cell"><details class="ticket-mobile-insights"><summary>Ver pronósticos y consenso</summary><div class="ticket-mobile-insights-list">${mobileInsights}</div></details></td>
         </tr>${state.expandedMatch === idx ? `<tr class="match-detail-row"><td colspan="${predictorColumns.length + 6}">${renderMatchDetailGrid(m, c)}</td></tr>` : ""}`;

@@ -3,6 +3,7 @@
 from .api_v1 import register_api_v1_aliases
 from .auth import bp as auth_bp
 from .comments import bp as comments_bp
+from .pena import bp as pena_bp
 from .contest_routes import bp as contest_bp
 from .legal import bp as legal_bp
 from .liga_data import bp as liga_data_bp
