@@ -167,6 +167,16 @@
             </div>
         </section>
 
+        <!-- Formulario de voto de La Peña (14 signos + pleno). Se renderiza y gestiona
+             desde static/js/pages/pena_vote.js, cargado bajo demanda en la vista TICKET. -->
+        <section id="pena-vote" class="pena-vote-section" aria-label="Voto de La Peña">
+            <div class="pena-vote-wrap">
+                <div id="pena-vote-header" class="pena-vote-header"></div>
+                <div id="pena-vote-form" class="pena-vote-form"></div>
+                <div id="pena-vote-footer" class="pena-vote-footer"></div>
+            </div>
+        </section>
+
         <main class="main-arena">
             <!-- Sin aria-live: es un contenedor de vista que se repinta entero
                  en cada refresh, y el lector de pantalla volvia a anunciar la

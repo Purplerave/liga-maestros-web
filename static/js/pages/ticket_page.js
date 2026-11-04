@@ -296,6 +296,12 @@ function renderArenaTensionBody(matches) {
     // unico manejador evita que el mismo clic marque y desmarque el signo al
     // propagarse, que hacia parecer que los botones no funcionaban.
     checkQuinielaCompletion();
+
+    // Inicializa el formulario de voto de La Peña una sola vez por sesion.
+    if (typeof initPenaVote === "function" && !state._penaVoteInited) {
+        state._penaVoteInited = true;
+        initPenaVote();
+    }
 }
 
 function patchTicketArena() {
