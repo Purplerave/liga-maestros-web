@@ -3,13 +3,13 @@
 from .api_v1 import register_api_v1_aliases
 from .auth import bp as auth_bp
 from .comments import bp as comments_bp
-from .pena import bp as pena_bp
 from .contest_routes import bp as contest_bp
 from .legal import bp as legal_bp
 from .liga_data import bp as liga_data_bp
 from .live import bp as live_bp
 from .main import bp as main_bp
 from .news import bp as news_bp
+from .pena import bp as pena_bp
 from .porra import bp as porra_bp
 from .predictions import bp as predictions_bp
 from .teams_routes import bp as teams_bp
@@ -29,4 +29,6 @@ def register_routes(app):
     app.register_blueprint(user_bp)
     app.register_blueprint(legal_bp)
     app.register_blueprint(comments_bp)
+    # La Peña: votos propios y consenso agregado (/api/pena/votar, /mis-votos, /consenso)
+    app.register_blueprint(pena_bp)
     register_api_v1_aliases(app)

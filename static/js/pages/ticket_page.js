@@ -10,6 +10,17 @@ function penaPercents(c) {
     return { p1, px, p2 };
 }
 
+/* La fecha (si el partido no es hoy) y la hora se apilan y no se truncan. */
+function renderFixtureSchedule(match) {
+    const { day, time, label } = fixtureScheduleParts(match);
+    if (!time) return `<span class="fixture-schedule is-pending" title="${escapeHtml(label)}">${escapeHtml(label)}</span>`;
+    return `<span class="fixture-schedule" title="${escapeHtml(label)}">${day ? `<small class="fixture-schedule-day">${escapeHtml(day)}</small>` : ""}<b class="fixture-schedule-time">${escapeHtml(time)}</b></span>`;
+}
+
+function renderMatchDetailGrid(m, c) {
+    return `<div class="match-detail-grid"><div class="empty-state">Detalle del partido</div></div>`;
+}
+
 /* Barra de la Peña: tres segmentos apilados %1 / %X / %2, con el mayoritario destacado.
    Legible sin ampliar, como los paneles de consenso tipo Polymarket/Tipsters. */
 function renderPenaBar(c) {

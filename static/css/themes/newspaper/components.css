@@ -9,35 +9,39 @@ body.newspaper-ui.quiniela-focus .contest-card{
     box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.36);
 }
 
-/* Marcador del duelo: Maestros X — Y Peña, en vivo, arriba del todo */
+/* Marcador del duelo: Maestros X — Y Peña, en vivo, dentro de la topbar.
+   Tres columnas fijas y compactas: la topbar mide 66px de alto y recorta
+   (overflow: hidden) cualquier cosa que crezca de más. */
 body.newspaper-ui.quiniela-focus .duelo-scorebar {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-areas: "maestros centro pena";
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    padding: 10px 16px;
-    margin: 10px 0 16px;
-    background: rgba(9, 14, 25, 0.92);
-    border: 1px solid rgba(243, 231, 207, 0.3);
-    border-radius: 6px;
+    justify-self: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 0 4px;
     font-family: var(--font-display, "Rajdhani", sans-serif);
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
 body.newspaper-ui.quiniela-focus .duelo-side {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    min-width: 100px;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
 }
+body.newspaper-ui.quiniela-focus .duelomaestros-side { grid-area: maestros; }
+body.newspaper-ui.quiniela-focus .duelopena-side { grid-area: pena; }
 body.newspaper-ui.quiniela-focus .duelo-label {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     color: #9fb1c8;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
 }
 body.newspaper-ui.quiniela-focus .duelo-score {
-    font-size: 1.8rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--news-paper, #f3e7ce);
     line-height: 1;
@@ -45,22 +49,41 @@ body.newspaper-ui.quiniela-focus .duelo-score {
 body.newspaper-ui.quiniela-focus .duelomaestros-side .duelo-score { color: #38bdf8; }
 body.newspaper-ui.quiniela-focus .duelopena-side .duelo-score { color: #fbbf24; }
 body.newspaper-ui.quiniela-focus .duelo-center {
+    grid-area: centro;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
 }
 body.newspaper-ui.quiniela-focus .duelo-vs {
-    font-size: 0.68rem;
+    font-size: 0.58rem;
     color: #64748b;
     letter-spacing: 0.2em;
+    line-height: 1;
 }
 body.newspaper-ui.quiniela-focus .duelo-countdown {
-    font-size: 0.72rem;
+    font-size: 0.6rem;
     color: #fbbf24;
+    /* --font-data es el token de la mono (tokens.css); --font-mono no existe. */
     font-family: var(--font-data, "JetBrains Mono", monospace);
+    white-space: nowrap;
+    line-height: 1.2;
 }
 body.newspaper-ui.quiniela-focus .duelo-countdown.urgent { color: #f87171; }
+
+/* Móvil: la topbar se queda en 52px y hay 3 columnas para 3 bloques. El
+   marcador solo muestra los números y el cierre, sin las etiquetas. */
+@media (max-width: 700px) {
+    body.newspaper-ui.quiniela-focus .duelo-scorebar {
+        gap: 6px;
+        padding: 0;
+    }
+    body.newspaper-ui.quiniela-focus .duelo-label { display: none; }
+    body.newspaper-ui.quiniela-focus .duelo-score { font-size: 1.15rem; }
+    body.newspaper-ui.quiniela-focus .duelo-countdown { font-size: 0.54rem; }
+}
 
 /* Cómo se juega: 3 pasos, una línea cada uno */
 body.newspaper-ui.quiniela-focus .como-juega {
@@ -311,4 +334,10 @@ body.newspaper-ui.quiniela-focus .newspaper-article-page p {
 body.newspaper-ui.quiniela-focus .article-note {
     color: var(--news-gold);
 }
+}
+
+/* El marcador del duelo abre una celda más en la topbar de escritorio:
+   contexto | duelo | filtros | acciones. Solo cuando el marcador existe. */
+body.newspaper-ui.quiniela-focus .topbar-shell:has(.duelo-scorebar) {
+    grid-template-columns: minmax(0, 1fr) auto auto max-content;
 }
