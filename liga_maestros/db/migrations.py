@@ -944,7 +944,7 @@ def ensure_schema_migrations_versioned(conn):
     if not _has_migration(conn, 5):
         ensure_predicciones_unique_index(conn)
         _record_migration(conn, 5, "predicciones unique index")
-    # version 6: votos_pena table (La Peña redesign)
+    # version 6: votos_pena table (La PeÃ±a redesign)
     if not _has_migration(conn, 6):
         ensure_votos_pena_table(conn)
         _record_migration(conn, 6, "votos_pena table")

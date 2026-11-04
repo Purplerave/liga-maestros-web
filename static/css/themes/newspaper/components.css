@@ -58,7 +58,7 @@ body.newspaper-ui.quiniela-focus .duelo-vs {
 body.newspaper-ui.quiniela-focus .duelo-countdown {
     font-size: 0.72rem;
     color: #fbbf24;
-    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-family: var(--font-data, "JetBrains Mono", monospace);
 }
 body.newspaper-ui.quiniela-focus .duelo-countdown.urgent { color: #f87171; }
 

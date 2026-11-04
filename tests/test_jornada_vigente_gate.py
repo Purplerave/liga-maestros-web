@@ -133,7 +133,6 @@ def test_la_jornada_del_seed_esta_en_la_temporada_vigente(current_jornada):
     assert is_current_season_jornada(current_jornada), "la jornada del seed no es de la temporada vigente"
 
 
-<<<<<<< HEAD
 def test_hay_quince_casillas_con_horario_verificado(horarios):
     """Quince casillas; el horario es obligatorio salvo donde la fuente no lo ha
     publicado.
