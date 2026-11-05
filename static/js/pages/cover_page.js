@@ -922,13 +922,18 @@ function kawaiiLiveAsideHtml() {
     const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
     const vacio = proximo
-        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
-        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><p>El panel mostrará aquí los partidos en cuanto comience el directo.</p></div>`;
-    return `<aside class="kk-live-aside" aria-label="Todos los partidos en directo">
+        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIGUIENTE EVENTO PROGRAMADO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
+        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SISTEMA EN ESPERA</span><b>El directo aparecerá aquí cuando empiecen los partidos.</b><p>Marcadores y minutos se actualizan automáticamente durante la jornada.</p></div>`;
+    return `<aside class="kk-live-aside kk-mission-board" aria-label="Centro de control del directo">
+            <div class="kk-mission-strip" aria-hidden="true">
+                <span>LM // CONTROL DE MISIÓN</span>
+                <span>JORNADA ${escapeHtml(String(state.data?.jornada || state.jornada || "—"))}</span>
+                <span class="kk-mission-signal"><i></i>${matches.length ? "SEÑAL EN VIVO" : "SEÑAL ESTABLE"}</span>
+            </div>
             <details class="lm-live-fold"${open ? " open" : ""}>
                 <summary class="kk-live-head">
                     <span class="kk-live-pulse" aria-hidden="true"></span>
-                    <b>PARTIDOS EN DIRECTO</b>
+                    <b>SEGUIMIENTO EN DIRECTO</b>
                     <span class="kk-live-count">${matches.length}</span>
                     <span class="kk-live-chevron" aria-hidden="true"></span>
                 </summary>
@@ -1015,8 +1020,6 @@ function renderNewspaperCoverPageV3() {
 
     return `<div class="cx kk-page${liveAside ? " has-live" : ""}">
         <div class="kk-wrap">
-            ${kawaiiCabeceraHtml(jornada, payload)}
-            ${kawaiiLoginHtml()}
             <div class="kk-layout">
                 ${liveAside}
                 <div class="kk-main">
@@ -1029,12 +1032,14 @@ function renderNewspaperCoverPageV3() {
                         <h2 class="kk-card-title"><span class="kk-card-kicker">ESTADÍSTICAS</span>Clasificación <span class="kk-tag">total · jornada</span></h2>
                         <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
                     </section>
-                    <section class="kk-card kk-history-card" aria-label="Historial de la liga">
-                        <h2 class="kk-card-title"><span class="kk-card-kicker">RESULTADOS ACUMULADOS</span>Historial de la liga <span class="kk-tag">jornada a jornada</span></h2>
+                    <details class="kk-card kk-history-card kk-archive-card">
+                        <summary class="kk-archive-summary"><span><span class="kk-card-kicker">ARCHIVO DE TEMPORADA</span>Jornadas anteriores</span><span class="kk-tag">ver resultados</span></summary>
                         <div id="historial-duelo-body" class="historial-duelo-body"><div class="kk-empty">Cargando estadísticas…</div></div>
-                    </section>
+                    </details>
                 </div>
             </div>
+            ${kawaiiLoginHtml()}
+            ${kawaiiCabeceraHtml(jornada, payload)}
             <footer class="kk-foot">LIGA DE MAESTROS · FEED DE RESULTADOS VERIFICADOS · DATOS ACTUALIZADOS AUTOMÁTICAMENTE</footer>
         </div>
     </div>`;

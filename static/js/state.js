@@ -136,8 +136,8 @@ function hydrateHero() {
     if (arenaTitle) arenaTitle.textContent = title;
     if (arenaKicker) arenaKicker.textContent = `Jornada ${state.data.jornada}`;
     if (document.body.classList.contains("newspaper-ui")) {
-        if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada} - La Peña vs Maestros IA`;
-        if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL" ? "Portada de la jornada" : title;
+        if (topbarKicker) topbarKicker.textContent = currentMainView() === "ALL" ? `Jornada ${state.data.jornada} · La Peña vs Maestros IA` : `Jornada ${state.data.jornada} - La Peña vs Maestros IA`;
+        if (topbarTitle) topbarTitle.textContent = currentMainView() === "ALL" ? "Centro de control" : title;
     } else {
         if (topbarTitle) topbarTitle.textContent = title;
         if (topbarKicker) topbarKicker.textContent = `Jornada ${state.data.jornada}`;
