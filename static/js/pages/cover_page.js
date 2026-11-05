@@ -1038,6 +1038,7 @@ function kawaiiCabeceraHtml(jornada, payload) {
                 <h1 class="kk-title">LIGA DE MAESTROS</h1>
                 <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
             </div>
+            <span class="kk-ticket-label">${escapeHtml(payload?.boleto?.nombre || "")}</span>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
             ${kawaiiLoginHtml()}
         </header>`;
