@@ -917,13 +917,40 @@ function kawaiiLiveItemHtml(match) {
             </li>`;
 }
 
+function kawaiiLiveFocusHtml(matches, proximo) {
+    if (!matches.length) {
+        const nextLabel = proximo
+            ? `${_matchSideName(proximo, "home")} — ${_matchSideName(proximo, "away")}`
+            : "Sin próximo partido confirmado";
+        const nextTime = proximo ? String(_whenLabel(proximo) || "Horario por confirmar") : "";
+        return `<div class="kk-live-focus is-standby">
+            <span class="kk-focus-kicker">SISTEMA DE SEGUIMIENTO · EN ESPERA</span>
+            <div class="kk-focus-orbit" aria-hidden="true"><i></i></div>
+            <div class="kk-focus-copy">
+                <b>SEÑAL DEPORTIVA EN ESPERA</b>
+                <p>Ahora mismo no hay partidos en directo.</p>
+                <small>${escapeHtml(nextLabel)}${nextTime ? ` · ${escapeHtml(nextTime)}` : ""}</small>
+            </div>
+        </div>`;
+    }
+
+    const match = matches[0];
+    return `<div class="kk-live-focus">
+        <span class="kk-focus-kicker">PARTIDO DESTACADO · ${escapeHtml(_liveCompLabel(match) || "ENCUENTRO")}</span>
+        <div class="kk-focus-orbit" aria-hidden="true"><i></i><b></b></div>
+        <div class="kk-focus-scoreline">
+            <div class="kk-focus-team"><small>LOCAL</small><b>${escapeHtml(_fitName(_matchSideName(match, "home"), 24))}</b></div>
+            <strong>${escapeHtml(String(_liveScoreText(match) || "—"))}</strong>
+            <div class="kk-focus-team is-away"><small>VISITANTE</small><b>${escapeHtml(_fitName(_matchSideName(match, "away"), 24))}</b></div>
+        </div>
+        <div class="kk-focus-foot"><span>${escapeHtml(String(_liveMinuteLabel(match) || "EN JUEGO"))}</span><span>FUENTE: MARCADOR VERIFICADO</span></div>
+    </div>`;
+}
+
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
     const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
-    const vacio = proximo
-        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>Ahora mismo no hay partidos en directo · ${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
-        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Ahora mismo no hay partidos en directo.</b><p>El panel mostrará aquí los marcadores y minutos en cuanto empiece la jornada.</p></div>`;
     return `<aside class="kk-live-aside" aria-label="Centro de control del directo">
             <div class="kk-mission-strip" aria-hidden="true">
                 <span>LM // CONTROL DE MISIÓN</span>
@@ -933,12 +960,23 @@ function kawaiiLiveAsideHtml() {
             <details class="lm-live-fold"${open ? " open" : ""}>
                 <summary class="kk-live-head">
                     <span class="kk-live-pulse" aria-hidden="true"></span>
-                    <b>SEGUIMIENTO EN DIRECTO</b>
+                    <b>MONITOR DE PARTIDOS EN DIRECTO</b>
                     <span class="kk-live-count">${matches.length}</span>
                     <span class="kk-live-chevron" aria-hidden="true"></span>
                 </summary>
-                ${matches.length ? `<ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>` : vacio}
-                <p class="kk-live-note">Actualización automática cada 30 segundos.</p>
+                <div class="kk-cockpit-grid">
+                    <section class="kk-cockpit-feed" aria-label="Marcadores del directo">
+                        <div class="kk-cockpit-label"><span>FEED DE PARTIDOS</span><small>${String(matches.length).padStart(2, "0")} CANALES</small></div>
+                        ${matches.length
+                            ? `<ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>`
+                            : `<div class="kk-feed-empty"><span>CANAL 01</span><b>SIN PARTIDOS EN JUEGO</b><small>Ahora mismo no hay partidos en directo.</small></div>`}
+                    </section>
+                    <section class="kk-cockpit-main" aria-label="Señal principal del directo">
+                        <div class="kk-cockpit-label"><span>SEÑAL PRINCIPAL</span><small>${matches.length ? "EN VIVO" : "STANDBY"}</small></div>
+                        ${kawaiiLiveFocusHtml(matches, proximo)}
+                    </section>
+                </div>
+                <div class="kk-live-note"><span>ACTUALIZACIÓN AUTOMÁTICA · 30 S</span><span>DATOS VERIFICADOS</span></div>
             </details>
         </aside>`;
 }
