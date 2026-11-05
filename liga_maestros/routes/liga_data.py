@@ -898,4 +898,3 @@ def get_historial():
                 "request_id": getattr(g, "request_id", ""),
             }
         ), 500
-
