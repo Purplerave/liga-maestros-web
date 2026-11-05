@@ -411,4 +411,3 @@ def add_competition_roster_columns(payload, competition_ranking, current_user_id
         ),
     )
     return payload
-
