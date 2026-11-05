@@ -21,7 +21,12 @@ from ..services.payloads.league_matches import (
 )
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
-from ..services.payloads.simple_view import build_simple_view_payload, build_simple_view_ranking
+from ..services.payloads.simple_view import (
+    build_simple_view_payload,
+    build_simple_view_ranking,
+    build_two_round_competition_ranking,
+    add_competition_roster_columns,
+)
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_live_scored_status, is_scored_status
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
@@ -301,6 +306,21 @@ def get_liga_data():
                 max_jornada=max_jornada,
                 current_user_id=user.get("id"),
             )
+            competition_ranking = build_two_round_competition_ranking(
+                conn,
+                jornada,
+                partidos,
+                simple_view,
+                participant_contract,
+                max_jornada,
+                jornadas_disponibles,
+                current_user_id=user.get("id"),
+                team_logos=team_logos,
+            )
+            simple_view = add_competition_roster_columns(
+                simple_view, competition_ranking, current_user_id=user.get("id")
+            )
+            simple_view["competition_ranking"] = competition_ranking
             ranking_maestros = predictions_payload["ranking_maestros"]
             if str(jornada) == "17":
                 # La clasificación de esta portada empieza en J17 y solo
@@ -875,3 +895,4 @@ def get_historial():
                 "request_id": getattr(g, "request_id", ""),
             }
         ), 500
+
