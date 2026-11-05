@@ -950,7 +950,7 @@ function kawaiiLiveFocusHtml(matches, proximo) {
 
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
-    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
+    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : false;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
     return `<aside class="kk-live-aside" aria-label="Centro de control del directo">
             <div class="kk-mission-strip" aria-hidden="true">
@@ -1031,6 +1031,10 @@ function kawaiiCabeceraHtml(jornada, payload) {
     const cerrada = coverIsClosed();
     const abierto = coverCloseLabel();
     const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
+    const cierreLabel = payload?.boleto?.cierre
+        ? `${payload.boleto.cierre}${payload.boleto.cierre_estimado ? " (estimado)" : ""}`
+        : "";
+    const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso, cierreLabel].filter(Boolean).join(" · ");
     return `<header class="kk-header">
             <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
@@ -1038,12 +1042,10 @@ function kawaiiCabeceraHtml(jornada, payload) {
                 <h1 class="kk-title">LIGA DE MAESTROS</h1>
                 <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
             </div>
+            <span class="kk-ticket-label">${escapeHtml(boletoLabel)}</span>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
-        </header>
-        <div class="kk-ticket">
-            ${simpleViewMetaHtml(payload)}
-            <span class="kk-pill kk-pill-state${cerrada ? " is-closed" : ""}">${escapeHtml(chip)}</span>
-        </div>`;
+            ${kawaiiLoginHtml()}
+        </header>`;
 }
 
 function renderNewspaperCoverPageV3() {
@@ -1078,7 +1080,6 @@ function renderNewspaperCoverPageV3() {
                     </details>
                 </div>
             </div>
-            ${kawaiiLoginHtml()}
             ${kawaiiCabeceraHtml(jornada, payload)}
             <footer class="kk-foot">LIGA DE MAESTROS · FEED DE RESULTADOS VERIFICADOS · DATOS ACTUALIZADOS AUTOMÁTICAMENTE</footer>
         </div>
