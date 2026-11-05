@@ -22,9 +22,9 @@ from ..services.payloads.league_matches import (
 from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.simple_view import (
+    add_competition_roster_columns,
     build_simple_view_payload,
     build_simple_view_ranking,
-    add_competition_roster_columns,
     build_two_round_competition_ranking,
 )
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
