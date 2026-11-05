@@ -3064,5 +3064,104 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label {
     font: 600 .72rem/1 "IBM Plex Mono", "JetBrains Mono", monospace;
     white-space: nowrap;
 }
+
+/* The ticket is the page: remove repeated instructions and the oversized duel banner. */
+body.newspaper-ui.quiniela-focus.newspaper-cover-active #como-juega,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-context,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .duelo-scorebar,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-filters {
+    display: none;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
+    position: relative;
+    top: auto;
+    display: flex;
+    justify-content: flex-end;
+    width: calc(100% - 28px);
+    min-height: 36px;
+    height: 36px;
+    margin: 3px auto 0;
+    padding: 2px 6px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions .primary-btn {
+    min-height: 28px;
+    padding: 3px 8px;
+    font-size: .72rem;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .main-arena {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap {
+    width: calc(100% - 24px);
+    max-width: none;
+    margin: 0 auto;
+    padding: 2px 0 8px;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header {
+    min-height: 38px;
+    padding: 3px 8px;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title { font-size: 1rem; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label { font-size: .64rem; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-glogin {
+    min-height: 26px;
+    padding: 2px 6px;
+    font-size: .72rem;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table thead th:first-child,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody th:first-child { width: 38%; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table thead th:nth-child(2),
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td:nth-child(2) { width: 8%; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table thead th:not(:first-child):not(:nth-child(2)),
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td:not(:nth-child(2)) { width: 10.8%; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody th,
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td {
+    min-height: 31px;
+    padding: 2px 4px;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-match {
+    display: grid;
+    grid-template-columns: 15px minmax(0, 1fr);
+    grid-template-areas: "idx teams" ". when";
+    align-items: center;
+    gap: 1px 4px;
+    padding: 3px 5px;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-idx { grid-area: idx; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams {
+    grid-area: teams;
+    min-width: 0;
+    font-size: .92rem;
+    line-height: 1;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
+    grid-area: when;
+    padding: 0;
+    font-size: .58rem;
+    line-height: 1;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card-title {
+    padding: 4px 8px;
+    font-size: .95rem;
+}
+@media (max-width: 900px) {
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap { width: calc(100% - 12px); }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell { width: calc(100% - 12px); }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table { min-width: 760px; }
+}
 }
 
