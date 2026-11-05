@@ -24,8 +24,8 @@ from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.simple_view import (
     build_simple_view_payload,
     build_simple_view_ranking,
-    build_two_round_competition_ranking,
     add_competition_roster_columns,
+    build_two_round_competition_ranking,
 )
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_live_scored_status, is_scored_status
