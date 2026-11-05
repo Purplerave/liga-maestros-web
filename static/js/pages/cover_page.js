@@ -1031,6 +1031,7 @@ function kawaiiCabeceraHtml(jornada, payload) {
     const cerrada = coverIsClosed();
     const abierto = coverCloseLabel();
     const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
+    const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso].filter(Boolean).join(" · ");
     return `<header class="kk-header">
             <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
@@ -1038,7 +1039,7 @@ function kawaiiCabeceraHtml(jornada, payload) {
                 <h1 class="kk-title">LIGA DE MAESTROS</h1>
                 <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
             </div>
-            <span class="kk-ticket-label">${escapeHtml(payload?.boleto?.nombre || "")}</span>
+            <span class="kk-ticket-label">${escapeHtml(boletoLabel)}</span>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
             ${kawaiiLoginHtml()}
         </header>`;
