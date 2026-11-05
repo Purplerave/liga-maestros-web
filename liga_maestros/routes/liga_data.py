@@ -393,13 +393,16 @@ def get_liga_data():
         return resp
     except Exception:
         logger.exception("api_liga_data failed")
-        return jsonify(
-            {
-                "status": "error",
-                "message": "No se pudo procesar la solicitud",
-                "request_id": getattr(g, "request_id", ""),
-            }
-        ), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "No se pudo procesar la solicitud",
+                    "request_id": getattr(g, "request_id", ""),
+                }
+            ),
+            500,
+        )
 
 
 def _resolve_max_jornada(conn):
