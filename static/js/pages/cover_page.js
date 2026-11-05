@@ -950,7 +950,7 @@ function kawaiiLiveFocusHtml(matches, proximo) {
 
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
-    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
+    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : false;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
     return `<aside class="kk-live-aside" aria-label="Centro de control del directo">
             <div class="kk-mission-strip" aria-hidden="true">
