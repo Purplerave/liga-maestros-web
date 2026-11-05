@@ -1863,4 +1863,208 @@ body.newspaper-ui.quiniela-focus .kk-foot { margin-top: 12px; text-align: center
     body.newspaper-ui.quiniela-focus .kk-card { padding: 10px 8px; }
 }
 
+/* Primera pantalla: el marcador funciona como tablero principal, no como
+   un chip dentro de la barra de navegación. */
+body.newspaper-ui.quiniela-focus .topbar-shell {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.85fr) minmax(360px, 1.35fr) minmax(210px, 0.8fr);
+    grid-template-areas: "context score actions" "filters score actions";
+    align-items: center;
+    gap: 8px 18px;
+    width: min(1480px, calc(100% - 28px));
+    max-width: 1480px;
+    min-height: 136px;
+    padding: 14px 18px;
+    border: 1px solid var(--cc-line-strong);
+    border-top: 3px solid var(--cc-cyan);
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, transparent 49.9%, rgba(56, 189, 248, 0.05) 50%, transparent 50.1%),
+        radial-gradient(ellipse at 50% 0%, rgba(14, 116, 144, 0.18), transparent 58%),
+        linear-gradient(120deg, rgba(4, 12, 22, 0.99), rgba(8, 20, 34, 0.98));
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.44), inset 0 1px rgba(255, 255, 255, 0.06);
+}
+
+body.newspaper-ui.quiniela-focus .topbar-context { grid-area: context; }
+body.newspaper-ui.quiniela-focus .topbar-filters { grid-area: filters; }
+body.newspaper-ui.quiniela-focus .topbar-actions {
+    grid-area: actions;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-kicker {
+    color: var(--cc-cyan);
+    font: 700 0.66rem/1.4 var(--cc-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus .topbar-title {
+    color: var(--cc-text);
+    font-size: clamp(1rem, 1.5vw, 1.3rem);
+    font-weight: 850;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus .duelo-scorebar {
+    grid-area: score;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "maestros centro pena";
+    justify-self: stretch;
+    align-self: stretch;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+    min-height: 100px;
+    padding: 12px 16px;
+    border: 1px solid var(--cc-line-strong);
+    border-radius: 6px;
+    background:
+        linear-gradient(rgba(56, 189, 248, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.045) 1px, transparent 1px),
+        radial-gradient(ellipse at center, rgba(8, 47, 73, 0.62), rgba(3, 8, 15, 0.96));
+    background-size: 18px 18px, 18px 18px, auto;
+    box-shadow: inset 0 0 26px rgba(56, 189, 248, 0.075), 0 0 22px rgba(56, 189, 248, 0.08);
+}
+
+body.newspaper-ui.quiniela-focus .duelo-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+body.newspaper-ui.quiniela-focus .duelo-label {
+    color: var(--cc-muted);
+    font: 700 0.62rem/1.2 var(--cc-mono);
+    letter-spacing: 0.14em;
+}
+
+body.newspaper-ui.quiniela-focus .duelo-score {
+    color: var(--cc-cyan);
+    font: 800 clamp(2rem, 4vw, 3rem)/0.95 var(--cc-mono);
+    text-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+}
+
+body.newspaper-ui.quiniela-focus .duelopena-side .duelo-score { color: var(--cc-green); text-shadow: 0 0 18px rgba(74, 222, 128, 0.22); }
+
+body.newspaper-ui.quiniela-focus .duelo-center { gap: 6px; }
+body.newspaper-ui.quiniela-focus .duelo-vs { color: var(--cc-muted); font: 700 0.62rem/1 var(--cc-mono); letter-spacing: 0.2em; }
+body.newspaper-ui.quiniela-focus .duelo-countdown { color: var(--cc-gold); font: 700 0.65rem/1.2 var(--cc-mono); }
+
+body.newspaper-ui.quiniela-focus #user-profile-nav .login-btn,
+body.newspaper-ui.quiniela-focus #user-profile-nav .topbar-login-btn {
+    border: 1px solid var(--cc-cyan);
+    border-radius: 4px;
+    background: rgba(8, 47, 73, 0.72);
+    color: var(--cc-text);
+    box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.08);
+    font: 700 0.72rem/1.2 var(--cc-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+body.newspaper-ui.quiniela-focus .como-juega {
+    width: min(1480px, calc(100% - 28px));
+    max-width: 1480px;
+    margin: 10px auto 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--cc-line);
+    border-left: 3px solid var(--cc-gold);
+    border-radius: 5px;
+    background: linear-gradient(90deg, rgba(10, 22, 36, 0.96), rgba(5, 12, 21, 0.94));
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+body.newspaper-ui.quiniela-focus .como-juega-steps { justify-content: space-between; gap: 8px 18px; }
+body.newspaper-ui.quiniela-focus .como-juega-step { color: var(--cc-text); font-size: 0.76rem; }
+body.newspaper-ui.quiniela-focus .como-juega-num {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(251, 191, 36, 0.75);
+    border-radius: 4px;
+    background: rgba(251, 191, 36, 0.12);
+    color: var(--cc-gold);
+    font: 700 0.72rem/1 var(--cc-mono);
+}
+
+body.newspaper-ui.quiniela-focus .kk-live-aside {
+    min-height: 270px;
+    padding: 16px;
+    border-top: 3px solid var(--cc-green);
+    background:
+        linear-gradient(rgba(56, 189, 248, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.035) 1px, transparent 1px),
+        linear-gradient(145deg, rgba(7, 18, 30, 0.98), rgba(3, 8, 15, 0.98));
+    background-size: 24px 24px, 24px 24px, auto;
+}
+
+body.newspaper-ui.quiniela-focus .kk-live-head {
+    min-height: 42px;
+    align-items: center;
+    border-bottom: 1px solid var(--cc-line-strong);
+}
+
+body.newspaper-ui.quiniela-focus .kk-live-count {
+    min-width: 34px;
+    padding: 5px 8px;
+    border-color: rgba(74, 222, 128, 0.5);
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--cc-green);
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus .kk-live-empty {
+    min-height: 188px;
+    padding: 18px 14px;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    border-radius: 4px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(8, 47, 73, 0.34), rgba(3, 8, 15, 0.72));
+    text-align: center;
+}
+
+body.newspaper-ui.quiniela-focus .kk-live-empty-state {
+    justify-self: center;
+    padding: 7px 10px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 3px;
+    background: rgba(251, 191, 36, 0.07);
+    color: var(--cc-gold);
+}
+
+@media (max-width: 900px) {
+    body.newspaper-ui.quiniela-focus .topbar-shell {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "score actions" "context context" "filters filters";
+        gap: 8px;
+        min-height: 0;
+        padding: 10px;
+    }
+
+    body.newspaper-ui.quiniela-focus .topbar-context { display: block; }
+    body.newspaper-ui.quiniela-focus .duelo-scorebar { min-height: 86px; padding: 8px; gap: 6px; }
+    body.newspaper-ui.quiniela-focus .duelo-label { display: block; font-size: 0.54rem; }
+    body.newspaper-ui.quiniela-focus .duelo-score { font-size: clamp(1.75rem, 7vw, 2.5rem); }
+    body.newspaper-ui.quiniela-focus .topbar-actions { justify-content: flex-end; }
+    body.newspaper-ui.quiniela-focus .kk-live-aside { min-height: 0; }
+    body.newspaper-ui.quiniela-focus .kk-live-empty { min-height: 142px; }
+}
+
+@media (max-width: 600px) {
+    body.newspaper-ui.quiniela-focus .topbar-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "score" "context" "actions"; }
+    body.newspaper-ui.quiniela-focus .topbar-context { display: block; text-align: center; }
+    body.newspaper-ui.quiniela-focus .topbar-actions { justify-content: center; }
+    body.newspaper-ui.quiniela-focus .como-juega { width: calc(100% - 16px); padding: 9px; }
+    body.newspaper-ui.quiniela-focus .como-juega-steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; }
+    body.newspaper-ui.quiniela-focus .como-juega-step { font-size: 0.72rem; }
+}
+
 }
