@@ -1031,7 +1031,10 @@ function kawaiiCabeceraHtml(jornada, payload) {
     const cerrada = coverIsClosed();
     const abierto = coverCloseLabel();
     const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
-    const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso].filter(Boolean).join(" · ");
+    const cierreLabel = payload?.boleto?.cierre
+        ? `${payload.boleto.cierre}${payload.boleto.cierre_estimado ? " (estimado)" : ""}`
+        : "";
+    const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso, cierreLabel].filter(Boolean).join(" · ");
     return `<header class="kk-header">
             <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
