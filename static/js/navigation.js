@@ -52,7 +52,7 @@ const VIEW_STYLES = {
 
 const VIEW_SCRIPTS = {
     ALL: [
-        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-95")],
+        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-96")],
         ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-3")],
         // El pleno de la columna «Tú» se elige con el mismo modal que usa el
         // boleto: la pagina unica lo pide al estar la jornada abierta.
