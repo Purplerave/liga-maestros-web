@@ -39,7 +39,7 @@ jobs:
         run: ruff check .
 
       - name: Format check with ruff
-        run: ruff format --check .
+        run: ruff format --diff .
 
       - name: Type check with mypy (informativo)
         run: |
