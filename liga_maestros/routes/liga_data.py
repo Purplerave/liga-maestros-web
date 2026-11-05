@@ -813,11 +813,8 @@ def get_historial():
             preds = _load_predictions(conn, j)
             contract = build_participant_contract()
             if j >= 19:
-                # La liga pública arranca en J19: Programa es el boleto de
-                # Pablo (MrPurple), no la línea editorial histórica Programa.
-                mrpurple = preds.get("mrpurple")
-                if mrpurple:
-                    preds["programa"] = mrpurple
+                # Desde J19 las cuentas humanas se puntúan con su identidad
+                # propia; MrPurple no se duplica bajo el alias Programa.
                 official_ids = set(CURRENT_MASTER_COLUMNS)
             else:
                 official_ids = {str(c.get("id", "")).lower() for c in contract.get("visible_ai_columns", [])}

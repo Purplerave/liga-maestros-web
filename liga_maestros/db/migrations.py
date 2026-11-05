@@ -833,6 +833,22 @@ def ensure_jornada_17(conn):
     return updated + imported
 
 
+def ensure_jornada_19(conn):
+    """Publica la J19 interna con el boleto SELAE 20.
+
+    La J18 interna corresponde al boleto europeo SELAE 19 y permanece vacía
+    en la vista de la liga. La J19 vuelve al calendario de liga y se alimenta
+    del fixture versionado; los boletos personales solo se importan cuando
+    llegan desde la app o desde un seed completo.
+    """
+    updated = ensure_jornada_completa(conn, 19)
+    imported = _import_compact_prediction_tickets(conn, 19)
+    _import_jornada_resultados(conn, 19)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -991,6 +1007,7 @@ def run_startup_migrations():
             ensure_jornada_12(conn)
             ensure_jornada_16(conn)
             ensure_jornada_17(conn)
+            ensure_jornada_19(conn)
             ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es

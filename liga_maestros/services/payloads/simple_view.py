@@ -1,7 +1,7 @@
 """Vista simple por columnas de la portada (J17 «en simple»).
 
-Una fila por casilla, solo las cinco columnas de participantes acordadas y
-aciertos/fallos ya decididos en el servidor. La regla de puntuacion vive
+Una fila por casilla, con la composición histórica o los participantes reales
+de la jornada abierta y aciertos/fallos decididos en el servidor. La regla de puntuacion vive
 UNA sola vez, en ``liga_maestros/scoring.py``: aqui se llama a
 ``score_prediction`` y el frontend solo pinta el resultado, para que un doble
 o el pleno no se puedan llegar a contar distinto en JS y en el ranking.
@@ -27,18 +27,28 @@ from ...services.teams import (
 )
 
 # La J17 es histórica: se conserva el elenco que jugó esa jornada. Desde la
-# J19 cambia la liga pública y MrPurple pasa a ocupar Programa; Sonia compite
-# desde La Peña y solo se incorporan maestros con una línea real.
+# J19, las personas conservan su propia identidad (MrPurple y Sonia) y el
+# Programa sigue siendo una columna separada. Las columnas sin línea real se
+# ocultan, salvo Programa, que permanece visible como referencia.
 HISTORICAL_COLUMNS = ("mrpurple", "programa", "tecnotron", "grok", "sonia")
-CURRENT_MASTER_COLUMNS = ("programa", "tecnotron", "grok", "gemini", "chatgpt", "copilot", "meta_ai")
+CURRENT_MASTER_COLUMNS = (
+    "mrpurple",
+    "sonia",
+    "programa",
+    "tecnotron",
+    "grok",
+    "gemini",
+    "chatgpt",
+    "copilot",
+    "meta_ai",
+)
 
 
 def load_ticket_metadata(jornada):
     """Metadatos del boleto (SELAE, concurso, cierre) desde el scrape de la jornada.
 
-    Solo la J17 los trae verificados; el resto de jornadas devuelven ``{}`` y
-    la vista se limita a pintar el numero de jornada. Sin importe de bote en
-    ningun caso: si no esta confirmado, no se muestra.
+    La vista lee los metadatos versionados para cada jornada. Sin importe de
+    bote confirmado, no se muestra.
     """
     name = f"quiniela15_J{int(jornada)}_scrape.json"
     for base_dir in (getattr(config, "SEED_DATA_DIR", ""), getattr(config, "DATA_DIR", ""), config.BASE_DIR):
@@ -92,8 +102,7 @@ def _column_ids(contract, signs, jornada, max_jornada, current_user_id=None):
 
     columns = []
     for uid in CURRENT_MASTER_COLUMNS:
-        # Programa representa el boleto de Pablo (MrPurple), no una columna
-        # editorial duplicada. La J18 europea se muestra explícitamente vacía.
+        # La J18 europea se muestra explícitamente vacía para Programa.
         if uid == "programa":
             columns.append(uid)
         elif has_line(uid):
@@ -155,10 +164,6 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
     programa_no_juega = jornada_num == 18
     if programa_no_juega:
         signs_by_column["programa"] = ["-"] * 15
-    if jornada_num >= 19:
-        # Desde la liga pública, la columna Programa es la quiniela de Pablo.
-        # No reutilizar aquí la predicción editorial histórica `programa`.
-        signs_by_column["programa"] = ["-"] * 15 if programa_no_juega else signs_by_column.get("mrpurple", ["-"] * 15)
     column_ids = _column_ids(contract, signs_by_column, jornada, max_jornada, current_user_id)
     yo = str(current_user_id or "").strip().lower()
 
@@ -170,7 +175,7 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
                 "id": uid,
                 "name": names.get(uid) or ("Meta AI" if uid == "meta_ai" else public_contest_name(uid, {})),
                 "es_pena": uid in {str(x).lower() for x in contract.get("pena_ids", [])},
-                "es_mia": bool(yo) and uid == ("mrpurple" if jornada_num < 19 else "programa"),
+                "es_mia": bool(yo) and uid == "mrpurple",
                 "sin_linea": not any(str(s) not in ("", "-") for s in line),
                 "estado": "no-juega" if uid == "programa" and programa_no_juega else "",
             }

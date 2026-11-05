@@ -505,7 +505,7 @@ function filasCubiertaAlineadas(idsFilas, idsPartidos) {
 }
 
 /* ==========================================================================
-   VISTA SIMPLE — la portada por defecto (Jornada 17 «en simple»)
+   VISTA SIMPLE — la portada por defecto (jornada activa)
    Una tabla por columnas, movil primero:
    Partido (fecha y hora) | Resultado | MrPurple | Programa | Tecnotron | Grok | Sonia.
 
@@ -535,7 +535,7 @@ function simpleViewColumns(payload) {
             sin_linea: Boolean(col.sin_linea),
         }));
     }
-    // Compatibilidad con payloads antiguos: la composición histórica de J17.
+    // Compatibilidad con payloads antiguos: la composición histórica.
     return [
         ["mrpurple", "MrPurple"],
         ["programa", "Programa"],
@@ -646,7 +646,7 @@ function simpleViewMark(pick) {
 
 function simpleViewWhenText(row) {
     const cuando = String(row?.cuando || "").trim();
-    // Casilla sin hora verificada (J17, la 14): se queda sin ella, sin rellenar.
+    // Una casilla sin hora verificada se queda sin ella, sin rellenar.
     return cuando || "—";
 }
 
