@@ -363,7 +363,12 @@ def build_two_round_competition_ranking(
                 continue
             participant = participants.setdefault(
                 uid,
-                {"id": uid, "name": column.get("name") or public_contest_name(uid, {}), "total": 0, "por_jornada": {}},
+                {
+                    "id": uid,
+                    "name": column.get("name") or public_contest_name(uid, {}),
+                    "total": 0,
+                    "por_jornada": {},
+                },
             )
             score = int((scores.get(uid) or {}).get("total") or 0)
             participant["por_jornada"][str(number)] = score
