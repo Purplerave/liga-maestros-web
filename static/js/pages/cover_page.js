@@ -922,8 +922,8 @@ function kawaiiLiveAsideHtml() {
     const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : true;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
     const vacio = proximo
-        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIGUIENTE EVENTO PROGRAMADO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
-        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SISTEMA EN ESPERA</span><b>El directo aparecerá aquí cuando empiecen los partidos.</b><p>Marcadores y minutos se actualizan automáticamente durante la jornada.</p></div>`;
+        ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>Ahora mismo no hay partidos en directo · ${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
+        : `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Ahora mismo no hay partidos en directo.</b><p>El panel mostrará aquí los marcadores y minutos en cuanto empiece la jornada.</p></div>`;
     return `<aside class="kk-live-aside kk-mission-board" aria-label="Centro de control del directo">
             <div class="kk-mission-strip" aria-hidden="true">
                 <span>LM // CONTROL DE MISIÓN</span>
