@@ -126,25 +126,24 @@ def save_predictions():
             "SELECT partido_id, fecha, hora, status FROM resultados WHERE jornada = ? ORDER BY partido_id",
             (target_jornada,),
         ).fetchall()
-        ids = {int(row["partido_id"]) for row in rows}
-        jornada_valida = len(rows) == Q15_EXPECTED_MATCHES and ids == set(range(1, Q15_EXPECTED_MATCHES + 1))
-        # Si el boleto apunta a una jornada que no está en las 15 filas de la
-        # jornada activa, conserva el rechazo genérico de jornada no activa.
-        if jornada_no_activa and not jornada_valida:
-            return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
-        if not jornada_valida:
-            return jsonify({"status": "error", "message": "La jornada no tiene 15 partidos validos."}), 400
+        # La hora de cierre prevalece sobre el filtro de jornada activa para
+        # devolver al usuario el motivo real cuando intenta editar una jornada
+        # vencida (aunque otra ya sea la jornada activa).
         close_info = compute_ticket_close_info(rows, source=f"save_predictions_j{target_jornada}")
         close_at = close_info["close_at"]
-        # Comprobacion rapida antes de tomar el lock de escritura. NO es la que
-        # protege: entre aqui y el BEGIN otro guardado (o el collector) puede
-        # cerrar la jornada, asi que se repite dentro de la transaccion.
         motivo_cierre = _motivo_de_cierre(rows, close_at)
         if motivo_cierre:
             return jsonify({"status": "error", "message": motivo_cierre}), 403
+
         if jornada_no_activa:
             return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
 
+        ids = {int(row["partido_id"]) for row in rows}
+        if len(rows) != Q15_EXPECTED_MATCHES or ids != set(range(1, Q15_EXPECTED_MATCHES + 1)):
+            return jsonify({"status": "error", "message": "La jornada no tiene 15 partidos validos."}), 400
+        # Comprobacion rapida antes de tomar el lock de escritura. NO es la que
+        # protege: entre aqui y el BEGIN otro guardado (o el collector) puede
+        # cerrar la jornada, asi que se repite dentro de la transaccion.
         # Solo el admin puede escribir el id reservado mrpurple
         es_admin = bool(user.get("is_admin"))
         if str(uid).strip().lower() == MRPURPLE_PUBLIC_ID and not es_admin:
