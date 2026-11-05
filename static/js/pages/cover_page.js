@@ -924,7 +924,7 @@ function kawaiiLiveAsideHtml() {
     const vacio = proximo
         ? `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Próximo: ${escapeHtml(_matchSideName(proximo, "home"))} — ${escapeHtml(_matchSideName(proximo, "away"))}</b><small>Ahora mismo no hay partidos en directo · ${escapeHtml(String(_whenLabel(proximo) || "Horario por confirmar"))}</small></div>`
         : `<div class="kk-live-empty"><span class="kk-live-empty-state">SIN PARTIDOS EN JUEGO</span><b>Ahora mismo no hay partidos en directo.</b><p>El panel mostrará aquí los marcadores y minutos en cuanto empiece la jornada.</p></div>`;
-    return `<aside class="kk-live-aside kk-mission-board" aria-label="Centro de control del directo">
+    return `<aside class="kk-live-aside" aria-label="Centro de control del directo">
             <div class="kk-mission-strip" aria-hidden="true">
                 <span>LM // CONTROL DE MISIÓN</span>
                 <span>JORNADA ${escapeHtml(String(state.data?.jornada || state.jornada || "—"))}</span>
