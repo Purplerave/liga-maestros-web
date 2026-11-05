@@ -121,14 +121,18 @@ def save_predictions():
     conn = get_db()
     try:
         active_jornada = resolve_active_jornada(conn)
-        if active_jornada is None or int(active_jornada) != target_jornada:
-            return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
+        jornada_no_activa = active_jornada is None or int(active_jornada) != target_jornada
         rows = conn.execute(
             "SELECT partido_id, fecha, hora, status FROM resultados WHERE jornada = ? ORDER BY partido_id",
             (target_jornada,),
         ).fetchall()
         ids = {int(row["partido_id"]) for row in rows}
-        if len(rows) != Q15_EXPECTED_MATCHES or ids != set(range(1, Q15_EXPECTED_MATCHES + 1)):
+        jornada_valida = len(rows) == Q15_EXPECTED_MATCHES and ids == set(range(1, Q15_EXPECTED_MATCHES + 1))
+        # Si el boleto apunta a una jornada que no está en las 15 filas de la
+        # jornada activa, conserva el rechazo genérico de jornada no activa.
+        if jornada_no_activa and not jornada_valida:
+            return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
+        if not jornada_valida:
             return jsonify({"status": "error", "message": "La jornada no tiene 15 partidos validos."}), 400
         close_info = compute_ticket_close_info(rows, source=f"save_predictions_j{target_jornada}")
         close_at = close_info["close_at"]
@@ -138,6 +142,8 @@ def save_predictions():
         motivo_cierre = _motivo_de_cierre(rows, close_at)
         if motivo_cierre:
             return jsonify({"status": "error", "message": motivo_cierre}), 403
+        if jornada_no_activa:
+            return jsonify({"status": "error", "message": "Solo se puede guardar la jornada activa."}), 403
 
         # Solo el admin puede escribir el id reservado mrpurple
         es_admin = bool(user.get("is_admin"))
