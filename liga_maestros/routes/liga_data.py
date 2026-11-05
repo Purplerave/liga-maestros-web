@@ -891,11 +891,14 @@ def get_historial():
         return jsonify({"status": "ok", "historial": historial})
     except Exception:
         logger.exception("api/liga/historial failed")
-        return jsonify(
-            {
-                "status": "error",
-                "message": "No se pudo procesar la solicitud",
-                "request_id": getattr(g, "request_id", ""),
-            }
-        ), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "No se pudo procesar la solicitud",
+                    "request_id": getattr(g, "request_id", ""),
+                }
+            ),
+            500,
+        )
 
