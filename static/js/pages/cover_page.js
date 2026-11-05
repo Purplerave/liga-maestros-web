@@ -100,11 +100,12 @@ function coverDisplayName(uid) {
     return names[id] || names[uid] || String(uid || "").split("@")[0];
 }
 function coverRankingRows() {
-    const ranking = state.data?.ranking_maestros || {};
+    const competition = state.data?.simple_view?.competition_ranking || {};
     const hidden = new Set((state.data?.participant_contract?.hidden_ids || []).map(id => String(id).toLowerCase()));
-    return Object.entries(ranking).filter(([uid]) => !hidden.has(String(uid).toLowerCase()))
-        .map(([uid, values]) => ({ uid, name: coverDisplayName(uid), total: Number(values?.total || 0), jornada: Number(values?.jornada_live ?? values?.jornada ?? 0) }))
-        .sort((a, b) => b.total - a.total || b.jornada - a.jornada || a.name.localeCompare(b.name, "es"));
+    return (Array.isArray(competition.rows) ? competition.rows : [])
+        .filter(row => !hidden.has(String(row.id || "").toLowerCase()))
+        .map(row => ({ uid: String(row.id || ""), name: String(row.name || coverDisplayName(row.id)), total: Number(row.total || 0), porJornada: row.por_jornada || {} }))
+        .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "es"));
 }
 function coverPredictionSigns(e) { if (Array.isArray(e)) return e; return Array.isArray(e?.signos) ? e.signos : []; }
 function coverPenaReading(row) {
@@ -515,8 +516,8 @@ function filasCubiertaAlineadas(idsFilas, idsPartidos) {
      que un doble o el pleno no se puedan contar distinto que en el ranking.
    - El marcador nunca se inventa: sin resultado verificado la casilla se queda
      en raya («—») y la fila aparece pendiente.
-   - La portada fija y blanquea sus cinco columnas permitidas: aqui solo se
-     pintan. Las demás líneas siguen en BD, pero no se muestran ni se puntúan.
+   - El backend fija el grupo de la competición: solo se pintan sus boletos.
+     Las líneas ajenas siguen guardadas, pero no entran en esta clasificación.
    El resto de secciones de la portada no se borra: siguen debajo, plegadas en
    «Otras secciones», y el historico J1-J16 se ve con el selector #jornada-nav.
    ========================================================================== */
@@ -1010,17 +1011,18 @@ function kawaiiRankingListHtml() {
         filas = [];
     }
     const yo = state.user ? String(state.user.id).toLowerCase() : "";
+    const jornadas = state.data?.simple_view?.competition_ranking?.jornadas || [];
     const items = filas.map((fila, i) => {
         const mia = Boolean(yo) && String(fila.uid).toLowerCase() === yo;
+        const porJornada = jornadas.map(jornada => `J${escapeHtml(String(jornada))}: ${Number(fila.porJornada?.[String(jornada)] || 0)}`).join(" · ");
         return `<div class="kk-rank${mia ? " is-you" : ""}">
                     <span class="kk-pos">${i + 1}</span>
-                    <span class="kk-av" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
                     <span class="kk-nm">${escapeHtml(_fitName(fila.name, 18))}${mia ? '<span class="kk-you-tag">tu columna</span>' : ""}</span>
-                    <span class="kk-sc"><b>${Number(fila.total || 0)}</b> pts · ${Number(fila.jornada || 0)} en J</span>
+                    <span class="kk-sc"><b>${Number(fila.total || 0)}</b> pts<small>${porJornada}</small></span>
                 </div>`;
     }).join("");
     if (!items) {
-        return `<p class="kk-empty">Todavía sin puntos: cada casilla se puntúa con su resultado verificado.</p>`;
+        return `<p class="kk-empty">La clasificación de las dos jornadas aparecerá cuando haya boletos enviados.</p>`;
     }
     return items;
 }
@@ -1066,12 +1068,12 @@ function renderNewspaperCoverPageV3() {
                         ${aviso}
                         ${simpleViewHtml()}
                     </section>
-                    <section class="kk-card kk-rank-card" aria-label="Clasificación">
-                        <h2 class="kk-card-title"><span class="kk-card-kicker">ESTADÍSTICAS</span>Clasificación <span class="kk-tag">total · jornada</span></h2>
+                    <section class="kk-card kk-rank-card" aria-label="Clasificación de las dos jornadas">
+                        <h2 class="kk-card-title"><span class="kk-card-kicker">COMPETICIÓN</span>Clasificación <span class="kk-tag">${(state.data?.simple_view?.competition_ranking?.jornadas || []).length} jornadas</span></h2>
                         <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
                     </section>
                     <details class="kk-card kk-history-card kk-archive-card">
-                        <summary class="kk-archive-summary"><span><span class="kk-card-kicker">ARCHIVO DE TEMPORADA</span>Jornadas anteriores</span><span class="kk-tag">ver resultados</span></summary>
+                        <summary class="kk-archive-summary"><span><span class="kk-card-kicker">ARCHIVO</span>Historial anterior</span><span class="kk-tag">guardado · fuera de clasificación</span></summary>
                         <div id="historial-duelo-body" class="historial-duelo-body"><div class="kk-empty">Cargando estadísticas…</div></div>
                     </details>
                 </div>
@@ -1082,3 +1084,4 @@ function renderNewspaperCoverPageV3() {
         </div>
     </div>`;
 }
+

@@ -32,6 +32,8 @@
     --kk-font: "Outfit", ui-rounded, "Segoe UI", system-ui, sans-serif;
 }
 
+
+
 /* ---------- shell: la pagina vuelve a ser un documento con scroll ---------- */
 /* Mismo selector que la capa `theme` del periodico, para que la cascada se
    resuelva por orden de fuente dentro de la capa kawaii. */
@@ -2653,4 +2655,270 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy { max-width: 75%; }
 }
 
+
+/* Portada compacta: partidos en primer plano, directo y clasificación como
+   módulos secundarios. Rajdhani aporta los trazos rectos del marcador sin
+   convertir toda la interfaz en una fuente monoespaciada de ciencia ficción. */
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-page,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-page * {
+        font-family: "Rajdhani", "Arial Narrow", sans-serif;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 2.15fr) minmax(300px, .85fr);
+        grid-template-areas:
+            "brand brand"
+            "meta meta"
+            "login login"
+            "table live"
+            "table rank"
+            "archive archive"
+            "foot foot";
+        align-items: start;
+        gap: 8px 14px;
+        width: min(1720px, calc(100% - 32px));
+        max-width: 1720px;
+        padding: 8px 0 14px;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-layout,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-main {
+        display: contents;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header { grid-area: brand; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket { grid-area: meta; margin: 0; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-glogin { grid-area: login; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-table-card { grid-area: table; min-width: 0; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside { grid-area: live; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-card { grid-area: rank; min-width: 0; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-archive-card { grid-area: archive; align-self: start; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-foot { grid-area: foot; margin-top: 2px; }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card-title,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-head b {
+        font-family: "Rajdhani", "Arial Narrow", sans-serif;
+        font-weight: 700;
+        letter-spacing: .035em;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header {
+        min-height: 58px;
+        padding: 6px 12px;
+        border-left: 2px solid var(--cc-cyan);
+        border-radius: 3px;
+        background: linear-gradient(100deg, #0b1420, #070d15);
+        box-shadow: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-logo { width: 38px; height: 38px; flex-basis: 38px; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title { font-size: 1.35rem; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sub { margin-top: 1px; font-size: .88rem; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip { display: none; }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside {
+        min-height: 0;
+        max-height: min(38vh, 300px);
+        position: static;
+        overflow: auto;
+        padding: 5px;
+        border: 1px solid rgba(125, 177, 205, .28);
+        border-top: 2px solid var(--cc-cyan);
+        border-radius: 3px;
+        background: #080e15;
+        box-shadow: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside::before,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside::after { display: none; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .lm-live-fold {
+        padding: 0 7px 6px;
+        border-color: rgba(125, 177, 205, .18);
+        background: #080e15;
+        box-shadow: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-head {
+        min-height: 32px;
+        padding: 2px 0 5px;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-head b {
+        color: var(--cc-text);
+        font-size: .95rem;
+        letter-spacing: .03em;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-grid {
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr);
+        border-color: rgba(125, 177, 205, .14);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-grid:has(.kk-feed-empty) .kk-cockpit-feed,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-grid:has(.kk-live-list) .kk-cockpit-main { display: none; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-list {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+        max-height: 145px;
+        overflow-y: auto;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-item {
+        min-height: 0;
+        padding: 5px 7px;
+        border: 1px solid rgba(125, 177, 205, .16);
+        border-left: 2px solid #d6b558;
+        background: #0a1119;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-body {
+        font: 600 .86rem/1.15 "Rajdhani", "Arial Narrow", sans-serif;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-score,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-min {
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-main {
+        min-height: 0;
+        padding: 6px 8px;
+        background: #080e15;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-label {
+        min-height: 18px;
+        margin-bottom: 2px;
+        color: var(--cc-muted);
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-focus,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-focus.is-standby {
+        min-height: 0;
+        padding: 5px 0;
+        border: 0;
+        background: transparent;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-kicker,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-orbit { display: none; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy {
+        max-width: none;
+        margin: 0;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy b {
+        color: #d6b558;
+        font: 700 .85rem/1.2 "Rajdhani", "Arial Narrow", sans-serif;
+        letter-spacing: .04em;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy p {
+        margin: 2px 0;
+        color: var(--cc-text);
+        font-size: .95rem;
+        font-weight: 600;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small {
+        color: var(--cc-muted);
+        font: 500 .75rem/1.25 "IBM Plex Mono", "JetBrains Mono", monospace;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note { display: none; }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card {
+        min-width: 0;
+        border-radius: 3px;
+        border-color: rgba(125, 177, 205, .2);
+        background: #080e15;
+        box-shadow: none;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card-title {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin: 0;
+        padding: 6px 9px;
+        border-bottom: 1px solid rgba(125, 177, 205, .18);
+        color: var(--cc-text);
+        font-size: 1.1rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card-kicker {
+        display: inline;
+        margin: 0;
+        color: var(--cc-cyan);
+        font-size: .7rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-tag {
+        margin-left: auto;
+        padding: 2px 5px;
+        color: var(--cc-muted);
+        font-size: .65rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-scroll { overflow: visible; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+        font-family: "Rajdhani", "Arial Narrow", sans-serif;
+        font-size: .94rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table thead th {
+        padding: 4px 3px;
+        font-size: .7rem;
+        letter-spacing: .025em;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody th,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td {
+        height: 27px;
+        padding: 2px 4px;
+        font-size: .88rem;
+        line-height: 1.05;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody th:first-child { width: 54%; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams {
+        font: 600 .98rem/1.05 "Rajdhani", "Arial Narrow", sans-serif;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
+        padding-left: 18px;
+        font: 500 .67rem/1.05 "IBM Plex Mono", "JetBrains Mono", monospace;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-result-val,
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-sign {
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-variant-numeric: tabular-nums;
+    }
+
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-list { padding: 0 8px; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank {
+        gap: 7px;
+        padding: 5px 2px;
+        border-color: rgba(125, 177, 205, .12);
+        font-size: .95rem;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-pos {
+        color: var(--cc-cyan);
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-nm { color: var(--cc-text); font-weight: 700; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sc {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        color: var(--cc-muted);
+        font: 500 .68rem/1.2 "IBM Plex Mono", "JetBrains Mono", monospace;
+    }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sc b { color: #d6b558; font-size: .95rem; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-empty { margin: 8px; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-archive-summary { padding: 6px 9px; font: 600 .9rem/1.2 "Rajdhani", sans-serif; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-history-card { max-height: 220px; }
+
+    @media (max-width: 900px) {
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-areas: "brand" "meta" "login" "table" "live" "rank" "archive" "foot";
+            width: calc(100% - 20px);
+        }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside { max-height: 280px; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-scroll { overflow-x: auto; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table { min-width: 680px; }
+    }
+
+    @media (max-width: 520px) {
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap { width: calc(100% - 14px); gap: 6px; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header { min-height: 48px; padding: 5px 7px; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title { font-size: 1.12rem; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket { padding: 5px 7px; }
+        body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside { max-height: 225px; }
+    }
 }
+

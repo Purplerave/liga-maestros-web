@@ -1,4 +1,4 @@
-"""Vista simple por columnas de la portada (J17 «en simple»).
+"""Vista simple por columnas de la portada y clasificación de la competición.
 
 Una fila por casilla, con la composición histórica o los participantes reales
 de la jornada abierta y aciertos/fallos decididos en el servidor. La regla de puntuacion vive
@@ -44,8 +44,8 @@ CURRENT_MASTER_COLUMNS = (
 )
 
 
-def load_ticket_metadata(jornada):
-    """Metadatos del boleto (SELAE, concurso, cierre) desde el scrape de la jornada.
+def _load_ticket_scrape(jornada):
+    """Registro versionado del boleto (fixture y metadatos) de una jornada.
 
     La vista lee los metadatos versionados para cada jornada. Sin importe de
     bote confirmado, no se muestra.
@@ -64,9 +64,14 @@ def load_ticket_metadata(jornada):
             continue
         if int(data.get("jornada") or 0) != int(jornada):
             continue
-        boleto = data.get("boleto")
-        return boleto if isinstance(boleto, dict) else {}
+        return data
     return {}
+
+
+def load_ticket_metadata(jornada):
+    data = _load_ticket_scrape(jornada)
+    boleto = data.get("boleto")
+    return boleto if isinstance(boleto, dict) else {}
 
 
 def _prediction_signs_by_column(conn, jornada):
@@ -258,7 +263,7 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
 
 
 def build_simple_view_ranking(payload):
-    """Clasificación J17 de las cinco columnas, derivada de los hits ya puntuados.
+    """Clasificación de una jornada, derivada de los hits ya puntuados.
 
     No vuelve a evaluar signos: reutiliza el resultado de ``score_prediction``
     almacenado por ``build_simple_view_payload`` para que tabla y ranking nunca
@@ -291,3 +296,118 @@ def build_simple_view_ranking(payload):
             "jornada_final": total,
         }
     return ranking
+
+
+def build_two_round_competition_ranking(
+    conn,
+    current_jornada,
+    current_partidos,
+    current_payload,
+    participant_contract,
+    max_jornada,
+    jornadas_disponibles,
+    current_user_id=None,
+    team_logos=None,
+):
+    """Clasifica solo a quienes compiten en las dos quinielas recientes.
+
+    La clasificación histórica global incluye participantes que ya no están en
+    esta competición. Para la portada empezamos en J17 y puntuamos las dos
+    jornadas más recientes que tengan boleto SELAE y fixture completo. J18 se
+    omite automáticamente porque no tiene scrape/quiniela.
+    """
+    from .matches import build_jornada_matches
+
+    try:
+        current_num = int(current_jornada)
+    except (TypeError, ValueError):
+        return {"jornadas": [], "rows": []}
+
+    rounds = []
+    for value in jornadas_disponibles or []:
+        try:
+            number = int(value)
+        except (TypeError, ValueError):
+            continue
+        if 17 <= number <= current_num:
+            scrape = _load_ticket_scrape(number)
+            if len(scrape.get("partidos") or []) == 15:
+                rounds.append(number)
+    if current_num >= 17 and current_num not in rounds:
+        scrape = _load_ticket_scrape(current_num)
+        if len(scrape.get("partidos") or []) == 15:
+            rounds.append(current_num)
+    rounds = sorted(set(rounds), reverse=True)[:2]
+
+    participants = {}
+    for number in reversed(rounds):
+        if number == current_num:
+            payload = current_payload
+        else:
+            matches = build_jornada_matches(conn, str(number), team_logos or {})
+            if len(matches) != 15:
+                continue
+            payload = build_simple_view_payload(
+                conn,
+                str(number),
+                matches,
+                participant_contract,
+                max_jornada=max_jornada,
+                current_user_id=current_user_id,
+            )
+
+        scores = build_simple_view_ranking(payload)
+        for column in payload.get("columns", []):
+            uid = str(column.get("id") or "").strip().lower()
+            if not uid or column.get("sin_linea"):
+                continue
+            participant = participants.setdefault(
+                uid,
+                {
+                    "id": uid,
+                    "name": column.get("name") or public_contest_name(uid, {}),
+                    "total": 0,
+                    "por_jornada": {},
+                },
+            )
+            score = int((scores.get(uid) or {}).get("total") or 0)
+            participant["por_jornada"][str(number)] = score
+            participant["total"] += score
+
+    rows = sorted(participants.values(), key=lambda row: (-row["total"], row["name"].casefold()))
+    return {"jornadas": rounds, "rows": rows}
+
+
+def add_competition_roster_columns(payload, competition_ranking, current_user_id=None):
+    """Keep the new-competition roster visible even before this week's pick is saved."""
+    payload = payload or {}
+    existing = {str(column.get("id") or "").lower() for column in payload.get("columns", [])}
+    additions = []
+    for participant in (competition_ranking or {}).get("rows", []):
+        uid = str(participant.get("id") or "").strip().lower()
+        if not uid or uid in existing:
+            continue
+        additions.append(
+            {
+                "id": uid,
+                "name": participant.get("name") or public_contest_name(uid, {}),
+                "es_pena": False,
+                "es_mia": uid == str(current_user_id or "").strip().lower(),
+                "sin_linea": True,
+                "estado": "",
+            }
+        )
+        payload.setdefault("totals", {})[uid] = {"aciertos": 0, "jugados": 0}
+        payload.setdefault("pleno", {})[uid] = {"acierto": None}
+        for row in payload.get("rows", []):
+            row.setdefault("picks", {})[uid] = {"signo": "-", "dobles": False, "hit": None}
+
+    order = {uid: index for index, uid in enumerate(CURRENT_MASTER_COLUMNS)}
+    payload["columns"] = sorted(
+        [*payload.get("columns", []), *additions],
+        key=lambda column: (
+            order.get(str(column.get("id") or "").lower(), len(order)),
+            str(column.get("name") or "").casefold(),
+        ),
+    )
+    return payload
