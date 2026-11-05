@@ -284,6 +284,52 @@ def test_los_ids_ocultos_del_contrato_no_pueden_colarse():
     assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
 
 
+def test_desde_j19_mrpurple_es_programa_y_sonia_no_aparece_como_maestra():
+    conn = _conn()
+    lineas = {
+        "mrpurple": "1",
+        "programa": "X",
+        "tecnotron": "2",
+        "grok": "1",
+        "sonia": "X",
+        "meta_ai": "2",
+    }
+    conn.executemany(
+        "INSERT OR REPLACE INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 19, ?, ?)",
+        [(uid, partido_id, signo) for uid, signo in lineas.items() for partido_id in range(1, 16)],
+    )
+    conn.commit()
+    payload = build_simple_view_payload(
+        conn,
+        19,
+        [{"id": 1, "status": "NS"}],
+        build_participant_contract(),
+        max_jornada=19,
+    )
+
+    ids = [col["id"] for col in payload["columns"]]
+    assert ids == ["programa", "tecnotron", "grok", "meta_ai"]
+    assert payload["columns"][0]["name"] == "Programa"
+    assert payload["rows"][0]["picks"]["programa"]["signo"] == "1"
+    assert "mrpurple" not in ids and "sonia" not in ids
+
+
+def test_j18_europea_mantiene_el_historico_y_marca_programa_como_no_juega():
+    conn = _conn()
+    payload = build_simple_view_payload(
+        conn,
+        18,
+        [{"id": 1, "status": "NS"}],
+        build_participant_contract(),
+        max_jornada=18,
+    )
+
+    program = next(col for col in payload["columns"] if col["id"] == "programa")
+    assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
+    assert program["estado"] == "no-juega"
+    assert payload["rows"][0]["picks"]["programa"]["signo"] == "-"
+
+
 # ---------------------------------------------------------------------------
 # (b) signos simples, (c) pleno, (d) pendiente
 # ---------------------------------------------------------------------------
@@ -595,6 +641,30 @@ def test_a_la_vista_por_defecto_se_le_ven_exactamente_las_cinco_columnas(portada
     # Y el boleto, con el cierre marcado como estimado y sin bote.
     assert "SELAE 18" in html and "2026/63" in html and "(estimado)" in html
     assert "€" not in html and "importe" not in html.lower()
+
+
+def test_la_portada_pinta_las_columnas_dinamicas_que_devuelve_el_backend():
+    state_data = {
+        "jornada": "19",
+        "max_jornada": 19,
+        "simple_view": {
+            "jornada": "19",
+            "columns": [
+                {"id": "programa", "name": "Programa", "sin_linea": False},
+                {"id": "tecnotron", "name": "Tecnotron", "sin_linea": False},
+                {"id": "meta_ai", "name": "Meta AI", "sin_linea": False},
+            ],
+            "rows": [],
+            "totals": {},
+            "total_casillas": 14,
+        },
+    }
+    html = _render_cover(state_data)
+
+    columns = re.findall(r'class="cx-sv-col" data-col="([^\"]+)"', html)
+    assert columns == ["programa", "tecnotron", "meta_ai"]
+    assert "Sonia" not in html and "MrPurple" not in html
+    assert "Meta AI" in html
 
 
 def test_b_las_casillas_pintan_aciertos_y_fallos_sin_dobles(portada_j17):

@@ -119,6 +119,7 @@ function renderArena() {
     if (state.currentFilter === "ALL") {
         container.className = "arena-content newspaper-cover-mode";
         container.innerHTML = renderNewspaperCoverPageV3();
+        if (typeof loadHistorial === "function") loadHistorial();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();
         if (typeof startSeasonCountdown === "function") startSeasonCountdown();

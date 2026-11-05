@@ -26,9 +26,11 @@ from ...services.teams import (
     signo_desde_goles,
 )
 
-# Orden cerrado de la portada J17. Las columnas se reservan aunque aún no
-# haya llegado una línea: pendiente se representa como «—», nunca se fabrica.
-BASE_COLUMNS = ("mrpurple", "programa", "tecnotron", "grok", "sonia")
+# La J17 es histórica: se conserva el elenco que jugó esa jornada. Desde la
+# J19 cambia la liga pública y MrPurple pasa a ocupar Programa; Sonia compite
+# desde La Peña y solo se incorporan maestros con una línea real.
+HISTORICAL_COLUMNS = ("mrpurple", "programa", "tecnotron", "grok", "sonia")
+CURRENT_MASTER_COLUMNS = ("programa", "tecnotron", "grok", "gemini", "chatgpt", "copilot", "meta_ai")
 
 
 def load_ticket_metadata(jornada):
@@ -77,12 +79,26 @@ def _prediction_signs_by_column(conn, jornada):
 
 
 def _column_ids(contract, signs, jornada, max_jornada, current_user_id=None):
-    """Devuelve solo las cinco columnas fijadas para la portada J17.
+    """Columnas históricas J17 o maestros reales de la liga pública desde J19."""
+    try:
+        jornada_num = int(jornada)
+    except (TypeError, ValueError):
+        jornada_num = 0
+    if jornada_num <= 18:
+        return list(HISTORICAL_COLUMNS)
 
-    Ni otras líneas guardadas ni ids ocultos u oficiales del contrato pueden
-    alterar el orden o colarse en esta tabla.
-    """
-    return list(BASE_COLUMNS)
+    def has_line(uid):
+        return any(str(sign or "").strip() not in ("", "-") for sign in signs.get(uid, []))
+
+    columns = []
+    for uid in CURRENT_MASTER_COLUMNS:
+        # Programa representa el boleto de Pablo (MrPurple), no una columna
+        # editorial duplicada. La J18 europea se muestra explícitamente vacía.
+        if uid == "programa":
+            columns.append(uid)
+        elif has_line(uid):
+            columns.append(uid)
+    return columns
 
 
 def _when_label(match):
@@ -135,6 +151,14 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
     current_uid = canonical_contest_id(current_user_id) if current_user_id else ""
     if current_uid and current_uid != "mrpurple" and current_uid in signs_by_column:
         signs_by_column["mrpurple"] = signs_by_column[current_uid]
+    jornada_num = int(jornada) if str(jornada).isdigit() else 0
+    programa_no_juega = jornada_num == 18
+    if programa_no_juega:
+        signs_by_column["programa"] = ["-"] * 15
+    if jornada_num >= 19:
+        # Desde la liga pública, la columna Programa es la quiniela de Pablo.
+        # No reutilizar aquí la predicción editorial histórica `programa`.
+        signs_by_column["programa"] = ["-"] * 15 if programa_no_juega else signs_by_column.get("mrpurple", ["-"] * 15)
     column_ids = _column_ids(contract, signs_by_column, jornada, max_jornada, current_user_id)
     yo = str(current_user_id or "").strip().lower()
 
@@ -144,10 +168,11 @@ def build_simple_view_payload(conn, jornada, partidos, participant_contract, max
         columns.append(
             {
                 "id": uid,
-                "name": names.get(uid) or public_contest_name(uid, {}),
+                "name": names.get(uid) or ("Meta AI" if uid == "meta_ai" else public_contest_name(uid, {})),
                 "es_pena": uid in {str(x).lower() for x in contract.get("pena_ids", [])},
-                "es_mia": bool(yo) and uid == "mrpurple",
+                "es_mia": bool(yo) and uid == ("mrpurple" if jornada_num < 19 else "programa"),
                 "sin_linea": not any(str(s) not in ("", "-") for s in line),
+                "estado": "no-juega" if uid == "programa" and programa_no_juega else "",
             }
         )
 

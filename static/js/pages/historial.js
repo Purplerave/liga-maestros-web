@@ -7,9 +7,19 @@ function qsHistorial(id) {
     return document.getElementById(id);
 }
 
+let historialRequestInFlight = false;
+let historialLastLoadedAt = 0;
+let historialCache = null;
+
 async function loadHistorial() {
     const body = qsHistorial("historial-duelo-body");
     if (!body) return;
+    if (historialCache && Date.now() - historialLastLoadedAt < 60_000) {
+        renderHistorial(historialCache);
+        return;
+    }
+    if (historialRequestInFlight) return;
+    historialRequestInFlight = true;
 
     try {
         const resp = await fetch("/api/liga/historial", { cache: "no-store" });
@@ -18,9 +28,13 @@ async function loadHistorial() {
         if (data.status !== "ok" || !Array.isArray(data.historial)) {
             throw new Error(data.message || "Error cargando historial");
         }
-        renderHistorial(data.historial);
+        historialCache = data.historial;
+        renderHistorial(historialCache);
+        historialLastLoadedAt = Date.now();
     } catch (err) {
         body.innerHTML = `<div class="empty-state">${escapeHtml(err.message || "Error cargando historial")}</div>`;
+    } finally {
+        historialRequestInFlight = false;
     }
 }
 
@@ -29,14 +43,13 @@ function renderHistorial(historial) {
     if (!body) return;
 
     if (!historial.length) {
-        body.innerHTML = `<div class="empty-state">Sin jornadas jugadas todavía.</div>`;
+        body.innerHTML = `<div class="kk-empty">Sin jornadas con resultados verificados todavía.</div>`;
         return;
     }
 
     const rows = historial.map(h => {
         const ganaMaestros = h.maestros > h.pena;
         const ganaPena = h.pena > h.maestros;
-        const empate = h.maestros === h.pena;
         const clase = ganaMaestros ? "maestros-win" : ganaPena ? "pena-win" : "draw";
         return `
             <tr class="${clase}">
@@ -51,7 +64,7 @@ function renderHistorial(historial) {
     }).join("");
 
     body.innerHTML = `
-        <table class="historial-duelo-table">
+        <div class="historial-duelo-scroll" tabindex="0"><table class="historial-duelo-table">
             <thead>
                 <tr>
                     <th>Jornada</th>
@@ -63,7 +76,7 @@ function renderHistorial(historial) {
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
-        </table>
+        </table></div>
     `;
 }
 
