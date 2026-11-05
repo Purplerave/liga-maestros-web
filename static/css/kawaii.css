@@ -2666,7 +2666,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-wrap {
-        display: grid !important;
+        display: grid;
         grid-template-columns: minmax(0, 2.15fr) minmax(300px, .85fr);
         grid-template-areas:
             "brand brand"
@@ -2685,7 +2685,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-layout,
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-main {
-        display: contents !important;
+        display: contents;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header { grid-area: brand; }
