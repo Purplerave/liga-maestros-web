@@ -1039,11 +1039,8 @@ function kawaiiCabeceraHtml(jornada, payload) {
                 <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
             </div>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
-        </header>
-        <div class="kk-ticket">
-            ${simpleViewMetaHtml(payload)}
-            <span class="kk-pill kk-pill-state${cerrada ? " is-closed" : ""}">${escapeHtml(chip)}</span>
-        </div>`;
+            ${kawaiiLoginHtml()}
+        </header>`;
 }
 
 function renderNewspaperCoverPageV3() {
@@ -1078,7 +1075,6 @@ function renderNewspaperCoverPageV3() {
                     </details>
                 </div>
             </div>
-            ${kawaiiLoginHtml()}
             ${kawaiiCabeceraHtml(jornada, payload)}
             <footer class="kk-foot">LIGA DE MAESTROS · FEED DE RESULTADOS VERIFICADOS · DATOS ACTUALIZADOS AUTOMÁTICAMENTE</footer>
         </div>
