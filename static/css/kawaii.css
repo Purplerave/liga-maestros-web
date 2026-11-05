@@ -3056,5 +3056,13 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title { font-size: 1rem; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-glogin { min-height: 26px; padding: 2px 6px; }
 }
+
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label {
+    padding: 3px 6px;
+    border: 1px solid rgba(125, 177, 205, .24);
+    color: #a9bbca;
+    font: 600 .72rem/1 "IBM Plex Mono", "JetBrains Mono", monospace;
+    white-space: nowrap;
+}
 }
 
