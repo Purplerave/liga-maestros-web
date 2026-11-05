@@ -2,6 +2,19 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-05 — Nueva jornada interna J19 (SELAE 20)
+
+### Añadido
+
+- Calendario verificado de los 15 partidos del boleto SELAE 20, del 7 al 8 de
+  noviembre. La portada y el panel directo pasan a mostrar esta jornada como
+  activa; la hora de cierre se marca como estimada.
+- Migración idempotente para importar los fixtures de J19 y los resultados
+  oficiales completos de J17. Los boletos de la nueva jornada se mantienen
+  vacíos hasta que los jugadores los envíen.
+- La vista desde J19 conserva separadas las cuentas de MrPurple y Sonia; ya no
+  duplica o renombra la línea de MrPurple como «Programa».
+
 ## 2026-11-01 — Los partidos ya jugados vuelven a mostrar su resultado
 
 ### Corregido

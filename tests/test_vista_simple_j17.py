@@ -167,7 +167,7 @@ def test_los_datos_de_la_jornada_17_estan_versionados():
 
 def test_migracion_persiste_los_resultados_oficiales_de_j17():
     conn = _conn()
-    assert migrations._import_jornada_resultados(conn, 17) == 2
+    assert migrations._import_jornada_resultados(conn, 17) == 15
     rows = conn.execute(
         "SELECT partido_id, goles_local, goles_visitante, status FROM resultados "
         "WHERE jornada = 17 AND partido_id IN (1, 12) ORDER BY partido_id"
@@ -284,7 +284,7 @@ def test_los_ids_ocultos_del_contrato_no_pueden_colarse():
     assert [col["id"] for col in payload["columns"]] == COLUMN_IDS
 
 
-def test_desde_j19_mrpurple_es_programa_y_sonia_no_aparece_como_maestra():
+def test_desde_j19_mrpurple_y_sonia_se_muestran_como_usuarios_separados():
     conn = _conn()
     lineas = {
         "mrpurple": "1",
@@ -308,10 +308,12 @@ def test_desde_j19_mrpurple_es_programa_y_sonia_no_aparece_como_maestra():
     )
 
     ids = [col["id"] for col in payload["columns"]]
-    assert ids == ["programa", "tecnotron", "grok", "meta_ai"]
-    assert payload["columns"][0]["name"] == "Programa"
-    assert payload["rows"][0]["picks"]["programa"]["signo"] == "1"
-    assert "mrpurple" not in ids and "sonia" not in ids
+    assert ids == ["mrpurple", "sonia", "programa", "tecnotron", "grok", "meta_ai"]
+    assert payload["columns"][0]["name"] == "MrPurple"
+    assert payload["columns"][1]["name"] == "Sonia"
+    assert payload["rows"][0]["picks"]["mrpurple"]["signo"] == "1"
+    assert payload["rows"][0]["picks"]["sonia"]["signo"] == "X"
+    assert payload["rows"][0]["picks"]["programa"]["signo"] == "X"
 
 
 def test_j18_europea_mantiene_el_historico_y_marca_programa_como_no_juega():

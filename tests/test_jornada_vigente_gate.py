@@ -93,9 +93,9 @@ def horarios(current_jornada: int) -> dict:
 def predicciones(current_jornada: int) -> dict:
     """Boletos de la jornada: del seed si existe, o de la importación editorial.
 
-    La J17 no tiene `data/predicciones_J17.json`: sus cinco líneas se despliegan
-    desde `J17_EDITORIAL_TICKETS`. Se normaliza la forma para que los tests no
-    distingan entre las dos fuentes.
+    La J17 tiene boletos editoriales cerrados. Desde la J19 la jornada es
+    abierta y las predicciones reales se envían desde la app; no se fabrican
+    líneas para que CI pase.
     """
     path = DATA / f"predicciones_J{current_jornada}.json"
     if path.is_file():
@@ -104,6 +104,8 @@ def predicciones(current_jornada: int) -> dict:
     from liga_maestros.db import migrations
 
     tickets = getattr(migrations, f"J{current_jornada}_EDITORIAL_TICKETS", None)
+    if current_jornada >= 19 and tickets is None:
+        return {}
     assert tickets, (
         f"falta data/predicciones_J{current_jornada}.json y no hay "
         f"J{current_jornada}_EDITORIAL_TICKETS en migrations.py"
@@ -160,9 +162,13 @@ def test_hay_quince_casillas_con_horario_verificado(horarios):
     assert len(sin_horario) <= 1, f"demasiadas casillas sin horario verificado: {sin_horario}"
 
 
-def test_el_programa_tiene_boleto_completo_y_valido(predicciones):
+def test_el_programa_tiene_boleto_completo_y_valido(predicciones, current_jornada):
     from liga_maestros.scoring import normalize_prediction_sign
 
+    # Desde J19 Programa y las cuentas personales son columnas distintas.
+    # Solo validar boletos realmente enviados.
+    if current_jornada >= 19 and "programa" not in predicciones:
+        return
     signos = predicciones["programa"]["signos"]
     assert len(signos) == MATCHES_PER_JORNADA, (
         f"el boleto del programa tiene {len(signos)} signos, no {MATCHES_PER_JORNADA}"
@@ -189,6 +195,10 @@ def test_todos_los_boletos_del_seed_estan_completos(predicciones, current_jornad
         if isinstance(entry, dict) and isinstance(entry.get("signos"), list)
     }
 
+    # En una jornada abierta, aún puede no haber boletos enviados. Nunca se
+    # completan ni se copian signos de una jornada histórica para rellenarla.
+    if current_jornada >= 19 and not participantes:
+        return
     assert participantes, f"el seed de la J{current_jornada} no contiene ningun boleto"
     for uid, entry in participantes.items():
         assert len(entry["signos"]) == MATCHES_PER_JORNADA, (

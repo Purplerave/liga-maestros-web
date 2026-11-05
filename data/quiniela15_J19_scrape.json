@@ -1,0 +1,33 @@
+{
+  "jornada": 19,
+  "source_url": "https://www.eduardolosilla.es/quiniela/ayudas/horarios",
+  "scraped_at": "2026-11-05",
+  "cierre": "sabado 7 de noviembre de 2026 a las 13:00 (estimado)",
+  "temporada": "2026-2027",
+  "fuente": "Horarios publicados para la Jornada 20 de SELAE; correspondencia interna de la Liga de Maestros J19 (SELAE 20). Fechas y horas verificadas el 05/11/2026.",
+  "nota": "Jornada abierta. No se cargan boletos personales hasta que los jugadores los envien.",
+  "boleto": {
+    "nombre": "SELAE 20",
+    "selae": 20,
+    "fecha": "2026-11-08",
+    "cierre": "sabado 7 de noviembre de 2026 a las 13:00",
+    "cierre_estimado": true
+  },
+  "partidos": [
+    {"num": 1, "local": "Málaga", "visitante": "Racing Santander", "fecha": "2026-11-07", "hora": "14:00", "division": "segunda"},
+    {"num": 2, "local": "Osasuna", "visitante": "Athletic Club", "fecha": "2026-11-07", "hora": "18:30", "division": "primera"},
+    {"num": 3, "local": "Valencia", "visitante": "Real Madrid", "fecha": "2026-11-07", "hora": "21:00", "division": "primera"},
+    {"num": 4, "local": "Elche", "visitante": "Betis", "fecha": "2026-11-08", "hora": "14:00", "division": "primera"},
+    {"num": 5, "local": "Real Sociedad", "visitante": "Rayo Vallecano", "fecha": "2026-11-08", "hora": "16:15", "division": "primera"},
+    {"num": 6, "local": "Celta", "visitante": "Levante", "fecha": "2026-11-08", "hora": "18:30", "division": "primera"},
+    {"num": 7, "local": "Villarreal", "visitante": "Getafe", "fecha": "2026-11-08", "hora": "18:30", "division": "primera"},
+    {"num": 8, "local": "Cádiz", "visitante": "Real Oviedo", "fecha": "2026-11-07", "hora": "16:15", "division": "segunda"},
+    {"num": 9, "local": "Girona", "visitante": "Almería", "fecha": "2026-11-08", "hora": "16:15", "division": "segunda"},
+    {"num": 10, "local": "Sporting", "visitante": "Valladolid", "fecha": "2026-11-08", "hora": "18:30", "division": "segunda"},
+    {"num": 11, "local": "Athletic Club (F)", "visitante": "Real Madrid (F)", "fecha": "2026-11-07", "hora": "16:00", "division": "liga_f"},
+    {"num": 12, "local": "Logroño (F)", "visitante": "Sevilla (F)", "fecha": "2026-11-08", "hora": "12:00", "division": "liga_f"},
+    {"num": 13, "local": "Eibar (F)", "visitante": "Real Sociedad (F)", "fecha": "2026-11-07", "hora": "17:15", "division": "liga_f"},
+    {"num": 14, "local": "Tenerife (F)", "visitante": "Alavés (F)", "fecha": "2026-11-08", "hora": "13:00", "division": "liga_f"},
+    {"num": 15, "local": "Atlético de Madrid", "visitante": "Barcelona", "fecha": "2026-11-08", "hora": "21:00", "division": "primera", "pleno_al_15": true}
+  ]
+}
