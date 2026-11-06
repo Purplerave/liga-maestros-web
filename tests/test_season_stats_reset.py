@@ -152,6 +152,9 @@ def _test_app(tmp_path, monkeypatch):
     # los importa: sin este no-op el fixture deja de poseer su propia BD y
     # aparece una tercera jornada (la 17) jugada por MrPurple.
     monkeypatch.setattr(migrations, "_import_inline_prediction_tickets", lambda conn, jornada, tickets: 0)
+    # Lo mismo para la J19: su seed (data/predicciones_J19.json) se importa en
+    # el arranque y sumaría una jornada jugada más por MrPurple.
+    monkeypatch.setattr(migrations, "_import_compact_prediction_tickets", lambda conn, jornada: 0)
     monkeypatch.setattr(config, "PRODUCTION_SEED_PATH", str(tmp_path / "missing-seed.json"))
     monkeypatch.setattr(config, "FIXTURE_CORRECTIONS_PATH", str(tmp_path / "missing-fixtures.json"))
     monkeypatch.setattr(config, "DB_BACKUP_DIR", str(tmp_path / "backups"))
