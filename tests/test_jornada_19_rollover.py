@@ -30,7 +30,7 @@ def test_jornada_19_importa_selae_20_y_mantiene_j17_completa():
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 17").fetchone()[0] == 15
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 75
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 19").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 19").fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 19").fetchone()[0] == 75
     assert resolve_active_jornada(conn) == 19
 
     first = conn.execute(
@@ -43,13 +43,8 @@ def test_vista_activa_muestra_selae_20_sin_mezclar_jugadores_historicos():
     conn = _conn()
     migrations.ensure_jornada_17(conn)
     migrations.ensure_jornada_19(conn)
-    line = ["1"] * 14 + ["1-0"]
-    for uid in ("mrpurple", "sonia"):
-        conn.executemany(
-            "INSERT INTO predicciones (user_id, jornada, partido_id, signo) VALUES (?, 19, ?, ?)",
-            [(uid, partido_id, signo) for partido_id, signo in enumerate(line, start=1)],
-        )
-    conn.commit()
+    # Los boletos de la J19 ya vienen en el seed (data/predicciones_J19.json):
+    # los 5 de la liga tienen línea, incluido el Programa.
     partidos = build_jornada_matches(conn, "19", {})
     payload = build_simple_view_payload(
         conn,
@@ -60,16 +55,26 @@ def test_vista_activa_muestra_selae_20_sin_mezclar_jugadores_historicos():
     )
 
     assert load_ticket_metadata(19)["nombre"] == "SELAE 20"
-    assert [column["id"] for column in payload["columns"]] == ["mrpurple", "sonia", "programa"]
+    assert [column["id"] for column in payload["columns"]] == [
+        "mrpurple",
+        "sonia",
+        "programa",
+        "tecnotron",
+        "grok",
+    ]
     assert payload["columns"][0]["sin_linea"] is False
     assert payload["columns"][1]["sin_linea"] is False
-    assert payload["columns"][2]["sin_linea"] is True
+    assert payload["columns"][2]["sin_linea"] is False
+    assert payload["columns"][3]["sin_linea"] is False
+    assert payload["columns"][4]["sin_linea"] is False
     assert len(payload["rows"]) == 15
     assert payload["rows"][0]["local"] == "Málaga"
     assert payload["rows"][0]["cuando"].endswith("14:00")
-    assert payload["rows"][0]["picks"]["mrpurple"]["signo"] == "1"
-    assert payload["rows"][0]["picks"]["sonia"]["signo"] == "1"
-    assert payload["rows"][0]["picks"]["programa"]["signo"] == "-"
+    assert payload["rows"][0]["picks"]["mrpurple"]["signo"] == "2"
+    assert payload["rows"][0]["picks"]["sonia"]["signo"] == "2"
+    assert payload["rows"][0]["picks"]["programa"]["signo"] == "1"
+    assert payload["rows"][0]["picks"]["tecnotron"]["signo"] == "X"
+    assert payload["rows"][0]["picks"]["grok"]["signo"] == "X"
 
 
 def test_fixture_j19_y_resultados_j17_estan_versionados_y_completos():
