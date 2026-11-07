@@ -3015,21 +3015,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td {
     padding: 4px 5px;
     line-height: 1.1;
 }
+/* El span de equipos: inline-flex para que quepa junto al numero dentro de la
+   casilla (table-cell, ver abajo). Sin white-space nowrap ni overflow hidden:
+   si un nombre no cabe parte en dos líneas en vez de recortarse. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams {
-    display: flex;
-    flex-wrap: nowrap;
+    display: inline-flex;
+    vertical-align: middle;
     align-items: center;
     gap: 3px;
-    overflow: hidden;
-    white-space: nowrap;
     font-size: .96rem;
-    line-height: 1;
+    line-height: 1.05;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams b {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams i { flex: 0 0 auto; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
@@ -3133,24 +3132,27 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody td {
     min-height: 31px;
     padding: 2px 4px;
 }
+/* display: grid aqui sacaba el th de la tabla: como dejaba de ser table-cell,
+   la fila remapeaba las columnas del table-layout fixed y la casilla quedaba
+   aplastada a ~110px de 289, recortando los nombres con puntos suspensivos.
+   Volviendo a table-cell recupera su 38% (289px) y el interior se ordena con
+   inline-flex (numero + nombres) y la fecha debajo, ya sin recortes. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-match {
-    display: grid;
-    grid-template-columns: 15px minmax(0, 1fr);
-    grid-template-areas: "idx teams" ". when";
-    align-items: center;
-    gap: 1px 4px;
+    display: table-cell;
+    vertical-align: middle;
     padding: 3px 5px;
 }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-idx { grid-area: idx; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-idx {
+    display: inline-block;
+    width: 15px;
+    vertical-align: middle;
+}
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams {
-    grid-area: teams;
-    min-width: 0;
     font-size: .92rem;
-    line-height: 1;
+    line-height: 1.05;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
-    grid-area: when;
-    padding: 0;
+    padding: 2px 0 0;
     font-size: .58rem;
     line-height: 1;
 }
