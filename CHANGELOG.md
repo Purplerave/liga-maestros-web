@@ -2,6 +2,19 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-07 — Los nombres de los equipos se leen completos
+
+### Corregido
+
+- La portada aplastaba la casilla del partido: la fila visible quedaba a unos
+  110px de los 289 de su columna ("Racing Santander" se mostraba como
+  "Racing S…" aunque el DOM llevaba el nombre completo). La causa era el
+  `display: grid` sobre `th.cx-sv-match` en `kawaii.css`: al dejar de ser
+  `table-cell`, la fila remapeaba las columnas del `table-layout: fixed`.
+  Ahora el `th` vuelve a ser `table-cell` (38%) y los nombres van en
+  `inline-flex` y parten en dos líneas si no caben, sin puntos suspensivos
+  nunca. Bump de caché `kawaii.css` (`-kawaii-17`).
+
 ## 2026-11-05 — Nueva jornada interna J19 (SELAE 20)
 
 ### Añadido
