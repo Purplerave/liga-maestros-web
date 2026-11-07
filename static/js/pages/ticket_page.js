@@ -340,6 +340,246 @@ function patchTicketArena() {
     return true;
 }
 
+/* ==========================================================================
+   COMMAND PANEL — Módulos de la columna derecha (directo, clasificación,
+   estadísticas) y resumen de aciertos inferior.
+   Se renderizan dentro de la estructura de dos zonas que arena.js pinta
+   cuando state.currentFilter === "TICKET".
+   ========================================================================== */
+
+/* ---------- Resumen de aciertos (debajo de la tabla, zona izquierda) ---------- */
+
+function renderAciertosSummary() {
+    const simple = state.data?.simple_view || {};
+    const columns = Array.isArray(simple.columns) ? simple.columns : [];
+    const totals = simple.totals || {};
+    const pleno = simple.pleno || {};
+
+    // Construir filas: nombre, aciertos, jugados, pleno
+    const filas = columns.map(col => {
+        const uid = String(col.id || "");
+        const t = totals[uid] || { aciertos: 0, jugados: 0 };
+        const p = pleno[uid] || { acierto: null };
+        const esMia = Boolean(col.es_mia);
+        const aciertos = Number(t.aciertos || 0);
+        const jugados = Number(t.jugados || 0);
+        const plenoTexto = p.acierto === true ? "✓" : p.acierto === false ? "✗" : "—";
+        const plenoClass = p.acierto === true ? "is-hit" : p.acierto === false ? "is-miss" : "";
+        return {
+            uid,
+            name: col.name || uid,
+            esMia,
+            aciertos,
+            jugados,
+            plenoTexto,
+            plenoClass,
+        };
+    });
+
+    // Ordenar por aciertos descendente
+    filas.sort((a, b) => b.aciertos - a.aciertos || a.name.localeCompare(b.name));
+
+    const filasHtml = filas.map((f, i) => {
+        const posClass = i === 0 ? "best" : "";
+        const meClass = f.esMia ? "is-me" : "";
+        return `<tr class="command-aciertos-row ${meClass}" data-acierto-uid="${escapeHtml(f.uid)}">
+            <td class="aciertos-pos">${i + 1}</td>
+            <td class="aciertos-nombre"><span class="nombre-participante">${escapeHtml(f.name)}</span></td>
+            <td class="aciertos-valor ${posClass}">${f.aciertos}</td>
+            <td class="aciertos-valor">${f.jugados}</td>
+            <td class="aciertos-valor ${f.plenoClass}">${f.plenoTexto}</td>
+        </tr>`;
+    }).join("");
+
+    return `<table class="command-aciertos-table">
+        <thead>
+            <tr>
+                <th style="width:24px;">#</th>
+                <th>Participante</th>
+                <th style="text-align:right;">Aciertos</th>
+                <th style="text-align:right;">Jugados</th>
+                <th style="text-align:right;width:34px;">Pleno</th>
+            </tr>
+        </thead>
+        <tbody id="aciertos-body">${filasHtml}</tbody>
+    </table>`;
+}
+
+/* ---------- Módulo: Monitor en directo ---------- */
+
+function renderDirectoModule() {
+    const matches = typeof getAllLiveMatches === "function" ? getAllLiveMatches() : [];
+    const quinielaMatches = matches.filter(m => typeof quinielaSlotForMatch === "function" && quinielaSlotForMatch(m) > 0);
+
+    if (!matches.length) {
+        return `<div class="live-monitor-empty">
+            <div class="empty-icon" aria-hidden="true">━</div>
+            <h4>SIN PARTIDOS EN DIRECTO</h4>
+            <p>No hay encuentros en juego en este momento.</p>
+        </div>`;
+    }
+
+    const itemsHtml = matches.map(match => {
+        const comp = typeof competitionLabel === "function" ? competitionLabel(match) : "";
+        const slot = typeof quinielaSlotForMatch === "function" ? quinielaSlotForMatch(match) : 0;
+        const home = getShortName(match.local || match.home_name || (match.home || {}).name || "");
+        const away = getShortName(match.visitante || match.away_name || (match.away || {}).name || "");
+        const score = (typeof liveScoreDisplay === "function"
+            ? liveScoreDisplay(match, match.marcador_base || match.score || match.marcador || "")
+            : "") || "—";
+        const minute = (typeof liveMinuteLabel === "function" && liveMinuteLabel(match)) || "EN JUEGO";
+        const isQuiniela = slot > 0;
+        return `<li class="live-item${isQuiniela ? " is-quiniela" : ""}">
+            <div class="live-item-meta">
+                ${comp && comp !== "OTROS" ? `<span class="live-item-comp">${escapeHtml(comp)}</span>` : ""}
+                ${isQuiniela ? `<span class="live-item-slot" title="Casilla ${slot} de la quiniela">Casilla ${slot}</span>` : ""}
+                <span class="live-item-min">${escapeHtml(String(minute))}</span>
+            </div>
+            <div class="live-item-teams">
+                <b class="home">${escapeHtml(home)}</b><i aria-hidden="true">–</i><b class="away">${escapeHtml(away)}</b>
+            </div>
+            <span class="live-item-score">${escapeHtml(String(score))}</span>
+        </li>`;
+    }).join("");
+
+    return `<div class="live-monitor-meta">
+        <span class="live-count">${matches.length}</span> partido${matches.length !== 1 ? "s" : ""} en juego${quinielaMatches.length ? ` · ${quinielaMatches.length} de la quiniela` : ""}
+    </div>
+    <ul class="live-monitor-list">${itemsHtml}</ul>`;
+}
+
+/* ---------- Módulo: Clasificación ---------- */
+
+function renderClasificacionModule() {
+    const simple = state.data?.simple_view || {};
+    const columns = Array.isArray(simple.columns) ? simple.columns : [];
+    const totals = simple.totals || {};
+    const pleno = simple.pleno || {};
+
+    const filas = columns.map(col => {
+        const uid = String(col.id || "");
+        const t = totals[uid] || { aciertos: 0, jugados: 0 };
+        const p = pleno[uid] || { acierto: null };
+        const aciertos = Number(t.aciertos || 0);
+        const jugados = Number(t.jugados || 0);
+        const esMia = Boolean(col.es_mia);
+        const total = aciertos + (p.acierto === true ? 1 : 0);
+        return { uid, name: col.name || uid, esMia, aciertos, jugados, total, pleno: p.acierto === true };
+    });
+
+    filas.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+
+    const filasHtml = filas.map((f, i) => {
+        const pos = i + 1;
+        const meClass = f.esMia ? "is-me" : "";
+        const posClass = i === 0 ? "best" : "";
+        let evolucion = "";
+        let evoClass = "is-same";
+        if (pos === 1) { evolucion = "▲"; evoClass = "is-up"; }
+        else if (pos === filas.length) { evolucion = "▼"; evoClass = "is-down"; }
+        return `<tr class="clasificacion-row ${meClass}">
+            <td class="pos">${pos}</td>
+            <td class="nombre"><span class="nombre-participante">${escapeHtml(f.name)}</span></td>
+            <td class="valor ${posClass}">${f.total}</td>
+            <td class="valor">${f.jugados}</td>
+            <td class="valor">${f.aciertos}</td>
+            <td class="evolucion ${evoClass}" title="Evolución de posición">${evolucion}</td>
+        </tr>`;
+    }).join("");
+
+    return `<table class="clasificacion-table">
+        <thead>
+            <tr>
+                <th style="width:24px;">Pos</th>
+                <th>Participante</th>
+                <th style="text-align:right;">Pts</th>
+                <th style="text-align:right;">J</th>
+                <th style="text-align:right;">Aciertos</th>
+                <th style="text-align:center;width:40px;">Evol.</th>
+            </tr>
+        </thead>
+        <tbody>${filasHtml}</tbody>
+    </table>
+    <div class="clasificacion-scroll-note">Desplaza para ver la clasificación completa</div>`;
+}
+
+/* ---------- Módulo: Estadísticas y rendimiento ---------- */
+
+function renderEstadisticasModule() {
+    const simple = state.data?.simple_view || {};
+    const columns = Array.isArray(simple.columns) ? simple.columns : [];
+    const totals = simple.totals || {};
+    const pleno = simple.pleno || {};
+
+    const filas = columns.map(col => {
+        const uid = String(col.id || "");
+        const t = totals[uid] || { aciertos: 0, jugados: 0 };
+        const p = pleno[uid] || { acierto: null };
+        const aciertos = Number(t.aciertos || 0);
+        const jugados = Number(t.jugados || 0);
+        const total = aciertos + (p.acierto === true ? 1 : 0);
+        const pct = jugados ? Math.round((aciertos * 100) / jugados) : 0;
+        const esMia = Boolean(col.es_mia);
+        return { uid, name: col.name || uid, esMia, aciertos, jugados, total, pct };
+    });
+
+    filas.sort((a, b) => b.total - a.total);
+
+    const mejor = filas[0] || { name: "—", total: 0, pct: 0 };
+    const maximaAciertos = Math.max(...filas.map(f => f.total), 0);
+    const miFila = filas.find(f => f.esMia) || { name: "Tú", total: 0, pct: 0 };
+
+    // Rachas simples: mejor racha de aciertos (aprox. por jornada actual)
+    const mejorPct = Math.max(...filas.map(f => f.pct), 0);
+
+    return `<div class="estadisticas-grid">
+        <div class="estadisticas-card">
+            <h4>Mejor de la jornada</h4>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Participante</span>
+                <span class="stat-value best">${escapeHtml(mejor.name)}</span>
+            </div>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Puntos</span>
+                <span class="stat-value">${mejor.total}</span>
+            </div>
+        </div>
+        <div class="estadisticas-card">
+            <h4>Máximo de aciertos</h4>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Aciertos</span>
+                <span class="stat-value best">${maximaAciertos}</span>
+            </div>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Efectividad</span>
+                <span class="stat-value">${mejorPct}%</span>
+            </div>
+        </div>
+        <div class="estadisticas-card">
+            <h4>Tu rendimiento</h4>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Puntos</span>
+                <span class="stat-value">${miFila.total}</span>
+            </div>
+            <div class="estadisticas-stat">
+                <span class="stat-label">Efectividad</span>
+                <span class="stat-value">${miFila.pct}%</span>
+            </div>
+        </div>
+        <div class="estadisticas-card">
+            <h4>Comparativa</h4>
+            <div class="estadisticas-racha">
+                ${filas.slice(0, 4).map(f => `
+                    <div class="racha-item">
+                        <span class="racha-label">${escapeHtml(f.name)}</span>
+                        <span class="racha-value">${f.total} pts</span>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    </div>`;
+}
+
 /* ensureQ15Directo() y loadPorra() viven en quantum_final.js, que se carga en el
    shell inicial. Este archivo se carga despues, bajo demanda, al entrar en la
    vista TICKET: como ambos son scripts clasicos, una declaracion `function` de

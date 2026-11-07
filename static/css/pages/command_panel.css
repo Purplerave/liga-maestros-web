@@ -1,0 +1,918 @@
+/* ==========================================================================
+   COMMAND PANEL — Rediseño del panel principal como centro de control deportivo
+   Estética de terminal informática / consola de operaciones.
+   Aplicado a la vista TICKET (quiniela principal).
+   ========================================================================== */
+
+@layer command_panel {
+
+/* ------------------------------------------------------------------ */
+/*  Contenedor de dos zonas: izquierda (partidos) y derecha (monitores) */
+/* ------------------------------------------------------------------ */
+
+.command-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+}
+
+/* Escritorio: dos columnas. Izquierda ~72-75%, derecha ~25-28%. */
+@media (min-width: 1024px) {
+    .command-panel {
+        grid-template-columns: 73% 27%;
+        grid-template-rows: 1fr;
+        gap: var(--space-3);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Zona izquierda — Partidos y pronósticos (tabla compacta)          */
+/* ------------------------------------------------------------------ */
+
+.command-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.command-table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--accent);
+    background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(3, 7, 14, 0.98));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.command-table-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(6, 12, 22, 0.8);
+    flex-shrink: 0;
+}
+
+.command-table-caption h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-main);
+}
+
+.command-table-caption .caption-meta {
+    font-family: var(--font-data);
+    font-size: 0.7rem;
+    color: var(--accent);
+}
+
+.command-table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.arena-table.is-tension-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: var(--font-data);
+    font-size: 0.72rem;
+    line-height: 1.25;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.arena-table.is-tension-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: rgba(3, 7, 14, 0.95);
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    padding: var(--space-2) var(--space-2);
+    white-space: nowrap;
+}
+
+.arena-table.is-tension-table thead th:last-child {
+    border-right: 0;
+}
+
+.arena-table.is-tension-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.12s ease;
+}
+
+.arena-table.is-tension-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.arena-table.is-tension-table tbody tr.is-live-row {
+    background: rgba(34, 197, 94, 0.04);
+    border-left: 3px solid var(--green);
+}
+
+.arena-table.is-tension-table tbody tr.is-finished-row {
+    opacity: 0.78;
+}
+
+.arena-table.is-tension-table tbody tr.is-split-row {
+    background: rgba(251, 191, 36, 0.03);
+}
+
+.arena-table.is-tension-table td {
+    padding: var(--space-2) var(--space-2);
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+.arena-table.is-tension-table td:last-child {
+    border-right: 0;
+}
+
+.arena-table.is-tension-table td.match-index-cell {
+    width: 28px;
+    min-width: 28px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    border-right: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.arena-table.is-tension-table td.fixture-cell {
+    min-width: 0;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+}
+
+.tension-fixture-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.tension-fixture-main .team-badge {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #05070d;
+}
+
+.tension-fixture-main .team-names {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.tension-fixture-main .team-name {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+.tension-fixture-main .team-name.home { color: var(--accent); }
+.tension-fixture-main .team-name.away { color: var(--text-muted); }
+
+.tension-fixture-main .team-vs {
+    flex: 0 0 auto;
+    font-family: var(--font-data);
+    font-size: 0.62rem;
+    font-weight: 900;
+    color: var(--text-dim);
+    line-height: 1;
+}
+
+.tension-fixture-main .ticket-live-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 20px;
+    padding: 0 6px;
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--green);
+    font-family: var(--font-data);
+    font-size: 0.62rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.tension-fixture-main .ticket-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+    50% { opacity: 0.5; box-shadow: 0 0 14px var(--green); }
+}
+
+.arena-table.is-tension-table td.ticket-status-cell {
+    width: 78px;
+    min-width: 78px;
+    text-align: center;
+    font-family: var(--font-data);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.match-score-badge {
+    display: inline-block;
+    min-width: 30px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--text-main);
+    background: rgba(11, 18, 32, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.match-score-badge.is-live-score {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.match-score-badge.is-scheduled-time {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+}
+
+/* Pronósticos — celdas de columna */
+.arena-table.is-tension-table td.ticket-pick-cell {
+    text-align: center;
+    padding: var(--space-2) 4px;
+}
+
+.tension-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(11, 18, 32, 0.55);
+    font-family: var(--font-data);
+    font-size: 0.68rem;
+    line-height: 1;
+}
+
+.tension-chip span {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.tension-chip .ia-signo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.82rem;
+    font-weight: 900;
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+}
+
+.tension-chip .ia-signo.active { color: var(--text-main); }
+
+/* Hits / misses */
+.tension-chip .ia-signo.is-hit,
+.tension-chip .ia-signo.hit {
+    background: var(--green);
+    color: #052e16;
+}
+
+.tension-chip .ia-signo.is-miss,
+.tension-chip .ia-signo.miss {
+    background: var(--red);
+    color: #fff1f2;
+}
+
+.tension-chip .ia-signo.is-pending,
+.tension-chip .ia-signo.pending {
+    color: var(--text-dim);
+    background: transparent;
+}
+
+/* Columna Peña — barra de consenso */
+.pena-cell-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+}
+
+.pena-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 2px 8px;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    background: rgba(251, 191, 36, 0.12);
+    font-family: var(--font-data);
+    font-size: 0.68rem;
+}
+
+.pena-chip span {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.pena-chip .ia-signo {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: var(--gold);
+}
+
+.pena-bar-inline {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pena-bar-wrap .pena-bar,
+.pena-bar-inline .pena-bar {
+    height: 100%;
+    display: flex;
+}
+
+.pena-seg {
+    height: 100%;
+    font-size: 0;
+}
+
+.pena-seg.is-leader { filter: brightness(1.15); }
+
+/* Columna usuario — "TU" */
+.tension-chip-user {
+    border-color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+}
+
+.tension-chip-user span { color: var(--accent); }
+.tension-chip-user .ia-signo { color: var(--accent); }
+
+/* Pleno al 15 — fila independiente */
+.arena-table.is-tension-table tbody tr.is-pleno-row td {
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.08), transparent);
+    border-top: 2px solid var(--gold);
+}
+
+.arena-table.is-tension-table tbody tr.is-pleno-row td.match-index-cell {
+    color: var(--gold);
+    border-right-color: var(--gold);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Resumen de aciertos (debajo de la tabla)                          */
+/* ------------------------------------------------------------------ */
+
+.command-aciertos-summary {
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--accent);
+    background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(3, 7, 14, 0.98));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.command-aciertos-summary .aciertos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(6, 12, 22, 0.8);
+    flex-shrink: 0;
+}
+
+.command-aciertos-summary .aciertos-header h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-main);
+}
+
+.command-aciertos-scroll {
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.command-aciertos-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: var(--font-data);
+    font-size: 0.7rem;
+    line-height: 1.3;
+}
+
+.command-aciertos-table th {
+    background: rgba(3, 7, 14, 0.9);
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    padding: var(--space-2) var(--space-3);
+    white-space: nowrap;
+}
+
+.command-aciertos-table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    white-space: nowrap;
+}
+
+.command-aciertos-table tr:last-child td { border-bottom: 0; }
+
+.command-aciertos-table tr.is-me { background: rgba(56, 189, 248, 0.08); }
+
+.command-aciertos-table td.aciertos-pos {
+    width: 24px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.command-aciertos-table td.aciertos-nombre {
+    min-width: 0;
+    padding-right: var(--space-2);
+}
+
+.command-aciertos-table .nombre-participante {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.command-aciertos-table td.aciertos-valor {
+    text-align: right;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+.command-aciertos-table td.aciertos-valor.is-hit { color: var(--green); }
+.command-aciertos-table td.aciertos-valor.is-miss { color: var(--red); }
+.command-aciertos-table td.aciertos-valor.best { color: var(--gold); }
+
+/* ------------------------------------------------------------------ */
+/*  Zona derecha — Monitores apilados                                 */
+/* ------------------------------------------------------------------ */
+
+.command-right {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.command-module {
+    flex: 1 1 auto;
+    min-height: 0;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--accent);
+    background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(3, 7, 14, 0.98));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.command-module-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(6, 12, 22, 0.8);
+    flex-shrink: 0;
+}
+
+.command-module-header h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-main);
+}
+
+.command-module-header .module-meta {
+    font-family: var(--font-data);
+    font-size: 0.66rem;
+    color: var(--accent);
+}
+
+.command-module-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* --- Módulo: Directo --- */
+
+.live-monitor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--space-6);
+    text-align: center;
+    color: var(--text-dim);
+}
+
+.live-monitor-empty .empty-icon {
+    font-size: 2.2rem;
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+.live-monitor-empty h4 {
+    margin: 0 0 var(--space-1) 0;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-main);
+}
+
+.live-monitor-empty p {
+    margin: 0;
+    font-size: 0.72rem;
+    font-family: var(--font-data);
+    color: var(--text-dim);
+}
+
+.live-monitor-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.live-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 5px;
+    background: rgba(6, 12, 22, 0.5);
+}
+
+.live-item.is-quiniela { border-color: rgba(56, 189, 248, 0.25); }
+
+.live-item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-family: var(--font-data);
+    font-size: 0.62rem;
+    color: var(--text-dim);
+}
+
+.live-item-comp {
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+
+.live-item-slot {
+    color: var(--text-dim);
+}
+
+.live-item-teams {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.live-item-teams b {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-item-teams b.home { color: var(--accent); }
+.live-item-teams b.away { color: var(--text-muted); }
+
+.live-item-teams i {
+    font-style: normal;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+}
+
+.live-item-score {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.live-item-min {
+    flex: 0 0 auto;
+    font-family: var(--font-data);
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: var(--green);
+    white-space: nowrap;
+}
+
+/* --- Módulo: Clasificación --- */
+
+.clasificacion-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: var(--font-data);
+    font-size: 0.7rem;
+    line-height: 1.3;
+}
+
+.clasificacion-table th {
+    background: rgba(3, 7, 14, 0.9);
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+    padding: var(--space-2) var(--space-2);
+    white-space: nowrap;
+}
+
+.clasificacion-table th:last-child { border-right: 0; }
+
+.clasificacion-table td {
+    padding: var(--space-2) var(--space-2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clasificacion-table tr:last-child td { border-bottom: 0; }
+.clasificacion-table td:last-child { border-right: 0; }
+
+.clasificacion-table tr.is-me { background: rgba(56, 189, 248, 0.08); }
+
+.clasificacion-table td.pos {
+    width: 24px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.clasificacion-table td.nombre {
+    min-width: 0;
+    padding-right: var(--space-2);
+}
+
+.clasificacion-table .nombre-participante {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clasificacion-table td.valor {
+    text-align: right;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+.clasificacion-table td.valor.best { color: var(--gold); }
+.clasificacion-table td.valor.is-hit { color: var(--green); }
+
+.clasificacion-table td.evolucion {
+    width: 44px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.clasificacion-table td.evolucion.is-up { color: var(--green); }
+.clasificacion-table td.evolucion.is-down { color: var(--red); }
+.clasificacion-table td.evolucion.is-same { color: var(--text-dim); }
+
+.clasificacion-scroll-note {
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    border: 1px solid rgba(56, 189, 248, 0.12);
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.05);
+    font-family: var(--font-data);
+    font-size: 0.62rem;
+    color: var(--accent);
+    text-align: center;
+}
+
+/* --- Módulo: Estadísticas --- */
+
+.estadisticas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+}
+
+.estadisticas-card {
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 5px;
+    background: rgba(6, 12, 22, 0.5);
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.estadisticas-card h4 {
+    margin: 0 0 var(--space-1) 0;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding-bottom: 4px;
+}
+
+.estadisticas-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-family: var(--font-data);
+    font-size: 0.72rem;
+}
+
+.estadisticas-stat .stat-label {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.estadisticas-stat .stat-value {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.estadisticas-stat .stat-value.best { color: var(--gold); }
+.estadisticas-stat .stat-value.is-hit { color: var(--green); }
+
+.estadisticas-racha {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.racha-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-data);
+    font-size: 0.72rem;
+}
+
+.racha-item .racha-label { color: var(--text-muted); }
+.racha-item .racha-value { font-family: var(--font-display); font-weight: 800; color: var(--text-main); }
+
+/* ------------------------------------------------------------------ */
+/*  Responsive: móvil — una sola columna                              */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1023px) {
+    .command-panel {
+        grid-template-rows: auto;
+    }
+
+    .command-left,
+    .command-right {
+        min-height: auto;
+    }
+
+    .command-module {
+        min-height: auto;
+    }
+
+    .estadisticas-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .arena-table.is-tension-table thead th.ticket-predictor-heading,
+    .arena-table.is-tension-table td.ticket-pick-cell {
+        font-size: 0.64rem;
+        padding: 6px 2px;
+    }
+
+    .command-table-caption { padding: var(--space-1) var(--space-2); }
+    .command-module-header { padding: var(--space-1) var(--space-2); }
+    .command-module-body { padding: var(--space-1); }
+}
+
+} /* @layer command_panel */
