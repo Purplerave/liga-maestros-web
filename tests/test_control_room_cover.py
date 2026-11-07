@@ -8,15 +8,12 @@ from pathlib import Path
 import pytest
 from bs4 import BeautifulSoup
 
-
 ROOT = Path(__file__).resolve().parents[1]
 pytestmark = pytest.mark.skipif(not shutil.which("node"), reason="Node.js no disponible")
 
 
 def run_node(script):
-    result = subprocess.run(
-        ["node", "-e", script], cwd=ROOT, capture_output=True, text=True
-    )
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
 
@@ -76,24 +73,26 @@ def competition_payload():
     for index in range(1, 16):
         result = index <= 6 or index == 15
         pleno = index == 15
-        rows.append({
-            "id": index,
-            "local": "Osasuna" if index == 2 else f"Local {index}",
-            "visitante": "Athletic Club" if index == 2 else f"Visitante {index}",
-            "fecha": "2026-11-07",
-            "hora": "17:30",
-            "cuando": "sabado 07/11 17:30",
-            "resultado": ("2-0" if pleno else "1-0") if result else "",
-            "has_result": result,
-            "status": "FT" if result else "NS",
-            "is_pleno": pleno,
-            "picks": {
-                "a": {"signo": "0-0" if pleno else "2", "hit": False if result else None},
-                "b": {"signo": "2-0" if pleno else "1", "hit": True if result else None},
-                "c": {"signo": "0-0" if pleno else "1", "hit": index <= 3 if result else None},
-                "d": {"signo": "0-0" if pleno else "1", "hit": index <= 2 if result else None},
-            },
-        })
+        rows.append(
+            {
+                "id": index,
+                "local": "Osasuna" if index == 2 else f"Local {index}",
+                "visitante": "Athletic Club" if index == 2 else f"Visitante {index}",
+                "fecha": "2026-11-07",
+                "hora": "17:30",
+                "cuando": "sabado 07/11 17:30",
+                "resultado": ("2-0" if pleno else "1-0") if result else "",
+                "has_result": result,
+                "status": "FT" if result else "NS",
+                "is_pleno": pleno,
+                "picks": {
+                    "a": {"signo": "0-0" if pleno else "2", "hit": False if result else None},
+                    "b": {"signo": "2-0" if pleno else "1", "hit": True if result else None},
+                    "c": {"signo": "0-0" if pleno else "1", "hit": index <= 3 if result else None},
+                    "d": {"signo": "0-0" if pleno else "1", "hit": index <= 2 if result else None},
+                },
+            }
+        )
     return {
         "jornada": 19,
         "max_jornada": 19,
@@ -104,8 +103,12 @@ def competition_payload():
             "jornada": 19,
             "columns": columns,
             "rows": rows,
-            "totals": {"a": {"aciertos": 0, "jugados": 6}, "b": {"aciertos": 6, "jugados": 6},
-                       "c": {"aciertos": 3, "jugados": 6}, "d": {"aciertos": 2, "jugados": 6}},
+            "totals": {
+                "a": {"aciertos": 0, "jugados": 6},
+                "b": {"aciertos": 6, "jugados": 6},
+                "c": {"aciertos": 3, "jugados": 6},
+                "d": {"aciertos": 2, "jugados": 6},
+            },
             "total_casillas": 14,
             "pleno": {"b": {"acierto": True}},
             "competition_ranking": {
@@ -125,15 +128,16 @@ def test_clasificacion_usa_puntuacion_jornadas_aciertos_y_movimiento_real():
     soup = BeautifulSoup(cover_render(competition_payload())["html"], "html.parser")
     assert len(soup.select(".cx-sv-body .cx-sv-row")) == 14
     assert len(soup.select(".cx-sv-pleno .is-pleno")) == 1
-    assert [el.get_text(strip=True) for el in soup.select("th.cx-sv-col")] == [
-        "Alfa", "Beta", "Gamma", "Delta & Co"
-    ]
+    assert [el.get_text(strip=True) for el in soup.select("th.cx-sv-col")] == ["Alfa", "Beta", "Gamma", "Delta & Co"]
     assert soup.select_one(".lm-live-fold").has_attr("open")
     assert "has-live" not in soup.select_one(".kk-page")["class"]
     assert "SIN PARTIDOS EN JUEGO" in soup.select_one(".kk-live-aside").get_text(" ")
     rows = soup.select("tbody .cp-st-row")
     assert [row.select_one(".cp-st-name").get_text(strip=True) for row in rows] == [
-        "Beta", "Gamma", "Alfa", "Delta & Co"
+        "Beta",
+        "Gamma",
+        "Alfa",
+        "Delta & Co",
     ]
     assert [row.select_one(".cp-st-pts").get_text(strip=True) for row in rows] == ["7", "6", "5", "2"]
     assert [row.select_one(".cp-st-rounds").get_text(strip=True) for row in rows] == ["2", "2", "2", "1"]
@@ -189,8 +193,15 @@ def test_sin_resultados_no_inventa_aciertos_ni_lideres():
 
 def test_directo_muestra_minuto_y_estado_de_descanso_y_permanece_accesible():
     payload = competition_payload()
-    match = {"id": 2, "local": "Osasuna", "visitante": "Athletic Club", "status": "HT",
-             "minuto_live": "45", "goles_local": 1, "goles_visitante": 0}
+    match = {
+        "id": 2,
+        "local": "Osasuna",
+        "visitante": "Athletic Club",
+        "status": "HT",
+        "minuto_live": "45",
+        "goles_local": 1,
+        "goles_visitante": 0,
+    }
     payload["partidos"] = [match]
     payload["live_matches"] = [match]
     rendered = cover_render(payload, live_match=match)
@@ -208,12 +219,17 @@ def test_directo_muestra_minuto_y_estado_de_descanso_y_permanece_accesible():
 def test_eventos_solo_del_partido_y_jornada_correctos_y_con_escape_html():
     payload = competition_payload()
     match = {"id": 2, "local": "Osasuna", "visitante": "Athletic Club"}
-    cached = {"jornada": 19, "matches": [{
-        **match,
-        "events": [{"team": "Osasuna", "events": [
-            {"type": "goal", "minute": "33'", "player": "<Jugador> & Co"}
-        ]}],
-    }]}
+    cached = {
+        "jornada": 19,
+        "matches": [
+            {
+                **match,
+                "events": [
+                    {"team": "Osasuna", "events": [{"type": "goal", "minute": "33'", "player": "<Jugador> & Co"}]}
+                ],
+            }
+        ],
+    }
     html = cover_render(payload, cached, match)["events"]
     assert "Gol" in html and "33&#039;" in html
     assert "&lt;Jugador&gt; &amp; Co" in html
