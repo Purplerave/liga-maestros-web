@@ -81,7 +81,14 @@ function openPlenoModal(idx) {
         liberarScroll?.();
         overlay.classList.remove("is-active");
         window.setTimeout(() => overlay.remove(), 160);
-        if (trigger instanceof HTMLElement) trigger.focus();
+        if (trigger instanceof HTMLElement) {
+            // Al confirmar se repinta la tabla: el botón original puede haberse
+            // sustituido. Devolver el foco al nuevo mantiene usable el teclado.
+            const target = trigger.isConnected
+                ? trigger
+                : document.querySelector(`.clickable[data-pleno][data-match-idx="${idx}"]`);
+            target?.focus({ preventScroll: true });
+        }
     };
     const onKeydown = event => {
         if (event.key === "Escape") close();

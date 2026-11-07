@@ -1,16 +1,7 @@
-/* Portada Liga de Maestros v19 — QUINIELA EN FORMATO TABLA
-   Direccion: boleto de quiniela digital con paneles alrededor.
-   - Centro: tabla de 14 partidos con una columna por Maestro (logo arriba,
-     signo 1/X/2 normal, sin pastillas de color), más panel separado para el
-     pleno con marcadores exactos de goles.
-   - Ticker de goles arriba (banda fina animada) con directo y finalizados.
-   - Paneles alrededor: LA PENA TOP 5, MAESTROS TOP 5, EN DIRECTO,
-     RESULTADOS/PROXIMOS, PORRA +2, ULTIMA HORA.
-   - Columna HORA / RES: horario si falta, marcador si el partido ya tiene resultado.
-   - Header minimo: countdown + progreso + boton Firmar.
-   Tipografia: Rajdhani (titular), Outfit (UI), JetBrains Mono (datos).
-   Tokens: gold #fbbf24, cyan #38bdf8, surfaces oscuros.
-*/
+/* Portada Liga de Maestros — centro de control de la jornada.
+   Boleto completo a la izquierda; directo, clasificación y rendimiento a la
+   derecha. Los pronósticos y las puntuaciones proceden de `simple_view`; los
+   eventos del directo utilizan el detalle compartido de quiniela15. */
 
 function loadSacramentoFont() {}
 function hydrateCoverTypewriter() {}
@@ -39,8 +30,11 @@ function startCoverCountdown() {
     const tick = () => {
         const el = document.getElementById("cx-cd");
         if (!el) return;
-        const c = _diffParts(state.data?.edit_deadline || state.data?.kickoff_at);
-        if (c.ms <= 0 || coverIsClosed()) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
+        const deadline = state.data?.edit_deadline || state.data?.kickoff_at;
+        if (coverIsClosed()) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
+        if (!_coverDeadlineMs(deadline)) { el.textContent = "SIN HORA"; return; }
+        const c = _diffParts(deadline);
+        if (c.ms <= 0) { el.innerHTML = '<span class="cx-kpi-closed">CERRADA</span>'; return; }
         el.innerHTML = `<span class="cx-cd-block">${String(c.d).padStart(2, "0")}<i>d</i></span><span class="cx-cd-block">${String(c.h).padStart(2, "0")}<i>h</i></span><span class="cx-cd-block">${String(c.m).padStart(2, "0")}<i>m</i></span><span class="cx-cd-block">${String(c.s).padStart(2, "0")}<i>s</i></span>`;
         el.closest("[data-kpi]")?.classList.toggle("is-urgent", c.urgent);
     };
@@ -731,12 +725,15 @@ function simpleViewCellHtml(col, row) {
 function simpleViewRowHtml(row, columns) {
     const cells = columns.map(col => simpleViewCellHtml(col, row)).join("");
     const resultClass = row.has_result ? (row.en_juego ? " is-live" : " is-ft") : " is-pending";
+    // La fecha y la hora salen del `th` del partido y viajan en su propia
+    // celda: dentro de la misma fila obligaban a partir el nombre de los
+    // equipos en dos lineas y era lo que hacia saltar el recorte.
     return `<tr class="cx-sv-row${row.is_pleno ? " is-pleno" : ""}" data-id="${escapeHtml(row.id)}">`
         + `<th scope="row" class="cx-sv-match">`
         + `<span class="cx-sv-idx" aria-hidden="true">${escapeHtml(row.id)}</span>`
         + `<span class="cx-sv-teams" title="${escapeHtml(row.local)} – ${escapeHtml(row.visitante)}"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
-        + `<span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span>`
         + `</th>`
+        + `<td class="cx-sv-when-cell"><span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span></td>`
         + `<td class="cx-sv-result${resultClass}">`
         + `<span class="cx-sv-result-val">${escapeHtml(simpleViewResultText(row))}</span></td>`
         + cells
@@ -756,7 +753,8 @@ function kawaiiTablaHtml() {
     const casillas = rows.filter(row => !row.is_pleno).slice(0, 14);
     const plenoRow = rows.find(row => row.is_pleno) || null;
     const totalCasillas = Number(payload?.total_casillas || 14);
-    const spanCols = 2 + columns.length;
+    // Columnas fijas del bloque partido: numero+equipos, fecha/hora y resultado.
+    const spanCols = 3 + columns.length;
 
     const headCells = columns
         .map(col => `<th scope="col" class="cx-sv-col" data-col="${escapeHtml(col.id)}">`
@@ -790,7 +788,8 @@ function kawaiiTablaHtml() {
     return `<table class="cx-sv-table">
                 <thead>
                     <tr>
-                        <th scope="col" class="cx-sv-match-head">PARTIDO (fecha y hora)</th>
+                        <th scope="col" class="cx-sv-match-head">PARTIDO</th>
+                        <th scope="col" class="cx-sv-when-head">FECHA Y HORA</th>
                         <th scope="col" class="cx-sv-result-head">RESULTADO</th>
                         ${headCells}
                     </tr>
@@ -799,7 +798,7 @@ function kawaiiTablaHtml() {
                 ${plenoBody}
                 <tfoot>
                     <tr>
-                        <th colspan="2" scope="row" class="cx-sv-total-label">TOTAL · ${totalCasillas} CASILLAS SIN PLENO</th>
+                        <th colspan="3" scope="row" class="cx-sv-total-label">TOTAL · ${totalCasillas} CASILLAS SIN PLENO</th>
                         ${footCells}
                     </tr>
                 </tfoot>
@@ -820,7 +819,8 @@ function simpleViewHtml() {
     }
 
     return `
-        <div class="cx-sv-scroll" tabindex="0">${kawaiiTablaHtml()}</div>
+        <div class="cx-sv-scroll-hint">Desliza la tabla para ver todos los pronósticos →</div>
+        <div class="cx-sv-scroll" role="region" aria-label="Quiniela: desplázate horizontalmente para ver todos los pronósticos" tabindex="0">${kawaiiTablaHtml()}</div>
         <footer class="cx-sv-note"><ul>${notas.map(nota => `<li>${escapeHtml(nota)}</li>`).join("")}</ul></footer>
     `;
 }
@@ -900,86 +900,112 @@ function kawaiiLiveMatches() {
     return rows;
 }
 
+/* Los eventos se muestran solo cuando la fuente los proporciona. El detalle de
+   quiniela15 ya tiene un cargador compartido; nunca se infiere un gol por el
+   simple cambio de marcador. */
+function kawaiiLiveEventsHtml(match) {
+    let groups = Array.isArray(match?.events) ? match.events : [];
+    const hasEventDetails = groups.some(group => Array.isArray(group?.events)
+        ? group.events.some(event => event && (event.type || event.player || event.minute))
+        : Boolean(group && (group.type || group.player || group.minute)));
+    const slot = kawaiiQuinielaSlot(match);
+    const cached = state.q15Directo;
+    if (!hasEventDetails && slot && Array.isArray(cached?.matches)
+        && String(cached.jornada || state.q15DirectoJornada || "") === String(state.data?.jornada || "")) {
+        const pair = typeof matchPairKey === "function" ? matchPairKey(match) : _matchPairKey(match);
+        const detail = cached.matches.find(item => {
+            const detailPair = typeof matchPairKey === "function" ? matchPairKey(item) : _matchPairKey(item);
+            return Number(item?.id) === slot && pair === detailPair;
+        });
+        groups = Array.isArray(detail?.events) ? detail.events : [];
+    }
+    const events = groups.flatMap(group => {
+        if (Array.isArray(group?.events)) return group.events.map(event => ({ ...event, team: group.team || "" }));
+        return group && typeof group === "object" ? [group] : [];
+    }).filter(event => event.type || event.player || event.minute);
+    if (!events.length) return "";
+    return events.map(event => {
+        const type = typeof eventTypeLabel === "function" ? eventTypeLabel(event.type) : event.type;
+        return `<span class="kk-live-event">${[type, event.minute, event.player, event.team]
+            .filter(Boolean).map(value => escapeHtml(String(value))).join(" · ")}</span>`;
+    }).join("");
+}
+
 function kawaiiLiveItemHtml(match) {
     const comp = _liveCompLabel(match);
     const home = _matchSideName(match, "home");
     const away = _matchSideName(match, "away");
     const marcador = _liveScoreText(match);
     const minuto = _liveMinuteLabel(match);
+    const descanso = (typeof liveStage === "function" && liveStage(match) === "HT") || minuto === "Desc.";
+    const estado = descanso ? "DESCANSO" : "EN JUEGO";
     const slot = kawaiiQuinielaSlot(match);
-    return `<li class="kk-live-item${slot ? " is-quiniela" : ""}">
+    return `<li class="kk-live-item${slot ? " is-quiniela" : ""}" data-live-key="${escapeHtml(_matchPairKey(match))}">
+                <div class="kk-live-body">
+                    <span class="kk-live-teams"><b>${escapeHtml(home || "—")}</b><i aria-hidden="true"> – </i><b>${escapeHtml(away || "—")}</b></span>
+                    <span class="kk-live-score">${escapeHtml(String(marcador || "—"))}</span>
+                    <span class="kk-live-min" title="${estado}">${escapeHtml(String(minuto || "—"))}</span>
+                </div>
                 <div class="kk-live-meta">
                     ${comp ? `<span class="kk-live-comp">${escapeHtml(comp)}</span>` : ""}
                     ${slot ? `<span class="kk-live-slot" title="Casilla ${slot} de la quiniela">Casilla ${slot}</span>` : ""}
-                    <span class="kk-live-min">${escapeHtml(String(minuto || "EN JUEGO"))}</span>
-                </div>
-                <div class="kk-live-body">
-                    <b>${escapeHtml(_fitName(home, 22))}</b><i aria-hidden="true">–</i><b>${escapeHtml(_fitName(away, 22))}</b>
-                    <span class="kk-live-score">${escapeHtml(String(marcador || "—"))}</span>
+                    <span class="kk-live-stage">${estado}</span>
+                    <span class="kk-live-events">${kawaiiLiveEventsHtml(match)}</span>
                 </div>
             </li>`;
 }
 
-function kawaiiLiveFocusHtml(matches, proximo) {
-    if (!matches.length) {
-        const nextLabel = proximo
-            ? `${_matchSideName(proximo, "home")} — ${_matchSideName(proximo, "away")}`
-            : "Sin próximo partido confirmado";
-        const nextTime = proximo ? String(_whenLabel(proximo) || "Horario por confirmar") : "";
-        return `<div class="kk-live-focus is-standby">
-            <span class="kk-focus-kicker">SISTEMA DE SEGUIMIENTO · EN ESPERA</span>
-            <div class="kk-focus-orbit" aria-hidden="true"><i></i></div>
-            <div class="kk-focus-copy">
-                <b>SEÑAL DEPORTIVA EN ESPERA</b>
-                <p>Ahora mismo no hay partidos en directo.</p>
-                <small>${escapeHtml(nextLabel)}${nextTime ? ` · ${escapeHtml(nextTime)}` : ""}</small>
-            </div>
-        </div>`;
-    }
+/* El detalle llega de forma asíncrona: actualizar solo los eventos evita
+   reconstruir el boleto, cerrar el archivo abierto o perder el foco. */
+function hydrateKawaiiLiveEvents() {
+    const matches = kawaiiLiveMatches();
+    document.querySelectorAll(".kk-live-item[data-live-key]").forEach(item => {
+        const match = matches.find(candidate => _matchPairKey(candidate) === item.dataset.liveKey);
+        const target = item.querySelector(".kk-live-events");
+        if (match && target) target.innerHTML = kawaiiLiveEventsHtml(match);
+    });
+}
 
-    const match = matches[0];
-    return `<div class="kk-live-focus">
-        <span class="kk-focus-kicker">PARTIDO DESTACADO · ${escapeHtml(_liveCompLabel(match) || "ENCUENTRO")}</span>
-        <div class="kk-focus-orbit" aria-hidden="true"><i></i><b></b></div>
-        <div class="kk-focus-scoreline">
-            <div class="kk-focus-team"><small>LOCAL</small><b>${escapeHtml(_fitName(_matchSideName(match, "home"), 24))}</b></div>
-            <strong>${escapeHtml(String(_liveScoreText(match) || "—"))}</strong>
-            <div class="kk-focus-team is-away"><small>VISITANTE</small><b>${escapeHtml(_fitName(_matchSideName(match, "away"), 24))}</b></div>
-        </div>
-        <div class="kk-focus-foot"><span>${escapeHtml(String(_liveMinuteLabel(match) || "EN JUEGO"))}</span><span>FUENTE: MARCADOR VERIFICADO</span></div>
-    </div>`;
+/* Reutiliza la caché compartida con el boleto y actualiza solo los eventos.
+   También se llama desde el poll existente si no cambió el marcador: una
+   tarjeta o un cambio pueden llegar durante el descanso sin alterar el score. */
+function refreshCoverLiveEvents() {
+    if (state.currentFilter !== "ALL" || state.contestView !== "MATCHES"
+        || typeof ensureQ15Directo !== "function"
+        || !kawaiiLiveMatches().some(match => kawaiiQuinielaSlot(match))) return;
+    const jornada = String(state.data?.jornada || state.jornada || "");
+    return ensureQ15Directo({ maxAgeMs: 60000 }).then(loadedNow => {
+        if (loadedNow && state.currentFilter === "ALL" && state.contestView === "MATCHES"
+            && String(state.data?.jornada || "") === jornada) hydrateKawaiiLiveEvents();
+    }).catch(error => console.warn("[cover] no se pudieron actualizar los eventos:", error));
 }
 
 function kawaiiLiveAsideHtml() {
     const matches = kawaiiLiveMatches();
-    const open = matches.length ? (typeof livePanelShouldOpen === "function" ? livePanelShouldOpen() : true) : false;
+    // En portada el monitor empieza abierto, también en espera. Se conserva la
+    // preferencia explícita de quien haya decidido plegarlo manualmente.
+    const remembered = typeof livePanelRememberedOpen === "function" ? livePanelRememberedOpen() : null;
+    const open = remembered === null ? true : remembered;
     const proximo = !matches.length && typeof getNextLeagueMatch === "function" ? getNextLeagueMatch() : null;
-    return `<aside class="kk-live-aside" aria-label="Centro de control del directo">
-            <div class="kk-mission-strip" aria-hidden="true">
-                <span>LM // CONTROL DE MISIÓN</span>
-                <span>JORNADA ${escapeHtml(String(state.data?.jornada || state.jornada || "—"))}</span>
-                <span class="kk-mission-signal"><i></i>${matches.length ? "SEÑAL EN VIVO" : "SEÑAL ESTABLE"}</span>
-            </div>
-            <details class="lm-live-fold"${open ? " open" : ""}>
+    const nextLabel = proximo ? `${_matchSideName(proximo, "home")} – ${_matchSideName(proximo, "away")}` : "";
+    const nextTime = proximo ? String(_whenLabel(proximo) || "Horario por confirmar") : "";
+    return `<aside class="kk-live-aside" aria-label="Monitor de partidos en directo">
+            <details class="lm-live-fold"${open ? ' data-initial-open="1" open' : ""}>
                 <summary class="kk-live-head">
                     <span class="kk-live-pulse" aria-hidden="true"></span>
                     <b>MONITOR DE PARTIDOS EN DIRECTO</b>
-                    <span class="kk-live-count">${matches.length}</span>
+                    <span class="kk-live-count">${matches.length} EN JUEGO</span>
                     <span class="kk-live-chevron" aria-hidden="true"></span>
                 </summary>
-                <div class="kk-cockpit-grid">
-                    <section class="kk-cockpit-feed" aria-label="Marcadores del directo">
-                        <div class="kk-cockpit-label"><span>FEED DE PARTIDOS</span><small>${String(matches.length).padStart(2, "0")} CANALES</small></div>
-                        ${matches.length
-                            ? `<ul class="kk-live-list">${matches.map(kawaiiLiveItemHtml).join("")}</ul>`
-                            : `<div class="kk-feed-empty"><span>CANAL 01</span><b>SIN PARTIDOS EN JUEGO</b><small>Ahora mismo no hay partidos en directo.</small></div>`}
-                    </section>
-                    <section class="kk-cockpit-main" aria-label="Señal principal del directo">
-                        <div class="kk-cockpit-label"><span>SEÑAL PRINCIPAL</span><small>${matches.length ? "EN VIVO" : "STANDBY"}</small></div>
-                        ${kawaiiLiveFocusHtml(matches, proximo)}
-                    </section>
-                </div>
-                <div class="kk-live-note"><span>ACTUALIZACIÓN AUTOMÁTICA · 30 S</span><span>DATOS VERIFICADOS</span></div>
+                ${matches.length
+                    ? `<ul class="kk-live-list" tabindex="0" aria-label="Partidos en directo">${matches.map(kawaiiLiveItemHtml).join("")}</ul>`
+                    : `<div class="kk-live-empty">
+                            <span class="kk-live-empty-state">SEÑAL EN ESPERA</span>
+                            <b>SIN PARTIDOS EN JUEGO</b>
+                            <p>Ahora mismo no hay partidos en directo.</p>
+                            ${nextLabel ? `<small>PRÓXIMO · ${escapeHtml(nextLabel)}${nextTime ? ` · ${escapeHtml(nextTime)}` : ""}</small>` : ""}
+                       </div>`}
+                <div class="kk-live-note"><span>SEGUIMIENTO AUTOMÁTICO</span><span>EVENTOS SEGÚN FUENTE</span></div>
             </details>
         </aside>`;
 }
@@ -1004,50 +1030,211 @@ function kawaiiDirectoHtml() {
     }
 }
 
+/* La posición y los puntos siguen siendo los de competition_ranking. La
+   variación compara esa clasificación con la anterior jornada disponible,
+   usando el mismo desempate por nombre y sin inventar puestos para quien no
+   participó entonces. */
 function kawaiiRankingListHtml() {
     let filas = [];
     try {
         filas = coverRankingRows();
     } catch (error) {
         console.warn("[cover] sin clasificacion pintable:", error);
-        filas = [];
     }
+    const view = state.data?.simple_view || {};
+    const jornadas = Array.isArray(view.competition_ranking?.jornadas) ? view.competition_ranking.jornadas : [];
+    const actual = jornadas.length ? String(jornadas[0]) : "";
+    const anteriores = jornadas.slice(1).map(String);
+    const tiene = (fila, jornada) => Object.prototype.hasOwnProperty.call(fila.porJornada, jornada);
+    const anterioresOrdenadas = filas
+        .filter(fila => anteriores.some(jornada => tiene(fila, jornada)))
+        .map(fila => ({ ...fila, anterior: anteriores.reduce((sum, jornada) => sum + Number(fila.porJornada[jornada] || 0), 0) }))
+        .sort((a, b) => b.anterior - a.anterior || a.name.localeCompare(b.name, "es"));
+    const posicionAnterior = new Map(anterioresOrdenadas.map((fila, i) => [fila.uid.toLowerCase(), i + 1]));
     const yo = state.user ? String(state.user.id).toLowerCase() : "";
-    const jornadas = state.data?.simple_view?.competition_ranking?.jornadas || [];
-    const items = filas.map((fila, i) => {
-        const mia = Boolean(yo) && String(fila.uid).toLowerCase() === yo;
-        const porJornada = jornadas.map(jornada => `J${escapeHtml(String(jornada))}: ${Number(fila.porJornada?.[String(jornada)] || 0)}`).join(" · ");
-        return `<div class="kk-rank${mia ? " is-you" : ""}">
-                    <span class="kk-pos">${i + 1}</span>
-                    <span class="kk-nm">${escapeHtml(_fitName(fila.name, 18))}${mia ? '<span class="kk-you-tag">tu columna</span>' : ""}</span>
-                    <span class="kk-sc"><b>${Number(fila.total || 0)}</b> pts<small>${porJornada}</small></span>
-                </div>`;
-    }).join("");
-    if (!items) {
-        return `<p class="kk-empty">La clasificación de las dos jornadas aparecerá cuando haya boletos enviados.</p>`;
+    if (!filas.length) {
+        return `<p class="kk-empty">La clasificación aparecerá cuando haya boletos enviados.</p>`;
     }
-    return items;
+    const filasHtml = filas.map((fila, i) => {
+        const uid = fila.uid.toLowerCase();
+        const mia = Boolean(yo) && uid === yo;
+        const anterior = posicionAnterior.get(uid);
+        const delta = anterior == null ? null : anterior - (i + 1);
+        const puestos = Math.abs(delta || 0);
+        const explicacion = delta == null ? "Sin posición anterior comparable"
+            : `${delta > 0 ? "Sube" : delta < 0 ? "Baja" : "Mantiene"} ${delta ? `${puestos} puesto${puestos === 1 ? "" : "s"}` : "su posición"} desde J${anteriores[0]}`;
+        const tendencia = delta == null ? "—" : delta > 0 ? `▲ ${delta}` : delta < 0 ? `▼ ${Math.abs(delta)}` : "=";
+        const clase = delta == null || delta === 0 ? "cp-st-flat" : delta > 0 ? "cp-st-up" : "cp-st-down";
+        const participadas = jornadas.filter(jornada => tiene(fila, String(jornada))).length;
+        const totalJornada = (view.totals || {})[uid];
+        const aciertos = actual && tiene(fila, actual) && totalJornada ? Number(totalJornada.aciertos || 0) : "—";
+        const detalle = jornadas.map(jornada => `J${jornada}: ${tiene(fila, String(jornada)) ? fila.porJornada[String(jornada)] : "sin boleto"}`).join(" · ");
+        return `<tr class="cp-st-row${mia ? " is-you" : ""}">
+                    <td class="cp-st-pos">${i + 1}</td>
+                    <th scope="row" class="cp-st-name" title="${escapeHtml(detalle)}">${escapeHtml(fila.name || fila.uid)}${mia ? '<span class="kk-you-tag">TÚ</span>' : ""}</th>
+                    <td class="cp-st-pts"><b>${Number(fila.total || 0)}</b></td>
+                    <td class="cp-st-rounds">${participadas}</td>
+                    <td class="cp-st-hits">${aciertos}</td>
+                    <td class="cp-st-trend"><span class="${clase}" title="${escapeHtml(explicacion)}" aria-label="${escapeHtml(explicacion)}">${tendencia}</span></td>
+                </tr>`;
+    }).join("");
+    const roundsLabel = jornadas.map(jornada => `J${jornada}`).reverse().join(" + ");
+    return `<table class="cp-standings">
+                <thead><tr>
+                    <th scope="col" class="cp-st-pos">#</th>
+                    <th scope="col" class="cp-st-name">PARTICIPANTE</th>
+                    <th scope="col" class="cp-st-pts" title="Puntos en la competición">PTS</th>
+                    <th scope="col" class="cp-st-rounds" title="Jornadas con boleto">JOR.</th>
+                    <th scope="col" class="cp-st-hits" title="Aciertos de las 14 casillas en la jornada actual">ACI. J${escapeHtml(actual || "—")}</th>
+                    <th scope="col" class="cp-st-trend" title="Cambio de posición respecto a la jornada anterior">Δ POS.</th>
+                </tr></thead>
+                <tbody>${filasHtml}</tbody>
+            </table>
+            <p class="cp-standings-foot">${escapeHtml(roundsLabel || "SIN JORNADAS")} · JOR. = BOLETOS · Δ = CAMBIO DE PUESTO</p>`;
+}
+
+/* Rendimiento calculado solo a partir de resultados y puntuaciones ya servidos
+   en simple_view. Los valores ausentes son «—», no ceros estimados. */
+function kawaiiRendimientoDatos() {
+    const view = state.data?.simple_view || {};
+    const columns = simpleViewColumns(view);
+    const totals = view.totals || {};
+    const competition = view.competition_ranking || {};
+    const jornadas = Array.isArray(competition.jornadas) ? competition.jornadas : [];
+    const compById = new Map((Array.isArray(competition.rows) ? competition.rows : [])
+        .map(row => [String(row.id || "").toLowerCase(), row]));
+    const filas = columns.map(col => {
+        const uid = String(col.id || "").toLowerCase();
+        const total = totals[uid];
+        const comp = compById.get(uid);
+        const porJornada = comp?.por_jornada || {};
+        return {
+            uid,
+            name: col.name || col.id,
+            esPena: Boolean(col.es_pena),
+            aciertos: !col.sin_linea && total ? Number(total.aciertos || 0) : null,
+            puntos: comp ? Number(comp.total || 0) : null,
+            serie: jornadas.slice().reverse().map(jornada => ({
+                jornada,
+                puntos: Object.prototype.hasOwnProperty.call(porJornada, String(jornada)) ? Number(porJornada[String(jornada)] || 0) : null,
+            })),
+            plenoAcierto: view.pleno?.[uid]?.acierto === true,
+        };
+    });
+    const resueltos = simpleViewRows(view).filter(row => row && !row.is_pleno && row.has_result).length;
+    const participantes = filas.filter(fila => fila.aciertos !== null);
+    const maxAciertos = participantes.length ? Math.max(...participantes.map(fila => fila.aciertos)) : null;
+    return {
+        filas,
+        jornadas,
+        resueltos,
+        totalCasillas: Number(view.total_casillas || 14),
+        maxPuntos: filas.reduce((max, fila) => Math.max(max, fila.puntos ?? 0), 0),
+        maxAciertos,
+        mejores: participantes.filter(fila => fila.aciertos === maxAciertos),
+    };
+}
+
+function kawaiiStatsHtml() {
+    const stats = kawaiiRendimientoDatos();
+    if (!stats.filas.length) return "";
+    const sinResultados = stats.resueltos === 0;
+    const vivo = kawaiiLiveMatches().length;
+    const mejores = stats.mejores.map(fila => String(fila.name));
+    const nombresMejores = !sinResultados && mejores.length ? mejores.join(", ") : "—";
+    const mejor = sinResultados || !mejores.length ? "—" : mejores.length > 1 ? `Empate (${mejores.length})` : mejores[0];
+    const kpis = `<div class="cp-kpis">
+            <div class="cp-kpi"><small>CON MARCADOR</small><b>${stats.resueltos}<i>/${stats.totalCasillas}</i></b><span>casillas</span></div>
+            <div class="cp-kpi is-hot"><small>MÁS ACIERTOS</small><b title="${escapeHtml(nombresMejores)}">${escapeHtml(mejor)}</b><span>${!sinResultados && stats.maxAciertos !== null ? `${stats.maxAciertos} en la jornada` : "pendiente"}</span></div>
+            <div class="cp-kpi${vivo ? " is-live" : ""}"><small>EN JUEGO</small><b>${vivo}</b><span>partidos</span></div>
+        </div>`;
+    const comparativa = stats.filas
+        .slice()
+        .sort((a, b) => (b.puntos ?? -1) - (a.puntos ?? -1) || a.name.localeCompare(b.name, "es"))
+        .map(fila => {
+            const pct = stats.maxPuntos > 0 && fila.puntos !== null ? Math.round((fila.puntos / stats.maxPuntos) * 100) : 0;
+            const serie = fila.serie.map(item => `<span title="Jornada ${escapeHtml(String(item.jornada))}">J${escapeHtml(String(item.jornada))} <b>${item.puntos === null ? "—" : item.puntos}</b></span>`).join("");
+            return `<div class="cp-cmp${fila.esPena ? " is-pena" : ""}">
+                    <span class="cp-cmp-name">${escapeHtml(String(fila.name))}</span>
+                    <span class="cp-cmp-track" aria-hidden="true"><i style="width:${pct}%"></i></span>
+                    <strong class="cp-cmp-val">${fila.puntos === null ? "—" : fila.puntos}</strong>
+                    <span class="cp-cmp-serie">${serie}</span>
+                </div>`;
+        }).join("");
+    const plenos = stats.filas.filter(fila => fila.plenoAcierto).map(fila => String(fila.name));
+    return `<section class="kk-card cp-stats-card" aria-label="Estadísticas y rendimiento de los participantes" tabindex="0">
+            <h2 class="kk-card-title"><span class="kk-card-kicker">03 / ANÁLISIS</span>Rendimiento <span class="kk-tag">JORNADA + TOTAL</span></h2>
+            ${kpis}
+            <div class="cp-cmp-head"><span>COMPARATIVA · PUNTOS</span><small>EVOLUCIÓN POR JORNADA</small></div>
+            <div class="cp-cmp-list">${comparativa}</div>
+            <div class="cp-stats-foot">
+                <span title="${plenos.length ? "Participantes con pleno exacto" : "Sin pleno exacto verificado"}">PLENO EXACTO: ${plenos.length ? escapeHtml(plenos.join(", ")) : "—"}</span>
+                <span>${sinResultados ? "AÚN SIN RESULTADOS" : `${stats.resueltos}/${stats.totalCasillas} CON MARCADOR`}</span>
+            </div>
+        </section>`;
 }
 
 function kawaiiCabeceraHtml(jornada, payload) {
     const cerrada = coverIsClosed();
     const abierto = coverCloseLabel();
-    const chip = cerrada ? "Cerrada" : (abierto === "abierta" ? "Abierta" : `Cierra en ${abierto}`);
+    const chip = cerrada ? "Edición cerrada" : (abierto === "abierta" ? "Edición abierta" : `Edición: ${abierto}`);
     const cierreLabel = payload?.boleto?.cierre
-        ? `${payload.boleto.cierre}${payload.boleto.cierre_estimado ? " (estimado)" : ""}`
+        ? `Cierre SELAE: ${payload.boleto.cierre}${payload.boleto.cierre_estimado ? " (estimado)" : ""}`
         : "";
     const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso, cierreLabel].filter(Boolean).join(" · ");
+    // `#cx-cd` es el nodo que rellena `startCoverCountdown()`: la cuenta atras
+    // vuelve a estar viva en la barra de estado en vez de en un panel aparte.
     return `<header class="kk-header">
             <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
-                <p class="kk-kicker">CENTRO DE CONTROL · QUINIELA PÚBLICA</p>
+                <p class="kk-kicker">CENTRO DE CONTROL · LA PEÑA vs MAESTROS IA</p>
                 <h1 class="kk-title">LIGA DE MAESTROS</h1>
-                <p class="kk-sub">Maestros vs La Peña · seguimiento de jornada en tiempo real</p>
+                <p class="kk-sub">Seguimiento de jornada en tiempo real</p>
             </div>
             <span class="kk-ticket-label">${escapeHtml(boletoLabel)}</span>
+            <span class="kk-state kk-state-${cerrada ? "closed" : "open"}">${escapeHtml(chip)}</span>
+            <span class="kk-clock" id="cx-cd" aria-label="Cuenta atrás del cierre de edición">--</span>
             <span class="kk-jbadge">J${escapeHtml(String(jornada))}</span>
             ${kawaiiLoginHtml()}
         </header>`;
+}
+
+/* Los repintados del poll y de la edición sustituyen el HTML de la portada.
+   Conservar desplazamientos, archivo y foco evita saltos, especialmente al
+   editar una columna situada fuera de la pantalla del móvil. */
+function captureCoverUi(container) {
+    if (!container?.querySelector?.(".kk-page")) return null;
+    const selectors = [".cx-sv-scroll", ".kk-live-list", ".kk-rank-list", ".cp-stats-card"];
+    const scroll = selectors.flatMap(selector => {
+        const node = container.querySelector(selector);
+        return node ? [{ selector, left: node.scrollLeft, top: node.scrollTop }] : [];
+    });
+    const archiveOpen = Boolean(container.querySelector(".kk-archive-card")?.open);
+    const active = document.activeElement;
+    let focus = "";
+    if (active && container.contains(active)) {
+        const idx = String(active.dataset?.matchIdx || "");
+        const sign = String(active.dataset?.sign || "");
+        if (active.matches(".kk-sign[data-sign]") && /^\d{1,2}$/.test(idx) && /^[1X2]$/.test(sign)) {
+            focus = `.kk-sign[data-match-idx="${idx}"][data-sign="${sign}"]`;
+        } else if (active.matches(".kk-sign[data-pleno]") && /^\d{1,2}$/.test(idx)) {
+            focus = `.kk-sign[data-match-idx="${idx}"][data-pleno]`;
+        } else {
+            focus = [...selectors, ".kk-live-head", ".kk-archive-summary"].find(selector => active.matches(selector)) || "";
+        }
+    }
+    return { scroll, archiveOpen, focus };
+}
+
+function restoreCoverUi(container, snapshot) {
+    if (!snapshot) return;
+    const archive = container.querySelector(".kk-archive-card");
+    if (archive) archive.open = snapshot.archiveOpen;
+    snapshot.scroll.forEach(({ selector, left, top }) => {
+        const node = container.querySelector(selector);
+        if (node) { node.scrollLeft = left; node.scrollTop = top; }
+    });
+    if (snapshot.focus) container.querySelector(snapshot.focus)?.focus({ preventScroll: true });
 }
 
 function renderNewspaperCoverPageV3() {
@@ -1061,28 +1248,45 @@ function renderNewspaperCoverPageV3() {
         : "";
 
     const liveAside = kawaiiLiveAsideHtml();
+    const hasLive = kawaiiLiveMatches().length > 0;
+    const resueltos = simpleViewRows(payload).filter(row => row && !row.is_pleno && row.has_result).length;
+    const progreso = `<span class="kk-tag" title="Casillas de la jornada con resultado verificado">${resueltos}/14 CON RESULTADO</span>`;
 
-    return `<div class="cx kk-page${liveAside ? " has-live" : ""}">
+    /* MAQUETACIÓN — dos zonas y nada más:
+       · .kk-main  → ZONA IZQUIERDA: la tabla de 15 partidos (72-75 % del ancho).
+       · .cp-rail  → ZONA DERECHA: directo, clasificación y rendimiento apilados.
+       El contenedor intermedio `.kk-layout` es el grid real; `.kk-wrap` solo
+       apila barra de estado + layout. Así la columna derecha crece con su
+       contenido y no queda hueco entre módulos. */
+    return `<div class="cx kk-page${hasLive ? " has-live" : ""}">
         <div class="kk-wrap">
+            ${kawaiiCabeceraHtml(jornada, payload)}
             <div class="kk-layout">
-                ${liveAside}
                 <div class="kk-main">
                     <section class="kk-card kk-table-card" aria-label="Quiniela de la jornada">
-                        <h2 class="kk-card-title"><span class="kk-card-kicker">PRONÓSTICOS</span>Jornada ${escapeHtml(String(jornada))} <span class="kk-tag">14 casillas + pleno al 15</span></h2>
+                        <h2 class="kk-card-title">
+                            <span class="kk-card-kicker">PRONÓSTICOS</span>
+                            Jornada ${escapeHtml(String(jornada))}
+                            <span class="kk-tag">14 CASILLAS + PLENO AL 15</span>
+                            ${progreso}
+                        </h2>
                         ${aviso}
                         ${simpleViewHtml()}
-                    </section>
-                    <section class="kk-card kk-rank-card" aria-label="Clasificación de las dos jornadas">
-                        <h2 class="kk-card-title"><span class="kk-card-kicker">COMPETICIÓN</span>Clasificación <span class="kk-tag">${(state.data?.simple_view?.competition_ranking?.jornadas || []).length} jornadas</span></h2>
-                        <div class="kk-rank-list">${kawaiiRankingListHtml()}</div>
                     </section>
                     <details class="kk-card kk-history-card kk-archive-card">
                         <summary class="kk-archive-summary"><span><span class="kk-card-kicker">ARCHIVO</span>Historial anterior</span><span class="kk-tag">guardado · fuera de clasificación</span></summary>
                         <div id="historial-duelo-body" class="historial-duelo-body"><div class="kk-empty">Cargando estadísticas…</div></div>
                     </details>
                 </div>
+                <div class="cp-rail">
+                    ${liveAside}
+                    <section class="kk-card kk-rank-card" aria-label="Clasificación de la competición">
+                        <h2 class="kk-card-title"><span class="kk-card-kicker">COMPETICIÓN</span>Clasificación <span class="kk-tag">${(state.data?.simple_view?.competition_ranking?.jornadas || []).length} JORNADAS</span></h2>
+                        <div class="kk-rank-list" role="region" aria-label="Tabla de clasificación" tabindex="0">${kawaiiRankingListHtml()}</div>
+                    </section>
+                    ${kawaiiStatsHtml()}
+                </div>
             </div>
-            ${kawaiiCabeceraHtml(jornada, payload)}
             <footer class="kk-foot">LIGA DE MAESTROS · FEED DE RESULTADOS VERIFICADOS · DATOS ACTUALIZADOS AUTOMÁTICAMENTE</footer>
         </div>
     </div>`;

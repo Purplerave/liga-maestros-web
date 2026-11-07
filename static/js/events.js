@@ -82,6 +82,13 @@ function bindLivePanelFold() {
     document.addEventListener("toggle", event => {
         const fold = event.target;
         if (!fold || !fold.classList || !fold.classList.contains("lm-live-fold")) return;
+        // La portada ya nace abierta: el navegador emite un toggle por ese
+        // atributo inicial, pero no es una preferencia elegida por el usuario.
+        // Solo la portada marca ese primer evento; el boleto no cambia.
+        if (fold.dataset.initialOpen === "1") {
+            delete fold.dataset.initialOpen;
+            if (fold.open) return;
+        }
         if (typeof rememberLivePanelOpen === "function") rememberLivePanelOpen(Boolean(fold.open));
     }, true);
 }
@@ -379,7 +386,10 @@ async function refreshLiveSnapshot() {
             cache: "no-store",
             headers
         });
-        if (response.status === 304) return true;
+        if (response.status === 304) {
+            if (typeof refreshCoverLiveEvents === "function") refreshCoverLiveEvents();
+            return true;
+        }
         if (!response.ok) return false;
         const freshData = await response.json();
         liveSnapshotEtag = response.headers.get("ETag") || null;
@@ -416,6 +426,7 @@ async function refreshLiveSnapshot() {
         logoAliasIndex = null;
         logoCache.clear();
         if (!changed && !lockChanged) {
+            if (typeof refreshCoverLiveEvents === "function") refreshCoverLiveEvents();
             if (freshData.slim) {
                 // Sin novedades no se repinta nada; lo pesado se resincroniza
                 // cada varios polls para que el consenso no se quede atras.
