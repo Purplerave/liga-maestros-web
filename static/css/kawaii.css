@@ -2669,10 +2669,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-empty { margin: 0; p
    con muchos simultáneos solo la lista tiene desplazamiento. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside {
     position: static;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
-    max-height: 43%;
-    overflow: auto;
+    max-height: 54%;
+    overflow: hidden;
     border-top: 2px solid var(--cc-cyan);
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside::before,
@@ -2738,7 +2740,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-empty small { c
    se desplaza cuando hay más partidos de los que caben simultáneamente. */
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-list {
     display: block;
-    max-height: clamp(80px, calc(100vh - 716px), 185px);
+    flex: 1 1 auto;
+    max-height: 46vh;
     margin: 0;
     padding: 0;
     overflow-y: auto;
@@ -2810,12 +2813,22 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note {
 }
 
 /* Monitor M2: clasificación completa, sin cambiar su puntuación. */
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-card { display: flex; flex: 0 0 auto; flex-direction: column; min-height: 0; max-height: 38%; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-list { min-height: 0; overflow: auto; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-card {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    min-height: 0;
+    max-height: none;
+    margin-top: auto;
+}
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-list {
+    min-height: 0;
+    overflow: visible;
+}
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings th,
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings td { padding: 4px 3px; border-bottom: 1px solid #1b3443; text-align: center; white-space: nowrap; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings thead th { background: #0f2331; color: #9cb4c3; font: 700 10px/1.2 var(--cc-mono); }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings td { padding: 2px 4px; height: 23px; border-bottom: 1px solid #1b3443; text-align: center; white-space: nowrap; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings thead th { height: 22px; padding: 2px 4px; background: #0f2331; color: #9cb4c3; font: 700 10px/1.2 var(--cc-mono); }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings tbody td { color: #b8ccd8; font: 600 12px/1.2 var(--cc-mono); }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings .cp-st-pos { width: 26px; color: #7cb8cf; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cp-standings .cp-st-name { padding-left: 7px; text-align: left; }
