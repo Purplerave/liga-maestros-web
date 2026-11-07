@@ -1179,7 +1179,7 @@ function kawaiiCabeceraHtml(jornada, payload) {
     const boletoLabel = [payload?.boleto?.nombre, payload?.boleto?.concurso, cierreLabel].filter(Boolean).join(" · ");
     // `#cx-cd` es el nodo que rellena `startCoverCountdown()`: la cuenta atras
     // vuelve a estar viva en la barra de estado en vez de en un panel aparte.
-    return `<header class="kk-header" style="display:none!important">
+    return `<header class="kk-header" style="display:none">
             <span class="kk-logo" aria-hidden="true">LM<br><small>SYS</small></span>
             <div class="kk-brand">
                 <p class="kk-kicker">CENTRO DE CONTROL · LA PEÑA vs MAESTROS IA</p>
