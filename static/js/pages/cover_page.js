@@ -647,8 +647,10 @@ function simpleViewMark(pick) {
 
 function simpleViewWhenText(row) {
     const cuando = String(row?.cuando || "").trim();
-    // Una casilla sin hora verificada se queda sin ella, sin rellenar.
-    return cuando || "—";
+    if (!cuando) return "—";
+    // El backend escribe los dias sin tilde ("sabado 08/11 16:15"); acentuar en
+    // pantalla sin tocar datos.
+    return cuando.replace(/\bsabado\b/g, "sábado").replace(/\bmiercoles\b/g, "miércoles");
 }
 
 function simpleViewResultText(row) {
@@ -732,7 +734,7 @@ function simpleViewRowHtml(row, columns) {
     return `<tr class="cx-sv-row${row.is_pleno ? " is-pleno" : ""}" data-id="${escapeHtml(row.id)}">`
         + `<th scope="row" class="cx-sv-match">`
         + `<span class="cx-sv-idx" aria-hidden="true">${escapeHtml(row.id)}</span>`
-        + `<span class="cx-sv-teams"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
+        + `<span class="cx-sv-teams" title="${escapeHtml(row.local)} – ${escapeHtml(row.visitante)}"><b>${escapeHtml(row.local)}</b><i>–</i><b>${escapeHtml(row.visitante)}</b></span>`
         + `<span class="cx-sv-when">${escapeHtml(simpleViewWhenText(row))}</span>`
         + `</th>`
         + `<td class="cx-sv-result${resultClass}">`

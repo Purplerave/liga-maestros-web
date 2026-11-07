@@ -153,7 +153,7 @@
         grid-template-columns: repeat(2, 1fr);
     }
     .topbar-actions .primary-btn {
-        font-size: 11px;
+        font-size: 0.72rem;
         padding: 3px 6px;
     }
 }

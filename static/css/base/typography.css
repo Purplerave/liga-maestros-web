@@ -1,5 +1,16 @@
 @layer typography {
 /* Voz tipografica compartida: interfaz, titulares y datos. */
+/* <small>/<sub> reducen un 0.83x por defecto del navegador: sin regla propia un
+   small dentro de texto al suelo quedaba por debajo (11.52*0.83 = 9.6px). El
+   max() conserva la escala relativa cuando el padre es grande y pone el suelo
+   cuando no. */
+small,
+sub,
+sup {
+    font-size: max(0.72rem, 0.83em);
+}
+
+
 body.newspaper-ui.quiniela-focus .match-score-badge,
 body.newspaper-ui.quiniela-focus .ia-signo,
 body.newspaper-ui.quiniela-focus .saved-ticket-sign,

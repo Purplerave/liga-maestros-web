@@ -16,7 +16,7 @@
     --fu: var(--font-ui);        /* alias legacy */
 
     /* Escala tipográfica (uso opcional; los legados siguen abajo) */
-    --text-2xs: 0.625rem;   /* 10px — solo datos decorativos */
+    --text-2xs: 0.72rem;   /* 11.5px - suelo de legibilidad (antes 0.625rem) */
     --text-xs:  0.75rem;    /* 12px — labels, captions (min legible) */
     --text-sm:  0.875rem;   /* 14px */
     --text-base: 1rem;      /* 16px */

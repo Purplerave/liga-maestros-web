@@ -35,7 +35,7 @@ body.newspaper-ui.quiniela-focus .duelo-side {
 body.newspaper-ui.quiniela-focus .duelomaestros-side { grid-area: maestros; }
 body.newspaper-ui.quiniela-focus .duelopena-side { grid-area: pena; }
 body.newspaper-ui.quiniela-focus .duelo-label {
-    font-size: 0.58rem;
+    font-size: 0.72rem;
     color: #9fb1c8;
     letter-spacing: 0.1em;
     white-space: nowrap;
@@ -58,13 +58,13 @@ body.newspaper-ui.quiniela-focus .duelo-center {
     min-width: 0;
 }
 body.newspaper-ui.quiniela-focus .duelo-vs {
-    font-size: 0.58rem;
+    font-size: 0.72rem;
     color: #64748b;
     letter-spacing: 0.2em;
     line-height: 1;
 }
 body.newspaper-ui.quiniela-focus .duelo-countdown {
-    font-size: 0.6rem;
+    font-size: 0.72rem;
     color: #fbbf24;
     /* --font-data es el token de la mono (tokens.css); --font-mono no existe. */
     font-family: var(--font-data, "JetBrains Mono", monospace);
@@ -82,7 +82,7 @@ body.newspaper-ui.quiniela-focus .duelo-countdown.urgent { color: #f87171; }
     }
     body.newspaper-ui.quiniela-focus .duelo-label { display: none; }
     body.newspaper-ui.quiniela-focus .duelo-score { font-size: 1.15rem; }
-    body.newspaper-ui.quiniela-focus .duelo-countdown { font-size: 0.54rem; }
+    body.newspaper-ui.quiniela-focus .duelo-countdown { font-size: 0.72rem; }
 }
 
 /* Cómo se juega: 3 pasos, una línea cada uno */
@@ -256,7 +256,7 @@ body.newspaper-ui.quiniela-focus .tension-row.is-live-row .match-score-badge::be
     border-radius: 999px;
     background: #0f6b32;
     color: #fff;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 900;
     line-height: 1;
     letter-spacing: 0.08em;

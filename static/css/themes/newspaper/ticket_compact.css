@@ -153,7 +153,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels {
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels span {
     justify-content: center;
     gap: 3px;
-    font-size: 0.67rem;
+    font-size: 0.72rem;
     line-height: 1;
 }
 
@@ -162,7 +162,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels b {
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-labels em {
-    font-size: 0.62rem;
+    font-size: 0.72rem;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .consensus-bar {
@@ -194,7 +194,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip > span,
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row.is-council-row .tension-chip > span {
-    font-size: 0.54rem;
+    font-size: 0.72rem;
     line-height: 1;
 }
 
@@ -385,7 +385,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-day {
-        font-size: 0.54rem;
+        font-size: 0.72rem;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-time {
@@ -393,7 +393,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule.is-pending {
-        font-size: 0.56rem;
+        font-size: 0.72rem;
         line-height: 1.15;
         overflow-wrap: anywhere;
     }
@@ -435,12 +435,12 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item b {
-        font-size: 0.62rem;
+        font-size: 0.72rem;
     }
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-pena-cell .pena-breakdown-item small {
         display: block;
-        font-size: 0.58rem;
+        font-size: 0.72rem;
         white-space: nowrap;
     }
 
@@ -455,7 +455,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .
 
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-fixture-main .fixture-name {
         overflow: hidden;
-        font-size: 0.61rem;
+        font-size: 0.72rem;
         line-height: 1.1;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -489,7 +489,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar-wrap {
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar {
     display: flex;
-    height: 8px;
+    height: 12px;
     border-radius: 999px;
     overflow: hidden;
     background: rgba(148, 163, 184, 0.18);
@@ -499,7 +499,7 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.5rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: #0b1220;
     min-width: 0;
@@ -518,19 +518,19 @@ body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-seg:not(.is-leade
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-voters {
-    font-size: 0.54rem;
+    font-size: 0.72rem;
     color: #9fb1c8;
     line-height: 1.1;
 }
 
 body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-bar-empty {
-    height: 8px;
+    height: 12px;
     border-radius: 999px;
     background: rgba(148, 163, 184, 0.18);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.54rem;
+    font-size: 0.72rem;
     color: #64748b;
 }
 

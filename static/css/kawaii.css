@@ -29,7 +29,7 @@
     --kk-line: rgba(125, 165, 205, 0.20);
     --kk-shadow: 0 14px 38px rgba(0, 0, 0, 0.38), 0 0 24px rgba(34, 211, 238, 0.05);
     --kk-radius: 14px;
-    --kk-font: "Outfit", ui-rounded, "Segoe UI", system-ui, sans-serif;
+    --kk-font: var(--font-ui);
 }
 
 
@@ -142,7 +142,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 .field-group label {
     color: var(--kk-muted);
-    font-size: 0.66rem;
+    font-size: 0.72rem;
 }
 
 .topbar-shell select {
@@ -398,14 +398,14 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 }
 
 .kk-live-comp {
-    font-size: 10px;
+    font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.5px;
     color: var(--kk-muted);
 }
 
 .kk-live-slot {
-    font-size: 10px;
+    font-size: 0.72rem;
     font-weight: 900;
     color: #2E7D6B;
     background: #fff;
@@ -416,7 +416,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 .kk-live-min {
     margin-left: auto;
-    font-size: 11px;
+    font-size: 0.72rem;
     font-weight: 900;
     color: var(--kk-pink-ink);
     white-space: nowrap;
@@ -450,7 +450,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 .kk-live-note {
     margin: 8px 2px 0;
-    font-size: 10.5px;
+    font-size: 0.72rem;
     color: var(--kk-muted);
     font-weight: 700;
 }
@@ -531,7 +531,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 }
 
 .kk-ticket .cx-sv-meta-item dt {
-    font-size: 10px;
+    font-size: 0.72rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--kk-muted);
@@ -749,7 +749,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 }
 
 .kk-page .cx-sv-table thead th {
-    font-size: 11px;
+    font-size: 0.72rem;
     color: var(--kk-muted);
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -768,7 +768,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 .kk-page .cx-sv-table thead th.cx-sv-result-head {
     text-align: center;
     width: auto;
-    font-size: 10px;
+    font-size: 0.72rem;
 }
 
 .kk-page .cx-sv-col-name {
@@ -783,7 +783,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 .kk-page .cx-sv-col-flag {
     display: inline-block;
     margin-top: 2px;
-    font-size: 10px;
+    font-size: 0.72rem;
     letter-spacing: 0;
     color: var(--kk-muted);
     border: 1.5px solid var(--kk-line);
@@ -820,7 +820,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 }
 
 .kk-page .cx-sv-idx {
-    font-size: 11px;
+    font-size: 0.72rem;
     color: var(--kk-muted);
     min-width: 14px;
 }
@@ -846,7 +846,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 .kk-page .cx-sv-when {
     flex: 1 1 100%;
     padding-left: 20px;
-    font-size: 11px;
+    font-size: 0.72rem;
     color: var(--kk-muted);
     font-weight: 700;
 }
@@ -1008,7 +1008,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 .kk-page .cx-sv-pleno-head th {
     padding: 10px 8px 6px;
     text-align: left;
-    font-size: 11px;
+    font-size: 0.72rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--kk-sun-ink);
@@ -1032,7 +1032,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 .kk-page .cx-sv-table tfoot th.cx-sv-total-label {
     padding: 12px 8px;
     text-align: left;
-    font-size: 11px;
+    font-size: 0.72rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--kk-muted);
@@ -1058,7 +1058,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 .kk-page .cx-sv-total small {
     display: block;
-    font-size: 10.5px;
+    font-size: 0.72rem;
     color: var(--kk-muted);
     font-weight: 800;
 }
@@ -1135,7 +1135,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
 .kk-you-tag {
     display: inline-block;
-    font-size: 10.5px;
+    font-size: 0.72rem;
     background: var(--kk-pink);
     color: #fff;
     border-radius: 999px;
@@ -1186,7 +1186,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell,
 
     .topbar-title,
     .topbar-kicker {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
     }
 
     .kk-wrap {
@@ -1460,7 +1460,7 @@ body.newspaper-ui.quiniela-focus {
         var(--cc-bg);
     background-size: 32px 32px, 32px 32px, auto, auto;
     color: var(--cc-text);
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-family: var(--font-ui);
 }
 
 body.newspaper-ui.quiniela-focus .topbar-shell {
@@ -1496,7 +1496,7 @@ body.newspaper-ui.quiniela-focus .duelo-scorebar {
 body.newspaper-ui.quiniela-focus .duelo-label,
 body.newspaper-ui.quiniela-focus .duelo-vs {
     color: var(--cc-muted);
-    font: 700 0.6rem/1.2 var(--cc-mono);
+    font: 700 0.72rem/1.2 var(--cc-mono);
     letter-spacing: 0.08em;
 }
 
@@ -1510,7 +1510,7 @@ body.newspaper-ui.quiniela-focus .duelopena-side .duelo-score { color: var(--cc-
 
 body.newspaper-ui.quiniela-focus .duelo-countdown {
     color: var(--cc-gold);
-    font: 700 0.6rem/1.2 var(--cc-mono);
+    font: 700 0.72rem/1.2 var(--cc-mono);
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -1534,7 +1534,7 @@ body.newspaper-ui.quiniela-focus .como-juega-num {
 body.newspaper-ui.quiniela-focus .kk-page {
     padding: 6px 0 28px;
     color: var(--cc-text);
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-family: var(--font-ui);
 }
 
 body.newspaper-ui.quiniela-focus .kk-wrap,
@@ -1572,7 +1572,7 @@ body.newspaper-ui.quiniela-focus .kk-logo {
 body.newspaper-ui.quiniela-focus .kk-logo small {
     margin-top: 4px;
     color: var(--cc-cyan);
-    font-size: 9px;
+    font-size: 0.72rem;
     letter-spacing: 0.2em;
 }
 
@@ -1583,7 +1583,7 @@ body.newspaper-ui.quiniela-focus .kk-card-kicker {
     display: block;
     margin: 0 0 4px;
     color: var(--cc-cyan);
-    font: 700 0.63rem/1.3 var(--cc-mono);
+    font: 700 0.72rem/1.3 var(--cc-mono);
     letter-spacing: 0.13em;
     text-transform: uppercase;
 }
@@ -1694,7 +1694,7 @@ body.newspaper-ui.quiniela-focus .kk-live-empty {
 
 body.newspaper-ui.quiniela-focus .kk-live-empty-state {
     color: var(--cc-gold);
-    font: 700 0.68rem/1.3 var(--cc-mono);
+    font: 700 0.72rem/1.3 var(--cc-mono);
     letter-spacing: 0.09em;
 }
 
@@ -1718,7 +1718,7 @@ body.newspaper-ui.quiniela-focus .kk-live-meta {
     flex-wrap: wrap;
     gap: 5px 8px;
     color: var(--cc-muted);
-    font: 650 0.62rem/1.3 var(--cc-mono);
+    font: 650 0.72rem/1.3 var(--cc-mono);
     text-transform: uppercase;
 }
 
@@ -1747,7 +1747,7 @@ body.newspaper-ui.quiniela-focus .kk-live-score {
 body.newspaper-ui.quiniela-focus .kk-live-note,
 body.newspaper-ui.quiniela-focus .kk-foot {
     color: var(--cc-muted);
-    font: 600 0.62rem/1.5 var(--cc-mono);
+    font: 600 0.72rem/1.5 var(--cc-mono);
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -1772,7 +1772,7 @@ body.newspaper-ui.quiniela-focus .kk-card-title {
 }
 
 body.newspaper-ui.quiniela-focus .kk-card-title .kk-card-kicker { flex-basis: 100%; }
-body.newspaper-ui.quiniela-focus .kk-tag { padding: 4px 7px; font-size: 0.6rem; }
+body.newspaper-ui.quiniela-focus .kk-tag { padding: 4px 7px; font-size: 0.72rem; }
 body.newspaper-ui.quiniela-focus .kk-hint { color: var(--cc-gold); font-size: 0.78rem; }
 
 body.newspaper-ui.quiniela-focus .cx-sv-scroll,
@@ -1801,7 +1801,7 @@ body.newspaper-ui.quiniela-focus .historial-duelo-table thead th {
     border-bottom: 1px solid var(--cc-line-strong);
     background: rgba(15, 31, 47, 0.9);
     color: var(--cc-cyan);
-    font: 700 0.64rem/1.3 var(--cc-mono);
+    font: 700 0.72rem/1.3 var(--cc-mono);
     letter-spacing: 0.04em;
     text-align: center;
     text-transform: uppercase;
@@ -1833,12 +1833,12 @@ body.newspaper-ui.quiniela-focus .cx-sv-col-flag {
     display: block;
     margin-top: 4px;
     color: var(--cc-gold);
-    font: 600 0.54rem/1.25 var(--cc-mono);
+    font: 600 0.72rem/1.25 var(--cc-mono);
     letter-spacing: 0;
     text-transform: none;
 }
 
-body.newspaper-ui.quiniela-focus .cx-sv-note { color: var(--cc-muted); font-size: 0.7rem; }
+body.newspaper-ui.quiniela-focus .cx-sv-note { color: var(--cc-muted); font-size: 0.72rem; }
 body.newspaper-ui.quiniela-focus .kk-rank { border-color: rgba(56, 189, 248, 0.16); border-radius: 4px; background: var(--cc-panel-soft); }
 body.newspaper-ui.quiniela-focus .kk-av,
 body.newspaper-ui.quiniela-focus .kk-pos { color: var(--cc-cyan); font-family: var(--cc-mono); }
@@ -1861,7 +1861,7 @@ body.newspaper-ui.quiniela-focus .kk-foot { margin-top: 12px; text-align: center
     body.newspaper-ui.quiniela-focus .kk-header { gap: 10px; padding: 10px; }
     body.newspaper-ui.quiniela-focus .kk-logo { width: 44px; height: 44px; flex-basis: 44px; }
     body.newspaper-ui.quiniela-focus .kk-title { font-size: 1rem; }
-    body.newspaper-ui.quiniela-focus .kk-sub { font-size: 0.68rem; }
+    body.newspaper-ui.quiniela-focus .kk-sub { font-size: 0.72rem; }
     body.newspaper-ui.quiniela-focus .kk-card { padding: 10px 8px; }
 }
 
@@ -1898,7 +1898,7 @@ body.newspaper-ui.quiniela-focus .topbar-actions {
 
 body.newspaper-ui.quiniela-focus .topbar-kicker {
     color: var(--cc-cyan);
-    font: 700 0.66rem/1.4 var(--cc-mono);
+    font: 700 0.72rem/1.4 var(--cc-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
@@ -1943,7 +1943,7 @@ body.newspaper-ui.quiniela-focus .duelo-side {
 
 body.newspaper-ui.quiniela-focus .duelo-label {
     color: var(--cc-muted);
-    font: 700 0.62rem/1.2 var(--cc-mono);
+    font: 700 0.72rem/1.2 var(--cc-mono);
     letter-spacing: 0.14em;
 }
 
@@ -1956,8 +1956,8 @@ body.newspaper-ui.quiniela-focus .duelo-score {
 body.newspaper-ui.quiniela-focus .duelopena-side .duelo-score { color: var(--cc-green); text-shadow: 0 0 18px rgba(74, 222, 128, 0.22); }
 
 body.newspaper-ui.quiniela-focus .duelo-center { gap: 6px; }
-body.newspaper-ui.quiniela-focus .duelo-vs { color: var(--cc-muted); font: 700 0.62rem/1 var(--cc-mono); letter-spacing: 0.2em; }
-body.newspaper-ui.quiniela-focus .duelo-countdown { color: var(--cc-gold); font: 700 0.65rem/1.2 var(--cc-mono); }
+body.newspaper-ui.quiniela-focus .duelo-vs { color: var(--cc-muted); font: 700 0.72rem/1 var(--cc-mono); letter-spacing: 0.2em; }
+body.newspaper-ui.quiniela-focus .duelo-countdown { color: var(--cc-gold); font: 700 0.72rem/1.2 var(--cc-mono); }
 
 body.newspaper-ui.quiniela-focus #user-profile-nav .login-btn,
 body.newspaper-ui.quiniela-focus #user-profile-nav .topbar-login-btn {
@@ -2053,7 +2053,7 @@ body.newspaper-ui.quiniela-focus .kk-live-empty-state {
 
     body.newspaper-ui.quiniela-focus .topbar-context { display: block; }
     body.newspaper-ui.quiniela-focus .duelo-scorebar { min-height: 86px; padding: 8px; gap: 6px; }
-    body.newspaper-ui.quiniela-focus .duelo-label { display: block; font-size: 0.54rem; }
+    body.newspaper-ui.quiniela-focus .duelo-label { display: block; font-size: 0.72rem; }
     body.newspaper-ui.quiniela-focus .duelo-score { font-size: clamp(1.75rem, 7vw, 2.5rem); }
     body.newspaper-ui.quiniela-focus .topbar-actions { justify-content: flex-end; }
     body.newspaper-ui.quiniela-focus .kk-live-aside { min-height: 0; }
@@ -2104,7 +2104,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions {
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-kicker {
     color: var(--cc-cyan);
-    font: 700 .67rem/1.4 var(--cc-mono);
+    font: 700 0.72rem/1.4 var(--cc-mono);
     letter-spacing: .12em;
     text-transform: uppercase;
 }
@@ -2200,7 +2200,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip {
     border-bottom: 1px solid rgba(56, 189, 248, .19);
     background: rgba(1, 7, 13, .42);
     color: var(--cc-muted);
-    font: 700 .64rem/1.3 var(--cc-mono);
+    font: 700 0.72rem/1.3 var(--cc-mono);
     letter-spacing: .13em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip > :nth-child(2) { color: var(--cc-gold); }
@@ -2223,7 +2223,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-head {
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-head b {
     color: var(--cc-text);
-    font: 800 clamp(1rem, 1.6vw, 1.3rem)/1.2 Inter, "Segoe UI", sans-serif;
+    font: 800 clamp(1rem, 1.6vw, 1.3rem)/1.2 var(--font-ui);
     letter-spacing: .1em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-count { margin-left: 4px; }
@@ -2273,7 +2273,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note {
     z-index: 1;
     margin: 12px 4px 0;
     color: rgba(139, 163, 191, .8);
-    font: 600 .62rem/1.4 var(--cc-mono);
+    font: 600 0.72rem/1.4 var(--cc-mono);
     letter-spacing: .04em;
 }
 
@@ -2325,7 +2325,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-history-card { max-h
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header { align-items: flex-start; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket { align-items: flex-start; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside { min-height: 270px; padding: 0 12px 14px; }
-    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip { margin-inline: -12px; padding-inline: 12px; gap: 6px 12px; font-size: .56rem; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip { margin-inline: -12px; padding-inline: 12px; gap: 6px 12px; font-size: 0.72rem; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-signal { margin-left: 0; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-empty { min-height: 174px; padding: 18px 14px 18px 38px; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-list { grid-template-columns: minmax(0, 1fr); }
@@ -2366,7 +2366,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip {
     border-radius: 4px 4px 0 0;
     background: linear-gradient(90deg, #111c14, #0a120d);
     color: #a6bc9c;
-    font-size: .59rem;
+    font-size: 0.72rem;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-strip > :nth-child(2) { color: #f0c566; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-mission-signal { color: #a4ff79; }
@@ -2432,7 +2432,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-label {
     min-height: 23px;
     margin-bottom: 8px;
     color: #a9d59a;
-    font: 700 .59rem/1.3 var(--cc-mono);
+    font: 700 0.72rem/1.3 var(--cc-mono);
     letter-spacing: .12em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-label small {
@@ -2466,7 +2466,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-min {
     background: none;
     padding: 0;
     color: #92ba84;
-    font: 600 .53rem/1.25 var(--cc-mono);
+    font: 600 0.72rem/1.25 var(--cc-mono);
     letter-spacing: .04em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-slot { color: #e9bf58; }
@@ -2476,7 +2476,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside .kk-live-
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 2px 8px;
     color: #d2e8ca;
-    font: 650 .66rem/1.2 var(--cc-mono);
+    font: 650 0.72rem/1.2 var(--cc-mono);
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-body i { display: none; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-aside .kk-live-score {
@@ -2502,8 +2502,8 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty {
     font-family: var(--cc-mono);
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty span,
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty small { color: #91ad87; font-size: .58rem; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty b { color: #edc05a; font-size: .7rem; letter-spacing: .08em; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty small { color: #91ad87; font-size: 0.72rem; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-feed-empty b { color: #edc05a; font-size: 0.72rem; letter-spacing: .08em; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-focus {
     position: relative;
     display: flex;
@@ -2525,7 +2525,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-kicker {
     position: relative;
     z-index: 1;
     color: #d5bd69;
-    font: 700 .61rem/1.4 var(--cc-mono);
+    font: 700 0.72rem/1.4 var(--cc-mono);
     letter-spacing: .12em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-orbit {
@@ -2581,7 +2581,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-scoreline {
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-team { display: grid; gap: 8px; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-team.is-away { text-align: right; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-team small { color: #95b486; font: 600 .58rem/1.2 var(--cc-mono); letter-spacing: .12em; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-team small { color: #95b486; font: 600 0.72rem/1.2 var(--cc-mono); letter-spacing: .12em; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-team b { color: #d8edcf; font-size: clamp(.9rem, 1.55vw, 1.32rem); }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-scoreline > strong {
     padding: 10px 14px;
@@ -2602,12 +2602,12 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-foot {
     padding-top: 10px;
     border-top: 1px solid rgba(145, 190, 127, .18);
     color: #a0c790;
-    font: 600 .57rem/1.3 var(--cc-mono);
+    font: 600 0.72rem/1.3 var(--cc-mono);
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy { position: relative; z-index: 1; max-width: 58%; margin-top: 30px; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy b { color: #e8c35d; font: 800 .75rem/1.4 var(--cc-mono); letter-spacing: .12em; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy p { margin: 8px 0; color: #d5e4cf; font-size: clamp(.95rem, 1.6vw, 1.25rem); font-weight: 800; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small { color: #9db891; font: 600 .62rem/1.5 var(--cc-mono); }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small { color: #9db891; font: 600 0.72rem/1.5 var(--cc-mono); }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note {
     position: relative;
     z-index: 1;
@@ -2616,7 +2616,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note {
     gap: 10px;
     margin: 7px 2px 0;
     color: #89a67d;
-    font: 600 .54rem/1.4 var(--cc-mono);
+    font: 600 0.72rem/1.4 var(--cc-mono);
     letter-spacing: .06em;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-shell {
@@ -2773,7 +2773,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-score,
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-min {
-        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-family: var(--font-data);
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-main {
         min-height: 0;
@@ -2811,7 +2811,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small {
         color: var(--cc-muted);
-        font: 500 .75rem/1.25 "IBM Plex Mono", "JetBrains Mono", monospace;
+        font: 500 .75rem/1.25 var(--font-data);
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note { display: none; }
 
@@ -2836,13 +2836,13 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
         display: inline;
         margin: 0;
         color: var(--cc-cyan);
-        font-size: .7rem;
+        font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-tag {
         margin-left: auto;
         padding: 2px 5px;
         color: var(--cc-muted);
-        font-size: .65rem;
+        font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-scroll { overflow: visible; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table {
@@ -2854,7 +2854,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table thead th {
         padding: 4px 3px;
-        font-size: .7rem;
+        font-size: 0.72rem;
         letter-spacing: .025em;
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-table tbody th,
@@ -2870,11 +2870,11 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
         padding-left: 18px;
-        font: 500 .67rem/1.05 "IBM Plex Mono", "JetBrains Mono", monospace;
+        font: 500 0.72rem/1.05 var(--font-data);
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-result-val,
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-sign {
-        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-family: var(--font-data);
         font-variant-numeric: tabular-nums;
     }
 
@@ -2887,17 +2887,20 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .topbar-actions #refresh
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-pos {
         color: var(--cc-cyan);
-        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-family: var(--font-data);
     }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-nm { color: var(--cc-text); font-weight: 700; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sc {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
+        display: block;
+        text-align: right;
         color: var(--cc-muted);
-        font: 500 .68rem/1.2 "IBM Plex Mono", "JetBrains Mono", monospace;
+        font: 500 0.72rem/1.2 var(--font-data);
     }
+    /* En flex column el <b>9</b>, el texto " pts" y el <small> quedan como tres
+       items apilados en vertical ("9" / "pts"); en bloque fluyen juntos en una
+       linea y el historial por jornada baja aparte. */
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sc b { color: #d6b558; font-size: .95rem; }
+    body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-sc small { display: block; margin-top: 1px; font-size: .72rem; white-space: nowrap; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-empty { margin: 8px; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-archive-summary { padding: 6px 9px; font: 600 .9rem/1.2 "Rajdhani", sans-serif; }
     body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-history-card { max-height: 220px; }
@@ -2995,7 +2998,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-label,
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-live-note { display: none; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-cockpit-main { padding: 2px 4px; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy p { margin: 1px 0; font-size: .8rem; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small { font-size: .65rem; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-focus-copy small { font-size: 0.72rem; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-card { grid-area: rank; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-rank-list { max-height: 210px; overflow: auto; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-archive-card { grid-area: archive; }
@@ -3036,7 +3039,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
     display: block;
     padding: 2px 0 0;
     white-space: nowrap;
-    font-size: .63rem;
+    font-size: 0.72rem;
     line-height: 1;
 }
 @media (max-width: 900px) {
@@ -3061,7 +3064,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label {
     padding: 3px 6px;
     border: 1px solid rgba(125, 177, 205, .24);
     color: #a9bbca;
-    font: 600 .72rem/1 "IBM Plex Mono", "JetBrains Mono", monospace;
+    font: 600 .72rem/1 var(--font-data);
     white-space: nowrap;
 }
 
@@ -3116,7 +3119,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-header {
     padding: 3px 8px;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-title { font-size: 1rem; }
-body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label { font-size: .64rem; }
+body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-ticket-label { font-size: 0.72rem; }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-glogin {
     min-height: 26px;
     padding: 2px 6px;
@@ -3151,7 +3154,7 @@ body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-teams {
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .cx-sv-when {
     grid-area: when;
     padding: 0;
-    font-size: .58rem;
+    font-size: 0.72rem;
     line-height: 1;
 }
 body.newspaper-ui.quiniela-focus.newspaper-cover-active .kk-card-title {
