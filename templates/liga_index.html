@@ -51,7 +51,7 @@
     {# La precarga y la hoja de estilo deben compartir version: con `v` distinto
        el navegador descargaba tokens.css dos veces. #}
     <link rel="preload" as="style" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-5') }}">
-    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding, kawaii;</style>
+    <style>@layer tokens, base, badges, theme, typewriter, surfaces, hero, typography, layout, interactions, unification, pages, animations, overlays, utilities, responsive, future, onboarding, kawaii, command-panel;</style>
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/base/tokens.css', v=assets_v ~ '-tokens-5') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/app_shell.css', v=assets_v ~ '-shell-3') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/team_badges.css', v=assets_v ~ '-badges-2') }}">

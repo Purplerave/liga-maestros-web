@@ -133,39 +133,60 @@ function renderArena() {
     if (state.currentFilter === "TICKET") {
         const matches = state.data.partidos || [];
         container.className = "arena-content table-mode";
+        const jornadaLabel = state.data?.jornada || state.jornada || "—";
         container.innerHTML = `
-            <div class="ticket-workspace">
-                <div class="ticket-main-column">
-                    <div class="ticket-progress-strip" aria-live="polite">
-                        <span>Tu quiniela</span>
-                        <strong id="ticket-picks-done">0/15</strong>
-                        <div class="picks-track" aria-hidden="true"><i id="ticket-picks-bar"></i></div>
+            <div class="command-panel" id="command-panel">
+                <div class="command-left" id="command-left">
+                    <div class="command-table-wrap">
+                        <div class="command-table-caption">
+                            <h2>Quiniela oficial · Jornada ${escapeHtml(String(jornadaLabel))}</h2>
+                            <span class="caption-meta">15 PARTIDOS &middot; PRONÓSTICOS</span>
+                        </div>
+                        <div class="command-table-scroll">
+                            <table class="arena-table is-tension-table">
+                                <thead id="arena-thead"></thead>
+                                <tbody id="arena-body"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <section class="ticket-porra-strip" aria-labelledby="ticket-porra-title">
-                        <div class="ticket-porra-heading">
-                            <span data-porra-label>PORRA</span>
-                            <strong id="ticket-porra-title">+2 puntos por marcador exacto</strong>
+                    <div class="command-aciertos-summary">
+                        <div class="aciertos-header">
+                            <h3>Aciertos &middot; Jornada</h3>
+                            <span>Participantes</span>
                         </div>
-                        <div id="ticket-porra-body" class="porra-body">
-                            <div class="empty-state">Cargando porra...</div>
-                        </div>
-                    </section>
-                    ${renderLiveScrutinyBadge(matches)}
-                    <div class="arena-table-wrap">
-                        <table class="arena-table is-tension-table">
-                            <thead id="arena-thead"></thead>
-                            <tbody id="arena-body"></tbody>
-                        </table>
+                        <div class="aciertos-scroll" id="aciertos-scroll"></div>
                     </div>
                 </div>
-                <div class="ticket-side-column">
-                    ${typeof renderTicketLivePanel === "function" ? renderTicketLivePanel() : ""}
-                    ${renderTicketCommentsPanel()}
+                <div class="command-right" id="command-right">
+                    <div class="command-module module-directo">
+                        <div class="command-module-header">
+                            <h3>Monitor en directo</h3>
+                            <span class="module-meta" id="directo-meta">0 en juego</span>
+                        </div>
+                        <div class="command-module-body" id="directo-body"></div>
+                    </div>
+                    <div class="command-module module-clasificacion">
+                        <div class="command-module-header">
+                            <h3>Clasificaci&oacute;n</h3>
+                            <span class="module-meta" id="clasificacion-meta">Jornada ${escapeHtml(String(jornadaLabel))}</span>
+                        </div>
+                        <div class="command-module-body" id="clasificacion-body"></div>
+                    </div>
+                    <div class="command-module module-estadisticas">
+                        <div class="command-module-header">
+                            <h3>Estad&iacute;sticas</h3>
+                            <span class="module-meta">Rendimiento</span>
+                        </div>
+                        <div class="command-module-body" id="estadisticas-body"></div>
+                    </div>
                 </div>
             </div>`;
         renderArenaTensionBody(matches);
+        qs("aciertos-scroll").innerHTML = renderAciertosSummary();
+        qs("directo-body").innerHTML = renderDirectoModule();
+        qs("clasificacion-body").innerHTML = renderClasificacionModule();
+        qs("estadisticas-body").innerHTML = renderEstadisticasModule();
         if (typeof updatePicksProgress === "function") updatePicksProgress();
-        initTicketComments();
         loadPorra();
         ensureQ15Directo().then(loadedNow => {
             if (loadedNow && state.currentFilter === "TICKET" && state.expandedMatch !== null) renderArena();

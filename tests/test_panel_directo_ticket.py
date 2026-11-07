@@ -206,9 +206,18 @@ def test_ticket_view_places_the_panel_on_the_side_and_the_chip_in_the_row():
     arena = (ROOT / "static" / "js" / "arena.js").read_text(encoding="utf-8")
     ticket = TICKET.read_text(encoding="utf-8")
     css = (ROOT / "static" / "css" / "pages" / "ticket.css").read_text(encoding="utf-8")
+    command_css = (ROOT / "static" / "css" / "pages" / "command_panel.css").read_text(encoding="utf-8")
 
-    assert "ticket-side-column" in arena and "renderTicketLivePanel()" in arena
-    assert "ticket-side-column" in css
-    assert "ticket-live-chip" in css and "ticketLiveChipHtml(m, score)" in ticket
+    # Nueva estructura de dos zonas: izquierda (partidos) y derecha (monitores)
+    assert "command-panel" in arena
+    assert "command-left" in arena
+    assert "command-right" in arena
+    assert "renderDirectoModule()" in arena
+    # El monitor en directo vive en la columna derecha
+    assert "command-module" in command_css
+    assert "live-monitor-list" in command_css
+    # El chip del marcador pegado al partido se conserva en la tabla
+    assert "ticket-live-chip" in css
+    assert "ticketLiveChipHtml(m, score)" in ticket
     # El parche del poll tambien refresca el marcador pegado al partido.
     assert "[data-ticket-live-chip]" in ticket

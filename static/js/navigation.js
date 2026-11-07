@@ -47,6 +47,7 @@ const VIEW_STYLES = {
         ["view-ticket-compact-styles", versionedAsset("/static/css/pages/ticket_compact.css", "ticket-compact-10")],
         ["view-ticket-nasa-styles", versionedAsset("/static/css/pages/ticket_nasa.css", "ticket-nasa-1")],
         ["view-pleno-modal-styles", versionedAsset("/static/css/components/pleno_modal.css", "pleno-modal-2")],
+        ["view-command-panel-styles", versionedAsset("/static/css/pages/command_panel.css", "command-panel-1")],
     ],
 };
 
