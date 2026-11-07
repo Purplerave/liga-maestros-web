@@ -1,10 +1,9 @@
+@layer command-panel {
 /* ==========================================================================
    COMMAND PANEL — Rediseño del panel principal como centro de control deportivo
    Estética de terminal informática / consola de operaciones.
    Aplicado a la vista TICKET (quiniela principal).
    ========================================================================== */
-
-@layer command_panel {
 
 /* ------------------------------------------------------------------ */
 /*  Contenedor de dos zonas: izquierda (partidos) y derecha (monitores) */
@@ -914,5 +913,3 @@
     .command-module-header { padding: var(--space-1) var(--space-2); }
     .command-module-body { padding: var(--space-1); }
 }
-
-} /* @layer command_panel */
