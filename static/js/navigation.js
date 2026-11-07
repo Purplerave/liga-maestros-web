@@ -53,11 +53,11 @@ const VIEW_STYLES = {
 
 const VIEW_SCRIPTS = {
     ALL: [
-        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-97")],
+        ["view-cover-script", versionedAsset("/static/js/pages/cover_page.js", "cover-page-99")],
         ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-3")],
         // El pleno de la columna «Tú» se elige con el mismo modal que usa el
         // boleto: la pagina unica lo pide al estar la jornada abierta.
-        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-6")],
     ],
     CONTEST: [["view-contest-script", versionedAsset("/static/js/contest.js", "contest-9")]],
     STANDINGS: [["view-standings-script", versionedAsset("/static/js/standings.js", "standings-6")]],
@@ -65,7 +65,7 @@ const VIEW_SCRIPTS = {
         ["view-ticket-script", versionedAsset("/static/js/pages/ticket_page.js", "ticket-page-14")],
         ["view-pena-vote-script", versionedAsset("/static/js/pages/pena_vote.js", "pena-vote-1")],
         ["view-historial-script", versionedAsset("/static/js/pages/historial.js", "historial-3")],
-        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-4")],
+        ["view-pleno-modal-script", versionedAsset("/static/js/components/pleno_modal.js", "pleno-modal-6")],
     ],
 };
 

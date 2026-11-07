@@ -117,8 +117,11 @@ function renderArena() {
     }
 
     if (state.currentFilter === "ALL") {
+        const coverUi = typeof captureCoverUi === "function" ? captureCoverUi(container) : null;
         container.className = "arena-content newspaper-cover-mode";
         container.innerHTML = renderNewspaperCoverPageV3();
+        if (typeof restoreCoverUi === "function") restoreCoverUi(container, coverUi);
+        if (typeof refreshCoverLiveEvents === "function") refreshCoverLiveEvents();
         if (typeof loadHistorial === "function") loadHistorial();
         requestAnimationFrame(hydrateCoverTypewriter);
         if (typeof startCoverCountdown === "function") startCoverCountdown();

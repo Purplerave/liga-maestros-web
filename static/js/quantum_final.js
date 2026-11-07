@@ -177,17 +177,42 @@ async function refreshData(options = {}) {
     }
 }
 
+// Un solo detalle de quiniela15 por jornada, compartido por las vistas. Si
+// varios repintados llegan mientras responde la red, reutilizan la promesa.
+const q15RequestsInFlight = new Map();
+let q15LoadedAt = 0;
 async function ensureQ15Directo() {
+    // La portada puede pedir una edad máxima; el boleto conserva su caché habitual.
+    const options = arguments[0] || {};
     const jornada = String(state.data?.jornada || state.jornada || "");
-    if (!jornada || state.q15DirectoJornada === jornada) return false;
+    if (!jornada) return false;
+    const age = Number(options?.maxAgeMs);
+    const maxAge = Number.isFinite(age) && age >= 0 ? age : Infinity;
+    if (state.q15DirectoJornada === jornada && Date.now() - q15LoadedAt < maxAge) return false;
+    if (q15RequestsInFlight.has(jornada)) return q15RequestsInFlight.get(jornada);
+
+    const request = (async () => {
+        let detalle = {};
+        try {
+            const response = await fetch(`/api/q15/directo?j=${encodeURIComponent(jornada)}`);
+            detalle = response.ok ? await response.json() : {};
+        } catch {
+            // Sin detalle se mantiene el marcador del payload principal.
+        }
+        // El usuario puede haber cambiado de jornada mientras llegaba la respuesta.
+        const selected = String(state.jornada || state.data?.jornada || "");
+        if (selected !== jornada || String(state.data?.jornada || jornada) !== jornada) return false;
+        state.q15Directo = detalle;
+        state.q15DirectoJornada = jornada;
+        q15LoadedAt = Date.now();
+        return true;
+    })();
+    q15RequestsInFlight.set(jornada, request);
     try {
-        const response = await fetch(`/api/q15/directo?j=${encodeURIComponent(jornada)}`);
-        state.q15Directo = response.ok ? await response.json() : {};
-    } catch {
-        state.q15Directo = {};
+        return await request;
+    } finally {
+        if (q15RequestsInFlight.get(jornada) === request) q15RequestsInFlight.delete(jornada);
     }
-    state.q15DirectoJornada = jornada;
-    return true;
 }
 
 // --- Porra ---

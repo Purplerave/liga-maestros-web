@@ -33,6 +33,11 @@ async function testAssets(first, second) {
 
 function testModal() {
   const listeners = {};
+  class FakeHTMLElement {}
+  const trigger = new FakeHTMLElement();
+  trigger.isConnected = false; // La tabla se sustituye al guardar.
+  let restoredFocus = 0;
+  const replacement = { focus(options) { assert.strictEqual(options.preventScroll, true); restoredFocus++; } };
   const goalButtons = ['local', 'visitante'].flatMap(side => ['0', '1', '2', 'M'].map(goal => ({
     dataset: { plenoSide: side, goal },
     classList: { toggle() {} }, setAttribute() {}, focus() {},
@@ -44,9 +49,13 @@ function testModal() {
   let matchClick;
   const matchesBody = { addEventListener(type, fn) { if (type === 'click') matchClick = fn; } };
   const document = {
-    activeElement: null,
+    activeElement: trigger,
     body: { appendChild(el) { overlay = el; } },
     getElementById() { return null; },
+    querySelector(selector) {
+      assert.strictEqual(selector, '.clickable[data-pleno][data-match-idx="14"]');
+      return replacement;
+    },
     querySelectorAll() { return []; },
     addEventListener() {}, removeEventListener() {},
     createElement() {
@@ -68,7 +77,7 @@ function testModal() {
   };
   let persisted = 0, rendered = 0, unlocked = 0;
   const context = vm.createContext({
-    document, HTMLElement: class {}, Date,
+    document, HTMLElement: FakeHTMLElement, Date,
     // Missing an earlier fixture: the 15th match is not at array index 14.
     state: { user: { id: 'test' }, data: { jornada: 1, max_jornada: 1, partidos: [{ id: 1, local: 'Otro', visitante: 'Partido' }, { id: 15, local: 'Pleno local', visitante: 'Pleno visitante' }] }, my_signs: Array(15).fill('-') },
     qs: id => id === 'matches-body' ? matchesBody : null,
@@ -99,6 +108,7 @@ function testModal() {
   assert.strictEqual(persisted, 1);
   assert.strictEqual(rendered, 1);
   assert.strictEqual(unlocked, 1);
+  assert.strictEqual(restoredFocus, 1, 'el foco vuelve al nuevo botón del pleno tras repintar');
   context.openPlenoModal(14);
   actions['.pleno-modal-cancel']();
   assert.strictEqual(context.state.my_signs[14], 'M-1');
