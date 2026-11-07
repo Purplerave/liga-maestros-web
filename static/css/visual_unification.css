@@ -82,7 +82,7 @@ body.newspaper-ui.quiniela-focus .topbar-shell::before {
 /* Título y kicker — legibles y elegantes */
 body.newspaper-ui.quiniela-focus .topbar-kicker {
     font-family: var(--font-ui);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -141,7 +141,7 @@ body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
 }
 
 body.newspaper-ui.quiniela-focus .newspaper-page-nav button b {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: inherit;
 }
@@ -235,7 +235,7 @@ body.newspaper-ui.quiniela-focus .icon-btn:hover {
 body.newspaper-ui.quiniela-focus .primary-btn#save-quiniela-btn {
     min-height: 32px;
     padding: 6px 14px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     border-color: rgba(251, 191, 36, 0.5);
     color: #06090f;
@@ -251,7 +251,7 @@ body.newspaper-ui.quiniela-focus .primary-btn#save-quiniela-btn:hover {
 body.newspaper-ui.quiniela-focus .primary-btn#share-ticket-btn {
     min-height: 32px;
     padding: 6px 12px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     background: rgba(56, 189, 248, 0.1);
     border-color: rgba(56, 189, 248, 0.25);
     color: var(--accent);
@@ -268,7 +268,7 @@ body.newspaper-ui.quiniela-focus .topbar-user-name {
 }
 
 body.newspaper-ui.quiniela-focus .topbar-user-score {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     padding: 4px 8px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
@@ -286,7 +286,7 @@ body.newspaper-ui.quiniela-focus .compact-logout {
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(13, 20, 35, 0.7);
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
     transition: all 0.18s ease;
 }
@@ -377,7 +377,7 @@ body.newspaper-ui.quiniela-focus .arena-table th {
     background: rgba(13, 20, 35, 0.9);
     color: var(--text-muted);
     font-family: var(--font-ui);
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -458,7 +458,7 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
 
 .site-legal-links a {
     color: var(--text-muted);
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
     transition: color 0.15s ease;
 }
@@ -516,7 +516,7 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
     }
 
     body.newspaper-ui.quiniela-focus .newspaper-page-nav button {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
         padding: 4px 8px;
         min-height: 30px;
     }
@@ -524,7 +524,7 @@ body.newspaper-ui.quiniela-focus a:focus-visible {
     body.newspaper-ui.quiniela-focus .primary-btn {
         min-height: 30px;
         padding: 5px 10px;
-        font-size: 0.68rem;
+        font-size: 0.72rem;
     }
 
     body.newspaper-ui.quiniela-focus .icon-btn {

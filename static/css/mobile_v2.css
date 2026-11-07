@@ -151,7 +151,7 @@
     }
     body.newspaper-ui.quiniela-focus .newspaper-page-nav button span {
         margin: 0;
-        font-size: 0.6rem;
+        font-size: 0.72rem;
         font-weight: 800;
         letter-spacing: 0.02em;
         text-transform: uppercase;
@@ -267,7 +267,7 @@
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-chip .pena-pick small,
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-breakdown-item small {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .pena-breakdown-item b {
         font-size: 0.85rem;
@@ -310,7 +310,7 @@
         font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus .standings-live {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
     }
 
     /* Tarjetas de partido (Directo / Ligas) */
@@ -461,13 +461,13 @@
         padding: 3px 8px;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-day {
-        font-size: 0.62rem;
+        font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule-time {
         font-size: 0.9rem;
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .ticket-status-cell .fixture-schedule.is-pending {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
         line-height: 1.2;
         overflow-wrap: anywhere;
     }
@@ -648,12 +648,12 @@
         font-size: 0.82rem;
     }
     body.newspaper-ui.quiniela-focus .cx-boleto-table thead th.cx-r-ia em {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
     }
     body.newspaper-ui.quiniela-focus .cx-news-cat,
     body.newspaper-ui.quiniela-focus .cx-kpi-big i,
     body.newspaper-ui.quiniela-focus .cx-cd-block i {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
     }
     /* El boleto puede necesitar scroll interno, pero nunca romper la página */
     body.newspaper-ui.quiniela-focus .cx-boleto-table {
@@ -807,7 +807,7 @@
         box-shadow: 0 0 10px rgba(56, 189, 248, 0.18), inset 0 0 8px rgba(56, 189, 248, 0.08);
     }
     body.newspaper-ui.quiniela-focus.newspaper-ticket-active .tension-row > .ticket-pick-cell:not(.ticket-pena-cell):not(.ticket-user-cell) .tension-chip > span {
-        font-size: 0.6rem;
+        font-size: 0.72rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: #7dd3fc;

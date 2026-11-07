@@ -88,7 +88,7 @@
 }
 .pj-you span {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -101,7 +101,7 @@
   line-height: 1.1;
 }
 .pj-you small {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.4);
 }
 .pj-ais {

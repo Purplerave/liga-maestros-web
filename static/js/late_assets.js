@@ -35,8 +35,8 @@
 
     // Estilos de componentes que no existen en el primer pintado.
     const LATE_STYLES = [
-        ["late-onboarding-styles", versionedAsset("/static/css/onboarding.css", "onboarding-1")],
-        ["late-post-jornada-styles", versionedAsset("/static/css/components/post_jornada.css", "pj-1")],
+        ["late-onboarding-styles", versionedAsset("/static/css/onboarding.css", "onboarding-2")],
+        ["late-post-jornada-styles", versionedAsset("/static/css/components/post_jornada.css", "pj-2")],
     ];
 
     // Scripts que la portada no necesita para ser util. El orden importa:
@@ -46,8 +46,8 @@
         ["late-sound-script", versionedAsset("/static/js/sound_manager.js", "sound-1")],
         ["late-confetti-script", versionedAsset("/static/js/confetti.js", "confetti-1")],
         ["late-ticket-image-script", versionedAsset("/static/js/ticket_image.js", "ticket-image-1")],
-        ["late-post-jornada-script", versionedAsset("/static/js/post_jornada.js", "pj-1")],
-        ["late-onboarding-script", versionedAsset("/static/js/onboarding.js", "onboarding-1")],
+        ["late-post-jornada-script", versionedAsset("/static/js/post_jornada.js", "pj-2")],
+        ["late-onboarding-script", versionedAsset("/static/js/onboarding.js", "onboarding-2")],
         ["late-cmdk-script", versionedAsset("/static/js/command_palette.js", "cmdk-4")],
         ["late-ux-signals-script", versionedAsset("/static/js/ux_signals.js", "ux-signals-1")],
         ["late-sw-script", versionedAsset("/static/js/sw_register.js", "sw-register-2")],

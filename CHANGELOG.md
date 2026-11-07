@@ -2,6 +2,35 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-07 — Legibilidad de los textos pequeños y fuentes sin fantasmas
+
+### Corregido
+
+- **Suelo de tamaño de texto.** Todas las declaraciones por debajo de ~11,5px
+  que cargaba la portada (0,5rem–0,68rem y 9/10/10,5px; 90 reglas en 16 hojas)
+  suben a **0,72rem**. Destacado: la barra de consenso de la peña pasa de 8px
+  de alto a 12px para que su numeración `%1/%X/%2` quepa en el nuevo tamaño.
+- **Fuentes fantasma tan lejos.** `kawaii.css` referenciaba `Inter` (no se
+  carga) y caía en Segoe UI/Arial según el dispositivo; esos elementos usan
+  ahora `var(--font-ui)` (Outfit). `--kk-font` apunta a `var(--font-ui)` en vez
+  de duplicar el stack, y los monos de kawaii usan `var(--font-data)`
+  (JetBrains Mono) en lugar de declarar "IBM Plex Mono" otra vez.
+- **Suelo también en `font:` y en `<small>` relativos.** Los atajos
+  `font: 600 .6rem/...` (25 en kawaii) tenían el mismo problema y el `small`
+  sin regla propia encoge un 0.83x por defecto del navegador
+  (`small/sub/sup { font-size: max(0.72rem, 0.83em) }`); el token
+  `--text-2xs` sube de 0.625rem a 0.72rem.
+- **Clasificación: "9 pts" ya en una línea.** `.kk-sc` era `flex-direction:
+  column` y troceaba el número, la palabra "pts" y el historial en tres
+  renglones apilados. Ahora fluyen juntos y el detalle por jornada baja
+  debajo.
+- **Tooltip del partido completo** al pasar sobre los nombres de la fila
+  (`title="Local – Visitante"`) y tildes corregidas en pantalla para los días
+  sin tilde del calendario ("sábado", "miércoles"), sin tocar el payload.
+- Bump de caché de las hojas editadas (`v=`) incluidos los late assets
+  (`onboarding.jsx`/`post_jornada`) y de `navigation.js` (registra
+  `cover_page.js` con su nueva versión).
+
 ## 2026-11-05 — Nueva jornada interna J19 (SELAE 20)
 
 ### Añadido
