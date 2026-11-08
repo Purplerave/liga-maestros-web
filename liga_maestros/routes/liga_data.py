@@ -499,30 +499,26 @@ def _raw_match_statuses(conn, jornada):
 
 def _is_ticket_locked(partidos, close_info, estados_crudos=()):
     """El boleto se bloquea con los MISMOS estados que acepta el guardado.
-
-    Tres fallos se acumulaban aqui:
-
-    1. Se comparaba contra una lista a mano, `("LIVE", "FT", "FINISHED")`, que se
-       quedaba corta: el guardado cierra con `is_scored_status` o
-       `is_live_scored_status`, que ademas reconocen IN PLAY, HT, HALF TIME BREAK,
-       EN JUEGO y TERMINADO. Con cualquiera de esos el front habria pintado el
-       selector 1X2 editable y el guardado devolveria 403.
-    2. Solo se miraba el status ya autoreparado del payload (ver
-       `_raw_match_statuses`): un LIVE con el saque en el futuro se pinta como NS,
-       el front ofrece firmar y el guardado lo rechaza.
-    3. La comprobacion por estado era mas laxa que la del guardado. Cuando el
-       horario no se puede interpretar `close_at` es None y el tiempo no bloquea
-       nada, asi que el estado es la unica red.
-
-    Ante la duda, cerrar. Perder una quiniela cuesta mucho mas que dejar un
-    partido sin firmar.
+    
+    Cualquier estado que sea reconocido como 'ya puntuado' (scored) bloquea el boleto.
     """
     close_at = close_info.get("close_at")
     close_started = bool(close_at and madrid_now() >= close_at)
+    
+    # Validamos estados crudos y procesados
     estados = [match.get("status") for match in partidos]
     estados.extend(estados_crudos or ())
+    
+    # Si cualquier partido ya tiene resultado confirmado o está en vivo, bloqueamos
     match_started = any(is_scored_status(estado) or is_live_scored_status(estado) for estado in estados)
-    return close_started or match_started
+    
+    # FIX: Forzamos bloqueo si hay cualquier estado que NO sea NS/Scheduled/Empty 
+    # para evitar que el guardado acepte cuando la pantalla dice que no.
+    # We need normalize_status to be available or use the logic directly
+    def normalize(s): return str(s or "").strip().upper()
+    is_actually_ns = all(normalize(e) in ("NS", "SCHEDULED", "", "NOT STARTED") for e in estados)
+    
+    return close_started or match_started or not is_actually_ns
 
 
 def _format_dt(value):
