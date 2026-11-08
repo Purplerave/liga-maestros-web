@@ -1,6 +1,8 @@
 """Register all route blueprints."""
 
 from .api_v1 import register_api_v1_aliases
+from .modern_api import bp as modern_api_bp
+from .standings_modern import bp as standings_modern_bp
 from .auth import bp as auth_bp
 from .comments import bp as comments_bp
 from .contest_routes import bp as contest_bp
@@ -17,6 +19,8 @@ from .user import bp as user_bp
 
 
 def register_routes(app):
+    app.register_blueprint(modern_api_bp)
+    app.register_blueprint(standings_modern_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(liga_data_bp)

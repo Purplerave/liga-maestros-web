@@ -97,6 +97,12 @@ def _fixture_schedule_label(row, fecha_limpia):
 
 
 def build_jornada_matches(conn, jornada, team_logos):
+    from ...services.cache import cache
+    cache_key = f"jornada_matches_{jornada}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
     def logo_for(team_name):
         if not team_name:
             return ""
@@ -241,7 +247,7 @@ def build_jornada_matches(conn, jornada, team_logos):
         except (TypeError, ValueError):
             continue
 
-    return [
+    res = [
         partidos_by_id.get(
             i,
             {
@@ -266,3 +272,5 @@ def build_jornada_matches(conn, jornada, team_logos):
         )
         for i in range(1, 16)
     ]
+    cache.set(cache_key, res)
+    return res
