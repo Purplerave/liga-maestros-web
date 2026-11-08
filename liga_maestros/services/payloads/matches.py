@@ -1,5 +1,7 @@
 """Build the 15-match jornada payload."""
 
+import hashlib
+import json
 import logging
 from datetime import datetime
 
@@ -47,7 +49,7 @@ def _scrape_backfill_rows(jornada, present_ids):
     return rows
 
 
-def _display_safe_row(row):
+def _display_safe_row(row, now=None):
     """Neutralise an impossible or frozen LIVE row before it reaches the page.
 
     The collector closes these rows persistently, but the web must not depend
@@ -56,11 +58,12 @@ def _display_safe_row(row):
     read means the page is self-healing and never shows, for example, a match
     LIVE at minute 90 whose kickoff is still hours away.
     """
+    now = now or madrid_now()
     kickoff = parse_db_match_datetime(row.get("fecha"), row.get("hora"))
     decision = evaluate_match_state(
         row.get("status"),
         kickoff,
-        madrid_now().replace(tzinfo=None),
+        now.replace(tzinfo=None),
         last_update_at=_parse_updated_at(row.get("updated_at")),
         minute=row.get("minuto"),
     )
@@ -96,7 +99,25 @@ def _fixture_schedule_label(row, fecha_limpia):
     return fecha_limpia or (f"{hora_label}h" if hora_label else "Horario por confirmar")
 
 
+def _match_cache_key(jornada, rows, team_logos, now):
+    """Key cached payloads by their source rows and all time-sensitive inputs."""
+    cache_input = {
+        "jornada": str(jornada),
+        "rows": rows,
+        "team_logos": team_logos or {},
+        "today": today_madrid(),
+        "clock_minute": now.isoformat(timespec="minutes"),
+    }
+    encoded = json.dumps(cache_input, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    digest = hashlib.sha256(encoded).hexdigest()
+    return f"jornada_matches:v1:{digest}"
+
+
 def build_jornada_matches(conn, jornada, team_logos):
+    from ...services.cache import cache
+
+    now = madrid_now()
+
     def logo_for(team_name):
         if not team_name:
             return ""
@@ -117,17 +138,19 @@ def build_jornada_matches(conn, jornada, team_logos):
 
     columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
     updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
-    rows = conn.execute(
-        f"""
-        SELECT partido_id as id, local, visitante, goles_local, goles_visitante,
-               status, fecha, hora, minuto, {updated_at_select}
-        FROM resultados
-        WHERE jornada = ?
-        ORDER BY partido_id ASC
-    """,  # noqa: S608 - column name comes from a local allowlist, never user input
-        (jornada,),
-    ).fetchall()
-    rows = [_display_safe_row(dict(row)) for row in rows]
+    rows = [
+        dict(row)
+        for row in conn.execute(
+            f"""
+            SELECT partido_id as id, local, visitante, goles_local, goles_visitante,
+                   status, fecha, hora, minuto, {updated_at_select}
+            FROM resultados
+            WHERE jornada = ?
+            ORDER BY partido_id ASC
+            """,  # noqa: S608 - column name comes from a local allowlist, never user input
+            (jornada,),
+        ).fetchall()
+    ]
 
     present_ids = set()
     for row in rows:
@@ -135,11 +158,16 @@ def build_jornada_matches(conn, jornada, team_logos):
             present_ids.add(int(row.get("id")))
         except (TypeError, ValueError):
             continue
-    missing_ids = [i for i in range(1, 16) if i not in present_ids]
-    if missing_ids:
-        rows.extend(_scrape_backfill_rows(jornada, set(present_ids)))
+    if any(partido_id not in present_ids for partido_id in range(1, 16)):
+        rows.extend(_scrape_backfill_rows(jornada, present_ids))
         rows.sort(key=lambda row: int(row.get("id") or 99))
 
+    cache_key = _match_cache_key(jornada, rows, team_logos, now)
+    cached_data = cache.get(cache_key)
+    if cached_data is not None:
+        return cached_data
+
+    rows = [_display_safe_row(row, now) for row in rows]
     partidos = []
     for row in rows:
         r = dict(row)
@@ -241,7 +269,7 @@ def build_jornada_matches(conn, jornada, team_logos):
         except (TypeError, ValueError):
             continue
 
-    return [
+    res = [
         partidos_by_id.get(
             i,
             {
@@ -266,3 +294,5 @@ def build_jornada_matches(conn, jornada, team_logos):
         )
         for i in range(1, 16)
     ]
+    cache.set(cache_key, res)
+    return res

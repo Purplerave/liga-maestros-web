@@ -38,7 +38,7 @@ from liga_maestros.db.connection import get_db
 from liga_maestros.routes import predictions as predictions_route
 from liga_maestros.services import contest as contest_service
 from liga_maestros.services.payloads.predictions import build_predictions_payload
-from liga_maestros.services.teams import is_live_scored_status, is_scored_status
+from liga_maestros.services.teams import is_ticket_closed_status
 from liga_maestros.services.ticket import madrid_now
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -48,7 +48,7 @@ VALID_SIGNS = ["1", "X", "2", "1", "X", "2", "1", "X", "2", "1", "X", "2", "1", 
 # Todos los estados que el guardado considera "ya no se puede cambiar". La lista
 # esta duplicada a proposito en el test: si alguien la cambia en el codigo sin
 # actualizar el frontend, este test falla.
-ESTADOS_CERRADOS = ["FT", "FINISHED", "TERMINADO", "LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO"]
+ESTADOS_CERRADOS = ["FT", "FINISHED", "TERMINADO", "LIVE", "IN PLAY", "HT", "HALF TIME BREAK", "EN JUEGO", "TBD"]
 
 
 def _app(tmp_path, monkeypatch):
@@ -201,14 +201,10 @@ def test_una_jornada_sin_juego_sigue_abierta(tmp_path, monkeypatch):
     assert respuesta.status_code == 200
 
 
-def test_los_estados_de_la_lista_coinciden_con_los_predicados_compartidos():
-    """Si alguien anade un estado a `is_scored_status` y olvida la lista del
-    front, este test lo dice en la CI y no en produccion."""
+def test_los_estados_cerrados_comparten_el_predicado_de_ticket():
+    """El bloqueo de la pantalla y el del guardado usan la misma regla."""
     for estado in ESTADOS_CERRADOS:
-        assert is_scored_status(estado) or is_live_scored_status(estado), (
-            f"{estado} esta en ESTADOS_CERRADOS pero los predicados compartidos no lo "
-            "reconocen: el front lo daria por editable"
-        )
+        assert is_ticket_closed_status(estado), f"{estado} debe cerrar el boleto en la pantalla y en el guardado"
 
 
 # ── 2. El cierre se comprueba DENTRO de la transaccion ──────────────────────
