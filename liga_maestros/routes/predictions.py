@@ -11,7 +11,7 @@ from ..middleware.rate_limit import is_rate_limited
 from ..scoring import normalize_prediction_sign
 from ..services.highlightly import Q15_EXPECTED_MATCHES
 from ..services.jornada import resolve_active_jornada
-from ..services.teams import is_live_scored_status, is_scored_status
+from ..services.teams import is_ticket_closed_status
 from ..services.ticket import compute_ticket_close_info, madrid_now
 
 bp = Blueprint("predictions", __name__)
@@ -47,7 +47,7 @@ def _motivo_de_cierre(rows, close_at):
     """Mensaje de cierre si la jornada ya no admite cambios, o None si sigue abierta."""
     if close_at and madrid_now() >= close_at:
         return f"La quiniela ya esta cerrada: el cierre era el {close_at.strftime('%d/%m %H:%M')}."
-    if any(is_scored_status(row["status"]) or is_live_scored_status(row["status"]) for row in rows):
+    if any(is_ticket_closed_status(row["status"]) for row in rows):
         return "La quiniela ya esta cerrada: empezo el primer partido."
     return None
 

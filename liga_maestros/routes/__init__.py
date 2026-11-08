@@ -8,15 +8,19 @@ from .legal import bp as legal_bp
 from .liga_data import bp as liga_data_bp
 from .live import bp as live_bp
 from .main import bp as main_bp
+from .modern_api import bp as modern_api_bp
 from .news import bp as news_bp
 from .pena import bp as pena_bp
 from .porra import bp as porra_bp
 from .predictions import bp as predictions_bp
+from .standings_modern import bp as standings_modern_bp
 from .teams_routes import bp as teams_bp
 from .user import bp as user_bp
 
 
 def register_routes(app):
+    app.register_blueprint(modern_api_bp)
+    app.register_blueprint(standings_modern_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(liga_data_bp)

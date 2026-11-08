@@ -176,6 +176,16 @@ def is_live_scored_status(status):
     )
 
 
+def is_ticket_closed_status(status):
+    """Treat every non-scheduled state as closed, consistently across UI and saves.
+
+    Unknown provider states fail closed: the ticket UI must not offer edits that
+    the save endpoint would reject (or accept while the UI says it is locked).
+    """
+    normalized = str(status or "").strip().upper()
+    return normalized not in {"", "NS", "SCHEDULED", "NOT STARTED"}
+
+
 def signo_desde_goles(goles_local, goles_visitante):
     """1, X o 2 a partir del marcador, o None si aun no hay goles.
 

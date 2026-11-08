@@ -314,3 +314,24 @@ class TestJornadaPayloadSelfHeals:
         partidos = matches_payload.build_jornada_matches(conn, 1, {})
 
         assert partidos[5]["status"] == "NS"
+
+    def test_match_cache_tracks_fixture_updates_and_logo_changes(self, monkeypatch):
+        self._freeze(monkeypatch)
+        conn = self._conn(
+            [(1, "Andorra", "Ceuta", None, None, "NS", "2026-08-16", "17:00", "", None)],
+        )
+
+        first = matches_payload.build_jornada_matches(conn, 1, {"ANDORRA": "/andorra-old.svg"})
+        assert first[0]["logo_local"] == "/andorra-old.svg"
+
+        second = matches_payload.build_jornada_matches(conn, 1, {"ANDORRA": "/andorra-new.svg"})
+        assert second[0]["logo_local"] == "/andorra-new.svg"
+
+        conn.execute(
+            "UPDATE resultados SET goles_local=2, goles_visitante=0, status='FT' WHERE jornada=1 AND partido_id=1"
+        )
+        conn.commit()
+        updated = matches_payload.build_jornada_matches(conn, 1, {"ANDORRA": "/andorra-new.svg"})
+
+        assert updated[0]["status"] == "FT"
+        assert updated[0]["marcador"] == "2-0"
