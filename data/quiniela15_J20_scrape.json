@@ -1,0 +1,139 @@
+{
+  "jornada": 20,
+  "source_url": "https://www.eduardolosilla.es/quiniela/ayudas/horarios",
+  "scraped_at": "2026-11-14",
+  "cierre": "sabado 14 de noviembre de 2026 a las 14:00",
+  "temporada": "2026-2027",
+  "fuente": "Horarios publicados para la Jornada 21 de SELAE; correspondencia interna de la Liga de Maestros J20 (SELAE 21). Fechas y horas verificadas el 14/11/2026.",
+  "nota": "Jornada abierta. No se cargan boletos personales hasta que los jugadores los envien.",
+  "boleto": {
+    "nombre": "SELAE 21",
+    "selae": 21,
+    "fecha": "2026-11-15",
+    "cierre": "sabado 14 de noviembre de 2026 a las 14:00",
+    "cierre_estimado": false
+  },
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Valladolid",
+      "visitante": "Castellón",
+      "fecha": "2026-11-14",
+      "hora": "14:00",
+      "division": "segunda"
+    },
+    {
+      "num": 2,
+      "local": "Real Sociedad B",
+      "visitante": "Sporting",
+      "fecha": "2026-11-14",
+      "hora": "16:15",
+      "division": "segunda"
+    },
+    {
+      "num": 3,
+      "local": "Almería",
+      "visitante": "Andorra",
+      "fecha": "2026-11-14",
+      "hora": "18:30",
+      "division": "segunda"
+    },
+    {
+      "num": 4,
+      "local": "Mallorca",
+      "visitante": "Córdoba",
+      "fecha": "2026-11-14",
+      "hora": "18:30",
+      "division": "segunda"
+    },
+    {
+      "num": 5,
+      "local": "Real Oviedo",
+      "visitante": "Girona",
+      "fecha": "2026-11-14",
+      "hora": "21:00",
+      "division": "segunda"
+    },
+    {
+      "num": 6,
+      "local": "Tenerife",
+      "visitante": "Ceuta",
+      "fecha": "2026-11-15",
+      "hora": "14:00",
+      "division": "segunda"
+    },
+    {
+      "num": 7,
+      "local": "Granada",
+      "visitante": "Las Palmas",
+      "fecha": "2026-11-15",
+      "hora": "16:15",
+      "division": "segunda"
+    },
+    {
+      "num": 8,
+      "local": "Eibar",
+      "visitante": "Cádiz",
+      "fecha": "2026-11-15",
+      "hora": "18:30",
+      "division": "segunda"
+    },
+    {
+      "num": 9,
+      "local": "Eldense",
+      "visitante": "Sabadell",
+      "fecha": "2026-11-15",
+      "hora": "18:30",
+      "division": "segunda"
+    },
+    {
+      "num": 10,
+      "local": "Bélgica",
+      "visitante": "Italia",
+      "fecha": "2026-11-15",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 11,
+      "local": "Alavés (F)",
+      "visitante": "Eibar (F)",
+      "fecha": "2026-11-14",
+      "hora": "18:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 12,
+      "local": "Real Sociedad (F)",
+      "visitante": "Athletic Club (F)",
+      "fecha": "2026-11-15",
+      "hora": "12:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 13,
+      "local": "Sevilla (F)",
+      "visitante": "Atlético de Madrid (F)",
+      "fecha": "2026-11-15",
+      "hora": "16:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 14,
+      "local": "Valencia (F)",
+      "visitante": "Granada (F)",
+      "fecha": "2026-11-15",
+      "hora": "18:15",
+      "division": "liga_f"
+    },
+    {
+      "num": 15,
+      "local": "España",
+      "visitante": "Inglaterra",
+      "fecha": "2026-11-15",
+      "hora": "20:45",
+      "division": "internacional",
+      "pleno_al_15": true
+    }
+  ]
+}

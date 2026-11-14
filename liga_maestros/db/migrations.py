@@ -849,6 +849,26 @@ def ensure_jornada_19(conn):
     return updated + imported
 
 
+def ensure_jornada_20(conn):
+    """Publica la J20 interna con el boleto SELAE 21 (fin de semana 14-16/11/2026).
+
+    Sigue el patron de ensure_jornada_19: fixture versionado en
+    data/quiniela15_J20_scrape.json + data/horarios_J20.json y boletos de los
+    5 + Gemini (invitado) en data/predicciones_J20.json. Las casillas 10 (Belgica-Italia) y 15
+    (Espana-Inglaterra, pleno al 15) son de selecciones y usan division
+    "internacional", como los plenos de selecciones de la J9 y la J11.
+    El pleno de MrPurple es 3-1, su prediccion real: el 2-1 del boleto
+    apostado en La Barca de Oro fue solo el pleno unico que admite esa web,
+    no su linea.
+    """
+    updated = ensure_jornada_completa(conn, 20)
+    imported = _import_compact_prediction_tickets(conn, 20)
+    _import_jornada_resultados(conn, 20)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -1008,6 +1028,7 @@ def run_startup_migrations():
             ensure_jornada_16(conn)
             ensure_jornada_17(conn)
             ensure_jornada_19(conn)
+            ensure_jornada_20(conn)
             ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
