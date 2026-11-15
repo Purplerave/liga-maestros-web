@@ -2,6 +2,7 @@
 
 import hashlib
 import logging
+import os
 import threading
 import time
 from datetime import datetime, timedelta
@@ -30,7 +31,7 @@ from ..services.payloads.simple_view import (
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_ticket_closed_status
 from ..services.ticket import compute_ticket_close_info, load_match_info_for_jornada, madrid_now, today_madrid
-from ..utils import load_team_logos, normalize_team_key
+from ..utils import load_team_logos, normalize_team_key, runtime_data_path
 
 bp = Blueprint("liga_data", __name__)
 logger = logging.getLogger(__name__)
@@ -69,6 +70,20 @@ def _cold_start_response(message="Los datos de la jornada aún se están prepara
     response.headers["Retry-After"] = str(_COLD_START_RETRY_AFTER)
     response.headers["Cache-Control"] = "no-store"
     return response
+
+
+def _collector_warming_response():
+    """Retry instead of serving the pre-refresh DB snapshot during process boot."""
+    try:
+        from ..workers.web_collector import collector_startup_pending
+
+        pending = collector_startup_pending()
+    except Exception:
+        logger.exception("No se pudo consultar el estado inicial del collector")
+        return None
+    if not pending:
+        return None
+    return _cold_start_response("El directo se está actualizando tras iniciar el servidor.")
 
 
 def _wants_slim():
@@ -179,16 +194,102 @@ def _parse_payload_kickoff(match):
         return None
 
 
-def _get_standings_cached(conn, partidos, team_logos):
-    """Return (standings, standings_db) with 5-min TTL cache keyed by jornada+partidos hash."""
-    # Cache key: jornada + hash of partidos IDs + count
-    partido_ids = tuple(sorted(str(p.get("id")) for p in partidos if p.get("id")))
-    cache_key = f"{len(partido_ids)}:{hash(partido_ids)}"
+def _standings_cache_source_signature(conn, jornada, partidos):
+    """Fingerprint every mutable input that can change the computed tables."""
+    try:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+        updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
+        rows = conn.execute(
+            f"""
+            SELECT jornada, partido_id, local, visitante, goles_local, goles_visitante,
+                   status, fecha, hora, minuto, {updated_at_select}
+            FROM resultados
+            ORDER BY jornada, partido_id
+            """  # noqa: S608 - column name comes from the local schema allowlist
+        ).fetchall()
+        result_signature = tuple(tuple(row) for row in rows)
+    except Exception:
+        # A broken/migrating DB should not make the optional cache fatal.
+        result_signature = ()
+
+    try:
+        standings_columns = {row[1] for row in conn.execute("PRAGMA table_info(clasificacion)").fetchall()}
+        standings_fields = tuple(
+            field
+            for field in ("division", "equipo", "pj", "pg", "pe", "pp", "gf", "gc", "pts", "pos", "racha")
+            if field in standings_columns
+        )
+        if {"division", "equipo"}.issubset(standings_columns):
+            order_fields = tuple(field for field in ("division", "pos", "equipo") if field in standings_columns)
+            query = f"SELECT {', '.join(standings_fields)} FROM clasificacion ORDER BY {', '.join(order_fields)}"
+            standings_rows = conn.execute(query).fetchall()
+            standings_signature = tuple(tuple(row) for row in standings_rows)
+        else:
+            standings_signature = ()
+    except Exception:
+        # Older schemas may not have the complete table; result and file
+        # signatures still protect the primary sources in that case.
+        standings_signature = ()
+
+    match_fields = (
+        "id",
+        "partido_id",
+        "local",
+        "visitante",
+        "goles_local",
+        "goles_visitante",
+        "status",
+        "signo_actual",
+        "fecha_raw",
+        "fecha",
+        "hora",
+        "minuto",
+    )
+    match_signature = tuple(
+        sorted(
+            tuple(repr(match.get(field)) for field in match_fields)
+            for match in (partidos or [])
+            if isinstance(match, dict)
+        )
+    )
+
+    source_paths = [
+        runtime_data_path("standings_oficial.json"),
+        runtime_data_path("STANDINGS_LALIGA_BASE.json"),
+        runtime_data_path("STANDINGS_SEGUNDA_BASE.json"),
+        os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json"),
+        os.path.join(config.BASE_DIR, "LIVE_ALL_MATCHES_V3.json"),
+        os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES.json"),
+    ]
+    try:
+        from ..services.daily_matches import history_path
+
+        source_paths.append(history_path())
+    except Exception:
+        pass
+    file_signature = []
+    for path in source_paths:
+        try:
+            stat = os.stat(path)
+            file_signature.append((path, stat.st_mtime_ns, stat.st_ctime_ns, stat.st_ino, stat.st_size))
+        except OSError:
+            file_signature.append((path, 0, 0))
+
+    payload = (str(jornada or ""), result_signature, standings_signature, match_signature, tuple(file_signature))
+    return hashlib.sha256(repr(payload).encode("utf-8")).hexdigest()
+
+
+def _get_standings_cached(conn, partidos, team_logos, jornada=None):
+    """Return cached standings only while their DB/provider inputs are unchanged."""
+    cache_key = _standings_cache_source_signature(conn, jornada, partidos)
     now = time.time()
     if _STANDINGS_CACHE["data"] and now < _STANDINGS_CACHE["expires"] and _STANDINGS_CACHE["key"] == cache_key:
         return _STANDINGS_CACHE["data"]
     standings, standings_db = build_standings_payload(conn, partidos)
     persist_standings(conn, standings)
+    # persist_standings may update the DB fallback source used for official
+    # rows. Store the post-write signature so the next request can hit cache.
+    cache_key = _standings_cache_source_signature(conn, jornada, partidos)
     _STANDINGS_CACHE["data"] = (standings, standings_db)
     _STANDINGS_CACHE["expires"] = now + _STANDINGS_TTL
     _STANDINGS_CACHE["key"] = cache_key
@@ -202,6 +303,13 @@ def _etag_for(payload):
 
 @bp.route("/api/liga/data")
 def get_liga_data():
+    # create_app starts the live collector in the background. Do not let the
+    # first page request win the race and publish the persisted pre-refresh
+    # snapshot as if it were current; the existing client retries this 503.
+    collector_response = _collector_warming_response()
+    if collector_response is not None:
+        return collector_response
+
     requested_jornada = request.args.get("j", "")
     conn = get_db()
     try:
@@ -226,7 +334,7 @@ def get_liga_data():
         # en su fila cuando el partido termina, incluso si el collector de BD
         # aún no ha guardado el FT definitivo.
         partidos = apply_verified_provider_scores(partidos)
-        standings, standings_db = _get_standings_cached(conn, partidos, team_logos)
+        standings, standings_db = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         live_matches = build_live_matches(partidos, team_logos, standings_db)
         multi_league_leagues = build_multi_league_standings(standings, team_logos)
@@ -707,7 +815,7 @@ def get_standings():
         jornada = str(resolve_active_jornada(conn) or "1")
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
-        standings, _ = _get_standings_cached(conn, partidos, team_logos)
+        standings, _ = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
         resp = jsonify({"jornada": jornada, "standings": standings, "today_madrid": today_madrid()})
         resp.headers["Cache-Control"] = "public, max-age=60, must-revalidate"
         return resp
@@ -731,7 +839,7 @@ def get_live():
         jornada = str(resolve_active_jornada(conn) or "1")
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
-        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
+        _, standings_db = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
         live_matches = build_live_matches(partidos, team_logos, standings_db)
         resp = jsonify({"jornada": jornada, "live_matches": live_matches, "today_madrid": today_madrid()})
         resp.headers["Cache-Control"] = "public, max-age=10, must-revalidate"
@@ -756,7 +864,7 @@ def get_matches():
         jornada = str(resolve_active_jornada(conn) or "1")
         team_logos = load_team_logos()
         partidos = build_jornada_matches(conn, jornada, team_logos)
-        _, standings_db = _get_standings_cached(conn, partidos, team_logos)
+        _, standings_db = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
         all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
         resp = jsonify(
             {

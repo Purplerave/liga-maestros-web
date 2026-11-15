@@ -491,20 +491,73 @@ function initShellExtras() {
 }
 document.addEventListener("liga:late-ready", () => initShellExtras());
 
+let initialLoadSettled = false;
+let pwaResumeRefreshPending = false;
+let lastForegroundRefreshAt = 0;
+let lastServiceWorkerCheckAt = 0;
+const PWA_RESUME_REFRESH_DEDUPE_MS = 4000;
+const PWA_SW_UPDATE_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+
+function checkPwaServiceWorkerUpdate() {
+    if (!("serviceWorker" in navigator)) return;
+    const now = Date.now();
+    if (now - lastServiceWorkerCheckAt < PWA_SW_UPDATE_CHECK_INTERVAL_MS) return;
+    lastServiceWorkerCheckAt = now;
+    navigator.serviceWorker.getRegistration()
+        .then(registration => registration?.update())
+        .catch(() => {});
+}
+
+function refreshAfterPwaResume() {
+    if (document.hidden || navigator.onLine === false) return;
+    // The app may be backgrounded/resumed before its very first fetch settles.
+    // Defer one revalidation until that request finishes rather than losing the
+    // resume signal and leaving the just-opened PWA with an old snapshot.
+    if (!initialLoadSettled) {
+        pwaResumeRefreshPending = true;
+        return;
+    }
+    const now = Date.now();
+    // pageshow + visibilitychange can both fire during one app resume.
+    if (now - lastForegroundRefreshAt < PWA_RESUME_REFRESH_DEDUPE_MS) return;
+    lastForegroundRefreshAt = now;
+    // `auto` keeps unsaved local ticket edits and the user's scroll position.
+    refreshData({ auto: true }).catch(error => console.warn("No se pudo actualizar al volver a la app", error));
+    checkPwaServiceWorkerUpdate();
+}
+
+function handlePwaVisibilityChange() {
+    if (document.hidden) {
+        stopLiveUpdates();
+        return;
+    }
+    refreshAfterPwaResume();
+    startLiveUpdates();
+}
+
+if (typeof window.addEventListener === "function") {
+    window.addEventListener("pageshow", event => {
+        // A page restored from BFCache does not rerun DOMContentLoaded.
+        if (event.persisted) refreshAfterPwaResume();
+    });
+    window.addEventListener("online", () => refreshAfterPwaResume());
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     bindEvents();
     initMicroInteractions();
     initShellExtras();
+    // Attach before the initial request: a PWA can be backgrounded while its
+    // first response is still pending.
+    document.addEventListener("visibilitychange", handlePwaVisibilityChange);
     await refreshData();
+    initialLoadSettled = true;
+    if (pwaResumeRefreshPending) {
+        pwaResumeRefreshPending = false;
+        if (state.data) refreshAfterPwaResume();
+    }
     startLiveUpdates();
     showWelcomeOnboarding();
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            stopLiveUpdates();
-        } else {
-            startLiveUpdates();
-        }
-    });
 });
 
 let liveSSE = null;

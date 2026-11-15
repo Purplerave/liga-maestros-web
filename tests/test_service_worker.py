@@ -65,6 +65,40 @@ def test_el_sw_parsea_y_el_registro_es_coherente():
         assert validador.returncode == 0, "sw.js no parsea:\n" + (validador.stdout + validador.stderr)
 
 
+def test_el_registro_funciona_si_late_assets_lo_inyecta_despues_de_load():
+    """The late loader must not wait for an already-fired window.load event."""
+    script = r"""
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync(process.argv[1], 'utf8');
+for (const readyState of ['complete', 'interactive']) {
+  const calls = [];
+  const listeners = {};
+  const context = {
+    navigator: { serviceWorker: { register: (...args) => { calls.push(args); return Promise.resolve({}); } } },
+    document: { readyState, currentScript: { dataset: { swUrl: '/static/sw.js?v=123' } } },
+    window: { addEventListener: (name, callback) => { listeners[name] = callback; } },
+    console: { warn() {} },
+  };
+  vm.runInNewContext(source, context);
+  if (readyState === 'complete' && calls.length !== 1) process.exit(1);
+  if (readyState === 'interactive') {
+    if (calls.length !== 0 || typeof listeners.load !== 'function') process.exit(2);
+    listeners.load();
+    if (calls.length !== 1) process.exit(3);
+  }
+  if (calls[0][0] !== '/static/sw.js?v=123' || calls[0][1].updateViaCache !== 'none') process.exit(4);
+}
+"""
+    result = subprocess.run(
+        ["node", "-e", script, str(REGISTER)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_los_metodos_distintos_de_get_no_se_interceptan(sw):
     fetch = _bloque_fetch(sw)
     assert re.search(r"if\s*\(request\.method\s*!==\s*['\"]GET['\"]\)\s*return", fetch), (
