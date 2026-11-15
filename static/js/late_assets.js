@@ -50,7 +50,7 @@
         ["late-onboarding-script", versionedAsset("/static/js/onboarding.js", "onboarding-2")],
         ["late-cmdk-script", versionedAsset("/static/js/command_palette.js", "cmdk-4")],
         ["late-ux-signals-script", versionedAsset("/static/js/ux_signals.js", "ux-signals-1")],
-        ["late-sw-script", versionedAsset("/static/js/sw_register.js", "sw-register-2")],
+        ["late-sw-script", versionedAsset("/static/js/sw_register.js", "sw-register-3")],
     ];
 
     function injectStylesheet(id, href) {

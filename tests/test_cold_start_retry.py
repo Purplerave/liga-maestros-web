@@ -5,6 +5,7 @@ from pathlib import Path
 import config
 from liga_maestros import create_app
 from liga_maestros.routes import liga_data
+from liga_maestros.workers import web_collector
 
 
 def _test_app(tmp_path, monkeypatch):
@@ -31,6 +32,37 @@ def test_liga_data_returns_retryable_cold_start(monkeypatch, tmp_path):
         "code": "COLD_START",
         "message": "Los datos de la jornada aún se están preparando.",
     }
+
+
+def test_liga_data_waits_for_collector_first_pass(monkeypatch, tmp_path):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+
+    response = app.test_client().get("/api/liga/data")
+
+    assert response.status_code == 503
+    assert response.headers["Retry-After"] == "2"
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.get_json() == {
+        "status": "cold_start",
+        "code": "COLD_START",
+        "message": "El directo se está actualizando tras iniciar el servidor.",
+    }
+
+
+def test_pwa_foreground_resume_revalidates_data_and_checks_worker_updates():
+    root = Path(__file__).resolve().parents[1]
+    source = (root / "static/js/events.js").read_text(encoding="utf-8")
+
+    assert 'window.addEventListener("pageshow"' in source
+    assert 'window.addEventListener("online", () => refreshAfterPwaResume())' in source
+    assert "if (event.persisted) refreshAfterPwaResume()" in source
+    assert 'document.addEventListener("visibilitychange", handlePwaVisibilityChange)' in source
+    assert "refreshData({ auto: true })" in source
+    assert "registration?.update()" in source
+    assert "PWA_RESUME_REFRESH_DEDUPE_MS" in source
+    assert "pwaResumeRefreshPending = true" in source
+    assert "if (state.data) refreshAfterPwaResume()" in source
 
 
 def test_frontend_retries_cold_start_and_honours_retry_after():

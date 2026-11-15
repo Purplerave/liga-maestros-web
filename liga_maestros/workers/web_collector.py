@@ -14,6 +14,19 @@ logger = logging.getLogger(__name__)
 
 _collector_started = False
 _collector_lock = threading.Lock()
+_collector_startup_complete = threading.Event()
+_collector_startup_complete.set()
+
+
+def collector_startup_pending():
+    """Whether the collector's first post-boot pass is still in progress.
+
+    The web app may receive requests as soon as ``create_app`` returns, while
+    the collector is still refreshing the persistent result snapshot in its
+    daemon thread. The first data request can wait/retry instead of presenting
+    that pre-refresh snapshot as current.
+    """
+    return not _collector_startup_complete.is_set()
 
 
 def _truthy(value):
@@ -63,10 +76,16 @@ def start_web_collector(app):
             logger.info("web_collector=already_running")
             return
         _collector_started = True
+        # Clear before returning from create_app: the first HTTP request must
+        # not race ahead of the collector's initial data pass.
+        _collector_startup_complete.clear()
 
     # Leader election: only one gunicorn worker should run schedulers
     _leader_lock_handle = _try_acquire_leader_lock()
     if _leader_lock_handle is None:
+        # Another process owns the collector; this worker must not hold page
+        # requests behind a pass it will never run itself.
+        _collector_startup_complete.set()
         logger.info("web_collector=leader_skipped another worker is leader")
         return
     if _leader_lock_handle is not True:
@@ -78,38 +97,52 @@ def start_web_collector(app):
     q15_enabled = not _truthy(os.getenv("WEB_COLLECTOR_DISABLE_Q15", "0"))
 
     def _loop():
-        import sys
-        from pathlib import Path
+        first_pass_pending = True
+        try:
+            import sys
+            from pathlib import Path
 
-        tools_ops = str(Path(__file__).resolve().parents[2] / "tools" / "ops")
-        if tools_ops not in sys.path:
-            sys.path.insert(0, tools_ops)
-        from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
+            tools_ops = str(Path(__file__).resolve().parents[2] / "tools" / "ops")
+            if tools_ops not in sys.path:
+                sys.path.insert(0, tools_ops)
+            from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
 
-        log_line("web_collector=start")
-        logger.info(
-            "web_collector=started interval=%s highlightly_interval=%s q15=%s",
-            interval,
-            highlightly_interval,
-            q15_enabled,
-        )
-        while True:
-            try:
-                _, window = run_once(
-                    force=False,
-                    q15=q15_enabled,
-                    highlightly_interval=highlightly_interval,
-                )
-                sleep_seconds = next_sleep_seconds(window, interval)
-            except Exception as exc:
+            log_line("web_collector=start")
+            logger.info(
+                "web_collector=started interval=%s highlightly_interval=%s q15=%s",
+                interval,
+                highlightly_interval,
+                q15_enabled,
+            )
+            while True:
                 try:
-                    log_line(f"web_collector_error={exc}")
-                    write_health("error", error=exc)
-                except Exception:
-                    pass
-                logger.exception("web_collector loop error")
-                sleep_seconds = max(60, min(interval or 60, 300))
-            time.sleep(max(30, int(sleep_seconds)))
+                    _, window = run_once(
+                        force=False,
+                        q15=q15_enabled,
+                        highlightly_interval=highlightly_interval,
+                    )
+                    sleep_seconds = next_sleep_seconds(window, interval)
+                except Exception as exc:
+                    try:
+                        log_line(f"web_collector_error={exc}")
+                        write_health("error", error=exc)
+                    except Exception:
+                        pass
+                    logger.exception("web_collector loop error")
+                    sleep_seconds = max(60, min(interval or 60, 300))
+                finally:
+                    if first_pass_pending:
+                        # Release the first-page barrier even on a failed pass;
+                        # the API can then serve its last known snapshot rather
+                        # than making the site unavailable indefinitely.
+                        _collector_startup_complete.set()
+                        first_pass_pending = False
+                time.sleep(max(30, int(sleep_seconds)))
+        except Exception:
+            logger.exception("web_collector failed before completing startup")
+        finally:
+            # Import/setup errors must not strand all first-page requests at 503.
+            _collector_startup_complete.set()
 
     thread = threading.Thread(target=_loop, name="liga-web-collector", daemon=True)
     thread.start()
