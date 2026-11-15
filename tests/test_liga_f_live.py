@@ -77,9 +77,11 @@ def test_liga_f_merge_is_deduped_by_id(tmp_path, monkeypatch):
 
     def fake_get_matches(params, headers):
         calls.append(dict(params))
-        # Tanto la pagina generica como la consulta por nombre devuelven el
-        # mismo partido: el merge no debe duplicarlo.
-        return [_sample_match(992, league="Liga F")]
+        # La consulta generica clasifica mal/ambiguamente el encuentro, pero
+        # la consulta específica de Liga F devuelve el mismo ID. Debe
+        # conservarse una sola copia y prevalecer la competición específica.
+        league = "Liga F" if "leagueName" in params else "Friendly"
+        return [_sample_match(992, league=league)]
 
     monkeypatch.setattr(highlightly, "_highlightly_get_matches", fake_get_matches)
 
@@ -88,6 +90,7 @@ def test_liga_f_merge_is_deduped_by_id(tmp_path, monkeypatch):
 
     assert [m["id"] for m in matches] == [992]
     assert len(calls) == 2, "consulta generica + consulta explicita por nombre de Liga F"
+    assert matches[0]["_competition_name"] == "LIGA F"
 
 
 def test_no_liga_f_query_when_quiniela_has_no_feminine_on_date(tmp_path, monkeypatch):

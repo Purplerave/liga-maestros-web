@@ -398,15 +398,24 @@ def _quiniela_has_pending_matches_on_date(conn, jornada, date_text, now=None):
 
 
 def _merge_unique_matches(matches, extra, competition_name):
-    known_ids = {str(match.get("id")) for match in matches if match.get("id") is not None}
+    known_by_id = {
+        str(match.get("id")): match
+        for match in matches
+        if match.get("id") is not None
+    }
     for match in extra or []:
         match_id = match.get("id")
-        if match_id is not None and str(match_id) in known_ids:
+        if match_id is not None and str(match_id) in known_by_id:
+            # Una consulta por liga es más específica que /matches. Conserva
+            # el partido original (con su marcador/estado más reciente), pero
+            # actualiza la competición autoritativa para normalizar equipos,
+            # especialmente los nombres ambiguos de Liga F.
+            known_by_id[str(match_id)]["_competition_name"] = competition_name
             continue
         match["_competition_name"] = competition_name
         matches.append(match)
         if match_id is not None:
-            known_ids.add(str(match_id))
+            known_by_id[str(match_id)] = match
     return matches
 
 
