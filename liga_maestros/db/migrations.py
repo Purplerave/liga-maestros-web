@@ -869,6 +869,23 @@ def ensure_jornada_20(conn):
     return updated + imported
 
 
+def ensure_jornada_21(conn):
+    """Publica la J21 interna con el boleto SELAE 22 (17-19/11/2026).
+
+    Jornada de entre semana: seis partidos internacionales (casillas 1-6), ocho
+    de Liga F (7-14) y el pleno al 15 Dinamarca-Noruega. Se alimenta del fixture
+    versionado data/quiniela15_J21_scrape.json + data/horarios_J21.json y queda
+    abierta, sin boletos personales, hasta que los jugadores envien sus lineas
+    (data/predicciones_J21.json), igual que la J18.
+    """
+    updated = ensure_jornada_completa(conn, 21)
+    imported = _import_compact_prediction_tickets(conn, 21)
+    _import_jornada_resultados(conn, 21)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -1029,6 +1046,7 @@ def run_startup_migrations():
             ensure_jornada_17(conn)
             ensure_jornada_19(conn)
             ensure_jornada_20(conn)
+            ensure_jornada_21(conn)
             ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
