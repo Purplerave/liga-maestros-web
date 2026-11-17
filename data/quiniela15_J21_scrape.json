@@ -1,0 +1,139 @@
+{
+  "jornada": 21,
+  "source_url": "https://www.eduardolosilla.es/quiniela/ayudas/horarios",
+  "scraped_at": "2026-11-17",
+  "cierre": "martes 17 de noviembre de 2026 a las 20:45",
+  "temporada": "2026-2027",
+  "fuente": "Horarios publicados para la Jornada 22 de SELAE; correspondencia interna de la Liga de Maestros J21 (SELAE 22). Fechas y horas verificadas el 17/11/2026.",
+  "nota": "Jornada abierta. No se cargan boletos personales hasta que los jugadores los envien.",
+  "boleto": {
+    "nombre": "SELAE 22",
+    "selae": 22,
+    "fecha": "2026-11-19",
+    "cierre": "martes 17 de noviembre de 2026 a las 20:45",
+    "cierre_estimado": false
+  },
+  "partidos": [
+    {
+      "num": 1,
+      "local": "Bosnia Herzegovina",
+      "visitante": "Rumanía",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 2,
+      "local": "Ucrania",
+      "visitante": "Georgia",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 3,
+      "local": "Gales",
+      "visitante": "Portugal",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 4,
+      "local": "Hungría",
+      "visitante": "Irlanda N.",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 5,
+      "local": "Polonia",
+      "visitante": "Suecia",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 6,
+      "local": "Rep. Irlanda",
+      "visitante": "Kosovo",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional"
+    },
+    {
+      "num": 7,
+      "local": "R. Madrid (F)",
+      "visitante": "Inter (F)",
+      "fecha": "2026-11-18",
+      "hora": "18:45",
+      "division": "liga_f"
+    },
+    {
+      "num": 8,
+      "local": "BK Hacken (F)",
+      "visitante": "Man. City (F)",
+      "fecha": "2026-11-18",
+      "hora": "18:45",
+      "division": "liga_f"
+    },
+    {
+      "num": 9,
+      "local": "Chelsea (F)",
+      "visitante": "PSG (F)",
+      "fecha": "2026-11-18",
+      "hora": "21:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 10,
+      "local": "Juventus (F)",
+      "visitante": "Leuven (F)",
+      "fecha": "2026-11-18",
+      "hora": "21:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 11,
+      "local": "Austria Wien (F)",
+      "visitante": "B. Munich (F)",
+      "fecha": "2026-11-19",
+      "hora": "18:45",
+      "division": "liga_f"
+    },
+    {
+      "num": 12,
+      "local": "Arsenal (F)",
+      "visitante": "OL. Lyonnes (F)",
+      "fecha": "2026-11-19",
+      "hora": "21:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 13,
+      "local": "Barcelona (F)",
+      "visitante": "Servette (F)",
+      "fecha": "2026-11-19",
+      "hora": "21:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 14,
+      "local": "Benfica (F)",
+      "visitante": "Roma (F)",
+      "fecha": "2026-11-19",
+      "hora": "21:00",
+      "division": "liga_f"
+    },
+    {
+      "num": 15,
+      "local": "Dinamarca",
+      "visitante": "Noruega",
+      "fecha": "2026-11-17",
+      "hora": "20:45",
+      "division": "internacional",
+      "pleno_al_15": true
+    }
+  ]
+}
