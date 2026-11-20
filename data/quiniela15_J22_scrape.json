@@ -1,0 +1,139 @@
+{
+  "boleto": {
+    "cierre": "sábado 21 de noviembre de 2026 a las 14:00",
+    "cierre_estimado": false,
+    "fecha": "2026-11-22",
+    "nombre": "SELAE 23",
+    "selae": 23
+  },
+  "cierre": "sábado 21 de noviembre de 2026 a las 14:00",
+  "fuente": "Horarios publicados para la Jornada 23 de SELAE; correspondencia interna de la Liga de Maestros J22 (SELAE 23). Fechas y horas verificadas el 20/11/2026.",
+  "jornada": 22,
+  "nota": "Jornada abierta. Líneas de los 5 + Gemini en data/predicciones_J22.json; boleto pendiente de pago en La Barca de Oro.",
+  "partidos": [
+    {
+      "division": "primera",
+      "fecha": "2026-11-21",
+      "hora": "14:00",
+      "local": "Alavés",
+      "num": 1,
+      "visitante": "Deportivo"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-21",
+      "hora": "16:15",
+      "local": "Rayo Vallecano",
+      "num": 2,
+      "visitante": "Valencia"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-21",
+      "hora": "21:00",
+      "local": "Real Madrid",
+      "num": 3,
+      "visitante": "Celta"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-22",
+      "hora": "14:00",
+      "local": "Barcelona",
+      "num": 4,
+      "visitante": "Villarreal"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-22",
+      "hora": "16:15",
+      "local": "Racing Santander",
+      "num": 5,
+      "visitante": "Real Sociedad"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-22",
+      "hora": "18:30",
+      "local": "Osasuna",
+      "num": 6,
+      "visitante": "Málaga"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-22",
+      "hora": "21:00",
+      "local": "Getafe",
+      "num": 7,
+      "visitante": "Atlético Madrid"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-21",
+      "hora": "21:00",
+      "local": "Tenerife",
+      "num": 8,
+      "visitante": "Mallorca"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-22",
+      "hora": "16:15",
+      "local": "Sporting Gijón",
+      "num": 9,
+      "visitante": "Las Palmas"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-22",
+      "hora": "18:30",
+      "local": "Girona",
+      "num": 10,
+      "visitante": "Eibar"
+    },
+    {
+      "division": "liga_f",
+      "fecha": "2026-11-21",
+      "hora": "17:00",
+      "local": "Eibar (F)",
+      "num": 11,
+      "visitante": "Atlético Madrid (F)"
+    },
+    {
+      "division": "liga_f",
+      "fecha": "2026-11-22",
+      "hora": "12:00",
+      "local": "Granada (F)",
+      "num": 12,
+      "visitante": "Real Madrid (F)"
+    },
+    {
+      "division": "liga_f",
+      "fecha": "2026-11-22",
+      "hora": "12:00",
+      "local": "Real Sociedad (F)",
+      "num": 13,
+      "visitante": "Sevilla (F)"
+    },
+    {
+      "division": "liga_f",
+      "fecha": "2026-11-22",
+      "hora": "17:00",
+      "local": "Tenerife (F)",
+      "num": 14,
+      "visitante": "Madrid CFF (F)"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-21",
+      "hora": "18:30",
+      "local": "Sevilla",
+      "num": 15,
+      "pleno_al_15": true,
+      "visitante": "Betis"
+    }
+  ],
+  "scraped_at": "2026-11-20",
+  "source_url": "https://www.eduardolosilla.es/quiniela/ayudas/horarios",
+  "temporada": "2026-2027"
+}

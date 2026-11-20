@@ -886,6 +886,24 @@ def ensure_jornada_21(conn):
     return updated + imported
 
 
+def ensure_jornada_22(conn):
+    """Publica la J22 interna con el boleto SELAE 23 (21-22/11/2026).
+
+    Fin de semana de liga: siete partidos de Primera (casillas 1-7), tres de
+    Segunda (8-10), cuatro de Liga F (11-14) y el pleno al 15 Sevilla-Betis.
+    Se alimenta del fixture versionado data/quiniela15_J22_scrape.json +
+    data/horarios_J22.json y de las lineas de los 5 + Gemini (invitado) en
+    data/predicciones_J22.json. El pleno del boleto unificado es 1-1
+    (mayoria: cinco de seis lineas; solo Sonia lleva 1-2 en su linea).
+    """
+    updated = ensure_jornada_completa(conn, 22)
+    imported = _import_compact_prediction_tickets(conn, 22)
+    _import_jornada_resultados(conn, 22)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
+
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
     _import_jornada_resultados(conn, 75)
@@ -1047,6 +1065,7 @@ def run_startup_migrations():
             ensure_jornada_19(conn)
             ensure_jornada_20(conn)
             ensure_jornada_21(conn)
+            ensure_jornada_22(conn)
             ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
