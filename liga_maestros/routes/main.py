@@ -1,8 +1,10 @@
 """Main routes: index page, static files."""
 
+import gzip
 import os
 import time
 from functools import lru_cache
+from io import BytesIO
 
 from flask import (
     Blueprint,
@@ -12,6 +14,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     send_from_directory,
     session,
     url_for,
@@ -81,6 +84,13 @@ def app_index():
     return index()
 
 
+@lru_cache(maxsize=128)
+def _gzip_static(file_path, mtime_ns, size):
+    """Cache bounded text assets per file revision, not per request or URL."""
+    with open(file_path, "rb") as source:
+        return gzip.compress(source.read(), compresslevel=6, mtime=0)
+
+
 @bp.route("/static/<path:filename>")
 def static_files(filename):
     static_root = os.path.realpath(os.path.join(config.BASE_DIR, "static"))
@@ -99,7 +109,22 @@ def static_files(filename):
         cache_control = "public, max-age=31536000, immutable"
     else:
         cache_control = "no-store, no-cache, must-revalidate, max-age=0"
-    response = send_from_directory(static_root, normalized, conditional=True)
+    stat = os.stat(file_path)
+    compressible = normalized.endswith((".css", ".js", ".svg")) and 1024 <= stat.st_size <= 1024 * 1024
+    if compressible and request.accept_encodings["gzip"] > 0 and "Range" not in request.headers:
+        compressed = _gzip_static(file_path, stat.st_mtime_ns, stat.st_size)
+        response = send_file(
+            BytesIO(compressed),
+            download_name=normalized,
+            conditional=True,
+            last_modified=stat.st_mtime,
+            etag=f"gzip-{stat.st_mtime_ns}-{stat.st_size}-{normalized}",
+        )
+        response.headers["Content-Encoding"] = "gzip"
+    else:
+        response = send_from_directory(static_root, normalized, conditional=True)
+    if compressible:
+        response.vary.add("Accept-Encoding")
     response.headers["Cache-Control"] = cache_control
     if normalized == "sw.js":
         response.headers["Service-Worker-Allowed"] = "/"
