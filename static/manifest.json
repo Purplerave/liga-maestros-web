@@ -34,12 +34,12 @@
   "js/pages/pena_vote.js": "js/pages/pena_vote.153c9035.js",
   "js/pages/ticket_page.js": "js/pages/ticket_page.8b246779.js",
   "js/post_jornada.js": "js/post_jornada.9fcce1ac.js",
-  "js/quantum_final.js": "js/quantum_final.972b6b28.js",
+  "js/quantum_final.js": "js/quantum_final.6e597f7b.js",
   "js/sound_manager.js": "js/sound_manager.eb673f07.js",
   "js/standings.js": "js/standings.7e7c319a.js",
   "js/state.js": "js/state.cf67c20c.js",
   "js/sw_register.js": "js/sw_register.66f33c49.js",
   "js/ticket_image.js": "js/ticket_image.4a29e93d.js",
-  "js/utils.js": "js/utils.db847fb4.js",
+  "js/utils.js": "js/utils.dd68239f.js",
   "js/ux_signals.js": "js/ux_signals.6f1bb351.js"
 }

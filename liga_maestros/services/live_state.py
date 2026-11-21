@@ -60,6 +60,12 @@ PREKICKOFF_TOLERANCE = timedelta(minutes=20)
 MINUTE_CLOCK_TOLERANCE = 30
 # Un partido programado que ya deberia haber acabado y sigue "pendiente".
 PENDING_OVERDUE_AFTER = timedelta(hours=3)
+# Tiempo maximo desde el saque en el que un "descanso" sigue siendo creible:
+# 45' de primera parte + descuento generoso + descanso (~15-20'). Pasado este
+# tiempo, un HT/Descanso del proveedor es un retraso del feed: la segunda
+# parte ya ha empezado. Sin esta guarda, el "Descanso" se quedaba clavado en
+# pantalla mientras el partido ya iba por la segunda parte.
+HALF_TIME_MAX_ELAPSED = timedelta(minutes=75)
 
 # Acciones devueltas por `evaluate_match_state`.
 KEEP = "keep"
@@ -72,6 +78,18 @@ PENDING_OVERDUE = "pending_overdue"
 # anterior y se reevalua en la siguiente pasada. Nunca congela un marcador
 # parcial disfrazandolo de final.
 SKIP_SNAPSHOT = "skip_snapshot"
+# Descanso imposible por reloj: el proveedor sigue diciendo HT/Descanso cuando
+# ya ha pasado el tiempo maximo de primera parte + descanso. La segunda parte
+# ya empezo y el feed va con retraso: la fila se reabre como segunda parte en
+# juego, sin inventar minuto (el proveedor lo repoblara en la siguiente
+# pasada). Sigue siendo directo: `closes_live` no lo incluye.
+REOPEN_SECOND_HALF = "reopen_second_half"
+
+# Estados y minutos que significan "en el descanso". El minuto tambien cuenta:
+# Highlightly escribe el descanso como status LIVE + minuto "HT", asi que
+# mirar solo el estado dejaria esa fila fuera de la guarda del descanso.
+HALF_TIME_STATUSES = frozenset({"HT", "HALF TIME", "HALF TIME BREAK", "HALF-TIME", "DESCANSO", "MEDIO TIEMPO"})
+HALF_TIME_MINUTES = frozenset({"HT", "DESCANSO", "DESC.", "HALF TIME", "HALF TIME BREAK", "HALF-TIME", "MEDIO TIEMPO"})
 
 # Estado con el que se marca un directo cerrado sin datos suficientes para dar
 # el partido por finalizado oficialmente. La web ya lo trata como terminado.
@@ -96,6 +114,18 @@ def is_final_status(status):
 
 def is_pending_status(status):
     return normalize_status(status) in PENDING_STATUSES
+
+
+def is_halftime(status, minute=None):
+    """True cuando la fila dice que el partido esta en el descanso.
+
+    Vale el estado (HT, "HALF TIME"...) o el minuto ("HT", "Descanso"): el
+    colector de Highlightly escribe el descanso como LIVE + minuto "HT" y la
+    quiniela15 como HT + "Descanso", y ambas formas deben tratarse igual.
+    """
+    if normalize_status(status) in HALF_TIME_STATUSES:
+        return True
+    return str(minute or "").strip().upper() in HALF_TIME_MINUTES
 
 
 def minute_number(minute):
@@ -193,7 +223,24 @@ def evaluate_match_state(
             return _decision(CLOSE_NO_DATA, "minuto_imposible", status=NO_DATA_STATUS, minute=NO_DATA_MINUTE)
         return _decision(SKIP_SNAPSHOT, "minuto_por_delante_del_reloj")
 
-    # 4. Ventana maxima de partido agotada: cierre definitivo.
+    # 4. Descanso imposible por reloj: el proveedor sigue diciendo HT/Descanso
+    #    cuando ya ha pasado el tiempo maximo de primera parte + descanso. La
+    #    segunda parte ya ha empezado y el feed va con retraso: se reabre como
+    #    segunda parte en juego sin inventar minuto. Se comprueba despues de
+    #    la frescura para que un feed congelado siga cerrandose como STALE.
+    if (
+        kickoff_at
+        and is_halftime(normalized, minute)
+        and now - kickoff_at >= HALF_TIME_MAX_ELAPSED
+    ):
+        return _decision(
+            REOPEN_SECOND_HALF,
+            "descanso_expirado_segunda_parte",
+            status="LIVE",
+            minute="",
+        )
+
+    # 5. Ventana maxima de partido agotada: cierre definitivo.
     if kickoff_at and now >= kickoff_at + full_match_window:
         return _decision(CLOSE_FINAL, "ventana_de_partido_agotada", status=FINAL_STATUS, minute=FINAL_MINUTE)
 

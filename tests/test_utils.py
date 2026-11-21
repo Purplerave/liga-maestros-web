@@ -170,6 +170,20 @@ class TestHighlightlyStatus:
         assert status == "LIVE"
         assert minute == "HT"
 
+    def test_half_time_with_first_half_clock_stays_half_time(self):
+        status, minute = highlightly_status({"description": "Half time", "clock": "45"})
+        assert status == "LIVE"
+        assert minute == "HT"
+
+    def test_half_time_description_with_second_half_clock_is_live(self):
+        """El proveedor tarda en cambiar la descripcion a "Second half": si el
+        reloj ya paso del 45, la segunda parte ya empezo aunque la descripcion
+        siga diciendo "Half time". Sin esto, el descanso se quedaba clavado
+        en pantalla con el partido ya en la segunda parte."""
+        status, minute = highlightly_status({"description": "Half time", "clock": "46"})
+        assert status == "LIVE"
+        assert minute == "46'"
+
     def test_not_started(self):
         status, minute = highlightly_status({})
         assert status == "NS"

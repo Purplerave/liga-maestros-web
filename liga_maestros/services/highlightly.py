@@ -31,7 +31,7 @@ from .highlightly_limits import (
     record_highlightly_success,
     reserve_highlightly_calls,
 )
-from .live_state import KEEP, evaluate_match_state, is_live_status
+from .live_state import KEEP, REOPEN_SECOND_HALF, evaluate_match_state, is_live_status
 from .ticket import madrid_now, today_madrid
 
 logger = logging.getLogger(__name__)
@@ -745,7 +745,13 @@ def refresh_current_matches_from_highlightly(force=False, jornada=None):
                         last_update_at=now.replace(tzinfo=None),
                         minute=minute,
                     )
-                    if decision["action"] != KEEP:
+                    if decision["action"] == REOPEN_SECOND_HALF:
+                        # El feed dice "Descanso" pero el reloj prueba que ya
+                        # hay segunda parte: se escribe la segunda parte en
+                        # juego (sin minuto inventado) en vez de descartar el
+                        # snapshot y dejar el descanso clavado en la fila.
+                        status, minute = decision["status"], decision["minute"]
+                    elif decision["action"] != KEEP:
                         logger.warning(
                             "Snapshot LIVE incoherente descartado j=%s partido=%s motivo=%s",
                             target_jornada,
