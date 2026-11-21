@@ -82,9 +82,12 @@ async function refreshData(options = {}) {
         const userRequest = options.auto
             ? Promise.resolve(null)
             : fetch("/api/user/status");
+        // La vista no depende del payload: descargarla mientras responde la API,
+        // no despues. Promise.all tambien recoge cualquier error del cargador.
         const [userRes, dataRes] = await Promise.all([
             userRequest,
-            fetchLigaDataWithRetry(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`)
+            fetchLigaDataWithRetry(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`),
+            ensureViewAssets(currentMainView())
         ]);
         if (userRes) {
             if (!userRes.ok) throw new Error(`User API ${userRes.status}`);
@@ -110,7 +113,6 @@ async function refreshData(options = {}) {
             }
         }
 
-        await ensureViewAssets(currentMainView());
         const patchedLiveView = Boolean(options.auto && state.currentFilter === "LIVE" && typeof patchLiveArena === "function" && patchLiveArena());
         const patchedTicketView = Boolean(
             options.auto
