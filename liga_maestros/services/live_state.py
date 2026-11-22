@@ -228,11 +228,7 @@ def evaluate_match_state(
     #    segunda parte ya ha empezado y el feed va con retraso: se reabre como
     #    segunda parte en juego sin inventar minuto. Se comprueba despues de
     #    la frescura para que un feed congelado siga cerrandose como STALE.
-    if (
-        kickoff_at
-        and is_halftime(normalized, minute)
-        and now - kickoff_at >= HALF_TIME_MAX_ELAPSED
-    ):
+    if kickoff_at and is_halftime(normalized, minute) and now - kickoff_at >= HALF_TIME_MAX_ELAPSED:
         return _decision(
             REOPEN_SECOND_HALF,
             "descanso_expirado_segunda_parte",
