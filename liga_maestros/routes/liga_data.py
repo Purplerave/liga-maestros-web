@@ -42,11 +42,11 @@ _STANDINGS_TTL = 300  # seconds
 _COLD_START_RETRY_AFTER = 2
 # Antipisarrapeos del refresco de primera pintura (ver
 # _maybe_refresh_stale_window): un scrape Q15 como mucho cada 90 s en todo el
-# proceso, y nunca dos a la vez.
+# proceso, y nunca dos a la vez. Corre en segundo plano: nunca bloquea la
+# respuesta de la portada.
 _WINDOW_REFRESH_LOCK = threading.Lock()
 _WINDOW_REFRESH_LAST = {"at": 0.0}
 _WINDOW_REFRESH_MIN_GAP = 90  # seconds
-_WINDOW_REFRESH_BUDGET = 6  # seconds max bloqueando la respuesta
 # Ventana en la que un NS con el saque ya pasado exige dato fresco antes de
 # pintar: desde 10 min antes del saque hasta 3 h despues (igual que el poll
 # rapido del frontend). Fuera de ahi manda el catchup del colector.
@@ -73,17 +73,50 @@ def _cold_start_response(message="Los datos de la jornada aún se están prepara
 
 
 def _collector_warming_response():
-    """Retry instead of serving the pre-refresh DB snapshot during process boot."""
-    try:
-        from ..workers.web_collector import collector_startup_pending
+    """Primera pintura tras un arranque: esperar un poco antes de rendirse.
 
-        pending = collector_startup_pending()
+    Antes se contestaba 503 en cuanto el collector no habia terminado su
+    primera pasada. Eso convertia cada arranque en el mensaje «Cargando el
+    directo… Reintentando (n/4)» del navegador, y en produccion el collector
+    tarda bastante mas que los 4 reintentos del frontend (scrape Q15 +
+    highlightly + agenda), asi que la portada se quedaba sin datos.
+
+    Ahora la peticion espera un margen corto a que la pasada termine y, si no
+    termina, sirve el ultimo snapshot persistido (que es justo el que el
+    collector esta refrescando) en vez de un 503. El poll del directo lo cura
+    en cuanto haya novedades.
+
+    Devuelve una respuesta (503 reintentable) solo en un caso: la peticion es
+    automatica (``?auto=1`` o el reintento ``X-Liga-Retry``) y esperar
+    bloquearia su reintento. El resto de lectores salen con el snapshot.
+    """
+    try:
+        from ..workers.web_collector import (
+            collector_startup_pending,
+            collector_startup_stale,
+            wait_for_collector_startup,
+        )
     except Exception:
-        logger.exception("No se pudo consultar el estado inicial del collector")
+        logger.exception("No se pudo importar el estado inicial del collector")
         return None
-    if not pending:
+    if not collector_startup_pending():
         return None
-    return _cold_start_response("El directo se está actualizando tras iniciar el servidor.")
+    # La pasada inicial del collector todavia esta en marcha. Los lectores con
+    # datos previos pueden servir el snapshot; los que no, esperan un momento.
+    if collector_startup_stale():
+        logger.info("collector_startup sin terminar: sirvo el ultimo snapshot persistido")
+        return None
+    # Una peticion automatica (poll del directo o reintento del navegador) no
+    # bloquea: se reintenta sola en segundos y no puede quedarse esperando
+    # detras del collector.
+    automatica = (request.args.get("auto") or "").strip().lower() in _SLIM_FLAGS
+    automatica = automatica or (request.headers.get("X-Liga-Retry") or "").strip() == "1"
+    if automatica:
+        response = _cold_start_response("El directo se está actualizando tras iniciar el servidor.")
+        response.headers["Retry-After"] = "1"
+        return response
+    wait_for_collector_startup()
+    return None
 
 
 def _wants_slim():
@@ -105,15 +138,22 @@ def _wants_first():
 
 
 def _maybe_refresh_stale_window(conn, jornada, partidos):
-    """Scrape Q15 sincrono (con tope) cuando la primera pintura saldria rancia.
+    """Reconstruye la lista de partidos tras un scrape Q15 fuera del camino.
 
     Si algun partido esta en ventana de juego (saque entre hace 3 h y dentro
     de 10 min) pero la BD aun lo marca NS, la pagina pintaria "no empezado"
-    aunque el partido vaya por el minuto 5: es justo lo que se ve al abrir
-    tras un cold start, con el colector aun despertando. En ese caso se lanza
-    un scrape directo con presupuesto maximo de 6 s y se reconstruye la lista
-    de partidos con lo que traiga. Best-effort total: cualquier fallo (o el
-    tope) deja la respuesta como estaba y el poll del directo la cura en 30 s.
+    aunque el partido vaya por el minuto 5. Ese hueco lo cura el scrape Q15.
+
+    Antes se lanzaba el scrape **dentro** de la peticion con un tope de 6 s y
+    se bloqueaba la respuesta hasta que terminara. Medido en local: la primera
+    peticion tras arrancar tardaba 4,8 s aunque la BD ya tenia los 15 partidos
+    (el scrape no llegaba ni a responder por TLS). Eso, con el 503 del
+    arranque, es justo lo que se veia como «Cargando el directo… Reintentando».
+
+    Ahora: el scrape sigue lanzandose (respeta la ventana, el antipisarrajeo de
+    90 s y el limite de una pasada a la vez), pero en segundo plano. Se sirve
+    la foto de la BD de inmediato y el poll del directo recoge el resultado del
+    scrape cuando este escriba su cache.
     """
     try:
         now = madrid_now().replace(tzinfo=None)
@@ -142,34 +182,21 @@ def _maybe_refresh_stale_window(conn, jornada, partidos):
         _WINDOW_REFRESH_LAST["at"] = time.time()
     finally:
         _WINDOW_REFRESH_LOCK.release()
-    try:
-        import sys as _sys
-        from pathlib import Path as _Path
 
-        tools_ops = str(_Path(config.BASE_DIR) / "tools" / "ops")
-        if tools_ops not in _sys.path:
-            _sys.path.insert(0, tools_ops)
+    def _refresh():
+        try:
+            import sys as _sys
+            from pathlib import Path as _Path
 
-        holder = {}
-        worker = threading.Thread(
-            target=lambda: holder.update(_run_q15_cache(jornada)),
-            name="liga-first-paint-refresh",
-            daemon=True,
-        )
-        worker.start()
-        worker.join(timeout=_WINDOW_REFRESH_BUDGET)
-        if not holder.get("done"):
-            logger.info(
-                "first-paint refresh supera %ss para J%s; pinta BD y el poll curara", _WINDOW_REFRESH_BUDGET, jornada
-            )
-            return partidos
-        from ..services.payloads.matches import build_jornada_matches
-        from ..utils import load_team_logos
+            tools_ops = str(_Path(config.BASE_DIR) / "tools" / "ops")
+            if tools_ops not in _sys.path:
+                _sys.path.insert(0, tools_ops)
+            _run_q15_cache(jornada)
+        except Exception:
+            logger.exception("first-paint refresh fallo para J%s", jornada)
 
-        return build_jornada_matches(conn, jornada, load_team_logos())
-    except Exception:
-        logger.exception("first-paint refresh fallo para J%s", jornada)
-        return partidos
+    threading.Thread(target=_refresh, name="liga-first-paint-refresh", daemon=True).start()
+    return partidos
 
 
 def _run_q15_cache(jornada):
@@ -303,9 +330,10 @@ def _etag_for(payload):
 
 @bp.route("/api/liga/data")
 def get_liga_data():
-    # create_app starts the live collector in the background. Do not let the
-    # first page request win the race and publish the persisted pre-refresh
-    # snapshot as if it were current; the existing client retries this 503.
+    # create_app starts the live collector in the background. A request that
+    # wins that race waits a short moment (or serves the persisted snapshot)
+    # instead of answering a 503 that the browser turns into
+    # «Cargando el directo… Reintentando».
     collector_response = _collector_warming_response()
     if collector_response is not None:
         return collector_response
@@ -327,8 +355,9 @@ def get_liga_data():
         if len(partidos) < 15:
             return _cold_start_response("La jornada todavía no tiene sus 15 partidos disponibles.")
         # Primera pintura fresca: si hay saques en ventana aun marcados NS
-        # (cold start con BD dormida), intenta traer el directo ahora mismo
-        # con tope de 6 s en vez de pintar "no empezado" hasta el refresh.
+        # (cold start con BD dormida) se lanza el scrape Q15 en segundo plano.
+        # La respuesta no espera: sirve la foto de la BD y el poll del directo
+        # recoge el resultado en cuanto el scrape escriba su cache.
         partidos = _maybe_refresh_stale_window(conn, jornada, partidos)
         # Directo es efímero; el resultado de una casilla de la quiniela queda
         # en su fila cuando el partido termina, incluso si el collector de BD

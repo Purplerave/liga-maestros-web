@@ -2,6 +2,56 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-22 — La portada deja de quedarse en «Cargando el directo… Reintentando»
+
+### Corregido
+
+- **El 503 del arranque era el «Reintentando (n/4)».** `/api/liga/data`
+  contestaba `503 cold_start` mientras el collector hacía su primera pasada
+  tras cada arranque/despliegue. En producción esa pasada (scrape Q15 +
+  Highlightly + agenda + clasificaciones) dura bastante más que los 4
+  reintentos del navegador (2 s, 4 s, 6 s y 8 s), así que la portada se
+  quedaba sin datos y solo un F5 manual la recuperaba. Ahora la petición
+  espera un margen corto (1,2 s) y **sirve el último snapshot persistido**;
+  solo las peticiones automáticas (`?auto=1`, cabecera `X-Liga-Retry`) reciben
+  el 503, y con `Retry-After: 1`. Si la primera pasada se queda colgada más de
+  30 s, se deja de esperar y se pinta el snapshot en vez de bloquear la
+  portada para siempre (afectaba también a las CLI que construyen la app).
+- **El scrape Q15 de primera pintura bloqueaba la respuesta.** Se lanzaba
+  dentro del ciclo de la petición con un tope de 6 s y se esperaba
+  (`worker.join`). Medido en local: la primera petición tardaba **4,8 s**
+  aunque la BD ya tuviera los 15 partidos, porque el scrape ni siquiera
+  llegaba a responder. Ahora corre en segundo plano; la respuesta sale con la
+  foto de la BD y el poll del directo recoge el scrape cuando escribe su caché.
+- **El navegador no tenía presupuesto de red.** Toda petición del arranque
+  lleva tope de espera propio (`AbortController`: 8 s la primera, 20 s la
+  carga completa; antes el único tope era el de 30 s del service worker) y el
+  reintento se marca con `X-Liga-Retry` para que el backend no lo retenga.
+- **El reintento ya no parece un error.** Mientras reintenta se pinta el
+  esqueleto de la portada, no una caja de texto gris; y si ya había datos en
+  pantalla, un fallo del refresco mantiene la última versión con un aviso, sin
+  tapar la página.
+
+### Añadido
+
+- **Esqueleto de la portada en el propio HTML** (`#matches-body`). Antes del
+  primer `renderArena()` la página mostraba un hueco vacío: con el servidor
+  arrancando no había ni contenido ni pista visual. Ahora hay un esqueleto
+  accesible (`role="status"`) que no depende de ningún script ni de ninguna
+  API, y estilos propios (`.arena-skeleton*`) en
+  `themes/newspaper/animations.css`.
+
+### Rendimiento medido (local, J22)
+
+| Escenario | Antes | Ahora |
+| --- | --- | --- |
+| Primera petición tras arrancar | 503 + «Reintentando» o 4,8 s | **200 en ~1,3 s** |
+| Petición con el servidor caliente | ~50 ms | ~50 ms |
+| Portada completa pintada (jsdom) | bloqueada por el 503 | **~0,8 s** |
+
+- `tests/test_primera_pintura_portada.py` (nuevo), `tests/test_cold_start_retry.py`
+  y `tests/test_web_collector_startup.py` fijan el comportamiento.
+
 ## 2026-11-07 — Legibilidad de los textos pequeños y fuentes sin fantasmas
 
 ### Corregido

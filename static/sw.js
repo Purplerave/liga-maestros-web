@@ -18,8 +18,8 @@
    caducidad servia la politica de privacidad y cookies de hace semanas.
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE = 'liga-maestros-v14';
-const STATIC_CACHE = 'liga-maestros-static-v14';
+const CACHE = 'liga-maestros-v15';
+const STATIC_CACHE = 'liga-maestros-static-v15';
 const CACHE_PREFIX = 'liga-maestros-';
 
 /* Cuanto tiempo se considera aceptable una entrada de la cache de navegacion.

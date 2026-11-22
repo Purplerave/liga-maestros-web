@@ -67,7 +67,7 @@
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/layout/stable_masthead.css', v=assets_v ~ '-masthead-6') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/interactions.css', v=assets_v ~ '-interactions-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/visual_unification.css', v=assets_v ~ '-unify-4') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-3') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/themes/newspaper/animations.css', v=assets_v ~ '-animations-4') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/command_palette.css', v=assets_v ~ '-cmdk-1') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/ux_signals.css', v=assets_v ~ '-ux-signals-2') }}">
     <link rel="stylesheet" href="{{ url_for('main.static_files', filename='css/components/match_cards.css', v=assets_v ~ '-match-cards-3') }}">
@@ -182,7 +182,22 @@
                  en cada refresh, y el lector de pantalla volvia a anunciar la
                  portada completa. Lo que si interesa anunciar es el contador de
                  picks (#picks-done), que ya tiene su propia region. -->
-            <section id="matches-body" class="arena-content"></section>
+            {# Esqueleto de carga desde el propio HTML: mientras el servidor
+               arranca (o el collector hace su primera pasada) la primera
+               pantalla era un hueco vacio con un texto de "reintentando".
+               Pintado aqui no depende de ningun script ni de ninguna API.
+               `renderArena()` lo sustituye en cuanto hay datos. #}
+            <section id="matches-body" class="arena-content">
+                <div class="arena-skeleton" aria-hidden="true">
+                    <div class="skeleton skeleton-heading arena-skeleton-line" style="width: 38%"></div>
+                    <div class="skeleton skeleton-text arena-skeleton-line" style="width: 66%"></div>
+                    <div class="arena-skeleton-grid">
+                        <div class="skeleton skeleton-card arena-skeleton-card"></div>
+                        <div class="skeleton skeleton-card arena-skeleton-card"></div>
+                    </div>
+                </div>
+                <p class="arena-skeleton-status" role="status">Cargando la quiniela&hellip;</p>
+            </section>
         </main>
         <nav class="site-legal-links" aria-label="Informaci&oacute;n legal">
             <a href="/ayuda">Ayuda</a>
@@ -220,8 +235,8 @@
     <script defer src="{{ url_for('main.static_files', filename='js/navigation.js', v=assets_v ~ '-navigation-23') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/live.js', v=assets_v ~ '-live-3') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/arena.js', v=assets_v ~ '-arena-18') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-23') }}"></script>
-    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-50') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/events.js', v=assets_v ~ '-events-24') }}"></script>
+    <script defer src="{{ url_for('main.static_files', filename='js/quantum_final.js', v=assets_v ~ '-ui-quiniela-51') }}"></script>
     <script defer src="{{ url_for('main.static_files', filename='js/pages/duelo.js', v=assets_v ~ '-duelo-1') }}"></script>
     {# Frente 2: analytics, confeti, imagen del boleto, sonidos, paleta de
        comandos, señales UX, post-jornada, onboarding y service worker NO van

@@ -150,6 +150,8 @@ def test_live_transport_waits_for_data_and_degrades_to_bounded_polling():
     quantum = QUANTUM_JS.read_text(encoding="utf-8")
 
     dom_ready = events.split('document.addEventListener("DOMContentLoaded"', 1)[1]
+    # La portada no arranca el transporte del directo hasta tener datos. Si la
+    # pestaña tiene snapshot se pinta antes; la revalidacion sigue siendo previa.
     assert dom_ready.index("await refreshData()") < dom_ready.index("startLiveUpdates()")
     assert "state.data?.live_stream_enabled" in events
     assert "window.setTimeout" in events

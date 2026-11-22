@@ -16,6 +16,24 @@ const INITIAL_LOAD_MAX_RETRIES = 4;
    dejaba la página clavada en «No se pudo cargar la Arena» hasta recargar a
    mano, justo lo que se veía cuando el DIRECTO "no funcionaba" con partidos en
    juego. */
+
+/* ── Presupuesto de red del arranque ────────────────────────────────────────
+   Si el servidor acaba de arrancar, `/api/liga/data` puede tardar segundos
+   (el collector hace su primera pasada); el navegador se quedaba mirando el
+   mensaje «Cargando el directo… Reintentando (n/4)».
+
+   Dos reglas para que eso no deje la portada sin datos:
+   - Toda peticion del arranque tiene tope de espera propio (el del service
+     worker, 30 s, es una red de seguridad, no un presupuesto de portada).
+   - El reintento se marca (`X-Liga-Retry`) para que el backend sepa que es una
+     peticion automatica y no la retenga detras del arranque del collector.
+*/
+
+// Tope por peticion. Con tope, el reintento (y el ultimo recurso) llegan antes
+// de que el usuario se pregunte si la pagina esta rota.
+const FIRST_PAINT_TIMEOUT_MS = 8000;
+const FULL_PAINT_TIMEOUT_MS = 20000;
+
 function ligaDataRetryDelay(response, attempt) {
     let retryAfter = NaN;
     if (response) {
@@ -41,14 +59,18 @@ function isRetryableLigaDataFailure(response, payload) {
         || payload?.retryable === true;
 }
 
-async function fetchLigaDataWithRetry(url) {
+async function fetchLigaDataWithRetry(url, { timeoutMs = FULL_PAINT_TIMEOUT_MS } = {}) {
     const maxAttempts = 3;
     let lastResponse = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         let response;
         try {
-            response = await fetch(url, { cache: "no-store" });
+            response = await fetchWithTimeout(url, {
+                timeoutMs,
+                init: { cache: "no-store", headers: ligaDataRetryHeaders(attempt) }
+            });
         } catch (networkError) {
+            // Un abort por tope de espera es un fallo mas de red: se reintenta.
             if (attempt === maxAttempts) throw networkError;
             await new Promise(resolve => window.setTimeout(resolve, ligaDataRetryDelay(null, attempt)));
             continue;
@@ -65,7 +87,24 @@ async function fetchLigaDataWithRetry(url) {
         if (!isRetryableLigaDataFailure(response, payload) || attempt === maxAttempts) return response;
         await new Promise(resolve => window.setTimeout(resolve, ligaDataRetryDelay(response, attempt)));
     }
-    return lastResponse || fetch(url, { cache: "no-store" });
+    return lastResponse || fetchWithTimeout(url, { timeoutMs, init: { cache: "no-store" } });
+}
+
+/* fetch con tope de espera. */
+async function fetchWithTimeout(url, { timeoutMs = FIRST_PAINT_TIMEOUT_MS, init = {} } = {}) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(url, { ...init, signal: controller.signal });
+    } finally {
+        window.clearTimeout(timer);
+    }
+}
+
+function ligaDataRetryHeaders(attempt) {
+    // Un reintento es una peticion automatica: el backend no la hace esperar
+    // detras del arranque del collector, contesta 503 al momento.
+    return attempt > 1 ? { "X-Liga-Retry": "1" } : {};
 }
 
 async function refreshData(options = {}) {
@@ -73,6 +112,9 @@ async function refreshData(options = {}) {
     // mientras se edita. `preserveLocalTicket` evita que la respuesta sustituya
     // los signos locales aún no guardados.
     const preserveLocalTicket = Boolean(options.auto && (state.editMode || state.draftDirty));
+    // Jornada pedida AHORA: si el usuario cambia de jornada mientras responde
+    // esta peticion, su respuesta ya no vale y no debe pisar la vista nueva.
+    const requestedJornada = String(state.jornada || "");
     const scrollState = options.auto ? {
         x: window.scrollX,
         y: window.scrollY,
@@ -86,7 +128,7 @@ async function refreshData(options = {}) {
         // no despues. Promise.all tambien recoge cualquier error del cargador.
         const [userRes, dataRes] = await Promise.all([
             userRequest,
-            fetchLigaDataWithRetry(`/api/liga/data?j=${encodeURIComponent(state.jornada)}`),
+            fetchLigaDataWithRetry(`/api/liga/data?j=${encodeURIComponent(state.jornada)}${options.auto ? "&auto=1" : ""}`),
             ensureViewAssets(currentMainView())
         ]);
         if (userRes) {
@@ -95,8 +137,14 @@ async function refreshData(options = {}) {
             state.user = userPayload.user;
             state.csrfToken = userPayload.csrf_token || "";
         }
-        if (!dataRes.ok) throw new Error(`Data API ${dataRes.status}`);
-        state.data = await dataRes.json();
+        if (!dataRes.ok) {
+            const failure = new Error(`Data API ${dataRes.status}`);
+            failure.status = dataRes.status;
+            throw failure;
+        }
+        const payload = await dataRes.json();
+        if (String(state.jornada || "") !== requestedJornada) return;
+        state.data = payload;
         initialLoadAttempts = 0;
         logoAliasIndex = null;
         logoCache.clear();
@@ -157,12 +205,14 @@ async function refreshData(options = {}) {
         // solo (espera creciente) antes de rendirse y pedir recarga manual.
         initialLoadAttempts += 1;
         if (!state.data && initialLoadAttempts <= INITIAL_LOAD_MAX_RETRIES) {
-            if (body) {
-                body.innerHTML = `<div class="empty-state">Cargando el directo&#8230; Reintentando (${initialLoadAttempts}/${INITIAL_LOAD_MAX_RETRIES}).</div>`;
+            // Esqueleto, no un texto de error: la pagina sigue "cargando" y el
+            // reintento no tapa lo que el usuario ya pueda estar viendo.
+            if (body && typeof renderSkeletonLoading === "function") {
+                body.innerHTML = renderSkeletonLoading();
             }
             window.setTimeout(() => {
                 refreshData(options).catch(retryError => console.warn("Reintento de carga fallido", retryError));
-            }, 2000 * initialLoadAttempts);
+            }, 1500 * initialLoadAttempts);
             return;
         }
         if (body) {
