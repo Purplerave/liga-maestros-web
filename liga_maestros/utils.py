@@ -562,6 +562,14 @@ def highlightly_status(state):
     ):
         return "LIVE", f"{clock}'" if clock.isdigit() else clock
     if desc in ("HALF TIME", "HALF TIME BREAK", "HALF-TIME", "HT"):
+        # El proveedor tarda en cambiar la descripcion a "Second half": si el
+        # reloj ya paso del 45, la segunda parte ya empezo aunque la
+        # descripcion siga diciendo "Half time". Sin esto, el descanso se
+        # quedaba clavado en pantalla con el partido ya en la segunda parte.
+        clock_match = re.match(r"\s*(\d+)", clock)
+        clock_num = int(clock_match.group(1)) if clock_match else None
+        if clock_num is not None and clock_num > 45:
+            return "LIVE", f"{clock}'" if clock.isdigit() else clock
         return "LIVE", "HT"
     return "NS", "NS"
 

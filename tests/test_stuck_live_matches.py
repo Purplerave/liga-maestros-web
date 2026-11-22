@@ -22,6 +22,7 @@ from liga_maestros.services.live_state import (
     CLOSE_NO_DATA,
     KEEP,
     PENDING_OVERDUE,
+    REOPEN_SECOND_HALF,
     RESET_TO_SCHEDULED,
     SKIP_SNAPSHOT,
     evaluate_match_state,
@@ -148,6 +149,76 @@ class TestEvaluateMatchState:
 
         assert decision["action"] == CLOSE_NO_DATA
 
+    def test_genuine_half_time_stays_half_time(self):
+        """Descanso real: a los 50' desde el saque el HT sigue siendo creible."""
+        decision = evaluate_match_state(
+            "HT",
+            NOW - timedelta(minutes=50),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="HT",
+        )
+
+        assert decision["action"] == KEEP
+
+    def test_stale_half_time_reopens_as_second_half(self):
+        """El feed dice "Descanso" a los 80' del saque: ya hay segunda parte.
+
+        El partido del Madrid seguia mostrando DESCANSO con el partido ya en
+        la segunda parte porque el proveedor tardaba en cambiar la descripcion.
+        La fila se reabre como segunda parte en juego, sin inventar minuto.
+        """
+        decision = evaluate_match_state(
+            "HT",
+            NOW - timedelta(minutes=80),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="HT",
+        )
+
+        assert decision["action"] == REOPEN_SECOND_HALF
+        assert decision["status"] == "LIVE"
+        assert decision["minute"] == ""
+
+    def test_highlightly_half_time_shape_reopens_as_second_half(self):
+        """Highlightly escribe el descanso como LIVE + minuto "HT": la guarda
+        del descanso tambien debe reconocer esa forma, no solo el estado HT."""
+        decision = evaluate_match_state(
+            "LIVE",
+            NOW - timedelta(minutes=80),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="HT",
+        )
+
+        assert decision["action"] == REOPEN_SECOND_HALF
+        assert decision["status"] == "LIVE"
+
+    def test_second_half_minute_is_not_treated_as_half_time(self):
+        """Un minuto de segunda parte a los 80' es un directo normal."""
+        decision = evaluate_match_state(
+            "LIVE",
+            NOW - timedelta(minutes=80),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=1),
+            minute="55'",
+        )
+
+        assert decision["action"] == KEEP
+
+    def test_frozen_half_time_still_closes_as_no_data(self):
+        """La frescura manda sobre la guarda del descanso: un HT sin
+        actualizaciones durante 30' se cierra como STALE, no se reabre."""
+        decision = evaluate_match_state(
+            "HT",
+            NOW - timedelta(minutes=80),
+            NOW,
+            last_update_at=NOW - timedelta(minutes=45),
+            minute="HT",
+        )
+
+        assert decision["action"] == CLOSE_NO_DATA
+
     def test_missing_freshness_stamp_does_not_close_a_plausible_live_match(self):
         """Legacy rows have no updated_at: they must not be closed blindly."""
         decision = evaluate_match_state("LIVE", NOW - timedelta(minutes=30), NOW, minute="30")
@@ -245,6 +316,37 @@ class TestJornadaPayloadSelfHeals:
         assert (cadiz["goles_local"], cadiz["goles_visitante"]) == (2, 1)
         assert cadiz["marcador"] == "2-1"
         assert cadiz["signo_actual"] == "1"
+
+    def test_stale_half_time_is_served_as_second_half_not_descanso(self, monkeypatch):
+        """El feed dice "Descanso" a los 80' del saque: la pagina debe mostrar
+        segunda parte en juego, nunca DESCANSO, aunque el colector no haya
+        vuelto a escribir la fila."""
+        self._freeze(monkeypatch)
+        conn = self._conn(
+            [(3, "Real Madrid", "Rival", 1, 0, "LIVE", "2026-08-16", "14:10", "HT", "2026-08-16T15:29:00")],
+        )
+
+        partidos = matches_payload.build_jornada_matches(conn, 1, {})
+        madrid = partidos[2]
+
+        assert madrid["status"] == "LIVE"
+        assert madrid["minuto"] == ""
+        assert madrid["minuto_live"] == ""
+        assert madrid["marcador"] == "1-0"
+        assert "Desc" not in madrid["marcador"]
+
+    def test_genuine_half_time_is_served_as_descanso(self, monkeypatch):
+        """Descanso real (a los 50' del saque): sigue mostrando "(Desc.)"."""
+        self._freeze(monkeypatch)
+        conn = self._conn(
+            [(3, "Real Madrid", "Rival", 1, 0, "LIVE", "2026-08-16", "14:40", "HT", "2026-08-16T15:29:00")],
+        )
+
+        partidos = matches_payload.build_jornada_matches(conn, 1, {})
+        madrid = partidos[2]
+
+        assert madrid["status"] == "LIVE"
+        assert madrid["marcador"] == "1-0 (Desc.)"
 
     def test_genuine_live_match_is_untouched(self, monkeypatch):
         self._freeze(monkeypatch)

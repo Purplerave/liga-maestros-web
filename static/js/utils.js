@@ -396,6 +396,15 @@ function plenoScoreKey(value) {
 function liveStage(match) {
     const st = String(match?.status || "").toUpperCase();
     if (st === "HT" || st === "HALF TIME BREAK") return "HT";
+    /* El colector de Highlightly escribe el descanso como status LIVE +
+       minuto "HT": mirar solo el estado dejaba esas filas como "LIVE" y el
+       descanso no se reconocia como etapa. El minuto tambien manda. */
+    const candidates = [match?.minuto, match?.minuto_live, match?.minute, match?.time];
+    for (const raw of candidates) {
+        const clean = String(raw ?? "").trim();
+        if (!clean || clean === "-" || clean === "—") continue;
+        if (/^(HT|DESC|DESCANSO|HALF)/i.test(clean)) return "HT";
+    }
     return "LIVE";
 }
 

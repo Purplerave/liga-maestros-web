@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime
 
-from ...services.live_state import RESET_TO_SCHEDULED, closes_live, evaluate_match_state
+from ...services.live_state import REOPEN_SECOND_HALF, RESET_TO_SCHEDULED, closes_live, evaluate_match_state
 from ...services.ticket import madrid_now, today_madrid
 from ...utils import normalize_team_key, parse_db_match_datetime
 
@@ -67,6 +67,12 @@ def _display_safe_row(row, now=None):
         last_update_at=_parse_updated_at(row.get("updated_at")),
         minute=row.get("minuto"),
     )
+    if decision["action"] == REOPEN_SECOND_HALF:
+        # El feed dice "Descanso" pero el reloj prueba que ya hay segunda
+        # parte: se muestra en juego sin minuto inventado, no en descanso.
+        safe = dict(row)
+        safe.update({"status": decision["status"], "minuto": decision["minute"]})
+        return safe
     if not closes_live(decision["action"]):
         return row
     safe = dict(row)

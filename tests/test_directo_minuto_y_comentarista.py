@@ -99,6 +99,33 @@ def test_live_score_with_minute_builds_the_ticket_badge_text():
 
 
 @requires_node
+def test_live_stage_recognises_half_time_from_the_minute():
+    """Highlightly escribe el descanso como status LIVE + minuto "HT": la
+    etapa debe ser HT tambien en esa forma, no solo con status HT."""
+    script = f"""
+        const fs = require("fs");
+        const vm = require("vm");
+        const context = {{ console, Map, String, Number, Date, JSON, Set, RegExp }};
+        vm.createContext(context);
+        vm.runInContext(fs.readFileSync({json.dumps(str(UTILS))}, "utf8"), context);
+        console.log(JSON.stringify({{
+            porEstado: context.liveStage({{ status: "HT", minuto_live: "" }}),
+            porMinuto: context.liveStage({{ status: "LIVE", minuto: "HT" }}),
+            porMinutoDescanso: context.liveStage({{ status: "LIVE", minuto: "Descanso" }}),
+            enJuego: context.liveStage({{ status: "LIVE", minuto: "55'" }}),
+            segundaParte: context.liveStage({{ status: "LIVE", minuto: "46'" }})
+        }}));
+    """
+    stages = _run_node(script)
+
+    assert stages["porEstado"] == "HT"
+    assert stages["porMinuto"] == "HT"
+    assert stages["porMinutoDescanso"] == "HT"
+    assert stages["enJuego"] == "LIVE"
+    assert stages["segundaParte"] == "LIVE"
+
+
+@requires_node
 def test_directo_card_renders_the_minute_chip_under_the_score():
     script = f"""
         const fs = require("fs");
