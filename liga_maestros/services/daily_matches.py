@@ -34,6 +34,7 @@ from .highlightly_limits import (
     record_highlightly_success,
     reserve_highlightly_calls,
 )
+from .http_deadline import get_with_deadline
 from .season_rosters import SEASON_ID
 from .ticket import madrid_now, today_madrid
 
@@ -95,11 +96,13 @@ def _api_get(path, params):
     if not reserve_highlightly_calls(1):
         return None
     try:
-        response = requests.get(
+        response = get_with_deadline(
             f"https://{config.HIGHLIGHTLY_HOST}{path}",
             params=params,
             headers={"x-rapidapi-key": api_key},
-            timeout=10,
+            connect_timeout=5,
+            read_timeout=10,
+            total_timeout=20,
         )
         response.raise_for_status()
         record_highlightly_success()

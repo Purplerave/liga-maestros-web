@@ -3,7 +3,9 @@
 import json
 import os
 import re
+import threading
 from datetime import datetime, timedelta
+from typing import Any
 
 import config
 
@@ -88,8 +90,14 @@ def _close_stale_live_matches(matches):
 
 
 def build_all_league_matches(jornada, partidos, standings_db, team_logos):
-    all_league_matches = _close_stale_live_matches(_load_external_matches())
     quiniela_league_matches = _close_stale_live_matches(_build_quiniela_league_matches(jornada, partidos, standings_db))
+    # Prefiltro barato sobre el panel cacheado (superconjunto de lo que deja
+    # pasar el filtro de ventana): no se copian ni se evaluan miles de partidos
+    # de otras fechas. El filtro completo se aplica igual justo debajo.
+    today_str, _, _, window_dates = _jornada_window(quiniela_league_matches)
+    all_league_matches = _external_matches_where(
+        lambda match: _could_keep_external_match(match, today_str, window_dates)
+    )
     quiniela_pairs = {_match_pair_key(match) for match in quiniela_league_matches}
 
     all_league_matches = _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches)
@@ -114,7 +122,9 @@ def build_live_matches(partidos, team_logos, standings_db=None):
     the quiniela copy wins so the competition label stays consistent with the
     rest of the app.
     """
-    external_live = [match for match in _close_stale_live_matches(_load_external_matches()) if _is_live_match(match)]
+    # Cerrar un directo nunca convierte en directo lo que no lo era: basta con
+    # copiar y evaluar los que el panel trae en vivo.
+    external_live = [match for match in _external_matches_where(_is_live_match) if _is_live_match(match)]
     quiniela_live = [
         match
         for match in _close_stale_live_matches(_build_quiniela_league_matches("", partidos, standings_db or {}))
@@ -143,9 +153,23 @@ def apply_verified_provider_scores(partidos):
     verified live score and then the final result, even while the database
     result collector is catching up.
     """
-    provider_matches = _close_stale_live_matches(_load_external_matches())
+    # Solo pueden cruzar los partidos del proveedor a +-1 dia de alguna casilla
+    # (la misma regla que se aplica abajo con las fechas ya parseadas). Filtrar
+    # antes por la cadena de fecha evita normalizar nombres y parsear fechas de
+    # miles de partidos de otras jornadas: era el 60 % del coste de la peticion.
+    candidate_dates = _candidate_dates_around(partidos)
+
+    def could_cross(provider):
+        status = str(provider.get("status") or "").strip().upper()
+        if status == "STALE" or not (is_live_status(status) or is_final_status(status)):
+            return False
+        date_hint = _match_date_hint(provider)
+        return candidate_dates is None or not date_hint or date_hint in candidate_dates
+
+    provider_matches = _external_matches_where(could_cross)
     by_pair = {}
     for provider in provider_matches:
+        # Cerrar un directo caducado lo deja en STALE: se vuelve a mirar.
         status = str(provider.get("status") or "").strip().upper()
         if status == "STALE" or not (is_live_status(status) or is_final_status(status)):
             continue
@@ -215,6 +239,24 @@ def apply_verified_provider_scores(partidos):
     return merged
 
 
+def _match_date_hint(match):
+    """Fecha (YYYY-MM-DD) que usara ``parse_any_match_datetime``, sin parsear."""
+    raw = str(match.get("fecha_raw") or "").strip()[:10] or str(match.get("added") or "").strip()[:10]
+    return raw if len(raw) == 10 and raw[4] == "-" and raw[7] == "-" else ""
+
+
+def _candidate_dates_around(partidos, days=1):
+    """Fechas de las casillas +-``days``; None si alguna casilla no tiene fecha."""
+    dates = set()
+    for match in partidos or []:
+        kickoff = parse_any_match_datetime(match)
+        if kickoff is None:
+            return None
+        for offset in range(-days, days + 1):
+            dates.add((kickoff.date() + timedelta(days=offset)).isoformat())
+    return dates
+
+
 def _match_pair_key(match):
     """Team-pair identity key, robust across the two payload shapes."""
     competition = match.get("competition_name") or match.get("competition")
@@ -273,7 +315,17 @@ def _is_live_match(match):
     return is_live_status(match.get("status"))
 
 
-def _load_external_matches():
+# Cache del panel externo ya parseado, por (ruta, mtime_ns, tamaño). El panel
+# acumula todos los partidos que ha visto el proveedor (varios MB a mitad de
+# temporada) y cada /api/liga/data lo parseaba tres veces: medido en local con
+# 6.000 partidos, ~150 ms por peticion solo en json.load. Ahora se parsea una
+# vez por version del fichero y cada lector recibe copias superficiales (los
+# builders añaden claves como los logos y no deben tocar la copia cacheada).
+_EXTERNAL_CACHE_LOCK = threading.Lock()
+_EXTERNAL_CACHE: dict[str, Any] = {"key": None, "matches": []}
+
+
+def _external_candidate_paths():
     candidate_match_paths = [
         os.path.join(config.DATA_DIR, "LIVE_ALL_MATCHES_V3.json"),
         os.path.join(config.BASE_DIR, "LIVE_ALL_MATCHES_V3.json"),
@@ -282,17 +334,49 @@ def _load_external_matches():
     extra_panel_path = os.getenv("LIVE_ALL_MATCHES_EXTRA_PATH", "").strip()
     if extra_panel_path:
         candidate_match_paths.insert(0, extra_panel_path)
-    for path in candidate_match_paths:
-        if not os.path.exists(path):
-            continue
-        try:
-            with open(path, encoding="utf-8") as fh:
-                loaded_matches = json.load(fh)
-            if loaded_matches:
-                return loaded_matches
-        except Exception:
-            pass
+    return candidate_match_paths
+
+
+def _read_external_file(path):
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    key = (path, stat.st_mtime_ns, stat.st_size)
+    with _EXTERNAL_CACHE_LOCK:
+        if _EXTERNAL_CACHE["key"] == key:
+            return _EXTERNAL_CACHE["matches"]
+    try:
+        with open(path, encoding="utf-8") as fh:
+            loaded_matches = json.load(fh)
+    except Exception:
+        return None
+    if not isinstance(loaded_matches, list):
+        return None
+    loaded_matches = [match for match in loaded_matches if isinstance(match, dict)]
+    with _EXTERNAL_CACHE_LOCK:
+        _EXTERNAL_CACHE["key"] = key
+        _EXTERNAL_CACHE["matches"] = loaded_matches
+    return loaded_matches
+
+
+def _load_external_matches():
+    """Copias superficiales del panel externo (el primer candidato con datos)."""
+    for path in _external_candidate_paths():
+        loaded_matches = _read_external_file(path)
+        if loaded_matches:
+            return [dict(match) for match in loaded_matches]
     return []
+
+
+def _external_matches_where(predicate):
+    """Panel externo ya filtrado por ``predicate`` y con los directos caducados cerrados.
+
+    El filtro barato va antes del cierre (que evalua el estado de cada partido
+    contra el reloj): con miles de partidos de otras fechas en el panel, cerrar
+    solo los candidatos es lo que mantiene la peticion por debajo de 50 ms.
+    """
+    return _close_stale_live_matches([match for match in _load_external_matches() if predicate(match)])
 
 
 def _build_quiniela_league_matches(jornada, partidos, standings_db):
@@ -350,16 +434,9 @@ def _infer_match_competition(match, standings_db):
     return "FRIENDLIES"
 
 
-def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):
-    """Keep external matches that are relevant right now.
-
-    Always keep today's matches (scheduled, live or finished today): a
-    midweek Castellon game must show up in the Directo even when the
-    quiniela is idle. Additionally, during the jornada window keep the
-    matches inside it, as before.
-    """
+def _jornada_window(quiniela_league_matches):
+    """(hoy, inicio, fin, fechas) de la ventana de la jornada; sin ventana -> None."""
     today_str = today_madrid()
-
     window_start = window_end = None
     if quiniela_league_matches:
         quiniela_datetimes = [dt for dt in (parse_any_match_datetime(m) for m in quiniela_league_matches) if dt]
@@ -370,6 +447,35 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
             window_start = min(quiniela_datetimes) - timedelta(days=1)
             window_end = max(quiniela_datetimes) + timedelta(days=1)
 
+    window_dates = None
+    if window_start is not None:
+        window_dates = {
+            (window_start.date() + timedelta(days=offset)).isoformat()
+            for offset in range((window_end.date() - window_start.date()).days + 1)
+        }
+    return today_str, window_start, window_end, window_dates
+
+
+def _could_keep_external_match(match, today_str, window_dates):
+    """Superconjunto barato (sin parsear) de lo que conserva el filtro de ventana."""
+    if _is_live_match(match):
+        return True
+    if str(match.get("added") or match.get("fecha_raw") or "")[:10] == today_str:
+        return True
+    date_hint = _match_date_hint(match)
+    return not date_hint or date_hint == today_str or (window_dates is not None and date_hint in window_dates)
+
+
+def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_league_matches):
+    """Keep external matches that are relevant right now.
+
+    Always keep today's matches (scheduled, live or finished today): a
+    midweek Castellon game must show up in the Directo even when the
+    quiniela is idle. Additionally, during the jornada window keep the
+    matches inside it, as before.
+    """
+    today_str, window_start, window_end, window_dates = _jornada_window(quiniela_league_matches)
+
     def keep_external_match(match):
         # Un directo ya validado por _close_stale_live_matches es relevante
         # aunque el proveedor conserve una fecha de importación antigua.
@@ -378,6 +484,13 @@ def _filter_external_matches_to_jornada_window(all_league_matches, quiniela_leag
         match_date = str(match.get("added") or match.get("fecha_raw") or "")[:10]
         if match_date == today_str:
             return True
+        # Descarte barato por la cadena de fecha antes de parsear: el panel
+        # trae miles de partidos de otras fechas y strptime era la mitad del
+        # coste de este filtro. Es la misma fecha que parsearia
+        # parse_any_match_datetime, asi que el resultado no cambia.
+        date_hint = _match_date_hint(match)
+        if date_hint and date_hint != today_str and (window_dates is None or date_hint not in window_dates):
+            return False
         dt = parse_any_match_datetime(match)
         if dt is not None and dt.strftime("%Y-%m-%d") == today_str:
             return True

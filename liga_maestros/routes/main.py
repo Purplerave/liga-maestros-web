@@ -206,13 +206,50 @@ def health():
             collector_status = "missing"
     except Exception:
         collector_status = "error"
-    # quota sin secretos
+    # Latido del hilo del colector dentro de este proceso (no del fichero): es
+    # lo que distingue "el colector esta idle" de "el colector esta colgado".
+    collector = {"status": collector_status, "age_seconds": collector_age_s}
+    try:
+        from ..workers.web_collector import collector_heartbeat
+
+        beat = collector_heartbeat()
+        collector.update(
+            {
+                "passes": beat.get("passes"),
+                "last_pass_age_seconds": beat.get("last_pass_age_seconds"),
+                "pass_running_for_seconds": beat.get("pass_running_for_seconds"),
+                "restarts": beat.get("restarts"),
+                "stall_reason": beat.get("stall_reason") or "",
+            }
+        )
+    except Exception:
+        pass
+    live_refresh_info = {}
+    try:
+        from ..services.live_refresh import refresh_state
+
+        state = refresh_state()
+        live_refresh_info = {
+            "runs": state.get("runs"),
+            "running": state.get("running"),
+            "last_reason": state.get("last_reason"),
+        }
+    except Exception:
+        pass
+    # quota sin secretos. Antes leia claves que no existen ("used",
+    # "remaining_pct") y salia siempre null.
     quota = {}
     try:
         from ..services.highlightly import get_highlightly_usage
 
         u = get_highlightly_usage()
-        quota = {"remaining_pct": u.get("remaining_pct"), "used": u.get("used"), "limit": u.get("limit")}
+        limit = int(u.get("limit") or 0)
+        usable = int(u.get("usable_remaining") or 0)
+        quota = {
+            "remaining_pct": round(100.0 * usable / limit, 1) if limit else None,
+            "used": u.get("calls"),
+            "limit": u.get("limit"),
+        }
     except Exception:
         quota = {"remaining_pct": None}
     payload = {
@@ -221,7 +258,8 @@ def health():
         "build_sha": build_sha,
         "db": {"ok": db_ok, "integrity": db_integrity, "size_mb": db_size_mb},
         "backup": {"ok": backup_ok, "age_hours": backup_age_h},
-        "collector": {"status": collector_status, "age_seconds": collector_age_s},
+        "collector": collector,
+        "live_refresh": live_refresh_info,
         "quota": quota,
         "version": build_sha,
     }

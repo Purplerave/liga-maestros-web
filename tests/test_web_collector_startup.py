@@ -46,8 +46,13 @@ def test_collector_marks_startup_pending_before_background_thread_runs(monkeypat
 
     web_collector.start_web_collector(Flask("collector-startup-test"))
 
-    assert len(threads) == 2  # live collector + scheduled standings refresh
-    assert threads[0].name == "liga-web-collector"
+    # live collector + scheduled standings refresh + vigilante del colector
+    assert [thread.name for thread in threads] == [
+        "liga-web-collector",
+        "liga-standings-refresh",
+        "liga-collector-watchdog",
+    ]
+    assert all(thread.daemon for thread in threads)
     assert web_collector.collector_startup_pending() is True
     # La marca temporal del cierre queda puesta: sin ella no hay forma de
     # distinguir "acaba de arrancar" de "se quedo atascado".

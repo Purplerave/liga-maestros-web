@@ -57,11 +57,32 @@ LAST_BACKUP_DATE = ""
 MADRID_TZ = ZoneInfo("Europe/Madrid")
 
 
+# En la CLI el log tambien sale por pantalla. El colector integrado en el
+# proceso web lo apaga (workers/web_collector.py): ahi stdout puede ser una
+# tuberia que nadie vacia y un print() bloqueado congela la pasada entera.
+ECHO_STDOUT = True
+# El fichero de log no tenia tope: se rota al superar este tamaño.
+LOG_MAX_BYTES = 5 * 1024 * 1024
+
+
+def _rotate_log_if_needed():
+    try:
+        if LOG_PATH.exists() and LOG_PATH.stat().st_size > LOG_MAX_BYTES:
+            LOG_PATH.replace(LOG_PATH.with_name(LOG_PATH.name + ".1"))
+    except OSError:
+        pass
+
+
 def log_line(message):
     line = f"{madrid_now():%Y-%m-%d %H:%M:%S} {message}"
-    print(line, flush=True)
+    if ECHO_STDOUT:
+        try:
+            print(line, flush=True)
+        except Exception:
+            pass
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _rotate_log_if_needed()
         with LOG_PATH.open("a", encoding="utf-8") as fh:
             fh.write(line + "\n")
     except Exception:

@@ -1,19 +1,19 @@
 """Liga data route: the main data endpoint."""
 
+import gzip
 import hashlib
 import logging
 import os
-import threading
 import time
-from datetime import datetime, timedelta
 
-from flask import Blueprint, g, jsonify, request, session
+from flask import Blueprint, current_app, g, jsonify, request, session
 
 import config
 
 from ..db.connection import get_db
 from ..middleware.authz import is_admin_request
 from ..schemas import validate_liga_data, validate_liga_data_first, validate_liga_data_slim
+from ..services import live_refresh
 from ..services.multi_standings import build_multi_league_standings
 from ..services.payloads.league_matches import (
     apply_verified_provider_scores,
@@ -40,18 +40,9 @@ logger = logging.getLogger(__name__)
 _STANDINGS_CACHE = {"data": None, "expires": 0, "key": None}
 _STANDINGS_TTL = 300  # seconds
 _COLD_START_RETRY_AFTER = 2
-# Antipisarrapeos del refresco de primera pintura (ver
-# _maybe_refresh_stale_window): un scrape Q15 como mucho cada 90 s en todo el
-# proceso, y nunca dos a la vez. Corre en segundo plano: nunca bloquea la
-# respuesta de la portada.
-_WINDOW_REFRESH_LOCK = threading.Lock()
-_WINDOW_REFRESH_LAST = {"at": 0.0}
-_WINDOW_REFRESH_MIN_GAP = 90  # seconds
-# Ventana en la que un NS con el saque ya pasado exige dato fresco antes de
-# pintar: desde 10 min antes del saque hasta 3 h despues (igual que el poll
-# rapido del frontend). Fuera de ahi manda el catchup del colector.
-_WINDOW_PRE_MINUTES = 10
-_WINDOW_POST_HOURS = 3
+# El refresco del directo bajo demanda (ventana de juego, frescura del dato,
+# un solo scrape a la vez y como mucho uno por minuto) vive en
+# services/live_refresh.py; ver _maybe_refresh_stale_window.
 # ``?slim=1`` lo pide el poll del directo (static/js/events.js). Cualquiera de
 # estos valores activa la variante ligera; cualquier otro la desactiva.
 _SLIM_FLAGS = frozenset({"1", "true", "yes", "on"})
@@ -138,87 +129,104 @@ def _wants_first():
 
 
 def _maybe_refresh_stale_window(conn, jornada, partidos):
-    """Reconstruye la lista de partidos tras un scrape Q15 fuera del camino.
+    """Pide datos frescos en segundo plano cuando el directo se ha quedado viejo.
 
-    Si algun partido esta en ventana de juego (saque entre hace 3 h y dentro
-    de 10 min) pero la BD aun lo marca NS, la pagina pintaria "no empezado"
-    aunque el partido vaya por el minuto 5. Ese hueco lo cura el scrape Q15.
+    22/11/2026, J22: el hilo del colector se colgo tras el despliegue de las
+    16:04 y la portada dejo de recibir datos. El unico scrape que entro (17:03)
+    fue el de primera pintura, porque esta funcion solo miraba casillas en
+    ventana todavia en **NS**. Los partidos que ya iban en juego nunca la
+    disparaban, asi que a los 30 minutos sin noticias la lectura segura los
+    cerro como STALE «Sin datos»: sin marcador en la quiniela y fuera del
+    DIRECTO mientras se estaban jugando.
 
-    Antes se lanzaba el scrape **dentro** de la peticion con un tope de 6 s y
-    se bloqueaba la respuesta hasta que terminara. Medido en local: la primera
-    peticion tras arrancar tardaba 4,8 s aunque la BD ya tenia los 15 partidos
-    (el scrape no llegaba ni a responder por TLS). Eso, con el 503 del
-    arranque, es justo lo que se veia como «Cargando el directo… Reintentando».
+    Ahora decide la frescura del dato, no el estado (ver
+    ``services/live_refresh.py``): basta una casilla en ventana de juego, sin
+    final confirmado y con su ultimo dato de proveedor viejo. El scrape Q15 se
+    lanza en un hilo (uno a la vez, como mucho uno por minuto y nunca si la
+    cache de la jornada es reciente) y la respuesta no espera: sirve la foto de
+    la BD y el poll del directo recoge el resultado en el siguiente ciclo. Asi
+    la portada se cura sola aunque el colector este caido, siempre que alguien
+    la tenga abierta, que es justo cuando hace falta.
+    """
+    if (os.getenv("LIVE_REFRESH_ON_DEMAND", "1") or "").strip().lower() in ("0", "false", "no", "off"):
+        return partidos
+    try:
+        jornada_num = int(jornada)
+    except (TypeError, ValueError):
+        return partidos
+    try:
+        rows = _live_freshness_rows(conn, jornada_num, partidos)
+        if not live_refresh.needs_live_refresh(rows, madrid_now(), _q15_cache_age_seconds(jornada_num)):
+            return partidos
+        stale_ids = live_refresh.stale_live_rows(rows, madrid_now())
+        live_refresh.trigger_refresh(
+            jornada_num,
+            _run_q15_cache,
+            reason="casillas sin dato fresco: " + ",".join(str(pid) for pid in stale_ids),
+        )
+    except Exception:
+        logger.exception("No se pudo evaluar el refresco del directo para J%s", jornada)
+    return partidos
 
-    Ahora: el scrape sigue lanzandose (respeta la ventana, el antipisarrajeo de
-    90 s y el limite de una pasada a la vez), pero en segundo plano. Se sirve
-    la foto de la BD de inmediato y el poll del directo recoge el resultado del
-    scrape cuando este escriba su cache.
+
+def _live_freshness_rows(conn, jornada, partidos):
+    """Filas (estado, horario y sello de frescura) para decidir el refresco.
+
+    Se leen de la BD porque el payload ya viene "reparado" (un LIVE sin
+    noticias sale como STALE) y no trae ``updated_at``. Las casillas que solo
+    existen en el scrape versionado (backfill) entran sin sello: siempre
+    cuentan como viejas.
     """
     try:
-        now = madrid_now().replace(tzinfo=None)
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(resultados)").fetchall()}
+        updated_at_select = "updated_at" if "updated_at" in columns else "NULL AS updated_at"
+        db_rows = conn.execute(
+            f"SELECT partido_id, fecha, hora, status, {updated_at_select} FROM resultados WHERE jornada = ?",  # noqa: S608 - columna de una allowlist local
+            (int(jornada),),
+        ).fetchall()
+        rows = [dict(row) for row in db_rows]
     except Exception:
-        return partidos
+        rows = []
+    present = {str(row.get("partido_id")) for row in rows}
+    for match in partidos or []:
+        if str(match.get("id")) in present:
+            continue
+        rows.append(
+            {
+                "partido_id": match.get("id"),
+                "fecha": match.get("fecha_raw") or match.get("fecha"),
+                "hora": match.get("hora"),
+                "status": match.get("status"),
+                "updated_at": None,
+            }
+        )
+    return rows
+
+
+def _q15_cache_age_seconds(jornada):
+    """Segundos desde la ultima escritura de la cache Q15 (None si no existe)."""
+    path = os.path.join(config.DATA_DIR, f"quiniela15_directo_J{int(jornada)}.json")
     try:
-        in_window_ns = False
-        for match in partidos or []:
-            if str(match.get("status") or "").upper() not in ("NS", "SCHEDULED", "NOT STARTED", ""):
-                continue
-            kickoff = _parse_payload_kickoff(match)
-            if kickoff is None:
-                continue
-            if kickoff - timedelta(minutes=_WINDOW_PRE_MINUTES) <= now <= kickoff + timedelta(hours=_WINDOW_POST_HOURS):
-                in_window_ns = True
-                break
-        if not in_window_ns:
-            return partidos
-    except Exception:
-        return partidos
-    if not _WINDOW_REFRESH_LOCK.acquire(blocking=False):
-        return partidos
-    try:
-        if time.time() - _WINDOW_REFRESH_LAST["at"] < _WINDOW_REFRESH_MIN_GAP:
-            return partidos
-        _WINDOW_REFRESH_LAST["at"] = time.time()
-    finally:
-        _WINDOW_REFRESH_LOCK.release()
-
-    def _refresh():
-        try:
-            import sys as _sys
-            from pathlib import Path as _Path
-
-            tools_ops = str(_Path(config.BASE_DIR) / "tools" / "ops")
-            if tools_ops not in _sys.path:
-                _sys.path.insert(0, tools_ops)
-            _run_q15_cache(jornada)
-        except Exception:
-            logger.exception("first-paint refresh fallo para J%s", jornada)
-
-    threading.Thread(target=_refresh, name="liga-first-paint-refresh", daemon=True).start()
-    return partidos
+        return max(0.0, time.time() - os.path.getmtime(path))
+    except OSError:
+        return None
 
 
 def _run_q15_cache(jornada):
     try:
+        import sys as _sys
+        from pathlib import Path as _Path
+
+        tools_ops = str(_Path(config.BASE_DIR) / "tools" / "ops")
+        if tools_ops not in _sys.path:
+            _sys.path.insert(0, tools_ops)
         from LIVE_COLLECTOR import write_q15_directo_cache
 
         write_q15_directo_cache(int(jornada))
         return {"done": True}
     except Exception:
+        logger.exception("refresco Q15 bajo demanda fallo para J%s", jornada)
         return {"done": False}
-
-
-def _parse_payload_kickoff(match):
-    """Kickoff naive (Madrid) desde los campos del payload de partidos."""
-    try:
-        date = str(match.get("fecha_raw") or match.get("fecha") or "")[:10]
-        hour = str(match.get("hora") or "")[:5]
-        if len(date) != 10 or len(hour) != 5:
-            return None
-        return datetime.strptime(f"{date} {hour}", "%Y-%m-%d %H:%M")
-    except Exception:
-        return None
 
 
 def _standings_cache_source_signature(conn, jornada, partidos):
@@ -363,12 +371,19 @@ def get_liga_data():
         # en su fila cuando el partido termina, incluso si el collector de BD
         # aún no ha guardado el FT definitivo.
         partidos = apply_verified_provider_scores(partidos)
-        standings, standings_db = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
-        all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
-        live_matches = build_live_matches(partidos, team_logos, standings_db)
-        multi_league_leagues = build_multi_league_standings(standings, team_logos)
-        multi_league_standings = {"leagues": multi_league_leagues}
-        jornada_liga = str(matchday_played(standings) or "")
+        wants_first = _wants_first()
+        standings = standings_db = all_league_matches = live_matches = multi_league_standings = None
+        jornada_liga = ""
+        if not wants_first:
+            # La primera pintura no lleva clasificaciones, directo de otras
+            # ligas ni comentarista: no se calculan para que el arranque en
+            # frio sirva cuanto antes lo necesario para firmar.
+            standings, standings_db = _get_standings_cached(conn, partidos, team_logos, jornada=jornada)
+            all_league_matches = build_all_league_matches(jornada, partidos, standings_db, team_logos)
+            live_matches = build_live_matches(partidos, team_logos, standings_db)
+            multi_league_leagues = build_multi_league_standings(standings, team_logos)
+            multi_league_standings = {"leagues": multi_league_leagues}
+            jornada_liga = str(matchday_played(standings) or "")
         close_info = compute_ticket_close_info(partidos, source=f"api_liga_data_j{jornada}")
         is_locked = _is_ticket_locked(partidos, close_info, _raw_match_statuses(conn, jornada))
         user = session.get("user") or {}
@@ -383,9 +398,11 @@ def get_liga_data():
             ).fetchone()
             ticket_guardado = bool(row and row["c"] > 0)
 
-        comentarista = _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
+        comentarista = (
+            None if wants_first else _build_comentarista_payload(_live_matches_for_commentator(partidos, live_matches))
+        )
 
-        if _wants_first():
+        if wants_first:
             # Primera pintura: solo lo necesario para firmar. Sin predicciones,
             # ranking, trash talk, standings ni comentarista.
             response_payload = {
@@ -507,7 +524,11 @@ def get_liga_data():
 
         # ETag support
         response_json = jsonify(validated).get_data(as_text=True)
-        etag = _etag_for(response_json)
+        body = response_json.encode("utf-8")
+        use_gzip = _should_gzip(body)
+        # Cada codificacion es una representacion distinta y lleva su propio
+        # validador (igual que los estaticos comprimidos).
+        etag = _etag_for(response_json) + ("-gz" if use_gzip else "")
         # Esta respuesta es POR USUARIO: `ticket_guardado`, `is_locked`,
         # `predicciones_actuales` e `is_admin` dependen de la sesion. Servirla con
         # `public` hacia que un CDN o un proxy compartido guardara el body y se lo
@@ -520,13 +541,13 @@ def get_liga_data():
             resp.status_code = 304
             resp.headers["ETag"] = etag
             resp.headers["Cache-Control"] = "private, no-cache, must-revalidate"
-            resp.headers["Vary"] = "Cookie"
+            resp.headers["Vary"] = "Cookie, Accept-Encoding"
             return resp
 
-        resp = jsonify(validated)
+        resp = _json_response(body, use_gzip)
         resp.headers["ETag"] = etag
         resp.headers["Cache-Control"] = "private, no-cache, must-revalidate"
-        resp.headers["Vary"] = "Cookie"
+        resp.headers["Vary"] = "Cookie, Accept-Encoding"
         return resp
     except Exception:
         logger.exception("api_liga_data failed")
@@ -540,6 +561,29 @@ def get_liga_data():
             ),
             500,
         )
+
+
+# Por debajo de esto no compensa comprimir (cabeceras + CPU).
+_GZIP_MIN_BYTES = 2048
+
+
+def _should_gzip(body):
+    return len(body) >= _GZIP_MIN_BYTES and request.accept_encodings["gzip"] > 0
+
+
+def _json_response(body, use_gzip):
+    """Respuesta JSON ya serializada, comprimida con gzip si el cliente lo acepta.
+
+    El payload de la portada pesa 130-300 KB (sobre todo ``all_league_matches``)
+    y el poll del directo lo pide cada 30 s por cliente; la app solo comprimia
+    los estaticos. Con gzip baja a ~10 %. Se reutiliza el JSON ya calculado
+    para el ETag en vez de serializar dos veces el mismo payload.
+    """
+    resp = current_app.response_class(body, mimetype="application/json")
+    if use_gzip:
+        resp.set_data(gzip.compress(body, compresslevel=5))
+        resp.headers["Content-Encoding"] = "gzip"
+    return resp
 
 
 def _resolve_max_jornada(conn):

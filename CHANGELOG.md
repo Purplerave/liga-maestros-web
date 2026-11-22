@@ -2,6 +2,84 @@
 
 Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## 2026-11-22 — Los partidos en juego ya no se quedan en «Sin datos» aunque el colector se cuelgue
+
+### Corregido
+
+- **Tres partidos en juego desaparecieron de la quiniela y del DIRECTO (J22,
+  boleto SELAE 23).** Tras el despliegue de las 16:04 el hilo del colector hizo
+  una sola pasada y se quedó colgado: `LIVE_COLLECTOR_HEALTH.json` siguió en
+  «idle» con la hora 16:04:20 durante horas y nadie lo volvió a arrancar. El
+  único scrape de quiniela15 que entró después (17:03) fue el de primera
+  pintura, y solo porque saltaba con una casilla en ventana todavía en NS. Los
+  partidos que ya se estaban jugando nunca lo disparaban, así que a los 30
+  minutos sin noticias la lectura segura de la portada cerró como STALE «Sin
+  datos» el Racing - Real Sociedad (2-1), el Sporting - Las Palmas (0-1) y el
+  Tenerife (F) - Madrid CFF (0-0): sin marcador en la quiniela y fuera del
+  DIRECTO mientras se jugaban.
+- **El refresco bajo demanda decide por la frescura del dato, no por el
+  estado** (`services/live_refresh.py`, nuevo). Basta con que una casilla esté
+  en su ventana de juego (de 10 minutos antes del saque a 3 horas después), no
+  tenga un final confirmado y su último dato tenga más de 100 s; da igual que
+  esté en NS, LIVE, HT o STALE. Funciona en las tres variantes de
+  `/api/liga/data` (`first`, `slim` y completa), corre en un único hilo de
+  fondo (uno a la vez, como mucho uno por minuto) y la respuesta nunca lo
+  espera. Si la caché de quiniela15 de la jornada se escribió hace menos de
+  100 s no se repite: con el colector sano la web no duplica nada. Así la
+  portada se cura sola aunque el colector esté caído, siempre que alguien la
+  tenga abierta. Interruptor de emergencia: `LIVE_REFRESH_ON_DEMAND=0`.
+- **Vigilante del colector** (`workers/web_collector.py`). Un hilo de Python no
+  se puede matar, pero sí sustituir: cada bucle lleva un número de generación
+  y un vigilante (cada 30 s) arranca otro si detecta el hilo muerto, una
+  pasada de más de 7 minutos, un arranque que no llega a la primera pasada o
+  más de 21 minutos sin pasadas. El bucle viejo, si despierta, ve que ya no es
+  el titular y se retira sin tocar nada más. Como mucho 12 sustituciones por
+  proceso.
+- **Ninguna llamada de red de fondo puede esperar sin fin**
+  (`services/http_deadline.py`, nuevo). El `timeout` de `requests` es por
+  operación de socket: un servidor que contesta a goteo podía retener la
+  pasada mucho más de esos 25 s. Ahora el scrape de quiniela15 (2 intentos de
+  20 s como máximo), Highlightly (15 s) y la agenda diaria (20 s) tienen un
+  tope **total**.
+- **El log del colector ya no puede congelar la pasada.** Dentro del proceso
+  web deja de escribir en stdout (una tubería llena bloqueaba el `print`) y el
+  fichero de log rota al pasar de 5 MB.
+- **La ida del derbi tapaba el directo de la vuelta.** Si el panel del
+  proveedor guardaba un final antiguo del mismo emparejamiento (p. ej. un
+  Sevilla - Betis de meses atrás), ese final ganaba al directo de hoy y la
+  casilla se quedaba sin marcador. Ahora solo cruzan los partidos a ±1 día de
+  la jornada.
+- **`/health` mostraba la cuota siempre a `null`** (leía claves que no
+  existen). Ahora da `used`, `limit` y `remaining_pct` reales, y además el
+  latido del colector (`passes`, `last_pass_age_seconds`,
+  `pass_running_for_seconds`, `restarts`, `stall_reason`) y el estado del
+  refresco bajo demanda, sin secretos.
+
+### Rendimiento
+
+- El panel externo (`LIVE_ALL_MATCHES_V3.json`, varios MB y creciendo toda la
+  temporada) se parseaba **tres veces por petición**. Ahora se parsea una vez
+  por versión del fichero (caché por ruta, `mtime_ns` y tamaño).
+- Los partidos de otras fechas se descartan por la cadena de fecha antes de
+  normalizar nombres, parsear fechas o evaluar si su directo ha caducado: era
+  el 85 % del coste de la petición. Un test de propiedad comprueba sobre 3.000
+  partidos aleatorios que el DIRECTO conserva exactamente lo mismo.
+- La primera pintura (`?first=1`) ya no calcula clasificaciones, partidos de
+  otras ligas ni comentarista, que no viajan en esa respuesta.
+- `/api/liga/data` sale comprimido con gzip cuando el navegador lo acepta,
+  con un ETag propio por codificación: el 304 del poll sigue funcionando.
+
+| Medido en local (panel de 6.000 partidos) | Antes | Ahora |
+| --- | --- | --- |
+| `/api/liga/data` completa (mediana) | 419 ms | **~90 ms** |
+| Poll del directo `?slim=1` (mediana) | 361 ms | **~40-55 ms** |
+| Bytes por poll | 130 KB | **13 KB** (gzip) |
+| Bytes de la carga completa | 148 KB | **16 KB** (gzip) |
+
+- Tests nuevos: `tests/test_live_refresh.py` (incluye la foto de producción
+  del 22/11 curándose sola de punta a punta), `tests/test_collector_watchdog.py`,
+  `tests/test_http_deadline.py` y `tests/test_league_matches_perf.py`.
+
 ## 2026-11-22 — La portada deja de quedarse en «Cargando el directo… Reintentando»
 
 ### Corregido

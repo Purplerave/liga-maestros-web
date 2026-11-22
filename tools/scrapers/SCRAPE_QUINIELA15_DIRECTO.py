@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 from liga_maestros import utils
 from liga_maestros.services.boleto_numero import resolve_boleto_number
+from liga_maestros.services.http_deadline import get_with_deadline
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, "data")
@@ -25,11 +26,26 @@ REQUEST_HEADERS = {
 }
 
 
-def fetch_page(url, attempts=3):
+# Topes de red del scrape. Antes: timeout=25 por operacion y 3 intentos, sin
+# tope total. Un servidor a goteo podia retener la pasada del colector (y con
+# ella toda la jornada) indefinidamente. Ahora cada intento tiene un tope total
+# y el peor caso de la funcion entera ronda el minuto.
+FETCH_CONNECT_TIMEOUT = 6
+FETCH_READ_TIMEOUT = 12
+FETCH_TOTAL_TIMEOUT = 20
+
+
+def fetch_page(url, attempts=2):
     last_error = None
     for attempt in range(1, attempts + 1):
         try:
-            response = requests.get(url, timeout=25, headers=REQUEST_HEADERS)
+            response = get_with_deadline(
+                url,
+                headers=REQUEST_HEADERS,
+                connect_timeout=FETCH_CONNECT_TIMEOUT,
+                read_timeout=FETCH_READ_TIMEOUT,
+                total_timeout=FETCH_TOTAL_TIMEOUT,
+            )
             response.raise_for_status()
             response.encoding = "utf-8"
             return response

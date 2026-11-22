@@ -152,57 +152,23 @@ def start_web_collector(app):
     highlightly_interval = int(os.getenv("WEB_COLLECTOR_HIGHLIGHTLY_INTERVAL_SECONDS", "60"))
     q15_enabled = not _truthy(os.getenv("WEB_COLLECTOR_DISABLE_Q15", "0"))
 
-    def _loop():
-        first_pass_pending = True
-        try:
-            import sys
-            from pathlib import Path
+    def _start_collector_thread(generation):
+        loop = _make_collector_loop(
+            generation,
+            interval=interval,
+            highlightly_interval=highlightly_interval,
+            q15_enabled=q15_enabled,
+        )
+        thread = threading.Thread(target=loop, name="liga-web-collector", daemon=True)
+        with _heartbeat_lock:
+            _heartbeat["thread"] = thread
+            _heartbeat["loop_started_at"] = time.time()
+            _heartbeat["pass_started_at"] = 0.0
+        thread.start()
+        app.extensions["web_collector_thread"] = thread
+        return thread
 
-            tools_ops = str(Path(__file__).resolve().parents[2] / "tools" / "ops")
-            if tools_ops not in sys.path:
-                sys.path.insert(0, tools_ops)
-            from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
-
-            log_line("web_collector=start")
-            logger.info(
-                "web_collector=started interval=%s highlightly_interval=%s q15=%s",
-                interval,
-                highlightly_interval,
-                q15_enabled,
-            )
-            while True:
-                try:
-                    _, window = run_once(
-                        force=False,
-                        q15=q15_enabled,
-                        highlightly_interval=highlightly_interval,
-                    )
-                    sleep_seconds = next_sleep_seconds(window, interval)
-                except Exception as exc:
-                    try:
-                        log_line(f"web_collector_error={exc}")
-                        write_health("error", error=exc)
-                    except Exception:
-                        pass
-                    logger.exception("web_collector loop error")
-                    sleep_seconds = max(60, min(interval or 60, 300))
-                finally:
-                    if first_pass_pending:
-                        # Release the first-page barrier even on a failed pass;
-                        # the API can then serve its last known snapshot rather
-                        # than making the site unavailable indefinitely.
-                        mark_collector_startup_complete()
-                        first_pass_pending = False
-                time.sleep(max(30, int(sleep_seconds)))
-        except Exception:
-            logger.exception("web_collector failed before completing startup")
-        finally:
-            # Import/setup errors must not strand all first-page requests at 503.
-            mark_collector_startup_complete()
-
-    thread = threading.Thread(target=_loop, name="liga-web-collector", daemon=True)
-    thread.start()
-    app.extensions["web_collector_thread"] = thread
+    _start_collector_thread(_current_generation())
     logger.info("web_collector=thread_started")
 
     # Background standings refresh: ALL leagues (Spanish BASE files + foreign
@@ -274,3 +240,233 @@ def start_web_collector(app):
 
         start_daily_tracker(app)
         logger.info("web_collector=daily_tracker_started")
+
+    # Vigilante del colector: si una pasada se cuelga (red, disco, lo que sea)
+    # arranca un hilo nuevo en vez de dejar la jornada sin datos hasta el
+    # siguiente despliegue. Ver ``_collector_watchdog_loop``.
+    watchdog_thread = threading.Thread(
+        target=lambda: _collector_watchdog_loop(_start_collector_thread),
+        name="liga-collector-watchdog",
+        daemon=True,
+    )
+    watchdog_thread.start()
+    app.extensions["web_collector_watchdog"] = watchdog_thread
+    logger.info("web_collector=watchdog_started")
+
+
+# ---------------------------------------------------------------------------
+# Bucle del colector y vigilante
+# ---------------------------------------------------------------------------
+#
+# 22/11/2026, J22: tras el despliegue de las 16:04 el hilo del colector hizo
+# una pasada y se quedo colgado para siempre (LIVE_COLLECTOR_HEALTH.json
+# congelado en «idle» a las 16:04:20 y la cache de quiniela15 sin tocar
+# mientras se jugaban tres partidos). Un hilo de Python no se puede matar,
+# pero si se puede sustituir: cada bucle lleva un numero de generacion y el
+# vigilante, cuando detecta una pasada colgada, un hilo muerto o un silencio
+# demasiado largo, sube la generacion y arranca otro. El viejo, si algun dia
+# despierta, ve que ya no es el titular y se retira sin tocar nada mas.
+
+# Una pasada normal dura segundos; con todos los scrapes y llamadas fallando
+# hasta su tope de red no llega a 3 minutos. 7 minutos ya es un cuelgue.
+COLLECTOR_PASS_DEADLINE_SECONDS = max(120, int(os.getenv("WEB_COLLECTOR_PASS_DEADLINE_SECONDS", "420") or 420))
+# El sueño mas largo entre pasadas es de 900 s: sin ninguna pasada terminada
+# en 21 minutos el bucle esta muerto o atascado fuera de una pasada.
+COLLECTOR_SILENCE_SECONDS = max(
+    COLLECTOR_PASS_DEADLINE_SECONDS + 300, int(os.getenv("WEB_COLLECTOR_SILENCE_SECONDS", "1260") or 1260)
+)
+COLLECTOR_WATCHDOG_INTERVAL_SECONDS = 30
+# Tope de sustituciones: si la causa es permanente no se acumulan hilos sin fin
+# (el refresco bajo demanda de la portada sigue trayendo datos igualmente).
+COLLECTOR_MAX_RESTARTS = 12
+
+_heartbeat_lock = threading.Lock()
+_heartbeat = {
+    "generation": 0,
+    "thread": None,
+    "loop_started_at": 0.0,
+    "pass_started_at": 0.0,
+    "pass_finished_at": 0.0,
+    "passes": 0,
+    "restarts": 0,
+    "last_restart_at": 0.0,
+    "last_restart_reason": "",
+}
+
+
+def _current_generation():
+    with _heartbeat_lock:
+        return _heartbeat["generation"]
+
+
+def _is_current_generation(generation):
+    return _current_generation() == generation
+
+
+def _mark_pass_started(generation):
+    with _heartbeat_lock:
+        if _heartbeat["generation"] == generation:
+            _heartbeat["pass_started_at"] = time.time()
+
+
+def _mark_pass_finished(generation):
+    with _heartbeat_lock:
+        if _heartbeat["generation"] == generation:
+            _heartbeat["pass_finished_at"] = time.time()
+            _heartbeat["passes"] += 1
+
+
+def collector_heartbeat(now=None):
+    """Foto publica (sin secretos) del latido del colector."""
+    now = time.time() if now is None else now
+    with _heartbeat_lock:
+        snapshot = {key: value for key, value in _heartbeat.items() if key != "thread"}
+        thread = _heartbeat["thread"]
+    started = snapshot["pass_started_at"]
+    finished = snapshot["pass_finished_at"]
+    is_alive = getattr(thread, "is_alive", None)
+    snapshot["thread_alive"] = bool(is_alive()) if callable(is_alive) else False
+    snapshot["pass_running_for_seconds"] = int(now - started) if started and started > finished else 0
+    snapshot["last_pass_age_seconds"] = int(now - finished) if finished else None
+    snapshot["stall_reason"] = collector_stall_reason(now)
+    return snapshot
+
+
+def collector_stall_reason(now=None):
+    """Motivo por el que el colector se da por atascado ('' si esta sano)."""
+    now = time.time() if now is None else now
+    with _heartbeat_lock:
+        thread = _heartbeat["thread"]
+        loop_started = _heartbeat["loop_started_at"]
+        started = _heartbeat["pass_started_at"]
+        finished = _heartbeat["pass_finished_at"]
+    if thread is None:
+        return ""
+    is_alive = getattr(thread, "is_alive", None)
+    if callable(is_alive) and not is_alive():
+        return "hilo_muerto"
+    if started and started > finished:
+        # En plena pasada solo manda el tope de la pasada.
+        return "pasada_colgada" if now - started > COLLECTOR_PASS_DEADLINE_SECONDS else ""
+    if not started:
+        # Este bucle aun no ha empezado ninguna pasada.
+        if loop_started and now - loop_started > COLLECTOR_PASS_DEADLINE_SECONDS:
+            return "arranque_colgado"
+        return ""
+    # Entre pasadas: el sueño mas largo es de 900 s.
+    if now - max(finished, loop_started) > COLLECTOR_SILENCE_SECONDS:
+        return "sin_pasadas"
+    return ""
+
+
+def _restart_collector(reason, start_thread):
+    """Sube la generacion y arranca un bucle nuevo. Devuelve True si arranco."""
+    with _heartbeat_lock:
+        if _heartbeat["restarts"] >= COLLECTOR_MAX_RESTARTS:
+            return False
+        _heartbeat["generation"] += 1
+        _heartbeat["restarts"] += 1
+        _heartbeat["last_restart_at"] = time.time()
+        _heartbeat["last_restart_reason"] = str(reason or "")
+        generation = _heartbeat["generation"]
+        restarts = _heartbeat["restarts"]
+    logger.warning("web_collector=restart reason=%s generation=%s restarts=%s", reason, generation, restarts)
+    start_thread(generation)
+    return True
+
+
+def _collector_watchdog_loop(start_thread, sleep=time.sleep, max_iterations=None):
+    iterations = 0
+    while max_iterations is None or iterations < max_iterations:
+        iterations += 1
+        sleep(COLLECTOR_WATCHDOG_INTERVAL_SECONDS)
+        try:
+            reason = collector_stall_reason()
+            if reason and not _restart_collector(reason, start_thread):
+                logger.error("web_collector=stalled reason=%s sin mas sustituciones disponibles", reason)
+        except Exception:
+            logger.exception("web_collector watchdog error")
+
+
+def _reset_heartbeat_for_tests():
+    with _heartbeat_lock:
+        _heartbeat.update(
+            {
+                "generation": 0,
+                "thread": None,
+                "loop_started_at": 0.0,
+                "pass_started_at": 0.0,
+                "pass_finished_at": 0.0,
+                "passes": 0,
+                "restarts": 0,
+                "last_restart_at": 0.0,
+                "last_restart_reason": "",
+            }
+        )
+
+
+def _make_collector_loop(generation, interval, highlightly_interval, q15_enabled, sleep=time.sleep):
+    """Bucle del colector para una generacion concreta."""
+
+    def _loop():
+        # Solo el primer bucle del proceso abre la barrera de la primera
+        # pintura; los sustitutos no tienen nada que liberar.
+        first_pass_pending = generation == 0
+        try:
+            import sys
+            from pathlib import Path
+
+            tools_ops = str(Path(__file__).resolve().parents[2] / "tools" / "ops")
+            if tools_ops not in sys.path:
+                sys.path.insert(0, tools_ops)
+            import LIVE_COLLECTOR
+            from LIVE_COLLECTOR import log_line, next_sleep_seconds, run_once, write_health
+
+            # Dentro del proceso web el log del colector va a su fichero, no a
+            # stdout: un print() bloqueado por una tuberia llena no puede
+            # congelar la recogida de resultados.
+            LIVE_COLLECTOR.ECHO_STDOUT = False
+            log_line(f"web_collector=start generation={generation}")
+            logger.info(
+                "web_collector=started generation=%s interval=%s highlightly_interval=%s q15=%s",
+                generation,
+                interval,
+                highlightly_interval,
+                q15_enabled,
+            )
+            while True:
+                if not _is_current_generation(generation):
+                    logger.warning("web_collector generation=%s sustituida: el hilo se retira", generation)
+                    return
+                _mark_pass_started(generation)
+                try:
+                    _, window = run_once(
+                        force=False,
+                        q15=q15_enabled,
+                        highlightly_interval=highlightly_interval,
+                    )
+                    sleep_seconds = next_sleep_seconds(window, interval)
+                except Exception as exc:
+                    try:
+                        log_line(f"web_collector_error={exc}")
+                        write_health("error", error=exc)
+                    except Exception:
+                        pass
+                    logger.exception("web_collector loop error")
+                    sleep_seconds = max(60, min(interval or 60, 300))
+                finally:
+                    _mark_pass_finished(generation)
+                    if first_pass_pending:
+                        # Release the first-page barrier even on a failed pass;
+                        # the API can then serve its last known snapshot rather
+                        # than making the site unavailable indefinitely.
+                        mark_collector_startup_complete()
+                        first_pass_pending = False
+                sleep(max(30, int(sleep_seconds)))
+        except Exception:
+            logger.exception("web_collector failed before completing startup")
+        finally:
+            # Import/setup errors must not strand all first-page requests at 503.
+            mark_collector_startup_complete()
+
+    return _loop

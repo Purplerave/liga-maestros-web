@@ -83,9 +83,14 @@ def test_el_aviso_de_reintento_es_un_esqueleto_y_no_un_error():
 def test_el_scrape_q15_de_primera_pintura_no_bloquea_la_respuesta():
     ruta = RUTA.read_text(encoding="utf-8")
     funcion = ruta[ruta.index("def _maybe_refresh_stale_window") : ruta.index("def _run_q15_cache")]
-    assert "threading.Thread(" in funcion
+    # El scrape se delega en el disparador de un solo hilo daemon
+    # (services/live_refresh.py); la peticion nunca lo espera.
+    assert "live_refresh.trigger_refresh(" in funcion
     assert "_WINDOW_REFRESH_BUDGET" not in ruta
     assert "worker.join(" not in funcion
+    disparador = (ROOT / "liga_maestros" / "services" / "live_refresh.py").read_text(encoding="utf-8")
+    assert "daemon=True" in disparador
+    assert ".join(" not in disparador[disparador.index("def trigger_refresh") :].split("def _reset_for_tests")[0]
 
 
 def test_el_backend_no_hace_esperar_al_poll_automatico():

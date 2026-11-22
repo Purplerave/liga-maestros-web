@@ -31,6 +31,7 @@ from .highlightly_limits import (
     record_highlightly_success,
     reserve_highlightly_calls,
 )
+from .http_deadline import get_with_deadline
 from .live_state import KEEP, evaluate_match_state, is_live_status
 from .ticket import madrid_now, today_madrid
 
@@ -52,6 +53,10 @@ HIGHLIGHTLY_ACTIVE_LEAGUES = {
 }
 HIGHLIGHTLY_BUDGET_RESERVE_PCT = float(os.getenv("HIGHLIGHTLY_BUDGET_RESERVE_PCT", "0.10"))
 Q15_EXPECTED_MATCHES = 15
+# Tope total por llamada al API (ver services/http_deadline.py): el timeout de
+# requests es por operacion de socket y no protegia al hilo del colector de
+# una respuesta a goteo.
+HIGHLIGHTLY_TOTAL_TIMEOUT = 15
 
 # Liga F league names the provider may return. leagueName queries are more
 # stable than the season-dependent leagueId, so they are the first choice for
@@ -290,7 +295,14 @@ def _highlightly_get_matches(params, headers):
         return []
     url = f"https://{config.HIGHLIGHTLY_HOST}/matches"
     try:
-        response = requests.get(url, params=params, headers=headers, timeout=8)
+        response = get_with_deadline(
+            url,
+            params=params,
+            headers=headers,
+            connect_timeout=5,
+            read_timeout=8,
+            total_timeout=HIGHLIGHTLY_TOTAL_TIMEOUT,
+        )
         response.raise_for_status()
         record_highlightly_success()
         data = response.json().get("data", [])
@@ -319,7 +331,14 @@ def _highlightly_get_matches(params, headers):
                         }
                         if not reserve_highlightly_calls(1):
                             break
-                        fb_resp = requests.get(url, params=fallback_params, headers=headers, timeout=8)
+                        fb_resp = get_with_deadline(
+                            url,
+                            params=fallback_params,
+                            headers=headers,
+                            connect_timeout=5,
+                            read_timeout=8,
+                            total_timeout=HIGHLIGHTLY_TOTAL_TIMEOUT,
+                        )
                         fb_resp.raise_for_status()
                         record_highlightly_success()
                         fb_data = fb_resp.json().get("data", [])

@@ -111,3 +111,19 @@ def _aisla_rate_limit_global():
     limpiar()
     yield
     limpiar()
+
+
+@pytest.fixture(autouse=True)
+def _sin_refresco_del_directo_bajo_demanda(monkeypatch):
+    """La portada lanza un scrape de quiniela15 en segundo plano cuando el
+    directo se queda viejo (services/live_refresh.py). En la suite eso seria
+    un hilo con red real escribiendo en la BD temporal de otro test, asi que se
+    apaga por defecto; los tests de esa funcion lo encienden y le inyectan un
+    runner falso.
+    """
+    from liga_maestros.services import live_refresh
+
+    monkeypatch.setenv("LIVE_REFRESH_ON_DEMAND", "0")
+    live_refresh._reset_for_tests()
+    yield
+    live_refresh._reset_for_tests()
