@@ -75,7 +75,9 @@ def test_cover_boleto_includes_programa_column():
             tone: ctx._mtone({ id: "programa", label: "Programa" })
         }));
     """
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True, encoding="utf-8"
+    )
     payload = json.loads(result.stdout)
     assert payload["ids"] == ["programa", "claude", "grok", "chatgpt", "copilot", "gemini"]
     assert payload["short"] == "PRG"
@@ -148,7 +150,9 @@ def test_cover_when_label_switches_from_schedule_to_score():
             nsLabel: ctx._whenLabel(ns),
         }));
     """
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True)
+    result = subprocess.run(
+        ["node", "-e", script], cwd=ROOT, check=True, text=True, capture_output=True, encoding="utf-8"
+    )
     payload = json.loads(result.stdout)
     assert payload["ftKind"] == "finished"
     assert payload["ftLabel"] == "2-1"

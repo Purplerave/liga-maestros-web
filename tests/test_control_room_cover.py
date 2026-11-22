@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skipif(not shutil.which("node"), reason="Node.js no dis
 
 
 def run_node(script):
-    result = subprocess.run(["node", "-e", script], cwd=ROOT, capture_output=True, text=True)
+    result = subprocess.run(["node", "-e", script], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
 

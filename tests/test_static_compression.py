@@ -63,7 +63,7 @@ def test_disabled_gzip_and_binary_assets_are_not_compressed(client):
 
 
 def test_view_download_is_part_of_parallel_initial_requests():
-    source = (Path(__file__).resolve().parents[1] / "static/js/quantum_final.js").read_text()
+    source = (Path(__file__).resolve().parents[1] / "static/js/quantum_final.js").read_text(encoding="utf-8")
     refresh = source.split("async function refreshData(options = {})", 1)[1].split("// Un solo detalle", 1)[0]
     parallel = refresh.split("await Promise.all([", 1)[1].split("]);", 1)[0]
     assert "ensureViewAssets(currentMainView())" in parallel
