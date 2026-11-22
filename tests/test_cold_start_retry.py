@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 import config
 from liga_maestros import create_app
 from liga_maestros.routes import liga_data
@@ -34,20 +36,85 @@ def test_liga_data_returns_retryable_cold_start(monkeypatch, tmp_path):
     }
 
 
-def test_liga_data_waits_for_collector_first_pass(monkeypatch, tmp_path):
+def test_liga_data_sirve_el_snapshot_mientras_arranca_el_collector(monkeypatch, tmp_path):
+    """Un arranque lento no puede dejar la portada en «Reintentando (n/4)».
+
+    Antes: cualquier peticion que llegase antes de la primera pasada del
+    collector recibia un 503 `cold_start`. En produccion esa pasada (scrape Q15
+    + highlightly + agenda) dura mas que los 4 reintentos del navegador, asi
+    que la portada se quedaba sin datos. Ahora el lector espera un margen corto
+    y sirve el ultimo snapshot persistido.
+    """
     app = _test_app(tmp_path, monkeypatch)
     monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+    monkeypatch.setattr(web_collector, "collector_startup_stale", lambda: False)
+    esperas = []
+    monkeypatch.setattr(
+        web_collector, "wait_for_collector_startup", lambda timeout=None: esperas.append(timeout) or True
+    )
 
-    response = app.test_client().get("/api/liga/data")
+    response = app.test_client().get("/api/liga/data?first=1")
+
+    assert response.status_code == 200
+    assert esperas, "la primera pintura debe esperar al arranque, no rendirse"
+
+
+def test_liga_data_espera_y_luego_sirve_si_la_pasada_no_termina(monkeypatch, tmp_path):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+    monkeypatch.setattr(web_collector, "collector_startup_stale", lambda: False)
+    monkeypatch.setattr(web_collector, "wait_for_collector_startup", lambda timeout=None: False)
+
+    response = app.test_client().get("/api/liga/data?slim=1")
+
+    assert response.status_code == 200
+    assert response.get_json()["slim"] is True
+
+
+def test_liga_data_no_hace_esperar_al_poll_automatico(monkeypatch, tmp_path):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+    monkeypatch.setattr(web_collector, "collector_startup_stale", lambda: False)
+    monkeypatch.setattr(
+        web_collector,
+        "wait_for_collector_startup",
+        lambda timeout=None: pytest.fail("el poll automatico no debe bloquearse"),
+    )
+
+    response = app.test_client().get("/api/liga/data?auto=1&slim=1")
 
     assert response.status_code == 503
-    assert response.headers["Retry-After"] == "2"
-    assert response.headers["Cache-Control"] == "no-store"
-    assert response.get_json() == {
-        "status": "cold_start",
-        "code": "COLD_START",
-        "message": "El directo se está actualizando tras iniciar el servidor.",
-    }
+    assert response.headers["Retry-After"] == "1"
+    assert response.get_json()["code"] == "COLD_START"
+
+
+def test_liga_data_no_hace_esperar_al_reintento_del_navegador(monkeypatch, tmp_path):
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+    monkeypatch.setattr(web_collector, "collector_startup_stale", lambda: False)
+    monkeypatch.setattr(
+        web_collector, "wait_for_collector_startup", lambda timeout=None: pytest.fail("el reintento no espera")
+    )
+
+    response = app.test_client().get("/api/liga/data", headers={"X-Liga-Retry": "1"})
+
+    assert response.status_code == 503
+
+
+def test_liga_data_sirve_si_la_primera_pasada_esta_atascada(monkeypatch, tmp_path):
+    """Pasado el margen se sirve el snapshot, no un 503 eterno."""
+    app = _test_app(tmp_path, monkeypatch)
+    monkeypatch.setattr(web_collector, "collector_startup_pending", lambda: True)
+    monkeypatch.setattr(web_collector, "collector_startup_stale", lambda: True)
+    monkeypatch.setattr(
+        web_collector,
+        "wait_for_collector_startup",
+        lambda timeout=None: pytest.fail("no hay que esperar a una pasada atascada"),
+    )
+
+    response = app.test_client().get("/api/liga/data?first=1")
+
+    assert response.status_code == 200
 
 
 def test_pwa_foreground_resume_revalidates_data_and_checks_worker_updates():
@@ -73,4 +140,9 @@ def test_frontend_retries_cold_start_and_honours_retry_after():
     assert 'payload?.status === "cold_start"' in source
     assert 'response.headers.get("Retry-After")' in source
     assert "maxAttempts = 3" in source
-    assert "fetchLigaDataWithRetry(`/api/liga/data" in source
+    assert "fetchLigaDataWithRetry(" in source
+    assert "/api/liga/data?j=" in source
+    # La carga tiene tope de espera propio y el reintento se marca como
+    # automatico para que el backend no lo retenga tras el arranque.
+    assert "fetchWithTimeout" in source
+    assert '"X-Liga-Retry": "1"' in source

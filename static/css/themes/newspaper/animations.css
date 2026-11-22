@@ -195,6 +195,40 @@
     margin-bottom: 8px;
 }
 
+/* Esqueleto de la portada: se pinta desde el propio HTML (liga_index.html)
+   para que la primera pantalla no sea un hueco vacio mientras el servidor
+   arranca. `renderArena()` lo sustituye en cuanto llega el primer payload. */
+.arena-skeleton {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.arena-skeleton-line {
+    display: block;
+    margin-bottom: 18px;
+}
+
+.arena-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.arena-skeleton-card {
+    height: 128px;
+    margin: 0;
+}
+
+.arena-skeleton-status {
+    margin: 4px auto 18px;
+    max-width: 880px;
+    padding: 0 20px;
+    color: var(--text-muted, #94a3b8);
+    text-align: center;
+}
+
 .skeleton-avatar {
     width: 36px;
     height: 36px;

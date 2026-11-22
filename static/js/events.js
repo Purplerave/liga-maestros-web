@@ -550,6 +550,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Attach before the initial request: a PWA can be backgrounded while its
     // first response is still pending.
     document.addEventListener("visibilitychange", handlePwaVisibilityChange);
+    // La portada se pinta con la carga completa (es la que trae `simple_view`,
+    // predicciones y clasificacion). Mientras llega se ve el esqueleto del
+    // HTML; la peticion tiene tope de espera y reintentos propios, y el
+    // backend ya no contesta 503 mientras el collector arranca.
     await refreshData();
     initialLoadSettled = true;
     if (pwaResumeRefreshPending) {
