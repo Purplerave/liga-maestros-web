@@ -1,0 +1,128 @@
+{
+    "jornada": 22,
+    "fuente": "Panel en vivo /api/liga/data?j=22 (marcadores finales)",
+    "verificado_en": "2026-11-27",
+    "nota": "Resultados finales oficiales: combinación ganadora SELAE 1 2 1 1 1 1 2 X 2 1 2 2 1 2, pleno 1-1 (Sevilla-Betis 1-1). Verificados contra el API en vivo el 2026-11-27. La importación idempotente no sobrescribe resultados reales ya recogidos.",
+    "resultados": [
+        {
+            "id": 1,
+            "goles_local": 3,
+            "goles_visitante": 1,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 2,
+            "goles_local": 0,
+            "goles_visitante": 1,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 3,
+            "goles_local": 2,
+            "goles_visitante": 1,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 4,
+            "goles_local": 3,
+            "goles_visitante": 2,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 5,
+            "goles_local": 3,
+            "goles_visitante": 2,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 6,
+            "goles_local": 1,
+            "goles_visitante": 0,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 7,
+            "goles_local": 0,
+            "goles_visitante": 3,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 8,
+            "goles_local": 0,
+            "goles_visitante": 0,
+            "signo": "X",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 9,
+            "goles_local": 0,
+            "goles_visitante": 2,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 10,
+            "goles_local": 2,
+            "goles_visitante": 1,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 11,
+            "goles_local": 1,
+            "goles_visitante": 3,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 12,
+            "goles_local": 1,
+            "goles_visitante": 5,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 13,
+            "goles_local": 1,
+            "goles_visitante": 0,
+            "signo": "1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 14,
+            "goles_local": 0,
+            "goles_visitante": 3,
+            "signo": "2",
+            "status": "FT",
+            "minuto": "Finalizado"
+        },
+        {
+            "id": 15,
+            "goles_local": 1,
+            "goles_visitante": 1,
+            "signo": "1-1",
+            "status": "FT",
+            "minuto": "Finalizado"
+        }
+    ]
+}
