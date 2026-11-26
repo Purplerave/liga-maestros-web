@@ -903,6 +903,25 @@ def ensure_jornada_22(conn):
         conn.commit()
     return updated + imported
 
+def ensure_jornada_24(conn):
+    """Publica la J24 interna con el boleto SELAE 25 (28-30/11/2026).
+
+    Fin de semana de liga: ocho partidos de Primera (casillas 1-8), seis de
+    Segunda (9-14) y el pleno al 15 Espanyol-Getafe. Se alimenta del fixture
+    versionado data/quiniela15_J24_scrape.json + data/horarios_J24.json y de
+    las lineas de Programa, Gemini, MrPurple, Tecnotron y Grok en
+    data/predicciones_J24.json. Sonia no manda linea, asi que no hay fila
+    para ella: su columna se muestra pendiente. El pleno del boleto
+    unificado es 1-0 (mayoria: cuatro de cinco lineas; solo Programa
+    lleva 1-1).
+    """
+    updated = ensure_jornada_completa(conn, 24)
+    imported = _import_compact_prediction_tickets(conn, 24)
+    _import_jornada_resultados(conn, 24)
+    if updated or imported:
+        conn.commit()
+    return updated + imported
+
 
 def ensure_jornada_75(conn):
     ensure_jornada_completa(conn, 75, force=True)
@@ -1066,6 +1085,7 @@ def run_startup_migrations():
             ensure_jornada_20(conn)
             ensure_jornada_21(conn)
             ensure_jornada_22(conn)
+            ensure_jornada_24(conn)
             ensure_votos_pena_table(conn)
             # Red de seguridad: aplica los resultados oficiales de TODAS las
             # jornadas que tengan fichero (incluidas futuras J12+). Es
