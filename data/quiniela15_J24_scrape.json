@@ -1,0 +1,139 @@
+{
+  "boleto": {
+    "cierre": "sábado 28 de noviembre de 2026 a las 14:00",
+    "cierre_estimado": false,
+    "fecha": "2026-11-30",
+    "nombre": "SELAE 25",
+    "selae": 25
+  },
+  "cierre": "sábado 28 de noviembre de 2026 a las 14:00",
+  "fuente": "Horarios publicados para la Jornada 25 de SELAE; correspondencia interna de la Liga de Maestros J24 (SELAE 25). Fechas y horas verificadas el 26/11/2026.",
+  "jornada": 24,
+  "nota": "Jornada abierta. Líneas de Programa, Gemini, MrPurple, Tecnotron y Grok en data/predicciones_J24.json; Sonia pendiente, su columna se muestra pendiente; boleto pendiente de pago en La Barca de Oro.",
+  "partidos": [
+    {
+      "division": "primera",
+      "fecha": "2026-11-28",
+      "hora": "14:00",
+      "local": "Betis",
+      "num": 1,
+      "visitante": "Rayo Vallecano"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-28",
+      "hora": "16:15",
+      "local": "Málaga",
+      "num": 2,
+      "visitante": "Athletic Club"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-28",
+      "hora": "18:30",
+      "local": "Elche",
+      "num": 3,
+      "visitante": "Atlético Madrid"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-28",
+      "hora": "21:00",
+      "local": "Real Madrid",
+      "num": 4,
+      "visitante": "Alavés"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-29",
+      "hora": "14:00",
+      "local": "Valencia",
+      "num": 5,
+      "visitante": "Osasuna"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-29",
+      "hora": "16:15",
+      "local": "Deportivo",
+      "num": 6,
+      "visitante": "Barcelona"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-29",
+      "hora": "18:30",
+      "local": "Celta",
+      "num": 7,
+      "visitante": "Villarreal"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-29",
+      "hora": "21:00",
+      "local": "Real Sociedad",
+      "num": 8,
+      "visitante": "Sevilla"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-28",
+      "hora": "14:00",
+      "local": "Las Palmas",
+      "num": 9,
+      "visitante": "Andorra"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-28",
+      "hora": "16:15",
+      "local": "Albacete",
+      "num": 10,
+      "visitante": "Tenerife"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-28",
+      "hora": "18:30",
+      "local": "Eibar",
+      "num": 11,
+      "visitante": "Burgos"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-29",
+      "hora": "14:00",
+      "local": "Granada",
+      "num": 12,
+      "visitante": "Ceuta"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-29",
+      "hora": "16:15",
+      "local": "Mallorca",
+      "num": 13,
+      "visitante": "Castellón"
+    },
+    {
+      "division": "segunda",
+      "fecha": "2026-11-29",
+      "hora": "21:00",
+      "local": "Almería",
+      "num": 14,
+      "visitante": "Sporting Gijón"
+    },
+    {
+      "division": "primera",
+      "fecha": "2026-11-30",
+      "hora": "21:00",
+      "local": "Espanyol",
+      "num": 15,
+      "pleno_al_15": true,
+      "visitante": "Getafe"
+    }
+  ],
+  "scraped_at": "2026-11-26",
+  "source_url": "https://www.eduardolosilla.es/quiniela/ayudas/horarios",
+  "temporada": "2026-2027"
+}

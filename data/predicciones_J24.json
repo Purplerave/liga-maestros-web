@@ -1,0 +1,106 @@
+{
+  "created_at": "2026-11-26",
+  "fuente": "Líneas J24 aportadas por Programa, Gemini, MrPurple (Pablo), Tecnotron y Grok, 26/11/2026. Sonia pendiente: no hay fila para ella, su columna se muestra pendiente. Pleno del boleto unificado 1-0 (mayoría: cuatro de cinco líneas; solo Programa lleva 1-1). Boleto pendiente de pago en La Barca de Oro.",
+  "gemini": {
+    "nombre": "Gemini",
+    "signos": [
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ]
+  },
+  "grok": {
+    "nombre": "Grok",
+    "signos": [
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ]
+  },
+  "jornada": 24,
+  "mrpurple": {
+    "nombre": "MrPurple",
+    "signos": [
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "X",
+      "2",
+      "X",
+      "1",
+      "1",
+      "X",
+      "2",
+      "1",
+      "1-0"
+    ]
+  },
+  "programa": {
+    "nombre": "Programa",
+    "signos": [
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1-1"
+    ]
+  },
+  "tecnotron": {
+    "nombre": "Tecnotron",
+    "signos": [
+      "1",
+      "2",
+      "2",
+      "1",
+      "1",
+      "2",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1",
+      "X",
+      "1",
+      "1-0"
+    ]
+  },
+  "temporada": "2026-2027"
+}
