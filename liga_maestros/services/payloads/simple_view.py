@@ -298,7 +298,7 @@ def build_simple_view_ranking(payload):
     return ranking
 
 
-def build_two_round_competition_ranking(
+def build_competition_ranking(
     conn,
     current_jornada,
     current_partidos,
@@ -309,12 +309,18 @@ def build_two_round_competition_ranking(
     current_user_id=None,
     team_logos=None,
 ):
-    """Clasifica solo a quienes compiten en las dos quinielas recientes.
+    """Clasificación acumulada de la competición, desde la J17.
 
-    La clasificación histórica global incluye participantes que ya no están en
-    esta competición. Para la portada empezamos en J17 y puntuamos las dos
-    jornadas más recientes que tengan boleto SELAE y fixture completo. J18 se
-    omite automáticamente porque no tiene scrape/quiniela.
+    La portada empieza en J17 y suma TODAS las jornadas con boleto SELAE y
+    fixture completo hasta la actual. J18 se omite automáticamente porque no
+    tiene scrape/quiniela, J23 porque no se jugó, y la jornada en juego
+    aporta 0 hasta que sus partidos se resuelvan. Quien no tiene línea en una
+    jornada no suma por ella (su columna se muestra pendiente).
+
+    Antes esta función se llamaba ``build_two_round_competition_ranking`` y
+    se quedaba solo con las dos jornadas más recientes
+    (``sorted(...)[:2]``): la portada mostraba únicamente la última jornada
+    cerrada y la clasificación acumulada salía mal.
     """
     from .matches import build_jornada_matches
 
@@ -337,7 +343,7 @@ def build_two_round_competition_ranking(
         scrape = _load_ticket_scrape(current_num)
         if len(scrape.get("partidos") or []) == 15:
             rounds.append(current_num)
-    rounds = sorted(set(rounds), reverse=True)[:2]
+    rounds = sorted(set(rounds), reverse=True)
 
     participants = {}
     for number in reversed(rounds):

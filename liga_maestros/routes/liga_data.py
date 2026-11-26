@@ -24,9 +24,9 @@ from ..services.payloads.matches import build_jornada_matches
 from ..services.payloads.predictions import build_predictions_payload
 from ..services.payloads.simple_view import (
     add_competition_roster_columns,
+    build_competition_ranking,
     build_simple_view_payload,
     build_simple_view_ranking,
-    build_two_round_competition_ranking,
 )
 from ..services.payloads.standings import build_standings_payload, matchday_played, persist_standings
 from ..services.teams import build_participant_contract, is_ticket_closed_status
@@ -443,7 +443,7 @@ def get_liga_data():
                 max_jornada=max_jornada,
                 current_user_id=user.get("id"),
             )
-            competition_ranking = build_two_round_competition_ranking(
+            competition_ranking = build_competition_ranking(
                 conn,
                 jornada,
                 partidos,

@@ -7,8 +7,8 @@ from liga_maestros.services.jornada import resolve_active_jornada
 from liga_maestros.services.payloads.matches import build_jornada_matches
 from liga_maestros.services.payloads.simple_view import (
     add_competition_roster_columns,
+    build_competition_ranking,
     build_simple_view_payload,
-    build_two_round_competition_ranking,
     load_ticket_metadata,
 )
 from liga_maestros.services.teams import build_participant_contract
@@ -69,9 +69,7 @@ def test_vista_j24_muestra_cinco_lineas_y_sonia_pendiente():
         "gemini",
     ]
     assert all(column["sin_linea"] is False for column in payload["columns"])
-    ranking = build_two_round_competition_ranking(
-        conn, 24, partidos, payload, build_participant_contract(), 24, [24, 22]
-    )
+    ranking = build_competition_ranking(conn, 24, partidos, payload, build_participant_contract(), 24, [24, 22])
     payload = add_competition_roster_columns(payload, ranking)
     assert [column["id"] for column in payload["columns"]] == COLUMNS
     assert [column for column in payload["columns"] if column["id"] == "sonia"][0]["sin_linea"] is True
