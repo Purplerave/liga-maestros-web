@@ -31,7 +31,7 @@ def test_jornada_24_importa_selae_25_y_promociona_la_activa():
     migrations.ensure_jornada_24(conn)
 
     assert conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 24").fetchone()[0] == 15
-    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 24").fetchone()[0] == 75
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 24").fetchone()[0] == 90
     # J22 (21-22/11) ya no tiene NS abiertos; la J24 (28-30/11) toma el relevo.
     assert resolve_active_jornada(conn) == 24
 
@@ -44,7 +44,7 @@ def test_jornada_24_importa_selae_25_y_promociona_la_activa():
     assert tuple(last) == ("Espanyol", "Getafe")
 
 
-def test_vista_j24_muestra_cinco_lineas_y_sonia_pendiente():
+def test_vista_j24_muestra_seis_lineas():
     conn = _conn()
     migrations.ensure_jornada_22(conn)
     migrations.ensure_jornada_24(conn)
@@ -58,47 +58,44 @@ def test_vista_j24_muestra_cinco_lineas_y_sonia_pendiente():
     )
 
     assert load_ticket_metadata(24)["nombre"] == "SELAE 25"
-    # Sin linea, Sonia no entra en las columnas de la jornada (>= J19 solo
-    # aparecen los maestros con linea, salvo Programa). La ruta la repone
-    # como pendiente a traves del roster de la competicion (viene de la J22).
-    assert [column["id"] for column in payload["columns"]] == [
-        "mrpurple",
-        "programa",
-        "tecnotron",
-        "grok",
-        "gemini",
-    ]
+    # Sonia ya manda linea en la J24: las seis columnas aparecen en la
+    # jornada, en el orden del contrato.
+    assert [column["id"] for column in payload["columns"]] == COLUMNS
     assert all(column["sin_linea"] is False for column in payload["columns"])
     ranking = build_competition_ranking(conn, 24, partidos, payload, build_participant_contract(), 24, [24, 22])
     payload = add_competition_roster_columns(payload, ranking)
     assert [column["id"] for column in payload["columns"]] == COLUMNS
-    assert [column for column in payload["columns"] if column["id"] == "sonia"][0]["sin_linea"] is True
+    assert [column for column in payload["columns"] if column["id"] == "sonia"][0]["sin_linea"] is False
     assert len(payload["rows"]) == 15
     assert payload["rows"][0]["local"] == "Betis"
-    # Casilla 1: las cinco lineas abren con 1.
+    # Casilla 1: cinco lineas abren con 1; Sonia va al 2.
     assert payload["rows"][0]["picks"]["mrpurple"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["programa"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["tecnotron"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["grok"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["gemini"]["signo"] == "1"
-    # Casilla 7: MrPurple va solo a la X; el resto, 2.
+    assert payload["rows"][0]["picks"]["sonia"]["signo"] == "2"
+    # Casilla 7: MrPurple va solo a la X; el resto, 2 (Sonia incluida).
     assert payload["rows"][6]["picks"]["mrpurple"]["signo"] == "X"
     assert payload["rows"][6]["picks"]["programa"]["signo"] == "2"
     assert payload["rows"][6]["picks"]["tecnotron"]["signo"] == "2"
     assert payload["rows"][6]["picks"]["grok"]["signo"] == "2"
     assert payload["rows"][6]["picks"]["gemini"]["signo"] == "2"
-    # Casilla 8: MrPurple va solo al 2; el resto, 1.
+    assert payload["rows"][6]["picks"]["sonia"]["signo"] == "2"
+    # Casilla 8: MrPurple va solo al 2; el resto, 1 (Sonia incluida).
     assert payload["rows"][7]["picks"]["mrpurple"]["signo"] == "2"
     assert payload["rows"][7]["picks"]["programa"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["tecnotron"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["grok"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["gemini"]["signo"] == "1"
-    # Casilla 13: MrPurple va solo al 2; el resto, 1.
+    assert payload["rows"][7]["picks"]["sonia"]["signo"] == "1"
+    # Casilla 13: MrPurple va solo al 2; el resto, 1 (Sonia incluida).
     assert payload["rows"][12]["picks"]["mrpurple"]["signo"] == "2"
     assert payload["rows"][12]["picks"]["programa"]["signo"] == "1"
     assert payload["rows"][12]["picks"]["tecnotron"]["signo"] == "1"
     assert payload["rows"][12]["picks"]["grok"]["signo"] == "1"
     assert payload["rows"][12]["picks"]["gemini"]["signo"] == "1"
+    assert payload["rows"][12]["picks"]["sonia"]["signo"] == "1"
 
 
 def test_fixture_j24_esta_versionado_y_completo():
@@ -120,7 +117,7 @@ def test_fixture_j24_esta_versionado_y_completo():
 
     assert predicciones["jornada"] == 24
     lineas = [k for k, v in predicciones.items() if isinstance(v, dict) and "signos" in v]
-    assert sorted(lineas) == sorted(["gemini", "grok", "mrpurple", "programa", "tecnotron"])
+    assert sorted(lineas) == sorted(["gemini", "grok", "mrpurple", "programa", "sonia", "tecnotron"])
     for linea in lineas:
         assert len(predicciones[linea]["signos"]) == 15
     assert predicciones["mrpurple"]["signos"][0] == "1"
@@ -129,6 +126,7 @@ def test_fixture_j24_esta_versionado_y_completo():
     assert predicciones["grok"]["signos"][14] == "1-1"
     assert predicciones["gemini"]["signos"][14] == "1-0"
     assert predicciones["programa"]["signos"][14] == "1-1"
+    assert predicciones["sonia"]["signos"][14] == "2-1"
 
     source = (ROOT / "liga_maestros" / "db" / "migrations.py").read_text(encoding="utf-8")
     startup = source[source.index("def run_startup_migrations") :]
