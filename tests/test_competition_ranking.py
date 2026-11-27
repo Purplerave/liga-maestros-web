@@ -17,15 +17,15 @@ from liga_maestros.services.payloads.simple_view import (
 )
 from liga_maestros.services.teams import build_participant_contract
 
-# (total, puntos por jornada). Sonia no tiene línea en la J24 (en juego) y
-# Gemini no jugó ni la J17 ni la J19: en esos casos no hay entrada en
-# por_jornada, no un cero.
+# (total, puntos por jornada). Sonia ya tiene línea en la J24 (en juego,
+# aporta 0 hasta resolverse) y Gemini no jugó ni la J17 ni la J19: en
+# esos casos no hay entrada en por_jornada, no un cero.
 ESPERADO = {
     "grok": (45, {"17": 9, "19": 8, "20": 8, "21": 11, "22": 9, "24": 0}),
     "programa": (43, {"17": 9, "19": 7, "20": 9, "21": 10, "22": 8, "24": 0}),
     "tecnotron": (42, {"17": 9, "19": 7, "20": 6, "21": 11, "22": 9, "24": 0}),
     "mrpurple": (37, {"17": 9, "19": 6, "20": 7, "21": 7, "22": 8, "24": 0}),
-    "sonia": (34, {"17": 5, "19": 5, "20": 7, "21": 9, "22": 8}),
+    "sonia": (34, {"17": 5, "19": 5, "20": 7, "21": 9, "22": 8, "24": 0}),
     "gemini": (28, {"20": 9, "21": 11, "22": 8, "24": 0}),
 }
 
@@ -57,12 +57,13 @@ def test_resultados_j19_j22_importados_desde_los_ficheros():
             ).fetchone()[0]
             == 15
         )
-    # J17 y J19 traen 5 líneas (sin Gemini); J20-J22 traen 6.
+    # J17 y J19 traen 5 líneas (sin Gemini); J20-J22 y J24 traen 6.
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 17").fetchone()[0] == 75
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 19").fetchone()[0] == 75
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 20").fetchone()[0] == 90
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 21").fetchone()[0] == 90
     assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 22").fetchone()[0] == 90
+    assert conn.execute("SELECT COUNT(*) FROM predicciones WHERE jornada = 24").fetchone()[0] == 90
     # La J24 sigue en juego: fixture completo pero sin resultados.
     assert (
         conn.execute("SELECT COUNT(*) FROM resultados WHERE jornada = 24 AND goles_local IS NOT NULL").fetchone()[0]
