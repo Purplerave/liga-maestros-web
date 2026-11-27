@@ -81,24 +81,24 @@ def test_vista_j24_muestra_cinco_lineas_y_sonia_pendiente():
     assert payload["rows"][0]["picks"]["tecnotron"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["grok"]["signo"] == "1"
     assert payload["rows"][0]["picks"]["gemini"]["signo"] == "1"
-    # Casilla 7: Programa va solo al 2; el resto, X.
+    # Casilla 7: MrPurple va solo a la X; el resto, 2.
     assert payload["rows"][6]["picks"]["mrpurple"]["signo"] == "X"
     assert payload["rows"][6]["picks"]["programa"]["signo"] == "2"
-    assert payload["rows"][6]["picks"]["tecnotron"]["signo"] == "X"
-    assert payload["rows"][6]["picks"]["grok"]["signo"] == "X"
-    assert payload["rows"][6]["picks"]["gemini"]["signo"] == "X"
+    assert payload["rows"][6]["picks"]["tecnotron"]["signo"] == "2"
+    assert payload["rows"][6]["picks"]["grok"]["signo"] == "2"
+    assert payload["rows"][6]["picks"]["gemini"]["signo"] == "2"
     # Casilla 8: MrPurple va solo al 2; el resto, 1.
     assert payload["rows"][7]["picks"]["mrpurple"]["signo"] == "2"
     assert payload["rows"][7]["picks"]["programa"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["tecnotron"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["grok"]["signo"] == "1"
     assert payload["rows"][7]["picks"]["gemini"]["signo"] == "1"
-    # Casilla 13: MrPurple va solo al 2; Programa al 1; el resto, X.
+    # Casilla 13: MrPurple va solo al 2; el resto, 1.
     assert payload["rows"][12]["picks"]["mrpurple"]["signo"] == "2"
     assert payload["rows"][12]["picks"]["programa"]["signo"] == "1"
-    assert payload["rows"][12]["picks"]["tecnotron"]["signo"] == "X"
-    assert payload["rows"][12]["picks"]["grok"]["signo"] == "X"
-    assert payload["rows"][12]["picks"]["gemini"]["signo"] == "X"
+    assert payload["rows"][12]["picks"]["tecnotron"]["signo"] == "1"
+    assert payload["rows"][12]["picks"]["grok"]["signo"] == "1"
+    assert payload["rows"][12]["picks"]["gemini"]["signo"] == "1"
 
 
 def test_fixture_j24_esta_versionado_y_completo():
@@ -125,7 +125,8 @@ def test_fixture_j24_esta_versionado_y_completo():
         assert len(predicciones[linea]["signos"]) == 15
     assert predicciones["mrpurple"]["signos"][0] == "1"
     assert predicciones["mrpurple"]["signos"][14] == "1-0"
-    assert predicciones["grok"]["signos"][14] == "1-0"
+    assert predicciones["tecnotron"]["signos"][14] == "1-1"
+    assert predicciones["grok"]["signos"][14] == "1-1"
     assert predicciones["gemini"]["signos"][14] == "1-0"
     assert predicciones["programa"]["signos"][14] == "1-1"
 
